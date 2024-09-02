@@ -319,9 +319,9 @@ namespace Game.Networking.Packets
 
             _worldPacket.WritePackedGuid(Player);
             _worldPacket.WriteInt32(ActualMapID);
-            _worldPacket.WriteVector3(Position);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WritePackedGuid(Transport);
+            _worldPacket.WriteVector3(Position);
         }
 
         public ObjectGuid Player;

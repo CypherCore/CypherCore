@@ -53,8 +53,8 @@ namespace Game.DungeonFinding
 
             SetLeader(guid, ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(0)));
 
-            uint dungeon = field.Read<uint>(18);
-            LfgState state = (LfgState)field.Read<byte>(19);
+            uint dungeon = field.Read<uint>(19);
+            LfgState state = (LfgState)field.Read<byte>(20);
 
             if (dungeon == 0 || state == 0)
                 return;

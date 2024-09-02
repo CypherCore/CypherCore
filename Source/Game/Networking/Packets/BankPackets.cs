@@ -2,12 +2,14 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
+using Framework.Constants;
 
 namespace Game.Networking.Packets
 {
     public class AutoBankItem : ClientPacket
     {
         public InvUpdate Inv;
+        public BankType BankType;
         public byte Bag;
         public byte Slot;
 
@@ -16,6 +18,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Inv = new InvUpdate(_worldPacket);
+            BankType = (BankType)_worldPacket.ReadInt8();
             Bag = _worldPacket.ReadUInt8();
             Slot = _worldPacket.ReadUInt8();
         }
@@ -93,5 +96,19 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Banker;
+    }
+
+    class BankerActivate : ClientPacket
+    {
+        public ObjectGuid Banker;
+        public PlayerInteractionType InteractionType;
+
+        public BankerActivate(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            InteractionType = (PlayerInteractionType)_worldPacket.ReadInt32();
+        }
     }
 }

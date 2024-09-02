@@ -41,6 +41,11 @@ namespace Game.Networking.Packets
         public ItemInstance OldItem = new();
         public ItemInstance NewItem = new();
         public int EnchantID;
+        public int ConcentrationCurrencyID;
+        public int ConcentrationSpent;
+        public int IngenuityRefund;
+        public bool HasIngenuityProc;
+        public bool ApplyConcentration;
 
         public void Write(WorldPacket data)
         {
@@ -59,6 +64,9 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(ItemGUID);
             data.WriteInt32(Quantity);
             data.WriteInt32(EnchantID);
+            data.WriteInt32(ConcentrationCurrencyID);
+            data.WriteInt32(ConcentrationSpent);
+            data.WriteInt32(IngenuityRefund);
 
             foreach (SpellReducedReagent spellReducedReagent in ResourcesReturned)
                 spellReducedReagent.Write(data);
@@ -67,6 +75,8 @@ namespace Game.Networking.Packets
             data.WriteBit(field_29);
             data.WriteBit(field_2A);
             data.WriteBit(BonusCraft);
+            data.WriteBit(HasIngenuityProc);
+            data.WriteBit(ApplyConcentration);
             data.FlushBits();
 
             OldItem.Write(data);

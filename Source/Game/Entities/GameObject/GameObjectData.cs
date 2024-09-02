@@ -857,7 +857,7 @@ namespace Game.Entities
             public uint GiganticAOI;                             // 9 Gigantic AOI, enum { false, true, }; Default: false
             public uint InfiniteAOI;                             // 10 Infinite AOI, enum { false, true, }; Default: false
             public uint NotLOSBlocking;                          // 11 Not LOS Blocking, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 12 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 12 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Collisionupdatedelayafteropen;           // 13 Collision update delay(ms) after open, int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
@@ -873,7 +873,7 @@ namespace Game.Entities
             public uint closeTextID;                             // 7 closeTextID, References: BroadcastText, NoValue = 0
             public uint requireLOS;                              // 8 require LOS, enum { false, true, }; Default: false
             public uint conditionID1;                            // 9 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 10 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 10 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct questgiver
@@ -890,7 +890,7 @@ namespace Game.Entities
             public uint GiganticAOI;                             // 9 Gigantic AOI, enum { false, true, }; Default: false
             public uint conditionID1;                            // 10 conditionID1, References: PlayerCondition, NoValue = 0
             public uint NeverUsableWhileMounted;                 // 11 Never Usable While Mounted, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 12 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 12 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct chest
@@ -904,7 +904,7 @@ namespace Game.Entities
             public uint triggeredEvent;                          // 6 triggeredEvent, References: GameEvents, NoValue = 0
             public uint linkedTrap;                              // 7 linkedTrap, References: GameObjects, NoValue = 0
             public uint questID;                                 // 8 questID, References: QuestV2, NoValue = 0
-            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint requireLOS;                              // 10 require LOS, enum { false, true, }; Default: false
             public uint leaveLoot;                               // 11 leaveLoot, enum { false, true, }; Default: false
             public uint notInCombat;                             // 12 notInCombat, enum { false, true, }; Default: false
@@ -913,9 +913,9 @@ namespace Game.Entities
             public uint usegrouplootrules;                       // 15 use group loot rules, enum { false, true, }; Default: false
             public uint floatingTooltip;                         // 16 floatingTooltip, enum { false, true, }; Default: false
             public uint conditionID1;                            // 17 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint Unused;                                  // 18 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public uint xpLevel;                                 // 18 xpLevel, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint xpDifficulty;                            // 19 xpDifficulty, enum { No Exp, Trivial, Very Small, Small, Substandard, Standard, High, Epic, Dungeon, 5, }; Default: No Exp
-            public uint Unused2;                                 // 20 Unused, int, Min value: 0, Max value: 123, Default value: 0
+            public uint Unused ;                                 // 20 Unused, int, Min value: 0, Max value: 123, Default value: 0
             public uint GroupXP;                                 // 21 Group XP, enum { false, true, }; Default: false
             public uint DamageImmuneOK;                          // 22 Damage Immune OK, enum { false, true, }; Default: false
             public uint trivialSkillLow;                         // 23 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
@@ -934,7 +934,7 @@ namespace Game.Entities
 
         public struct binder
         {
-            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct generic
@@ -948,7 +948,7 @@ namespace Game.Entities
             public uint conditionID1;                            // 6 conditionID1, References: PlayerCondition, NoValue = 0
             public uint LargeAOI;                                // 7 Large AOI, enum { false, true, }; Default: false
             public uint UseGarrisonOwnerGuildColors;             // 8 Use Garrison Owner Guild Colors, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Allowunfriendlycrossfactionpartymemberstocollaborateonaritual;// 10 Allow unfriendly cross faction party members to collaborate on a ritual, enum { false, true, }; Default: false
         }
 
@@ -975,7 +975,7 @@ namespace Game.Entities
             public uint requireLOS;                              // 18 require LOS, enum { false, true, }; Default: false
             public uint TriggerCondition;                        // 19 Trigger Condition, References: PlayerCondition, NoValue = 0
             public uint Checkallunits;                           // 20 Check all units (spawned traps only check players), enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 21 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 21 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct chair
@@ -985,7 +985,7 @@ namespace Game.Entities
             public uint onlyCreatorUse;                          // 2 onlyCreatorUse, enum { false, true, }; Default: false
             public uint triggeredEvent;                          // 3 triggeredEvent, References: GameEvents, NoValue = 0
             public uint conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct spellFocus
@@ -999,7 +999,7 @@ namespace Game.Entities
             public uint floatingTooltip;                         // 6 floatingTooltip, enum { false, true, }; Default: false
             public uint floatOnWater;                            // 7 floatOnWater, enum { false, true, }; Default: false
             public uint conditionID1;                            // 8 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint gossipID;                                // 10 gossipID, References: Gossip, NoValue = 0
             public uint spellFocusType2;                         // 11 spellFocusType 2, References: SpellFocusObject, NoValue = 0
             public uint spellFocusType3;                         // 12 spellFocusType 3, References: SpellFocusObject, NoValue = 0
@@ -1017,7 +1017,7 @@ namespace Game.Entities
             public uint allowMounted;                            // 3 allowMounted, enum { false, true, }; Default: false
             public uint conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
             public uint NeverUsableWhileMounted;                 // 5 Never Usable While Mounted, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 6 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 6 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct goober
@@ -1055,7 +1055,7 @@ namespace Game.Entities
             public uint SyncAnimationtoObjectLifetime;           // 30 Sync Animation to Object Lifetime (global track only), enum { false, true, }; Default: false
             public uint NoFuzzyHit;                              // 31 No Fuzzy Hit, enum { false, true, }; Default: false
             public uint LargeAOI;                                // 32 Large AOI, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 33 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 33 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct transport
@@ -1084,7 +1084,7 @@ namespace Game.Entities
             public uint Reached10thfloor;                        // 21 Reached 10th floor, References: GameEvents, NoValue = 0
             public uint onlychargeheightcheck;                   // 22 only charge height check. (yards), int, Min value: 0, Max value: 65535, Default value: 0
             public uint onlychargetimecheck;                     // 23 only charge time check, int, Min value: 0, Max value: 65535, Default value: 0
-            public uint InteractRadiusOverride;                  // 24 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 24 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct areadamage
@@ -1097,7 +1097,7 @@ namespace Game.Entities
             public uint autoClose;                               // 5 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint openTextID;                              // 6 openTextID, References: BroadcastText, NoValue = 0
             public uint closeTextID;                             // 7 closeTextID, References: BroadcastText, NoValue = 0
-            public uint InteractRadiusOverride;                  // 8 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 8 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct camera
@@ -1107,7 +1107,7 @@ namespace Game.Entities
             public uint eventID;                                 // 2 eventID, References: GameEvents, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
             public uint conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct moTransport
@@ -1123,19 +1123,19 @@ namespace Game.Entities
             public uint allowstopping;                           // 8 allow stopping, enum { false, true, }; Default: false
             public uint InitStopped;                             // 9 Init Stopped, enum { false, true, }; Default: false
             public uint TrueInfiniteAOI;                         // 10 True Infinite AOI (programmer only!), enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 11 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 11 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Allowareaexplorationwhileonthistransport;// 12 Allow area exploration while on this transport, enum { false, true, }; Default: false
         }
 
         public struct duelflag
         {
-            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Willthisduelgountilaplayerdies;          // 1 Will this duel go until a player dies?, enum { false, true, }; Default: false
         }
 
         public struct fishingnode
         {
-            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct ritual
@@ -1149,13 +1149,13 @@ namespace Game.Entities
             public uint castersGrouped;                          // 6 castersGrouped, enum { false, true, }; Default: true
             public uint ritualNoTargetCheck;                     // 7 ritualNoTargetCheck, enum { false, true, }; Default: true
             public uint conditionID1;                            // 8 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 9 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct mailbox
         {
             public uint conditionID1;                            // 0 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct guardpost
@@ -1163,7 +1163,7 @@ namespace Game.Entities
             public uint creatureID;                              // 0 creatureID, References: Creature, NoValue = 0
             public uint charges;                                 // 1 charges, int, Min value: 0, Max value: 65535, Default value: 1
             public uint Preferonlyifinlineofsight;               // 2 Prefer only if in line of sight (expensive), enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct spellcaster
@@ -1176,7 +1176,7 @@ namespace Game.Entities
             public uint conditionID1;                            // 5 conditionID1, References: PlayerCondition, NoValue = 0
             public uint playerCast;                              // 6 playerCast, enum { false, true, }; Default: false
             public uint NeverUsableWhileMounted;                 // 7 Never Usable While Mounted, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 8 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 8 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct meetingstone
@@ -1184,7 +1184,7 @@ namespace Game.Entities
             public uint Unused;                                  // 0 Unused, int, Min value: 0, Max value: 65535, Default value: 1
             public uint Unused2;                                 // 1 Unused, int, Min value: 1, Max value: 65535, Default value: 60
             public uint areaID;                                  // 2 areaID, References: AreaTable, NoValue = 0
-            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Preventmeetingstonefromtargetinganunfriendlypartymemberoutsideofinstances;// 4 Prevent meeting stone from targeting an unfriendly party member outside of instances, enum { false, true, }; Default: false
         }
 
@@ -1203,7 +1203,7 @@ namespace Game.Entities
             public uint GiganticAOI;                             // 10 Gigantic AOI, enum { false, true, }; Default: false
             public uint InfiniteAOI;                             // 11 Infinite AOI, enum { false, true, }; Default: false
             public uint cooldown;                                // 12 cooldown, int, Min value: 0, Max value: 2147483647, Default value: 3000
-            public uint InteractRadiusOverride;                  // 13 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 13 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct fishinghole
@@ -1213,7 +1213,7 @@ namespace Game.Entities
             public uint minRestock;                              // 2 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint maxRestock;                              // 3 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint open;                                    // 4 open, References: Lock_, NoValue = 0
-            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct flagdrop
@@ -1228,7 +1228,7 @@ namespace Game.Entities
             public uint GiganticAOI;                             // 7 Gigantic AOI, enum { false, true, }; Default: false
             public uint InfiniteAOI;                             // 8 Infinite AOI, enum { false, true, }; Default: false
             public uint cooldown;                                // 9 cooldown, int, Min value: 0, Max value: 2147483647, Default value: 3000
-            public uint InteractRadiusOverride;                  // 10 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 10 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct controlzone
@@ -1261,7 +1261,7 @@ namespace Game.Entities
             public uint UncontestedTime;                         // 25 Uncontested Time, int, Min value: 0, Max value: 65535, Default value: 0
             public uint FrequentHeartbeat;                       // 26 Frequent Heartbeat, enum { false, true, }; Default: false
             public uint EnablingWorldStateExpression;            // 27 Enabling World State Expression, References: WorldStateExpression, NoValue = 0
-            public uint InteractRadiusOverride;                  // 28 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 28 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct auraGenerator
@@ -1273,7 +1273,7 @@ namespace Game.Entities
             public uint auraID2;                                 // 4 auraID2, References: Spell, NoValue = 0
             public uint conditionID2;                            // 5 conditionID2, References: PlayerCondition, NoValue = 0
             public uint serverOnly;                              // 6 serverOnly, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 7 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 7 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct dungeonDifficulty
@@ -1289,7 +1289,7 @@ namespace Game.Entities
             public uint LargeAOI;                                // 8 Large AOI, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 9 Gigantic AOI, enum { false, true, }; Default: false
             public uint Legacy;                                  // 10 Legacy, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 11 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 11 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct barberChair
@@ -1297,7 +1297,7 @@ namespace Game.Entities
             public uint chairheight;                             // 0 chairheight, int, Min value: 0, Max value: 2, Default value: 1
             public int HeightOffset;                             // 1 Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
             public uint SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
-            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint CustomizationScope;                      // 4 Customization Scope, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Preventteleportingtheplayeroutofthebarbershopchair;// 5 Prevent teleporting the player out of the barbershop chair, enum { false, true, }; Default: false
         }
@@ -1328,16 +1328,16 @@ namespace Game.Entities
             public int Unused10;                                 // 21 Unused, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint DamageEvent;                             // 22 Damage Event, References: GameEvents, NoValue = 0
             public uint Displaymouseoverasanameplate;            // 23 Display mouseover as a nameplate, enum { false, true, }; Default: false
-            public int Thexoffsetofthedestructiblenameplateifitisenabled;// 24 The x offset (in hundredths) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public int Theyoffsetofthedestructiblenameplateifitisenabled;// 25 The y offset (in hundredths) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public int Thezoffsetofthedestructiblenameplateifitisenabled;// 26 The z offset (in hundredths) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public uint InteractRadiusOverride;                  // 27 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public int Thexoffsetofthedestructiblenameplateifitisenabled;// 24 The x offset (Yards * 100) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int Theyoffsetofthedestructiblenameplateifitisenabled;// 25 The y offset (Yards * 100) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public int Thezoffsetofthedestructiblenameplateifitisenabled;// 26 The z offset (Yards * 100) of the destructible nameplate, if it is enabled, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 27 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct guildbank
         {
             public uint conditionID1;                            // 0 conditionID1, References: PlayerCondition, NoValue = 0
-            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct trapDoor
@@ -1350,7 +1350,7 @@ namespace Game.Entities
             public uint GiganticAOI;                             // 5 Gigantic AOI, enum { false, true, }; Default: false
             public uint InfiniteAOI;                             // 6 Infinite AOI, enum { false, true, }; Default: false
             public uint DoorisOpaque;                            // 7 Door is Opaque (Disable portal on close), enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 8 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 8 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct newflag
@@ -1369,27 +1369,27 @@ namespace Game.Entities
             public uint worldState1;                             // 11 worldState1, References: WorldState, NoValue = 0
             public uint ReturnonDefenderInteract;                // 12 Return on Defender Interact, enum { false, true, }; Default: false
             public uint SpawnVignette;                           // 13 Spawn Vignette, References: vignette, NoValue = 0
-            public uint InteractRadiusOverride;                  // 14 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 14 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct newflagdrop
         {
             public uint open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint SpawnVignette;                           // 1 Spawn Vignette, References: vignette, NoValue = 0
-            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct garrisonbuilding
         {
             public int SpawnMap;                                 // 0 Spawn Map, References: Map, NoValue = -1
-            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct garrisonplot
         {
             public uint PlotInstance;                            // 0 Plot Instance, References: GarrPlotInstance, NoValue = 0
             public int SpawnMap;                                 // 1 Spawn Map, References: Map, NoValue = -1
-            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct clientcreature
@@ -1429,7 +1429,7 @@ namespace Game.Entities
             public uint SpellVisual4;                            // 20 Spell Visual 4, References: SpellVisual, NoValue = 0
             public uint SpellVisual5;                            // 21 Spell Visual 5, References: SpellVisual, NoValue = 0
             public uint SpawnVignette;                           // 22 Spawn Vignette, References: vignette, NoValue = 0
-            public uint InteractRadiusOverride;                  // 23 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 23 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct phaseablemo
@@ -1438,14 +1438,14 @@ namespace Game.Entities
             public int AreaNameSet;                              // 1 Area Name Set (Index), int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint DoodadSetA;                              // 2 Doodad Set A, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint DoodadSetB;                              // 3 Doodad Set B, int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint InteractRadiusOverride;                  // 4 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 4 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct garrisonmonument
         {
             public uint TrophyTypeID;                            // 0 Trophy Type ID, References: TrophyType, NoValue = 0
             public uint TrophyInstanceID;                        // 1 Trophy Instance ID, References: TrophyInstance, NoValue = 0
-            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct garrisonshipment
@@ -1453,13 +1453,13 @@ namespace Game.Entities
             public uint ShipmentContainer;                       // 0 Shipment Container, References: CharShipmentContainer, NoValue = 0
             public uint GiganticAOI;                             // 1 Gigantic AOI, enum { false, true, }; Default: false
             public uint LargeAOI;                                // 2 Large AOI, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 3 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct garrisonmonumentplaque
         {
             public uint TrophyInstanceID;                        // 0 Trophy Instance ID, References: TrophyInstance, NoValue = 0
-            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 1 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct itemforge
@@ -1470,7 +1470,7 @@ namespace Game.Entities
             public uint CameraMode;                              // 3 Camera Mode, References: CameraMode, NoValue = 0
             public uint FadeRegionRadius;                        // 4 Fade Region Radius, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ForgeType;                               // 5 Forge Type, enum { Artifact Forge, Relic Forge, Heart Forge, Soulbind Forge, Anima Reservoir, }; Default: Relic Forge
-            public uint InteractRadiusOverride;                  // 6 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 6 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint GarrTalentTreeID;                        // 7 GarrTalentTree ID, References: GarrTalentTree, NoValue = 0
         }
 
@@ -1481,13 +1481,13 @@ namespace Game.Entities
             public uint GiganticAOI;                             // 2 Gigantic AOI, enum { false, true, }; Default: false
             public uint spellFocusType;                          // 3 spellFocusType, References: SpellFocusObject, NoValue = 0
             public uint radius;                                  // 4 radius, int, Min value: 0, Max value: 50, Default value: 10
-            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ItemInteractionID;                       // 6 Item Interaction ID, References: UiItemInteraction, NoValue = 0
         }
 
         public struct keystonereceptacle
         {
-            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 0 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct gatheringnode
@@ -1516,7 +1516,7 @@ namespace Game.Entities
             public uint PlayOpenAnimationonOpening;              // 21 Play Open Animation on Opening, enum { false, true, }; Default: false
             public uint turnpersonallootsecurityoff;             // 22 turn personal loot security off, enum { false, true, }; Default: false
             public uint ClearObjectVignetteonOpening;            // 23 Clear Object Vignette on Opening, enum { false, true, }; Default: false
-            public uint InteractRadiusOverride;                  // 24 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 24 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Overrideminimaptrackingicon;             // 25 Override minimap tracking icon, References: UiTextureAtlasMember, NoValue = 0
         }
 
@@ -1526,7 +1526,7 @@ namespace Game.Entities
             public uint WhenAvailable;                           // 1 When Available, References: GameObjectDisplayInfo, NoValue = 0
             public uint open;                                    // 2 open, References: Lock_, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
-            public uint InteractRadiusOverride;                  // 4 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 4 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct multi
@@ -1548,7 +1548,7 @@ namespace Game.Entities
             public uint DoodadSetC;                              // 3 Doodad Set C, int, Min value: 0, Max value: 2147483647, Default value: 0
             public int SpawnMap;                                 // 4 Spawn Map, References: Map, NoValue = -1
             public int AreaNameSet;                              // 5 Area Name Set (Index), int, Min value: -2147483648, Max value: 2147483647, Default value: 0
-            public uint InteractRadiusOverride;                  // 6 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 6 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct pvpReward
@@ -1557,7 +1557,7 @@ namespace Game.Entities
             public uint WhenAvailable;                           // 1 When Available, References: GameObjectDisplayInfo, NoValue = 0
             public uint open;                                    // 2 open, References: Lock_, NoValue = 0
             public uint openTextID;                              // 3 openTextID, References: BroadcastText, NoValue = 0
-            public uint InteractRadiusOverride;                  // 4 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 4 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct playerchoicechest
@@ -1569,7 +1569,7 @@ namespace Game.Entities
             public uint MawPowerFilter;                          // 4 Maw Power Filter, References: MawPowerFilter, NoValue = 0
             public uint Script;                                  // 5 Script, References: SpellScript, NoValue = 0
             public uint SpellVisual1;                            // 6 Spell Visual 1, References: SpellVisual, NoValue = 0
-            public uint InteractRadiusOverride;                  // 7 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 7 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Dontupdateplayerinteractability;         // 8 Don't update player interactability, enum { false, true, }; Default: false
         }
 
@@ -1577,21 +1577,21 @@ namespace Game.Entities
         {
             public uint PlayerChoice;                            // 0 Player Choice, References: PlayerChoice, NoValue = 0
             public uint CustomItemBonusFilter;                   // 1 Custom Item Bonus Filter, References: CustomItemBonusFilter, NoValue = 0
-            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct garrtalenttree
         {
             public uint UiMapID;                                 // 0 Ui Map ID, References: UiMap, NoValue = 0
             public uint GarrTalentTreeID;                        // 1 GarrTalentTree ID, References: GarrTalentTree, NoValue = 0
-            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct weeklyrewardchest
         {
             public uint WhenAvailable;                           // 0 When Available, References: GameObjectDisplayInfo, NoValue = 0
             public uint open;                                    // 1 open, References: Lock_, NoValue = 0
-            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (in hundredths), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint InteractRadiusOverride;                  // 2 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ExpansionLevel;                          // 3 Expansion Level, int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 

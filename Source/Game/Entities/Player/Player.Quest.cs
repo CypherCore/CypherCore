@@ -2095,20 +2095,28 @@ namespace Game.Entities
                     case QuestStatus.Complete:
                         if (quest.IsImportant())
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.ImportantQuestRewardCompleteNoPOI : QuestGiverStatus.ImportantQuestRewardCompletePOI;
+                        else if (quest.IsMeta())
+                            result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.MetaQuestRewardCompleteNoPOI : QuestGiverStatus.MetaQuestRewardCompletePOI;
                         else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.CovenantCallingRewardCompleteNoPOI : QuestGiverStatus.CovenantCallingRewardCompletePOI;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.LegendaryRewardCompleteNoPOI : QuestGiverStatus.LegendaryRewardCompletePOI;
+                        else if (quest.IsDailyOrWeekly())
+                            result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RepeatableRewardCompleteNoPOI : QuestGiverStatus.RepeatableRewardCompletePOI;
                         else
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RewardCompleteNoPOI : QuestGiverStatus.RewardCompletePOI;
                         break;
                     case QuestStatus.Incomplete:
                         if (quest.IsImportant())
                             result |= QuestGiverStatus.ImportantReward;
+                        else if (quest.IsMeta())
+                            result |= QuestGiverStatus.MetaReward;
                         else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
                             result |= QuestGiverStatus.CovenantCallingReward;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= QuestGiverStatus.LegendaryReward;
+                        else if (quest.IsDailyOrWeekly())
+                            result |= QuestGiverStatus.RepeatableReward;
                         else
                             result |= QuestGiverStatus.Reward;
                         break;
@@ -2116,12 +2124,16 @@ namespace Game.Entities
                         break;
                 }
 
-                if (quest.IsTurnIn() && CanTakeQuest(quest, false) && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly())
+                if (quest.IsTurnIn() && CanTakeQuest(quest, false))
                 {
-                    if (GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
-                        result |= QuestGiverStatus.RepeatableTurnin;
-                    else
-                        result |= QuestGiverStatus.TrivialRepeatableTurnin;
+                    if (quest.IsRepeatable())
+                    {
+                        if (GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
+                            result |= QuestGiverStatus.RepeatableTurnin;
+                        else
+                            result |= QuestGiverStatus.TrivialRepeatableTurnin;
+                    }
+                    result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RewardCompleteNoPOI : QuestGiverStatus.RewardCompletePOI;
                 }
             }
 
@@ -2143,12 +2155,14 @@ namespace Game.Entities
                             bool isTrivial = GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff));
                             if (quest.IsImportant())
                                 result |= isTrivial ? QuestGiverStatus.TrivialImportantQuest : QuestGiverStatus.ImportantQuest;
+                            else if (quest.IsMeta())
+                                result |= isTrivial ? QuestGiverStatus.TrivialMetaQuest : QuestGiverStatus.MetaQuest;
                             else if (quest.GetQuestTag() == QuestTagType.CovenantCalling)
                                 result |= QuestGiverStatus.CovenantCallingQuest;
                             else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                                 result |= isTrivial ? QuestGiverStatus.TrivialLegendaryQuest : QuestGiverStatus.LegendaryQuest;
-                            else if (quest.IsDaily())
-                                result |= isTrivial ? QuestGiverStatus.TrivialDailyQuest : QuestGiverStatus.DailyQuest;
+                            else if (quest.IsDailyOrWeekly())
+                                result |= isTrivial ? QuestGiverStatus.TrivialRepeatableQuest : QuestGiverStatus.RepeatableQuest;
                             else
                                 result |= isTrivial ? QuestGiverStatus.Trivial : QuestGiverStatus.Quest;
                         }
@@ -3373,9 +3387,11 @@ namespace Game.Entities
                     {
                         ObjectFieldData objMask = new();
                         UnitData unitMask = new();
-                        for (int i = 0; i < creature.m_unitData.NpcFlags.GetSize(); ++i)
-                            if (creature.m_unitData.NpcFlags[i] != 0)
-                                unitMask.MarkChanged(creature.m_unitData.NpcFlags, i);
+
+                        if (creature.m_unitData.NpcFlags != 0)
+                            unitMask.MarkChanged(m_unitData.NpcFlags);
+                        if (creature.m_unitData.NpcFlags2 != 0)
+                            unitMask.MarkChanged(m_unitData.NpcFlags2);
 
                         if (objMask.GetUpdateMask().IsAnySet() || unitMask.GetUpdateMask().IsAnySet())
                             creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
@@ -3396,7 +3412,7 @@ namespace Game.Entities
                             {
                                 ObjectFieldData objMask = new();
                                 UnitData unitMask = new();
-                                unitMask.MarkChanged(m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
+                                unitMask.MarkChanged(m_unitData.NpcFlags); // NpcFlags has UNIT_NPC_FLAG_SPELLCLICK
                                 creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
                                 break;
                             }

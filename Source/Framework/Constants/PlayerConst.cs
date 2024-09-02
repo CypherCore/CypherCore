@@ -518,8 +518,14 @@ namespace Framework.Constants
         // first slot for item stored (in any way in player items data)
         Start = 0,
         // last+1 slot for item stored (in any way in player items data)
-        End = 227,
+        End = 232,
         Count = (End - Start)
+    }
+
+    enum AccountBankBagSlots
+    {
+        Start = 227,
+        End = 232
     }
 
     public enum PlayerTitle : ulong

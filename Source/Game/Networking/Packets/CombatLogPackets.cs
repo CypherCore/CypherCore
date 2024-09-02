@@ -152,7 +152,7 @@ namespace Game.Networking.Packets
                 {
                     _worldPacket.WritePackedGuid(powerDrainTarget.Victim);
                     _worldPacket.WriteUInt32(powerDrainTarget.Points);
-                    _worldPacket.WriteUInt32(powerDrainTarget.PowerType);
+                    _worldPacket.WriteInt8((sbyte)powerDrainTarget.PowerType);
                     _worldPacket.WriteFloat(powerDrainTarget.Amplitude);
                 }
 
@@ -663,7 +663,7 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid Victim;
         public uint Points;
-        public uint PowerType;
+        public PowerType PowerType;
         public float Amplitude;
     }
 

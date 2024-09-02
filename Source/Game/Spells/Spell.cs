@@ -4356,7 +4356,7 @@ namespace Game.Spells
 
             spellLogEffectPowerDrainParams.Victim = target.GetGUID();
             spellLogEffectPowerDrainParams.Points = points;
-            spellLogEffectPowerDrainParams.PowerType = (uint)powerType;
+            spellLogEffectPowerDrainParams.PowerType = powerType;
             spellLogEffectPowerDrainParams.Amplitude = amplitude;
 
             GetExecuteLogEffect(effect).PowerDrainTargets.Add(spellLogEffectPowerDrainParams);

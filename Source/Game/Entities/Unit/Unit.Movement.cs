@@ -345,6 +345,36 @@ namespace Game.Entities
             return true;
         }
 
+        bool SetEnableFullSpeedTurning(bool enable)
+        {
+            if (!IsPlayer())
+                return false;
+
+            if (enable == HasUnitMovementFlag2(MovementFlag2.FullSpeedTurning))
+                return false;
+
+            if (enable)
+                AddUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
+            else
+                RemoveUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
+
+            ServerOpcodes[] fullSpeedTurningOpcodeTable = [ServerOpcodes.MoveDisableFullSpeedTurning, ServerOpcodes.MoveEnableFullSpeedTurning];
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(fullSpeedTurningOpcodeTable[enable ? 1 : 0]);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
         public bool SetCanTransitionBetweenSwimAndFly(bool enable)
         {
             if (!IsTypeId(TypeId.Player))

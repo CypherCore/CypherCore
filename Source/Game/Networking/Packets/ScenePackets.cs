@@ -18,6 +18,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SceneScriptPackageID);
             _worldPacket.WritePackedGuid(TransportGUID);
             _worldPacket.WriteXYZO(Location);
+            _worldPacket.WriteInt32(MovieID);
             _worldPacket.WriteBit(Encrypted);
             _worldPacket.FlushBits();
         }
@@ -26,6 +27,7 @@ namespace Game.Networking.Packets
         public uint PlaybackFlags;
         public uint SceneInstanceID;
         public uint SceneScriptPackageID;
+        public int MovieID;
         public ObjectGuid TransportGUID;
         public Position Location;
         public bool Encrypted;

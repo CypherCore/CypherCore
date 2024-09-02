@@ -621,12 +621,14 @@ namespace Game.Networking.Packets
             Loc.Write(_worldPacket);
             _worldPacket.WriteUInt32(Reason);
             _worldPacket.WriteXYZ(MovementOffset);
+            _worldPacket.WriteInt32(Counter);
         }
 
         public uint MapID;
         public uint Reason;
         public TeleportLocation Loc = new();
         public Position MovementOffset;    // Adjusts all pending movement events by this offset
+        public int Counter;
     }
 
     public class WorldPortResponse : ClientPacket

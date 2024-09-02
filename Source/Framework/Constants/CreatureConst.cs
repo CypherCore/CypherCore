@@ -179,7 +179,7 @@ namespace Framework.Constants
         None = 0x00,
         Gossip = 0x01,     // 100%
         QuestGiver = 0x02,     // 100%
-        Unk1 = 0x04,
+        AccountBanker = 0x04, //account banker
         Unk2 = 0x08,
         Trainer = 0x10,     // 100%
         TrainerClass = 0x20,     // 100%

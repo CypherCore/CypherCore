@@ -145,7 +145,7 @@ namespace Game.Chat
         [CommandNonGroup("bank", RBACPermissions.CommandBank)]
         static bool HandleBankCommand(CommandHandler handler)
         {
-            handler.GetSession().SendShowBank(handler.GetSession().GetPlayer().GetGUID());
+            handler.GetSession().SendShowBank(handler.GetSession().GetPlayer().GetGUID(), PlayerInteractionType.Banker);
             return true;
         }
 

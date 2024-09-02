@@ -35,7 +35,7 @@ namespace Game.Networking.Packets
         }
 
         public GarrisonError Result;
-        public  uint GarrSiteID;
+        public uint GarrSiteID;
     }
 
     class GetGarrisonInfo : ClientPacket
@@ -103,7 +103,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)GarrTypeID);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
             _worldPacket.WriteUInt32((uint)Result);
             BuildingInfo.Write(_worldPacket);
             _worldPacket.WriteBit(PlayActivationCinematic);
@@ -136,7 +136,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)GarrTypeID);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(GarrPlotInstanceID);
             _worldPacket.WriteUInt32(GarrBuildingID);
@@ -154,7 +154,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)GarrTypeID);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(BuildingID);
         }
@@ -170,14 +170,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)GarrTypeID);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteUInt32(BuildingID);
         }
 
         public GarrisonType GarrTypeID;
-        public uint BuildingID;
         public GarrisonError Result;
+        public uint BuildingID;
     }
 
     class GarrisonRequestBlueprintAndSpecializationData : ClientPacket
@@ -193,7 +193,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32((uint)GarrTypeID);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
             _worldPacket.WriteInt32(BlueprintsKnown != null ? BlueprintsKnown.Count : 0);
             _worldPacket.WriteInt32(SpecializationsKnown != null ? SpecializationsKnown.Count : 0);
             if (BlueprintsKnown != null)
@@ -206,8 +206,8 @@ namespace Game.Networking.Packets
         }
 
         public GarrisonType GarrTypeID;
-        public List<uint> SpecializationsKnown = null;
         public List<uint> BlueprintsKnown = null;
+        public List<uint> SpecializationsKnown = null;
     }
 
     class GarrisonGetMapData : ClientPacket
@@ -237,7 +237,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)GarrTypeID);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
             PlotInfo.Write(_worldPacket);
         }
 
@@ -263,8 +263,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)GarrTypeID);
-            _worldPacket .WriteUInt32((uint)Result);
+            _worldPacket.WriteUInt8((byte)GarrTypeID);
+            _worldPacket.WriteUInt32((uint)Result);
             Follower.Write(_worldPacket);
         }
 
@@ -279,15 +279,15 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(FollowerDBID);
-            _worldPacket.WriteInt32(GarrTypeID);
+            _worldPacket.WriteUInt8(GarrTypeID);
             _worldPacket.WriteUInt32(Result);
+            _worldPacket.WriteUInt64(FollowerDBID);
             _worldPacket.WriteUInt32(Destroyed);
         }
 
-        public ulong FollowerDBID;
-        public int GarrTypeID;
+        public byte GarrTypeID;
         public uint Result;
+        public ulong FollowerDBID;
         public uint Destroyed;
     }
 
@@ -302,7 +302,7 @@ namespace Game.Networking.Packets
 
         public uint GarrPlotInstanceID;
     }
-    
+
     //Structs
     public struct GarrisonPlotInfo
     {
@@ -310,12 +310,12 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(GarrPlotInstanceID);
             data.WriteXYZO(PlotPos);
-            data.WriteUInt32(PlotType);
+            data.WriteUInt8(PlotType);
         }
 
         public uint GarrPlotInstanceID;
         public Position PlotPos;
-        public uint PlotType;
+        public byte PlotType;
     }
 
     public class GarrisonBuildingInfo
@@ -600,7 +600,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32((uint)GarrTypeID);
+            data.WriteUInt8((byte)GarrTypeID);
             data.WriteUInt32(GarrSiteID);
             data.WriteUInt32(GarrSiteLevelID);
             data.WriteInt32(Buildings.Count);
@@ -700,11 +700,11 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(GarrFollowerTypeID);
+            data.WriteUInt8(GarrFollowerTypeID);
             data.WriteUInt32(Count);
         }
 
-        public int GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public uint Count;
     }
 

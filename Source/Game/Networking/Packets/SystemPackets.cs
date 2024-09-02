@@ -35,6 +35,8 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteInt32(ActiveSeason);
             _worldPacket.WriteInt32(GameRuleValues.Count);
+            _worldPacket.WriteInt32(ActiveTimerunningSeasonID);
+            _worldPacket.WriteInt32(RemainingTimerunningSeasonSeconds);
 
             _worldPacket.WriteInt16(MaxPlayerNameQueriesPerPacket);
             _worldPacket.WriteInt16(PlayerNameQueryTelemetryInterval);
@@ -87,19 +89,25 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ChatDisabledByPlayer);
             _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
             _worldPacket.WriteBit(AddonsDisabled);
+            _worldPacket.WriteBit(TimerunningEnabled);
             _worldPacket.WriteBit(WarGamesEnabled);
             _worldPacket.WriteBit(ContentTrackingEnabled);
             _worldPacket.WriteBit(IsSellAllJunkEnabled);
-            _worldPacket.WriteBit(IsGroupFinderEnabled);
 
+            _worldPacket.WriteBit(IsGroupFinderEnabled);
             _worldPacket.WriteBit(IsLFDEnabled);
             _worldPacket.WriteBit(IsLFREnabled);
             _worldPacket.WriteBit(IsPremadeGroupEnabled);
             _worldPacket.WriteBit(CanShowSetRoleButton);
             _worldPacket.WriteBit(false); // unused 10.2.7
-            _worldPacket.WriteBit(false); // unused 10.2.7
+            _worldPacket.WriteBit(GuildEventsEditsEnabled);
+            _worldPacket.WriteBit(GuildTradeSkillsEnabled);
 
             _worldPacket.WriteBits(Unknown1027.GetByteCount(), 7);
+            _worldPacket.WriteBit(BNSendWhisperUseV2Services);
+
+            _worldPacket.WriteBit(BNSendGameDataUseV2Services);
+            _worldPacket.WriteBit(IsAccountCurrencyTransferEnabled);
 
             _worldPacket.FlushBits();
 
@@ -194,6 +202,7 @@ namespace Game.Networking.Packets
         public bool ChatDisabledByPlayer;
         public bool LFGListCustomRequiresAuthenticator;
         public bool AddonsDisabled;
+        public bool TimerunningEnabled;
         public bool WarGamesEnabled; // classic only
         public bool ContentTrackingEnabled;
         public bool IsSellAllJunkEnabled;
@@ -202,11 +211,18 @@ namespace Game.Networking.Packets
         public bool IsLFREnabled = true;  // classic only
         public bool IsPremadeGroupEnabled = true;  // classic only
         public bool CanShowSetRoleButton = true;
+        public bool GuildEventsEditsEnabled = true;
+        public bool GuildTradeSkillsEnabled = true;
+        public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
+        public bool BNSendGameDataUseV2Services = true; ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
+        public bool IsAccountCurrencyTransferEnabled;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
         public List<GameRuleValuePair> GameRuleValues = new();
+        public int ActiveTimerunningSeasonID;
+        public int RemainingTimerunningSeasonSeconds;
         public string Unknown1027;                          // related to movement lua functions used by keybinds
         public AddonChatThrottleParams AddonChatThrottle;
 
@@ -290,10 +306,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsBoostEnabled);
             _worldPacket.WriteBit(TrialBoostEnabled);
             _worldPacket.WriteBit(TokenBalanceEnabled);
+            _worldPacket.WriteBit(PaidCharacterTransfersBetweenBnetAccountsEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterCopyEnabled);
-            _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
 
+            _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
             _worldPacket.WriteBit(false); // unused, 10.0.2
@@ -301,12 +318,17 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsNameReservationEnabled);
             _worldPacket.WriteBit(LaunchETA.HasValue);
             _worldPacket.WriteBit(TimerunningEnabled);
-            _worldPacket.WriteBit(AddonsDisabled);
 
+            _worldPacket.WriteBit(AddonsDisabled);
             _worldPacket.WriteBit(Unused1000);
             _worldPacket.WriteBit(AccountSaveDataExportEnabled);
             _worldPacket.WriteBit(AccountLockedByExport);
             _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
+
+            _worldPacket.WriteBit(BNSendWhisperUseV2Services);
+
+            _worldPacket.WriteBit(BNSendGameDataUseV2Services);
+            _worldPacket.WriteBit(CharacterSelectListModeRealmless);
 
             _worldPacket.FlushBits();
 
@@ -363,6 +385,7 @@ namespace Game.Networking.Packets
         public bool IsBoostEnabled; // classic only
         public bool TrialBoostEnabled; // NYI
         public bool TokenBalanceEnabled; // NYI
+        public bool PaidCharacterTransfersBetweenBnetAccountsEnabled;
         public bool LiveRegionCharacterListEnabled; // NYI
         public bool LiveRegionCharacterCopyEnabled; // NYI
         public bool LiveRegionAccountCopyEnabled; // NYI
@@ -374,6 +397,9 @@ namespace Game.Networking.Packets
         public bool Unused1000;
         public bool AccountSaveDataExportEnabled;
         public bool AccountLockedByExport;
+        public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
+        public bool BNSendGameDataUseV2Services = true; ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
+        public bool CharacterSelectListModeRealmless;
         public EuropaTicketConfig? EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI

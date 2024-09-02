@@ -54,6 +54,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(GossipGUID);
             _worldPacket.WriteUInt32(GossipID);
+            _worldPacket.WriteUInt32(LfgDungeonsID);
             _worldPacket.WriteInt32(FriendshipFactionID);
             _worldPacket.WriteInt32(GossipOptions.Count);
             _worldPacket.WriteInt32(GossipText.Count);
@@ -81,6 +82,7 @@ namespace Game.Networking.Packets
         public int? TextID; // in classic variants this still holds npc_text id
         public int? BroadcastTextID;
         public uint GossipID;
+        public uint LfgDungeonsID;
     }
 
     public class GossipSelectOption : ClientPacket
@@ -346,6 +348,7 @@ namespace Game.Networking.Packets
         public TreasureLootList Treasure = new();
         public int? SpellID;
         public int? OverrideIconID;
+        public string FailureDescription;
 
         public void Write(WorldPacket data)
         {
@@ -361,6 +364,7 @@ namespace Game.Networking.Packets
             data.WriteBits((byte)Status, 2);
             data.WriteBit(SpellID.HasValue);
             data.WriteBit(OverrideIconID.HasValue);
+            data.WriteBits(FailureDescription.GetByteCount() + 1, 8);
             data.FlushBits();
 
             Treasure.Write(data);
@@ -373,6 +377,9 @@ namespace Game.Networking.Packets
 
             if (OverrideIconID.HasValue)
                 data.WriteInt32(OverrideIconID.Value);
+
+            if (!FailureDescription.IsEmpty())
+                data.WriteCString(FailureDescription);
         }
     }
 
@@ -382,10 +389,13 @@ namespace Game.Networking.Packets
         public uint ContentTuningID;
         public int QuestType;
         public bool Repeatable;
+        public bool ResetByScheduler;
         public bool Important;
+        public bool Meta;
         public string QuestTitle;
         public uint QuestFlags;
         public uint QuestFlagsEx;
+        public uint QuestFlagsEx2;
 
         public void Write(WorldPacket data)
         {
@@ -394,9 +404,12 @@ namespace Game.Networking.Packets
             data.WriteInt32(QuestType);
             data.WriteUInt32(QuestFlags);
             data.WriteUInt32(QuestFlagsEx);
+            data.WriteUInt32(QuestFlagsEx2);
 
             data.WriteBit(Repeatable);
+            data.WriteBit(ResetByScheduler);
             data.WriteBit(Important);
+            data.WriteBit(Meta);
             data.WriteBits(QuestTitle.GetByteCount(), 9);
             data.FlushBits();
 

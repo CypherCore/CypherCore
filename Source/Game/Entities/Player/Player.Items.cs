@@ -2447,9 +2447,14 @@ namespace Game.Entities
             packet.QuestLogItemID = item.GetTemplate().QuestLogItemId;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
+
+            QuestObjective questObjective = GetQuestObjectiveForItem(item.GetEntry(), false);
+            if (questObjective != null)
+                packet.QuantityInQuestLog = GetQuestObjectiveData(questObjective);
+
             packet.BattlePetSpeciesID = (int)item.GetModifier(ItemModifier.BattlePetSpeciesId);
             packet.BattlePetBreedID = (int)item.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF;
-            packet.BattlePetBreedQuality = (item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF;
+            packet.BattlePetBreedQuality = (byte)((item.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF);
             packet.BattlePetLevel = (int)item.GetModifier(ItemModifier.BattlePetLevel);
 
             packet.ItemGUID = item.GetGUID();

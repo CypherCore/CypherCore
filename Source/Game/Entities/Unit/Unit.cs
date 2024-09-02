@@ -867,17 +867,17 @@ namespace Game.Entities
                 m_areaTrigger.Last()?.Remove();
         }
 
-        public NPCFlags GetNpcFlags() { return (NPCFlags)m_unitData.NpcFlags[0]; }
-        public bool HasNpcFlag(NPCFlags flags) { return (m_unitData.NpcFlags[0] & (uint)flags) != 0; }
-        public void SetNpcFlag(NPCFlags flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
-        public void RemoveNpcFlag(NPCFlags flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
-        public void ReplaceAllNpcFlags(NPCFlags flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 0), (uint)flags); }
+        public NPCFlags GetNpcFlags() { return (NPCFlags)m_unitData.NpcFlags.GetValue(); }
+        public bool HasNpcFlag(NPCFlags flags) { return (m_unitData.NpcFlags & (uint)flags) != 0; }
+        public void SetNpcFlag(NPCFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags), (uint)flags); }
+        public void RemoveNpcFlag(NPCFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags), (uint)flags); }
+        public void ReplaceAllNpcFlags(NPCFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags), (uint)flags); }
 
-        public NPCFlags2 GetNpcFlags2() { return (NPCFlags2)m_unitData.NpcFlags[1]; }
-        public bool HasNpcFlag2(NPCFlags2 flags) { return (m_unitData.NpcFlags[1] & (uint)flags) != 0; }
-        public void SetNpcFlag2(NPCFlags2 flags) { SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
-        public void RemoveNpcFlag2(NPCFlags2 flags) { RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
-        public void ReplaceAllNpcFlags2(NPCFlags2 flags) { SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, 1), (uint)flags); }
+        public NPCFlags2 GetNpcFlags2() { return (NPCFlags2)m_unitData.NpcFlags2.GetValue(); }
+        public bool HasNpcFlag2(NPCFlags2 flags) { return (m_unitData.NpcFlags2 & (uint)flags) != 0; }
+        public void SetNpcFlag2(NPCFlags2 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags2), (uint)flags); }
+        public void RemoveNpcFlag2(NPCFlags2 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags2), (uint)flags); }
+        public void ReplaceAllNpcFlags2(NPCFlags2 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags2), (uint)flags); }
 
         public bool IsVendor() { return HasNpcFlag(NPCFlags.Vendor); }
         public bool IsTrainer() { return HasNpcFlag(NPCFlags.Trainer); }

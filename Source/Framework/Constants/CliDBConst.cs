@@ -2015,7 +2015,10 @@ namespace Framework.Constants
         BarbersChoice = 62,
         JailersTowerBuffs = 63,
         MajorFactionRenown = 64,
-        PersonalTabardVendor = 65
+        PersonalTabardVendor = 65,
+        ForgeMaster = 66,
+        CharacterBanker = 67,
+        AccountBanker = 68,
     }
 
     [Flags]

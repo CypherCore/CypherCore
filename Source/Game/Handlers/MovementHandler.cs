@@ -462,6 +462,7 @@ namespace Game
             packet.MapID = loc.Location.GetMapId();
             packet.Loc.Pos = loc.Location;
             packet.Reason = (uint)(!_player.IsBeingTeleportedSeamlessly() ? NewWorldReason.Normal : NewWorldReason.Seamless);
+            packet.Counter = _player.GetNewWorldCounter();
             SendPacket(packet);
 
             if (_player.IsBeingTeleportedSeamlessly())

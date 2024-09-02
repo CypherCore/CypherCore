@@ -84,13 +84,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Tier = _worldPacket.ReadInt32();
-            AzeritePowerID = _worldPacket.ReadInt32();
             ContainerSlot = _worldPacket.ReadUInt8();
             Slot = _worldPacket.ReadUInt8();
+            Tier = _worldPacket.ReadUInt8();
+            AzeritePowerID = _worldPacket.ReadInt32();
         }
 
-        public int Tier;
+        public byte Tier;
         public int AzeritePowerID;
         public byte ContainerSlot;
         public byte Slot;

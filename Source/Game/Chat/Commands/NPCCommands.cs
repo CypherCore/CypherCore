@@ -82,7 +82,7 @@ namespace Game.Chat
             CreatureTemplate cInfo = target.GetCreatureTemplate();
 
             uint faction = target.GetFaction();
-            ulong npcflags = (ulong)target.m_unitData.NpcFlags[1] << 32 | target.m_unitData.NpcFlags[0];
+            ulong npcflags = (ulong)target.m_unitData.NpcFlags2 << 32 | target.m_unitData.NpcFlags;
             ulong mechanicImmuneMask = 0;
             CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(cInfo.CreatureImmunitiesId);
             if (immunities != null)
@@ -151,7 +151,7 @@ namespace Game.Chat
                 if (cInfo.FlagsExtra.HasAnyFlag((CreatureFlagsExtra)value))
                     handler.SendSysMessage("{0} (0x{1:X})", (CreatureFlagsExtra)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, target.m_unitData.NpcFlags[0]);
+            handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, target.m_unitData.NpcFlags);
             foreach (uint value in Enum.GetValues(typeof(NPCFlags)))
                 if (npcflags.HasAnyFlag(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (NPCFlags)value, value);

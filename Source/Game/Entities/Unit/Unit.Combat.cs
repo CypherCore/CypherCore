@@ -1714,12 +1714,12 @@ namespace Game.Entities
 
         public virtual void UpdateNearbyPlayersInteractions()
         {
-            for (int i = 0; i < m_unitData.NpcFlags.GetSize(); ++i)
-                if (m_unitData.NpcFlags[i] != 0)
-                {
-                    m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags, i);
-                    ForceUpdateFieldChange();
-                }
+            if (m_unitData.NpcFlags != 0)
+                m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags);
+            if (m_unitData.NpcFlags2 != 0)
+                m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags2);
+
+            ForceUpdateFieldChange();
         }
     }
 }

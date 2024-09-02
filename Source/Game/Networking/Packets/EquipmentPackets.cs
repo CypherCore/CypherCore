@@ -14,9 +14,9 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(GUID);
             _worldPacket.WriteInt32(Type);
             _worldPacket.WriteUInt32(SetID);
+            _worldPacket.WriteUInt64(GUID);
         }
 
         public ulong GUID; // Set Identifier
@@ -159,11 +159,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
+            _worldPacket.WriteInt32(Reason);
             _worldPacket.WriteUInt64(GUID);
-            _worldPacket.WriteUInt8(Reason);
         }
 
         public ulong GUID; //Set Identifier
-        public byte Reason;
+        public int Reason;
     }
 }

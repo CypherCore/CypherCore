@@ -245,8 +245,11 @@ namespace Game.Misc
 
             GossipMenuAddon addon = Global.ObjectMgr.GetGossipMenuAddon(packet.GossipID);
             if (addon != null)
+            {
                 packet.FriendshipFactionID = addon.FriendshipFactionID;
-
+                packet.LfgDungeonsID = addon.LfgDungeonsID;
+            }
+            
             NpcText text = Global.ObjectMgr.GetNpcText(titleTextId);
             if (text != null)
                 packet.BroadcastTextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
@@ -282,8 +285,11 @@ namespace Game.Misc
                     gossipText.QuestType = item.QuestIcon;
                     gossipText.QuestFlags = (uint)quest.Flags;
                     gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
+                    gossipText.QuestFlagsEx2 = (uint)quest.FlagsEx2;
                     gossipText.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    gossipText.ResetByScheduler = quest.IsResetByScheduler();
                     gossipText.Important = quest.IsImportant();
+                    gossipText.Meta = quest.IsMeta();
 
                     gossipText.QuestTitle = quest.LogTitle;
                     Locale locale = _session.GetSessionDbLocaleIndex();
@@ -375,10 +381,13 @@ namespace Game.Misc
                     text.QuestType = questMenuItem.QuestIcon;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
+                    text.QuestFlagsEx2 = (uint)quest.FlagsEx2;
                     text.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
+                    text.ResetByScheduler = quest.IsResetByScheduler();
                     text.Important = quest.IsImportant();
-                    text.QuestTitle = quest.LogTitle;
+                    text.Meta = quest.IsMeta();
 
+                    text.QuestTitle = quest.LogTitle;
                     if (localeConstant != Locale.enUS)
                     {
                         QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(quest.Id);
@@ -446,6 +455,7 @@ namespace Game.Misc
             packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
             packet.PortraitGiverModelSceneID = quest.QuestGiverPortraitModelSceneId;
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
+            packet.QuestInfoID = (int)quest.QuestInfoID;
             packet.QuestSessionBonus = 0; //quest.GetQuestSessionBonus(); // this is only sent while quest session is active
             packet.AutoLaunched = autoLaunched;
             packet.DisplayPopup = displayPopup;
@@ -481,9 +491,10 @@ namespace Game.Misc
             {
                 var obj = new QuestObjectiveSimple();
                 obj.Id = objs[i].Id;
+                obj.Type = (byte)objs[i].Type;
                 obj.ObjectID = objs[i].ObjectID;
                 obj.Amount = objs[i].Amount;
-                obj.Type = (byte)objs[i].Type;
+
                 packet.Objectives.Add(obj);
             }
 
@@ -554,6 +565,7 @@ namespace Game.Misc
             offer.QuestID = quest.Id;
             offer.AutoLaunched = autoLaunched;
             offer.SuggestedPartyMembers = quest.SuggestedPlayers;
+            offer.QuestInfoID = (int)quest.QuestInfoID;
 
             for (uint i = 0; i < SharedConst.QuestEmoteCount && quest.OfferRewardEmote[i] != 0; ++i)
                 offer.Emotes.Add(new QuestDescEmote(quest.OfferRewardEmote[i], quest.OfferRewardEmoteDelay[i]));
@@ -632,6 +644,7 @@ namespace Game.Misc
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.QuestFlags[2] = (uint)quest.FlagsEx2;
             packet.SuggestPartyMembers = quest.SuggestedPlayers;
+            packet.QuestInfoID = (int)quest.QuestInfoID;
 
             // incomplete: FD
             // incomplete quest with item objective but item objective is complete DD
@@ -795,6 +808,7 @@ namespace Game.Misc
     public class GossipMenuAddon
     {
         public int FriendshipFactionID;
+        public uint LfgDungeonsID;
     }
 
     public class PointOfInterest

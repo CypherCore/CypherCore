@@ -89,6 +89,9 @@ namespace Framework.Constants
         BarbersChoice = 52,
         MajorFactionRenown = 53,
         PersonalTabardVendor = 54,
+        ForgeMaster = 55,
+        CharacterBanker = 56,
+        AccountBanker = 57,
 
         Max
     }
@@ -164,7 +167,8 @@ namespace Framework.Constants
     public enum GossipOptionFlags
     {
         None = 0x0,
-        QuestLabelPrepend = 0x1
+        QuestLabelPrepend = 0x1,
+        HideOptionIDFromClient = 0x2
     }
 
     [Flags]

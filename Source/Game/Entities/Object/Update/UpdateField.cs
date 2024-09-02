@@ -69,6 +69,8 @@ namespace Game.Entities
             return updateField._value;
         }
 
+        public int Size() { return _value.GetByteCount(); }
+
         public void SetValue(string value) { _value = value; }
 
         public string GetValue() { return _value; }
@@ -411,7 +413,8 @@ namespace Game.Entities
 
         public void ClearChanged<U>(UpdateFieldArray<U> updateField, int index) where U : new()
         {
-            _changesMask.Reset(updateField.FirstElementBit + index);
+            if (updateField.FirstElementBit >= 0)
+                _changesMask.Reset(updateField.FirstElementBit + index);
         }
 
         public void ClearChanged<U>(DynamicUpdateField<U> updateField, int index) where U : new()
@@ -518,9 +521,10 @@ namespace Game.Entities
                 updateField[index]._updateMask.Resize((uint)(updateField[index]._values.Count + 31) / 32);
             }
 
-            //MarkChanged(updateField, index);
             _changesMask.Set(updateField.Bit);
-            _changesMask.Set(updateField.FirstElementBit);
+            if (updateField.FirstElementBit >= 0)
+                _changesMask.Set(updateField.FirstElementBit);
+
             updateField[index].MarkChanged(dynamicIndex);
 
             return new DynamicUpdateFieldSetter<U>(updateField[index], dynamicIndex);
@@ -547,13 +551,15 @@ namespace Game.Entities
         public void MarkChanged<U>(UpdateFieldArray<U> updateField, int index) where U : new()
         {
             _changesMask.Set(updateField.Bit);
-            _changesMask.Set(updateField.FirstElementBit + index);
+            if (updateField.FirstElementBit >= 0)
+                _changesMask.Set(updateField.FirstElementBit + index);
         }
 
         public void MarkChanged(UpdateFieldArrayString updateField, int index)
         {
             _changesMask.Set(updateField.Bit);
-            _changesMask.Set(updateField.FirstElementBit + index);
+            if (updateField.FirstElementBit >= 0)
+                _changesMask.Set(updateField.FirstElementBit + index);
         }
 
         public void WriteCompleteDynamicFieldUpdateMask(int size, WorldPacket data, int bitsForSize = 32)

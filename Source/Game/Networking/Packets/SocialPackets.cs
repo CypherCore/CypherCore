@@ -69,7 +69,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Level);
             _worldPacket.WriteUInt32((uint)ClassID);
             _worldPacket.WriteBits(Notes.GetByteCount(), 10);
-            _worldPacket.WriteBit(Mobile);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
         }
@@ -83,7 +82,6 @@ namespace Game.Networking.Packets
         public uint Level;
         public uint AreaID;
         public FriendsResult FriendResult;
-        public bool Mobile;
     }
 
     public class AddFriend : ClientPacket
@@ -204,7 +202,6 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Level);
             data.WriteUInt32((uint)ClassID);
             data.WriteBits(Notes.GetByteCount(), 10);
-            data.WriteBit(Mobile);
             data.FlushBits();
             data.WriteString(Notes);
         }
@@ -219,7 +216,6 @@ namespace Game.Networking.Packets
         uint AreaID;
         uint Level;
         Class ClassID;
-        bool Mobile;
     }
 
     public struct QualifiedGUID

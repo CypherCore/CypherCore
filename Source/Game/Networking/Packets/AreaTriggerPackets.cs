@@ -54,6 +54,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(TriggerGUID);
+            _worldPacket.WritePackedGuid(Unused_1100);
 
             _worldPacket.WriteBit(AreaTriggerSpline != null);
             _worldPacket.WriteBit(AreaTriggerOrbit != null);
@@ -74,6 +75,7 @@ namespace Game.Networking.Packets
         public AreaTriggerOrbitInfo AreaTriggerOrbit;
         public AreaTriggerMovementScriptInfo? AreaTriggerMovementScript;
         public ObjectGuid TriggerGUID;
+        public ObjectGuid Unused_1100;
     }
 
     class AreaTriggerPlaySpellVisual : ServerPacket

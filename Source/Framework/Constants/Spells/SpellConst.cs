@@ -774,7 +774,8 @@ namespace Framework.Constants
         CantFlyHere = 318,
         DragonridingRidingRequirement = 319,
         ItemModAppearanceGroupAlreadyKnown = 320,
-        Unknown = 321,
+        ItemCreationDisabledForEvent = 321,
+        Unknown = 322,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1416,8 +1417,48 @@ namespace Framework.Constants
         YouDontHaveTheSwirlingMojoStone = 999, // You Don'T Have The Swirling Mojo Stone Equipped.
         YouMustBeNearADragonflightOathstone = 1000, // You Must Be Near One Of The Five Dragonflight Oathstones In The Dragon Isles.
         CanOnlyUseThisItemWhileAirborne = 1001, // You Can Only Use This Item While Airborne.
+        ThisPlayerIsNotOppositeFaction = 1002, // This Player Is Not Of The Opposite Faction.
+        ThisPlayerAlreadyHasThisMount = 1003, // This Player Already Has This Mount.
+        YourTargetIsInWarMode = 1004, // Your Target Is In War Mode.
+        CooldownReset = 1005, // Cooldown Reset
+        SoilNutrientsMustReplenish = 1006, // The Nutrients Of This Soil Must Replenish Before Further Growth.
+        TargetAlreadyHadSomeFeathersPlucked = 1007, // The Target Has Already Had Some Feathers Plucked. It Would Be Rude To Take More.
+        ThisCreatureHasAlreadyBeenAttunedWith = 1008, // This Creature Has Already Been Attuned With Recently.
+        YouAlreadyHaveSomeMulchPrepared = 1009, // You Already Have Some Mulch Prepared. Use Your Current Mulch First.
+        YouDontKnowHowToGatherThis = 1010, // You Don't Know How To Gather This.
+        YouDontHaveAnyItemsOfThisType = 1011, // You Don't Have Any Items Of This Type.
+        YouDontHaveAnyRadiantRemnants = 1012, // You Don't Have Any Radiant Remnants.
+        TargetsRingIsAlreadyBoundToAnotherPlayer = 1013, // Your Target's Ring Is Already Bound To Another Player.
+        TargetIsNotWearingThisRing = 1014, // Your Target Is Not Also Wearing This Ring.
+        CanOnlyBeUsedOnSocketablePvpTwwItems = 1015, // Can Only Be Used On Socket Eligible Pvp Items From The War Within Expansion.
+        HarvestbotsAlreadyActive = 1016, // Harvestbots Already Active.
+        AirshipDauntlessIsAlreadyActive = 1017, // The Airship Dauntless Is Already Active.
+        CannotSwapSpellsOnCooldownInCombat = 1026, // You Cannot Swap Spells On Cooldown While In Combat.
+        MustEquipCloakOfInfinitePotential = 1027, // You Must First Equip The Cloak Of Infinite Potential.
+        InsufficientBronze = 1028, // You Have Insufficient Bronze To Make This Trade.
+        RequiresSkyriding = 1029, // Requires Skyriding
+        YouAlreadyOverloadedThisGatheringNode = 1030, // You Have Already Overloaded This Gathering Node.
+        YouDontKnowHowToOverloadThisNode = 1031, // You Do Not Know How To Overload This Gathering Node.
+        TimerunnersCannotTeleportOutOfPandaria = 1032, // Timerunners Cannot Teleport Outside Of Pandaria.
+        SpecializeFurtherForTheseNotes = 1033, // Specialize Further Or Improve Your Hasty Handwriting To Make Sense Of These Notes.
+        ThereIsNothingLeftToInvent = 1034, // There Is Nothing Left To Invent And You Cannot Be Convinced Otherwise.
+        PlayerInPartyDoesntHaveThisTierUnlocked = 1035, // A Player In Your Party Does Not Have This Tier Unlocked
+        YouDontHaveAnyRadiantEchoes = 1036, // You Don't Have Any Radiant Echoes.
+        RequiresTwwPathfinderUnlocked = 1037, // Requires The War Within Pathfinder Unlocked To Use In This Area.
+        CanOnlyBeUsedWhileInCombat = 1039, // Can Only Be Used While In Combat.
+        NotHighEnoughLevelToEnterADelve = 1040, // You Are Not High Enough Level To Enter A Delve.
+        WondrousWisdomballIsNonresponsive = 1041, // For Some Reason The Wondrous Wisdomball Is Nonresponsive.
+        YouAlreadyHaveThisCurioInYourCollection = 1042, // You Already Have This Curio In Your Collection.
+        AlreadyHaveIdentifiedPrototype = 1043, // You Must Choose What To Do With Your Current Prototype Before Identifying New Ones.
+        YouAlreadyUsedKhazAlgarContract = 1044, // You Have Already Used A Khaz Algar Contract This Week.
+        YouAlreadyRevealedAllTodayPactLocations = 1051, // You Have Revealed Or Completed All Of Today's Pact Locations.
+        TimerunnersCannotCastThisSpell = 1053, // Timerunners Cannot Cast This Spell.
+        ThisEmblemHasNoMagicStored = 2001, // The Emblem Has No Magic Stored.
         YouMustBeInVisageForm = 2222, // You Must Be In Visage Form To Do This.
-        TooCloseToAnotherMoltenRitual = 2424, // You Can'T Begin A Molten Ritual This Close To Another One.
+        ATrialIsBeingUndergoneNearby = 2223, // A Trial Is Already Being Undergone Nearby.
+        YouCannotUseVantusRuneInStoryMode = 2224, // You Cannot Use A Vantus Rune In Story Mode.
+        TooCloseToAnotherMoltenRitual = 2424, // You Can't Begin A Molten Ritual This Close To Another One.
+        EarthenCannotConsumeRegularFoodOrDrink = 2425, // Earthen Cannot Consume Traditional Food Or Drink.
     }
 
     public enum SpellMissInfo

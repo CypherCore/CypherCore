@@ -8,27 +8,22 @@ namespace Game.Networking.Packets
 {
     public class InitializeFactions : ServerPacket
     {
-        const ushort FactionCount = 1000;
-
         public InitializeFactions() : base(ServerOpcodes.InitializeFactions, ConnectionType.Instance) { }
 
         public override void Write()
         {
-            for (ushort i = 0; i < FactionCount; ++i)
-            {
-                _worldPacket.WriteUInt16((ushort)((ushort)FactionFlags[i] & 0xFF));
-                _worldPacket.WriteInt32(FactionStandings[i]);
-            }
+            _worldPacket.WriteInt32(Factions.Count);
+            _worldPacket.WriteInt32(Bonuses.Count);
 
-            for (ushort i = 0; i < FactionCount; ++i)
-                _worldPacket.WriteBit(FactionHasBonus[i]);
+            foreach (FactionData faction in Factions)
+                faction.Write(_worldPacket);
 
-            _worldPacket.FlushBits();
+            foreach (FactionBonusData bonus in Bonuses)
+                bonus.Write(_worldPacket);
         }
 
-        public int[] FactionStandings = new int[FactionCount];
-        public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
-        public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
+        public List<FactionData> Factions = new();
+        public List<FactionBonusData> Bonuses = new();
     }
 
     class RequestForcedReactions : ClientPacket
@@ -71,6 +66,33 @@ namespace Game.Networking.Packets
         public float BonusFromAchievementSystem;
         public List<FactionStandingData> Faction = new();
         public bool ShowVisual;
+    }
+
+    public struct FactionData
+    {
+        public uint FactionID;
+        public ushort Flags;
+        public int Standing;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(FactionID);
+            data.WriteUInt16(Flags);
+            data.WriteInt32(Standing);
+        }
+    }
+
+    public struct FactionBonusData
+    {
+        public uint FactionID;
+        public bool FactionHasBonus;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(FactionID);
+            data.WriteBit(FactionHasBonus);
+            data.FlushBits();
+        }
     }
 
     struct ForcedReaction

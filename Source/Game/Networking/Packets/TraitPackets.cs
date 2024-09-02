@@ -148,6 +148,51 @@ namespace Game.Networking.Packets
         }
     }
 
+    public class TraitSubTreeCache
+    {
+        public int TraitSubTreeID;
+        public List<TraitEntryPacket> Entries = new();
+        public bool Active;
+
+        public TraitSubTreeCache() { }
+        public TraitSubTreeCache(TraitSubTreeCache ufSubTreeCache)
+        {
+            TraitSubTreeID = ufSubTreeCache.TraitSubTreeID;
+            foreach (var ufEntry in ufSubTreeCache.Entries)
+                Entries.Add(ufEntry);
+            Active = ufSubTreeCache.Active;
+        }
+
+        public void Read(WorldPacket data)
+        {
+            TraitSubTreeID = data.ReadInt32();
+            uint entriesSize = data.ReadUInt32();
+            //if (entriesSize > 100)
+            //throw new Exception(entriesSize, 100);
+
+            for (var i = 0; i < entriesSize; ++i)
+            {
+                var entry = new TraitEntryPacket();
+                entry.Read(data);
+                Entries.Add(entry);
+            }
+
+            Active = data.HasBit();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(TraitSubTreeID);
+            data.WriteInt32(Entries.Count);
+
+            foreach (var traitEntry in Entries)
+                traitEntry.Write(data);
+
+            data.WriteBit(Active);
+            data.FlushBits();
+        }
+    }
+
     public class TraitConfigPacket
     {
         public int ID;
@@ -158,9 +203,11 @@ namespace Game.Networking.Packets
         public uint SkillLineID;
         public int TraitSystemID;
         public List<TraitEntryPacket> Entries = new();
+        public List<TraitSubTreeCache> SubTrees = new();
         public string Name = "";
 
         public TraitConfigPacket() { }
+
         public TraitConfigPacket(TraitConfig ufConfig)
         {
             ID = ufConfig.ID;
@@ -174,12 +221,14 @@ namespace Game.Networking.Packets
                 Entries.Add(new TraitEntryPacket(ufEntry));
             Name = ufConfig.Name;
         }
-        
+
         public void Read(WorldPacket data)
         {
             ID = data.ReadInt32();
             Type = (TraitConfigType)data.ReadInt32();
-            var entriesCount = data.ReadInt32();
+            int entriesCount = data.ReadInt32();
+            int subtreesSize = data.ReadInt32();
+
             switch (Type)
             {
                 case TraitConfigType.Combat:
@@ -205,6 +254,14 @@ namespace Game.Networking.Packets
             }
 
             uint nameLength = data.ReadBits<uint>(9);
+
+            for (var i = 0; i < subtreesSize; ++i)
+            {
+                TraitSubTreeCache subtrees = new();
+                subtrees.Read(data);
+                SubTrees.Add(subtrees);
+            }
+
             Name = data.ReadString(nameLength);
         }
 
@@ -213,6 +270,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(ID);
             data.WriteInt32((int)Type);
             data.WriteInt32(Entries.Count);
+            data.WriteInt32(SubTrees.Count);
+
             switch (Type)
             {
                 case TraitConfigType.Combat:
@@ -234,6 +293,10 @@ namespace Game.Networking.Packets
                 traitEntry.Write(data);
 
             data.WriteBits(Name.GetByteCount(), 9);
+
+            foreach (TraitSubTreeCache traitSubTreeCache in SubTrees)
+                traitSubTreeCache.Write(data);
+
             data.FlushBits();
 
             data.WriteString(Name);

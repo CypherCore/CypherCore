@@ -70,7 +70,7 @@ namespace Game
             {
                 do
                 {
-                    EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
+                    EnumCharactersResult.CharacterInfoBasic charInfo = new(result.GetFields());
 
                     var customizationsForChar = customizations.LookupByKey(charInfo.Guid.GetCounter());
                     if (!customizationsForChar.Empty())
@@ -149,7 +149,7 @@ namespace Game
             {
                 do
                 {
-                    EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
+                    EnumCharactersResult.CharacterInfoBasic charInfo = new(result.GetFields());
 
                     Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 

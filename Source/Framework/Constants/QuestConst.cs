@@ -84,7 +84,7 @@ namespace Framework.Constants
 
     public enum QuestType
     {
-        TurnIn= 0,
+        TurnIn = 0,
         WithMaxLevel = 1,
         Normal = 2,
         Task = 3,
@@ -417,39 +417,53 @@ namespace Framework.Constants
 
     public enum QuestGiverStatus : ulong
     {
-        None = 0x00,
-        Future = 0x02,
-        Trivial = 0x04,
-        TrivialRepeatableTurnin = 0x08,
-        TrivialDailyQuest = 0x10,
-        Reward = 0x20,
-        JourneyReward = 0x40,
-        CovenantCallingReward = 0x80,
-        RepeatableTurnin = 0x100,
-        DailyQuest = 0x200,
-        Quest = 0x400,
-        RewardCompleteNoPOI = 0x800,
-        RewardCompletePOI = 0x1000,
-        LegendaryQuest = 0x2000,
-        LegendaryRewardCompleteNoPOI = 0x4000,
-        LegendaryRewardCompletePOI = 0x8000,
-        JourneyQuest = 0x10000,
-        JourneyRewardCompleteNoPOI = 0x20000,
-        JourneyRewardCompletePOI = 0x40000,
-        CovenantCallingQuest = 0x80000,
-        CovenantCallingRewardCompleteNoPOI = 0x100000,
-        CovenantCallingRewardCompletePOI = 0x200000,
-        TrivialLegendaryQuest = 0x400000,
-        FutureLegendaryQuest = 0x800000,
-        LegendaryReward = 0x1000000,
-        ImportantReward = 0x2000000,
-        ImportantQuest = 0x4000000,
-        TrivialImportantQuest = 0x8000000,
-        FutureImportantQuest = 0x010000000,
-        ImportantQuestRewardCompleteNoPOI = 0x20000000,
-        ImportantQuestRewardCompletePOI = 0x40000000,
-        TrivialJourneyQuest = 0x80000000,
-        FutureJourneyQuest = 0x100000000,
+        None = 0x000000000000,
+        Future = 0x000000000002,
+        FutureJourneyQuest = 0x000000000004,
+        FutureLegendaryQuest = 0x000000000008,
+        FutureImportantQuest = 0x000000000010,
+        TrivialRepeatableTurnin = 0x000000000020,
+        Trivial = 0x000000000040,
+        TrivialDailyQuest = 0x000000000080,
+        TrivialRepeatableQuest = 0x000000000100,
+        TrivialMetaQuest = 0x000000000200,
+        TrivialJourneyQuest = 0x000000000400,
+        TrivialLegendaryQuest = 0x000000000800,
+        TrivialImportantQuest = 0x000000001000,
+        Reward = 0x000000002000,
+        RepeatableReward = 0x000000004000,
+        MetaReward = 0x000000008000,
+        JourneyReward = 0x000000010000,
+        CovenantCallingReward = 0x000000020000,
+        LegendaryReward = 0x000000040000,
+        ImportantReward = 0x000000080000,
+        RepeatableTurnin = 0x000000100000,
+        QuestAccountCompleted = 0x000000200000,
+        Quest = 0x000000400000,
+        DailyQuest = 0x000000800000,
+        RepeatableQuest = 0x000001000000,
+        MetaQuest = 0x000002000000,
+        CovenantCallingQuest = 0x000004000000,
+        JourneyQuestAccountCompleted = 0x000008000000,
+        JourneyQuest = 0x000010000000,
+        LegendaryQuestAccountCompleted = 0x000020000000,
+        LegendaryQuest = 0x000040000000,
+        ImportantQuestAccountCompleted = 0x000080000000,
+        ImportantQuest = 0x000100000000,
+        RewardCompleteNoPOI = 0x000200000000,
+        RewardCompletePOI = 0x000400000000,
+        RepeatableRewardCompleteNoPOI = 0x000800000000,
+        RepeatableRewardCompletePOI = 0x001000000000,
+        MetaQuestRewardCompleteNoPOI = 0x002000000000,
+        MetaQuestRewardCompletePOI = 0x004000000000,
+        CovenantCallingRewardCompleteNoPOI = 0x008000000000,
+        CovenantCallingRewardCompletePOI = 0x010000000000,
+        JourneyRewardCompleteNoPOI = 0x020000000000,
+        JourneyRewardCompletePOI = 0x040000000000,
+        LegendaryRewardCompleteNoPOI = 0x080000000000,
+        LegendaryRewardCompletePOI = 0x100000000000,
+        ImportantQuestRewardCompleteNoPOI = 0x200000000000,
+        ImportantQuestRewardCompletePOI = 0x400000000000,
     }
 
     [Flags]
@@ -554,6 +568,8 @@ namespace Framework.Constants
         IgnoreSoulboundItems = 0x00200000,
         DontDeferStartEffects = 0x00400000,
         HideRequiredItemsPreTurnIn = 0x00800000,
+
+        AbandonOnDisable = 0x04000000,
     }
 
     public enum QuestSpecialFlags
@@ -597,5 +613,12 @@ namespace Framework.Constants
         Islands,
         Threat,
         CovenantCalling
+    }
+
+    public enum QuestRewardContextFlags
+    {
+        None = 0x0,
+        FirstCompletionBonus = 0x1,
+        RepeatCompletionBonus = 0x2
     }
 }

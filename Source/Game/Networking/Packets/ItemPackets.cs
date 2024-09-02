@@ -411,10 +411,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestLogItemID);
             _worldPacket.WriteUInt32(Quantity);
             _worldPacket.WriteUInt32(QuantityInInventory);
+            _worldPacket.WriteInt32(QuantityInQuestLog);
             _worldPacket.WriteInt32(DungeonEncounterID);
             _worldPacket.WriteInt32(BattlePetSpeciesID);
             _worldPacket.WriteInt32(BattlePetBreedID);
-            _worldPacket.WriteUInt32(BattlePetBreedQuality);
+            _worldPacket.WriteUInt8(BattlePetBreedQuality);
             _worldPacket.WriteInt32(BattlePetLevel);
             _worldPacket.WritePackedGuid(ItemGUID);
             _worldPacket.WriteInt32(Toasts.Count);
@@ -448,10 +449,11 @@ namespace Game.Networking.Packets
                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
         public uint Quantity;
         public uint QuantityInInventory;
+        public int QuantityInQuestLog;
         public int DungeonEncounterID;
         public int BattlePetSpeciesID;
         public int BattlePetBreedID;
-        public uint BattlePetBreedQuality;
+        public byte BattlePetBreedQuality;
         public int BattlePetLevel;
         public ObjectGuid ItemGUID;
         public List<UiEventToast> Toasts = new();
@@ -634,6 +636,13 @@ namespace Game.Networking.Packets
         public ObjectGuid Item;
     }
 
+    class SortAccountBankBags : ClientPacket
+    {
+        public SortAccountBankBags(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
     class SortBags : ClientPacket
     {
         public SortBags(WorldPacket packet) : base(packet) { }
@@ -683,7 +692,7 @@ namespace Game.Networking.Packets
 
     class ChangeBagSlotFlag : ClientPacket
     {
-        public int BagIndex;
+        public byte BagIndex;
         public BagSlotFlags FlagToChange;
         public bool On;
 
@@ -691,7 +700,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            BagIndex = _worldPacket.ReadInt32();
+            BagIndex = _worldPacket.ReadUInt8();
             FlagToChange = (BagSlotFlags)_worldPacket.ReadUInt32();
             On = _worldPacket.HasBit();
         }
@@ -699,7 +708,7 @@ namespace Game.Networking.Packets
 
     class ChangeBankBagSlotFlag : ClientPacket
     {
-        public int BagIndex;
+        public byte BagIndex;
         public BagSlotFlags FlagToChange;
         public bool On;
 
@@ -707,7 +716,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            BagIndex = _worldPacket.ReadInt32();
+            BagIndex = _worldPacket.ReadUInt8();
             FlagToChange = (BagSlotFlags)_worldPacket.ReadUInt32();
             On = _worldPacket.HasBit();
         }
@@ -870,14 +879,14 @@ namespace Game.Networking.Packets
 
         public void Read(WorldPacket data)
         {
-            Value = data.ReadUInt32();
             Type = (ItemModifier)data.ReadUInt8();
+            Value = data.ReadUInt32();
         }
 
         public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(Value);
+        {     
             data.WriteUInt8((byte)Type);
+            data.WriteUInt32(Value);
         }
 
         public override int GetHashCode()

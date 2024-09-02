@@ -55,15 +55,15 @@ namespace Game.Networking.Packets
             uint itemClassFilterCount = _worldPacket.ReadBits<uint>(3);
             uint sortSize = _worldPacket.ReadBits<uint>(2);
 
-            for (var i = 0; i < sortSize; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
-
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
 
             Name = _worldPacket.ReadString(nameLength);
-            for (var i = 0; i < itemClassFilterCount; ++i)// AuctionListFilterClass filterClass in ItemClassFilters)
+            for (var i = 0; i < itemClassFilterCount; ++i)
                 ItemClassFilters[i] = new AuctionListFilterClass(_worldPacket);
+
+            for (var i = 0; i < sortSize; ++i)
+                Sorts[i] = new AuctionSortDef(_worldPacket);
         }
     }
 
@@ -141,14 +141,14 @@ namespace Game.Networking.Packets
             uint auctionIDCount = _worldPacket.ReadBits<uint>(7);
             uint sortCount = _worldPacket.ReadBits<uint>(2);
 
-            for (var i = 0; i < sortCount; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
-
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
 
             for (var i = 0; i < auctionIDCount; ++i)
                 AuctionItemIDs[i] = _worldPacket.ReadUInt32();
+
+            for (var i = 0; i < sortCount; ++i)
+                Sorts[i] = new AuctionSortDef(_worldPacket);
         }
     }
 
@@ -170,14 +170,14 @@ namespace Game.Networking.Packets
             uint bucketKeysCount = _worldPacket.ReadBits<uint>(7);
             uint sortCount = _worldPacket.ReadBits<uint>(2);
 
-            for (var i = 0; i < sortCount; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
-
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
 
             for (var i = 0; i < bucketKeysCount; ++i)
                 BucketKeys[i] = new AuctionBucketKey(_worldPacket);
+
+            for (var i = 0; i < sortCount; ++i)
+                Sorts[i] = new AuctionSortDef(_worldPacket);
         }
     }
 
@@ -201,13 +201,14 @@ namespace Game.Networking.Packets
                 TaintedBy = new();
 
             uint sortCount = _worldPacket.ReadBits<uint>(2);
-            for (var i = 0; i < sortCount; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
 
             BucketKey = new AuctionBucketKey(_worldPacket);
 
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
+
+            for (var i = 0; i < sortCount; ++i)
+                Sorts[i] = new AuctionSortDef(_worldPacket);
         }
     }
 
@@ -234,11 +235,11 @@ namespace Game.Networking.Packets
 
             uint sortCount = _worldPacket.ReadBits<uint>(2);
 
-            for (var i = 0; i < sortCount; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
-
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
+
+            for (var i = 0; i < sortCount; ++i)
+                Sorts[i] = new AuctionSortDef(_worldPacket);
         }
     }
 
@@ -260,11 +261,11 @@ namespace Game.Networking.Packets
 
             uint sortCount = _worldPacket.ReadBits<uint>(2);
 
-            for (var i = 0; i < sortCount; ++i)
-                Sorts[i] = new AuctionSortDef(_worldPacket);
-
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
+
+            for (var i = 0; i < sortCount; ++i)
+                Sorts[i] = new AuctionSortDef(_worldPacket);
         }
     }
 

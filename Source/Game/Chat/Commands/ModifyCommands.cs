@@ -107,7 +107,7 @@ namespace Game.Chat
                 flag = target.m_unitData.Flags;
 
             if (!npcflag.HasValue)
-                npcflag = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
+                npcflag = (ulong)target.m_unitData.NpcFlags2 << 32 | target.m_unitData.NpcFlags;
 
             if (!dyflag.HasValue)
                 dyflag = target.m_objectData.DynamicFlags;

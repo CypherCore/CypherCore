@@ -769,6 +769,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SequenceNum);
             _worldPacket.WritePackedGuid(LeaderGUID);
             _worldPacket.WriteUInt8(LeaderFactionGroup);
+            _worldPacket.WriteInt32((int)PingRestriction);
             _worldPacket.WriteInt32(PlayerList.Count);
             _worldPacket.WriteBit(LfgInfos.HasValue);
             _worldPacket.WriteBit(LootSettings.HasValue);
@@ -798,6 +799,8 @@ namespace Game.Networking.Packets
 
         public int MyIndex;
         public int SequenceNum;
+
+        public RestrictPingsTo PingRestriction;
 
         public List<PartyPlayerInfo> PlayerList = new();
 
@@ -939,14 +942,14 @@ namespace Game.Networking.Packets
     class SetRestrictPingsToAssistants : ClientPacket
     {
         public byte? PartyIndex;
-        public bool RestrictPingsToAssistants;
+        public RestrictPingsTo RestrictTo;
 
         public SetRestrictPingsToAssistants(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             bool hasPartyIndex = _worldPacket.HasBit();
-            RestrictPingsToAssistants = _worldPacket.HasBit();
+            RestrictTo =  (RestrictPingsTo)_worldPacket.ReadInt32();
             if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
         }
@@ -995,6 +998,7 @@ namespace Game.Networking.Packets
         public Vector3 Point;
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
+        public ObjectGuid Transport;
 
         public SendPingWorldPoint(WorldPacket packet) : base(packet) { }
 
@@ -1003,8 +1007,9 @@ namespace Game.Networking.Packets
             SenderGUID = _worldPacket.ReadPackedGuid();
             MapID = _worldPacket.ReadUInt32();
             Point = _worldPacket.ReadVector3();
-            Type = (PingSubjectType)_worldPacket.ReadUInt8();
+            Type = (PingSubjectType)_worldPacket.ReadUInt32();
             PinFrameID = _worldPacket.ReadUInt32();
+            Transport = _worldPacket.ReadPackedGuid();
         }
     }
 
@@ -1015,6 +1020,7 @@ namespace Game.Networking.Packets
         public Vector3 Point;
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
+        public ObjectGuid Transport;
 
         public ReceivePingWorldPoint() : base(ServerOpcodes.ReceivePingWorldPoint) { }
 
@@ -1025,6 +1031,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteVector3(Point);
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
+            _worldPacket.WritePackedGuid(Transport);
         }
     }
 

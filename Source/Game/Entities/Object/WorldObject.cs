@@ -654,7 +654,7 @@ namespace Game.Entities
                 //                *data << int32(Players[i].Pets[j].Power);
                 //                *data << int32(Players[i].Pets[j].Speed);
                 //                *data << int32(Players[i].Pets[j].NpcTeamMemberID);
-                //                *data << uint16(Players[i].Pets[j].BreedQuality);
+                //                *data << uint8(Players[i].Pets[j].BreedQuality);
                 //                *data << uint16(Players[i].Pets[j].StatusFlags);
                 //                *data << int8(Players[i].Pets[j].Slot);
 

@@ -4358,6 +4358,10 @@ namespace Game.Entities
 
             // ENDOF STORMSONG VALLEY SPELLS
 
+            //
+            // THE WANDERING ISLE SPELLS
+            //
+
             // Summon Master Li Fei
             ApplySpellFix(new[] { 102445 }, spellInfo =>
             {
@@ -4366,6 +4370,18 @@ namespace Game.Entities
                     spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
                 });
             });
+
+            // Summon Living Air
+            ApplySpellFix([102207], spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestTargetRandom);
+                });
+            });
+
+            // END OF THE WANDERING ISLE SPELLS
+            //
 
             // Earthquake
             ApplySpellFix(new[] { 61882 }, spellInfo =>

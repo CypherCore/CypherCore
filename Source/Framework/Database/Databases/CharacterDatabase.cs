@@ -473,7 +473,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_ACCOUNT_ONLINE, "UPDATE characters SET online = 0 WHERE account = ?");
             PrepareStatement(CharStatements.INS_CHARACTER_CUSTOMIZATION, "INSERT INTO character_customizations (guid, chrCustomizationOptionID, chrCustomizationChoiceID) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS, "DELETE FROM character_customizations WHERE guid = ?");
-            PrepareStatement(CharStatements.INS_GROUP, "INSERT INTO `groups` (guid, leaderGuid, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raidDifficulty, legacyRaidDifficulty, masterLooterGuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_GROUP, "INSERT INTO `groups` (guid, leaderGuid, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raidDifficulty, legacyRaidDifficulty, masterLooterGuid, pingRestriction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_GROUP_MEMBER, "INSERT INTO group_member (guid, memberGuid, memberFlags, subgroup, roles) VALUES(?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_GROUP_MEMBER, "DELETE FROM group_member WHERE memberGuid = ?");
             PrepareStatement(CharStatements.UPD_GROUP_LEADER, "UPDATE `groups` SET leaderGuid = ? WHERE guid = ?");
@@ -483,6 +483,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_GROUP_DIFFICULTY, "UPDATE `groups` SET difficulty = ? WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_GROUP_RAID_DIFFICULTY, "UPDATE `groups` SET raidDifficulty = ? WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_GROUP_LEGACY_RAID_DIFFICULTY, "UPDATE `groups` SET legacyRaidDifficulty = ? WHERE guid = ?");
+            PrepareStatement(CharStatements.UPD_GROUP_PING_RESTRICTION, "UPDATE `groups` SET pingRestriction = ? WHERE guid = ?");
             PrepareStatement(CharStatements.DEL_INVALID_SPELL_SPELLS, "DELETE FROM character_spell WHERE spell = ?");
             PrepareStatement(CharStatements.UPD_DELETE_INFO, "UPDATE characters SET deleteInfos_Name = name, deleteInfos_Account = account, deleteDate = UNIX_TIMESTAMP(), name = '', account = 0 WHERE guid = ?");
             PrepareStatement(CharStatements.UPD_RESTORE_DELETE_INFO, "UPDATE characters SET name = ?, account = ?, deleteDate = NULL, deleteInfos_Name = NULL, deleteInfos_Account = NULL WHERE deleteDate IS NOT NULL AND guid = ?");
@@ -1121,6 +1122,7 @@ namespace Framework.Database
         UPD_GROUP_DIFFICULTY,
         UPD_GROUP_RAID_DIFFICULTY,
         UPD_GROUP_LEGACY_RAID_DIFFICULTY,
+        UPD_GROUP_PING_RESTRICTION,
         DEL_INVALID_SPELL_SPELLS,
         UPD_DELETE_INFO,
         UPD_RESTORE_DELETE_INFO,

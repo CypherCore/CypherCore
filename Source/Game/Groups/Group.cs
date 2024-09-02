@@ -146,6 +146,7 @@ namespace Game.Groups
                 stmt.AddValue(index++, (byte)m_raidDifficulty);
                 stmt.AddValue(index++, (byte)m_legacyRaidDifficulty);
                 stmt.AddValue(index++, m_masterLooterGuid.GetCounter());
+                stmt.AddValue(index++, (sbyte)m_pingRestriction);
 
                 DB.Characters.Execute(stmt);
 
@@ -190,6 +191,8 @@ namespace Game.Groups
             m_legacyRaidDifficulty = Player.CheckLoadedLegacyRaidDifficultyID((Difficulty)field.Read<byte>(15));
 
             m_masterLooterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(16));
+
+            m_pingRestriction = (RestrictPingsTo)field.Read<sbyte>(18);
 
             if (m_groupFlags.HasAnyFlag(GroupFlags.Lfg))
                 Global.LFGMgr._LoadFromDB(field, GetGUID());
@@ -818,6 +821,8 @@ namespace Game.Groups
             partyUpdate.LeaderFactionGroup = m_leaderFactionGroup;
 
             partyUpdate.SequenceNum = player.NextGroupUpdateSequenceNumber(m_groupCategory);
+
+            partyUpdate.PingRestriction = m_pingRestriction;
 
             partyUpdate.MyIndex = -1;
             byte index = 0;
@@ -1883,23 +1888,20 @@ namespace Game.Groups
             SendUpdate();
         }
 
-        public bool IsRestrictPingsToAssistants()
+        public RestrictPingsTo GetRestrictPings()
         {
-            return m_groupFlags.HasFlag(GroupFlags.RestrictPings);
+            return m_pingRestriction;
         }
 
-        public void SetRestrictPingsToAssistants(bool restrictPingsToAssistants)
+        public void SetRestrictPingsTo(RestrictPingsTo restrictTo)
         {
-            if (restrictPingsToAssistants)
-                m_groupFlags |= GroupFlags.RestrictPings;
-            else
-                m_groupFlags &= ~GroupFlags.RestrictPings;
+            m_pingRestriction = restrictTo;
 
             if (!IsBGGroup() && !IsBFGroup())
             {
-                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_TYPE);
+                PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_GROUP_PING_RESTRICTION);
 
-                stmt.AddValue(0, (ushort)m_groupFlags);
+                stmt.AddValue(0, (sbyte)m_pingRestriction);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -1982,6 +1984,8 @@ namespace Game.Groups
         uint m_activeMarkers;
 
         CountdownInfo[] _countdowns = new CountdownInfo[3];
+
+        RestrictPingsTo m_pingRestriction;
     }
 
     public class MemberSlot

@@ -1771,6 +1771,8 @@ namespace Game
                         return (long)(left.BidAmount - right.BidAmount);
                     case AuctionHouseSortOrder.Buyout:
                         return (long)(left.BuyoutOrUnitPrice - right.BuyoutOrUnitPrice);
+                    case AuctionHouseSortOrder.TimeRemaining:
+                        return (long)(left.EndTime - right.EndTime).TotalMilliseconds;
                     default:
                         break;
                 }

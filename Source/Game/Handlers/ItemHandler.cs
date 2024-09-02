@@ -1062,6 +1062,13 @@ namespace Game
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
         }
 
+        void HandleSortAccountBankBags(SortAccountBankBags sortAccountBankBags)
+        {
+            // TODO: Implement sorting
+            // Placeholder to prevent completely locking out bags clientside
+            SendPacket(new BagCleanupFinished());
+        }
+
         [WorldPacketHandler(ClientOpcodes.SortBags, Processing = PacketProcessing.Inplace)]
         void HandleSortBags(SortBags sortBags)
         {

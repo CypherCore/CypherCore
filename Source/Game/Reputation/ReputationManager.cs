@@ -321,12 +321,20 @@ namespace Game
         {
             InitializeFactions initFactions = new();
 
-            foreach (var pair in _factions)
+            foreach (var (_, factionState) in _factions)
             {
-                initFactions.FactionFlags[pair.Key] = pair.Value.Flags;
-                initFactions.FactionStandings[pair.Key] = pair.Value.Standing;
+                FactionData factionData = new();
+                factionData.FactionID = factionState.Id;
+                factionData.Flags = (ushort)factionState.Flags;
+                factionData.Standing = factionState.Standing;
+                initFactions.Factions.Add(factionData);
+
                 // @todo faction bonus
-                pair.Value.needSend = false;
+                FactionBonusData bonus = new();
+                bonus.FactionID = factionState.Id;
+                bonus.FactionHasBonus = false;
+                factionState.needSend = false;
+                initFactions.Bonuses.Add(bonus);
             }
 
             _player.SendPacket(initFactions);

@@ -657,8 +657,8 @@ namespace Game
 
             _gossipMenuAddonStorage.Clear();
 
-            //                                         0       1
-            SQLResult result = DB.World.Query("SELECT MenuID, FriendshipFactionID FROM gossip_menu_addon");
+            //                                         0       1                    2
+            SQLResult result = DB.World.Query("SELECT MenuID, FriendshipFactionID, LfgDungeonsID FROM gossip_menu_addon");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gossip_menu_addon IDs. DB table `gossip_menu_addon` is empty!");
@@ -670,20 +670,30 @@ namespace Game
                 uint menuID = result.Read<uint>(0);
                 GossipMenuAddon addon = new();
                 addon.FriendshipFactionID = result.Read<int>(1);
+                addon.LfgDungeonsID = result.Read<uint>(2);
 
-                var faction = CliDB.FactionStorage.LookupByKey(addon.FriendshipFactionID);
-                if (faction != null)
+                if (addon.FriendshipFactionID != 0)
                 {
-                    if (!CliDB.FriendshipReputationStorage.ContainsKey(faction.FriendshipRepID))
+                    var faction = CliDB.FactionStorage.LookupByKey(addon.FriendshipFactionID);
+                    if (faction != null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using FriendshipFactionID {addon.FriendshipFactionID} referencing non-existing FriendshipRepID {faction.FriendshipRepID}");
+                        if (!CliDB.FriendshipReputationStorage.ContainsKey(faction.FriendshipRepID))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using FriendshipFactionID {addon.FriendshipFactionID} referencing non-existing FriendshipRepID {faction.FriendshipRepID}");
+                            addon.FriendshipFactionID = 0;
+                        }
+                    }
+                    else
+                    {
+                        Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using non-existing FriendshipFactionID {addon.FriendshipFactionID}");
                         addon.FriendshipFactionID = 0;
                     }
                 }
-                else
+
+                if (addon.LfgDungeonsID != 0 && !CliDB.LFGDungeonsStorage.ContainsKey(addon.LfgDungeonsID))
                 {
-                    Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using non-existing FriendshipFactionID {addon.FriendshipFactionID}");
-                    addon.FriendshipFactionID = 0;
+                    Log.outError(LogFilter.Sql, $"Table gossip_menu_addon: ID {menuID} is using non-existing LfgDungeonsID {addon.LfgDungeonsID}");
+                    addon.LfgDungeonsID = 0;
                 }
 
                 _gossipMenuAddonStorage[menuID] = addon;
@@ -3257,7 +3267,7 @@ namespace Game
             }
 
             foreach (var unusedSpells in spellsByTrainer)
-                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");            
+                Log.outError(LogFilter.Sql, $"Table `trainer_spell` references non-existing trainer (TrainerId: {unusedSpells.Key}) for SpellId {unusedSpells.Value.SpellId}, ignoring");
 
             SQLResult trainerLocalesResult = DB.World.Query("SELECT Id, locale, Greeting_lang FROM trainer_locale");
             if (!trainerLocalesResult.IsEmpty())
@@ -7055,7 +7065,7 @@ namespace Game
                 //90                91                  92                 93                  94                 95                  96                 97
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
                 //98                 99                  100          101          102             103               104        105                  106
-                "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, ManagedWorldStateID, QuestSessionBonus, " +
+                "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, ResetByScheduler, Expansion, ManagedWorldStateID, QuestSessionBonus, " +
                 //107      108             109               110              111                112                113                 114                 115
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog " +
                 " FROM quest_template");
@@ -7077,7 +7087,6 @@ namespace Game
                     _questTemplatesAutoPush.Add(newQuest);
             }
             while (result.NextRow());
-
 
             // Load `quest_reward_choice_items`
             //                               0        1      2      3      4      5      6
@@ -7250,6 +7259,107 @@ namespace Game
                     var quest = _questTemplates.LookupByKey(questId);
                     if (quest != null)
                         quest.LoadQuestObjective(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+            // Load `quest_description_conditional`
+            //                               0        1                  2                     3     4
+            result = DB.World.Query("SELECT QuestId, PlayerConditionId, QuestgiverCreatureId, Text, locale FROM `quest_description_conditional` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadConditionalConditionalQuestDescription(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+
+            // Load `quest_request_items_conditional`
+            //                               0        1                  2                     3     4
+            result = DB.World.Query("SELECT QuestId, PlayerConditionId, QuestgiverCreatureId, Text, locale FROM `quest_request_items_conditional` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadConditionalConditionalRequestItemsText(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+
+            // Load `quest_offer_reward_conditional`
+            //                               0        1                  2                     3     4
+            result = DB.World.Query("SELECT QuestId, PlayerConditionId, QuestgiverCreatureId, Text, locale FROM `quest_offer_reward_conditional` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadConditionalConditionalOfferRewardText(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+            // Load `quest_completion_log_conditional`
+            //                               0        1                  2                     3     4
+            result = DB.World.Query("SELECT QuestId, PlayerConditionId, QuestgiverCreatureId, Text, locale FROM `quest_completion_log_conditional` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadConditionalConditionalQuestCompletionLog(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+            // Load `quest_treasure_pickers`
+            result = DB.World.Query("SELECT QuestID, TreasurePickerID FROM `quest_treasure_pickers` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest objectives. DB table `quest_objectives` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadTreasurePickers(result.GetFields());
                     else
                         Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
                 } while (result.NextRow());

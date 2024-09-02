@@ -71,7 +71,8 @@ namespace Framework.Constants
         Name = 1,
         Level = 2,
         Bid = 3,
-        Buyout = 4
+        Buyout = 4,
+        TimeRemaining = 5
     }
 
     public enum AuctionHouseBrowseMode

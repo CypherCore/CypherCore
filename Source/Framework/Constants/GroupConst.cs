@@ -61,7 +61,7 @@ namespace Framework.Constants
         EveryoneAssistant = 0x040, // Script_IsEveryoneAssistant()
         GuildGroup = 0x100,
         CrossFaction = 0x200,
-        RestrictPings = 0x400,
+        RestrictPings = 0x400, // deprecated
 
         MaskBgRaid = FakeRaid | Raid
     }
@@ -172,5 +172,13 @@ namespace Framework.Constants
         Pvp = 0,
         ChallengeMode = 1,
         PlayerCountdown = 2
+    }
+
+    public enum RestrictPingsTo
+    {
+        None = 0,
+        Lead = 1,
+        Assist = 2,
+        TankHealer = 3,
     }
 }

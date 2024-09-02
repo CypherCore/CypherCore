@@ -11,7 +11,7 @@ namespace Framework.Constants
         public const int MaxGemSockets = 3;
         public const int MaxSpells = 5;
         public const int MaxStats = 10;
-        public const int MaxBagSize = 36;
+        public const int MaxBagSize = 98;
         public const byte NullBag = 0;
         public const byte NullSlot = 255;
         public const int MaxOutfitItems = 24;
@@ -1293,7 +1293,15 @@ namespace Framework.Constants
         ReagentBagWrongSlot = 115,// Reagent Bags can only be placed in the reagent bag slot.
         SlotOnlyReagentBag = 116,// Only Reagent Bags can be placed in the reagent bag slot.
         ReagentBagItemType = 117,// Only Reagents can be placed in Reagent Bags.
-        CantBulkSellItemWithRefund = 118// Items that can be refunded can't be bulk sold.
+        CantBulkSellItemWithRefund = 118,// Items that can be refunded can't be bulk sold.
+        NoSoulboundItemInAccountBank = 119,// Soulbound items cannot be stored in the Warband Bank.
+    }
+
+    public enum BankType
+    {
+        Character = 0,
+        Guild = 1,
+        Account = 2
     }
 
     public enum BuyResult

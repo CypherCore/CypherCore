@@ -982,7 +982,7 @@ namespace Game
             SendPacket(commodityQuoteResult);
         }
 
-        public void SendAuctionHello(ObjectGuid guid, Creature unit)
+        public void SendAuctionHello(ObjectGuid guid, Unit unit)
         {
             if (GetPlayer().GetLevel() < WorldConfig.GetIntValue(WorldCfg.AuctionLevelReq))
             {

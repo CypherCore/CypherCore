@@ -668,6 +668,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteVector3(SourceRotation);
             _worldPacket.WriteVector3(TargetLocation);
             _worldPacket.WritePackedGuid(Target);
+            _worldPacket.WritePackedGuid(TargetTransport);
             _worldPacket.WriteUInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
             _worldPacket.WriteFloat(LaunchDelay);
@@ -677,6 +678,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Target; // Exclusive with TargetLocation
+        public ObjectGuid TargetTransport;
         public Position SourceLocation;
         public uint SpellVisualID;
         public bool SpeedAsTime;
@@ -1294,14 +1296,14 @@ namespace Game.Networking.Packets
     //Structs
     public struct SpellLogPowerData
     {
-        public SpellLogPowerData(int powerType, int amount, int cost)
+        public SpellLogPowerData(sbyte powerType, int amount, int cost)
         {
             PowerType = powerType;
             Amount = amount;
             Cost = cost;
         }
 
-        public int PowerType;
+        public sbyte PowerType;
         public int Amount;
         public int Cost;
     }
@@ -1314,7 +1316,7 @@ namespace Game.Networking.Packets
             AttackPower = (int)unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = unit.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
             Armor = unit.GetArmor();
-            PowerData.Add(new SpellLogPowerData((int)unit.GetPowerType(), unit.GetPower(unit.GetPowerType()), 0));
+            PowerData.Add(new SpellLogPowerData((sbyte)unit.GetPowerType(), unit.GetPower(unit.GetPowerType()), 0));
         }
 
         public void Initialize(Spell spell)
@@ -1330,13 +1332,13 @@ namespace Game.Networking.Packets
                 bool primaryPowerAdded = false;
                 foreach (SpellPowerCost cost in spell.GetPowerCost())
                 {
-                    PowerData.Add(new SpellLogPowerData((int)cost.Power, unitCaster.GetPower(cost.Power), (int)cost.Amount));
+                    PowerData.Add(new SpellLogPowerData((sbyte)cost.Power, unitCaster.GetPower(cost.Power), (int)cost.Amount));
                     if (cost.Power == primaryPowerType)
                         primaryPowerAdded = true;
                 }
 
                 if (!primaryPowerAdded)
-                    PowerData.Insert(0, new SpellLogPowerData((int)primaryPowerType, unitCaster.GetPower(primaryPowerType), 0));
+                    PowerData.Insert(0, new SpellLogPowerData((sbyte)primaryPowerType, unitCaster.GetPower(primaryPowerType), 0));
             }
         }
 
@@ -1351,7 +1353,7 @@ namespace Game.Networking.Packets
 
             foreach (SpellLogPowerData powerData in PowerData)
             {
-                data.WriteInt32(powerData.PowerType);
+                data.WriteInt8(powerData.PowerType);
                 data.WriteInt32(powerData.Amount);
                 data.WriteInt32(powerData.Cost);
             }
@@ -1812,6 +1814,7 @@ namespace Game.Networking.Packets
         public Array<SpellCraftingReagent> RemovedModifications = new(6);
         public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
         public ulong? CraftingOrderID;
+        public byte CraftingFlags; // 1 = ApplyConcentration
         public ObjectGuid CraftingNPC;
         public uint[] Misc = new uint[2];
 
@@ -1830,6 +1833,7 @@ namespace Game.Networking.Packets
             var optionalCurrenciesCount = data.ReadUInt32();
             var optionalReagentsCount = data.ReadUInt32();
             var removedModificationsCount = data.ReadUInt32();
+            CraftingFlags = data.ReadUInt8();
 
             for (var i = 0; i < optionalCurrenciesCount; ++i)
                 OptionalCurrencies[i].Read(data);
@@ -1906,8 +1910,8 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Cost);
             data.WriteInt8((sbyte)Type);
+            data.WriteInt32(Cost);
         }
     }
 

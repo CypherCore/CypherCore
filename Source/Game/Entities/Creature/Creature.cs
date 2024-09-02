@@ -1395,7 +1395,7 @@ namespace Game.Entities
             CreatureData data = Global.ObjectMgr.NewOrExistCreatureData(m_spawnId);
 
             uint displayId = GetNativeDisplayId();
-            ulong spawnNpcFlags = ((ulong)m_unitData.NpcFlags[1] << 32) | m_unitData.NpcFlags[0];
+            ulong spawnNpcFlags = ((ulong)GetNpcFlags2() << 32) | (uint)GetNpcFlags();
             ulong? npcflag = null;
             uint? unitFlags = null;
             uint? unitFlags2 = null;

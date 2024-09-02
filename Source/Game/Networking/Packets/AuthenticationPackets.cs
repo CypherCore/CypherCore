@@ -357,12 +357,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Serial = (ConnectToSerial)_worldPacket.ReadUInt32();
             Con = _worldPacket.ReadUInt8();
+            Serial = (ConnectToSerial)_worldPacket.ReadUInt32();
         }
 
         public ConnectToSerial Serial;
-        byte Con;
+        public byte Con;
     }
 
     class EnterEncryptedMode : ServerPacket

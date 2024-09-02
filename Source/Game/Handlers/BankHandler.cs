@@ -21,6 +21,9 @@ namespace Game
                 return;
             }
 
+            if (packet.BankType != BankType.Character)
+                return;
+
             Item item = GetPlayer().GetItemByPos(packet.Bag, packet.Slot);
             if (item == null)
                 return;
@@ -45,19 +48,40 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BankerActivate, Processing = PacketProcessing.Inplace)]
-        void HandleBankerActivate(Hello packet)
+        void HandleBankerActivate(BankerActivate bankerActivate)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
+            if (bankerActivate.InteractionType != PlayerInteractionType.Banker)
+                return;
+
+            Creature unit = GetPlayer().GetNPCIfCanInteractWith(bankerActivate.Banker, NPCFlags.AccountBanker | NPCFlags.Banker, NPCFlags2.None);
             if (unit == null)
             {
-                Log.outError(LogFilter.Network, "HandleBankerActivate: {0} not found or you can not interact with him.", packet.Unit.ToString());
+                Log.outError(LogFilter.Network, $"HandleBankerActivate: {bankerActivate.Banker} not found or you can not interact with him.");
                 return;
+            }
+
+            switch (bankerActivate.InteractionType)
+            {
+                case PlayerInteractionType.Banker:
+                    if (!unit.HasNpcFlag(NPCFlags.AccountBanker) || !unit.HasNpcFlag(NPCFlags.Banker))
+                        return;
+                    break;
+                case PlayerInteractionType.CharacterBanker:
+                    if (!unit.HasNpcFlag(NPCFlags.Banker))
+                        return;
+                    break;
+                case PlayerInteractionType.AccountBanker:
+                    if (!unit.HasNpcFlag(NPCFlags.AccountBanker))
+                        return;
+                    break;
+                default:
+                    break;
             }
 
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            SendShowBank(packet.Unit);
+            SendShowBank(bankerActivate.Banker, bankerActivate.InteractionType);
         }
 
         [WorldPacketHandler(ClientOpcodes.AutostoreBankItem, Processing = PacketProcessing.Inplace)]
@@ -281,13 +305,13 @@ namespace Game
             }
         }
 
-        public void SendShowBank(ObjectGuid guid)
+        public void SendShowBank(ObjectGuid guid, PlayerInteractionType interactionType)
         {
             _player.PlayerTalkClass.GetInteractionData().Reset();
             _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
             NPCInteractionOpenResult npcInteraction = new();
             npcInteraction.Npc = guid;
-            npcInteraction.InteractionType = PlayerInteractionType.Banker;
+            npcInteraction.InteractionType = interactionType;
             npcInteraction.Success = true;
             SendPacket(npcInteraction);
         }

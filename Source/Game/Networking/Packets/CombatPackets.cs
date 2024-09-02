@@ -169,8 +169,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Powers.Count);
             foreach (var power in Powers)
             {
-                _worldPacket.WriteInt32(power.Power);
                 _worldPacket.WriteUInt8(power.PowerType);
+                _worldPacket.WriteInt32(power.Power);
             }
         }
 
@@ -180,16 +180,16 @@ namespace Game.Networking.Packets
 
     class InterruptPowerRegen : ServerPacket
     {
-        public int PowerType;
+        public sbyte PowerType;
 
         public InterruptPowerRegen(PowerType powerType) : base(ServerOpcodes.InterruptPowerRegen, ConnectionType.Instance)
         {
-            PowerType = (int)powerType;
+            PowerType = (sbyte)powerType;
         }
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(PowerType);
+            _worldPacket.WriteInt8(PowerType);
         }
     }
     

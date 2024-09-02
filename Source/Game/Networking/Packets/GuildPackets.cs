@@ -183,9 +183,14 @@ namespace Game.Networking.Packets
 
     public class AcceptGuildInvite : ClientPacket
     {
+        public ObjectGuid GuildGuid;
+
         public AcceptGuildInvite(WorldPacket packet) : base(packet) { }
 
-        public override void Read() { }
+        public override void Read()
+        {
+            GuildGuid = _worldPacket.ReadPackedGuid();
+        }
     }
 
     public class GuildDeclineInvitation : ClientPacket
@@ -297,7 +302,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.WriteBit(LoggedOn);
-            _worldPacket.WriteBit(Mobile);
 
             _worldPacket.WriteString(Name);
         }
@@ -305,7 +309,6 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public uint VirtualRealmAddress;
         public string Name;
-        public bool Mobile;
         public bool LoggedOn;
     }
 

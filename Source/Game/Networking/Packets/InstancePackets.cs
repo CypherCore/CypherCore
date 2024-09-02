@@ -139,9 +139,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Type);
+            _worldPacket.WriteInt32((int)Type);
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt32((uint)DifficultyID);
+            _worldPacket.WriteInt32(TimeLeft);
+            _worldPacket.WriteBits(WarningMessage, 8);
             _worldPacket.WriteBit(Locked);
             _worldPacket.WriteBit(Extended);
             _worldPacket.FlushBits();
@@ -150,6 +152,8 @@ namespace Game.Networking.Packets
         public InstanceResetWarningType Type;
         public uint MapID;
         public Difficulty DifficultyID;
+        public int TimeLeft;
+        public string WarningMessage;    // GlobalStrings tag
         public bool Locked;
         public bool Extended;
     }

@@ -2342,7 +2342,7 @@ namespace Game.Entities
         }
 
         public ItemContext GetContext() { return (ItemContext)(int)m_itemData.Context; }
-        public void SetContext(ItemContext context) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Context), (int)context); }
+        public void SetContext(ItemContext context) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Context), (byte)context); }
 
         public void SetPetitionId(uint petitionId)
         {

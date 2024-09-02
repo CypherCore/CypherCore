@@ -2200,6 +2200,8 @@ namespace Game.Entities
 
                 if (!GetSession().PlayerLogout())
                 {
+                    ++m_newWorldCounter;
+
                     SuspendToken suspendToken = new();
                     suspendToken.SequenceIndex = m_movementCounter; // not incrementing
                     suspendToken.Reason = options.HasAnyFlag(TeleportToOptions.Seamless) ? 2 : 1u;
@@ -2946,7 +2948,8 @@ namespace Game.Entities
                         PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
                         PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
                         PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
-                        PlayerInteractionType.PersonalTabardVendor
+                        PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker, 
+                        PlayerInteractionType.AccountBanker
                     };
 
                     PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
@@ -6469,8 +6472,8 @@ namespace Game.Entities
             int offset = (areaEntry.AreaBit / PlayerConst.ExploredZonesBits);
             ulong val = 1ul << (areaEntry.AreaBit % PlayerConst.ExploredZonesBits);
 
-            if (offset >= m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex].Size()
-                || (m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][offset] & val) == 0)
+            if (offset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Size()
+                || (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][offset] & val) == 0)
             {
                 AddExploredZones(offset, val);
 
@@ -6521,12 +6524,14 @@ namespace Game.Entities
 
         public void AddExploredZones(int pos, ulong mask)
         {
-            SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DataFlags, (int)PlayerDataFlag.ExploredZonesIndex, pos), mask);
+            BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+            SetUpdateFieldFlagValue(bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.ExploredZonesIndex, pos), mask);
         }
 
         public void RemoveExploredZones(int pos, ulong mask)
         {
-            RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DataFlags, (int)PlayerDataFlag.ExploredZonesIndex, pos), mask);
+            BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+            RemoveUpdateFieldFlagValue(bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.ExploredZonesIndex, pos), mask);
         }
 
         public bool HasExploredZone(uint areaId)
@@ -6539,11 +6544,11 @@ namespace Game.Entities
                 return false;
 
             int playerIndexOffset = area.AreaBit / PlayerConst.ExploredZonesBits;
-            if (playerIndexOffset >= m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex].Size())
+            if (playerIndexOffset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Size())
                 return false;
 
             ulong mask = 1ul << (area.AreaBit % PlayerConst.ExploredZonesBits);
-            return (m_activePlayerData.DataFlags[(int)PlayerDataFlag.ExploredZonesIndex][playerIndexOffset] & mask) != 0;
+            return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][playerIndexOffset] & mask) != 0;
         }
 
         void SendExplorationExperience(uint Area, uint Experience)
@@ -7353,6 +7358,8 @@ namespace Game.Entities
         public bool IsBeingTeleportedSeamlessly() { return IsBeingTeleportedFar() && m_teleport_options.HasAnyFlag(TeleportToOptions.Seamless); }
         public void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
         public void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
+
+        public int GetNewWorldCounter() { return m_newWorldCounter; }
 
         public bool IsReagentBankUnlocked() { return HasPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }
         public void UnlockReagentBank() { SetPlayerFlagEx(PlayerFlagsEx.ReagentBankUnlocked); }

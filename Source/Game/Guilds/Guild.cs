@@ -1239,7 +1239,6 @@ namespace Game.Guilds
             eventPacket.Name = player.GetName();
             eventPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
             eventPacket.LoggedOn = loggedOn;
-            eventPacket.Mobile = false;
 
             if (broadcast)
                 BroadcastPacket(eventPacket);
