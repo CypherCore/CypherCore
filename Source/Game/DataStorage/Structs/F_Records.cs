@@ -39,7 +39,7 @@ namespace Game.DataStorage
 
         public uint Id;
         public ushort Faction;
-        public ushort Flags;
+        public int Flags;
         public byte FactionGroup;
         public byte FriendGroup;
         public byte EnemyGroup;

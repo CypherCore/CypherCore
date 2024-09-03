@@ -293,6 +293,8 @@ namespace Game.Entities
                 // multiplicative bonus, for example Dispersion + Shadowform (0.10*0.85=0.085)
                 TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)spellProto.GetSchoolMask());
 
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageTakenByLabel, aurEff => spellProto.HasLabel((uint)aurEff.GetMiscValue()));
+
                 // From caster spells
                 if (caster != null)
                 {
@@ -306,7 +308,7 @@ namespace Game.Entities
                         return aurEff.GetCasterGUID() == caster.GetGUID() && aurEff.IsAffectingSpell(spellProto);
                     });
 
-                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModDamageTakenFromCasterByLabel, aurEff =>
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSpellDamageFromCasterByLabel, aurEff =>
                     {
                         return aurEff.GetCasterGUID() == caster.GetGUID() && spellProto.HasLabel((uint)aurEff.GetMiscValue());
                     });
@@ -2182,7 +2184,10 @@ namespace Game.Entities
                             // double blocked amount if block is critical
                             float value = victim.GetBlockPercent(GetLevel());
                             if (victim.IsBlockCritical())
+                            {
                                 value *= 2; // double blocked percent
+                                value *= GetTotalAuraMultiplier(AuraType.ModCriticalBlockAmount);
+                            }
                             damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
                             if (damage <= damageInfo.blocked)
                             {

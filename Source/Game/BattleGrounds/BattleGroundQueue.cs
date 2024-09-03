@@ -731,11 +731,8 @@ namespace Game.BattleGrounds
             }
 
             // loop over queues for every map
-            foreach (var mapId in bg_template.BattlemasterEntry.MapId)
+            foreach (var mapId in bg_template.MapIDs)
             {
-                if (mapId == -1)
-                    break;
-
                 var bgQueues = Global.BattlegroundMgr.GetBGFreeSlotQueueStore((uint)mapId);
                 foreach (var bg in bgQueues)
                 {

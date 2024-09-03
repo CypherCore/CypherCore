@@ -59,6 +59,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
+        public int Expansion;
         public int PlayerConditionID;
     }
 }

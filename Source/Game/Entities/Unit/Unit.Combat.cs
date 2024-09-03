@@ -1294,7 +1294,10 @@ namespace Game.Entities
                     // 30% damage blocked, double blocked amount if block is critical
                     damageInfo.Blocked = MathFunctions.CalculatePct(damageInfo.Damage, damageInfo.Target.GetBlockPercent(GetLevel()));
                     if (damageInfo.Target.IsBlockCritical())
+                    {
                         damageInfo.Blocked *= 2;
+                        damageInfo.Blocked *= (uint)GetTotalAuraMultiplier(AuraType.ModCriticalBlockAmount);
+                    }
 
                     damageInfo.OriginalDamage = damageInfo.Damage;
                     damageInfo.Damage -= damageInfo.Blocked;

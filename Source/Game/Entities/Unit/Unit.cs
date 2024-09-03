@@ -262,7 +262,7 @@ namespace Game.Entities
 
             var emotesEntry = CliDB.EmotesStorage.LookupByKey(emoteId);
             if (emotesEntry != null && spellVisualKitIds != null)
-                if (emotesEntry.AnimId == (uint)Anim.MountSpecial || emotesEntry.AnimId == (uint)Anim.MountSelfSpecial)
+                if (emotesEntry.AnimID == (uint)Anim.MountSpecial || emotesEntry.AnimID == (uint)Anim.MountSelfSpecial)
                     packet.SpellVisualKitIDs.AddRange(spellVisualKitIds);
 
             packet.SequenceVariation = sequenceVariation;

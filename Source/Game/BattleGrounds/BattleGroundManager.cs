@@ -290,10 +290,10 @@ namespace Game.BattleGrounds
             if (bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.AA || bgTypeId == BattlegroundTypeId.RandomEpic)
                 return null;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById((uint)bg_template.BattlemasterEntry.MapId[0], bracketId);
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById((uint)bg_template.MapIDs[0], bracketId);
             if (bracketEntry == null)
             {
-                Log.outError(LogFilter.Battleground, $"Battleground: CreateNewBattleground: bg bracket entry not found for map {bg_template.BattlemasterEntry.MapId[0]} bracket id {bracketId}");
+                Log.outError(LogFilter.Battleground, $"Battleground: CreateNewBattleground: bg bracket entry not found for map {bg_template.MapIDs[0]} bracket id {bracketId}");
                 return null;
             }
 
@@ -328,6 +328,11 @@ namespace Game.BattleGrounds
                 return;
             }
 
+            MultiMap<BattlegroundTypeId, int> mapsByBattleground = new();
+            foreach (var (_, battlemasterListXMap) in CliDB.BattlemasterListXMapStorage)
+                if (CliDB.BattlemasterListStorage.HasRecord(battlemasterListXMap.BattlemasterListID) && CliDB.MapStorage.HasRecord((uint)battlemasterListXMap.MapID))
+                    mapsByBattleground.Add((BattlegroundTypeId)battlemasterListXMap.BattlemasterListID, battlemasterListXMap.MapID);
+
             uint count = 0;
             do
             {
@@ -351,6 +356,7 @@ namespace Game.BattleGrounds
 
                 bgTemplate.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(5));
                 bgTemplate.BattlemasterEntry = bl;
+                bgTemplate.MapIDs = mapsByBattleground[bgTypeId];
 
                 if (bgTemplate.Id != BattlegroundTypeId.AA && !IsRandomBattleground(bgTemplate.Id))
                 {
@@ -381,8 +387,8 @@ namespace Game.BattleGrounds
 
                 _battlegroundTemplates[bgTypeId] = bgTemplate;
 
-                if (bgTemplate.BattlemasterEntry.MapId[1] == -1) // in this case we have only one mapId
-                    _battlegroundMapTemplates[(uint)bgTemplate.BattlemasterEntry.MapId[0]] = _battlegroundTemplates[bgTypeId];
+                if (bgTemplate.MapIDs.Count == 1)
+                    _battlegroundMapTemplates[(uint)bgTemplate.MapIDs[0]] = _battlegroundTemplates[bgTypeId];
 
                 ++count;
             }
@@ -641,11 +647,8 @@ namespace Game.BattleGrounds
             {
                 Dictionary<BattlegroundTypeId, float> selectionWeights = new();
 
-                foreach (var mapId in bgTemplate.BattlemasterEntry.MapId)
+                foreach (var mapId in bgTemplate.MapIDs)
                 {
-                    if (mapId == -1)
-                        break;
-
                     BattlegroundTemplate bg = GetBattlegroundTemplateByMapId((uint)mapId);
                     if (bg != null)
                     {
@@ -788,6 +791,7 @@ namespace Game.BattleGrounds
         public byte Weight;
         public uint ScriptId;
         public BattlemasterListRecord BattlemasterEntry;
+        public List<int> MapIDs = new();
 
         public bool IsArena() { return BattlemasterEntry.InstanceType == (uint)MapTypes.Arena; }
 

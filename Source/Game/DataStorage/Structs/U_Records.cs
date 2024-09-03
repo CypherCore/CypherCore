@@ -22,6 +22,7 @@ namespace Game.DataStorage
         public int BkgAtlasID;
         public int AlternateUiMapGroup;
         public int ContentTuningID;
+        public int AdventureMapTextureKitID;
 
         public bool HasFlag(UiMapFlag uiMapFlag) { return (Flags & (int)uiMapFlag) != 0; }
 }
@@ -85,9 +86,9 @@ namespace Game.DataStorage
     public sealed class UnitConditionRecord
     {
         public uint Id;
-        public byte Flags;
+        public int Flags;
         public byte[] Variable = new byte[8];
-        public sbyte[] Op = new sbyte[8];
+        public byte[] Op = new byte[8];
         public int[] Value = new int[8];
 
         public bool HasFlag(UnitConditionFlags unitConditionFlags) { return (Flags & (byte)unitConditionFlags) != 0; }

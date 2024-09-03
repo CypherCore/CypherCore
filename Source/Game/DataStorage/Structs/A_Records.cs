@@ -85,7 +85,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort Fallback;
         public byte BehaviorTier;
-        public int BehaviorID;
+        public short BehaviorID;
         public int[] Flags = new int[2];
     }
 

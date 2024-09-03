@@ -47,7 +47,7 @@ namespace Framework.Constants
         RacialForThePurposeOfTemporaryRaceChange = 0x8000,
     }
 
-    public enum AbilityLearnType : byte
+    public enum AbilityLearnType : int
     {
         OnSkillValue = 1, // Spell state will update depending on skill value
         OnSkillLearn = 2, // Spell will be learned/removed together with entire skill
@@ -1096,7 +1096,11 @@ namespace Framework.Constants
         UseTotalEarnedForEarned = 0x01,
         ShowQuestXPGainInTooltip = 0x02, // NYI
         NoNotificationMailOnOfflineProgress = 0x04, // NYI
-        BattlenetVirtualCurrency = 0x08  // NYI
+        BattlenetVirtualCurrency = 0x08,  // NYI
+        FutureCurrencyFlag = 0x10, // NYI
+        DontDisplayIfZero = 0x20, // NYI
+        ScaleMaxQuantityBySeasonWeeks = 0x40, // NYI
+        ScaleMaxQuantityByWeeksSinceStart = 0x80, // NYI
     }
 
     [Flags]
@@ -2498,7 +2502,8 @@ namespace Framework.Constants
         Available = 0,
         Visible = 1,
         Granted = 2,
-        Increased = 3
+        Increased = 3,
+        DisplayError = 4
     }
 
     public enum TraitConfigType
@@ -2551,7 +2556,8 @@ namespace Framework.Constants
     {
         Single = 0,
         Tiered = 1,
-        Selection = 2
+        Selection = 2,
+        SubTreeSelection = 3
     }
 
     public enum TraitPointsOperationType

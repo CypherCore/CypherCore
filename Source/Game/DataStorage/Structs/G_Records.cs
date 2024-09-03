@@ -24,6 +24,7 @@ namespace Game.DataStorage
         public int AlternateDisplayType;
         public int ClientCreatureDisplayInfoID;
         public int ClientItemID;
+        public ushort Unknown1100;
 
         public Vector3 GeoBoxMin
         {
@@ -50,6 +51,7 @@ namespace Game.DataStorage
         public int PhaseUseFlags;
         public int PhaseID;
         public int PhaseGroupID;
+        public ushort Unknown1100;
         public int[] PropValue = new int[8];
     }
 
@@ -133,7 +135,7 @@ namespace Game.DataStorage
         public byte AllianceGarrFollRaceID;
         public uint HordeGarrClassSpecID;
         public uint AllianceGarrClassSpecID;
-        public sbyte Quality;
+        public int Quality;
         public byte FollowerLevel;
         public ushort ItemLevelWeapon;
         public ushort ItemLevelArmor;
@@ -206,7 +208,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public byte PlotType;
+        public sbyte PlotType;
         public uint HordeConstructObjID;
         public uint AllianceConstructObjID;
         public byte Flags;
@@ -293,7 +295,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public byte GlyphType;
+        public sbyte GlyphType;
         public byte GlyphExclusiveCategoryID;
         public uint SpellIconID;
     }
@@ -311,7 +313,7 @@ namespace Game.DataStorage
         public int GossipNpcOption;
         public int LFGDungeonsID;
         public int TrainerID;
-        public int GarrFollowerTypeID;
+        public sbyte GarrFollowerTypeID;
         public int CharShipmentID;
         public int GarrTalentTreeID;
         public int UiMapID;

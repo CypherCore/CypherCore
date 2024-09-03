@@ -1256,7 +1256,7 @@ namespace Game.BattleGrounds
 
         public uint GetMapId()
         {
-            return (uint)_battlegroundTemplate.BattlemasterEntry.MapId[0];
+            return (uint)_battlegroundTemplate.MapIDs[0];
         }
 
         public void SetBgMap(BattlegroundMap map)

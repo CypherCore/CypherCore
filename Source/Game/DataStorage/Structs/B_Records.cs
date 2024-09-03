@@ -92,9 +92,15 @@ namespace Game.DataStorage
         public int Flags;
         public int IconFileDataID;
         public int RequiredPlayerConditionID;
-        public short[] MapId = new short[16];
 
         public bool HasFlag(BattlemasterListFlags battlemasterListFlags) { return (Flags & (int)battlemasterListFlags) != 0; }
+    }
+
+    public sealed class BattlemasterListXMapRecord
+    {
+        public uint ID;
+        public int MapID;
+        public uint BattlemasterListID;
     }
 
     public sealed class BroadcastTextRecord

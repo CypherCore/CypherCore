@@ -1445,7 +1445,11 @@ namespace Game.Entities
                     playerCurrency.EarnedQuantity += (uint)amount;
 
                 if (!isGainOnRefund)
+                {
                     UpdateCriteria(CriteriaType.CurrencyGained, id, (ulong)amount);
+                    if (gainSource == CurrencyGainSource.RenownRepGain)
+                        UpdateCriteria(CriteriaType.ReachRenownLevel, id, playerCurrency.Quantity);
+                }
             }
 
             CurrencyChanged(id, amount);
@@ -6513,6 +6517,8 @@ namespace Game.Entities
                             uint minScaledXP = (uint)(ObjectMgr.GetBaseXP(areaLevel) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore)) * WorldConfig.GetUIntValue(WorldCfg.MinDiscoveredScaledXpRatio) / 100;
                             XP = Math.Max(minScaledXP, XP);
                         }
+
+                        XP += (uint)(XP * GetTotalAuraMultiplier(AuraType.ModExplorationExperience));
 
                         GiveXP(XP, null);
                         SendExplorationExperience(areaId, XP);

@@ -253,7 +253,7 @@ namespace Game.Garrisons
                 Plot plotInfo = _plots[garrPlotInstanceId];
                 plotInfo.PacketInfo.GarrPlotInstanceID = garrPlotInstanceId;
                 plotInfo.PacketInfo.PlotPos.Relocate(gameObject.Pos.X, gameObject.Pos.Y, gameObject.Pos.Z, 2 * (float)Math.Acos(gameObject.Rot[3]));
-                plotInfo.PacketInfo.PlotType = plot.PlotType;
+                plotInfo.PacketInfo.PlotType = (byte)plot.PlotType;
                 plotInfo.Rotation = new Quaternion(gameObject.Rot[0], gameObject.Rot[1], gameObject.Rot[2], gameObject.Rot[3]);
                 plotInfo.EmptyGameObjectId = gameObject.Id;
                 plotInfo.GarrSiteLevelPlotInstId = plots[i].Id;

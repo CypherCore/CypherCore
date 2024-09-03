@@ -125,6 +125,7 @@ namespace Game.DataStorage
         public int RequiredLevel;
         public int FreeSharedStringID;
         public int SpendMoreSharedStringID;
+        public int TraitCondAccountElementID;
 
         public TraitConditionType GetCondType() { return (TraitConditionType)CondType; }
     }
@@ -199,8 +200,9 @@ namespace Game.DataStorage
         public int TraitTreeID;
         public int PosX;
         public int PosY;
-        public sbyte Type;
+        public byte Type;
         public int Flags;
+        public int TraitSubTreeID;
 
         public TraitNodeType GetNodeType() { return (TraitNodeType)Type; }
     }
@@ -211,6 +213,7 @@ namespace Game.DataStorage
         public int TraitDefinitionID;
         public int MaxRanks;
         public byte NodeEntryType;
+        public int TraitSubTreeID;
 
         public TraitNodeEntryType GetNodeEntryType() { return (TraitNodeEntryType)NodeEntryType; }
     }
@@ -219,7 +222,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int TraitCondID;
-        public uint TraitNodeEntryID;
+        public int TraitNodeEntryID;
     }
 
     public sealed class TraitNodeEntryXTraitCostRecord
@@ -342,15 +345,15 @@ namespace Game.DataStorage
         public string Name;
         public uint Id;
         public int ClassMask;
-        public uint TrackingQuestID;
+        public int TrackingQuestID;
         public int Flags;
         public uint TransmogSetGroupID;
         public int ItemNameDescriptionID;
-        public ushort ParentTransmogSetID;
-        public byte Unknown810;
-        public byte ExpansionID;
+        public int ParentTransmogSetID;
+        public int Unknown810;
+        public int ExpansionID;
         public int PatchID;
-        public short UiOrder;
+        public int UiOrder;
         public uint PlayerConditionID;
     }
 

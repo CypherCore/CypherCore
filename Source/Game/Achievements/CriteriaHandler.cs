@@ -182,6 +182,7 @@ namespace Game.Achievements
                     case CriteriaType.HighestHealReceived:
                     case CriteriaType.AnyArtifactPowerRankPurchased:
                     case CriteriaType.AzeriteLevelReached:
+                    case CriteriaType.ReachRenownLevel:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
                         break;
                     case CriteriaType.ReachLevel:
@@ -3695,6 +3696,40 @@ namespace Game.Achievements
                 {
                     var mapEntry = referencePlayer.GetMap().GetEntry();
                     if (mapEntry.ExpansionID != reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasActiveTraitSubTree: // 385
+                {
+                    int traitConfigWithSubtree = referencePlayer.m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                    {
+                        if (traitConfig.Type == (int)TraitConfigType.Combat
+                            && (referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
+                                || !traitConfig.CombatConfigFlags.GetValue().HasAnyFlag((int)TraitCombatConfigFlags.ActiveForSpec)))
+                            return false;
+
+                        return traitConfig.SubTrees.FindIndexIf(traitSubTree =>
+                        {
+                            return traitSubTree.TraitSubTreeID == reqValue && traitSubTree.Active != 0;
+                        }) >= 0;
+                    });
+                    if (traitConfigWithSubtree < 0)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.TargetCreatureClassificationEqual: // 389
+                {
+                    Creature targetCreature = refe?.ToCreature();
+                    if (targetCreature == null)
+                        return false;
+                    if (targetCreature.GetCreatureClassification() != (CreatureClassifications)reqValue)
+                        return false;
+                    break;
+                }
+                case ModifierTreeType.PlayerHasCompletedQuestOrIsReadyToTurnIn: // 392
+                {
+                    QuestStatus status = referencePlayer.GetQuestStatus(reqValue);
+                    if (status != QuestStatus.Complete && status != QuestStatus.Rewarded)
                         return false;
                     break;
                 }

@@ -2565,6 +2565,24 @@ namespace Framework.Constants
         ChangeItemBonuses2 = 313, // MiscValue[0] = ItemBonusTreeID to preserve
         AddSocketBonus = 314, // MiscValue[0] = required ItemBonusTreeID
         LearnTransmogAppearanceFromItemModAppearanceGroup = 315, // MiscValue[0] = ItemModAppearanceGroupID (not in db2)
+        KillCreditLbael1 = 316,
+        KillCreditLabel2 = 317,
+        Unk318 = 318,
+        Unk319 = 319,
+        Unk320 = 320,
+        Unk321 = 321,
+        Unk322 = 322,
+        Unk323 = 323,
+        Unk324 = 324,
+        Unk325 = 325,
+        Unk326 = 326,
+        Unk327 = 327,
+        Unk328 = 328,
+        Unk329 = 329,
+        Unk330 = 330,
+        Unk331 = 331,
+        Unk332 = 332,
+        Unk333 = 333,
 
         TotalSpellEffects
     }

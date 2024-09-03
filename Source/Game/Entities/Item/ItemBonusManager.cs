@@ -163,82 +163,35 @@ namespace Game.Entities
 
         public static uint GetBonusTreeIdOverride(uint itemBonusTreeId, ItemBonusGenerationParams generationParams)
         {
-            // TODO: configure seasons globally
-            var mythicPlusSeason = CliDB.MythicPlusSeasonStorage.LookupByKey(0);
-            if (mythicPlusSeason != null)
+            List<int> passedTimeEvents = new(); // sorted by date TODO: configure globally
+
+            if (!passedTimeEvents.Empty())
             {
                 int selectedLevel = -1;
                 int selectedMilestoneSeason = -1;
                 ChallengeModeItemBonusOverrideRecord selectedItemBonusOverride = null;
                 foreach (var itemBonusOverride in _challengeModeItemBonusOverrides.LookupByKey(itemBonusTreeId))
                 {
-                    if (itemBonusOverride.Type != 0)
+                    if (generationParams.MythicPlusKeystoneLevel != 0 && itemBonusOverride.Value > generationParams.MythicPlusKeystoneLevel)
                         continue;
 
-                    if (itemBonusOverride.Value > generationParams.MythicPlusKeystoneLevel.GetValueOrDefault(-1))
+                    if (generationParams.PvpTier != 0 && itemBonusOverride.Value > generationParams.PvpTier)
                         continue;
 
-                    if (itemBonusOverride.MythicPlusSeasonID != 0)
+                    if (itemBonusOverride.RequiredTimeEventPassed != 0)
                     {
-                        var overrideSeason = CliDB.MythicPlusSeasonStorage.LookupByKey(itemBonusOverride.MythicPlusSeasonID);
-                        if (overrideSeason == null)
-                            continue;
+                        var overrideMilestoneSeason = passedTimeEvents.IndexOf(itemBonusOverride.RequiredTimeEventPassed);
+                        if (overrideMilestoneSeason == -1)
+                            continue;       // season not started yet
 
-                        if (mythicPlusSeason.MilestoneSeason < overrideSeason.MilestoneSeason)
-                            continue;
+                        if (selectedMilestoneSeason > overrideMilestoneSeason)
+                            continue;       // older season that what was selected
 
-                        if (selectedMilestoneSeason > overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason == overrideSeason.MilestoneSeason)
+                        if (selectedMilestoneSeason == overrideMilestoneSeason)
                             if (selectedLevel > itemBonusOverride.Value)
-                                continue;
+                                continue; // lower level in current season than what was already found
 
-                        selectedMilestoneSeason = overrideSeason.MilestoneSeason;
-                    }
-                    else if (selectedLevel > itemBonusOverride.Value)
-                        continue;
-
-                    selectedLevel = itemBonusOverride.Value;
-                    selectedItemBonusOverride = itemBonusOverride;
-                }
-
-                if (selectedItemBonusOverride != null && selectedItemBonusOverride.DstItemBonusTreeID != 0)
-                    itemBonusTreeId = (uint)selectedItemBonusOverride.DstItemBonusTreeID;
-            }
-
-            // TODO: configure seasons globally
-            var pvpSeason = CliDB.PvpSeasonStorage.LookupByKey(0);
-            if (pvpSeason != null)
-            {
-                int selectedLevel = -1;
-                int selectedMilestoneSeason = -1;
-                ChallengeModeItemBonusOverrideRecord selectedItemBonusOverride = null;
-                foreach (var itemBonusOverride in _challengeModeItemBonusOverrides.LookupByKey(itemBonusTreeId))
-                {
-                    if (itemBonusOverride.Type != 1)
-                        continue;
-
-                    if (itemBonusOverride.Value > generationParams.PvpTier.GetValueOrDefault(-1))
-                        continue;
-
-                    if (itemBonusOverride.PvPSeasonID != 0)
-                    {
-                        var overrideSeason = CliDB.PvpSeasonStorage.LookupByKey(itemBonusOverride.PvPSeasonID);
-                        if (overrideSeason == null)
-                            continue;
-
-                        if (pvpSeason.MilestoneSeason < overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason > overrideSeason.MilestoneSeason)
-                            continue;
-
-                        if (selectedMilestoneSeason == overrideSeason.MilestoneSeason)
-                            if (selectedLevel > itemBonusOverride.Value)
-                                continue;
-
-                        selectedMilestoneSeason = overrideSeason.MilestoneSeason;
+                        selectedMilestoneSeason = overrideMilestoneSeason;
                     }
                     else if (selectedLevel > itemBonusOverride.Value)
                         continue;

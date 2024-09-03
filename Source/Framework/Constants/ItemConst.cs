@@ -329,6 +329,9 @@ namespace Framework.Constants
         OnPickup = 5,
         OnLearn = 6,                   // used in itemtemplate.spell2 with spellid with SPELLGENERICLEARN in spell1
         OnLooted = 7,
+        TeachMount = 8,
+        OnPickupForced = 9,
+        OnLootedForced = 10,
         Max
     }
 
@@ -561,8 +564,11 @@ namespace Framework.Constants
         DungeonNormalJackpot = 101,
         DungeonHeroicJackpot = 102,
         DungeonMythicJackpot = 103,
-        Delves = 104,
+        Delves1 = 104,
         Timerunning = 105,
+        Delves2 = 106,
+        Delves3 = 107,
+        DelvesJackpot = 108,
 
         Max
     }
@@ -669,6 +675,11 @@ namespace Framework.Constants
         OnEquip = 2,
         OnUse = 3,
         Quest = 4,
+        Unused1 = 5,
+        Unused2 = 6,
+        WowAccount = 7,
+        BnetAccount = 8,
+        BnetAccountUntilEquipped = 9,
     }
 
     public enum ItemClass : sbyte

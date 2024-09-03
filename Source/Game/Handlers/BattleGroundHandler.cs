@@ -80,7 +80,7 @@ namespace Game
                 return;
 
             // expected bracket entry
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.BattlemasterEntry.MapId[0], GetPlayer().GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -295,7 +295,7 @@ namespace Game
                 return;
             }
 
-            uint mapId = (uint)bgTemplate.BattlemasterEntry.MapId[0];
+            uint mapId = (uint)bgTemplate.MapIDs[0];
 
             // BGTemplateId returns Battleground_AA when it is arena queue.
             // Do instance id search as there is no AA bg instances.
@@ -469,7 +469,7 @@ namespace Game
                         continue;
 
                     // expected bracket entry
-                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.BattlemasterEntry.MapId[0], _player.GetLevel());
+                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], _player.GetLevel());
                     if (bracketEntry == null)
                         continue;
 
@@ -506,7 +506,7 @@ namespace Game
 
             BattlegroundTypeId bgTypeId = bgTemplate.Id;
             BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId((ushort)bgTypeId, BattlegroundQueueIdType.Arena, true, arenatype);
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.BattlemasterEntry.MapId[0], _player.GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], _player.GetLevel());
             if (bracketEntry == null)
                 return;
 

@@ -892,7 +892,9 @@ namespace Game.DataStorage
 
         public uint GetEmptyAnimStateID()
         {
-            return AnimationDataStorage.GetNumRows();
+            return 1778;
+            // TEMP: well... AnimationData.db2 in 11.0.0 has more rows than max hardcoded anim id in client
+            //return AnimationDataStorage.GetNumRows();
         }
 
         public List<uint> GetAreasForGroup(uint areaGroupId)

@@ -1187,7 +1187,7 @@ namespace Game.Groups
             if (reference == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.BattlemasterEntry.MapId[0], reference.GetLevel());
+            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.MapIDs[0], reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 

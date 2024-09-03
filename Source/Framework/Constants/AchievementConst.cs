@@ -450,8 +450,21 @@ namespace Framework.Constants
         PlayerWeaponHighWatermarkAboveOrEqual = 375, /*NYI*/
         PlayerHeadHighWatermarkAboveOrEqual = 376, /*NYI*/
         PlayerHasDisplayedCurrencyLessThan = 377, /*NYI*/ // Player has {CurrencyTypes} less than {#Amount} (value visible in ui is taken into account, not raw value)
-
+        PlayerDataFlagAccountIsSet = 387, /*NYI*/ // Player {PlayerDataFlagAccount} is set
+        PlayerDataFlagCharacterIsSet = 389, /*NYI*/ // Player {PlayerDataFlagCharacter} is set
         PlayerIsOnMapWithExpansion = 380, // Player is on map that has {ExpansionID}
+
+        PlayerHasCompletedQuestOnAccount = 382, /*NYI*/ // Player has previously completed quest "{QuestV2}" on account
+        PlayerHasCompletedQuestlineOnAccount = 383, /*NYI*/ // Player has completed questline "{Questline}" on account
+        PlayerHasCompletedQuestlineQuestCountOnAccount = 384, /*NYI*/ // Player has completed "{#Quests}" quests in questline "{Questline}" on account
+        PlayerHasActiveTraitSubTree = 385, // Player has active trait config with {TraitSubTree}
+
+        PlayerIsInSoloRBG = 387, /*NYI*/ // Player is in solo RBG (BG Blitz)
+        PlayerHasCompletedCampaign = 388, /*NYI*/ // Player has completed campaign "{Campaign}"
+        TargetCreatureClassificationEqual = 389, // Creature classification is {CreatureClassification}
+        PlayerDataElementCharacterEqual = 390, /*NYI*/ // Player {PlayerDataElementCharacter} is greater than {#Amount}
+        PlayerDataElementAccountEqual = 391, /*NYI*/ // Player {PlayerDataElementAccount} is greater than {#Amount}
+        PlayerHasCompletedQuestOrIsReadyToTurnIn = 392, // Player has previously completed quest "{QuestV2}" or is ready to turn it in
     }
 
     public enum CriteriaFailEvent : byte
@@ -755,9 +768,9 @@ namespace Framework.Constants
         CompleteQuestsCountOnAccount = 257, /*NYI*/
 
         WarbandBankTabPurchased = 260, /*NYI*/
-
+        ReachRenownLevel = 261,
         LearnTaxiNode = 262,
-        Count = 263
+        Count = 264
     }
 
     public enum CriteriaDataType

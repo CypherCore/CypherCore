@@ -106,7 +106,7 @@ namespace Game.DataStorage
         public sbyte ChrSpecializationRole;
         public uint ModifierTreeID;
         public sbyte PowerType;
-        public byte PowerTypeComp;
+        public sbyte PowerTypeComp;
         public byte PowerTypeValue;
         public int WeaponSubclassMask;
         public byte MaxGuildLevel;
@@ -151,7 +151,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string GlobalStringBaseTag;
-        public byte ActualType;
+        public sbyte ActualType;
         public byte Red;
         public byte Green;
         public byte Blue;
@@ -171,9 +171,9 @@ namespace Game.DataStorage
         public int RegenInterruptTimeMS;
         public float RegenPeace;
         public float RegenCombat;
-        public short Flags;
+        public int Flags;
 
-        public bool HasFlag(PowerTypeFlags powerTypeFlags) { return (Flags & (short)powerTypeFlags) != 0; }
+        public bool HasFlag(PowerTypeFlags powerTypeFlags) { return (Flags & (int)powerTypeFlags) != 0; }
     }
 
     public sealed class PrestigeLevelInfoRecord

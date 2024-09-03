@@ -43,7 +43,7 @@ namespace Game.DataStorage
         public byte MinPlayers;
         public byte MaxPlayers;
         public ushort Flags;
-        public byte ItemContext;
+        public sbyte ItemContext;
         public byte ToggleDifficultyID;
         public uint GroupSizeHealthCurveID;
         public uint GroupSizeDmgCurveID;

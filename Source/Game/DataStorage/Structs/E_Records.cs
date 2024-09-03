@@ -8,9 +8,9 @@ namespace Game.DataStorage
         public uint Id;
         public long RaceMask;
         public string EmoteSlashCommand;
-        public int AnimId;
-        public uint EmoteFlags;
-        public byte EmoteSpecProc;
+        public short AnimID;
+        public int EmoteFlags;
+        public int EmoteSpecProc;
         public uint EmoteSpecProcParam;
         public uint EventSoundID;
         public uint SpellVisualKitId;
