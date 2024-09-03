@@ -360,7 +360,7 @@ namespace Game
             bool hasTraitNodeEntry(int traitNodeEntryId)
             {
                 return traitConfig.Entries.Any(traitEntry => traitEntry.TraitNodeEntryID == traitNodeEntryId && (traitEntry.Rank > 0 || traitEntry.GrantedRanks > 0));
-            }            
+            }
 
             foreach (Tree tree in trees)
             {
@@ -524,19 +524,21 @@ namespace Game
             if (trees == null)
                 return entries;
 
-            TraitEntry getOrCreateEntry(uint nodeId, uint entryId)
+            void addGrantedRankToEntry(uint nodeId, NodeEntry entry, int grantedRanks)
             {
-                TraitEntry foundTraitEntry = entries.Find(traitEntry => traitEntry.TraitNodeID == nodeId && traitEntry.TraitNodeEntryID == entryId);
+                TraitEntry foundTraitEntry = entries.Find(traitEntry => traitEntry.TraitNodeID == nodeId && traitEntry.TraitNodeEntryID == entry.Data.Id);
                 if (foundTraitEntry == null)
                 {
                     foundTraitEntry = new();
                     foundTraitEntry.TraitNodeID = (int)nodeId;
-                    foundTraitEntry.TraitNodeEntryID = (int)entryId;
+                    foundTraitEntry.TraitNodeEntryID = (int)entry.Data.Id;
                     foundTraitEntry.Rank = 0;
                     foundTraitEntry.GrantedRanks = 0;
                     entries.Add(foundTraitEntry);
                 }
-                return foundTraitEntry;
+                foundTraitEntry.GrantedRanks += grantedRanks;
+                if (foundTraitEntry.GrantedRanks > entry.Data.MaxRanks)
+                    foundTraitEntry.GrantedRanks = entry.Data.MaxRanks;
             }
 
             Dictionary<int, int> cachedCurrencies = null;
@@ -548,18 +550,18 @@ namespace Game
                     foreach (NodeEntry entry in node.Entries)
                         foreach (TraitCondRecord condition in entry.Conditions)
                             if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
-                                getOrCreateEntry(node.Data.Id, entry.Data.Id).GrantedRanks += condition.GrantedRanks;
+                                addGrantedRankToEntry(node.Data.Id, entry, condition.GrantedRanks);
 
                     foreach (TraitCondRecord condition in node.Conditions)
                         if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
                             foreach (NodeEntry entry in node.Entries)
-                                getOrCreateEntry(node.Data.Id, entry.Data.Id).GrantedRanks += condition.GrantedRanks;
+                                addGrantedRankToEntry(node.Data.Id, entry, condition.GrantedRanks);
 
                     foreach (NodeGroup group in node.Groups)
                         foreach (TraitCondRecord condition in group.Conditions)
                             if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
                                 foreach (NodeEntry entry in node.Entries)
-                                    getOrCreateEntry(node.Data.Id, entry.Data.Id).GrantedRanks += condition.GrantedRanks;
+                                    addGrantedRankToEntry(node.Data.Id, entry, condition.GrantedRanks);
                 }
             }
 
@@ -582,7 +584,7 @@ namespace Game
             return true;
         }
 
-        public static TalentLearnResult ValidateConfig(TraitConfigPacket traitConfig, Player player, bool requireSpendingAllCurrencies = false)
+        public static TalentLearnResult ValidateConfig(TraitConfigPacket traitConfig, Player player, bool requireSpendingAllCurrencies = false, bool removeInvalidEntries = false)
         {
             int getNodeEntryCount(int traitNodeId)
             {
@@ -630,13 +632,13 @@ namespace Game
                 return !hasConditions;
             }
 
-            foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
+            var isValidTraitEntry = TalentLearnResult (TraitEntryPacket traitEntry) =>
             {
                 if (!IsValidEntry(traitEntry))
                     return TalentLearnResult.FailedUnknown;
 
                 Node node = _traitNodes.LookupByKey(traitEntry.TraitNodeID);
-                if (node.Data.GetNodeType() == TraitNodeType.Selection)
+                if (node.Data.GetNodeType() == TraitNodeType.Selection || node.Data.GetNodeType() == TraitNodeType.SubTreeSelection)
                     if (getNodeEntryCount(traitEntry.TraitNodeID) != 1)
                         return TalentLearnResult.FailedUnknown;
 
@@ -670,6 +672,29 @@ namespace Game
                     if (!hasAnyParentTrait)
                         return TalentLearnResult.FailedNotEnoughTalentsInPrimaryTree;
                 }
+
+                return TalentLearnResult.LearnOk;
+            };
+
+            for (var i = 0; i != traitConfig.Entries.Count;)
+            {
+                TalentLearnResult result = isValidTraitEntry(traitConfig.Entries[i]);
+                if (result != TalentLearnResult.LearnOk)
+                {
+                    if (!removeInvalidEntries)
+                        return result;
+
+                    if (traitConfig.Entries[i].GrantedRanks == 0  // fully remove entries that don't have granted ranks
+                        || traitConfig.Entries[i].Rank == 0)      // ... or entries that do have them and don't have any additional spent ranks (can happen if the same entry is revalidated after first removing all spent ranks)
+                        traitConfig.Entries.RemoveAt(i);
+                    else
+                        traitConfig.Entries[i].Rank = 0;
+
+                    // revalidate entire config - a removed entry will invalidate all other entries that depend on it
+                    i = 0;
+                }
+                else
+                    ++i;
             }
 
             Dictionary<int, int> grantedCurrencies = new();

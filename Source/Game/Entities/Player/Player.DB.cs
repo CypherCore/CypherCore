@@ -1057,15 +1057,14 @@ namespace Game.Entities
             MultiMap<int, TraitEntryPacket> traitEntriesByConfig = new();
             if (!entriesResult.IsEmpty())
             {
-                //                    0            1,                2     3             4
-                // SELECT traitConfigId, traitNodeId, traitNodeEntryId, rank, grantedRanks FROM character_trait_entry WHERE guid = ?
+                //         0              1            2                 3
+                // SELECT traitConfigId, traitNodeId, traitNodeEntryId, rank FROM character_trait_entry WHERE guid = ?
                 do
                 {
                     TraitEntryPacket traitEntry = new();
                     traitEntry.TraitNodeID = entriesResult.Read<int>(1);
                     traitEntry.TraitNodeEntryID = entriesResult.Read<int>(2);
                     traitEntry.Rank = entriesResult.Read<int>(3);
-                    traitEntry.GrantedRanks = entriesResult.Read<int>(4);
 
                     if (!TraitMgr.IsValidEntry(traitEntry))
                         continue;
@@ -1103,10 +1102,26 @@ namespace Game.Entities
 
                     traitConfig.Name = configsResult.Read<string>(7);
 
-                    foreach (var traitEntry in traitEntriesByConfig.LookupByKey(traitConfig.ID))
-                        traitConfig.Entries.Add(traitEntry);
+                    foreach (var grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
+                        traitConfig.Entries.Add(new TraitEntryPacket(grantedEntry));
 
-                    if (TraitMgr.ValidateConfig(traitConfig, this) != TalentLearnResult.LearnOk)
+                    var loadedEntriesNode = traitEntriesByConfig.LookupByKey(traitConfig.ID);
+                    if (loadedEntriesNode != null)
+                    {
+                        foreach (var loadedEntry in loadedEntriesNode)
+                        {
+                            var itr = traitConfig.Entries.Find(entry => entry.TraitNodeID == loadedEntry.TraitNodeID && entry.TraitNodeEntryID == loadedEntry.TraitNodeEntryID);
+                            if (itr == null)
+                            {
+                                traitConfig.Entries.Add(traitConfig.Entries.Last());
+                                traitConfig.Entries[^1].TraitNodeID = loadedEntry.TraitNodeID;
+                                traitConfig.Entries[^1].TraitNodeEntryID = loadedEntry.TraitNodeEntryID;
+                            }
+                            itr.Rank = loadedEntry.Rank;
+                        }
+                    }
+
+                    if (TraitMgr.ValidateConfig(traitConfig, this, false, true) != TalentLearnResult.LearnOk)
                     {
                         traitConfig.Entries.Clear();
                         foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
@@ -1117,6 +1132,10 @@ namespace Game.Entities
 
                 } while (configsResult.NextRow());
             }
+
+            // Remove orphaned trait entries from database
+            foreach (var (traitConfigID, _) in traitEntriesByConfig)
+                m_traitConfigStates[traitConfigID] = PlayerSpellState.Removed;
 
             bool hasConfigForSpec(int specId)
             {
@@ -2430,7 +2449,6 @@ namespace Game.Entities
                                 stmt.AddValue(2, traitEntry.TraitNodeID);
                                 stmt.AddValue(3, traitEntry.TraitNodeEntryID);
                                 stmt.AddValue(4, traitEntry.Rank);
-                                stmt.AddValue(5, traitEntry.GrantedRanks);
                                 trans.Append(stmt);
                             }
                         }
