@@ -16,7 +16,8 @@ namespace Game.Movement
         static float FOLLOW_RANGE_TOLERANCE = 1.0f;
 
         float _range;
-        ChaseAngle _angle;
+        ChaseAngle? _angle;
+        bool _ignoreTargetWalk;
 
         TimeTracker _checkTimer;
         TimeTracker _duration;
@@ -25,11 +26,12 @@ namespace Game.Movement
 
         AbstractFollower _abstractFollower;
 
-        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle, TimeSpan? duration, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public FollowMovementGenerator(Unit target, float range, ChaseAngle? angle, TimeSpan? duration, bool ignoreTargetWalk = false, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _abstractFollower = new AbstractFollower(target);
             _range = range;
             _angle = angle;
+            _ignoreTargetWalk = ignoreTargetWalk;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -131,16 +133,16 @@ namespace Game.Movement
                     // select angle
                     float tAngle;
                     float curAngle = target.GetRelativeAngle(owner);
-                    if (_angle.IsAngleOkay(curAngle))
+                    if (!_angle.HasValue || _angle.Value.IsAngleOkay(curAngle))
                         tAngle = curAngle;
                     else
                     {
-                        float diffUpper = Position.NormalizeOrientation(curAngle - _angle.UpperBound());
-                        float diffLower = Position.NormalizeOrientation(_angle.LowerBound() - curAngle);
+                        float diffUpper = Position.NormalizeOrientation(curAngle - _angle.Value.UpperBound());
+                        float diffLower = Position.NormalizeOrientation(_angle.Value.LowerBound() - curAngle);
                         if (diffUpper < diffLower)
-                            tAngle = _angle.UpperBound();
+                            tAngle = _angle.Value.UpperBound();
                         else
-                            tAngle = _angle.LowerBound();
+                            tAngle = _angle.Value.LowerBound();
                     }
 
                     target.GetNearPoint(owner, out x, out y, out z, range, target.ToAbsoluteAngle(tAngle));
@@ -167,7 +169,8 @@ namespace Game.Movement
 
                     MoveSplineInit init = new(owner);
                     init.MovebyPath(_path.GetPath());
-                    init.SetWalk(target.IsWalking());
+                    if (!_ignoreTargetWalk)
+                        init.SetWalk(target.IsWalking());
                     init.SetFacing(target.GetOrientation());
                     init.Launch();
                 }

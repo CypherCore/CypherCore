@@ -552,12 +552,12 @@ namespace Game.Movement
                 scriptResult.SetResult(MovementStopReason.Interrupted);
         }
 
-        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, bool ignoreTargetWalk = false, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
-            MoveFollow(target, dist, new ChaseAngle(angle), duration, slot, scriptResult);
+            MoveFollow(target, dist, new ChaseAngle(angle), duration, ignoreTargetWalk, slot, scriptResult);
         }
 
-        public void MoveFollow(Unit target, float dist, ChaseAngle angle, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveFollow(Unit target, float dist, ChaseAngle? angle = null, TimeSpan? duration = null, bool ignoreTargetWalk = false, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             // Ignore movement request if target not exist
             if (target == null || target == _owner)
@@ -567,7 +567,7 @@ namespace Game.Movement
                 return;
             }
 
-            Add(new FollowMovementGenerator(target, dist, angle, duration, scriptResult), slot);
+            Add(new FollowMovementGenerator(target, dist, angle, duration, ignoreTargetWalk, scriptResult), slot);
         }
 
         public void MoveChase(Unit target, float dist, float angle = 0.0f) { MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); }
