@@ -5808,6 +5808,9 @@ namespace Game.Spells
             if (target == null)
                 return;
 
+            if (target.IsLoading() && target.m_activePlayerData.TraitConfigs.Empty())
+                return; // traits not loaded yet
+
             TraitConfigPacket newConfig = new();
             newConfig.Type = TraitMgr.GetConfigTypeForTree(effectInfo.MiscValue);
             if (newConfig.Type != TraitConfigType.Generic)
