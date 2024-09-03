@@ -408,7 +408,7 @@ namespace Framework.Constants
         BattleGroundPlayerPosition = 398,
         ModTimeRate = 399,
         ModSkill2 = 400,
-        Unk401 = 401,
+        ActAsControlZone = 401,
         ModOverridePowerDisplay = 402,
         OverrideSpellVisual = 403,
         OverrideAttackPowerBySpPct = 404,

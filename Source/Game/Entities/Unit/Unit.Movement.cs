@@ -689,6 +689,14 @@ namespace Game.Entities
                     GetMap().PlayerRelocation(ToPlayer(), x, y, z, orientation);
                 else
                     GetMap().CreatureRelocation(ToCreature(), x, y, z, orientation);
+
+                var controlZoneAuras = GetAuraEffectsByType(AuraType.ActAsControlZone);
+                foreach (AuraEffect auraEffect in controlZoneAuras)
+                {
+                    GameObject controlZone = GetGameObject(auraEffect.GetSpellInfo().Id);
+                    if (controlZone != null)
+                        GetMap().GameObjectRelocation(controlZone, x, y, z, orientation);
+                }
             }
             else if (turn)
                 UpdateOrientation(orientation);

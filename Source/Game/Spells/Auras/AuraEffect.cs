@@ -6063,6 +6063,43 @@ namespace Game.Spells
 
             playerTarget.UpdatePositionData();
         }
+
+        [AuraEffectHandler(AuraType.ActAsControlZone)]
+        void HandleAuraActAsControlZone(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit auraOwner = aurApp.GetTarget();
+            if (!apply)
+            {
+                auraOwner.RemoveGameObject(GetSpellInfo().Id, true);
+                return;
+            }
+
+            GameObjectTemplate gameobjectTemplate = Global.ObjectMgr.GetGameObjectTemplate((uint)GetMiscValue());
+            if (gameobjectTemplate == null)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HanldeAuraActAsControlZone: Spell {GetId()} [EffectIndex: {GetEffIndex()}] does not have an existing gameobject template.");
+                return;
+            }
+
+            if (gameobjectTemplate.type != GameObjectTypes.ControlZone)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HanldeAuraActAsControlZone: Spell {GetId()} [EffectIndex: {GetEffIndex()}] has a gameobject template ({gameobjectTemplate.entry}) that is not a control zone.");
+                return;
+            }
+
+            if (gameobjectTemplate.displayId != 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"AuraEffect::HanldeAuraActAsControlZone: Spell {GetId()} [EffectIndex: {GetEffIndex()}] has a gameobject template ({gameobjectTemplate.entry}) that has a display id. Only invisible gameobjects are supported.");
+                return;
+            }
+
+            GameObject controlZone = auraOwner.SummonGameObject(gameobjectTemplate.entry, auraOwner.GetPosition(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(aurApp.GetTarget().GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromHours(24), GameObjectSummonType.TimedOrCorpseDespawn);
+            if (controlZone != null)
+                controlZone.SetSpellId(GetSpellInfo().Id);
+        }
         #endregion
     }
 

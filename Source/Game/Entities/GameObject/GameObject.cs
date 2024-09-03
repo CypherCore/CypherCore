@@ -4697,7 +4697,7 @@ namespace Game.Entities
             if (Math.Abs(delta) < minSuperiority)
                 return 0;
 
-            float slope = ((float)minTime - maxTime) / (maxSuperiority - minSuperiority);
+            float slope = ((float)minTime - maxTime) / Math.Max(maxSuperiority - minSuperiority, 1);
             float intercept = maxTime - slope * minSuperiority;
             float timeNeeded = slope * Math.Abs(delta) + intercept;
             float percentageIncrease = 100.0f / timeNeeded;
