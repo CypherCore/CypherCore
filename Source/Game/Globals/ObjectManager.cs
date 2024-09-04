@@ -10660,6 +10660,8 @@ namespace Game
                     return 60;
                 case Expansion.Dragonflight:
                     return 70;
+                case Expansion.TheWarWithin:
+                    return 80;
                 default:
                     break;
             }
