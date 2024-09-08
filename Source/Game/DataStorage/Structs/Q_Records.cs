@@ -49,6 +49,7 @@ namespace Game.DataStorage
         public uint Id;
         public string SortName;
         public byte UiOrderIndex;
+        public int Flags;
     }
 
     public sealed class QuestV2Record

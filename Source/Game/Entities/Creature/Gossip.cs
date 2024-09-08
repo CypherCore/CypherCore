@@ -564,6 +564,7 @@ namespace Game.Misc
 
             offer.QuestID = quest.Id;
             offer.AutoLaunched = autoLaunched;
+            offer.ResetByScheduler = quest.IsResetByScheduler();
             offer.SuggestedPartyMembers = quest.SuggestedPlayers;
             offer.QuestInfoID = (int)quest.QuestInfoID;
 
@@ -670,6 +671,7 @@ namespace Game.Misc
             }
 
             packet.AutoLaunched = autoLaunched;
+            packet.ResetByScheduler = quest.IsResetByScheduler();
 
             _session.SendPacket(packet);
         }

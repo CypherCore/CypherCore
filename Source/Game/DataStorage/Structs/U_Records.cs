@@ -23,6 +23,7 @@ namespace Game.DataStorage
         public int AlternateUiMapGroup;
         public int ContentTuningID;
         public int AdventureMapTextureKitID;
+        public sbyte MapArtZoneTextPosition;
 
         public bool HasFlag(UiMapFlag uiMapFlag) { return (Flags & (int)uiMapFlag) != 0; }
 }

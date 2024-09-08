@@ -282,7 +282,7 @@ namespace Game.DataStorage
                     _factionTeams.Add(faction.ParentFactionID, faction.Id);
 
             foreach (FriendshipRepReactionRecord friendshipRepReaction in FriendshipRepReactionStorage.Values)
-                _friendshipRepReactions.Add(friendshipRepReaction.FriendshipRepID, friendshipRepReaction);
+                _friendshipRepReactions.Add((uint)friendshipRepReaction.FriendshipRepID, friendshipRepReaction);
 
             foreach (var key in _friendshipRepReactions.Keys)
                 _friendshipRepReactions[key].Sort(new FriendshipRepReactionRecordComparer());
@@ -892,9 +892,7 @@ namespace Game.DataStorage
 
         public uint GetEmptyAnimStateID()
         {
-            return 1778;
-            // TEMP: well... AnimationData.db2 in 11.0.0 has more rows than max hardcoded anim id in client
-            //return AnimationDataStorage.GetNumRows();
+            return AnimationDataStorage.GetNumRows();
         }
 
         public List<uint> GetAreasForGroup(uint areaGroupId)

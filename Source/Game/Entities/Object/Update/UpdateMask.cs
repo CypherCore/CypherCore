@@ -47,7 +47,7 @@ namespace Game.Entities
         {
             get
             {
-                return (_blocks[index / 32] & (1 << (index % 32))) != 0;
+                return (_blocks[GetBlockIndex(index)] & GetBlockFlag(index)) != 0;
             }
         }
 

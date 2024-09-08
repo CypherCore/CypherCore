@@ -1270,7 +1270,7 @@ namespace Framework.Constants
         CantEquipRating = 81, // You Don'T Have The Personal, Team, Or Battleground Rating Required To Buy That Item
         EventAutoequipBindConfirm = 82,
         NotSameAccount = 83, // Account-Bound Items Can Only Be Given To Your Own Characters.
-        EquipNone3 = 84,
+        None = 84,
         ItemMaxLimitCategoryCountExceededIs = 85, // You Can Only Carry %D %S
         ItemMaxLimitCategorySocketedExceededIs = 86, // You Can Only Equip %D |4item:Items In The %S Category
         ScalingStatItemLevelExceeded = 87, // Your Level Is Too High To Use That Item
@@ -1306,6 +1306,16 @@ namespace Framework.Constants
         ReagentBagItemType = 117,// Only Reagents can be placed in Reagent Bags.
         CantBulkSellItemWithRefund = 118,// Items that can be refunded can't be bulk sold.
         NoSoulboundItemInAccountBank = 119,// Soulbound items cannot be stored in the Warband Bank.
+        CantDoThatRightNow3 = 120,// You Can't Do That Right Now.
+        NoAccountInventoryLock = 121,// Your Character Cannot Complete This Action.
+        TooManyAccountBankTabs = 122,// You Have Already Purchased The Maximum Amount Of Tabs.
+        NoAccountBankHere = 123,// You Are Too Far Away From A Warband Bank.
+        NoRefundableItemInAccountBank = 124,// Refundable Items Cannot Be Stored In The Warband Bank.
+        NoImmediateContainerInAccountBank = 125,// You Cannot Place That In The Warband Bank.
+        NoOpenImmediateContainerInAccountBank = 126,// You Cannot Open This While It Is In The Warband Bank.
+        CantDeleteInAccountBank = 127,// Items Must Be Moved Out Of The Warband Bank To Be Deleted.
+        BankNotAccessible = 128,// This Character Does Not Have Access To This Bank.
+        CantTradeAccountItem = 129,// You Can't Trade An Item From The Warband Bank.
     }
 
     public enum BankType

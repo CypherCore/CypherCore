@@ -2657,6 +2657,49 @@ namespace Game.Entities
         }
     }
 
+    public class ZonePlayerForcedReaction : HasChangesMask
+    {
+        public UpdateField<int> FactionID = new(0, 1);
+        public UpdateField<int> Reaction = new(0, 2);
+
+        public ZonePlayerForcedReaction() : base(3) { }
+
+        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        {
+            data.WriteInt32(FactionID);
+            data.WriteInt32(Reaction);
+        }
+
+        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        {
+            UpdateMask changesMask = _changesMask;
+            if (ignoreChangesMask)
+                changesMask.SetAll();
+
+            data.WriteBits(changesMask.GetBlock(0), 3);
+
+            data.FlushBits();
+            if (changesMask[0])
+            {
+                if (changesMask[1])
+                {
+                    data.WriteInt32(FactionID);
+                }
+                if (changesMask[2])
+                {
+                    data.WriteInt32(Reaction);
+                }
+            }
+        }
+
+        public override void ClearChangesMask()
+        {
+            ClearChangesMask(FactionID);
+            ClearChangesMask(Reaction);
+            _changesMask.ResetAll();
+        }
+    }
+
     public class PetCreatureName : HasChangesMask
     {
         public UpdateField<uint> CreatureID = new(0, 1);
@@ -2901,10 +2944,11 @@ namespace Game.Entities
         public UpdateFieldArray<QuestLog> QuestLog = new(175, 49, 50);
         public UpdateFieldArray<VisibleItem> VisibleItems = new(19, 225, 226);
         public UpdateFieldArray<float> AvgItemLevel = new(6, 245, 246);
-        public UpdateFieldArray<ItemInstance> VisibleEquipableSpells = new(16, 252, 253);
-        public UpdateFieldArray<uint> Field_3120 = new(19, 269, 270);
+        public UpdateFieldArray<ZonePlayerForcedReaction> ForcedReactions = new(32, 252, 253);
+        public UpdateFieldArray<ItemInstance> VisibleEquipableSpells = new(16, 285, 286);
+        public UpdateFieldArray<uint> Field_3120 = new(19, 302, 303);
 
-        public PlayerData() : base(0, TypeId.Player, 289) { }
+        public PlayerData() : base(0, TypeId.Player, 322) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -2954,6 +2998,10 @@ namespace Game.Entities
             data.WriteUInt32(HonorLevel);
             data.WriteInt64(LogoutTime);
             data.WriteInt32(ArenaCooldowns.Size());
+            for (int i = 0; i < 32; ++i)
+            {
+                ForcedReactions[i].WriteCreate(data, owner, receiver);
+            }
             data.WriteInt32(Field_1AC);
             data.WriteInt32(Field_1B0);
             data.WriteInt32(CurrentBattlePetSpeciesID);
@@ -3019,7 +3067,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new(289, [0xFFFFFFDDu, 0x0001FFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFEu, 0xFFFFFFFFu, 0x00000001u]);
+            UpdateMask allowedMaskForTarget = new(322, [0xFFFFFFDDu, 0x0001FFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFEu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000003u]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -3027,20 +3075,20 @@ namespace Game.Entities
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
-                allowedMaskForTarget.OR(new UpdateMask(289, [0x00000022u, 0xFFFE0000u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000001u, 0x00000000u, 0x00000000u]));
+                allowedMaskForTarget.OR(new UpdateMask(322, [0x00000022u, 0xFFFE0000u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000001u, 0x00000000u, 0x00000000u, 0x00000000u]));
         }
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new(289, [0xFFFFFFDDu, 0x0001FFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFEu, 0xFFFFFFFFu, 0x00000001u]);
+            UpdateMask allowedMaskForTarget = new(322, [0xFFFFFFDDu, 0x0001FFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFFEu, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x00000003u]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
         {
-            data.WriteBits(changesMask.GetBlocksMask(0), 10);
-            for (uint i = 0; i < 10; ++i)
+            data.WriteBits(changesMask.GetBlocksMask(0), 11);
+            for (uint i = 0; i < 11; ++i)
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
@@ -3364,21 +3412,31 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[269])
+            if (changesMask[252])
+            {
+                for (int i = 0; i < 32; ++i)
+                {
+                    if (changesMask[253 + i])
+                    {
+                        ForcedReactions[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    }
+                }
+            }
+            if (changesMask[302])
             {
                 for (int i = 0; i < 19; ++i)
                 {
-                    if (changesMask[270 + i])
+                    if (changesMask[303 + i])
                     {
                         data.WriteUInt32(Field_3120[i]);
                     }
                 }
             }
-            if (changesMask[252])
+            if (changesMask[285])
             {
                 for (int i = 0; i < 16; ++i)
                 {
-                    if (changesMask[253 + i])
+                    if (changesMask[286 + i])
                     {
                         VisibleEquipableSpells[i].Write(data);
                     }
@@ -3437,6 +3495,7 @@ namespace Game.Entities
             ClearChangesMask(QuestLog);
             ClearChangesMask(VisibleItems);
             ClearChangesMask(AvgItemLevel);
+            ClearChangesMask(ForcedReactions);
             ClearChangesMask(VisibleEquipableSpells);
             ClearChangesMask(Field_3120);
             _changesMask.ResetAll();
@@ -5010,19 +5069,19 @@ namespace Game.Entities
 
     public class NPCCraftingOrderInfo : HasChangesMask
     {
-        public UpdateField<ulong> Field_0 = new(-1, 0);
-        public UpdateField<int> Field_8 = new(-1, 1);
-        public UpdateField<int> Field_C = new(-1, 2);
-        public UpdateField<int> Field_10 = new(-1, 3);
+        public UpdateField<ulong> OrderID = new(-1, 0);
+        public UpdateField<int> NpcCraftingOrderSetID = new(-1, 1);
+        public UpdateField<int> NpcTreasureID = new(-1, 2);
+        public UpdateField<int> NpcCraftingOrderCustomerID = new(-1, 3);
 
         public NPCCraftingOrderInfo() : base(4) { }
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt64(Field_0);
-            data.WriteInt32(Field_8);
-            data.WriteInt32(Field_C);
-            data.WriteInt32(Field_10);
+            data.WriteUInt64(OrderID);
+            data.WriteInt32(NpcCraftingOrderSetID);
+            data.WriteInt32(NpcTreasureID);
+            data.WriteInt32(NpcCraftingOrderCustomerID);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
@@ -5036,28 +5095,28 @@ namespace Game.Entities
             data.FlushBits();
             if (changesMask[0])
             {
-                data.WriteUInt64(Field_0);
+                data.WriteUInt64(OrderID);
             }
             if (changesMask[1])
             {
-                data.WriteInt32(Field_8);
+                data.WriteInt32(NpcCraftingOrderSetID);
             }
             if (changesMask[2])
             {
-                data.WriteInt32(Field_C);
+                data.WriteInt32(NpcTreasureID);
             }
             if (changesMask[3])
             {
-                data.WriteInt32(Field_10);
+                data.WriteInt32(NpcCraftingOrderCustomerID);
             }
         }
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Field_0);
-            ClearChangesMask(Field_8);
-            ClearChangesMask(Field_C);
-            ClearChangesMask(Field_10);
+            ClearChangesMask(OrderID);
+            ClearChangesMask(NpcCraftingOrderSetID);
+            ClearChangesMask(NpcTreasureID);
+            ClearChangesMask(NpcCraftingOrderCustomerID);
             _changesMask.ResetAll();
         }
     }

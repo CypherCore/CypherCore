@@ -1245,12 +1245,6 @@ namespace Game
             }));
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestForcedReactions)]
-        void HandleRequestForcedReactions(RequestForcedReactions requestForcedReactions)
-        {
-            GetPlayer().GetReputationMgr().SendForceReactions();
-        }
-
         [WorldPacketHandler(ClientOpcodes.CharacterRenameRequest, Status = SessionStatus.Authed)]
         void HandleCharRename(CharacterRenameRequest request)
         {

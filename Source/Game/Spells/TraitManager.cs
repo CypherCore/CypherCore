@@ -591,13 +591,7 @@ namespace Game
                     FillSpentCurrenciesMap(traitConfig, cachedCurrencies);
                 }
 
-                if (condition.TraitNodeGroupID != 0)
-                {
-                    cachedCurrencies.TryAdd(condition.TraitCurrencyID, 0);
-                    if (cachedCurrencies[condition.TraitCurrencyID] < condition.SpentAmountRequired)
-                        return false;
-                }
-                else if (condition.TraitNodeID != 0)
+                if (condition.TraitNodeGroupID != 0 || condition.TraitNodeID != 0 || condition.TraitNodeEntryID != 0)
                 {
                     cachedCurrencies.TryAdd(condition.TraitCurrencyID, 0);
                     if (cachedCurrencies[condition.TraitCurrencyID] < condition.SpentAmountRequired)

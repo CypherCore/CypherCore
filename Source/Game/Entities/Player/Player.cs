@@ -1844,6 +1844,34 @@ namespace Game.Entities
 
             return MathFunctions.CalculatePct(rep, percent);
         }
+
+        public void SetVisibleForcedReaction(uint factionId, ReputationRank rank)
+        {
+            var zonePlayerForcedReaction = m_playerData.ForcedReactions.First(p => p.FactionID == factionId);
+            if (zonePlayerForcedReaction == null)
+                zonePlayerForcedReaction = m_playerData.ForcedReactions.First(p => p.FactionID == 0);
+
+            if (zonePlayerForcedReaction == null)
+                return; // no more free slots
+
+            var setter = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.ForcedReactions, m_playerData.ForcedReactions.IndexOf(zonePlayerForcedReaction));
+
+            SetUpdateFieldValue(setter.ModifyValue(setter.FactionID), (int)factionId);
+            SetUpdateFieldValue(setter.ModifyValue(setter.Reaction), (int)rank);
+        }
+
+        public void RemoveVisibleForcedReaction(uint factionId)
+        {
+            var zonePlayerForcedReaction = m_playerData.ForcedReactions.First(p => p.FactionID == factionId);
+            if (zonePlayerForcedReaction == null)
+                return;
+
+            var setter = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.ForcedReactions, m_playerData.ForcedReactions.IndexOf(zonePlayerForcedReaction));
+
+            SetUpdateFieldValue(setter.ModifyValue(setter.FactionID), 0);
+            SetUpdateFieldValue(setter.ModifyValue(setter.Reaction), 0);
+        }
+
         // Calculates how many reputation points player gains in victim's enemy factions
         public void RewardReputation(Unit victim, float rate)
         {
@@ -2952,7 +2980,7 @@ namespace Game.Entities
                         PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
                         PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
                         PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
-                        PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker, 
+                        PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker,
                         PlayerInteractionType.AccountBanker
                     };
 

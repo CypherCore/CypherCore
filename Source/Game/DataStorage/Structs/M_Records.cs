@@ -132,6 +132,7 @@ namespace Game.DataStorage
         public uint ItemContextPickerID;
         public int Flags;
         public int ContentTuningID;
+        public int WorldStateExpressionID;
         public uint MapID;
 
         public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }

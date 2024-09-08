@@ -133,23 +133,6 @@ namespace Game.Networking.Packets
         public int GuildFlags;
     }
 
-    public class GuildRosterUpdate : ServerPacket
-    {
-        public GuildRosterUpdate() : base(ServerOpcodes.GuildRosterUpdate)
-        {
-            MemberData = new List<GuildRosterMemberData>();
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(MemberData.Count);
-
-            MemberData.ForEach(p => p.Write(_worldPacket));
-        }
-
-        public List<GuildRosterMemberData> MemberData;
-    }
-
     public class GuildUpdateMotdText : ClientPacket
     {
         public GuildUpdateMotdText(WorldPacket packet) : base(packet) { }
@@ -195,9 +178,16 @@ namespace Game.Networking.Packets
 
     public class GuildDeclineInvitation : ClientPacket
     {
+        public ObjectGuid GuildGuid;
+        public bool IsAuto;
+
         public GuildDeclineInvitation(WorldPacket packet) : base(packet) { }
 
-        public override void Read() { }
+        public override void Read()
+        {
+            GuildGuid = _worldPacket.ReadPackedGuid();
+            IsAuto = _worldPacket.HasBit();
+        }
     }
 
     public class DeclineGuildInvites : ClientPacket

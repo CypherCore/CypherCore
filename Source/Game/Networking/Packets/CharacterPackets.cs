@@ -272,6 +272,7 @@ namespace Game.Networking.Packets
                     data.WriteUInt8(Subclass);
                     data.WriteUInt32(SecondaryItemModifiedAppearanceID);
                     data.WriteUInt32(ItemID);
+                    data.WriteUInt32(TransmogrifiedItemID);
                 }
 
                 public uint DisplayId;
@@ -280,6 +281,7 @@ namespace Game.Networking.Packets
                 public byte InvType;
                 public byte Subclass;
                 public uint ItemID;
+                public uint TransmogrifiedItemID;
             }
 
             public struct PetInfo

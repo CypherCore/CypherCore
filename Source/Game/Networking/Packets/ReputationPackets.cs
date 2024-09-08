@@ -26,27 +26,6 @@ namespace Game.Networking.Packets
         public List<FactionBonusData> Bonuses = new();
     }
 
-    class RequestForcedReactions : ClientPacket
-    {
-        public RequestForcedReactions(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
-
-    class SetForcedReactions : ServerPacket
-    {
-        public SetForcedReactions() : base(ServerOpcodes.SetForcedReactions, ConnectionType.Instance) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteInt32(Reactions.Count);
-            foreach (ForcedReaction reaction in Reactions)
-                reaction.Write(_worldPacket);
-        }
-
-        public List<ForcedReaction> Reactions = new();
-    }
-
     class SetFactionStanding : ServerPacket
     {
         public SetFactionStanding() : base(ServerOpcodes.SetFactionStanding, ConnectionType.Instance) { }
@@ -93,18 +72,6 @@ namespace Game.Networking.Packets
             data.WriteBit(FactionHasBonus);
             data.FlushBits();
         }
-    }
-
-    struct ForcedReaction
-    {
-        public void Write(WorldPacket data)
-        {
-            data.WriteInt32(Faction);
-            data.WriteInt32(Reaction);
-        }
-
-        public int Faction;
-        public int Reaction;
     }
 
     struct FactionStandingData

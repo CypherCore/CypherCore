@@ -312,12 +312,14 @@ namespace Game.Networking.Packets
         public GossipOptionRewardType Type;
         public int ID;
         public int Quantity;
+        public sbyte ItemContext;
 
         public void Write(WorldPacket data)
         {
             data.WriteBits((byte)Type, 1);
             data.WriteInt32(ID);
             data.WriteInt32(Quantity);
+            data.WriteInt8(ItemContext);
         }
     }
 
@@ -388,6 +390,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
         public uint ContentTuningID;
         public int QuestType;
+        public int Unused1102;
         public bool Repeatable;
         public bool ResetByScheduler;
         public bool Important;
@@ -402,6 +405,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(QuestID);
             data.WriteUInt32(ContentTuningID);
             data.WriteInt32(QuestType);
+            data.WriteInt32(Unused1102);
             data.WriteUInt32(QuestFlags);
             data.WriteUInt32(QuestFlagsEx);
             data.WriteUInt32(QuestFlagsEx2);

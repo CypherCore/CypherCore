@@ -195,6 +195,16 @@ namespace Game.Entities
 
         public int GetSize() { return _values.Length; }
 
+        public T First(Func<T, bool> predicate)
+        {
+            return _values.First(predicate);
+        }
+
+        public int IndexOf(T value)
+        {
+            return Array.IndexOf(_values, value);
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
             foreach (var obj in _values)

@@ -697,6 +697,7 @@ namespace Game
             broadcastPingUnit.TargetGUID = pingUnit.TargetGUID;
             broadcastPingUnit.Type = pingUnit.Type;
             broadcastPingUnit.PinFrameID = pingUnit.PinFrameID;
+            broadcastPingUnit.PingDuration = pingUnit.PingDuration;
             broadcastPingUnit.Write();
 
             for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
@@ -726,6 +727,7 @@ namespace Game
             broadcastPingWorldPoint.Type = pingWorldPoint.Type;
             broadcastPingWorldPoint.PinFrameID = pingWorldPoint.PinFrameID;
             broadcastPingWorldPoint.Transport = pingWorldPoint.Transport;
+            broadcastPingWorldPoint.PingDuration = pingWorldPoint.PingDuration;
             broadcastPingWorldPoint.Write();
 
             for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())

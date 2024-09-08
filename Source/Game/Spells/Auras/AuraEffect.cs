@@ -4624,7 +4624,6 @@ namespace Game.Spells
             ReputationRank factionRank = (ReputationRank)GetAmount();
 
             player.GetReputationMgr().ApplyForceReaction(factionId, factionRank, apply);
-            player.GetReputationMgr().SendForceReactions();
 
             // stop fighting at apply (if forced rank friendly) or at remove (if real rank friendly)
             if ((apply && factionRank >= ReputationRank.Friendly) || (!apply && player.GetReputationRank(factionId) >= ReputationRank.Friendly))

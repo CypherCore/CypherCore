@@ -119,6 +119,7 @@ namespace Game.DataStorage
         public int SpecSetID;
         public int TraitNodeGroupID;
         public int TraitNodeID;
+        public int TraitNodeEntryID;
         public int TraitCurrencyID;
         public int SpentAmountRequired;
         public int Flags;

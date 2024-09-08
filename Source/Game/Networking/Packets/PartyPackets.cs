@@ -961,6 +961,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
+        public TimeSpan PingDuration;
 
         public SendPingUnit(WorldPacket packet) : base(packet) { }
 
@@ -970,6 +971,7 @@ namespace Game.Networking.Packets
             TargetGUID = _worldPacket.ReadPackedGuid();
             Type = (PingSubjectType)_worldPacket.ReadUInt8();
             PinFrameID = _worldPacket.ReadUInt32();
+            PingDuration = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
         }
     }
 
@@ -979,6 +981,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
+        public TimeSpan PingDuration;
 
         public ReceivePingUnit() : base(ServerOpcodes.ReceivePingUnit) { }
 
@@ -988,6 +991,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
+            _worldPacket.WriteInt32((int)PingDuration.TotalMilliseconds);
         }
     }
 
@@ -999,6 +1003,7 @@ namespace Game.Networking.Packets
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
         public ObjectGuid Transport;
+        public TimeSpan PingDuration;
 
         public SendPingWorldPoint(WorldPacket packet) : base(packet) { }
 
@@ -1010,6 +1015,7 @@ namespace Game.Networking.Packets
             Type = (PingSubjectType)_worldPacket.ReadUInt32();
             PinFrameID = _worldPacket.ReadUInt32();
             Transport = _worldPacket.ReadPackedGuid();
+            PingDuration = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
         }
     }
 
@@ -1020,6 +1026,7 @@ namespace Game.Networking.Packets
         public Vector3 Point;
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
+        public TimeSpan PingDuration;
         public ObjectGuid Transport;
 
         public ReceivePingWorldPoint() : base(ServerOpcodes.ReceivePingWorldPoint) { }
@@ -1032,6 +1039,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
             _worldPacket.WritePackedGuid(Transport);
+            _worldPacket.WriteInt32((int)PingDuration.TotalMilliseconds);
         }
     }
 
