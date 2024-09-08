@@ -251,7 +251,7 @@ namespace Framework.Constants
         SummonCreature = 12,     // Creatureid, Summontype, Duration In Ms, Storageid, Attackinvoker, flags(SmartActionSummonCreatureFlags)
         ThreatSinglePct = 13,     // Threat%
         ThreatAllPct = 14,     // Threat%
-        CallAreaexploredoreventhappens = 15,     // Questid
+        CallAreaexploredoreventhappens = 15,     // UNUSED, DO NOT REUSE
         SetIngamePhaseGroup = 16,     // phaseGroupId, apply
         SetEmoteState = 17,     // Emoteid
         SetUnitFlag = 18,     // UNUSED, DO NOT REUSE
@@ -262,7 +262,7 @@ namespace Framework.Constants
         IncEventPhase = 23,     // Value (May Be Negative To Decrement Phase, Should Not Be 0)
         Evade = 24,     // No Params
         FleeForAssist = 25,     // With Emote
-        CallGroupeventhappens = 26,     // Questid
+        CallGroupeventhappens = 26,     // UNUSED, DO NOT REUSE
         CombatStop = 27,     //
         RemoveAurasFromSpell = 28,     // Spellid, 0 Removes All Auras
         Follow = 29,     // Distance (0 = Default), Angle (0 = Default), Endcreatureentry, Credit, Credittype (0monsterkill, 1event)
@@ -388,6 +388,7 @@ namespace Framework.Constants
         BecomePersonalCloneForPlayer = 149, // summonType 1-8, duration in ms
         TriggerGameEvent = 150, // eventId, useSaiTargetAsGameEventSource
         DoAction = 151,
+        CompleteQuest = 152, // QuestId. Regular quests with objectives can't be completed with this action (only quests with QUEST_FLAGS_COMPLETION_EVENT, QUEST_FLAGS_COMPLETION_AREA_TRIGGER or QUEST_FLAGS_TRACKING_EVENT)
         End
     }
 

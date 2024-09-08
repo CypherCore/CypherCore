@@ -3374,11 +3374,17 @@ namespace Game.Spells
                 if (quest == null)
                     return;
 
-                ushort logSlot = player.FindQuestSlot(questId);
-                if (logSlot < SharedConst.MaxQuestLogSize)
-                    player.AreaExploredOrEventHappens(questId);
-                else if (quest.HasFlag(QuestFlags.TrackingEvent))  // Check if the quest is used as a serverside flag.
-                    player.SetRewardedQuest(questId);          // If so, set status to rewarded without broadcasting it to client.
+                QuestStatus questStatus = player.GetQuestStatus(questId);
+                if (questStatus == QuestStatus.Rewarded)
+                    return;
+
+                if (quest.HasFlag(QuestFlags.CompletionEvent) || quest.HasFlag(QuestFlags.CompletionAreaTrigger))
+                {
+                    if (questStatus == QuestStatus.Incomplete)
+                        player.AreaExploredOrEventHappens(questId);
+                }
+                else if (quest.HasFlag(QuestFlags.TrackingEvent)) // Check if the quest is used as a serverside flag
+                    player.CompleteQuest(questId);
             }
         }
 

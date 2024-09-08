@@ -284,7 +284,6 @@ namespace Game.AI
                         }
                         break;
                     case SmartEvents.VictimCasting:
-                    case SmartEvents.IsBehindTarget:
                         if (temp.Event.minMaxRepeat.min == 0 && temp.Event.minMaxRepeat.max == 0 && !temp.Event.event_flags.HasAnyFlag(SmartEventFlags.NotRepeatable) && temp.SourceType != SmartScriptType.TimedActionlist)
                         {
                             temp.Event.event_flags |= SmartEventFlags.NotRepeatable;
@@ -696,7 +695,6 @@ namespace Game.AI
                 SmartActions.SummonCreature => Marshal.SizeOf(typeof(SmartAction.SummonCreature)),
                 SmartActions.ThreatSinglePct => Marshal.SizeOf(typeof(SmartAction.ThreatPCT)),
                 SmartActions.ThreatAllPct => Marshal.SizeOf(typeof(SmartAction.ThreatPCT)),
-                SmartActions.CallAreaexploredoreventhappens => Marshal.SizeOf(typeof(SmartAction.Quest)),
                 SmartActions.SetIngamePhaseGroup => Marshal.SizeOf(typeof(SmartAction.IngamePhaseGroup)),
                 SmartActions.SetEmoteState => Marshal.SizeOf(typeof(SmartAction.Emote)),
                 SmartActions.AutoAttack => Marshal.SizeOf(typeof(SmartAction.AutoAttack)),
@@ -705,7 +703,6 @@ namespace Game.AI
                 SmartActions.IncEventPhase => Marshal.SizeOf(typeof(SmartAction.IncEventPhase)),
                 SmartActions.Evade => Marshal.SizeOf(typeof(SmartAction.Evade)),
                 SmartActions.FleeForAssist => Marshal.SizeOf(typeof(SmartAction.FleeAssist)),
-                SmartActions.CallGroupeventhappens => Marshal.SizeOf(typeof(SmartAction.Quest)),
                 SmartActions.CombatStop => 0,
                 SmartActions.RemoveAurasFromSpell => Marshal.SizeOf(typeof(SmartAction.RemoveAura)),
                 SmartActions.Follow => Marshal.SizeOf(typeof(SmartAction.Follow)),
@@ -816,6 +813,7 @@ namespace Game.AI
                 SmartActions.BecomePersonalCloneForPlayer => Marshal.SizeOf(typeof(SmartAction.BecomePersonalClone)),
                 SmartActions.TriggerGameEvent => Marshal.SizeOf(typeof(SmartAction.TriggerGameEvent)),
                 SmartActions.DoAction => Marshal.SizeOf(typeof(SmartAction.DoAction)),
+                SmartActions.CompleteQuest => Marshal.SizeOf(typeof(SmartAction.Quest)),
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
@@ -1572,23 +1570,6 @@ namespace Game.AI
                         return false;
                     }
                     break;
-                case SmartActions.CallAreaexploredoreventhappens:
-                case SmartActions.CallGroupeventhappens:
-                    Quest qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
-                    if (qid != null)
-                    {
-                        if (!qid.HasFlag(QuestFlags.CompletionEvent) && !qid.HasFlag(QuestFlags.CompletionAreaTrigger))
-                        {
-                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} Flags for Quest entry {e.Action.quest.questId} does not include QUEST_FLAGS_COMPLETION_EVENT or QUEST_FLAGS_COMPLETION_AREA_TRIGGER, skipped.");
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Quest entry {e.Action.quest.questId}, skipped.");
-                        return false;
-                    }
-                    break;
                 case SmartActions.SetEventPhase:
                     if (e.Action.setEventPhase.phase >= (uint)SmartPhase.Max)
                     {
@@ -2215,7 +2196,25 @@ namespace Game.AI
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.triggerGameEvent.useSaiTargetAsGameEventSource);
                     break;
                 }
+                case SmartActions.CompleteQuest:
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
+                    if (quest != null)
+                    {
+                        if (!quest.HasFlag(QuestFlags.CompletionEvent) && !quest.HasFlag(QuestFlags.CompletionAreaTrigger) && !quest.HasFlag(QuestFlags.TrackingEvent))
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Flags for Quest entry {e.Action.quest.questId} does not include QUEST_FLAGS_COMPLETION_EVENT or QUEST_FLAGS_COMPLETION_AREA_TRIGGER or QUEST_FLAGS_TRACKING_EVENT, skipped.");
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent Quest entry {e.Action.quest.questId}, skipped.");
+                        return false;
+                    }
+                    break;
                 // No longer supported
+                case SmartActions.CallAreaexploredoreventhappens:
+                case SmartActions.CallGroupeventhappens:
                 case SmartActions.SetUnitFlag:
                 case SmartActions.RemoveUnitFlag:
                 case SmartActions.InstallAITemplate:

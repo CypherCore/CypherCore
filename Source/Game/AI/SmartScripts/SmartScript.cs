@@ -413,34 +413,6 @@ namespace Game.AI
                     }
                     break;
                 }
-                case SmartActions.CallAreaexploredoreventhappens:
-                {
-                    foreach (var target in targets)
-                    {
-                        // Special handling for vehicles
-                        if (IsUnit(target))
-                        {
-                            Vehicle vehicle = target.ToUnit().GetVehicleKit();
-                            if (vehicle != null)
-                            {
-                                foreach (var seat in vehicle.Seats)
-                                {
-                                    Player player = Global.ObjAccessor.GetPlayer(target, seat.Value.Passenger.Guid);
-                                    if (player != null)
-                                        player.AreaExploredOrEventHappens(e.Action.quest.questId);
-                                }
-                            }
-                        }
-
-                        if (IsPlayer(target))
-                        {
-                            target.ToPlayer().AreaExploredOrEventHappens(e.Action.quest.questId);
-                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_CALL_AREAEXPLOREDOREVENTHAPPENS: {0} credited quest {1}",
-                                target.GetGUID().ToString(), e.Action.quest.questId);
-                        }
-                    }
-                    break;
-                }
                 case SmartActions.Cast:
                 {
                     if (targets.Empty())
@@ -712,33 +684,6 @@ namespace Game.AI
                         Global.CreatureTextMgr.SendChatPacket(_me, builder, ChatMsg.Emote);
                     }
                     Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_FLEE_FOR_ASSIST: Creature {0} DoFleeToGetAssistance", _me.GetGUID().ToString());
-                    break;
-                }
-                case SmartActions.CallGroupeventhappens:
-                {
-                    if (unit == null)
-                        break;
-
-                    // If invoker was pet or charm
-                    Player playerCharmed = unit.GetCharmerOrOwnerPlayerOrPlayerItself();
-                    if (playerCharmed != null && GetBaseObject() != null)
-                    {
-                        playerCharmed.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
-                        Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction: SMART_ACTION_CALL_GROUPEVENTHAPPENS: Player {0}, group credit for quest {1}",
-                            unit.GetGUID().ToString(), e.Action.quest.questId);
-                    }
-
-                    // Special handling for vehicles
-                    Vehicle vehicle = unit.GetVehicleKit();
-                    if (vehicle != null)
-                    {
-                        foreach (var seat in vehicle.Seats)
-                        {
-                            Player passenger = Global.ObjAccessor.GetPlayer(unit, seat.Value.Passenger.Guid);
-                            if (passenger != null)
-                                passenger.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
-                        }
-                    }
                     break;
                 }
                 case SmartActions.CombatStop:
@@ -2582,6 +2527,34 @@ namespace Game.AI
                             if (goTarget != null)
                                 goTarget.GetAI()?.DoAction((int)e.Action.doAction.actionId);
                         }
+                    }
+
+                    break;
+                }
+                case SmartActions.CompleteQuest:
+                {
+                    uint questId = e.Action.quest.questId;
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                    if (quest == null)
+                        break;
+
+                    foreach (WorldObject target in targets)
+                    {
+                        Player player = target?.ToPlayer();
+                        if (player == null)
+                            continue;
+
+                        QuestStatus questStatus = player.GetQuestStatus(questId);
+                        if (questStatus == QuestStatus.Rewarded)
+                            continue;
+
+                        if (quest.HasFlag(QuestFlags.CompletionEvent) || quest.HasFlag(QuestFlags.CompletionAreaTrigger))
+                        {
+                            if (questStatus == QuestStatus.Incomplete)
+                                player.AreaExploredOrEventHappens(questId);
+                        }
+                        else if (quest.HasFlag(QuestFlags.TrackingEvent)) // Check if the quest is used as a serverside flag
+                            player.CompleteQuest(questId);
                     }
 
                     break;
