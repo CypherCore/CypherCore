@@ -1258,11 +1258,11 @@ namespace Game.Networking.Packets
             Rewards.Write(data); // QuestRewards
             data.WriteInt32(Emotes.Count);
             data.WritePackedGuid(QuestGiverGUID);
-            data.WriteUInt32(QuestGiverCreatureID);
-            data.WriteUInt32(QuestID);
             data.WriteUInt32(QuestFlags[0]); // Flags
             data.WriteUInt32(QuestFlags[1]); // FlagsEx
             data.WriteUInt32(QuestFlags[2]); // FlagsEx2
+            data.WriteUInt32(QuestGiverCreatureID);
+            data.WriteUInt32(QuestID);
             data.WriteUInt32(SuggestedPartyMembers);
             data.WriteInt32(QuestInfoID);
 

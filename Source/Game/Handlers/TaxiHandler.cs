@@ -122,7 +122,7 @@ namespace Game
 
             if (GetPlayer().m_taxi.SetTaximaskNode(curloc))
             {
-                SendPacket(new NewTaxiPath());
+                SendPacket(new NewTaxiPath(curloc));
 
                 TaxiNodeStatusPkt data = new();
                 data.Unit = unit.GetGUID();
@@ -139,7 +139,7 @@ namespace Game
         public void SendDiscoverNewTaxiNode(uint nodeid)
         {
             if (GetPlayer().m_taxi.SetTaximaskNode(nodeid))
-                SendPacket(new NewTaxiPath());
+                SendPacket(new NewTaxiPath(nodeid));
         }
 
         [WorldPacketHandler(ClientOpcodes.ActivateTaxi, Processing = PacketProcessing.ThreadSafe)]

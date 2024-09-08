@@ -25,7 +25,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket .WritePackedGuid( Unit);
+            _worldPacket.WritePackedGuid(Unit);
             _worldPacket.WriteBits(Status, 2);
             _worldPacket.FlushBits();
         }
@@ -108,9 +108,17 @@ namespace Game.Networking.Packets
 
     class NewTaxiPath : ServerPacket
     {
-        public NewTaxiPath() : base(ServerOpcodes.NewTaxiPath) { }
+        uint TaxiNodesID;
 
-        public override void Write() { }
+        public NewTaxiPath(uint taxiNodesId) : base(ServerOpcodes.NewTaxiPath)
+        {
+            TaxiNodesID = taxiNodesId;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(TaxiNodesID);
+        }
     }
 
     class ActivateTaxiReplyPkt : ServerPacket
