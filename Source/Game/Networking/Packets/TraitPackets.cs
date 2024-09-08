@@ -148,19 +148,19 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class TraitSubTreeCache
+    public class TraitSubTreeCachePacket
     {
         public int TraitSubTreeID;
         public List<TraitEntryPacket> Entries = new();
         public bool Active;
 
-        public TraitSubTreeCache() { }
-        public TraitSubTreeCache(TraitSubTreeCache ufSubTreeCache)
+        public TraitSubTreeCachePacket() { }
+        public TraitSubTreeCachePacket(TraitSubTreeCache ufSubTreeCache)
         {
             TraitSubTreeID = ufSubTreeCache.TraitSubTreeID;
             foreach (var ufEntry in ufSubTreeCache.Entries)
-                Entries.Add(ufEntry);
-            Active = ufSubTreeCache.Active;
+                Entries.Add(new TraitEntryPacket(ufEntry));
+            Active = ufSubTreeCache.Active == 0 ? false : true;
         }
 
         public void Read(WorldPacket data)
@@ -203,7 +203,7 @@ namespace Game.Networking.Packets
         public uint SkillLineID;
         public int TraitSystemID;
         public List<TraitEntryPacket> Entries = new();
-        public List<TraitSubTreeCache> SubTrees = new();
+        public List<TraitSubTreeCachePacket> SubTrees = new();
         public string Name = "";
 
         public TraitConfigPacket() { }
@@ -219,6 +219,8 @@ namespace Game.Networking.Packets
             TraitSystemID = ufConfig.TraitSystemID;
             foreach (TraitEntry ufEntry in ufConfig.Entries)
                 Entries.Add(new TraitEntryPacket(ufEntry));
+            foreach (var ufSubTree in ufConfig.SubTrees)
+                SubTrees.Add(new TraitSubTreeCachePacket(ufSubTree));
             Name = ufConfig.Name;
         }
 
@@ -257,7 +259,7 @@ namespace Game.Networking.Packets
 
             for (var i = 0; i < subtreesSize; ++i)
             {
-                TraitSubTreeCache subtrees = new();
+                TraitSubTreeCachePacket subtrees = new();
                 subtrees.Read(data);
                 SubTrees.Add(subtrees);
             }
@@ -294,7 +296,7 @@ namespace Game.Networking.Packets
 
             data.WriteBits(Name.GetByteCount(), 9);
 
-            foreach (TraitSubTreeCache traitSubTreeCache in SubTrees)
+            foreach (TraitSubTreeCachePacket traitSubTreeCache in SubTrees)
                 traitSubTreeCache.Write(data);
 
             data.FlushBits();

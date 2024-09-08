@@ -1497,6 +1497,12 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY, "SELECT ID, TraitNodeID, TraitNodeEntryID, `Index` FROM trait_node_x_trait_node_entry" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // TraitSubTree.db2
+            PrepareStatement(HotfixStatements.SEL_TRAIT_SUB_TREE, "SELECT Name, Description, ID, UiTextureAtlasElementID, TraitTreeID FROM trait_sub_tree" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_TRAIT_SUB_TREE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM trait_sub_tree_locale WHERE (`VerifiedBuild` > 0) = ?" +
+                " AND locale = ?");
+
             // TraitTree.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_TREE, "SELECT ID, TraitSystemID, Unused1000_1, FirstTraitNodeID, PlayerConditionID, Flags, Unused1000_2, " +
                 "Unused1000_3 FROM trait_tree WHERE (`VerifiedBuild` > 0) = ?");
@@ -2349,6 +2355,9 @@ namespace Framework.Database
         SEL_TRAIT_NODE_X_TRAIT_COST,
 
         SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY,
+
+        SEL_TRAIT_SUB_TREE,
+        SEL_TRAIT_SUB_TREE_LOCALE,
 
         SEL_TRAIT_TREE,
 

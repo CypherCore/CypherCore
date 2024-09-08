@@ -71,23 +71,26 @@ namespace Game
                         return;
                     }
 
-                    TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitNodeEntry.TraitDefinitionID);
-                    if (traitDefinition == null)
+                    if (traitNodeEntry.TraitDefinitionID != 0)
                     {
-                        SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
-                        return;
-                    }
+                        TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitNodeEntry.TraitDefinitionID);
+                        if (traitDefinition == null)
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, 0, (int)TalentLearnResult.FailedUnknown));
+                            return;
+                        }
 
-                    if (traitDefinition.SpellID != 0 && _player.GetSpellHistory().HasCooldown(traitDefinition.SpellID))
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.SpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
-                        return;
-                    }
+                        if (traitDefinition.SpellID != 0 && _player.GetSpellHistory().HasCooldown(traitDefinition.SpellID))
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.SpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
+                            return;
+                        }
 
-                    if (traitDefinition.VisibleSpellID != 0 && _player.GetSpellHistory().HasCooldown((uint)traitDefinition.VisibleSpellID))
-                    {
-                        SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.VisibleSpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
-                        return;
+                        if (traitDefinition.VisibleSpellID != 0 && _player.GetSpellHistory().HasCooldown((uint)traitDefinition.VisibleSpellID))
+                        {
+                            SendPacket(new TraitConfigCommitFailed(configId, traitDefinition.VisibleSpellID, (int)TalentLearnResult.FailedCantRemoveTalent));
+                            return;
+                        }
                     }
 
                     hasRemovedEntries = true;

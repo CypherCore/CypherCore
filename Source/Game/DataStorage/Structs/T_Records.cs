@@ -283,6 +283,15 @@ namespace Game.DataStorage
         public int Index;
     }
 
+    public sealed class TraitSubTreeRecord
+    {
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public uint ID;
+        public int UiTextureAtlasElementID;
+        public int TraitTreeID;             // Parent tree
+    }
+
     public sealed class TraitTreeRecord
     {
         public uint Id;

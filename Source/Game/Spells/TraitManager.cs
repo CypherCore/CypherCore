@@ -15,6 +15,7 @@ namespace Game
 
         static Dictionary<int, NodeGroup> _traitGroups = new();
         static Dictionary<int, Node> _traitNodes = new();
+        static Dictionary<int, SubTree> _traitSubTrees = new();
         static Dictionary<int, Tree> _traitTrees = new();
         static int[] _skillLinesByClass = new int[(int)Class.Max];
         static MultiMap<int, Tree> _traitTreesBySkillLine = new();
@@ -96,12 +97,11 @@ namespace Game
                     treeCosts.Add(traitTreeXTraitCostEntry.TraitTreeID, traitCostEntry);
             }
 
-            MultiMap<int, TraitCurrencyRecord> treeCurrencies = new();
+            MultiMap<int, TraitTreeXTraitCurrencyRecord> treeCurrencies = new();
             foreach (TraitTreeXTraitCurrencyRecord traitTreeXTraitCurrencyEntry in CliDB.TraitTreeXTraitCurrencyStorage.Values)
             {
-                TraitCurrencyRecord traitCurrencyEntry = CliDB.TraitCurrencyStorage.LookupByKey(traitTreeXTraitCurrencyEntry.TraitCurrencyID);
-                if (traitCurrencyEntry != null)
-                    treeCurrencies.Add(traitTreeXTraitCurrencyEntry.TraitTreeID, traitCurrencyEntry);
+                if (CliDB.TraitCurrencyStorage.HasRecord((uint)traitTreeXTraitCurrencyEntry.TraitCurrencyID))
+                    treeCurrencies.Add(traitTreeXTraitCurrencyEntry.TraitTreeID, traitTreeXTraitCurrencyEntry);
             }
 
             MultiMap<int, int> traitTreesIdsByTraitSystem = new();
@@ -116,7 +116,10 @@ namespace Game
 
                 var currencies = treeCurrencies.LookupByKey(traitTree.Id);
                 if (currencies != null)
-                    tree.Currencies = currencies;
+                {
+                    currencies.OrderBy(p => p.Index);
+                    tree.Currencies.AddRange(currencies.Select(p => CliDB.TraitCurrencyStorage.LookupByKey(p.TraitCurrencyID)));
+                }
 
                 if (traitTree.TraitSystemID != 0)
                 {
@@ -127,7 +130,19 @@ namespace Game
                 _traitTrees[(int)traitTree.Id] = tree;
             }
 
-            foreach (TraitNodeGroupRecord traitNodeGroup in CliDB.TraitNodeGroupStorage.Values)
+            foreach (var (_, traitSubTree) in CliDB.TraitSubTreeStorage)
+            {
+                SubTree subTree = new();
+                subTree.Data = traitSubTree;
+
+                Tree tree = _traitTrees.LookupByKey(traitSubTree.TraitTreeID);
+                if (tree != null)
+                    tree.SubTrees.Add(subTree);
+
+                _traitSubTrees[(int)traitSubTree.ID] = subTree;
+            }
+
+            foreach (var (_, traitNodeGroup) in CliDB.TraitNodeGroupStorage)
             {
                 NodeGroup nodeGroup = new();
                 nodeGroup.Data = traitNodeGroup;
@@ -185,6 +200,50 @@ namespace Game
                 var costs1 = nodeCosts.LookupByKey(traitNode.Id);
                 if (costs1 != null)
                     node.Costs = costs1;
+
+                SubTree subTree = _traitSubTrees.LookupByKey(traitNode.TraitSubTreeID);
+                if (subTree != null)
+                {
+                    subTree.Nodes.Add(node);
+
+                    foreach (NodeEntry nodeEntry in node.Entries)
+                    {
+                        foreach (TraitCostRecord cost in nodeEntry.Costs)
+                        {
+                            TraitCurrencyRecord traitCurrency = CliDB.TraitCurrencyStorage.LookupByKey(cost.TraitCurrencyID);
+                            if (traitCurrency != null)
+                                subTree.Currencies.Add(traitCurrency);
+                        }
+                    }
+
+                    foreach (NodeGroup nodeGroup in node.Groups)
+                    {
+                        foreach (TraitCostRecord cost in nodeGroup.Costs)
+                        {
+                            TraitCurrencyRecord traitCurrency = CliDB.TraitCurrencyStorage.LookupByKey(cost.TraitCurrencyID);
+                            if (traitCurrency != null)
+                                subTree.Currencies.Add(traitCurrency);
+                        }
+                    }
+
+                    foreach (TraitCostRecord cost in node.Costs)
+                    {
+                        TraitCurrencyRecord traitCurrency = CliDB.TraitCurrencyStorage.LookupByKey(cost.TraitCurrencyID);
+                        if (traitCurrency != null)
+                            subTree.Currencies.Add(traitCurrency);
+                    }
+
+                    Tree tree1 = _traitTrees.LookupByKey(traitNode.TraitTreeID);
+                    if (tree1 != null)
+                    {
+                        foreach (TraitCostRecord cost in tree1.Costs)
+                        {
+                            TraitCurrencyRecord traitCurrency = CliDB.TraitCurrencyStorage.LookupByKey(cost.TraitCurrencyID);
+                            if (traitCurrency != null)
+                                subTree.Currencies.Add(traitCurrency);
+                        }
+                    }
+                }
 
                 _traitNodes[(int)traitNode.Id] = node;
             }
@@ -471,6 +530,41 @@ namespace Game
                 FillSpentCurrenciesMap(entry, cachedCurrencies);
         }
 
+        public static int[] GetClassAndSpecTreeCurrencies(TraitConfigPacket traitConfig)
+        {
+            int[] currencies = new int[2];
+
+            List<Tree> trees = GetTreesForConfig(traitConfig);
+            if (trees != null)
+            {
+                int destIndex = 0;
+                foreach (var tree in trees)
+                {
+                    if (destIndex >= currencies.Length)
+                        break;
+
+                    foreach (var currency in tree.Currencies)
+                    {
+                        if (destIndex >= currencies.Length)
+                            break;
+
+                        currencies[destIndex++] = (int)currency.Id;
+                    }
+                }
+            }
+
+            return currencies;
+        }
+
+        public static List<TraitCurrencyRecord> GetSubTreeCurrency(int traitSubTreeId)
+        {
+            SubTree subTree = _traitSubTrees.LookupByKey(traitSubTreeId);
+            if (subTree == null)
+                return null;
+
+            return subTree.Currencies;
+        }
+
         public static bool MeetsTraitCondition(TraitConfigPacket traitConfig, Player player, TraitCondRecord condition, ref Dictionary<int, int> cachedCurrencies)
         {
             if (condition.QuestID != 0 && !player.IsQuestRewarded(condition.QuestID))
@@ -643,7 +737,7 @@ namespace Game
                         return TalentLearnResult.FailedUnknown;
 
                 foreach (NodeEntry entry in node.Entries)
-                    if (!meetsConditions(entry.Conditions))
+                    if (entry.Data.Id == traitEntry.TraitNodeEntryID && !meetsConditions(entry.Conditions))
                         return TalentLearnResult.FailedUnknown;
 
                 if (!meetsConditions(node.Conditions))
@@ -697,6 +791,41 @@ namespace Game
                     ++i;
             }
 
+            Dictionary<int, SubtreeValidationData> subtrees = new();
+
+            foreach (TraitEntryPacket traitEntry in traitConfig.Entries)
+            {
+                Node node = _traitNodes.LookupByKey(traitEntry.TraitNodeID);
+                var entryItr = node.Entries.Find(nodeEntry => nodeEntry.Data.Id == traitEntry.TraitNodeEntryID);
+                Cypher.Assert(entryItr != null);
+
+                if (!subtrees.ContainsKey(entryItr.Data.TraitSubTreeID))
+                    subtrees[entryItr.Data.TraitSubTreeID] = new();
+
+                if (node.Data.GetNodeType() == TraitNodeType.SubTreeSelection)
+                    subtrees[entryItr.Data.TraitSubTreeID].IsSelected = true;
+
+                if (node.Data.TraitSubTreeID != 0)
+                    subtrees[node.Data.TraitSubTreeID].Entries.Add(traitEntry);
+            }
+
+            foreach (TraitSubTreeCachePacket subTree in traitConfig.SubTrees)
+                subTree.Active = false;
+
+            foreach (var (selectedSubTreeId, data) in subtrees)
+            {
+                var subtreeDataItr = traitConfig.SubTrees.Find(p => p.TraitSubTreeID == selectedSubTreeId);
+                if (subtreeDataItr == null)
+                {
+                    subtreeDataItr = new TraitSubTreeCachePacket();
+                    subtreeDataItr.TraitSubTreeID = selectedSubTreeId;
+                    traitConfig.SubTrees.Add(subtreeDataItr);
+                }
+
+                subtreeDataItr.Entries = data.Entries;
+                subtreeDataItr.Active = data.IsSelected;
+            }
+
             Dictionary<int, int> grantedCurrencies = new();
             FillOwnedCurrenciesMap(traitConfig, player, grantedCurrencies);
 
@@ -716,8 +845,10 @@ namespace Game
 
             if (requireSpendingAllCurrencies && traitConfig.Type == TraitConfigType.Combat)
             {
-                foreach (var (traitCurrencyId, grantedAmount) in grantedCurrencies)
+                // client checks only first two currencies for trait tree
+                foreach (int traitCurrencyId in GetClassAndSpecTreeCurrencies(traitConfig))
                 {
+                    int grantedAmount = grantedCurrencies.LookupByKey(traitCurrencyId);
                     if (grantedAmount == 0)
                         continue;
 
@@ -725,9 +856,42 @@ namespace Game
                     if (spentAmount == 0 || spentAmount != grantedAmount)
                         return TalentLearnResult.UnspentTalentPoints;
                 }
+
+                foreach (var (selectedTraitSubTreeId, data) in subtrees)
+                {
+                    if (!data.IsSelected)
+                        continue;
+
+                    foreach (TraitCurrencyRecord subTreeCurrency in GetSubTreeCurrency(selectedTraitSubTreeId))
+                    {
+                        int grantedAmount = grantedCurrencies.LookupByKey(subTreeCurrency.Id);
+                        if (grantedAmount == 0)
+                            continue;
+
+                        int spentAmount = spentCurrencies.LookupByKey(subTreeCurrency.Id);
+                        if (spentAmount == 0 || spentAmount != grantedAmount)
+                            return TalentLearnResult.UnspentTalentPoints;
+                    }
+                }
             }
 
             return TalentLearnResult.LearnOk;
+        }
+
+        public static bool CanApplyTraitNode(TraitConfig traitConfig, TraitEntry traitEntry)
+        {
+            Node node = _traitNodes.LookupByKey(traitEntry.TraitNodeID);
+            if (node == null)
+                return false;
+
+            if (node.Data.TraitSubTreeID != 0)
+            {
+                var subTreeItr = traitConfig.SubTrees._values.Find(p => p.TraitSubTreeID == node.Data.TraitSubTreeID);
+                if (subTreeItr == null || subTreeItr.Active == 0)
+                    return false;
+            }
+
+            return true;
         }
 
         public static List<TraitDefinitionEffectPointsRecord> GetTraitDefinitionEffectPointModifiers(int traitDefinitionId)
@@ -819,12 +983,26 @@ namespace Game
         public List<Node> Nodes = new();
     }
 
+    class SubTree
+    {
+        public TraitSubTreeRecord Data;
+        public List<Node> Nodes = new();
+        public List<TraitCurrencyRecord> Currencies = new();
+    }
+
     class Tree
     {
         public TraitTreeRecord Data;
         public List<Node> Nodes = new();
         public List<TraitCostRecord> Costs = new();
         public List<TraitCurrencyRecord> Currencies = new();
+        public List<SubTree> SubTrees = new();
         public TraitConfigType ConfigType;
+    }
+
+    class SubtreeValidationData
+    {
+        public List<TraitEntryPacket> Entries = new();
+        public bool IsSelected;
     }
 }

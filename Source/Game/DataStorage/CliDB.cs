@@ -365,6 +365,7 @@ namespace Game.DataStorage
             TraitNodeXTraitCondStorage = ReadDB2<TraitNodeXTraitCondRecord>("TraitNodeXTraitCond.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_COND);
             TraitNodeXTraitCostStorage = ReadDB2<TraitNodeXTraitCostRecord>("TraitNodeXTraitCost.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_COST);
             TraitNodeXTraitNodeEntryStorage = ReadDB2<TraitNodeXTraitNodeEntryRecord>("TraitNodeXTraitNodeEntry.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY);
+            TraitSubTreeStorage = ReadDB2<TraitSubTreeRecord>("TraitSubTree.db2", HotfixStatements.SEL_TRAIT_SUB_TREE, HotfixStatements.SEL_TRAIT_SUB_TREE_LOCALE);
             TraitTreeStorage = ReadDB2<TraitTreeRecord>("TraitTree.db2", HotfixStatements.SEL_TRAIT_TREE);
             TraitTreeLoadoutStorage = ReadDB2<TraitTreeLoadoutRecord>("TraitTreeLoadout.db2", HotfixStatements.SEL_TRAIT_TREE_LOADOUT);
             TraitTreeLoadoutEntryStorage = ReadDB2<TraitTreeLoadoutEntryRecord>("TraitTreeLoadoutEntry.db2", HotfixStatements.SEL_TRAIT_TREE_LOADOUT_ENTRY);
@@ -811,6 +812,7 @@ namespace Game.DataStorage
         public static DB6Storage<TraitNodeXTraitCondRecord> TraitNodeXTraitCondStorage;
         public static DB6Storage<TraitNodeXTraitCostRecord> TraitNodeXTraitCostStorage;
         public static DB6Storage<TraitNodeXTraitNodeEntryRecord> TraitNodeXTraitNodeEntryStorage;
+        public static DB6Storage<TraitSubTreeRecord> TraitSubTreeStorage;
         public static DB6Storage<TraitTreeRecord> TraitTreeStorage;
         public static DB6Storage<TraitTreeLoadoutRecord> TraitTreeLoadoutStorage;
         public static DB6Storage<TraitTreeLoadoutEntryRecord> TraitTreeLoadoutEntryStorage;

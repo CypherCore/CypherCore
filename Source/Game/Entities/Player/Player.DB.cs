@@ -1124,8 +1124,12 @@ namespace Game.Entities
                     if (TraitMgr.ValidateConfig(traitConfig, this, false, true) != TalentLearnResult.LearnOk)
                     {
                         traitConfig.Entries.Clear();
+                        traitConfig.SubTrees.Clear();
                         foreach (TraitEntry grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
                             traitConfig.Entries.Add(new TraitEntryPacket(grantedEntry));
+
+                        // rebuild subtrees
+                        TraitMgr.ValidateConfig(traitConfig, this, false, true);
                     }
 
                     AddTraitConfig(traitConfig);

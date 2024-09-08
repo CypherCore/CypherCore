@@ -899,6 +899,25 @@ namespace Game.Entities
                 newEntry.GrantedRanks = traitEntry.GrantedRanks;
                 AddDynamicUpdateFieldValue(setter.ModifyValue(setter.Entries), newEntry);
             }
+
+            foreach (var traitSubTree in traitConfig.SubTrees)
+            {
+                TraitSubTreeCache newSubTree = new();
+                newSubTree.TraitSubTreeID = traitSubTree.TraitSubTreeID;
+                newSubTree.Active = traitSubTree.Active ? 1 : 0u;
+
+                foreach (var traitEntry in traitSubTree.Entries)
+                {
+                    TraitEntry newEntry = new();
+                    newEntry.TraitNodeID = traitEntry.TraitNodeID;
+                    newEntry.TraitNodeEntryID = traitEntry.TraitNodeEntryID;
+                    newEntry.Rank = traitEntry.Rank;
+                    newEntry.GrantedRanks = traitEntry.GrantedRanks;
+                    newSubTree.Entries.Add(newEntry);
+                }
+
+                AddDynamicUpdateFieldValue(setter.ModifyValue(setter.SubTrees), newSubTree);
+            }
         }
 
         public TraitConfig GetTraitConfig(int configId)
@@ -1062,7 +1081,49 @@ namespace Game.Entities
                 }
             }
 
-            m_traitConfigStates[(int)editedConfigId] = PlayerSpellState.Changed;
+            for (int i = 0; i < newConfig.SubTrees.Count; ++i)
+            {
+                var newSubTree = newConfig.SubTrees[i];
+                int oldSubTreeIndex = editedConfig.SubTrees.FindIndexIf(ufSubTree => ufSubTree.TraitSubTreeID == newSubTree.TraitSubTreeID);
+
+                List<TraitEntry> subTreeEntries = new();
+                for (int j = 0; j < newSubTree.Entries.Count; ++j)
+                {
+                    TraitEntry newUfEntry = subTreeEntries[j];
+                    newUfEntry.TraitNodeID = newSubTree.Entries[j].TraitNodeID;
+                    newUfEntry.TraitNodeEntryID = newSubTree.Entries[j].TraitNodeEntryID;
+                    newUfEntry.Rank = newSubTree.Entries[j].Rank;
+                    newUfEntry.GrantedRanks = newSubTree.Entries[j].GrantedRanks;
+                }
+                if (oldSubTreeIndex < 0)
+                {
+                    TraitSubTreeCache newUfSubTree = new();
+                    newUfSubTree.TraitSubTreeID = newSubTree.TraitSubTreeID;
+                    newUfSubTree.Active = newSubTree.Active ? 1 : 0u;
+                    newUfSubTree.Entries = subTreeEntries;
+
+                    TraitConfig traitConfig = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, editedIndex);
+                    AddDynamicUpdateFieldValue(traitConfig.ModifyValue(traitConfig.SubTrees), newUfSubTree);
+                }
+                else
+                {
+                    bool wasActive = m_activePlayerData.TraitConfigs[editedIndex].SubTrees[oldSubTreeIndex].Active != 0;
+
+                    TraitConfig traitConfig = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TraitConfigs, editedIndex);
+                    TraitSubTreeCache traitSubTreeCache = traitConfig.ModifyValue(traitConfig.SubTrees, oldSubTreeIndex);
+
+                    traitSubTreeCache.Active = newSubTree.Active ? 1 : 0u;
+                    traitSubTreeCache.Entries = subTreeEntries;
+                    SetUpdateFieldValue(traitConfig.ModifyValue(traitConfig.SubTrees, oldSubTreeIndex), traitSubTreeCache);
+
+
+                    if (applyTraits && wasActive != newSubTree.Active)
+                        foreach (var subTreeEntry in newSubTree.Entries)
+                            ApplyTraitEntry(subTreeEntry.TraitNodeEntryID, subTreeEntry.Rank, subTreeEntry.GrantedRanks, newSubTree.Active);
+                }
+            }
+
+            m_traitConfigStates[editedConfigId] = PlayerSpellState.Changed;
         }
 
         public void RenameTraitConfig(int editedConfigId, string newName)
@@ -1106,7 +1167,8 @@ namespace Game.Entities
                 return;
 
             foreach (TraitEntry traitEntry in traitConfig.Entries)
-                ApplyTraitEntry(traitEntry.TraitNodeEntryID, traitEntry.Rank, traitEntry.GrantedRanks, apply);
+                if (!apply || TraitMgr.CanApplyTraitNode(traitConfig, traitEntry))
+                    ApplyTraitEntry(traitEntry.TraitNodeEntryID, traitEntry.Rank, traitEntry.GrantedRanks, apply);
         }
 
         void ApplyTraitEntry(int traitNodeEntryId, int rank, int grantedRanks, bool apply)
