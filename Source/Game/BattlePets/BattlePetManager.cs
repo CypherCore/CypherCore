@@ -409,7 +409,7 @@ namespace Game.BattlePets
             {
                 BattlePetStruct.BattlePetOwnerInfo battlePetOwnerInfo = new();
                 battlePetOwnerInfo.Guid = player.GetGUID();
-                battlePetOwnerInfo.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                battlePetOwnerInfo.PlayerVirtualRealm = _owner.m_playerData.VirtualPlayerRealm;
                 battlePetOwnerInfo.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
                 pet.PacketInfo.OwnerInfo = battlePetOwnerInfo;
             }

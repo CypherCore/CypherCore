@@ -581,7 +581,7 @@ namespace Game.Guilds
 
             GuildInvite invite = new();
 
-            invite.InviterVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            invite.InviterVirtualRealmAddress = player.m_playerData.VirtualPlayerRealm;
             invite.GuildVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
             invite.GuildGUID = GetGUID();
 
@@ -1237,7 +1237,7 @@ namespace Game.Guilds
             GuildEventPresenceChange eventPacket = new();
             eventPacket.Guid = player.GetGUID();
             eventPacket.Name = player.GetName();
-            eventPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            eventPacket.VirtualRealmAddress = player.m_playerData.VirtualPlayerRealm;
             eventPacket.LoggedOn = loggedOn;
 
             if (broadcast)

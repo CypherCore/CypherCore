@@ -370,7 +370,7 @@ namespace Game.Achievements
                 if (!achievement.Flags.HasAnyFlag(AchievementFlags.Account))
                 {
                     earned.Owner = _owner.GetGUID();
-                    earned.VirtualRealmAddress = earned.NativeRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+                    earned.VirtualRealmAddress = earned.NativeRealmAddress = _owner.m_playerData.VirtualPlayerRealm;
                 }
 
                 achievementData.Data.Earned.Add(earned);
@@ -430,7 +430,7 @@ namespace Game.Achievements
                 if (!achievement.Flags.HasAnyFlag(AchievementFlags.Account))
                 {
                     earned.Owner = _owner.GetGUID();
-                    earned.VirtualRealmAddress = earned.NativeRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+                    earned.VirtualRealmAddress = earned.NativeRealmAddress = _owner.m_playerData.VirtualPlayerRealm;
                 }
 
                 inspectedAchievements.Data.Earned.Add(earned);
@@ -665,7 +665,7 @@ namespace Game.Achievements
                 AchievementEarned achievementEarned = new();
                 achievementEarned.Sender = _owner.GetGUID();
                 achievementEarned.Earner = _owner.GetGUID();
-                achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = _owner.m_playerData.VirtualPlayerRealm;
                 achievementEarned.AchievementID = achievement.Id;
                 achievementEarned.Time = GameTime.GetUtcWowTime();
                 achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();

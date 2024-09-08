@@ -438,10 +438,10 @@ namespace Game.Entities
             if (type != DuelCompleteType.Interrupted)
             {
                 DuelWinner duelWinner = new();
-                duelWinner.BeatenName = (type == DuelCompleteType.Won ? opponent.GetName() : GetName());
-                duelWinner.WinnerName = (type == DuelCompleteType.Won ? GetName() : opponent.GetName());
-                duelWinner.BeatenVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
-                duelWinner.WinnerVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+                duelWinner.BeatenName = (type == DuelCompleteType.Won ? opponent : this).GetName();
+                duelWinner.WinnerName = (type == DuelCompleteType.Won ? this : opponent).GetName();
+                duelWinner.BeatenVirtualRealmAddress = (type == DuelCompleteType.Won ? opponent : this).m_playerData.VirtualPlayerRealm;
+                duelWinner.WinnerVirtualRealmAddress = (type == DuelCompleteType.Won ? this : opponent).m_playerData.VirtualPlayerRealm;
                 duelWinner.Fled = type != DuelCompleteType.Won;
 
                 SendMessageToSet(duelWinner, true);

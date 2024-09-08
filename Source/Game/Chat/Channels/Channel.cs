@@ -536,7 +536,7 @@ namespace Game.Chat
                     member.GetSession().GetSecurity() <= (AccountTypes)gmLevelInWhoList) &&
                     member.IsVisibleGloballyFor(player))
                 {
-                    list.Members.Add(new ChannelListResponse.ChannelPlayer(pair.Key, Global.WorldMgr.GetVirtualRealmAddress(), pair.Value.GetFlags()));
+                    list.Members.Add(new ChannelListResponse.ChannelPlayer(pair.Key, member.m_playerData.VirtualPlayerRealm, pair.Value.GetFlags()));
                 }
             }
 

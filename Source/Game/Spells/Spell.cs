@@ -4619,7 +4619,12 @@ namespace Game.Spells
 
             ResurrectRequest resurrectRequest = new();
             resurrectRequest.ResurrectOffererGUID = m_caster.GetGUID();
-            resurrectRequest.ResurrectOffererVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+            Player playerCaster = m_caster.ToPlayer();
+            if (playerCaster != null)
+                resurrectRequest.ResurrectOffererVirtualRealmAddress = playerCaster.m_playerData.VirtualPlayerRealm;
+            else
+                resurrectRequest.ResurrectOffererVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+
             resurrectRequest.Name = sentName;
             resurrectRequest.Sickness = m_caster.IsUnit() && !m_caster.IsTypeId(TypeId.Player); // "you'll be afflicted with resurrection sickness"
             resurrectRequest.UseTimer = !m_spellInfo.HasAttribute(SpellAttr3.NoResTimer);

@@ -2446,7 +2446,12 @@ namespace Game.Entities
 
             SummonRequest summonRequest = new();
             summonRequest.SummonerGUID = summoner.GetGUID();
-            summonRequest.SummonerVirtualRealmAddress = WorldMgr.GetVirtualRealmAddress();
+            Player playerSummoner = summoner.ToPlayer();
+            if (playerSummoner != null)
+                summonRequest.SummonerVirtualRealmAddress = playerSummoner.m_playerData.VirtualPlayerRealm;
+            else
+                summonRequest.SummonerVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
+
             summonRequest.AreaID = (int)summoner.GetZoneId();
             SendPacket(summonRequest);
 
