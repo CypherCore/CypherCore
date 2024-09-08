@@ -549,16 +549,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Collect.Count);
             _worldPacket.WriteInt32(Currency.Count);
             _worldPacket.WritePackedGuid(QuestGiverGUID);
+            _worldPacket.WriteUInt32(QuestFlags[0]);
+            _worldPacket.WriteUInt32(QuestFlags[1]);
+            _worldPacket.WriteUInt32(QuestFlags[2]);
+            _worldPacket.WriteInt32(StatusFlags);
             _worldPacket.WriteUInt32(QuestGiverCreatureID);
             _worldPacket.WriteUInt32(QuestID);
             _worldPacket.WriteUInt32(CompEmoteDelay);
             _worldPacket.WriteUInt32(CompEmoteType);
-            _worldPacket.WriteUInt32(QuestFlags[0]);
-            _worldPacket.WriteUInt32(QuestFlags[1]);
-            _worldPacket.WriteUInt32(QuestFlags[2]);
             _worldPacket.WriteUInt32(SuggestPartyMembers);
             _worldPacket.WriteInt32(MoneyToGet);
-            _worldPacket.WriteInt32(StatusFlags);
             _worldPacket.WriteInt32(QuestInfoID);
 
             foreach (QuestObjectiveCollect obj in Collect)
