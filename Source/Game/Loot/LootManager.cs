@@ -620,7 +620,7 @@ namespace Game.Loots
             Log.outError(LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
         }
 
-        public bool HaveLootFor(uint loot_id) { return m_LootTemplates.LookupByKey(loot_id) != null; }
+        public bool HaveLootFor(uint loot_id) { return m_LootTemplates.ContainsKey(loot_id); }
         public bool HaveQuestLootFor(uint loot_id)
         {
             var lootTemplate = m_LootTemplates.LookupByKey(loot_id);
@@ -642,22 +642,12 @@ namespace Game.Loots
 
         public LootTemplate GetLootFor(uint loot_id)
         {
-            var tab = m_LootTemplates.LookupByKey(loot_id);
-
-            if (tab == null)
-                return null;
-
-            return tab;
+            return m_LootTemplates.LookupByKey(loot_id);
         }
 
         public LootTemplate GetLootForConditionFill(uint loot_id)
         {
-            var tab = m_LootTemplates.LookupByKey(loot_id);
-
-            if (tab == null)
-                return null;
-
-            return tab;
+            return m_LootTemplates.LookupByKey(loot_id);
         }
 
         public string GetName() { return m_name; }
@@ -687,12 +677,6 @@ namespace Game.Loots
                 byte mincount = result.Read<byte>(7);
                 byte maxcount = result.Read<byte>(8);
 
-                if (groupid >= 1 << 7)                                     // it stored in 7 bit field
-                {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: group ({3}) must be less {4} - skipped", GetName(), entry, item, groupid, 1 << 7);
-                    return 0;
-                }
-
                 LootStoreItem storeitem = new(item, reference, chance, needsquest, lootmode, groupid, mincount, maxcount);
 
                 if (!storeitem.IsValid(this, entry))            // Validity checks
@@ -701,7 +685,7 @@ namespace Game.Loots
                 // Looking for the template of the entry
                 // often entries are put together
                 if (m_LootTemplates.Empty() || !m_LootTemplates.ContainsKey(entry))
-                    m_LootTemplates.Add(entry, new LootTemplate());
+                    m_LootTemplates.TryAdd(entry, new LootTemplate());
 
                 // Adds current row to the template
                 m_LootTemplates[entry].AddEntry(storeitem);
@@ -1196,9 +1180,14 @@ namespace Game.Loots
 
             LootStoreItem Roll(ushort lootMode, Player personalLooter = null)
             {
-                LootStoreItemList possibleLoot = ExplicitlyChanced;
-                possibleLoot.RemoveAll(new LootGroupInvalidSelector(lootMode, personalLooter).Check);
+                LootStoreItemList getValidLoot(LootStoreItemList items, ushort lootMode, Player personalLooter)
+                {
+                    LootStoreItemList possibleLoot = new(items);
+                    possibleLoot.RemoveAll(new LootGroupInvalidSelector(lootMode, personalLooter).Check);
+                    return possibleLoot;
+                }
 
+                var possibleLoot = getValidLoot(ExplicitlyChanced, lootMode, personalLooter);
                 if (!possibleLoot.Empty())                             // First explicitly chanced entries are checked
                 {
                     float roll = (float)RandomHelper.randChance();
@@ -1214,8 +1203,7 @@ namespace Game.Loots
                     }
                 }
 
-                possibleLoot = EqualChanced;
-                possibleLoot.RemoveAll(new LootGroupInvalidSelector(lootMode, personalLooter).Check);
+                possibleLoot = getValidLoot(EqualChanced, lootMode, personalLooter);
                 if (!possibleLoot.Empty())                              // If nothing selected yet - an item is taken from equal-chanced part
                     return possibleLoot.SelectRandom();
 
