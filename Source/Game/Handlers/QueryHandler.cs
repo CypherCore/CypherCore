@@ -324,7 +324,7 @@ namespace Game
             SendPacket(queryItemTextResponse);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryRealmName, Processing = PacketProcessing.Inplace)]
+        [WorldPacketHandler(ClientOpcodes.QueryRealmName, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
         void HandleQueryRealmName(QueryRealmName queryRealmName)
         {
             RealmQueryResponse realmQueryResponse = new();
@@ -341,6 +341,8 @@ namespace Game
             }
             else
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Failure;
+
+            SendPacket(realmQueryResponse);
         }
     }
 }
