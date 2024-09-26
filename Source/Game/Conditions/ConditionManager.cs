@@ -768,14 +768,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `creature_loot_template`, ignoring.", cond.ToString());
                         return false;
                     }
-
-                    LootTemplate loot = LootStorage.Creature.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
-                        return false;
-                    }
                     break;
                 }
                 case ConditionSourceType.DisenchantLootTemplate:
@@ -783,14 +775,6 @@ namespace Game
                     if (!LootStorage.Disenchant.HaveLootFor(cond.SourceGroup))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `disenchant_loot_template`, ignoring.", cond.ToString());
-                        return false;
-                    }
-
-                    LootTemplate loot = LootStorage.Disenchant.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -802,14 +786,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `fishing_loot_template`, ignoring.", cond.ToString());
                         return false;
                     }
-
-                    LootTemplate loot = LootStorage.Fishing.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                        return false;
-                    }
                     break;
                 }
                 case ConditionSourceType.GameobjectLootTemplate:
@@ -817,14 +793,6 @@ namespace Game
                     if (!LootStorage.Gameobject.HaveLootFor(cond.SourceGroup))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `gameobject_loot_template`, ignoring.", cond.ToString());
-                        return false;
-                    }
-
-                    LootTemplate loot = LootStorage.Gameobject.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -836,14 +804,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `item_loot_template`, ignoring.", cond.ToString());
                         return false;
                     }
-
-                    LootTemplate loot = LootStorage.Items.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                        return false;
-                    }
                     break;
                 }
                 case ConditionSourceType.MailLootTemplate:
@@ -851,14 +811,6 @@ namespace Game
                     if (!LootStorage.Mail.HaveLootFor(cond.SourceGroup))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `mail_loot_template`, ignoring.", cond.ToString());
-                        return false;
-                    }
-
-                    LootTemplate loot = LootStorage.Mail.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -870,14 +822,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `milling_loot_template`, ignoring.", cond.ToString());
                         return false;
                     }
-
-                    LootTemplate loot = LootStorage.Milling.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                        return false;
-                    }
                     break;
                 }
                 case ConditionSourceType.PickpocketingLootTemplate:
@@ -885,14 +829,6 @@ namespace Game
                     if (!LootStorage.Pickpocketing.HaveLootFor(cond.SourceGroup))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `pickpocketing_loot_template`, ignoring.", cond.ToString());
-                        return false;
-                    }
-
-                    LootTemplate loot = LootStorage.Pickpocketing.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -904,14 +840,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `prospecting_loot_template`, ignoring.", cond.ToString());
                         return false;
                     }
-
-                    LootTemplate loot = LootStorage.Prospecting.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                        return false;
-                    }
                     break;
                 }
                 case ConditionSourceType.ReferenceLootTemplate:
@@ -919,14 +847,6 @@ namespace Game
                     if (!LootStorage.Reference.HaveLootFor(cond.SourceGroup))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `reference_loot_template`, ignoring.", cond.ToString());
-                        return false;
-                    }
-
-                    LootTemplate loot = LootStorage.Reference.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                         return false;
                     }
                     break;
@@ -938,14 +858,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `skinning_loot_template`, ignoring.", cond.ToString());
                         return false;
                     }
-
-                    LootTemplate loot = LootStorage.Skinning.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                        return false;
-                    }
                     break;
                 }
                 case ConditionSourceType.SpellLootTemplate:
@@ -953,14 +865,6 @@ namespace Game
                     if (!LootStorage.Spell.HaveLootFor(cond.SourceGroup))
                     {
                         Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `spell_loot_template`, ignoring.", cond.ToString());
-                        return false;
-                    }
-
-                    LootTemplate loot = LootStorage.Spell.GetLootForConditionFill(cond.SourceGroup);
-                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                    {
-                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
                         return false;
                     }
                     break;

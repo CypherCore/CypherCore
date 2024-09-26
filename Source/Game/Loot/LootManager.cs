@@ -1064,15 +1064,6 @@ namespace Game.Loots
             return false;
         }
 
-        public bool IsReference(uint id)
-        {
-            foreach (var storeItem in Entries)
-                if (storeItem.itemid == id && storeItem.reference > 0)
-                    return true;
-
-            return false;//not found or not reference
-        }
-
         LootStoreItemList Entries = new();                          // not grouped only
         Dictionary<int, LootGroup> Groups = new();                           // groups have own (optimised) processing, grouped entries go there
 
