@@ -30,6 +30,7 @@ namespace Scripts.Spells.Rogue
         public const uint DeathFromAbove = 152150;
         public const uint GrandMelee = 193358;
         public const uint GrapplingHook = 195457;
+        public const uint ImrovedShiv = 319032;
         public const uint KillingSpree = 51690;
         public const uint KillingSpreeTeleport = 57840;
         public const uint KillingSpreeWeaponDmg = 57841;
@@ -47,6 +48,7 @@ namespace Scripts.Spells.Rogue
         public const uint SkullAndCrossbones = 199603;
         public const uint ShadowFocus = 108209;
         public const uint ShadowFocusEffect = 112942;
+        public const uint ShivNatureDamage = 319504;
         public const uint SliceAndDice = 315496;
         public const uint Sprint = 2983;
         public const uint Stealth = 1784;
@@ -385,6 +387,32 @@ namespace Scripts.Spells.Rogue
         public override void Register()
         {
             OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 5938 - Shiv
+    class spell_rog_improved_shiv : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ShivNatureDamage);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.ImrovedShiv);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.ShivNatureDamage, new CastSpellExtraArgs()
+                .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                .SetTriggeringSpell(GetSpell()));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.SchoolDamage));
         }
     }
 
