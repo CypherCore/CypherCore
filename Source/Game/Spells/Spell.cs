@@ -3492,7 +3492,7 @@ namespace Game.Spells
 
                     if (IsEmpowerSpell())
                     {
-                        int getCompletedEmpowerStages()
+                        int completedStages = new Func<int>(() =>
                         {
                             TimeSpan passed = TimeSpan.FromMilliseconds(m_channeledDuration - m_timer);
                             for (int i = 0; i < m_empower.StageDurations.Count; ++i)
@@ -3503,9 +3503,8 @@ namespace Game.Spells
                             }
 
                             return m_empower.StageDurations.Count;
-                        };
+                        })();
 
-                        int completedStages = getCompletedEmpowerStages();
                         if (completedStages != m_empower.CompletedStages)
                         {
                             SpellEmpowerSetStage empowerSetStage = new();
@@ -3518,6 +3517,7 @@ namespace Game.Spells
                             m_caster.ToUnit().SetSpellEmpowerStage((sbyte)completedStages);
 
                             CallScriptEmpowerStageCompletedHandlers(completedStages);
+                            m_caster.ToUnit().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.ReleaseEmpower, m_spellInfo);
                         }
 
                         if (CanReleaseEmpowerSpell())

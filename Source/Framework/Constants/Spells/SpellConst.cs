@@ -176,6 +176,7 @@ namespace Framework.Constants
         ChallengeModeStart = 0x400000, // Implemented in Unit::AtStartOfEncounter
         StartOfEncounter = 0x800000, // Implemented in Unit::AtStartOfEncounter
         EndOfEncounter = 0x1000000, // Implemented in Unit::AtEndOfEncounter
+        ReleaseEmpower = 0x02000000, // Implemented in Spell::update
     }
 
     // Enum with EffectRadiusIndex and their actual radius
