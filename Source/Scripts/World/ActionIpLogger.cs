@@ -86,7 +86,7 @@ namespace Scripts.World.Achievements
 
             // We declare all the required variables
             uint playerGuid = accountId;
-            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            uint realmId = Global.RealmMgr.GetCurrentRealmId().Index;
             string systemNote = "Error"; // "Error" is a placeholder here. We change it later.
 
             // With this switch, we change systemNote so that we have a more accurate phraMath.Sing of what type it is.
@@ -193,7 +193,7 @@ namespace Scripts.World.Achievements
 
             // We declare all the required variables
             uint playerGuid = player.GetSession().GetAccountId();
-            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            uint realmId = Global.RealmMgr.GetCurrentRealmId().Index;
             string currentIp = player.GetSession().GetRemoteAddress();
             string systemNote;
 
@@ -261,7 +261,7 @@ namespace Scripts.World.Achievements
             // Action Ip Logger is only intialized if config is set up
             // Else, this script isn't loaded in the first place: We require no config check.
 
-            uint realmId = Global.WorldMgr.GetRealmId().Index;
+            uint realmId = Global.RealmMgr.GetCurrentRealmId().Index;
             // Query playerGuid/accountId, as we only have characterGuid
             string systemNote;
 

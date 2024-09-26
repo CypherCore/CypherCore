@@ -66,6 +66,6 @@ public class Realm : IEquatable<Realm>
     public RealmFlags Flags;
     public byte Timezone;
     public AccountTypes AllowedSecurityLevel;
-    public float PopulationLevel;
+    public RealmPopulationState PopulationLevel;
 }
 

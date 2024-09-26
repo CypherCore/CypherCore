@@ -5,8 +5,11 @@ using System.Text.Json.Serialization;
 
 namespace Framework.Web
 {
-    public class RealmListUpdate
+    public class RealmListUpdatePart
     {
+        [JsonPropertyName("wowRealmAddress")]
+        public int WoWRealmAddress { get; set; }
+
         [JsonPropertyName("update")]
         public RealmEntry Update { get; set; } = new RealmEntry();
 

@@ -43,8 +43,6 @@ namespace Game
 
             m_allowedSecurityLevel = AccountTypes.Player;
 
-            _realm = new Realm();
-
             _worldUpdateTime = new WorldUpdateTime();
             _warnShutdownTime = GameTime.GetGameTime();
         }
@@ -79,12 +77,9 @@ namespace Game
 
         public void LoadDBAllowedSecurityLevel()
         {
-            PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
-            stmt.AddValue(0, (int)_realm.Id.Index);
-            SQLResult result = DB.Login.Query(stmt);
-
-            if (!result.IsEmpty())
-                SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
+            var currentRealm = Global.RealmMgr.GetCurrentRealm();
+            if (currentRealm != null)
+                SetPlayerSecurityLimit(currentRealm.AllowedSecurityLevel);
         }
 
         public void SetPlayerSecurityLimit(AccountTypes _sec)
@@ -256,8 +251,13 @@ namespace Game
             {
                 float popu = GetActiveSessionCount();              // updated number of users on the server
                 popu /= pLimit;
-                popu *= 2;
-                Log.outInfo(LogFilter.Server, "Server Population ({0}).", popu);
+
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_REALM_POPULATION);
+                stmt.AddValue(0, popu);
+                stmt.AddValue(1, Global.RealmMgr.GetCurrentRealmId().Index);
+                DB.Login.Execute(stmt);
+
+                Log.outInfo(LogFilter.Server, $"Server Population ({popu}).");
             }
         }
 
@@ -381,9 +381,7 @@ namespace Game
 
         public bool SetInitialWorldSettings()
         {
-            LoadRealmInfo();
-
-            Log.SetRealmId(_realm.Id.Index);
+            Log.SetRealmId(Global.RealmMgr.GetCurrentRealmId().Index);
 
             LoadConfigSettings();
 
@@ -415,7 +413,7 @@ namespace Game
             RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
             uint realm_zone = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
-            DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Index);      // One-time query
+            DB.Login.Execute($"UPDATE realmlist SET icon = {(byte)server_type}, timezone = {realm_zone} WHERE id = '{Global.RealmMgr.GetCurrentRealmId().Index}'");      // One-time query
 
             Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
             // Load DB2s
@@ -1036,7 +1034,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Initialize game time and timers");
             GameTime.UpdateGameTimers();
 
-            DB.Login.Execute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({0}, {1}, 0, '{2}')", _realm.Id.Index, GameTime.GetStartTime(), "");       // One-time query
+            DB.Login.Execute($"INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES({Global.RealmMgr.GetCurrentRealmId().Index}, {GameTime.GetStartTime()}, 0, '{""}')");       // One-time query
 
             m_timers[WorldTimers.Auctions].SetInterval(Time.Minute * Time.InMilliseconds);
             m_timers[WorldTimers.AuctionsPending].SetInterval(250);
@@ -1307,7 +1305,7 @@ namespace Game
             m_Autobroadcasts.Clear();
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
-            stmt.AddValue(0, _realm.Id.Index);
+            stmt.AddValue(0, Global.RealmMgr.GetCurrentRealmId().Index);
 
             SQLResult result = DB.Login.Query(stmt);
             if (result.IsEmpty())
@@ -1442,7 +1440,7 @@ namespace Game
 
                 stmt.AddValue(0, tmpDiff);
                 stmt.AddValue(1, maxOnlinePlayers);
-                stmt.AddValue(2, _realm.Id.Index);
+                stmt.AddValue(2, Global.RealmMgr.GetCurrentRealmId().Index);
                 stmt.AddValue(3, (uint)GameTime.GetStartTime());
 
                 DB.Login.Execute(stmt);
@@ -1458,7 +1456,7 @@ namespace Game
                     PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
                     stmt.AddValue(0, WorldConfig.GetIntValue(WorldCfg.LogdbCleartime));
                     stmt.AddValue(1, 0);
-                    stmt.AddValue(2, GetRealm().Id.Index);
+                    stmt.AddValue(2, Global.RealmMgr.GetCurrentRealmId().Index);
 
                     DB.Login.Execute(stmt);
                 }
@@ -2021,7 +2019,7 @@ namespace Game
                 PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
                 stmt.AddValue(0, charCount);
                 stmt.AddValue(1, Id);
-                stmt.AddValue(2, _realm.Id.Index);
+                stmt.AddValue(2, Global.RealmMgr.GetCurrentRealmId().Index);
                 DB.Login.DirectExecute(stmt);
             }
         }
@@ -2454,30 +2452,6 @@ namespace Game
 
         public Locale GetDefaultDbcLocale() { return m_defaultDbcLocale; }
 
-        public bool LoadRealmInfo()
-        {
-            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
-            if (result.IsEmpty())
-                return false;
-
-            _realm.SetName(result.Read<string>(1));
-            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(2)));
-            _realm.Addresses.Add(System.Net.IPAddress.Parse(result.Read<string>(3)));
-            _realm.Port = result.Read<ushort>(4);
-            _realm.Type = result.Read<byte>(5);
-            _realm.Flags = (RealmFlags)result.Read<byte>(6);
-            _realm.Timezone = result.Read<byte>(7);
-            _realm.AllowedSecurityLevel = (AccountTypes)result.Read<byte>(8);
-            _realm.PopulationLevel = result.Read<float>(9);
-            _realm.Build = result.Read<uint>(10);
-            _realm.Id.Region = result.Read<byte>(11);
-            _realm.Id.Site = result.Read<byte>(12);
-            return true;
-        }
-
-        public Realm GetRealm() { return _realm; }
-        public RealmId GetRealmId() { return _realm.Id; }
-
         public void RemoveOldCorpses()
         {
             m_timers[WorldTimers.Corpses].SetCurrent(m_timers[WorldTimers.Corpses].GetInterval());
@@ -2545,7 +2519,7 @@ namespace Game
 
         public uint GetVirtualRealmAddress()
         {
-            return _realm.Id.GetAddress();
+            return Global.RealmMgr.GetCurrentRealmId().GetAddress();
         }
 
         public float GetMaxVisibleDistanceOnContinents() { return m_MaxVisibleDistanceOnContinents; }
@@ -2631,8 +2605,6 @@ namespace Game
         ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new();
 
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
-
-        Realm _realm;
 
         string _dataPath;
         string m_DBVersion;

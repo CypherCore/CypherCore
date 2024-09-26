@@ -24,7 +24,11 @@ public class PacketLog
             writer.Write(Encoding.ASCII.GetBytes("PKT"));
             writer.Write((ushort)769);
             writer.Write(Encoding.ASCII.GetBytes("T"));
-            writer.Write(Global.WorldMgr.GetRealm().Build);
+            var currentRealm = Global.RealmMgr.GetCurrentRealm();
+            if (currentRealm != null)
+                writer.Write(currentRealm.Build);
+            else
+                writer.Write(0);
             writer.Write(Encoding.ASCII.GetBytes("enUS"));
             writer.Write(new byte[40]);//SessionKey
             writer.Write((uint)GameTime.GetGameTime());

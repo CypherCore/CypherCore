@@ -1439,7 +1439,10 @@ namespace Game.Achievements
                         return false;
                     break;
                 case ModifierTreeType.ClientVersionEqualOrLessThan: // 33
-                    if (reqValue < Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build))
+                    var currentRealm = Global.RealmMgr.GetCurrentRealm();
+                    if (currentRealm == null)
+                        return false;
+                    if (reqValue < Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(currentRealm.Build))
                         return false;
                     break;
                 case ModifierTreeType.BattlePetTeamLevel: // 34

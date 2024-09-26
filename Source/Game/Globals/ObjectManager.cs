@@ -60,9 +60,13 @@ namespace Game
 
         static CfgCategoriesCharsets GetRealmLanguageType(bool create)
         {
-            Cfg_CategoriesRecord category = CliDB.CfgCategoriesStorage.LookupByKey(Global.WorldMgr.GetRealm().Timezone);
-            if (category != null)
-                return create ? category.GetCreateCharsetMask() : category.GetExistingCharsetMask();
+            var currentRealm = Global.RealmMgr.GetCurrentRealm();
+            if (currentRealm != null)
+            {
+                Cfg_CategoriesRecord category = CliDB.CfgCategoriesStorage.LookupByKey(currentRealm.Timezone);
+                if (category != null)
+                    return create ? category.GetCreateCharsetMask() : category.GetExistingCharsetMask();
+            }
 
             return create ? CfgCategoriesCharsets.English : CfgCategoriesCharsets.Any;        // basic-Latin at create, any at login
         }

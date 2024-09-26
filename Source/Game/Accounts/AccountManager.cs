@@ -424,7 +424,7 @@ namespace Game
             while (result.NextRow());
 
             Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC: Loading default permissions");
-            result = DB.Login.Query("SELECT secId, permissionId FROM rbac_default_permissions ORDER BY secId ASC");
+            result = DB.Login.Query($"SELECT secId, permissionId FROM rbac_default_permissions WHERE (realmId = {Global.RealmMgr.GetCurrentRealmId().Index} OR realmId = -1) ORDER BY secId ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 default permission definitions. DB table `rbac_default_permissions` is empty.");

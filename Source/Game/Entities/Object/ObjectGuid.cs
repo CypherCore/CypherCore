@@ -576,7 +576,7 @@ namespace Game.Entities
             if (realmId != 0)
                 return realmId;
 
-            return Global.WorldMgr.GetRealmId().Index;
+            return Global.RealmMgr.GetCurrentRealmId().Index;
         }
     }
 

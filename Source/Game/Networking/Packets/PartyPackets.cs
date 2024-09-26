@@ -76,8 +76,9 @@ namespace Game.Networking.Packets
 
             ProposedRoles = (byte)proposedRoles;
 
-            var realm = Global.WorldMgr.GetRealm();
-            InviterRealm = new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName);
+            var realm = Global.RealmMgr.GetRealm(new Framework.Realm.RealmId(inviter.m_playerData.VirtualPlayerRealm));
+            if (realm != null)
+                InviterRealm = new VirtualRealmInfo(realm.Id.GetAddress(), true, false, realm.Name, realm.NormalizedName);
         }
 
         public override void Write()
@@ -949,7 +950,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             bool hasPartyIndex = _worldPacket.HasBit();
-            RestrictTo =  (RestrictPingsTo)_worldPacket.ReadInt32();
+            RestrictTo = (RestrictPingsTo)_worldPacket.ReadInt32();
             if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
         }

@@ -270,7 +270,7 @@ namespace Game
             }
 
             // When not found, consult database
-            GetQueryProcessor().AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId, (int)Global.WorldMgr.GetRealmId().Index, friendSecurity =>
+            GetQueryProcessor().AddCallback(Global.AccountMgr.GetSecurityAsync(friendCharacterInfo.AccountId, (int)Global.RealmMgr.GetCurrentRealmId().Index, friendSecurity =>
             {
                 if (!Global.AccountMgr.IsPlayerAccount((AccountTypes)friendSecurity))
                 {
@@ -280,16 +280,6 @@ namespace Game
 
                 processFriendRequest();
             }));
-
-
-
-
-
-
-
-
-
-
         }
 
         [WorldPacketHandler(ClientOpcodes.DelFriend)]

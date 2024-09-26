@@ -608,7 +608,7 @@ namespace Game
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.REP_REALM_CHARACTERS);
                     stmt.AddValue(0, createInfo.CharCount);
                     stmt.AddValue(1, GetAccountId());
-                    stmt.AddValue(2, Global.WorldMgr.GetRealm().Id.Index);
+                    stmt.AddValue(2, Global.RealmMgr.GetCurrentRealmId().Index);
                     loginTransaction.Append(stmt);
 
                     DB.Login.CommitTransaction(loginTransaction);

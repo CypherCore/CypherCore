@@ -229,19 +229,20 @@ namespace Game.BattlePets
                         pet.NameTimestamp = petsResult.Read<long>(10);
                         pet.PacketInfo.CreatureID = speciesEntry.CreatureID;
 
-                        if (!petsResult.IsNull(12))
+                        if (!petsResult.IsNull(13))
                         {
                             pet.DeclinedName = new();
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                                pet.DeclinedName.name[i] = petsResult.Read<string>(12 + i);
+                                pet.DeclinedName.name[i] = petsResult.Read<string>(13 + i);
                         }
 
                         if (!ownerGuid.IsEmpty())
                         {
                             BattlePetStruct.BattlePetOwnerInfo battlePetOwnerInfo = new();
                             battlePetOwnerInfo.Guid = ownerGuid;
-                            battlePetOwnerInfo.PlayerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
-                            battlePetOwnerInfo.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
+                            var ownerRealm = Global.RealmMgr.GetRealm(new Framework.Realm.RealmId(petsResult.Read<uint>(12)));
+                            if (ownerRealm != null)
+                                battlePetOwnerInfo.PlayerVirtualRealm = battlePetOwnerInfo.PlayerNativeRealm = ownerRealm.Id.GetAddress();
                             pet.PacketInfo.OwnerInfo = battlePetOwnerInfo;
                         }
 
@@ -293,7 +294,7 @@ namespace Game.BattlePets
                         if (pair.Value.PacketInfo.OwnerInfo.HasValue)
                         {
                             stmt.AddValue(12, pair.Value.PacketInfo.OwnerInfo.Value.Guid.GetCounter());
-                            stmt.AddValue(13, Global.WorldMgr.GetRealmId().Index);
+                            stmt.AddValue(13, Global.RealmMgr.GetCurrentRealmId().Index);
                         }
                         else
                         {
@@ -409,7 +410,7 @@ namespace Game.BattlePets
             {
                 BattlePetStruct.BattlePetOwnerInfo battlePetOwnerInfo = new();
                 battlePetOwnerInfo.Guid = player.GetGUID();
-                battlePetOwnerInfo.PlayerVirtualRealm = _owner.m_playerData.VirtualPlayerRealm;
+                battlePetOwnerInfo.PlayerVirtualRealm = player.m_playerData.VirtualPlayerRealm;
                 battlePetOwnerInfo.PlayerNativeRealm = Global.WorldMgr.GetVirtualRealmAddress();
                 pet.PacketInfo.OwnerInfo = battlePetOwnerInfo;
             }

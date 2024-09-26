@@ -330,12 +330,14 @@ namespace Game
             RealmQueryResponse realmQueryResponse = new();
             realmQueryResponse.VirtualRealmAddress = queryRealmName.VirtualRealmAddress;
 
-            RealmId realmHandle = new(queryRealmName.VirtualRealmAddress);
-            if (Global.RealmMgr.GetRealmNames(realmHandle, out realmQueryResponse.NameInfo.RealmNameActual, out realmQueryResponse.NameInfo.RealmNameNormalized))
+            var realm = Global.RealmMgr.GetRealm(new RealmId(queryRealmName.VirtualRealmAddress));
+            if (realm != null)
             {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Success;
                 realmQueryResponse.NameInfo.IsInternalRealm = false;
                 realmQueryResponse.NameInfo.IsLocal = queryRealmName.VirtualRealmAddress == Global.WorldMgr.GetVirtualRealmAddress();
+                realmQueryResponse.NameInfo.RealmNameActual = realm.Name;
+                realmQueryResponse.NameInfo.RealmNameNormalized = realm.NormalizedName;
             }
             else
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Failure;

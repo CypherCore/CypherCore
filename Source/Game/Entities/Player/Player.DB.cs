@@ -3835,7 +3835,11 @@ namespace Game.Entities
                 stmt.AddValue(index++, ss.ToString());
 
                 stmt.AddValue(index++, m_activePlayerData.MultiActionBars);
-                stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
+                var currentRealm = Global.RealmMgr.GetCurrentRealm();
+                if (currentRealm != null)
+                    stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(currentRealm.Build));
+                else
+                    stmt.AddValue(index++, 0);
             }
             else
             {
@@ -3992,7 +3996,11 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetHonorLevel());
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
-                stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
+                var currentRealm = Global.RealmMgr.GetCurrentRealm();
+                if (currentRealm != null)
+                    stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(currentRealm.Build));
+                else
+                    stmt.AddValue(index++, 0);
 
                 // Index
                 stmt.AddValue(index, GetGUID().GetCounter());
@@ -4054,17 +4062,19 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountTransmogIllusions(loginTransaction);
 
+            var currentRealmId = Global.RealmMgr.GetCurrentRealmId();
+
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, GetSession().GetAccountId());
-            stmt.AddValue(1, Global.WorldMgr.GetRealmId().Region);
-            stmt.AddValue(2, Global.WorldMgr.GetRealmId().Site);
+            stmt.AddValue(1, currentRealmId.Region);
+            stmt.AddValue(2, currentRealmId.Site);
             loginTransaction.Append(stmt);
 
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_LAST_PLAYER_CHARACTERS);
             stmt.AddValue(0, GetSession().GetAccountId());
-            stmt.AddValue(1, Global.WorldMgr.GetRealmId().Region);
-            stmt.AddValue(2, Global.WorldMgr.GetRealmId().Site);
-            stmt.AddValue(3, Global.WorldMgr.GetRealmId().Index);
+            stmt.AddValue(1, currentRealmId.Region);
+            stmt.AddValue(2, currentRealmId.Site);
+            stmt.AddValue(3, currentRealmId.Index);
             stmt.AddValue(4, GetName());
             stmt.AddValue(5, GetGUID().GetCounter());
             stmt.AddValue(6, GameTime.GetGameTime());
@@ -4562,12 +4572,12 @@ namespace Game.Entities
 
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME_BY_OWNER);
                     stmt.AddValue(0, guid);
-                    stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
+                    stmt.AddValue(1, Global.RealmMgr.GetCurrentRealmId().Index);
                     loginTransaction.Append(stmt);
 
                     stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS_BY_OWNER);
                     stmt.AddValue(0, guid);
-                    stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
+                    stmt.AddValue(1, Global.RealmMgr.GetCurrentRealmId().Index);
                     loginTransaction.Append(stmt);
 
                     Corpse.DeleteFromDB(playerGuid, trans);

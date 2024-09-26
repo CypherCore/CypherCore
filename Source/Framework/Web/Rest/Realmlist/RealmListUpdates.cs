@@ -9,6 +9,6 @@ namespace Framework.Web
     public class RealmListUpdates
     {
         [JsonPropertyName("updates")]
-        public IList<RealmListUpdate> Updates { get; set; } = new List<RealmListUpdate>();
+        public IList<RealmListUpdatePart> Updates { get; set; } = new List<RealmListUpdatePart>();
     }
 }

@@ -453,7 +453,7 @@ namespace Game.Networking
         {
             // Get the account information from the realmd database
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME);
-            stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
+            stmt.AddValue(0, Global.RealmMgr.GetCurrentRealmId().Index);
             stmt.AddValue(1, authSession.RealmJoinTicket);
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthSessionCallback, authSession));
@@ -469,16 +469,16 @@ namespace Game.Networking
                 return;
             }
 
-            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(Global.WorldMgr.GetRealm().Build);
+            AccountInfo account = new(result.GetFields());
+
+            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(account.game.Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
-                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {Global.WorldMgr.GetRealm().Build} ({GetRemoteIpAddress()}).");
+                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {account.game.Build} ({GetRemoteIpAddress()}).");
                 CloseSocket();
                 return;
             }
-
-            AccountInfo account = new(result.GetFields());
 
             // For hook purposes, we get Remoteaddress at this point.
             var address = GetRemoteIpAddress();
@@ -556,11 +556,11 @@ namespace Game.Networking
                 return;
             }
 
-            if (authSession.RealmID != Global.WorldMgr.GetRealm().Id.Index)
+            if (authSession.RealmID != Global.RealmMgr.GetCurrentRealmId().Index)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
                 Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Client {0} requested connecting with realm id {1} but this realm has id {2} set in config.",
-                    GetRemoteIpAddress().ToString(), authSession.RealmID, Global.WorldMgr.GetRealm().Id.Index);
+                    GetRemoteIpAddress().ToString(), authSession.RealmID, Global.RealmMgr.GetCurrentRealmId().Index);
                 CloseSocket();
                 return;
             }
@@ -648,7 +648,7 @@ namespace Game.Networking
             Global.ScriptMgr.OnAccountLogin(account.game.Id);
 
             _worldSession = new WorldSession(account.game.Id, authSession.RealmJoinTicket, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
-                mutetime, account.game.OS, account.game.TimezoneOffset, account.battleNet.Locale, account.game.Recruiter, account.game.IsRectuiter);
+                mutetime, account.game.OS, account.game.TimezoneOffset, account.game.Build, account.game.Locale, account.game.Recruiter, account.game.IsRectuiter);
 
             // Initialize Warden system only if it is enabled by config
             //if (wardenActive)
@@ -835,9 +835,9 @@ namespace Game.Networking
     {
         public AccountInfo(SQLFields fields)
         {
-            //           0              1           2          3                4            5           6          7            8     9                 10     11                12
-            // SELECT a.id, a.session_key, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, ba.locale, a.recruiter, a.os, a.timezone_offset, ba.id, aa.SecurityLevel,
-            //                                                              13                                                            14    15
+            //           0              1           2          3                4            5           6               7         8            9    10                 11     12                13
+            // SELECT a.id, a.session_key, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, a.client_build, a.locale, a.recruiter, a.os, a.timezone_offset, ba.id, aa.SecurityLevel,
+            //                                                              14                                                            15    16
             // bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id
             // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?)
             // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
@@ -849,18 +849,19 @@ namespace Game.Networking
             battleNet.LockCountry = fields.Read<string>(4);
             game.Expansion = fields.Read<byte>(5);
             game.MuteTime = fields.Read<long>(6);
-            battleNet.Locale = (Locale)fields.Read<byte>(7);
-            game.Recruiter = fields.Read<uint>(8);
-            game.OS = fields.Read<string>(9);
-            game.TimezoneOffset = TimeSpan.FromMinutes(fields.Read<short>(10));
-            battleNet.Id = fields.Read<uint>(11);
-            game.Security = (AccountTypes)fields.Read<byte>(12);
-            battleNet.IsBanned = fields.Read<uint>(13) != 0;
-            game.IsBanned = fields.Read<uint>(14) != 0;
-            game.IsRectuiter = fields.Read<uint>(15) != 0;
+            game.Build = fields.Read<uint>(7);
+            game.Locale = (Locale)fields.Read<byte>(8);
+            game.Recruiter = fields.Read<uint>(9);
+            game.OS = fields.Read<string>(10);
+            game.TimezoneOffset = TimeSpan.FromMinutes(fields.Read<short>(11));
+            battleNet.Id = fields.Read<uint>(12);
+            game.Security = (AccountTypes)fields.Read<byte>(13);
+            battleNet.IsBanned = fields.Read<uint>(14) != 0;
+            game.IsBanned = fields.Read<uint>(15) != 0;
+            game.IsRectuiter = fields.Read<uint>(16) != 0;
 
-            if (battleNet.Locale >= Locale.Total)
-                battleNet.Locale = Locale.enUS;
+            if (game.Locale >= Locale.Total)
+                game.Locale = Locale.enUS;
         }
 
         public bool IsBanned() { return battleNet.IsBanned || game.IsBanned; }
@@ -874,7 +875,6 @@ namespace Game.Networking
             public bool IsLockedToIP;
             public string LastIP;
             public string LockCountry;
-            public Locale Locale;
             public bool IsBanned;
         }
 
@@ -884,6 +884,8 @@ namespace Game.Networking
             public byte[] KeyData;
             public byte Expansion;
             public long MuteTime;
+            public uint Build;
+            public Locale Locale;
             public uint Recruiter;
             public string OS;
             public TimeSpan TimezoneOffset;

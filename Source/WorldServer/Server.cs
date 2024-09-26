@@ -36,10 +36,29 @@ namespace WorldServer
             // Server startup begin
             uint startupBegin = Time.GetMSTime();
 
-            // set server offline (not connectable)
-            DB.Login.DirectExecute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
-
             Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
+
+            ///- Get the realm Id from the configuration file
+            uint realmId = ConfigMgr.GetDefaultValue("RealmID", 0u);
+            if (realmId == 0)
+            {
+                Log.outError(LogFilter.ServerLoading, "Realm ID not defined in configuration file");
+                ExitNow();
+            }
+
+            Global.RealmMgr.SetCurrentRealmId(new Framework.Realm.RealmId(realmId));
+
+            Log.outInfo(LogFilter.ServerLoading, $"Realm running as realm ID {realmId}");
+
+            ///- Clean the database before starting
+            ClearOnlineAccounts(realmId);
+
+            var realm = Global.RealmMgr.GetCurrentRealm();
+            if (realm == null)
+                ExitNow();
+
+            // Set server offline (not connectable)
+            DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag | {LegacyRealmFlags.Offline} WHERE id = '{realmId}'");
 
             if (!Global.WorldMgr.SetInitialWorldSettings())
                 ExitNow();
@@ -75,9 +94,7 @@ namespace WorldServer
             }
 
             // set server online (allow connecting now)
-            DB.Login.DirectExecute("UPDATE realmlist SET flag = flag & ~{0}, population = 0 WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
-            Global.WorldMgr.GetRealm().PopulationLevel = 0.0f;
-            Global.WorldMgr.GetRealm().Flags = Global.WorldMgr.GetRealm().Flags & ~RealmFlags.VersionMismatch;
+            DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag & ~{LegacyRealmFlags.Offline}, population = 0 WHERE id = '{realmId}'");
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -112,10 +129,10 @@ namespace WorldServer
                 Global.ScriptMgr.Unload();
 
                 // set server offline
-                DB.Login.DirectExecute("UPDATE realmlist SET flag = flag | {0} WHERE id = '{1}'", (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
+                DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag | {LegacyRealmFlags.Offline} WHERE id = '{realmId}'");
                 Global.RealmMgr.Close();
 
-                ClearOnlineAccounts();
+                ClearOnlineAccounts(realmId);
 
                 ExitNow();
             }
@@ -138,28 +155,16 @@ namespace WorldServer
             if (!loader.Load())
                 return false;
 
-            // Get the realm Id from the configuration file
-            Global.WorldMgr.GetRealm().Id.Index = ConfigMgr.GetDefaultValue("RealmID", 0u);
-            if (Global.WorldMgr.GetRealm().Id.Index == 0)
-            {
-                Log.outError(LogFilter.Server, "Realm ID not defined in configuration file");
-                return false;
-            }
-            Log.outInfo(LogFilter.ServerLoading, "Realm running as realm ID {0} ", Global.WorldMgr.GetRealm().Id.Index);
-
-            // Clean the database before starting
-            ClearOnlineAccounts();
-
             Global.WorldMgr.LoadDBVersion();
 
             Log.outInfo(LogFilter.Server, $"Using World DB: {Global.WorldMgr.GetDBVersion()}");
             return true;
         }
 
-        static void ClearOnlineAccounts()
+        static void ClearOnlineAccounts(uint realmId)
         {
             // Reset online status for all accounts with characters on the current realm
-            DB.Login.DirectExecute("UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {0})", Global.WorldMgr.GetRealm().Id.Index);
+            DB.Login.DirectExecute($"UPDATE account SET online = 0 WHERE online > 0 AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = {realmId})");
 
             // Reset online status for all characters
             DB.Characters.DirectExecute("UPDATE characters SET online = 0 WHERE online <> 0");

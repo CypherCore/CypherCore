@@ -2846,7 +2846,7 @@ namespace Game
                     DateTime localTime = GameTime.GetDateAndTime();
                     return localTime.Hour * Time.Minute + localTime.Minute;
                 case WorldStateExpressionFunctions.Region:
-                    return Global.WorldMgr.GetRealmId().Region;
+                    return Global.RealmMgr.GetCurrentRealmId().Region;
                 case WorldStateExpressionFunctions.ClockHour:
                     int currentHour = GameTime.GetDateAndTime().Hour + 1;
                     return currentHour <= 12 ? (currentHour != 0 ? currentHour : 12) : currentHour - 12;
@@ -2863,7 +2863,7 @@ namespace Game
                 case WorldStateExpressionFunctions.WeekNumber:
                     long now = GameTime.GetGameTime();
                     uint raidOrigin = 1135695600;
-                    Cfg_RegionsRecord region = CliDB.CfgRegionsStorage.LookupByKey(Global.WorldMgr.GetRealmId().Region);
+                    Cfg_RegionsRecord region = CliDB.CfgRegionsStorage.LookupByKey(Global.RealmMgr.GetCurrentRealmId().Region);
                     if (region != null)
                         raidOrigin = region.Raidorigin;
 

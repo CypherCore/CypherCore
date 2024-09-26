@@ -230,7 +230,8 @@ namespace Game.Chat.Commands
             if (account.IsConnected())
                 return new RBACCommandData() { rbac = account.GetConnectedSession().GetRBACData(), needDelete = false };
 
-            RBACData rbac = new(account.GetID(), account.GetName(), (int)Global.WorldMgr.GetRealmId().Index, (byte)Global.AccountMgr.GetSecurity(account.GetID(), (int)Global.WorldMgr.GetRealmId().Index));
+            int realmId = (int)Global.RealmMgr.GetCurrentRealmId().Index;
+            RBACData rbac = new(account.GetID(), account.GetName(), realmId, (byte)Global.AccountMgr.GetSecurity(account.GetID(), realmId));
             rbac.LoadFromDB();
 
             return new RBACCommandData() { rbac = rbac, needDelete = true };

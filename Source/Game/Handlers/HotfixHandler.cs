@@ -49,7 +49,7 @@ namespace Game
         void SendAvailableHotfixes()
         {
             AvailableHotfixes availableHotfixes = new();
-            availableHotfixes.VirtualRealmAddress = Global.WorldMgr.GetRealmId().GetAddress();
+            availableHotfixes.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
 
             foreach (var (_, push) in Global.DB2Mgr.GetHotfixData())
             {

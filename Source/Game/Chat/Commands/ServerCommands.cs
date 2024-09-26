@@ -26,15 +26,11 @@ namespace Game.Chat
         {
             string dbPortOutput;
 
-            ushort dbPort = 0;
-            SQLResult res = DB.Login.Query($"SELECT port FROM realmlist WHERE id = {Global.WorldMgr.GetRealmId().Index}");
-            if (!res.IsEmpty())
-                dbPort = res.Read<ushort>(0);
-
-            if (dbPort != 0)
-                dbPortOutput = $"Realmlist (Realm Id: {Global.WorldMgr.GetRealmId().Index}) configured in port {dbPort}";
+            var currentRealm = Global.RealmMgr.GetCurrentRealm();
+            if (currentRealm != null)
+                dbPortOutput = $"Realmlist (Realm Id: {currentRealm.Id.Index}) configured in port {currentRealm.Port}";
             else
-                dbPortOutput = $"Realm Id: {Global.WorldMgr.GetRealmId().Index} not found in `realmlist` table. Please check your setup";
+                dbPortOutput = $"Realm Id: {Global.RealmMgr.GetCurrentRealmId().Index} not found in `realmlist` table. Please check your setup";
 
             DatabaseTypeFlags updateFlags = ConfigMgr.GetDefaultValue("Updates.EnableDatabases", DatabaseTypeFlags.None);
             if (updateFlags == 0)

@@ -207,7 +207,7 @@ namespace Game.Chat
         {
             ulong high = 0;
             high |= (ulong)HighGuid.ChatChannel << 58;
-            high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
+            high |= (ulong)Global.RealmMgr.GetCurrentRealmId().Index << 42;
             high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
 
             ObjectGuid channelGuid = new();
@@ -224,9 +224,13 @@ namespace Game.Chat
 
             if (channelEntry.HasFlag(ChatChannelFlags.GlobalForTournament))
             {
-                var category = CliDB.CfgCategoriesStorage.LookupByKey(Global.WorldMgr.GetRealm().Timezone);
-                if (category != null && category.HasFlag(CfgCategoriesFlags.Tournament))
-                    zoneId = 0;
+                var currentRealm = Global.RealmMgr.GetCurrentRealm();
+                if (currentRealm != null)
+                {
+                    var category = CliDB.CfgCategoriesStorage.LookupByKey(currentRealm.Timezone);
+                    if (category != null && category.HasFlag(CfgCategoriesFlags.Tournament))
+                        zoneId = 0;
+                }
             }
 
             return ObjectGuid.Create(HighGuid.ChatChannel, true, channelEntry.HasFlag(ChatChannelFlags.LinkedChannel), (ushort)zoneId, (byte)(_team == Team.Alliance ? 3 : 5), channelId);
