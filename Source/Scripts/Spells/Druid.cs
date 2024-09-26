@@ -1273,6 +1273,21 @@ namespace Scripts.Spells.Druid
         uint _removeOverrideSpell;
     }
 
+    [Script] // 113043 - Omen of Clarity
+    class spell_dru_omen_of_clarity_restoration : AuraScript
+    {
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+
     [Script] // 16864 - Omen of Clarity
     class spell_dru_omen_of_clarity : AuraScript
     {
