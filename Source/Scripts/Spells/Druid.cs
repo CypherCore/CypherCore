@@ -17,6 +17,7 @@ namespace Scripts.Spells.Druid
     {
         public const uint Abundance = 207383;
         public const uint AbundanceEffect = 207640;
+        public const uint AstralSmolderDamage = 394061;
         public const uint BalanceT10Bonus = 70718;
         public const uint BalanceT10BonusProc = 70721;
         public const uint BearForm = 5487;
@@ -145,6 +146,41 @@ namespace Scripts.Spells.Druid
         {
             AfterEffectApply.Add(new(HandleOnApplyOrReapply, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.RealOrReapplyMask));
             AfterEffectRemove.Add(new(HandleOnRemove, 0, AuraType.PeriodicHeal, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 394058 - Astral Smolder
+    class spell_dru_astral_smolder : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.AstralSmolderDamage, 0))
+                && SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, Difficulty.None).GetMaxTicks() != 0;
+        }
+
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetProcTarget() != null;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            SpellInfo astralSmolderDmg = SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, GetCastDifficulty());
+            int pct = aurEff.GetAmount();
+
+            int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / astralSmolderDmg.GetMaxTicks());
+
+            CastSpellExtraArgs args = new(aurEff);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.AstralSmolderDamage, args);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
