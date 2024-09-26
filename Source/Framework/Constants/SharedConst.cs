@@ -746,8 +746,8 @@ namespace Framework.Constants
         BattleForAzeroth = 7,
         ShadowLands = 8,
         Dragonflight = 9,
-        Max,
         TheWarWithin = 10,
+        Max,
 
         MaxAccountExpansions
     }

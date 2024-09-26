@@ -7,7 +7,7 @@ namespace Framework.Constants
 {
     public struct PlayerConst
     {
-        public const Expansion CurrentExpansion = Expansion.Dragonflight;
+        public const Expansion CurrentExpansion = Expansion.TheWarWithin;
 
         public const int MaxTalentTiers = 7;
         public const int MaxTalentColumns = 3;
