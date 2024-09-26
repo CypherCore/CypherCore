@@ -37,6 +37,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Currencies.Count);
             _worldPacket.WriteBit(Acquired);
             _worldPacket.WriteBit(AELooting);
+            _worldPacket.WriteBit(SuppressError);
             _worldPacket.FlushBits();
 
             foreach (LootItemData item in Items)
@@ -63,6 +64,7 @@ namespace Game.Networking.Packets
         public List<LootCurrency> Currencies = new();
         public bool Acquired;
         public bool AELooting;
+        public bool SuppressError; // Hides error from UI
     }
 
     class LootItemPkt : ClientPacket

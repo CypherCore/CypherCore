@@ -90,6 +90,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AllowMultipleRoles);
             _worldPacket.WriteBit(QuestSessionActive);
             _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
+            _worldPacket.WriteBit(Unused1102);
 
             InviterRealm.Write(_worldPacket);
 
@@ -110,6 +111,7 @@ namespace Game.Networking.Packets
         public bool MustBeBNetFriend;
         public bool AllowMultipleRoles;
         public bool QuestSessionActive;
+        public bool Unused1102;
         public ushort Unk1;
 
         public bool CanAccept;
