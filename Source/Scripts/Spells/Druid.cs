@@ -42,6 +42,8 @@ namespace Scripts.Spells.Druid
         public const uint EclipseOoc = 329910;
         public const uint EclipseSolarAura = 48517;
         public const uint EclipseSolarSpellCnt = 326053;
+        public const uint EclipseVisualLunar = 93431;
+        public const uint EclipseVisualSolar = 93430;
         public const uint EfflorescenceAura = 81262;
         public const uint EfflorescenceHeal = 81269;
         public const uint EmbraceOfTheDreamEffect = 392146;
@@ -307,6 +309,33 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             AfterEffectRemove.Add(new(HandleAfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 194223 - Celestial Alignment
+    class spell_dru_celestial_alignment : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EclipseSolarAura, SpellIds.EclipseLunarAura, SpellIds.EclipseVisualSolar, SpellIds.EclipseVisualLunar);
+        }
+
+        void TriggerEclipses(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            CastSpellExtraArgs args = new();
+            args.SetTriggeringSpell(GetSpell());
+            args.SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
+
+            caster.CastSpell(caster, SpellIds.EclipseSolarAura, args);
+            caster.CastSpell(caster, SpellIds.EclipseLunarAura, args);
+            caster.CastSpell(caster, SpellIds.EclipseVisualSolar, args);
+            caster.CastSpell(caster, SpellIds.EclipseVisualLunar, args);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(TriggerEclipses, 0, SpellEffectName.ApplyAura));
         }
     }
 
