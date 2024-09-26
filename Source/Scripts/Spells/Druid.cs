@@ -60,12 +60,15 @@ namespace Scripts.Spells.Druid
         public const uint FormsTrinketMoonkin = 37343;
         public const uint FormsTrinketNone = 37344;
         public const uint FormsTrinketTree = 37342;
+        public const uint FullMoon = 274283;
         public const uint GalacticGuardianAura = 213708;
         public const uint Germination = 155675;
         public const uint GlyphOfStars = 114301;
         public const uint GlyphOfStarsVisual = 114302;
         public const uint GoreProc = 93622;
         public const uint Growl = 6795;
+        public const uint HalfMoon = 274282;
+        public const uint HalfMoonOverride = 274297;
         public const uint IdolOfFeralShadows = 34241;
         public const uint IdolOfWorship = 60774;
         public const uint Incarnation = 117679;
@@ -81,6 +84,8 @@ namespace Scripts.Spells.Druid
         public const uint Mangle = 33917;
         public const uint MassEntanglement = 102359;
         public const uint MoonfireDamage = 164812;
+        public const uint NewMoon = 274281;
+        public const uint NewMoonOverride = 274295;
         public const uint PowerOfTheArchdruid = 392302;
         public const uint Prowl = 5215;
         public const uint Regrowth = 8936;
@@ -1225,6 +1230,47 @@ namespace Scripts.Spells.Druid
         {
             OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.Dummy));
         }
+    }
+
+    // 274283 - Full Moon
+    // 274282 - Half Moon
+    // 274281 - New Moon
+    [Script("spell_dru_full_moon", 0, SpellIds.HalfMoonOverride)]
+    [Script("spell_dru_half_moon", SpellIds.HalfMoonOverride, SpellIds.NewMoonOverride)]
+    [Script("spell_dru_new_moon", SpellIds.NewMoonOverride, 0)]
+    class spell_dru_new_moon : SpellScript
+    {
+        public spell_dru_new_moon(uint newOverrideSpell, uint removeOverrideSpell)
+        {
+            _newOverrideSpell = newOverrideSpell;
+            _removeOverrideSpell = removeOverrideSpell;
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return (_newOverrideSpell == 0 || ValidateSpellInfo(_newOverrideSpell))
+            && (_removeOverrideSpell == 0 || ValidateSpellInfo(_removeOverrideSpell));
+        }
+
+        void OverrideMoon()
+        {
+            Unit caster = GetCaster();
+            if (_newOverrideSpell != 0)
+                caster.CastSpell(caster, _newOverrideSpell, new CastSpellExtraArgs()
+                    .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
+                    .SetTriggeringSpell(GetSpell()));
+
+            if (_removeOverrideSpell != 0)
+                caster.RemoveAurasDueToSpell(_removeOverrideSpell);
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new(OverrideMoon));
+        }
+
+        uint _newOverrideSpell;
+        uint _removeOverrideSpell;
     }
 
     [Script] // 16864 - Omen of Clarity
