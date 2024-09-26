@@ -261,7 +261,7 @@ namespace Framework.Database
             }
 
             // Set the default charset to utf8
-            args += "--default-character-set=utf8 ";
+            args += "--default-character-set=utf8mb4 ";
 
             // Set max allowed packet to 1 GB
             args += "--max-allowed-packet=1GB ";
