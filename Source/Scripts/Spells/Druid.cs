@@ -92,6 +92,7 @@ namespace Scripts.Spells.Druid
         public const uint SkullBashInterrupt = 93985;
         public const uint SpringBlossoms = 207385;
         public const uint SpringBlossomsHeal = 207386;
+        public const uint StarBurst = 356474;
         public const uint SunfireDamage = 164815;
         public const uint SurvivalInstincts = 50322;
         public const uint TravelForm = 783;
@@ -1454,6 +1455,25 @@ namespace Scripts.Spells.Druid
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
             OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 202347 - Stellar Flare
+    class spell_dru_stellar_flare : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.StarBurst);
+        }
+
+        void HandleDispel(DispelInfo dispelInfo)
+        {
+            GetCaster()?.CastSpell(dispelInfo.GetDispeller(), SpellIds.StarBurst, true);
+        }
+
+        public override void Register()
+        {
+            AfterDispel.Add(new(HandleDispel));
         }
     }
 
