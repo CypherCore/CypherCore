@@ -1449,4 +1449,10 @@ namespace Framework.Constants
         PriorityQuestItems = 0x20,
         ExcludeJunkSell = 0x40,
     }
+
+    public enum LootStoreItemType
+    {
+        Item        = 0,
+        Reference   = 1,
+    }
 }

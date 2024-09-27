@@ -9,6 +9,7 @@ using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Loots
 {
@@ -98,22 +99,22 @@ namespace Game.Loots
 
             // Remove real entries and check loot existence
             var templates = Global.ObjectMgr.GetCreatureTemplates();
-            foreach (var creatureTemplate in templates.Values)
+            foreach (var (creatureId, creatureTemplate) in templates)
             {
                 foreach (var (_, creatureDifficulty) in creatureTemplate.difficultyStorage)
                 {
                     if (creatureDifficulty.LootID != 0)
                     {
                         if (!lootIdSet.Contains(creatureDifficulty.LootID))
-                            Creature.ReportNonExistingId(creatureDifficulty.LootID, creatureTemplate.Entry);
+                            Creature.ReportNonExistingId(creatureDifficulty.LootID, creatureId);
                         else
                             lootIdSetUsed.Add(creatureDifficulty.LootID);
                     }
                 }
             }
 
-            foreach (var id in lootIdSetUsed)
-                lootIdSet.Remove(id);
+            foreach (var lootId in lootIdSetUsed)
+                lootIdSet.Remove(lootId);
 
             // 1 means loot for player corpse
             lootIdSet.Remove(SharedConst.PlayerCorpseLootEntry);
@@ -136,7 +137,7 @@ namespace Game.Loots
             List<uint> lootIdSet, lootIdSetUsed = new();
             uint count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
 
-            foreach (var disenchant in CliDB.ItemDisenchantLootStorage.Values)
+            foreach (var (_, disenchant) in CliDB.ItemDisenchantLootStorage)
             {
                 uint lootid = disenchant.Id;
                 if (!lootIdSet.Contains(lootid))
@@ -145,8 +146,8 @@ namespace Game.Loots
                     lootIdSetUsed.Add(lootid);
             }
 
-            foreach (var id in lootIdSetUsed)
-                lootIdSet.Remove(id);
+            foreach (var lootId in lootIdSetUsed)
+                lootIdSet.Remove(lootId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Disenchant.ReportUnusedIds(lootIdSet);
@@ -215,8 +216,8 @@ namespace Game.Loots
                 }
             }
 
-            foreach (var id in lootIdSetUsed)
-                lootIdSet.Remove(id);
+            foreach (var lootId in lootIdSetUsed)
+                lootIdSet.Remove(lootId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Gameobject.ReportUnusedIds(lootIdSet);
@@ -238,9 +239,10 @@ namespace Game.Loots
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
-            foreach (var pair in its)
-                if (lootIdSet.Contains(pair.Value.GetId()) && pair.Value.HasFlag(ItemFlags.HasLoot))
-                    lootIdSet.Remove(pair.Value.GetId());
+            foreach (var (itemId, itemTemplate) in its)
+                if (itemTemplate.HasFlag(ItemFlags.HasLoot))
+                    if (!lootIdSet.Remove(itemId))
+                        Items.ReportNonExistingId(itemId, itemId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Items.ReportUnusedIds(lootIdSet);
@@ -262,14 +264,10 @@ namespace Game.Loots
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
-            foreach (var pair in its)
-            {
-                if (!pair.Value.HasFlag(ItemFlags.IsMillable))
-                    continue;
-
-                if (lootIdSet.Contains(pair.Value.GetId()))
-                    lootIdSet.Remove(pair.Value.GetId());
-            }
+            foreach (var (itemId, itemTemplate) in its)
+                if (!itemTemplate.HasFlag(ItemFlags.IsMillable))
+                    if (!lootIdSet.Remove(itemId))
+                        Milling.ReportNonExistingId(itemId, itemId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Milling.ReportUnusedIds(lootIdSet);
@@ -292,22 +290,22 @@ namespace Game.Loots
 
             // Remove real entries and check loot existence
             var templates = Global.ObjectMgr.GetCreatureTemplates();
-            foreach (var creatureTemplate in templates.Values)
+            foreach (var (creatureId, creatureTemplate) in templates)
             {
                 foreach (var (_, creatureDifficulty) in creatureTemplate.difficultyStorage)
                 {
                     if (creatureDifficulty.PickPocketLootID != 0)
                     {
                         if (!lootIdSet.Contains(creatureDifficulty.PickPocketLootID))
-                            Pickpocketing.ReportNonExistingId(creatureDifficulty.PickPocketLootID, creatureTemplate.Entry);
+                            Pickpocketing.ReportNonExistingId(creatureDifficulty.PickPocketLootID, creatureId);
                         else
                             lootIdSetUsed.Add(creatureDifficulty.PickPocketLootID);
                     }
                 }
             }
 
-            foreach (var id in lootIdSetUsed)
-                lootIdSet.Remove(id);
+            foreach (var lootId in lootIdSetUsed)
+                lootIdSet.Remove(lootId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Pickpocketing.ReportUnusedIds(lootIdSet);
@@ -329,14 +327,10 @@ namespace Game.Loots
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
-            foreach (var pair in its)
-            {
-                if (!pair.Value.HasFlag(ItemFlags.IsProspectable))
-                    continue;
-
-                if (lootIdSet.Contains(pair.Value.GetId()))
-                    lootIdSet.Remove(pair.Value.GetId());
-            }
+            foreach (var (itemId, itemTemplate) in its)
+                if (itemTemplate.HasFlag(ItemFlags.IsProspectable))
+                    if (!lootIdSet.Remove(itemId))
+                        Prospecting.ReportNonExistingId(itemId, itemId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Prospecting.ReportUnusedIds(lootIdSet);
@@ -357,9 +351,8 @@ namespace Game.Loots
             uint count = Mail.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
-            foreach (var mail in CliDB.MailTemplateStorage.Values)
-                if (lootIdSet.Contains(mail.Id))
-                    lootIdSet.Remove(mail.Id);
+            foreach (var (_, mailTemplate) in CliDB.MailTemplateStorage)
+                lootIdSet.Remove(mailTemplate.Id);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Mail.ReportUnusedIds(lootIdSet);
@@ -382,22 +375,22 @@ namespace Game.Loots
 
             // remove real entries and check existence loot
             var templates = Global.ObjectMgr.GetCreatureTemplates();
-            foreach (var creatureTemplate in templates.Values)
+            foreach (var (creatureId, creatureTemplate) in templates)
             {
                 foreach (var (_, creatureDifficulty) in creatureTemplate.difficultyStorage)
                 {
                     if (creatureDifficulty.SkinLootID != 0)
                     {
                         if (!lootIdSet.Contains(creatureDifficulty.SkinLootID))
-                            Skinning.ReportNonExistingId(creatureDifficulty.SkinLootID, creatureTemplate.Entry);
+                            Skinning.ReportNonExistingId(creatureDifficulty.SkinLootID, creatureId);
                         else
                             lootIdSetUsed.Add(creatureDifficulty.SkinLootID);
                     }
                 }
             }
 
-            foreach (var id in lootIdSetUsed)
-                lootIdSet.Remove(id);
+            foreach (var lootId in lootIdSetUsed)
+                lootIdSet.Remove(lootId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Skinning.ReportUnusedIds(lootIdSet);
@@ -416,18 +409,15 @@ namespace Game.Loots
             uint oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
+            List<uint> lootIdSetUsed = new();
             uint count = Spell.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
-            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
+            Global.SpellMgr.ForEachSpellInfo(spellInfo =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
-                if (spellInfo == null)
-                    continue;
-
                 // possible cases
                 if (!spellInfo.IsLootCrafting())
-                    continue;
+                    return;
 
                 if (!lootIdSet.Contains(spellInfo.Id))
                 {
@@ -439,8 +429,11 @@ namespace Game.Loots
                     }
                 }
                 else
-                    lootIdSet.Remove(spellInfo.Id);
-            }
+                    lootIdSetUsed.Add(spellInfo.Id);
+            });
+
+            foreach (uint lootId in lootIdSetUsed)
+                lootIdSet.Remove(lootId);
 
             // output error for any still listed (not referenced from appropriate table) ids
             Spell.ReportUnusedIds(lootIdSet);
@@ -483,7 +476,7 @@ namespace Game.Loots
     public class LootStoreItem
     {
         public uint itemid;                 // id of the item
-        public uint reference;              // referenced TemplateleId
+        public LootStoreItemType type;
         public float chance;                // chance to drop for both quest and non-quest items, chance to be used for refs
         public ushort lootmode;
         public bool needs_quest;            // quest drop (negative ChanceOrQuestChance in DB)
@@ -492,10 +485,10 @@ namespace Game.Loots
         public byte maxcount;               // max drop count for the item mincount or Ref multiplicator
         public ConditionsReference conditions;  // additional loot condition
 
-        public LootStoreItem(uint _itemid, uint _reference, float _chance, bool _needs_quest, ushort _lootmode, byte _groupid, byte _mincount, byte _maxcount)
+        public LootStoreItem(uint _itemid, LootStoreItemType _type, float _chance, bool _needs_quest, ushort _lootmode, byte _groupid, byte _mincount, byte _maxcount)
         {
             itemid = _itemid;
-            reference = _reference;
+            type = _type;
             chance = _chance;
             lootmode = _lootmode;
             needs_quest = _needs_quest;
@@ -509,66 +502,78 @@ namespace Game.Loots
             if (chance >= 100.0f)
                 return true;
 
-            if (reference > 0)                                   // reference case
-                return RandomHelper.randChance(chance * (rate ? WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferenced) : 1.0f));
+            switch (type)
+            {
+                case LootStoreItemType.Item:
+                {
+                    ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
+                    float qualityModifier = pProto != null && rate && LootStoreItem.QualityToRate[(int)pProto.GetQuality()] != WorldCfg.Max ? WorldConfig.GetFloatValue(LootStoreItem.QualityToRate[(int)pProto.GetQuality()]) : 1.0f;
+                    return RandomHelper.randChance(chance * qualityModifier);
+                }
+                case LootStoreItemType.Reference:
+                    return RandomHelper.randChance(chance * (rate ? WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferenced) : 1.0f));
+                default:
+                    break;
+            }
 
-            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
-
-            float qualityModifier = pProto != null && rate ? WorldConfig.GetFloatValue(qualityToRate[(int)pProto.GetQuality()]) : 1.0f;
-
-            return RandomHelper.randChance(chance * qualityModifier);
+            return false;
         }
+
         public bool IsValid(LootStore store, uint entry)
         {
             if (mincount == 0)
             {
-                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: wrong mincount ({3}) - skipped", store.GetName(), entry, itemid, reference);
+                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: wrong mincount ({3}) - skipped", store.GetName(), entry, itemid, mincount);
                 return false;
             }
 
-            if (reference == 0)                                  // item (quest or non-quest) entry, maybe grouped
+            switch (type)
             {
-                ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
-                if (proto == null)
-                {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
-                    return false;
-                }
+                case LootStoreItemType.Item:
+                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
+                    if (proto == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
+                        return false;
+                    }
 
-                if (chance == 0 && groupid == 0)                      // Zero chance is allowed for grouped entries only
-                {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
-                    return false;
-                }
+                    if (chance == 0 && groupid == 0)                      // Zero chance is allowed for grouped entries only
+                    {
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
+                        return false;
+                    }
 
-                if (chance != 0 && chance < 0.000001f)             // loot with low chance
-                {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: low chance ({3}) - skipped",
-                        store.GetName(), entry, itemid, chance);
-                    return false;
-                }
+                    if (chance != 0 && chance < 0.000001f)             // loot with low chance
+                    {
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: low chance ({3}) - skipped",
+                            store.GetName(), entry, itemid, chance);
+                        return false;
+                    }
 
-                if (maxcount < mincount)                       // wrong max count
-                {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: max count ({3}) less that min count ({4}) - skipped", store.GetName(), entry, itemid, maxcount, reference);
+                    if (maxcount < mincount)                       // wrong max count
+                    {
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: max count ({3}) less that min count ({4}) - skipped", store.GetName(), entry, itemid, maxcount, mincount);
+                        return false;
+                    }
+                    break;
+                case LootStoreItemType.Reference:
+                    if (needs_quest)
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: quest chance will be treated as non-quest chance", store.GetName(), entry, itemid);
+                    else if (chance == 0)                              // no chance for the reference
+                    {
+                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: zero chance is specified for a reference, skipped", store.GetName(), entry, itemid);
+                        return false;
+                    }
+                    break;
+                default:
+                    Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} Item {itemid}: invalid ItemType {type}, skipped");
                     return false;
-                }
-            }
-            else                                                    // mincountOrRef < 0
-            {
-                if (needs_quest)
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: quest chance will be treated as non-quest chance", store.GetName(), entry, itemid);
-                else if (chance == 0)                              // no chance for the reference
-                {
-                    Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: zero chance is specified for a reference, skipped", store.GetName(), entry, itemid);
-                    return false;
-                }
             }
             return true;                                            // Referenced template existence is checked at whole store level
         }
 
-        public static WorldCfg[] qualityToRate = new WorldCfg[7]
-        {
+        public static WorldCfg[] QualityToRate =
+        [
             WorldCfg.RateDropItemPoor,                                    // ITEM_QUALITY_POOR
             WorldCfg.RateDropItemNormal,                                  // ITEM_QUALITY_NORMAL
             WorldCfg.RateDropItemUncommon,                                // ITEM_QUALITY_UNCOMMON
@@ -576,7 +581,9 @@ namespace Game.Loots
             WorldCfg.RateDropItemEpic,                                    // ITEM_QUALITY_EPIC
             WorldCfg.RateDropItemLegendary,                               // ITEM_QUALITY_LEGENDARY
             WorldCfg.RateDropItemArtifact,                                // ITEM_QUALITY_ARTIFACT
-        };
+            WorldCfg.Max,                                                 // ITEM_QUALITY_HEIRLOOM
+            WorldCfg.Max,                                                 // ITEM_QUALITY_WOW_TOKEN
+        ];
     }
 
     public class LootStore
@@ -590,52 +597,53 @@ namespace Game.Loots
 
         void Verify()
         {
-            foreach (var i in m_LootTemplates)
-                i.Value.Verify(this, i.Key);
+            foreach (var (lootId, lootTemplate) in m_LootTemplates)
+                lootTemplate.Verify(this, lootId);
         }
 
         public uint LoadAndCollectLootIds(out List<uint> lootIdSet)
         {
             uint count = LoadLootTable();
-            lootIdSet = new List<uint>();
-
-            foreach (var tab in m_LootTemplates)
-                lootIdSet.Add(tab.Key);
+            lootIdSet = new(m_LootTemplates.Select(tab => tab.Key));
 
             return count;
         }
+
         public void CheckLootRefs(List<uint> ref_set = null)
         {
-            foreach (var pair in m_LootTemplates)
-                pair.Value.CheckLootRefs(m_LootTemplates, ref_set);
+            foreach (var (_, lootTemplate) in m_LootTemplates)
+                lootTemplate.CheckLootRefs(m_LootTemplates, ref_set);
         }
+
         public void ReportUnusedIds(List<uint> lootIdSet)
         {
             // all still listed ids isn't referenced
-            foreach (var id in lootIdSet)
-                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} isn't {2} and not referenced from loot, and then useless.", GetName(), id, GetEntryName());
+            foreach (var lootId in lootIdSet)
+                Log.outError(LogFilter.Sql, $"Table '{GetName()}' entry {lootId} isn't {GetEntryName()} and not referenced from loot, and then useless.");
         }
+
         public void ReportNonExistingId(uint lootId, uint ownerId)
         {
             Log.outError(LogFilter.Sql, "Table '{0}' Entry {1} does not exist but it is used by {2} {3}", GetName(), lootId, GetEntryName(), ownerId);
         }
 
         public bool HaveLootFor(uint loot_id) { return m_LootTemplates.ContainsKey(loot_id); }
+
         public bool HaveQuestLootFor(uint loot_id)
         {
-            var lootTemplate = m_LootTemplates.LookupByKey(loot_id);
-            if (lootTemplate == null)
-                return false;
-
             // scan loot for quest items
-            return lootTemplate.HasQuestDrop(m_LootTemplates);
+            LootTemplate lootTemplate = m_LootTemplates.LookupByKey(loot_id);
+            if (lootTemplate != null)
+                return lootTemplate.HasQuestDrop(m_LootTemplates);
+
+            return false;
         }
+
         public bool HaveQuestLootForPlayer(uint loot_id, Player player)
         {
-            var tab = m_LootTemplates.LookupByKey(loot_id);
-            if (tab != null)
-                if (tab.HasQuestDropForPlayer(m_LootTemplates, player))
-                    return true;
+            LootTemplate lootTemplate = m_LootTemplates.LookupByKey(loot_id);
+            if (lootTemplate != null && lootTemplate.HasQuestDropForPlayer(m_LootTemplates, player))
+                return true;
 
             return false;
         }
@@ -659,8 +667,8 @@ namespace Game.Loots
             // Clearing store (for reloading case)
             Clear();
 
-            //                                            0     1      2        3         4             5          6        7         8
-            SQLResult result = DB.World.Query("SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {0}", GetName());
+            //                                          0      1         2     3       4              5         6        7         8
+            SQLResult result = DB.World.Query($"SELECT Entry, ItemType, Item, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {GetName()}");
             if (result.IsEmpty())
                 return 0;
 
@@ -668,8 +676,8 @@ namespace Game.Loots
             do
             {
                 uint entry = result.Read<uint>(0);
-                uint item = result.Read<uint>(1);
-                uint reference = result.Read<uint>(2);
+                LootStoreItemType type = (LootStoreItemType)result.Read<sbyte>(1);
+                uint item = result.Read<uint>(2);
                 float chance = result.Read<float>(3);
                 bool needsquest = result.Read<bool>(4);
                 ushort lootmode = result.Read<ushort>(5);
@@ -677,7 +685,7 @@ namespace Game.Loots
                 byte mincount = result.Read<byte>(7);
                 byte maxcount = result.Read<byte>(8);
 
-                LootStoreItem storeitem = new(item, reference, chance, needsquest, lootmode, groupid, mincount, maxcount);
+                LootStoreItem storeitem = new(item, type, chance, needsquest, lootmode, groupid, mincount, maxcount);
 
                 if (!storeitem.IsValid(this, entry))            // Validity checks
                     continue;
@@ -712,7 +720,7 @@ namespace Game.Loots
     {
         public void AddEntry(LootStoreItem item)
         {
-            if (item.groupid > 0 && item.reference == 0)         // Group
+            if (item.groupid > 0 && item.type != LootStoreItemType.Reference)  // Group
             {
                 if (!Groups.ContainsKey(item.groupid - 1))
                     Groups[item.groupid - 1] = new LootGroup();
@@ -740,40 +748,41 @@ namespace Game.Loots
             // Rolling non-grouped items
             foreach (var item in Entries)
             {
-                if (!Convert.ToBoolean(item.lootmode & lootMode))                       // Do not add if mode mismatch
+                if ((item.lootmode & lootMode) == 0)                       // Do not add if mode mismatch
                     continue;
 
                 if (!item.Roll(rate))
                     continue;                                           // Bad luck for the entry
 
-                if (item.reference > 0)                            // References processing
+                switch (item.type)
                 {
-                    LootTemplate Referenced = LootStorage.Reference.GetLootFor(item.reference);
-                    if (Referenced == null)
-                        continue;                                       // Error message already printed at loading stage
+                    case LootStoreItemType.Item:
+                        // Plain entries (not a reference, not grouped)
+                        // Chance is already checked, just add
+                        if (personalLooter == null
+                            || LootItem.AllowedForPlayer(personalLooter, null, item.itemid, item.needs_quest,
+                                !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
+                                true, item.conditions))
+                            loot.AddItem(item);
+                        break;
+                    case LootStoreItemType.Reference:
+                        LootTemplate Referenced = LootStorage.Reference.GetLootFor(item.itemid);
+                        if (Referenced == null)
+                            continue;                                       // Error message already printed at loading stage
 
-                    uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
-                    for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
-                        Referenced.Process(loot, rate, lootMode, item.groupid, personalLooter);
-                }
-                else
-                {
-                    // Plain entries (not a reference, not grouped)
-                    // Chance is already checked, just add
-                    if (personalLooter == null
-                        || LootItem.AllowedForPlayer(personalLooter, null, item.itemid, item.needs_quest,
-                            !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                            true, item.conditions))
-                        loot.AddItem(item);
+                        uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
+                        for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
+                            Referenced.Process(loot, rate, lootMode, item.groupid, personalLooter);
+
+                        break;
+                    default:
+                        break;
                 }
             }
 
             // Now processing groups
-            foreach (var group in Groups.Values)
-            {
-                if (group != null)
-                    group.Process(loot, lootMode, personalLooter);
-            }
+            foreach (var (_, group) in Groups)
+                group?.Process(loot, lootMode, personalLooter);
         }
 
         public void ProcessPersonalLoot(Dictionary<Player, Loot> personalLoot, bool rate, ushort lootMode)
@@ -798,68 +807,75 @@ namespace Game.Loots
                 if (!item.Roll(rate))
                     continue;                                           // Bad luck for the entry
 
-                if (item.reference > 0)                                // References processing
+                switch (item.type)
                 {
-                    LootTemplate referenced = LootStorage.Reference.GetLootFor(item.reference);
-                    if (referenced == null)
-                        continue;                                       // Error message already printed at loading stage
-
-                    uint maxcount = (uint)((float)item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
-                    List<Player> gotLoot = new();
-                    for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
+                    case LootStoreItemType.Item:
                     {
-                        var lootersForItem = getLootersForItem(looter => referenced.HasDropForPlayer(looter, item.groupid, true));
-
-                        // nobody can loot this, skip it
-                        if (lootersForItem.Empty())
-                            break;
-
-                        var newEnd = lootersForItem.RemoveAll(looter => gotLoot.Contains(looter));
-
-                        if (lootersForItem.Count == newEnd)
+                        // Plain entries (not a reference, not grouped)
+                        // Chance is already checked, just add
+                        var lootersForItem = getLootersForItem(looter =>
                         {
-                            // if we run out of looters this means that there are more items dropped than players
-                            // start a new cycle adding one item to everyone
-                            gotLoot.Clear();
+                            return LootItem.AllowedForPlayer(looter, null, item.itemid, item.needs_quest,
+                                !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
+                                true, item.conditions);
+                        });
+
+                        if (!lootersForItem.Empty())
+                        {
+                            Player chosenLooter = lootersForItem.SelectRandom();
+                            personalLoot[chosenLooter].AddItem(item);
                         }
-                        else
-                            lootersForItem.RemoveRange(newEnd, lootersForItem.Count - newEnd);
-
-                        Player chosenLooter = lootersForItem.SelectRandom();
-                        referenced.Process(personalLoot[chosenLooter], rate, lootMode, item.groupid, chosenLooter);
-                        gotLoot.Add(chosenLooter);
+                        break;
                     }
-                }
-                else
-                {
-                    // Plain entries (not a reference, not grouped)
-                    // Chance is already checked, just add
-                    var lootersForItem = getLootersForItem(looter =>
+                    case LootStoreItemType.Reference:
                     {
-                        return LootItem.AllowedForPlayer(looter, null, item.itemid, item.needs_quest,
-                            !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                            true, item.conditions);
-                    });
+                        LootTemplate referenced = LootStorage.Reference.GetLootFor(item.itemid);
+                        if (referenced == null)
+                            continue;                                       // Error message already printed at loading stage
 
-                    if (!lootersForItem.Empty())
-                    {
-                        Player chosenLooter = lootersForItem.SelectRandom();
-                        personalLoot[chosenLooter].AddItem(item);
+                        uint maxcount = (uint)((float)item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
+                        List<Player> gotLoot = new();
+                        for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
+                        {
+                            var lootersForItem = getLootersForItem(looter => referenced.HasDropForPlayer(looter, item.groupid, true));
+
+                            // nobody can loot this, skip it
+                            if (lootersForItem.Empty())
+                                break;
+
+                            var newEnd = lootersForItem.RemoveAll(looter => gotLoot.Contains(looter));
+
+                            if (lootersForItem.Count == newEnd)
+                            {
+                                // if we run out of looters this means that there are more items dropped than players
+                                // start a new cycle adding one item to everyone
+                                gotLoot.Clear();
+                            }
+                            else
+                                lootersForItem.RemoveRange(newEnd, lootersForItem.Count - newEnd);
+
+                            Player chosenLooter = lootersForItem.SelectRandom();
+                            referenced.Process(personalLoot[chosenLooter], rate, lootMode, item.groupid, chosenLooter);
+                            gotLoot.Add(chosenLooter);
+                        }
+                        break;
                     }
+                    default:
+                        break;
                 }
-            }
 
-            // Now processing groups
-            foreach (LootGroup group in Groups.Values)
-            {
-                if (group != null)
+                // Now processing groups
+                foreach (LootGroup group in Groups.Values)
                 {
-                    var lootersForGroup = getLootersForItem(looter => group.HasDropForPlayer(looter, true));
-
-                    if (!lootersForGroup.Empty())
+                    if (group != null)
                     {
-                        Player chosenLooter = lootersForGroup.SelectRandom();
-                        group.Process(personalLoot[chosenLooter], lootMode);
+                        var lootersForGroup = getLootersForItem(looter => group.HasDropForPlayer(looter, true));
+
+                        if (!lootersForGroup.Empty())
+                        {
+                            Player chosenLooter = lootersForGroup.SelectRandom();
+                            group.Process(personalLoot[chosenLooter], lootMode);
+                        }
                     }
                 }
             }
@@ -882,22 +898,28 @@ namespace Game.Loots
             // Checking non-grouped entries
             foreach (LootStoreItem lootStoreItem in Entries)
             {
-                if (lootStoreItem.reference > 0)                   // References processing
+                switch (lootStoreItem.type)
                 {
-                    LootTemplate referenced = LootStorage.Reference.GetLootFor(lootStoreItem.reference);
-                    if (referenced == null)
-                        continue;                                   // Error message already printed at loading stage
-                    if (referenced.HasDropForPlayer(player, lootStoreItem.groupid, strictUsabilityCheck))
-                        return true;
+                    case LootStoreItemType.Item:
+                        if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
+                            !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
+                            strictUsabilityCheck, lootStoreItem.conditions))
+                            return true;                                    // active quest drop found
+                        break;
+                    case LootStoreItemType.Reference:
+                        LootTemplate referenced = LootStorage.Reference.GetLootFor(lootStoreItem.itemid);
+                        if (referenced == null)
+                            continue;                                   // Error message already printed at loading stage
+                        if (referenced.HasDropForPlayer(player, lootStoreItem.groupid, strictUsabilityCheck))
+                            return true;
+                        break;
+                    default:
+                        break;
                 }
-                else if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
-                    !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                    strictUsabilityCheck, lootStoreItem.conditions))
-                    return true;                                    // active quest drop found
             }
 
             // Now checking groups
-            foreach (LootGroup group in Groups.Values)
+            foreach (var (_, group) in Groups)
                 if (group != null && group.HasDropForPlayer(player, strictUsabilityCheck))
                     return true;
 
@@ -932,21 +954,27 @@ namespace Game.Loots
 
             foreach (var item in Entries)
             {
-                if (item.reference > 0)                        // References
+                switch (item.type)
                 {
-                    var Referenced = store.LookupByKey(item.reference);
-                    if (Referenced == null)
-                        continue;                                   // Error message [should be] already printed at loading stage
-                    if (Referenced.HasQuestDrop(store, item.groupid))
-                        return true;
+                    case LootStoreItemType.Item:
+                        if (item.needs_quest)
+                            return true;                                    // quest drop found
+                        break;
+                    case LootStoreItemType.Reference:
+                        var Referenced = store.LookupByKey(item.itemid);
+                        if (Referenced == null)
+                            continue;                                   // Error message [should be] already printed at loading stage
+                        if (Referenced.HasQuestDrop(store, item.groupid))
+                            return true;
+                        break;
+                    default:
+                        break;
                 }
-                else if (item.needs_quest)
-                    return true;                                    // quest drop found
             }
 
             // Now processing groups
-            foreach (var group in Groups.Values)
-                if (group.HasQuestDrop())
+            foreach (var (_, group) in Groups)
+                if (group != null && group.HasQuestDrop())
                     return true;
 
             return false;
@@ -968,21 +996,27 @@ namespace Game.Loots
             // Checking non-grouped entries
             foreach (var item in Entries)
             {
-                if (item.reference > 0)                        // References processing
+                switch (item.type)
                 {
-                    var Referenced = store.LookupByKey(item.reference);
-                    if (Referenced == null)
-                        continue;                                   // Error message already printed at loading stage
-                    if (Referenced.HasQuestDropForPlayer(store, player, item.groupid))
-                        return true;
+                    case LootStoreItemType.Item:
+                        if (player.HasQuestForItem(item.itemid))
+                            return true;                                    // active quest drop found
+                        break;
+                    case LootStoreItemType.Reference:
+                        var Referenced = store.LookupByKey(item.itemid);
+                        if (Referenced == null)
+                            continue;                                   // Error message already printed at loading stage
+                        if (Referenced.HasQuestDropForPlayer(store, player, item.groupid))
+                            return true;
+                        break;
+                    default:
+                        break;
                 }
-                else if (player.HasQuestForItem(item.itemid))
-                    return true;                                    // active quest drop found
             }
 
             // Now checking groups
-            foreach (var group in Groups.Values)
-                if (group.HasQuestDropForPlayer(player))
+            foreach (var (_, group) in Groups)
+                if (group != null && group.HasQuestDropForPlayer(player))
                     return true;
 
             return false;
@@ -1000,17 +1034,17 @@ namespace Game.Loots
         {
             foreach (var item in Entries)
             {
-                if (item.reference > 0)
+                if (item.type == LootStoreItemType.Reference)
                 {
-                    if (LootStorage.Reference.GetLootFor(item.reference) == null)
-                        LootStorage.Reference.ReportNonExistingId(item.reference, item.itemid);
+                    if (LootStorage.Reference.GetLootFor(item.itemid) == null)
+                        LootStorage.Reference.ReportNonExistingId(item.itemid, item.itemid);
                     else if (ref_set != null)
-                        ref_set.Remove(item.reference);
+                        ref_set.Remove(item.itemid);
                 }
             }
 
-            foreach (var group in Groups.Values)
-                group.CheckLootRefs(store, ref_set);
+            foreach (var (_, group) in Groups)
+                group?.CheckLootRefs(store, ref_set);
         }
 
         public bool LinkConditions(ConditionId id, ConditionsReference reference)
@@ -1079,26 +1113,22 @@ namespace Game.Loots
 
             public bool HasQuestDrop()
             {
-                foreach (var i in ExplicitlyChanced)
-                    if (i.needs_quest)
-                        return true;
+                if (ExplicitlyChanced.Any(item => item.needs_quest))
+                    return true;
 
-                foreach (var i in EqualChanced)
-                    if (i.needs_quest)
-                        return true;
+                if (EqualChanced.Any(item => item.needs_quest))
+                    return true;
 
                 return false;
             }
 
             public bool HasQuestDropForPlayer(Player player)
             {
-                foreach (var i in ExplicitlyChanced)
-                    if (player.HasQuestForItem(i.itemid))
-                        return true;
+                if (ExplicitlyChanced.Any(item => player.HasQuestForItem(item.itemid)))
+                    return true;
 
-                foreach (var i in EqualChanced)
-                    if (player.HasQuestForItem(i.itemid))
-                        return true;
+                if (EqualChanced.Any(item => player.HasQuestForItem(item.itemid)))
+                    return true;
 
                 return false;
             }
@@ -1109,16 +1139,18 @@ namespace Game.Loots
                 if (item != null)
                     loot.AddItem(item);
             }
+
             float RawTotalChance()
             {
                 float result = 0;
 
-                foreach (var i in ExplicitlyChanced)
-                    if (!i.needs_quest)
-                        result += i.chance;
+                foreach (var item in ExplicitlyChanced)
+                    if (!item.needs_quest)
+                        result += item.chance;
 
                 return result;
             }
+
             float TotalChance()
             {
                 float result = RawTotalChance();
@@ -1139,31 +1171,34 @@ namespace Game.Loots
                     Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has items with chance=0% but group total chance >= 100% ({3})", lootstore.GetName(), id, group_id, chance);
 
             }
+
             public void CheckLootRefs(LootTemplateMap store, List<uint> ref_set)
             {
                 foreach (var item in ExplicitlyChanced)
                 {
-                    if (item.reference > 0)
+                    if (item.type == LootStoreItemType.Reference)
                     {
-                        if (LootStorage.Reference.GetLootFor(item.reference) == null)
-                            LootStorage.Reference.ReportNonExistingId(item.reference, item.itemid);
+                        if (LootStorage.Reference.GetLootFor(item.itemid) == null)
+                            LootStorage.Reference.ReportNonExistingId(item.itemid, item.itemid);
                         else if (ref_set != null)
-                            ref_set.Remove(item.reference);
+                            ref_set.Remove(item.itemid);
                     }
                 }
 
                 foreach (var item in EqualChanced)
                 {
-                    if (item.reference > 0)
+                    if (item.type == LootStoreItemType.Reference)
                     {
-                        if (LootStorage.Reference.GetLootFor(item.reference) == null)
-                            LootStorage.Reference.ReportNonExistingId(item.reference, item.itemid);
+                        if (LootStorage.Reference.GetLootFor(item.itemid) == null)
+                            LootStorage.Reference.ReportNonExistingId(item.itemid, item.itemid);
                         else if (ref_set != null)
-                            ref_set.Remove(item.reference);
+                            ref_set.Remove(item.itemid);
                     }
                 }
             }
+
             public LootStoreItemList GetExplicitlyChancedItemList() { return ExplicitlyChanced; }
+
             public LootStoreItemList GetEqualChancedItemList() { return EqualChanced; }
 
             LootStoreItemList ExplicitlyChanced = new();                // Entries with chances defined in DB
