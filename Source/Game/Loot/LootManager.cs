@@ -512,6 +512,14 @@ namespace Game.Loots
                 }
                 case LootStoreItemType.Reference:
                     return RandomHelper.randChance(chance * (rate ? WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferenced) : 1.0f));
+                case LootStoreItemType.Currency:
+                {
+                    CurrencyTypesRecord currency = CliDB.CurrencyTypesStorage.LookupByKey(itemid);
+
+                    float qualityModifier = currency != null && rate && QualityToRate[currency.Quality] != WorldCfg.Max ? WorldConfig.GetFloatValue(QualityToRate[currency.Quality]) : 1.0f;
+
+                    return RandomHelper.randChance(chance * qualityModifier);
+                }
                 default:
                     break;
             }
@@ -523,7 +531,7 @@ namespace Game.Loots
         {
             if (mincount == 0)
             {
-                Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: wrong mincount ({3}) - skipped", store.GetName(), entry, itemid, mincount);
+                Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: wrong mincount ({mincount}) - skipped");
                 return false;
             }
 
@@ -533,38 +541,64 @@ namespace Game.Loots
                     ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemid);
                     if (proto == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: item does not exist - skipped", store.GetName(), entry, itemid);
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: item does not exist - skipped");
                         return false;
                     }
 
                     if (chance == 0 && groupid == 0)                      // Zero chance is allowed for grouped entries only
                     {
-                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: equal-chanced grouped entry, but group not defined - skipped");
                         return false;
                     }
 
                     if (chance != 0 && chance < 0.000001f)             // loot with low chance
                     {
-                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: low chance ({3}) - skipped",
-                            store.GetName(), entry, itemid, chance);
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: low chance ({chance}) - skipped");
                         return false;
                     }
 
                     if (maxcount < mincount)                       // wrong max count
                     {
-                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: max count ({3}) less that min count ({4}) - skipped", store.GetName(), entry, itemid, maxcount, mincount);
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: max count ({maxcount}) less that min count ({mincount}) - skipped");
                         return false;
                     }
                     break;
                 case LootStoreItemType.Reference:
                     if (needs_quest)
-                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: quest chance will be treated as non-quest chance", store.GetName(), entry, itemid);
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: quest chance will be treated as non-quest chance");
                     else if (chance == 0)                              // no chance for the reference
                     {
-                        Log.outError(LogFilter.Sql, "Table '{0}' entry {1} item {2}: zero chance is specified for a reference, skipped", store.GetName(), entry, itemid);
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: zero chance is specified for a reference, skipped");
                         return false;
                     }
                     break;
+                case LootStoreItemType.Currency:
+                {
+                    if (!CliDB.CurrencyTypesStorage.HasRecord(itemid))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: currency does not exist - skipped");
+                        return false;
+                    }
+
+                    if (chance == 0 && groupid == 0)                // Zero chance is allowed for grouped entries only
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: equal-chanced grouped entry, but group not defined - skipped");
+                        return false;
+                    }
+
+                    if (chance != 0 && chance < 0.0001f)            // loot with low chance
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: low chance ({chance}) - skipped");
+                        return false;
+                    }
+
+                    if (maxcount < mincount)                        // wrong max count
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: MaxCount ({maxcount}) less that MinCount ({mincount}) - skipped");
+                        return false;
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} Item {itemid}: invalid ItemType {type}, skipped");
                     return false;
@@ -757,12 +791,10 @@ namespace Game.Loots
                 switch (item.type)
                 {
                     case LootStoreItemType.Item:
+                    case LootStoreItemType.Currency:
                         // Plain entries (not a reference, not grouped)
                         // Chance is already checked, just add
-                        if (personalLooter == null
-                            || LootItem.AllowedForPlayer(personalLooter, null, item.itemid, item.needs_quest,
-                                !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                                true, item.conditions))
+                        if (personalLooter == null || LootItem.AllowedForPlayer(personalLooter, item, true))
                             loot.AddItem(item);
                         break;
                     case LootStoreItemType.Reference:
@@ -813,13 +845,7 @@ namespace Game.Loots
                     {
                         // Plain entries (not a reference, not grouped)
                         // Chance is already checked, just add
-                        var lootersForItem = getLootersForItem(looter =>
-                        {
-                            return LootItem.AllowedForPlayer(looter, null, item.itemid, item.needs_quest,
-                                !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                                true, item.conditions);
-                        });
-
+                        var lootersForItem = getLootersForItem(looter => LootItem.AllowedForPlayer(looter, item, true));
                         if (!lootersForItem.Empty())
                         {
                             Player chosenLooter = lootersForItem.SelectRandom();
@@ -858,6 +884,16 @@ namespace Game.Loots
                             referenced.Process(personalLoot[chosenLooter], rate, lootMode, item.groupid, chosenLooter);
                             gotLoot.Add(chosenLooter);
                         }
+                        break;
+                    }
+                    case LootStoreItemType.Currency:
+                    {
+                        // Plain entries (not a reference, not grouped)
+                        // Chance is already checked, just add
+                        var lootersForItem = getLootersForItem(looter => LootItem.AllowedForPlayer(looter, item, true));
+
+                        foreach (Player looter in lootersForItem)
+                            personalLoot[looter].AddItem(item);
                         break;
                     }
                     default:
@@ -901,9 +937,7 @@ namespace Game.Loots
                 switch (lootStoreItem.type)
                 {
                     case LootStoreItemType.Item:
-                        if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
-                            !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                            strictUsabilityCheck, lootStoreItem.conditions))
+                        if (LootItem.AllowedForPlayer(player, lootStoreItem, strictUsabilityCheck))
                             return true;                                    // active quest drop found
                         break;
                     case LootStoreItemType.Reference:
@@ -931,6 +965,22 @@ namespace Game.Loots
             // Copies the conditions list from a template item to a LootItem
             foreach (var item in Entries)
             {
+                switch (item.type)
+                {
+                    case LootStoreItemType.Item:
+                        if (li.type != LootItemType.Item)
+                            continue;
+                        break;
+                    case LootStoreItemType.Reference:
+                        continue;
+                    case LootStoreItemType.Currency:
+                        if (li.type != LootItemType.Currency)
+                            continue;
+                        break;
+                    default:
+                        break;
+                }
+
                 if (item.itemid != li.itemid)
                     continue;
 
@@ -957,6 +1007,7 @@ namespace Game.Loots
                 switch (item.type)
                 {
                     case LootStoreItemType.Item:
+                    case LootStoreItemType.Currency:
                         if (item.needs_quest)
                             return true;                                    // quest drop found
                         break;
@@ -1008,6 +1059,10 @@ namespace Game.Loots
                             continue;                                   // Error message already printed at loading stage
                         if (Referenced.HasQuestDropForPlayer(store, player, item.groupid))
                             return true;
+                        break;
+                    case LootStoreItemType.Currency:
+                        if (player.HasQuestForCurrency(item.itemid))
+                            return true;                            // active quest drop found
                         break;
                     default:
                         break;
@@ -1124,10 +1179,24 @@ namespace Game.Loots
 
             public bool HasQuestDropForPlayer(Player player)
             {
-                if (ExplicitlyChanced.Any(item => player.HasQuestForItem(item.itemid)))
+                var hasQuestForLootItem = (LootStoreItem item) =>
+                {
+                    switch (item.type)
+                    {
+                        case LootStoreItemType.Item:
+                            return player.HasQuestForItem(item.itemid);
+                        case LootStoreItemType.Currency:
+                            return player.HasQuestForCurrency(item.itemid);
+                        default:
+                            break;
+                    }
+                    return false;
+                };
+
+                if (ExplicitlyChanced.Any(hasQuestForLootItem))
                     return true;
 
-                if (EqualChanced.Any(item => player.HasQuestForItem(item.itemid)))
+                if (EqualChanced.Any(hasQuestForLootItem))
                     return true;
 
                 return false;
@@ -1239,15 +1308,11 @@ namespace Game.Loots
             public bool HasDropForPlayer(Player player, bool strictUsabilityCheck)
             {
                 foreach (LootStoreItem lootStoreItem in ExplicitlyChanced)
-                    if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
-                        !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                        strictUsabilityCheck, lootStoreItem.conditions))
+                    if (LootItem.AllowedForPlayer(player, lootStoreItem, strictUsabilityCheck))
                         return true;
 
                 foreach (LootStoreItem lootStoreItem in EqualChanced)
-                    if (LootItem.AllowedForPlayer(player, null, lootStoreItem.itemid, lootStoreItem.needs_quest,
-                        !lootStoreItem.needs_quest || Global.ObjectMgr.GetItemTemplate(lootStoreItem.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                        strictUsabilityCheck, lootStoreItem.conditions))
+                    if (LootItem.AllowedForPlayer(player, lootStoreItem, strictUsabilityCheck))
                         return true;
 
                 return false;
@@ -1268,9 +1333,7 @@ namespace Game.Loots
             if ((item.lootmode & _lootMode) == 0)
                 return true;
 
-            if (_personalLooter != null && !LootItem.AllowedForPlayer(_personalLooter, null, item.itemid, item.needs_quest,
-                !item.needs_quest || Global.ObjectMgr.GetItemTemplate(item.itemid).HasFlag(ItemFlagsCustom.FollowLootRules),
-                true, item.conditions))
+            if (_personalLooter != null && !LootItem.AllowedForPlayer(_personalLooter, item, true))
                 return true;
 
             return false;

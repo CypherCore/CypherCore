@@ -611,11 +611,8 @@ namespace Game.Chat
         }
 
         [Command("currency", RBACPermissions.CommandModifyCurrency)]
-        static bool HandleModifyCurrencyCommand(CommandHandler handler, StringArguments args)
+        static bool HandleModifyCurrencyCommand(CommandHandler handler, CurrencyTypesRecord currency, int amount)
         {
-            if (args.Empty())
-                return false;
-
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)
             {
@@ -624,15 +621,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint currencyId = args.NextUInt32();
-            if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
-                return false;
-
-            uint amount = args.NextUInt32();
-            if (amount == 0)
-                return false;
-
-            target.ModifyCurrency(currencyId, (int)amount, CurrencyGainSource.Cheat, CurrencyDestroyReason.Cheat);
+            target.ModifyCurrency(currency.Id, amount, CurrencyGainSource.Cheat, CurrencyDestroyReason.Cheat);
 
             return true;
         }

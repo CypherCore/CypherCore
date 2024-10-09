@@ -427,11 +427,17 @@ namespace Game
 
                 if (req.LootListID >= loot.items.Count)
                 {
+                    _player.SendLootError(req.Object, loot.GetOwnerGUID(), LootError.MasterOther);
                     Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (slot {req.LootListID}, size {loot.items.Count})");
                     return;
                 }
 
                 LootItem item = loot.items[req.LootListID];
+                if (item.type != LootItemType.Item)
+                {
+                    _player.SendLootError(req.Object, loot.GetOwnerGUID(), LootError.MasterOther);
+                    return;
+                }
 
                 List<ItemPosCount> dest = new();
                 InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
@@ -452,7 +458,7 @@ namespace Game
                 // now move item from loot to target inventory
                 Item newitem = target.StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context, item.BonusListIDs);
                 if (newitem != null)
-                    aeResult.Add(newitem, item.count, loot.loot_type, loot.GetDungeonEncounterId());
+                    aeResult.Add(newitem, (byte)item.count, loot.loot_type, loot.GetDungeonEncounterId());
                 else
                     target.ApplyItemLootedSpell(Global.ObjectMgr.GetItemTemplate(item.itemid));
 

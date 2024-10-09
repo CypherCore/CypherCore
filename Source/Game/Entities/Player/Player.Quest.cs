@@ -2873,6 +2873,39 @@ namespace Game.Entities
             return null;
         }
 
+        public bool HasQuestForCurrency(uint currencyId)
+        {
+            bool isCompletableObjective(QuestObjectiveStatusData objectiveStatus)
+            {
+                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveStatus.QuestStatusPair.QuestID);
+                QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveStatus.ObjectiveId);
+                if (qInfo == null || objective == null || !IsQuestObjectiveCompletable(objectiveStatus.QuestStatusPair.Status.Slot, qInfo, objective))
+                    return false;
+
+                // hide quest if player is in raid-group and quest is no raid quest
+                if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
+                        return false;
+
+                if (!IsQuestObjectiveComplete(objectiveStatus.QuestStatusPair.Status.Slot, qInfo, objective))
+                    return true;
+
+                return false;
+            };
+
+            bool hasObjectiveTypeForCurrency(QuestObjectiveType type) => m_questObjectiveStatus.LookupByKey((type, currencyId)).Any(isCompletableObjective);
+            if (hasObjectiveTypeForCurrency(QuestObjectiveType.Currency))
+                return true;
+
+            if (hasObjectiveTypeForCurrency(QuestObjectiveType.HaveCurrency))
+                return true;
+
+            if (hasObjectiveTypeForCurrency(QuestObjectiveType.ObtainCurrency))
+                return true;
+
+            return false;
+        }
+
         public int GetQuestObjectiveData(QuestObjective objective)
         {
             ushort slot = FindQuestSlot(objective.QuestID);

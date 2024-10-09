@@ -370,7 +370,7 @@ namespace Framework.Constants
         CommandNpcShowlootLabel2 = 293,
         CommandNpcShowlootSublabel = 294,
         CommandNpcShowlootEntry2 = 295,
-        // 296 Free
+        CommandNpcShowLootCurrency = 296,
 
         // End
         CommandWanderDistance = 297,

@@ -6066,55 +6066,64 @@ namespace Game.Entities
                 return;
             }
 
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
-            if (msg == InventoryResult.Ok)
+            switch (item.type)
             {
-                Item newitem = StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context);
-                if (ffaItem != null)
-                {
-                    //freeforall case, notify only one player of the removal
-                    ffaItem.is_looted = true;
-                    SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
-                }
-                else    //not freeforall, notify everyone
-                    loot.NotifyItemRemoved(lootSlot, GetMap());
+                case LootItemType.Item:
+                    List<ItemPosCount> dest = new();
+                    InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
+                    if (msg != InventoryResult.Ok)
+                    {
+                        SendEquipError(msg, null, null, item.itemid);
+                        return;
+                    }
 
-                //if only one person is supposed to loot the item, then set it to looted
-                if (!item.freeforall)
-                    item.is_looted = true;
+                    Item newitem = StoreNewItem(dest, item.itemid, true, item.randomBonusListId, item.GetAllowedLooters(), item.context);
+                    if (newitem != null && (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel)))
+                    {
+                        Guild guild = GetGuild();
+                        if (guild != null)
+                            guild.AddGuildNews(GuildNews.ItemLooted, GetGUID(), 0, item.itemid);
+                    }
 
-                --loot.unlootedCount;
+                    // if aeLooting then we must delay sending out item so that it appears properly stacked in chat
+                    if (aeResult == null || newitem == null)
+                    {
+                        SendNewItem(newitem, item.count, false, false, true, loot.GetDungeonEncounterId());
+                        UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
+                        UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (uint)SharedConst.GetLootTypeForClient(loot.loot_type));
+                        UpdateCriteria(CriteriaType.LootAnyItem, item.itemid, item.count);
+                    }
+                    else
+                        aeResult.Add(newitem, (byte)item.count, SharedConst.GetLootTypeForClient(loot.loot_type), loot.GetDungeonEncounterId());
 
-                if (newitem != null && (newitem.GetQuality() > ItemQuality.Epic || (newitem.GetQuality() == ItemQuality.Epic && newitem.GetItemLevel(this) >= GuildConst.MinNewsItemLevel)))
-                {
-                    Guild guild = GetGuild();
-                    if (guild != null)
-                        guild.AddGuildNews(GuildNews.ItemLooted, GetGUID(), 0, item.itemid);
-                }
-
-                // if aeLooting then we must delay sending out item so that it appears properly stacked in chat
-                if (aeResult == null || newitem == null)
-                {
-                    SendNewItem(newitem, item.count, false, false, true, loot.GetDungeonEncounterId());
-                    UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
-                    UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (uint)SharedConst.GetLootTypeForClient(loot.loot_type));
-                    UpdateCriteria(CriteriaType.LootAnyItem, item.itemid, item.count);
-                }
-                else
-                    aeResult.Add(newitem, item.count, SharedConst.GetLootTypeForClient(loot.loot_type), loot.GetDungeonEncounterId());
-
-                // LootItem is being removed (looted) from the container, delete it from the DB.
-                if (loot.loot_type == LootType.Item)
-                    Global.LootItemStorage.RemoveStoredLootItemForContainer(lootWorldObjectGuid.GetCounter(), item.itemid, item.count, item.LootListId);
-
-                if (newitem != null)
-                    ApplyItemLootedSpell(newitem, true);
-                else
-                    ApplyItemLootedSpell(Global.ObjectMgr.GetItemTemplate(item.itemid));
+                    if (newitem != null)
+                        ApplyItemLootedSpell(newitem, true);
+                    else
+                        ApplyItemLootedSpell(Global.ObjectMgr.GetItemTemplate(item.itemid));
+                    break;
+                case LootItemType.Currency:
+                    ModifyCurrency(item.itemid, (int)item.count, CurrencyGainSource.Loot);
+                    break;
             }
-            else
-                SendEquipError(msg, null, null, item.itemid);
+
+            if (ffaItem != null)
+            {
+                //freeforall case, notify only one player of the removal
+                ffaItem.is_looted = true;
+                SendNotifyLootItemRemoved(loot.GetGUID(), loot.GetOwnerGUID(), lootSlot);
+            }
+            else    //not freeforall, notify everyone
+                loot.NotifyItemRemoved(lootSlot, GetMap());
+
+            //if only one person is supposed to loot the item, then set it to looted
+            if (!item.freeforall)
+                item.is_looted = true;
+
+            --loot.unlootedCount;
+
+            // LootItem is being removed (looted) from the container, delete it from the DB.
+            if (loot.loot_type == LootType.Item)
+                Global.LootItemStorage.RemoveStoredLootItemForContainer(lootWorldObjectGuid.GetCounter(), item.type, item.itemid, item.count, item.LootListId);
         }
 
         public Dictionary<ObjectGuid, Loot> GetAELootView() { return m_AELootView; }

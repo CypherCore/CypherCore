@@ -1454,5 +1454,6 @@ namespace Framework.Constants
     {
         Item        = 0,
         Reference   = 1,
+        Currency = 2,
     }
 }
