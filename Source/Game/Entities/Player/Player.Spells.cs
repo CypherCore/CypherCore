@@ -2773,7 +2773,7 @@ namespace Game.Entities
             if (traitDefinitionId.HasValue)
             {
                 TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitDefinitionId.Value);
-                if (traitDefinition != null)
+                if (traitDefinition != null && traitDefinition.OverridesSpellID != 0)
                     AddOverrideSpell(traitDefinition.OverridesSpellID, spellId);
             }
 

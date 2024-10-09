@@ -129,6 +129,7 @@ namespace Game.DataStorage
         public int TraitCondAccountElementID;
 
         public TraitConditionType GetCondType() { return (TraitConditionType)CondType; }
+        public bool HasFlag(TraitCondFlags flag) => Flags.HasAnyFlag((int)flag);
     }
 
     public sealed class TraitCostRecord

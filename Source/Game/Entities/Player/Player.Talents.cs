@@ -1058,8 +1058,7 @@ namespace Game.Entities
             if (consumeCurrencies)
             {
                 Dictionary<int, int> currencies = new();
-                foreach (TraitEntryPacket costEntry in costEntries)
-                    TraitMgr.FillSpentCurrenciesMap(costEntry, currencies);
+                TraitMgr.FillSpentCurrenciesMap(costEntries, currencies);
 
                 foreach (var (traitCurrencyId, amount) in currencies)
                 {
