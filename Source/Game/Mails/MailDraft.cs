@@ -56,6 +56,9 @@ namespace Game.Mails
                 LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
                 if (lootitem != null)
                 {
+                    if (lootitem.type != LootItemType.Item)
+                        continue;
+
                     Item item = Item.CreateItem(lootitem.itemid, lootitem.count, lootitem.context, receiver);
                     if (item != null)
                     {
