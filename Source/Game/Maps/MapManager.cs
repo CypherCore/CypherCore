@@ -296,7 +296,7 @@ namespace Game.Entities
             var time = (uint)i_timer.GetCurrent();
             foreach (var (key, map) in i_maps)
             {
-                if (map.CanUnload(diff))
+                if (map.CanUnload((uint)i_timer.GetCurrent()))
                 {
                     if (DestroyMap(map))
                         i_maps.Remove(key);
