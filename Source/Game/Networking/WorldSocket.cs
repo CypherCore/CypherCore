@@ -489,6 +489,8 @@ namespace Game.Networking
                 digestKeyHash.Finish(buildInfo.Win64AuthSeed);
             else if (account.game.OS == "Mc64")
                 digestKeyHash.Finish(buildInfo.Mac64AuthSeed);
+            else if (account.game.OS == "MacA")
+                digestKeyHash.Finish(buildInfo.MacArmAuthSeed);
             else
             {
                 Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
@@ -567,7 +569,7 @@ namespace Game.Networking
 
             // Must be done before WorldSession is created
             bool wardenActive = WorldConfig.GetBoolValue(WorldCfg.WardenEnabled);
-            if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64")
+            if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64" && account.game.OS != "MacA")
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
                 Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Client {0} attempted to log in using invalid client OS ({1}).", address, account.game.OS);

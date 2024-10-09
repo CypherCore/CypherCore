@@ -25,7 +25,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
-            if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64")
+            if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64" && logonRequest.Platform != "MacA")
             {
                 Log.outDebug(LogFilter.Session, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in from an unsupported platform (using {logonRequest.Platform})!");
                 return BattlenetRpcErrorCode.BadPlatform;
