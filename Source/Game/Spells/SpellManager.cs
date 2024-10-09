@@ -289,6 +289,11 @@ namespace Game.Entities
             return false;
         }
 
+        public List<SpellLearnSpellNode> GetSpellLearnedBySpellMapBounds(uint learnedSpellId)
+        {
+            return mSpellLearnedBySpells.LookupByKey(learnedSpellId);
+        }
+
         public SpellTargetPosition GetSpellTargetPosition(uint spell_id, uint effIndex)
         {
             return mSpellTargetPositions.LookupByKey(new KeyValuePair<uint, uint>(spell_id, effIndex));
@@ -849,6 +854,7 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
+            mSpellLearnedBySpells.Clear();
             mSpellLearnSpells.Clear();
 
             //                                         0      1        2
@@ -864,6 +870,7 @@ namespace Game.Entities
                 uint spell_id = result.Read<uint>(0);
 
                 var node = new SpellLearnSpellNode();
+                node.SourceSpell = spell_id;
                 node.Spell = result.Read<uint>(1);
                 node.OverridesSpell = 0;
                 node.Active = result.Read<bool>(2);
@@ -904,6 +911,7 @@ namespace Game.Entities
                     if (spellEffectInfo.Effect == SpellEffectName.LearnSpell)
                     {
                         var dbc_node = new SpellLearnSpellNode();
+                        dbc_node.SourceSpell = entry.Id;
                         dbc_node.Spell = spellEffectInfo.TriggerSpell;
                         dbc_node.Active = true;                     // all dbc based learned spells is active (show in spell book or hide by client itself)
                         dbc_node.OverridesSpell = 0;
@@ -976,6 +984,7 @@ namespace Game.Entities
                     continue;
 
                 SpellLearnSpellNode dbcLearnNode = new();
+                dbcLearnNode.SourceSpell = spellLearnSpell.SpellID;
                 dbcLearnNode.Spell = spellLearnSpell.LearnSpellID;
                 dbcLearnNode.OverridesSpell = spellLearnSpell.OverridesSpellID;
                 dbcLearnNode.Active = true;
@@ -984,6 +993,9 @@ namespace Game.Entities
                 mSpellLearnSpells.Add(spellLearnSpell.SpellID, dbcLearnNode);
                 ++dbc_count;
             }
+
+            foreach (var (_, learnedSpellNode) in mSpellLearnSpells)
+                mSpellLearnedBySpells.Add(learnedSpellNode.Spell, learnedSpellNode);
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell learn spells, {1} found in Spell.dbc in {2} ms", count, dbc_count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -2222,7 +2234,7 @@ namespace Game.Entities
                     case AuraType.AddPctModifierBySpellLabel:
                     case AuraType.AddFlatModifierBySpellLabel:
                         Cypher.Assert(effect.EffectMiscValue[0] < (int)SpellModOp.Max, $"MAX_SPELLMOD must be at least {effect.EffectMiscValue[0] + 1}");
-                        if (effect.EffectMiscValue[0] >= (int)SpellModOp.Max)                       
+                        if (effect.EffectMiscValue[0] >= (int)SpellModOp.Max)
                             Log.outError(LogFilter.ServerLoading, $"Invalid spell modifier type {effect.EffectMiscValue[0]} found on spell {effect.SpellID} effect index {effect.EffectIndex}, consider increasing MAX_SPELLMOD");
                         break;
                     default:
@@ -4903,6 +4915,7 @@ namespace Game.Entities
         MultiMap<uint, uint> mSpellReq = new();
         Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
+        MultiMap<uint, SpellLearnSpellNode> mSpellLearnedBySpells = new();
         Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
         MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
         MultiMap<SpellGroup, int> mSpellGroupSpell = new();

@@ -2331,6 +2331,18 @@ namespace Game.Entities
 
             foreach (var spellNode in spell_bounds)
             {
+                bool hasOtherSpellTeachingThis = Global.SpellMgr.GetSpellLearnedBySpellMapBounds(spellNode.Spell).Any(learnNode =>
+                {
+                    if (learnNode.SourceSpell == spellId)
+                        return false;
+                    if (!learnNode.Active)
+                        return false;
+                    return HasSpell(learnNode.SourceSpell);
+                });
+
+                if (hasOtherSpellTeachingThis)
+                    continue;
+
                 RemoveSpell(spellNode.Spell, disabled);
                 if (spellNode.OverridesSpell != 0)
                     RemoveOverrideSpell(spellNode.OverridesSpell, spellNode.Spell);

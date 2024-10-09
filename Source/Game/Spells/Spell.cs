@@ -8708,6 +8708,7 @@ namespace Game.Spells
 
     public class SpellLearnSpellNode
     {
+        public uint SourceSpell;
         public uint Spell;
         public uint OverridesSpell;
         public bool Active;         // show in spellbook or not
