@@ -1,14 +1,17 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.ClientBuild;
 using Framework.Constants;
 using Framework.Cryptography;
 using Framework.Database;
 using Framework.IO;
 using Framework.Networking;
+using Framework.Web;
 using Game.Networking.Packets;
 using System;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Game.Networking
@@ -451,15 +454,23 @@ namespace Game.Networking
 
         void HandleAuthSession(AuthSession authSession)
         {
+            RealmJoinTicket joinTicket = JsonSerializer.Deserialize<RealmJoinTicket>(authSession.RealmJoinTicket);
+            if (joinTicket == null)
+            {
+                SendAuthResponseError(BattlenetRpcErrorCode.WowServicesInvalidJoinTicket);
+                CloseSocket();
+                return;
+            }
+
             // Get the account information from the realmd database
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME);
             stmt.AddValue(0, Global.RealmMgr.GetCurrentRealmId().Index);
-            stmt.AddValue(1, authSession.RealmJoinTicket);
+            stmt.AddValue(1, joinTicket.GameAccount);
 
-            _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthSessionCallback, authSession));
+            _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthSessionCallback, authSession, joinTicket));
         }
 
-        async void HandleAuthSessionCallback(AuthSession authSession, SQLResult result)
+        async void HandleAuthSessionCallback(AuthSession authSession, RealmJoinTicket joinTicket, SQLResult result)
         {
             // Stop if the account is not found
             if (result.IsEmpty())
@@ -471,11 +482,21 @@ namespace Game.Networking
 
             AccountInfo account = new(result.GetFields());
 
-            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(account.game.Build);
+            ClientBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(account.game.Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
-                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing auth seed for realm build {account.game.Build} ({GetRemoteIpAddress()}).");
+                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSessionCallback: Missing client build info for realm build {account.game.Build} ({GetRemoteIpAddress()}).");
+                CloseSocket();
+                return;
+            }
+
+            ClientBuildVariantId buildVariant = new() { Platform = joinTicket.Platform, Arch = joinTicket.ClientArch, Type = joinTicket.Type };
+            var clientBuildAuthKey = buildInfo.AuthKeys.Find(p => p.Variant == buildVariant);
+            if (clientBuildAuthKey == null)
+            {
+                SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
+                Log.outError(LogFilter.Network, $"WorldSocket::HandleAuthSession: Missing client build auth key for build {account.game.Build} variant {buildVariant.Platform}-{buildVariant.Arch}-{buildVariant.Type} ({GetRemoteIpAddress()}).");
                 CloseSocket();
                 return;
             }
@@ -485,18 +506,7 @@ namespace Game.Networking
 
             Sha256 digestKeyHash = new();
             digestKeyHash.Process(account.game.KeyData, account.game.KeyData.Length);
-            if (account.game.OS == "Wn64")
-                digestKeyHash.Finish(buildInfo.Win64AuthSeed);
-            else if (account.game.OS == "Mc64")
-                digestKeyHash.Finish(buildInfo.Mac64AuthSeed);
-            else if (account.game.OS == "MacA")
-                digestKeyHash.Finish(buildInfo.MacArmAuthSeed);
-            else
-            {
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
-                CloseSocket();
-                return;
-            }
+            digestKeyHash.Finish(clientBuildAuthKey.Key);
 
             HmacSha256 hmac = new(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
@@ -507,7 +517,7 @@ namespace Game.Networking
             if (!hmac.Digest.Compare(authSession.Digest))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Authentication failed for account: {0} ('{1}') address: {2}", account.game.Id, authSession.RealmJoinTicket, address);
+                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSession: Authentication failed for account: {account.game.Id} ('{joinTicket.GameAccount}') address: {address}");
                 CloseSocket();
                 return;
             }
@@ -539,7 +549,7 @@ namespace Game.Networking
                 // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
                 stmt.AddValue(0, address.ToString());
-                stmt.AddValue(1, authSession.RealmJoinTicket);
+                stmt.AddValue(1, joinTicket.GameAccount);
                 DB.Login.Execute(stmt);
                 // This also allows to check for possible "hack" attempts on account
             }
@@ -569,10 +579,10 @@ namespace Game.Networking
 
             // Must be done before WorldSession is created
             bool wardenActive = WorldConfig.GetBoolValue(WorldCfg.WardenEnabled);
-            if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64" && account.game.OS != "MacA")
+            if (wardenActive && !ClientBuildHelper.IsValid(account.game.OS))
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
-                Log.outError(LogFilter.Network, "WorldSocket.HandleAuthSession: Client {0} attempted to log in using invalid client OS ({1}).", address, account.game.OS);
+                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSession: Client {address} attempted to log in using invalid client OS ({account.game.OS}).");
                 CloseSocket();
                 return;
             }
@@ -635,22 +645,22 @@ namespace Game.Networking
                 return;
             }
 
-            Log.outDebug(LogFilter.Network, "WorldSocket:HandleAuthSession: Client '{0}' authenticated successfully from {1}.", authSession.RealmJoinTicket, address);
+            Log.outDebug(LogFilter.Network, $"WorldSocket:HandleAuthSession: Client '{joinTicket.GameAccount}' authenticated successfully from {address}.");
 
             if (WorldConfig.GetBoolValue(WorldCfg.AllowLogginIpAddressesInDatabase))
             {
                 // Update the last_ip in the database
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_LAST_IP);
                 stmt.AddValue(0, address.ToString());
-                stmt.AddValue(1, authSession.RealmJoinTicket);
+                stmt.AddValue(1, joinTicket.GameAccount);
                 DB.Login.Execute(stmt);
             }
 
             // At this point, we can safely hook a successful login
             Global.ScriptMgr.OnAccountLogin(account.game.Id);
 
-            _worldSession = new WorldSession(account.game.Id, authSession.RealmJoinTicket, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
-                mutetime, account.game.OS, account.game.TimezoneOffset, account.game.Build, account.game.Locale, account.game.Recruiter, account.game.IsRectuiter);
+            _worldSession = new WorldSession(account.game.Id, joinTicket.GameAccount, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
+                mutetime, account.game.OS, account.game.TimezoneOffset, account.game.Build, buildVariant, account.game.Locale, account.game.Recruiter, account.game.IsRectuiter);
 
             // Initialize Warden system only if it is enabled by config
             //if (wardenActive)

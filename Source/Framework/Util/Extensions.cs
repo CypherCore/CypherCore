@@ -438,6 +438,21 @@ namespace System
             }
             return hash;
         }
+
+        public static int fourcc(this string str)
+        {
+            //if (length > sizeof(uint))
+            // throw "Text can only be max 4 characters long";
+
+            int intValue = 0;
+            foreach (char c in str.ToCharArray())
+            {
+                intValue <<= 8;
+                intValue |= c;
+            }
+
+            return intValue;
+        }
         #endregion
 
         #region BinaryReader

@@ -24,6 +24,11 @@ namespace Framework.Database
             return WithChainingCallback((queryCallback, result) => callback(obj, result));
         }
 
+        public QueryCallback WithCallback<T, U>(Action<T, U, SQLResult> callback, T obj, U obj2)
+        {
+            return WithChainingCallback((queryCallback, result) => callback(obj, obj2, result));
+        }
+
         public QueryCallback WithChainingCallback(Action<QueryCallback, SQLResult> callback)
         {
             _callbacks.Enqueue(new QueryCallbackData(callback));

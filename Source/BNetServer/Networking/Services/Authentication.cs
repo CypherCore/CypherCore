@@ -5,6 +5,7 @@ using Bgs.Protocol;
 using Bgs.Protocol.Authentication.V1;
 using Bgs.Protocol.Challenge.V1;
 using Framework;
+using Framework.ClientBuild;
 using Framework.Constants;
 using Framework.Database;
 using Framework.Realm;
@@ -25,7 +26,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.BadProgram;
             }
 
-            if (logonRequest.Platform != "Win" && logonRequest.Platform != "Wn64" && logonRequest.Platform != "Mc64" && logonRequest.Platform != "MacA")
+            if (!ClientBuildHelper.IsValid(logonRequest.Platform))
             {
                 Log.outDebug(LogFilter.Session, $"Battlenet.LogonRequest: {GetClientInfo()} attempted to log in from an unsupported platform (using {logonRequest.Platform})!");
                 return BattlenetRpcErrorCode.BadPlatform;

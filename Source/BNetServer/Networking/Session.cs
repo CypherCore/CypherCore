@@ -24,6 +24,7 @@ namespace BNetServer.Networking
         string locale;
         string os;
         uint build;
+        Framework.ClientBuild.ClientBuildVariantId _clientInfo;
         TimeSpan _timezoneOffset;
         string ipCountry;
 

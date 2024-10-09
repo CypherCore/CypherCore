@@ -6,7 +6,7 @@ using System;
 namespace Framework.Realm
 {
     public struct RealmId : IEquatable<RealmId>
-    {   
+    {
         public uint Index { get; set; }
         public byte Region { get; set; }
         public byte Site { get; set; }

@@ -25,7 +25,7 @@ namespace Game
 {
     public partial class WorldSession : IDisposable
     {
-        public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, uint build, Locale locale, uint recruiter, bool isARecruiter)
+        public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, uint build, Framework.ClientBuild.ClientBuildVariantId clientBuildVariant, Locale locale, uint recruiter, bool isARecruiter)
         {
             m_muteTime = mute_time;
             AntiDOS = new DosProtection(this);
@@ -38,6 +38,7 @@ namespace Game
             m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
             _os = os;
             _clientBuild = build;
+            _clientBuildVariant = clientBuildVariant;
             m_sessionDbcLocale = Global.WorldMgr.GetAvailableDbcLocale(locale);
             m_sessionDbLocaleIndex = locale;
             _timezoneOffset = timezoneOffset;
@@ -686,6 +687,7 @@ namespace Game
         public Expansion GetExpansion() { return m_expansion; }
         public string GetOS() { return _os; }
         public uint GetClientBuild() { return _clientBuild; }
+        public Framework.ClientBuild.ClientBuildVariantId GetClientBuildVariant() { return _clientBuildVariant; }
         public void SetInQueue(bool state) { m_inQueue = state; }
 
         public bool IsLogingOut() { return _logoutTime != 0 || m_playerLogout; }
@@ -953,6 +955,7 @@ namespace Game
         Expansion m_expansion;
         string _os;
         uint _clientBuild;
+        Framework.ClientBuild.ClientBuildVariantId _clientBuildVariant;
 
         uint expireTime;
         bool forceExit;
