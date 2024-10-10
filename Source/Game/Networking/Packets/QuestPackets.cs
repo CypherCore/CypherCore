@@ -953,6 +953,40 @@ namespace Game.Networking.Packets
         public bool IsReroll;
     }
 
+    class UiMapQuestLinesResponse : ServerPacket
+    {
+        public uint UiMapID;
+        public List<uint> QuestLineXQuestIDs = new();
+        public List<uint> QuestIDs = new();
+
+        public UiMapQuestLinesResponse() : base(ServerOpcodes.UiMapQuestLinesResponse, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(UiMapID);
+            _worldPacket.WriteInt32(QuestLineXQuestIDs.Count);
+            _worldPacket.WriteInt32(QuestIDs.Count);
+
+            foreach (var questLineQuestID in QuestLineXQuestIDs)
+                _worldPacket.WriteUInt32(questLineQuestID);
+
+            foreach (var questID in QuestIDs)
+                _worldPacket.WriteUInt32(questID);
+        }
+    }
+
+    class UiMapQuestLinesRequest : ClientPacket
+    {
+        public int UiMapID;
+
+        public UiMapQuestLinesRequest(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            UiMapID = _worldPacket.ReadInt32();
+        }
+    }
+
     //Structs
     public class QuestGiverInfo
     {

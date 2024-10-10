@@ -429,7 +429,7 @@ namespace Game.DataStorage
                         unsortedNodes[pathNode.PathID] = new();
 
                     unsortedNodes[pathNode.PathID].Add(pathNode);
-                }                
+                }
             }
 
             foreach (var (pathId, pathNodes) in unsortedNodes)
@@ -477,6 +477,9 @@ namespace Game.DataStorage
 
             foreach (QuestLineXQuestRecord questLineQuest in QuestLineXQuestStorage.Values)
                 _questsByQuestLine.Add(questLineQuest.QuestLineID, questLineQuest);
+
+            foreach (var questLineId in _questsByQuestLine.Keys)
+                _questsByQuestLine[questLineId].OrderByDescending(p => p.OrderIndex);
 
             foreach (QuestPackageItemRecord questPackageItem in QuestPackageItemStorage.Values)
             {

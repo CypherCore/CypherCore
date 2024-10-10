@@ -792,5 +792,41 @@ namespace Game
                     _player.GetReputationMgr().ModifyReputation(CliDB.FactionStorage.LookupByKey(faction.Id), faction.Quantity);
             }
         }
+
+        [WorldPacketHandler(ClientOpcodes.UiMapQuestLinesRequest)]
+        void HandleUiMapQuestLinesRequest(UiMapQuestLinesRequest uiMapQuestLinesRequest)
+        {
+            var uiMap = CliDB.UiMapStorage.LookupByKey(uiMapQuestLinesRequest.UiMapID);
+            if (uiMap == null)
+                return;
+
+            UiMapQuestLinesResponse response = new();
+            response.UiMapID = uiMap.Id;
+
+            var questLines = Global.ObjectMgr.GetUiMapQuestLinesList(uiMap.Id);
+            foreach (uint questLineId in questLines)
+            {
+                var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(questLineId);
+                if (questLineQuests.Empty())
+                    continue;
+
+                foreach (var questLineQuest in questLineQuests)
+                {
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(questLineQuest.QuestID);
+                    if (quest != null && _player.CanTakeQuest(quest, false))
+                        response.QuestLineXQuestIDs.Add(questLineQuest.Id);
+                }
+            }
+
+            var quests = Global.ObjectMgr.GetUiMapQuestsList(uiMap.Id);
+            foreach (uint questId in quests)
+            {
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                if (quest != null && _player.CanTakeQuest(quest, false))
+                    response.QuestIDs.Add(questId);
+            }
+
+            SendPacket(response);
+        }
     }
 }

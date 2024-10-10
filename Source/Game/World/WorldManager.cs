@@ -806,6 +806,12 @@ namespace Game
                 Global.ObjectMgr.LoadPlayerChoicesLocale();
             }
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading UIMap questlines...");
+            Global.ObjectMgr.LoadUiMapQuestLines();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading UIMap quests...");
+            Global.ObjectMgr.LoadUiMapQuests();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Jump Charge Params...");
             Global.ObjectMgr.LoadJumpChargeParams();
 

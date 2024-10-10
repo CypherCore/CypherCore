@@ -9772,7 +9772,6 @@ namespace Game
                 return;
             }
 
-            uint count = 0;
             do
             {
                 uint sceneId = result.Read<uint>(0);
@@ -9787,7 +9786,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} scene templates in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} scene templates in {1} ms.", _sceneTemplateStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
         public void LoadPlayerChoices()
         {
@@ -10150,6 +10149,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_playerChoices.Count} player choices, {responseCount} responses, {rewardCount} rewards, {itemRewardCount} item rewards, " +
                 $"{currencyRewardCount} currency rewards, {factionRewardCount} faction rewards, {itemChoiceRewardCount} item choice rewards and {mawPowersCount} maw powers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
+
         public void LoadPlayerChoicesLocale()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -10461,6 +10461,90 @@ namespace Game
             } while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} phase names in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+        }
+
+        public void LoadUiMapQuestLines()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _uiMapQuestLinesStorage.Clear();
+
+            //                                         0        1
+            SQLResult result = DB.World.Query("SELECT UiMapId, QuestLineId FROM ui_map_quest_line");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 questlines for UIMaps. DB table `ui_map_quest_line` is empty!");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint uiMapId = result.Read<uint>(0);
+                uint questLineId = result.Read<uint>(1);
+
+                if (!CliDB.UiMapStorage.HasRecord(uiMapId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `ui_map_quest_line` references non-existing UIMap {uiMapId}, skipped");
+                    continue;
+                }
+
+                if (Global.DB2Mgr.GetQuestsForQuestLine(questLineId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `ui_map_quest_line` references empty or non-existing questline {questLineId}, skipped");
+                    continue;
+                }
+
+                _uiMapQuestLinesStorage.Add(uiMapId, questLineId);
+                ++count;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} UiMap questlines definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public void LoadUiMapQuests()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _uiMapQuestsStorage.Clear();
+
+            //                                         0        1
+            SQLResult result = DB.World.Query("SELECT UiMapId, QuestId FROM ui_map_quest");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quests for UIMaps. DB table `ui_map_quest` is empty!");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint uiMapId = result.Read<uint>(0);
+                uint questId = result.Read<uint>(1);
+
+                if (!CliDB.UiMapStorage.HasRecord(uiMapId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `ui_map_quest` references non-existing UIMap {uiMapId}, skipped");
+                    continue;
+                }
+
+                if (GetQuestTemplate(questId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `ui_map_quest` references non-existing quest {questId}, skipped");
+                    continue;
+                }
+
+                _uiMapQuestsStorage.Add(uiMapId, questId);
+                ++count;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} UiMap quests definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public MailLevelReward GetMailLevelReward(uint level, Race race)
@@ -10913,6 +10997,16 @@ namespace Game
             return _phaseNameStorage.TryGetValue(phaseId, out string value) ? value : "Unknown Name";
         }
 
+        public List<uint> GetUiMapQuestLinesList(uint uiMapId)
+        {
+            return _uiMapQuestLinesStorage.LookupByKey(uiMapId);
+        }
+
+        public List<uint> GetUiMapQuestsList(uint uiMapId)
+        {
+            return _uiMapQuestsStorage.LookupByKey(uiMapId);
+        }
+
         //Vehicles
         public void LoadVehicleTemplate()
         {
@@ -11010,7 +11104,7 @@ namespace Game
 
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Vehicle Accessories in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vehicle Accessories. DB table `vehicle_accessory` is empty");
                 return;
             }
 
@@ -11126,6 +11220,8 @@ namespace Game
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new();
         Dictionary<int, JumpChargeParams> _jumpChargeParams = new();
         Dictionary<uint, string> _phaseNameStorage = new();
+        MultiMap<uint, uint> _uiMapQuestLinesStorage = new();
+        MultiMap<uint, uint> _uiMapQuestsStorage = new();
         Dictionary<(ulong, Difficulty), CreatureStaticFlagsOverride> _creatureStaticFlagsOverrideStorage = new();
 
         Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
