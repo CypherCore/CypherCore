@@ -28,64 +28,11 @@ public class RealmManager : Singleton<RealmManager>
         _updateTimer = new Timer(TimeSpan.FromSeconds(updateInterval).TotalMilliseconds);
         _updateTimer.Elapsed += UpdateRealms;
 
-        LoadBuildInfo();
+        ClientBuildHelper.LoadBuildInfo();
 
         UpdateRealms(null, null);
 
         _updateTimer.Start();
-    }
-
-    void LoadBuildInfo()
-    {
-        _builds.Clear();
-
-        //                                         0             1             2              3              4      5              6              7
-        SQLResult result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build, win64AuthSeed, mac64AuthSeed, macArmAuthSeed FROM build_info ORDER BY build ASC");
-        if (!result.IsEmpty())
-        {
-            do
-            {
-                ClientBuildInfo build = new();
-                build.MajorVersion = result.Read<uint>(0);
-                build.MinorVersion = result.Read<uint>(1);
-                build.BugfixVersion = result.Read<uint>(2);
-                string hotfixVersion = result.Read<string>(3);
-                if (!hotfixVersion.IsEmpty() && hotfixVersion.Length < build.HotfixVersion.Length)
-                    build.HotfixVersion = hotfixVersion.ToCharArray();
-
-                build.Build = result.Read<uint>(4);
-
-                string win64AuthSeedHexStr = result.Read<string>(5);
-                if (win64AuthSeedHexStr.Length == ClientBuildAuthKey.Size * 2)
-                {
-                    ClientBuildAuthKey buildKey = new();
-                    buildKey.Variant = new() { Platform = ClientBuildPlatformType.Windows, Arch = ClientBuildArch.x64, Type = ClientBuildType.Retail };
-                    buildKey.Key = win64AuthSeedHexStr.ToByteArray();
-                    build.AuthKeys.Add(buildKey);
-                }
-
-                string mac64AuthSeedHexStr = result.Read<string>(6);
-                if (mac64AuthSeedHexStr.Length == ClientBuildAuthKey.Size * 2)
-                {
-                    ClientBuildAuthKey buildKey = new();
-                    buildKey.Variant = new() { Platform = ClientBuildPlatformType.macOS, Arch = ClientBuildArch.x64, Type = ClientBuildType.Retail };
-                    buildKey.Key = mac64AuthSeedHexStr.ToByteArray();
-                    build.AuthKeys.Add(buildKey);
-                }
-
-                string macArmAuthSeedHexStr = result.Read<string>(7);
-                if (macArmAuthSeedHexStr.Length == ClientBuildAuthKey.Size * 2)
-                {
-                    ClientBuildAuthKey buildKey = new();
-                    buildKey.Variant = new() { Platform = ClientBuildPlatformType.macOS, Arch = ClientBuildArch.Arm64, Type = ClientBuildType.Retail };
-                    buildKey.Key = macArmAuthSeedHexStr.ToByteArray();
-                    build.AuthKeys.Add(buildKey);
-                }
-
-                _builds.Add(build);
-
-            } while (result.NextRow());
-        }
     }
 
     public void Close()
@@ -218,21 +165,6 @@ public class RealmManager : Singleton<RealmManager>
         }
     }
 
-    public ClientBuildInfo GetBuildInfo(uint build)
-    {
-        foreach (var clientBuild in _builds)
-            if (clientBuild.Build == build)
-                return clientBuild;
-
-        return null;
-    }
-
-    public uint GetMinorMajorBugfixVersionForBuild(uint build)
-    {
-        ClientBuildInfo buildInfo = _builds.FirstOrDefault(p => p.Build < build);
-        return buildInfo != null ? (buildInfo.MajorVersion * 10000 + buildInfo.MinorVersion * 100 + buildInfo.BugfixVersion) : 0;
-    }
-
     void FillRealmEntry(Realm realm, uint clientBuild, AccountTypes accountSecurityLevel, RealmEntry realmEntry)
     {
         realmEntry.WowRealmAddress = (int)realm.Id.GetAddress();
@@ -245,7 +177,7 @@ public class RealmManager : Singleton<RealmManager>
         realmEntry.CfgCategoriesID = realm.Timezone;
 
         ClientVersion version = new();
-        ClientBuildInfo buildInfo = GetBuildInfo(realm.Build);
+        ClientBuildInfo buildInfo = ClientBuildHelper.GetBuildInfo(realm.Build);
         if (buildInfo != null)
         {
             version.Major = (int)buildInfo.MajorVersion;
@@ -412,7 +344,6 @@ public class RealmManager : Singleton<RealmManager>
     public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
-    List<ClientBuildInfo> _builds = new();
     ConcurrentDictionary<RealmId, Realm> _realms = new();
     Dictionary<RealmId, string> _removedRealms = new();
     List<string> _subRegions = new();

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.ClientBuild;
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
@@ -3837,7 +3838,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_activePlayerData.MultiActionBars);
                 var currentRealm = Global.RealmMgr.GetCurrentRealm();
                 if (currentRealm != null)
-                    stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(currentRealm.Build));
+                    stmt.AddValue(index++, ClientBuildHelper.GetMinorMajorBugfixVersionForBuild(currentRealm.Build));
                 else
                     stmt.AddValue(index++, 0);
             }
@@ -3998,7 +3999,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
                 var currentRealm = Global.RealmMgr.GetCurrentRealm();
                 if (currentRealm != null)
-                    stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(currentRealm.Build));
+                    stmt.AddValue(index++, ClientBuildHelper.GetMinorMajorBugfixVersionForBuild(currentRealm.Build));
                 else
                     stmt.AddValue(index++, 0);
 

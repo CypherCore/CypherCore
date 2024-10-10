@@ -482,7 +482,7 @@ namespace Game.Networking
 
             AccountInfo account = new(result.GetFields());
 
-            ClientBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(account.game.Build);
+            ClientBuildInfo buildInfo = ClientBuildHelper.GetBuildInfo(account.game.Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
