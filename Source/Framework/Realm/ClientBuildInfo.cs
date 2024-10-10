@@ -1,38 +1,12 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Database;
 using System;
 using System.Collections.Generic;
-using Framework.Database;
-using System.Linq;
 
 namespace Framework.ClientBuild
 {
-    struct ClientBuildPlatformType
-    {
-        public static int Windows = "Win".fourcc();
-        public static int macOS = "Mac".fourcc();
-    }
-
-    struct ClientBuildArch
-    {
-        public static int x86 = "x86".fourcc();
-        public static int x64 = "x64".fourcc();
-        public static int Arm32 = "A32".fourcc();
-        public static int Arm64 = "A64".fourcc();
-        public static int WA32 = "WA32".fourcc();
-    }
-
-    struct ClientBuildType
-    {
-        public static int Retail = "WoW".fourcc();
-        public static int RetailChina = "WoWC".fourcc();
-        public static int Beta = "WoWB".fourcc();
-        public static int BetaRelease = "WoWE".fourcc();
-        public static int Ptr = "WoWT".fourcc();
-        public static int PtrRelease = "WoWR".fourcc();
-    }
-
     public class ClientBuildHelper
     {
         static List<ClientBuildInfo> _builds = new();
@@ -41,8 +15,8 @@ namespace Framework.ClientBuild
         {
             _builds.Clear();
 
-            //                                         0             1             2              3              4      5              6              7
-            SQLResult result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build, win64AuthSeed, mac64AuthSeed, macArmAuthSeed FROM build_info ORDER BY build ASC");
+            //                                         0             1             2              3              4
+            SQLResult result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build FROM build_info ORDER BY build ASC");
             if (!result.IsEmpty())
             {
                 do
@@ -56,35 +30,52 @@ namespace Framework.ClientBuild
                         build.HotfixVersion = hotfixVersion.ToCharArray();
 
                     build.Build = result.Read<uint>(4);
+                }
+                while (result.NextRow());
+            }
 
-                    string win64AuthSeedHexStr = result.Read<string>(5);
-                    if (win64AuthSeedHexStr.Length == ClientBuildAuthKey.Size * 2)
+            //                                          0        1           2       3       4
+            result = DB.Login.Query("SELECT `build`, `platform`, `arch`, `type`, `key` FROM `build_auth_key`");
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint build = result.Read<uint>(0);
+                    var buildInfo = _builds.Find(p => p.Build == build);
+                    if (buildInfo == null)
                     {
-                        ClientBuildAuthKey buildKey = new();
-                        buildKey.Variant = new() { Platform = ClientBuildPlatformType.Windows, Arch = ClientBuildArch.x64, Type = ClientBuildType.Retail };
-                        buildKey.Key = win64AuthSeedHexStr.ToByteArray();
-                        build.AuthKeys.Add(buildKey);
+                        Log.outError(LogFilter.Sql, $"ClientBuildHealper.LoadBuildInfo: Unknown `build` {build} in `build_auth_key` - missing from `build_info`, skipped.");
+                        continue;
                     }
 
-                    string mac64AuthSeedHexStr = result.Read<string>(6);
-                    if (mac64AuthSeedHexStr.Length == ClientBuildAuthKey.Size * 2)
+                    string platformType = result.Read<string>(1);
+                    if (!IsPlatformTypeValid(platformType))
                     {
-                        ClientBuildAuthKey buildKey = new();
-                        buildKey.Variant = new() { Platform = ClientBuildPlatformType.macOS, Arch = ClientBuildArch.x64, Type = ClientBuildType.Retail };
-                        buildKey.Key = mac64AuthSeedHexStr.ToByteArray();
-                        build.AuthKeys.Add(buildKey);
+                        Log.outError(LogFilter.Sql, $"ClientBuild::LoadBuildInfo: Invalid platform {platformType} for `build` {build} in `build_auth_key`, skipped.");
+                        continue;
                     }
 
-                    string macArmAuthSeedHexStr = result.Read<string>(7);
-                    if (macArmAuthSeedHexStr.Length == ClientBuildAuthKey.Size * 2)
+                    string arch = result.Read<string>(2);
+                    if (!IsArcValid(arch))
                     {
-                        ClientBuildAuthKey buildKey = new();
-                        buildKey.Variant = new() { Platform = ClientBuildPlatformType.macOS, Arch = ClientBuildArch.Arm64, Type = ClientBuildType.Retail };
-                        buildKey.Key = macArmAuthSeedHexStr.ToByteArray();
-                        build.AuthKeys.Add(buildKey);
+                        Log.outError(LogFilter.Sql, $"ClientBuild::LoadBuildInfo: Invalid `arch` {arch} for `build` {build} in `build_auth_key`, skipped.");
+                        continue;
                     }
 
-                    _builds.Add(build);
+                    string type = result.Read<string>(3);
+                    if (!IsTypeValid(type))
+                    {
+                        Log.outError(LogFilter.Sql, $"ClientBuild::LoadBuildInfo: Invalid `type` {type} for `build` {build} in `build_auth_key`, skipped.");
+                        continue;
+                    }
+
+                    ClientBuildAuthKey buildKey = new()
+                    {
+                        Variant = new() { Platform = platformType.ToFourCC(), Arch = arch.ToFourCC(), Type = type.ToFourCC() },
+                        Key = result.Read<byte[]>(4)
+                    };
+
+                    buildInfo.AuthKeys.Add(buildKey);
 
                 } while (result.NextRow());
             }
@@ -111,6 +102,64 @@ namespace Framework.ClientBuild
                 case "Mac":
                 case "Mc64":
                 case "MacA":
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        static bool IsPlatformTypeValid(string platformType)
+        {
+            if (platformType.Length > 4)
+                return false;
+
+            switch (platformType)
+            {
+                case "Win":
+                case "Mac":
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        static bool IsArcValid(string arch)
+        {
+            if (arch.Length > 4)
+                return false;
+
+            switch (arch)
+            {
+                case "x86":
+                case "x64":
+                case "A32":
+                case "A64":
+                case "WA32":
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
+        static bool IsTypeValid(string type)
+        {
+            if (type.Length > 4)
+                return false;
+
+            switch (type)
+            {
+                case "WoW":
+                case "WoWC":
+                case "WoWB":
+                case "WoWE":
+                case "WoWT":
+                case "WoWR":
                     return true;
                 default:
                     break;
