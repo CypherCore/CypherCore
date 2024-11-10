@@ -115,7 +115,7 @@ namespace Framework.Constants
         InfiniteAoi = 0x40000000,
         Unused13 = 0x80000000,
 
-        Disallowed = (FeignDeath | IgnoreReputation | ComprehendLang |
+        Disallowed = (/*FeignDeath |*/ IgnoreReputation | ComprehendLang |
             MirrorImage | ForceMovement | DisarmOffhand |
             DisablePredStats | AllowChangingTalents | DisarmRanged |
             /* UNIT_FLAG2_REGENERATE_POWER | */ RestrictPartyInteraction | CannotTurn |
@@ -166,7 +166,7 @@ namespace Framework.Constants
         Disallowed = (Unk0 | /* UnconsciousOnDeath | */ /* AllowMountedCombat | */ GarrisonPet |
                                                                    /* UiCanGetPosition | */ /* AiObstacle | */ AlternativeDefaultLanguage | /* SuppressAllNpcFeedback | */
                                                                    IgnoreCombat | SuppressNpcFeedback | Unk10 | Unk11 |
-                                                                   Unk12 | FakeDead | /* NoFacingOnInteractAndFastFacingChase | */ /* UntargetableFromUi | */
+                                                                   Unk12 | /*FakeDead |*/ /* NoFacingOnInteractAndFastFacingChase | */ /* UntargetableFromUi | */
                                                                    /* NoFacingOnInteractWhileFakeDead | */ AlreadySkinned | /* SuppressAllNpcSounds | */ /* SuppressNpcSounds | */
                                                                    AllowInteractionWhileInCombat | Unk21 | /* DontFadeOut | */ Unk23 |
                                                                    ForceHideNameplate | Unk25 | Unk26 | Unk27 |
