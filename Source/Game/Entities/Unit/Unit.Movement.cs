@@ -1596,6 +1596,32 @@ namespace Game.Entities
             RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
+        bool SetCanAdvFly(bool enable)
+        {
+            if (enable == HasExtraUnitMovementFlag2(MovementFlags3.CanAdvFly))
+                return false;
+
+            if (enable)
+                AddExtraUnitMovementFlag2(MovementFlags3.CanAdvFly);
+            else
+                RemoveExtraUnitMovementFlag2(MovementFlags3.CanAdvFly | MovementFlags3.AdvFlying);
+
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanAdvFly : ServerOpcodes.MoveUnsetCanAdvFly);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
         public bool SetMoveCantSwim(bool cantSwim)
         {
             if (cantSwim == HasExtraUnitMovementFlag2(MovementFlags3.CantSwim))
