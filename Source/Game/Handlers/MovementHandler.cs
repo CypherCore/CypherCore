@@ -263,7 +263,7 @@ namespace Game
                 player.m_InstanceValid = true;
 
             Map oldMap = player.GetMap();
-            Map newMap = loc.InstanceId.HasValue ? Global.MapMgr.FindMap(loc.Location.GetMapId(), loc.InstanceId.Value) : Global.MapMgr.CreateMap(loc.Location.GetMapId(), GetPlayer());
+            Map newMap = loc.InstanceId.HasValue ? Global.MapMgr.FindMap(loc.Location.GetMapId(), loc.InstanceId.Value) : Global.MapMgr.CreateMap(loc.Location.GetMapId(), GetPlayer(), loc.LfgDungeonsId);
 
             ITransport transport = player.GetTransport();
             if (transport != null)

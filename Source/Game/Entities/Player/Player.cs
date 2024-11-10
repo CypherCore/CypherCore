@@ -8061,7 +8061,8 @@ namespace Game.Entities
     public class TeleportLocation
     {
         public WorldLocation Location;
-        public uint? InstanceId;
         public ObjectGuid? TransportGuid;
+        public uint? InstanceId;
+        public uint? LfgDungeonsId;
     }
 }

@@ -4871,9 +4871,10 @@ namespace Game.Maps
 
     public class InstanceMap : Map
     {
-        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock) : base(id, expiry, InstanceId, spawnMode)
+        public InstanceMap(uint id, long expiry, uint InstanceId, Difficulty spawnMode, int instanceTeam, InstanceLock instanceLock, uint? lfgDungeonsId) : base(id, expiry, InstanceId, spawnMode)
         {
             i_instanceLock = instanceLock;
+            i_lfgDungeonsId = lfgDungeonsId;
 
             //lets initialize visibility distance for dungeons
             InitVisibilityDistance();
@@ -5270,6 +5271,8 @@ namespace Game.Maps
 
         public Team GetTeamInInstance() { return GetTeamIdInInstance() == BattleGroundTeamId.Alliance ? Team.Alliance : Team.Horde; }
 
+        public uint? GetLfgDungeonsId() { return i_lfgDungeonsId; }
+
         public uint GetScriptId()
         {
             return i_script_id;
@@ -5296,6 +5299,7 @@ namespace Game.Maps
         InstanceScenario i_scenario;
         InstanceLock i_instanceLock;
         GroupInstanceReference i_owningGroupRef = new();
+        uint? i_lfgDungeonsId;
         DateTime? i_instanceExpireEvent;
     }
 

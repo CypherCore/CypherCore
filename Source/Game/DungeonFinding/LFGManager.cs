@@ -1323,7 +1323,7 @@ namespace Game.DungeonFinding
 
                 player.FinishTaxiFlight();
 
-                if (!player.TeleportTo(mapid, x, y, z, orientation))
+                if (!player.TeleportTo(new Game.Entities.TeleportLocation(){ Location = new WorldLocation(mapid, x, y, z, orientation), LfgDungeonsId = dungeon.id }))
                     error = LfgTeleportResult.NoReturnLocation;
             }
             else

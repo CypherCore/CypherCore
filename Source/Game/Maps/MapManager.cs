@@ -57,7 +57,7 @@ namespace Game.Entities
             return map;
         }
 
-        InstanceMap CreateInstance(uint mapId, uint instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group)
+        InstanceMap CreateInstance(uint mapId, uint instanceId, InstanceLock instanceLock, Difficulty difficulty, int team, Group group, uint? lfgDungeonsId)
         {
             // make sure we have a valid map id
             var entry = CliDB.MapStorage.LookupByKey(mapId);
@@ -73,7 +73,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {difficulty}");
 
-            InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock);
+            InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock, lfgDungeonsId);
             Cypher.Assert(map.IsDungeon());
 
             map.LoadRespawnTimes();
@@ -122,9 +122,9 @@ namespace Game.Entities
         /// </summary>
         /// <param name="mapId"></param>
         /// <param name="player"></param>
-        /// <param name="loginInstanceId"></param>
+        /// <param name="lfgDungeonsId"></param>
         /// <returns>the right instance for the object, based on its InstanceId</returns>
-        public Map CreateMap(uint mapId, Player player)
+        public Map CreateMap(uint mapId, Player player, uint? lfgDungeonsId = null)
         {
             if (player == null)
                 return null;
@@ -199,7 +199,7 @@ namespace Game.Entities
 
                     if (map == null)
                     {
-                        map = CreateInstance(mapId, newInstanceId, instanceLock, difficulty, SharedConst.GetTeamIdForTeam(Global.CharacterCacheStorage.GetCharacterTeamByGuid(instanceOwnerGuid)), group);
+                        map = CreateInstance(mapId, newInstanceId, instanceLock, difficulty, SharedConst.GetTeamIdForTeam(Global.CharacterCacheStorage.GetCharacterTeamByGuid(instanceOwnerGuid)), group, lfgDungeonsId);
                         if (group != null)
                             group.SetRecentInstance(mapId, instanceOwnerGuid, newInstanceId);
                         else
