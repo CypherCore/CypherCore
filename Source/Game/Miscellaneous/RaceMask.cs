@@ -15,7 +15,8 @@ namespace Game.Miscellaneous
             RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral) | RaceMask<ulong>.GetMaskForRace(Race.PandarenAlliance) | RaceMask<ulong>.GetMaskForRace(Race.PandarenHorde) | RaceMask<ulong>.GetMaskForRace(Race.Nightborne) |
             RaceMask<ulong>.GetMaskForRace(Race.HighmountainTauren) | RaceMask<ulong>.GetMaskForRace(Race.VoidElf) | RaceMask<ulong>.GetMaskForRace(Race.LightforgedDraenei) | RaceMask<ulong>.GetMaskForRace(Race.ZandalariTroll) |
             RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.Vulpera) | RaceMask<ulong>.GetMaskForRace(Race.MagharOrc) |
-            RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrHorde)));
+            RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrHorde) | RaceMask<ulong>.GetMaskForRace(Race.EarthenDwarfHorde) |
+            RaceMask<ulong>.GetMaskForRace(Race.EarthenDwarfAlliance)));
         
         public static RaceMask<ulong> Neutral = new RaceMask<ulong>((ulong)RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral));
 
@@ -23,7 +24,8 @@ namespace Game.Miscellaneous
            RaceMask<ulong>.GetMaskForRace(Race.Human) | RaceMask<ulong>.GetMaskForRace(Race.Dwarf) | RaceMask<ulong>.GetMaskForRace(Race.NightElf) |
            RaceMask<ulong>.GetMaskForRace(Race.Gnome) | RaceMask<ulong>.GetMaskForRace(Race.Draenei) | RaceMask<ulong>.GetMaskForRace(Race.Worgen) |
            RaceMask<ulong>.GetMaskForRace(Race.PandarenAlliance) | RaceMask<ulong>.GetMaskForRace(Race.VoidElf) | RaceMask<ulong>.GetMaskForRace(Race.LightforgedDraenei) |
-           RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance)));
+           RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) | 
+           RaceMask<ulong>.GetMaskForRace(Race.EarthenDwarfAlliance)));
 
         public static RaceMask<ulong> Horde = new RaceMask<ulong>((ulong)(AllPlayable.RawValue & (~(Neutral | Alliance).RawValue)));
     }
@@ -94,6 +96,10 @@ namespace Game.Miscellaneous
                     return 16;
                 case Race.DracthyrHorde:
                     return 15;
+                case Race.EarthenDwarfHorde:
+                    return 17;
+                case Race.EarthenDwarfAlliance:
+                    return 18;
                 default:
                     break;
             }

@@ -730,7 +730,14 @@ namespace Framework.Constants
         //DracthyrVisageAlliance = 75,
         //DracthyrVisageHorde= 76,
         //CompanionPterrodax  = 77
-        Max = 78
+        //CompanionNetherwingDrake = 80,
+        //RostrumStormGryphon      = 82,
+        //RostrumFaerieDragon      = 83,
+        EarthenDwarfHorde = 84, // Title Earthen Description Earthen (Horde) (Racemask Bit 17)
+        EarthenDwarfAlliance = 85, // Title Earthen Description Earthen (Alliance) (Racemask Bit 18)
+        //Harronir                   = 86,
+        //RostrumAirship            = 87,
+        Max = 88
     }
 
     public enum Expansion
