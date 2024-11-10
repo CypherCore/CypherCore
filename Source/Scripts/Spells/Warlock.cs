@@ -1042,7 +1042,7 @@ namespace Scripts.Spells.Warlock
     }
 
     // 5740 - Rain of Fire
-    [Script] /// Updated 7.1.5
+    [Script] /// Updated 11.0.2
     class spell_warl_rain_of_fire : AuraScript
     {
         void HandleDummyTick(AuraEffect aurEff)
@@ -1067,7 +1067,7 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new(HandleDummyTick, 3, AuraType.PeriodicDummy));
+            OnEffectPeriodic.Add(new(HandleDummyTick, 2, AuraType.PeriodicDummy));
         }
     }
 }
