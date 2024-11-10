@@ -17,6 +17,8 @@ namespace Scripts.Spells.Druid
     {
         public const uint Abundance = 207383;
         public const uint AbundanceEffect = 207640;
+        public const uint AstralCommunionEnergize = 450599;
+        public const uint AstralCommunionTalent = 450598;
         public const uint AstralSmolderDamage = 394061;
         public const uint BalanceT10Bonus = 70718;
         public const uint BalanceT10BonusProc = 70721;
@@ -156,6 +158,35 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    // 102560 - Incarnation: Chosen of Elune
+    // 194223 - Celestial Alignment
+    // 383410 - Celestial Alignment
+    [Script] // 390414 - Incarnation: Chosen of Elune
+    class spell_dru_astral_communion_celestial_alignment : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AstralCommunionTalent, SpellIds.AstralCommunionEnergize);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.AstralCommunionTalent);
+        }
+
+        void Energize()
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.AstralCommunionEnergize, new CastSpellExtraArgs()
+                .SetTriggeringSpell(GetSpell())
+                .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new(Energize));
+        }
+    }
+    
     [Script] // 394058 - Astral Smolder
     class spell_dru_astral_smolder : AuraScript
     {
@@ -317,7 +348,11 @@ namespace Scripts.Spells.Druid
         }
     }
 
-    [Script] // 194223 - Celestial Alignment
+    // 102560 - Incarnation: Chosen of Elune
+    // 194223 - Celestial Alignment
+    // 383410 - Celestial Alignment
+    // 390414 - Incarnation: Chosen of Elune
+    [Script]
     class spell_dru_celestial_alignment : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -325,7 +360,7 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.EclipseSolarAura, SpellIds.EclipseLunarAura, SpellIds.EclipseVisualSolar, SpellIds.EclipseVisualLunar);
         }
 
-        void TriggerEclipses(uint effIndex)
+        void TriggerEclipses()
         {
             Unit caster = GetCaster();
             CastSpellExtraArgs args = new();
@@ -340,7 +375,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(TriggerEclipses, 0, SpellEffectName.ApplyAura));
+            AfterCast.Add(new(TriggerEclipses));
         }
     }
 
@@ -468,7 +503,7 @@ namespace Scripts.Spells.Druid
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseLunarSpellCnt, SpellIds.EclipseSolarAura, SpellIds.EclipseLunarAura);
+            return ValidateSpellInfo(SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseLunarSpellCnt, SpellIds.EclipseSolarAura, SpellIds.EclipseLunarAura, SpellIds.AstralCommunionTalent, SpellIds.AstralCommunionEnergize);
         }
 
         void HandleProc(ProcEventInfo eventInfo)
@@ -525,6 +560,9 @@ namespace Scripts.Spells.Druid
                 {
                     // cast eclipse
                     target.CastSpell(target, eclipseAuraSpellId, TriggerCastFlags.FullMask);
+
+                    if (target.HasAura(SpellIds.AstralCommunionTalent))
+                        target.CastSpell(target, SpellIds.AstralCommunionEnergize, true);
 
                     // Remove stacks from other one as well
                     // reset remaining power on other spellId
