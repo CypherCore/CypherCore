@@ -1596,6 +1596,32 @@ namespace Game.Entities
             RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
+        public bool SetMoveCantSwim(bool cantSwim)
+        {
+            if (cantSwim == HasExtraUnitMovementFlag2(MovementFlags3.CantSwim))
+                return false;
+
+            if (cantSwim)
+                AddExtraUnitMovementFlag2(MovementFlags3.CantSwim);
+            else
+                RemoveExtraUnitMovementFlag2(MovementFlags3.CantSwim);
+
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(cantSwim ? ServerOpcodes.MoveSetCantSwim : ServerOpcodes.MoveUnsetCantSwim);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
         void SendSetVehicleRecId(uint vehicleId)
         {
             Player player = ToPlayer();

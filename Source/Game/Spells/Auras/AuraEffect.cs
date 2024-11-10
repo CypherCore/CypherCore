@@ -2408,6 +2408,22 @@ namespace Game.Spells
             target.SetDisableInertia(apply);
         }
 
+        void HandleSetCantSwim(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            if (!apply)
+            {
+                // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
+                if (target.HasAuraType(GetAuraType()))
+                    return;
+            }
+
+            target.SetMoveCantSwim(apply);
+        }
+
         /****************************/
         /***        THREAT        ***/
         /****************************/

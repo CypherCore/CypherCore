@@ -87,5 +87,6 @@ namespace Framework.Constants
         DisableInertia = 0x01,
         CanAdvFly = 0x02,
         AdvFlying = 0x04,
+        CantSwim = 0x2000,
     }
 }

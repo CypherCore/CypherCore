@@ -552,7 +552,7 @@ namespace Framework.Constants
         TriggerSpellOnStackAmount = 542, // NYI
         Unk543 = 543,
         Unk544 = 544,
-        Unk545 = 545, // prevent swim
+        MoveSetCantSwim = 545,
         Unk546 = 546,
         Unk547 = 547,
         Unk548 = 548,
