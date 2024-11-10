@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Scripts.Spells.Warlock
 {
     struct SpellIds
     {
+        public const uint CorruptionDamage = 146739;
         public const uint CreateHealthstone = 23517;
         public const uint DemonicCircleAllowCast = 62388;
         public const uint DemonicCircleSummon = 48018;
@@ -556,27 +558,76 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 27285 - Seed of Corruption
+    [Script] // 27285 - Seed of Corruption (damage)
     class spell_warl_seed_of_corruption : SpellScript
     {
-        void FilterTargets(List<WorldObject> targets)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            if (GetExplTargetUnit() != null)
-                targets.Remove(GetExplTargetUnit());
+            return ValidateSpellInfo(SpellIds.CorruptionDamage);
+        }
+
+        void HandleHit(uint effIndex)
+        {
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.CorruptionDamage, true);
         }
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script]
+    class spell_warl_seed_of_corruption_dummy : SpellScript
+    {
+        void RemoveVisualMissile(ref WorldObject target)
+        {
+            target = null;
+        }
+
+        void SelectTarget(List<WorldObject> targets)
+        {
+            if (targets.Count < 2)
+                return;
+
+            if (!GetExplTargetUnit().HasAura(GetSpellInfo().Id, GetCaster().GetGUID()))
+            {
+                // primary target doesn't have seed, keep it
+                targets.Clear();
+                targets.Add(GetExplTargetUnit());
+            }
+            else
+            {
+                // primary target has seed, select random other target with no seed
+                targets.RemoveAll(new UnitAuraCheck(true, GetSpellInfo().Id, GetCaster().GetGUID()));
+                if (!targets.Empty())
+                    targets.RandomResize(1);
+                else
+                    targets.Add(GetExplTargetUnit());
+            }
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new(RemoveVisualMissile, 0, Targets.UnitTargetEnemy));
+            OnObjectAreaTargetSelect.Add(new(SelectTarget, 1, Targets.UnitDestAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new(SelectTarget, 2, Targets.UnitDestAreaEnemy));
         }
     }
 
     [Script] // 27243 - Seed of Corruption
-    class spell_warl_seed_of_corruption_dummy : AuraScript
+    class spell_warl_seed_of_corruption_dummy_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.SeedOfCorruptionDamage);
+        }
+
+        void OnPeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                caster.CastSpell(GetTarget(), SpellIds.SeedOfCorruptionDamage, aurEff);
         }
 
         void CalculateBuffer(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -591,29 +642,38 @@ namespace Scripts.Spells.Warlock
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
+
             DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            if (damageInfo == null || damageInfo.GetDamage() == 0)
+            if (damageInfo == null)
                 return;
-
-            int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
-            if (amount > 0)
-            {
-                aurEff.SetAmount(amount);
-                if (!GetTarget().HealthBelowPctDamaged(1, damageInfo.GetDamage()))
-                    return;
-            }
-
-            Remove();
 
             Unit caster = GetCaster();
             if (caster == null)
                 return;
+
+            if (damageInfo.GetAttacker() == null || damageInfo.GetAttacker() != caster)
+                return;
+
+            // other seed explosions detonate this instantly, no matter what damage amount is
+            if (damageInfo.GetSpellInfo() == null || damageInfo.GetSpellInfo().Id != SpellIds.SeedOfCorruptionDamage)
+            {
+                int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
+                if (amount > 0)
+                {
+                    aurEff.SetAmount(amount);
+                    if (!GetTarget().HealthBelowPctDamaged(1, damageInfo.GetDamage()))
+                        return;
+                }
+            }
+
+            Remove();
 
             caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionDamage, aurEff);
         }
 
         public override void Register()
         {
+            OnEffectPeriodic.Add(new(OnPeriodic, 1, AuraType.PeriodicDamage));
             DoEffectCalcAmount.Add(new(CalculateBuffer, 2, AuraType.Dummy));
             OnEffectProc.Add(new(HandleProc, 2, AuraType.Dummy));
         }

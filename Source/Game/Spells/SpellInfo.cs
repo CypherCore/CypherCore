@@ -747,7 +747,6 @@ namespace Game.Spells
                 case SpellSpecificType.Curse:
                 case SpellSpecificType.Bane:
                 case SpellSpecificType.Aspect:
-                case SpellSpecificType.WarlockCorruption:
                     return spellSpec == spellInfo.GetSpellSpecific();
                 default:
                     return false;
@@ -1548,10 +1547,6 @@ namespace Game.Spells
                     // Warlock (Demon Armor | Demon Skin | Fel Armor)
                     if (SpellFamilyFlags[1].HasAnyFlag(0x20000020u) || SpellFamilyFlags[2].HasAnyFlag(0x00000010u))
                         _spellSpecific = SpellSpecificType.WarlockArmor;
-
-                    //seed of corruption and corruption
-                    if (SpellFamilyFlags[1].HasAnyFlag(0x10u) || SpellFamilyFlags[0].HasAnyFlag(0x2u))
-                        _spellSpecific = SpellSpecificType.WarlockCorruption;
                     break;
                 }
                 case SpellFamilyNames.Priest:

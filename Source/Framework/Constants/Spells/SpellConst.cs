@@ -283,7 +283,6 @@ namespace Framework.Constants
         MageArmor = 9,
         ElementalShield = 10,
         MagePolymorph = 11,
-        WarlockCorruption = 17,
         Food = 19,
         Drink = 20,
         FoodAndDrink = 21,
