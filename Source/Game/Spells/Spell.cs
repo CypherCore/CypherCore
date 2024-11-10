@@ -9886,9 +9886,6 @@ namespace Game.Spells
         public CastSpellExtraArgs SetTriggeringAura(AuraEffect triggeringAura)
         {
             TriggeringAura = triggeringAura;
-            if (triggeringAura != null)
-                OriginalCastId = triggeringAura.GetBase().GetCastId();
-
             return this;
         }
 
