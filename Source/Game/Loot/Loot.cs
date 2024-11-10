@@ -519,8 +519,8 @@ namespace Game.Loots
                 m_voteMask = RollMask.AllMask;
                 if (itemTemplate.HasFlag(ItemFlags2.CanOnlyRollGreed))
                     m_voteMask = m_voteMask & ~RollMask.Need;
-                var disenchant = GetItemDisenchantLoot();
-                if (disenchant == null || disenchant.SkillRequired > enchantingSkill)
+                var disenchantSkillRequired = GetItemDisenchantSkillRequired();
+                if (!disenchantSkillRequired.HasValue || disenchantSkillRequired > enchantingSkill)
                     m_voteMask = m_voteMask & ~RollMask.Disenchant;
 
                 if (playerCount > 1)                                    // check if more than one player can loot this item
@@ -643,7 +643,30 @@ namespace Game.Loots
             return notVoted == 0;
         }
 
-        ItemDisenchantLootRecord GetItemDisenchantLoot()
+        uint? GetItemDisenchantLootId()
+        {
+            ItemInstance itemInstance = new(m_lootItem);
+
+            BonusData bonusData = new(itemInstance);
+            if (!bonusData.CanDisenchant)
+                return null;
+
+            if (bonusData.DisenchantLootId != 0)
+                return bonusData.DisenchantLootId;
+
+            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
+
+            // ignore temporary item level scaling (pvp or timewalking)
+            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, (uint)bonusData.RequiredLevel, 0, 0, 0, 0, false, 0);
+
+            var disenchantLoot = Item.GetBaseDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
+            if (disenchantLoot == null)
+                return null;
+
+            return disenchantLoot.Id;
+        }
+
+        ushort? GetItemDisenchantSkillRequired()
         {
             ItemInstance itemInstance = new(m_lootItem);
 
@@ -652,8 +675,15 @@ namespace Game.Loots
                 return null;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
-            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, 1, 0, 0, 0, 0, false, 0);
-            return Item.GetDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
+
+            // ignore temporary item level scaling (pvp or timewalking)
+            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, (uint)bonusData.RequiredLevel, 0, 0, 0, 0, false, 0);
+
+            var disenchantLoot = Item.GetBaseDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
+            if (disenchantLoot == null)
+                return null;
+
+            return disenchantLoot.SkillRequired;
         }
 
         // terminate the roll
@@ -682,9 +712,8 @@ namespace Game.Loots
 
                     if (winnerPair.Value.Vote == RollVote.Disenchant)
                     {
-                        var disenchant = GetItemDisenchantLoot();
                         Loot loot = new(m_map, m_loot.GetOwnerGUID(), LootType.Disenchanting, null);
-                        loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true, false, LootModes.Default, ItemContext.None);
+                        loot.FillLoot(GetItemDisenchantLootId().GetValueOrDefault(), LootStorage.Disenchant, player, true, false, LootModes.Default, ItemContext.None);
                         if (!loot.AutoStore(player, ItemConst.NullBag, ItemConst.NullSlot, true))
                         {
                             for (uint i = 0; i < loot.items.Count; ++i)
@@ -1141,7 +1170,7 @@ namespace Game.Loots
                     }
                     case LootItemType.Currency:
                     {
-                        LootCurrency  lootCurrency = new();
+                        LootCurrency lootCurrency = new();
                         lootCurrency.CurrencyID = item.itemid;
                         lootCurrency.Quantity = item.count;
                         lootCurrency.LootListID = (byte)item.LootListId;

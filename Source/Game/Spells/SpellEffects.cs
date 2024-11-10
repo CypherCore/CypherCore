@@ -3106,7 +3106,7 @@ namespace Game.Spells
                 if (m_CastItem == null)
                     caster.UpdateCraftSkill(m_spellInfo);
                 itemTarget.loot = new Loot(caster.GetMap(), itemTarget.GetGUID(), LootType.Disenchanting, null);
-                itemTarget.loot.FillLoot(itemTarget.GetDisenchantLoot(caster).Id, LootStorage.Disenchant, caster, true);
+                itemTarget.loot.FillLoot(itemTarget.GetDisenchantLootId().GetValueOrDefault(), LootStorage.Disenchant, caster, true);
                 caster.SendLoot(itemTarget.loot);
             }
 

@@ -1876,15 +1876,40 @@ namespace Game.Entities
             return 0f;
         }
 
-        public ItemDisenchantLootRecord GetDisenchantLoot(Player owner)
+        public uint? GetDisenchantLootId()
         {
             if (!_bonusData.CanDisenchant)
                 return null;
 
-            return GetDisenchantLoot(GetTemplate(), (uint)GetQuality(), GetItemLevel(owner));
+            if (_bonusData.DisenchantLootId != 0)
+                return _bonusData.DisenchantLootId;
+
+            // ignore temporary item level scaling (pvp or timewalking)
+            uint itemLevel = GetItemLevel(GetTemplate(), _bonusData, (uint)_bonusData.RequiredLevel, GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, 0);
+
+            var disenchantLoot = GetBaseDisenchantLoot(GetTemplate(), (uint)GetQuality(), itemLevel);
+            if (disenchantLoot == null)
+                return null;
+
+            return disenchantLoot.Id;
         }
 
-        public static ItemDisenchantLootRecord GetDisenchantLoot(ItemTemplate itemTemplate, uint quality, uint itemLevel)
+        public ushort? GetDisenchantSkillRequired()
+        {
+            if (!_bonusData.CanDisenchant)
+                return null;
+
+            // ignore temporary item level scaling (pvp or timewalking)
+            uint itemLevel = GetItemLevel(GetTemplate(), _bonusData, (uint)_bonusData.RequiredLevel, GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, 0);
+
+            var disenchantLoot = GetBaseDisenchantLoot(GetTemplate(), (uint)GetQuality(), itemLevel);
+            if (disenchantLoot == null)
+                return null;
+
+            return disenchantLoot.SkillRequired;
+        }
+
+        public static ItemDisenchantLootRecord GetBaseDisenchantLoot(ItemTemplate itemTemplate, uint quality, uint itemLevel)
         {
             if (itemTemplate.HasFlag(ItemFlags.Conjured) || itemTemplate.HasFlag(ItemFlags.NoDisenchant) || itemTemplate.GetBonding() == ItemBondingType.Quest)
                 return null;
@@ -2833,13 +2858,11 @@ namespace Game.Entities
             ItemLevelBonus = 0;
             RequiredLevel = proto.GetBaseRequiredLevel();
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
+            {
                 ItemStatType[i] = proto.GetStatModifierBonusStat(i);
-
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
                 StatPercentEditor[i] = proto.GetStatPercentEditor(i);
-
-            for (uint i = 0; i < ItemConst.MaxStats; ++i)
                 ItemStatSocketCostMultiplier[i] = proto.GetStatPercentageOfSocket(i);
+            }
 
             for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
@@ -2876,6 +2899,7 @@ namespace Game.Entities
 
             _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;
+            _state.DisenchantLootPriority = int.MaxValue;
             _state.ScalingStatDistributionPriority = int.MaxValue;
             _state.AzeriteTierUnlockSetPriority = int.MaxValue;
             _state.RequiredLevelCurvePriority = int.MaxValue;
@@ -2970,6 +2994,13 @@ namespace Game.Entities
                         HasFixedLevel = type == ItemBonusType.ScalingStatDistributionFixed;
                     }
                     break;
+                case ItemBonusType.DisenchantLootId:
+                    if (values[1] < _state.DisenchantLootPriority)
+                    {
+                        DisenchantLootId = (uint)values[0];
+                        _state.DisenchantLootPriority = values[1];
+                    }
+                    break;
                 case ItemBonusType.Bounding:
                     Bonding = (ItemBondingType)values[0];
                     break;
@@ -3041,6 +3072,7 @@ namespace Game.Entities
         {
             public int SuffixPriority;
             public int AppearanceModPriority;
+            public int DisenchantLootPriority;
             public int ScalingStatDistributionPriority;
             public int AzeriteTierUnlockSetPriority;
             public int RequiredLevelCurvePriority;

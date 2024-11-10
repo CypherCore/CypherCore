@@ -7036,10 +7036,10 @@ namespace Game.Spells
                         if (itemProto == null)
                             return SpellCastResult.CantBeSalvaged;
 
-                        ItemDisenchantLootRecord itemDisenchantLoot = item.GetDisenchantLoot(m_caster.ToPlayer());
-                        if (itemDisenchantLoot == null)
+                        ushort? disenchantSkillRequired = item.GetDisenchantSkillRequired();
+                        if (!disenchantSkillRequired.HasValue)
                             return SpellCastResult.CantBeSalvaged;
-                        if (itemDisenchantLoot.SkillRequired > player.GetSkillValue(SkillType.Enchanting))
+                        if (disenchantSkillRequired > player.GetSkillValue(SkillType.Enchanting))
                             return SpellCastResult.CantBeSalvagedSkill;
                         break;
                     }
@@ -9816,11 +9816,11 @@ namespace Game.Spells
     public class CastSpellExtraArgsInit
     {
         public TriggerCastFlags TriggerFlags;
+        public Difficulty CastDifficulty;
         public Item CastItem;
         public Spell TriggeringSpell;
         public AuraEffect TriggeringAura;
         public ObjectGuid OriginalCaster;
-        public Difficulty CastDifficulty;
         public ObjectGuid OriginalCastId;
         public int? OriginalCastItemLevel;
         public SpellValueOverride Value;

@@ -146,6 +146,18 @@ namespace Game.Loots
                     lootIdSetUsed.Add(lootid);
             }
 
+            foreach (var (_, itemBonus) in CliDB.ItemBonusStorage)
+            {
+                if (itemBonus.BonusType != ItemBonusType.DisenchantLootId)
+                    continue;
+
+                uint lootid = (uint)itemBonus.Value[0];
+                if (!lootIdSet.Contains(lootid))
+                    Disenchant.ReportNonExistingId(lootid, 0);
+                else
+                    lootIdSetUsed.Add(lootid);
+            }
+
             foreach (var lootId in lootIdSetUsed)
                 lootIdSet.Remove(lootId);
 
