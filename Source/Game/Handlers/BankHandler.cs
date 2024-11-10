@@ -50,7 +50,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BankerActivate, Processing = PacketProcessing.Inplace)]
         void HandleBankerActivate(BankerActivate bankerActivate)
         {
-            if (bankerActivate.InteractionType != PlayerInteractionType.Banker)
+            if (bankerActivate.InteractionType != PlayerInteractionType.Banker && bankerActivate.InteractionType != PlayerInteractionType.CharacterBanker)
                 return;
 
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(bankerActivate.Banker, NPCFlags.AccountBanker | NPCFlags.Banker, NPCFlags2.None);
