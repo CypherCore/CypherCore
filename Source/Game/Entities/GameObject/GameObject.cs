@@ -4676,7 +4676,8 @@ namespace Game.Entities
 
         float CalculatePointsPerSecond(List<Player> targetList)
         {
-            int delta = 0;
+            int hordePlayers = 0;
+            int alliancePlayers = 0;
 
             foreach (Player player in targetList)
             {
@@ -4684,28 +4685,45 @@ namespace Game.Entities
                     continue;
 
                 if (player.GetTeam() == Team.Horde)
-                    delta--;
+                    hordePlayers--;
                 else
-                    delta++;
+                    alliancePlayers++;
             }
+
+            sbyte factionCoefficient = 0; // alliance superiority = 1; horde superiority = -1
+
+            if (alliancePlayers > hordePlayers)
+                factionCoefficient = 1;
+            else if (hordePlayers > alliancePlayers)
+                factionCoefficient = -1;
+
+            float timeNeeded = CalculateTimeNeeded(hordePlayers, alliancePlayers);
+            if (timeNeeded == 0.0f)
+                return 0.0f;
+
+            return 100.0f / timeNeeded * factionCoefficient;
+        }
+
+        float CalculateTimeNeeded(int hordePlayers, int alliancePlayers)
+        {
+            uint uncontestedTime = _owner.GetGoInfo().ControlZone.UncontestedTime;
+            uint delta = (uint)Math.Abs(alliancePlayers - hordePlayers);
+            uint minSuperiority = _owner.GetGoInfo().ControlZone.minSuperiority;
+
+            if (delta < minSuperiority)
+                return 0;
+
+            // return the uncontested time if controlzone is not contested
+            if (uncontestedTime != 0 && (hordePlayers == 0 || alliancePlayers == 0))
+                return uncontestedTime;
 
             uint minTime = _owner.GetGoInfo().ControlZone.minTime;
             uint maxTime = _owner.GetGoInfo().ControlZone.maxTime;
-            uint minSuperiority = _owner.GetGoInfo().ControlZone.minSuperiority;
             uint maxSuperiority = _owner.GetGoInfo().ControlZone.maxSuperiority;
 
-            if (Math.Abs(delta) < minSuperiority)
-                return 0;
-
-            float slope = ((float)minTime - maxTime) / Math.Max(maxSuperiority - minSuperiority, 1);
+            float slope = (minTime - maxTime) / MathF.Max(maxSuperiority - minSuperiority, 1);
             float intercept = maxTime - slope * minSuperiority;
-            float timeNeeded = slope * Math.Abs(delta) + intercept;
-            float percentageIncrease = 100.0f / timeNeeded;
-
-            if (delta < 0)
-                percentageIncrease *= -1;
-
-            return percentageIncrease;
+            return slope * delta + intercept;
         }
 
         void HandleUnitEnterExit(List<Player> newTargetList)
