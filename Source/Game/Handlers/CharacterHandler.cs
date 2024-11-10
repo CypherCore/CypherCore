@@ -611,12 +611,12 @@ namespace Game
                     stmt.AddValue(2, Global.RealmMgr.GetCurrentRealmId().Index);
                     loginTransaction.Append(stmt);
 
-                    DB.Login.CommitTransaction(loginTransaction);
-
                     AddTransactionCallback(DB.Characters.AsyncCommitTransaction(characterTransaction)).AfterComplete(success =>
                     {
                         if (success)
                         {
+                            DB.Login.CommitTransaction(loginTransaction);
+
                             Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Create Character: {2} {3}", GetAccountId(), GetRemoteAddress(), createInfo.Name, newChar.GetGUID().ToString());
                             Global.ScriptMgr.OnPlayerCreate(newChar);
                             Global.CharacterCacheStorage.AddCharacterCacheEntry(newChar.GetGUID(), GetAccountId(), newChar.GetName(), (byte)newChar.GetNativeGender(), (byte)newChar.GetRace(), (byte)newChar.GetClass(), (byte)newChar.GetLevel(), false);
