@@ -133,7 +133,7 @@ namespace Game.DataStorage
     public sealed class ItemBonusTreeNodeRecord
     {
         public uint Id;
-        public byte ItemContext;
+        public sbyte ItemContext;
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
