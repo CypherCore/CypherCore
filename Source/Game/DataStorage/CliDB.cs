@@ -439,7 +439,7 @@ namespace Game.DataStorage
                 if (node.HasFlag(TaxiNodeFlags.ShowOnAllianceMap))
                     AllianceTaxiNodesMask[field] |= submask;
 
-                int uiMapId;
+                uint uiMapId;
                 if (!Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId))
                     Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId);
 

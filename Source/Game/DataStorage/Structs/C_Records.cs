@@ -64,7 +64,7 @@ namespace Game.DataStorage
         public long RaceMask;
         public sbyte ChrClassID;
         public int Purpose;
-        public sbyte ItemContext;
+        public byte ItemContext;
 
         public bool IsForNewCharacter() { return Purpose == 9; }
     }
@@ -255,7 +255,7 @@ namespace Game.DataStorage
     public sealed class ChrRaceXChrModelRecord
     {
         public uint Id;
-        public int ChrRacesID;
+        public uint ChrRacesID;
         public int ChrModelID;
         public int Sex;
         public int AllowedTransmogSlots;

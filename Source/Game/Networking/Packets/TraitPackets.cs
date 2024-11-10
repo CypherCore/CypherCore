@@ -201,7 +201,7 @@ namespace Game.Networking.Packets
         public TraitCombatConfigFlags CombatConfigFlags;
         public int LocalIdentifier;  // Local to specialization
         public uint SkillLineID;
-        public int TraitSystemID;
+        public uint TraitSystemID;
         public List<TraitEntryPacket> Entries = new();
         public List<TraitSubTreeCachePacket> SubTrees = new();
         public string Name = "";
@@ -242,7 +242,7 @@ namespace Game.Networking.Packets
                     SkillLineID = data.ReadUInt32();
                     break;
                 case TraitConfigType.Generic:
-                    TraitSystemID = data.ReadInt32();
+                    TraitSystemID = data.ReadUInt32();
                     break;
                 default:
                     break;
@@ -285,7 +285,7 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(SkillLineID);
                     break;
                 case TraitConfigType.Generic:
-                    data.WriteInt32(TraitSystemID);
+                    data.WriteUInt32(TraitSystemID);
                     break;
                 default:
                     break;

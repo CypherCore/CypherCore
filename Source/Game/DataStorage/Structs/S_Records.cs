@@ -122,7 +122,7 @@ namespace Game.DataStorage
     public sealed class SkillLineXTraitTreeRecord
     {
         public uint Id;
-        public int SkillLineID;
+        public uint SkillLineID;
         public int TraitTreeID;
         public int OrderIndex;
     }

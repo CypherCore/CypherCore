@@ -100,7 +100,7 @@ namespace Game.DataStorage
     public sealed class ItemBonusListGroupEntryRecord
     {
         public uint Id;
-        public int ItemBonusListGroupID;
+        public uint ItemBonusListGroupID;
         public int ItemBonusListID;
         public int ItemLevelSelectorID;
         public int SequenceValue;
@@ -133,7 +133,7 @@ namespace Game.DataStorage
     public sealed class ItemBonusTreeNodeRecord
     {
         public uint Id;
-        public sbyte ItemContext;
+        public byte ItemContext;
         public ushort ChildItemBonusTreeID;
         public ushort ChildItemBonusListID;
         public ushort ChildItemLevelSelectorID;
@@ -164,7 +164,7 @@ namespace Game.DataStorage
     public sealed class ItemContextPickerEntryRecord
     {
         public uint Id;
-        public sbyte ItemCreationContext;
+        public byte ItemCreationContext;
         public byte OrderIndex;
         public int PVal;
         public int LabelID;

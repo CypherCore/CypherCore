@@ -15,7 +15,7 @@ namespace Game.Entities
         static MultiMap<uint /*azeriteUnlockMappingSetId*/, AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new();
         static MultiMap<uint /*itemBonusTreeId*/, ChallengeModeItemBonusOverrideRecord> _challengeModeItemBonusOverrides = new();
         static MultiMap<uint /*itemBonusListId*/, ItemBonusRecord> _itemBonusLists = new();
-        static MultiMap<int, ItemBonusListGroupEntryRecord> _itemBonusListGroupEntries = new();
+        static MultiMap<uint, ItemBonusListGroupEntryRecord> _itemBonusListGroupEntries = new();
         static Dictionary<short /*itemLevelDelta*/, uint /*itemBonusListId*/> _itemLevelDeltaToBonusListContainer = new();
         static SortedMultiMap<uint /*itemLevelSelectorQualitySetId*/, ItemLevelSelectorQualityRecord> _itemLevelQualitySelectorQualities = new();
         static MultiMap<uint /*itemBonusTreeId*/, ItemBonusTreeNodeRecord> _itemBonusTrees = new();

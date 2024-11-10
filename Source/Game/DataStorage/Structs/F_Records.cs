@@ -96,7 +96,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Reaction;
-        public int FriendshipRepID;
+        public uint FriendshipRepID;
         public int ReactionThreshold;
         public int OverrideColor;
     }

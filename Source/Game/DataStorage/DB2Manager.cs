@@ -575,7 +575,7 @@ namespace Game.DataStorage
                 _uiMapAssignmentByWmoGroup[i] = new MultiMap<int, UiMapAssignmentRecord>();
             }
 
-            MultiMap<int, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
+            MultiMap<uint, UiMapAssignmentRecord> uiMapAssignmentByUiMap = new();
             foreach (UiMapAssignmentRecord uiMapAssignment in UiMapAssignmentStorage.Values)
             {
                 uiMapAssignmentByUiMap.Add(uiMapAssignment.UiMapID, uiMapAssignment);
@@ -594,9 +594,9 @@ namespace Game.DataStorage
                 }
             }
 
-            Dictionary<Tuple<int, uint>, UiMapLinkRecord> uiMapLinks = new();
+            Dictionary<Tuple<uint, int>, UiMapLinkRecord> uiMapLinks = new();
             foreach (UiMapLinkRecord uiMapLink in UiMapLinkStorage.Values)
-                uiMapLinks[Tuple.Create(uiMapLink.ParentUiMapID, (uint)uiMapLink.ChildUiMapID)] = uiMapLink;
+                uiMapLinks[Tuple.Create(uiMapLink.ParentUiMapID, uiMapLink.ChildUiMapID)] = uiMapLink;
 
             foreach (UiMapRecord uiMap in UiMapStorage.Values)
             {
@@ -1022,7 +1022,7 @@ namespace Game.DataStorage
             return broadcastText.Text[SharedConst.DefaultLocale];
         }
 
-        public int GetBroadcastTextDuration(int broadcastTextId, Locale locale = Locale.enUS)
+        public int GetBroadcastTextDuration(uint broadcastTextId, Locale locale = Locale.enUS)
         {
             return _broadcastTextDurations.LookupByKey((broadcastTextId, SharedConst.WowLocaleToCascLocaleBit[(int)locale]));
         }
@@ -2185,7 +2185,7 @@ namespace Game.DataStorage
             return nearestMapAssignment.UiMapAssignment;
         }
 
-        Vector2 CalculateGlobalUiMapPosition(int uiMapID, Vector2 uiPosition)
+        Vector2 CalculateGlobalUiMapPosition(uint uiMapID, Vector2 uiPosition)
         {
             UiMapRecord uiMap = UiMapStorage.LookupByKey(uiMapID);
             while (uiMap != null)
@@ -2211,14 +2211,14 @@ namespace Game.DataStorage
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out _, out newPos);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId)
+        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out uint uiMapId)
         {
             return GetUiMapPosition(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system, local, out uiMapId, out _);
         }
 
-        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out int uiMapId, out Vector2 newPos)
+        public bool GetUiMapPosition(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapSystem system, bool local, out uint uiMapId, out Vector2 newPos)
         {
-            uiMapId = -1;
+            uiMapId = uint.MaxValue;
             newPos = new Vector2();
 
             UiMapAssignmentRecord uiMapAssignment = FindNearestMapAssignment(x, y, z, mapId, areaId, wmoDoodadPlacementId, wmoGroupId, system);
@@ -2322,7 +2322,7 @@ namespace Game.DataStorage
         AzeriteItemMilestonePowerRecord[] _azeriteItemMilestonePowerByEssenceSlot = new AzeriteItemMilestonePowerRecord[SharedConst.MaxAzeriteEssenceSlot];
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
         Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
-        Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
+        Dictionary<(uint broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         Dictionary<(sbyte, sbyte), CharBaseInfoRecord> _charBaseInfoByRaceAndClass = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];

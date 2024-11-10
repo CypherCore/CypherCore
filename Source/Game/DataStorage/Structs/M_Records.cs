@@ -164,7 +164,7 @@ namespace Game.DataStorage
     public sealed class MawPowerRecord
     {
         public uint Id;
-        public int SpellID;
+        public uint SpellID;
         public int MawPowerRarityID;
     }
 

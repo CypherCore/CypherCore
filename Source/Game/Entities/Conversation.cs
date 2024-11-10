@@ -146,7 +146,7 @@ namespace Game.Entities
                     if (locale == Locale.enUS)
                         lineField.StartTime = (uint)_lastLineEndTimes[(int)locale].TotalMilliseconds;
 
-                    int broadcastTextDuration = Global.DB2Mgr.GetBroadcastTextDuration((int)convoLine.BroadcastTextID, locale);
+                    int broadcastTextDuration = Global.DB2Mgr.GetBroadcastTextDuration(convoLine.BroadcastTextID, locale);
                     if (broadcastTextDuration != 0)
                         _lastLineEndTimes[(int)locale] += TimeSpan.FromMilliseconds(broadcastTextDuration);
 
@@ -236,7 +236,7 @@ namespace Game.Entities
                 return 0;
             }
 
-            int textDuration = Global.DB2Mgr.GetBroadcastTextDuration((int)convoLine.BroadcastTextID, locale);
+            int textDuration = Global.DB2Mgr.GetBroadcastTextDuration(convoLine.BroadcastTextID, locale);
             if (textDuration == 0)
                 return 0;
 

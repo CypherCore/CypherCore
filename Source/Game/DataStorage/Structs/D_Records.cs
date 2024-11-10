@@ -43,7 +43,7 @@ namespace Game.DataStorage
         public byte MinPlayers;
         public byte MaxPlayers;
         public ushort Flags;
-        public sbyte ItemContext;
+        public byte ItemContext;
         public byte ToggleDifficultyID;
         public uint GroupSizeHealthCurveID;
         public uint GroupSizeDmgCurveID;
@@ -56,7 +56,7 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public uint Id;
-        public short MapID;
+        public ushort MapID;
         public int DifficultyID;
         public int OrderIndex;
         public int CompleteWorldStateID;

@@ -106,7 +106,7 @@ namespace Game.DataStorage
         public sbyte ChrSpecializationRole;
         public uint ModifierTreeID;
         public sbyte PowerType;
-        public sbyte PowerTypeComp;
+        public byte PowerTypeComp;
         public byte PowerTypeValue;
         public int WeaponSubclassMask;
         public byte MaxGuildLevel;
@@ -230,7 +230,7 @@ namespace Game.DataStorage
     {
         public string Description;
         public uint Id;
-        public int SpecID;
+        public uint SpecID;
         public uint SpellID;
         public uint OverridesSpellID;
         public int Flags;
@@ -263,7 +263,7 @@ namespace Game.DataStorage
         public short MaxRating;
         public int PrevTier;
         public int NextTier;
-        public sbyte BracketID;
+        public byte BracketID;
         public sbyte Rank;
         public int RankIconFileDataID;
     }

@@ -224,7 +224,7 @@ namespace Game.Entities
         {
             m_azeritePowers = Global.DB2Mgr.GetAzeritePowers(GetEntry());
             if (m_azeritePowers != null)
-                m_maxTier = m_azeritePowers.Aggregate((a1, a2) => a1.Tier < a2.Tier ? a2 : a1).Tier;
+                m_maxTier = m_azeritePowers.Max(p => p.Tier);
         }
 
         public int GetMaxAzeritePowerTier() { return m_maxTier; }

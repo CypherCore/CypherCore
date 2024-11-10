@@ -1095,7 +1095,7 @@ namespace Game.Entities
                             traitConfig.SkillLineID = configsResult.Read<uint>(5);
                             break;
                         case TraitConfigType.Generic:
-                            traitConfig.TraitSystemID = configsResult.Read<int>(6);
+                            traitConfig.TraitSystemID = configsResult.Read<uint>(6);
                             break;
                         default:
                             break;

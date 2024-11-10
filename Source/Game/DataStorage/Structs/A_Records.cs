@@ -35,7 +35,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public uint Id;
         public short Parent;
-        public sbyte UiOrder;
+        public byte UiOrder;
     }
 
     public sealed class AdventureJournalRecord

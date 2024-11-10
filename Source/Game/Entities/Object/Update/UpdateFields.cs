@@ -4348,7 +4348,7 @@ namespace Game.Entities
         public UpdateField<int> ChrSpecializationID = new(8, 9);
         public UpdateField<int> CombatConfigFlags = new(8, 10);
         public UpdateField<int> LocalIdentifier = new(8, 11);
-        public UpdateField<int> TraitSystemID = new(12, 13);
+        public UpdateField<uint> TraitSystemID = new(12, 13);
 
         public TraitConfig() : base(14) { }
 
@@ -4370,7 +4370,7 @@ namespace Game.Entities
             }
             if (Type == 3)
             {
-                data.WriteInt32(TraitSystemID);
+                data.WriteUInt32(TraitSystemID);
             }
             for (int i = 0; i < Entries.Size(); ++i)
             {
@@ -4482,7 +4482,7 @@ namespace Game.Entities
                 {
                     if (Type == 3)
                     {
-                        data.WriteInt32(TraitSystemID);
+                        data.WriteUInt32(TraitSystemID);
                     }
                 }
             }

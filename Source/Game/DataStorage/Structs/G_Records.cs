@@ -77,7 +77,7 @@ namespace Game.DataStorage
         public string Description;
         public string Tooltip;
         public sbyte GarrTypeID;
-        public sbyte BuildingType;
+        public byte BuildingType;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
         public int GarrSiteID;
@@ -187,7 +187,7 @@ namespace Game.DataStorage
         public uint EnvGarrMechanicID;
         public int EnvGarrMechanicTypeID;
         public uint PlayerConditionID;
-        public int GarrMissionSetID;
+        public uint GarrMissionSetID;
         public sbyte TargetLevel;
         public ushort TargetItemLevel;
         public int MissionDuration;
@@ -208,7 +208,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public sbyte PlotType;
+        public byte PlotType;
         public uint HordeConstructObjID;
         public uint AllianceConstructObjID;
         public byte Flags;
@@ -266,7 +266,7 @@ namespace Game.DataStorage
         public int GarrTalentTreeType;
         public int PlayerConditionID;
         public byte FeatureTypeIndex;
-        public sbyte FeatureSubtypeIndex;
+        public byte FeatureSubtypeIndex;
         public int CurrencyID;
     }
 
@@ -295,7 +295,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public sbyte GlyphType;
+        public byte GlyphType;
         public byte GlyphExclusiveCategoryID;
         public uint SpellIconID;
     }

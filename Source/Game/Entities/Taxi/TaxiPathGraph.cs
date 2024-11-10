@@ -17,7 +17,7 @@ namespace Game.Entities
         static List<TaxiNodesRecord> m_nodesByVertex = new();
         static Dictionary<uint, uint> m_verticesByNode = new();
 
-        static void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out int uiMapId)
+        static void GetTaxiMapPosition(Vector3 position, int mapId, out Vector2 uiMapPosition, out uint uiMapId)
         {
             if (!Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId, out uiMapPosition))
                 Global.DB2Mgr.GetUiMapPosition(position.X, position.Y, position.Z, mapId, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId, out uiMapPosition);
@@ -62,7 +62,7 @@ namespace Game.Entities
                     if (nodes[i - 1].HasFlag(TaxiPathNodeFlags.Teleport))
                         continue;
 
-                    int uiMap1, uiMap2;
+                    uint uiMap1, uiMap2;
                     Vector2 pos1, pos2;
 
                     GetTaxiMapPosition(nodes[i - 1].Loc, nodes[i - 1].ContinentID, out pos1, out uiMap1);

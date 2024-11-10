@@ -10,9 +10,9 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public uint Id;
-        public int ParentUiMapID;
+        public uint ParentUiMapID;
         public int Flags;
-        public sbyte System;
+        public byte System;
         public UiMapType Type;
         public int BountySetID;
         public uint BountyDisplayLocation;
@@ -34,7 +34,7 @@ namespace Game.DataStorage
         public Vector2 UiMax;
         public Vector3[] Region = new Vector3[2];
         public uint Id;
-        public int UiMapID;
+        public uint UiMapID;
         public int OrderIndex;
         public int MapID;
         public int AreaID;
@@ -47,7 +47,7 @@ namespace Game.DataStorage
         public Vector2 UiMin;
         public Vector2 UiMax;
         public uint Id;
-        public int ParentUiMapID;
+        public uint ParentUiMapID;
         public int OrderIndex;
         public int ChildUiMapID;
         public int PlayerConditionID;
@@ -76,7 +76,7 @@ namespace Game.DataStorage
         public string RightFeatureDesc;
         public int AllianceQuestID;
         public int HordeQuestID;
-        public sbyte ScreenType;
+        public byte ScreenType;
         public int TextureKitID;
         public int SoundKitID;
         public int PlayerConditionID;

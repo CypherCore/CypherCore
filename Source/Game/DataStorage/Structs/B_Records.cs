@@ -36,7 +36,7 @@ namespace Game.DataStorage
         public uint Id;
         public int MaxQualityRoll;
         public float StateMultiplier;
-        public sbyte QualityEnum;
+        public byte QualityEnum;
     }
 
     public sealed class BattlePetBreedStateRecord
@@ -122,7 +122,7 @@ namespace Game.DataStorage
     public sealed class BroadcastTextDurationRecord
     {
         public uint Id;
-        public int BroadcastTextID;
+        public uint BroadcastTextID;
         public int Locale;
         public int Duration;
     }
