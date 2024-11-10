@@ -115,11 +115,8 @@ namespace Game.Entities
                         case GameObjectTypes.Button:
                         case GameObjectTypes.Goober:
                             if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
-                            {
-                                dynFlags |= GameObjectDynamicLowFlags.Highlight;
                                 if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
-                                    dynFlags |= GameObjectDynamicLowFlags.Activate;
-                            }
+                                    dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Highlight;
                             break;
                         case GameObjectTypes.QuestGiver:
                             if (gameObject.CanActivateForPlayer(receiver))
@@ -134,7 +131,7 @@ namespace Game.Entities
                         case GameObjectTypes.Generic:
                         case GameObjectTypes.SpellFocus:
                             if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                                dynFlags |= GameObjectDynamicLowFlags.Sparkle;
                             break;
                         case GameObjectTypes.Transport:
                         case GameObjectTypes.MapObjTransport:
@@ -159,8 +156,17 @@ namespace Game.Entities
                             break;
                     }
 
-                    if (!receiver.IsGameMaster() && !gameObject.MeetsInteractCondition(receiver))
-                        dynFlags |= GameObjectDynamicLowFlags.NoInterract;
+                    if (!receiver.IsGameMaster())
+                    {
+                        // GO_DYNFLAG_LO_INTERACT_COND should be applied to GOs with conditional interaction (without GO_FLAG_INTERACT_COND) to disable interaction
+                        // (Ignore GAMEOBJECT_TYPE_GATHERING_NODE as some profession-related GOs may include quest loot and can always be interacted with)
+                        if (gameObject.GetGoType() != GameObjectTypes.GatheringNode)
+                            if (gameObject.HasConditionalInteraction() && !gameObject.HasFlag(GameObjectFlags.InteractCond))
+                                dynFlags |= GameObjectDynamicLowFlags.InteractCond;
+
+                        if (!gameObject.MeetsInteractCondition(receiver))
+                            dynFlags |= GameObjectDynamicLowFlags.NoInterract;
+                    }
 
                     unitDynFlags = ((uint)pathProgress << 16) | (uint)dynFlags;
                 }
