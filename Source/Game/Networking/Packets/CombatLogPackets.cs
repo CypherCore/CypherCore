@@ -382,7 +382,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CasterGUID);
 
             _worldPacket.WriteUInt32(SpellID);
-            _worldPacket.WriteUInt32((uint)Type);
+            _worldPacket.WriteInt8((sbyte)Type);
             _worldPacket.WriteInt32(Amount);
             _worldPacket.WriteInt32(OverEnergize);
 
