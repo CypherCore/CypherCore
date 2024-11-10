@@ -38,8 +38,8 @@ namespace Scripts.Spells.Warlock
         public const uint SoulSwapOverride = 86211;
         public const uint SoulSwapModCost = 92794;
         public const uint SoulSwapDotMarker = 92795;
-        public const uint UnstableAffliction = 30108;
-        public const uint UnstableAfflictionDispel = 31117;
+        public const uint UnstableAfflictionDamage = 196364;
+        public const uint UnstableAfflictionEnergize = 31117;
         public const uint Shadowflame = 37378;
         public const uint Flameshadow = 37379;
         public const uint SummonSuccubus = 712;
@@ -942,41 +942,42 @@ namespace Scripts.Spells.Warlock
         }
     }
 
-    [Script] // 30108, 34438, 34439, 35183 - Unstable Affliction
+    [Script] // 316099 - Unstable Affliction
     class spell_warl_unstable_affliction : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.UnstableAfflictionDispel);
+            return ValidateSpellInfo(SpellIds.UnstableAfflictionDamage, SpellIds.UnstableAfflictionEnergize);
         }
 
         void HandleDispel(DispelInfo dispelInfo)
         {
             Unit caster = GetCaster();
-            if (caster != null)
-            {
-                AuraEffect aurEff = GetEffect(1);
-                if (aurEff != null)
-                {
-                    Unit target = dispelInfo.GetDispeller().ToUnit();
-                    if (target != null)
-                    {
-                        int bp = aurEff.GetAmount();
-                        bp = target.SpellDamageBonusTaken(caster, aurEff.GetSpellInfo(), bp, DamageEffectType.DOT);
-                        bp *= 9;
+            if (caster == null)
+                return;
 
-                        // backfire damage and silence
-                        CastSpellExtraArgs args = new(aurEff);
-                        args.AddSpellMod(SpellValueMod.BasePoint0, bp);
-                        caster.CastSpell(target, SpellIds.UnstableAfflictionDispel, args);
-                    }
-                }
-            }
+            AuraEffect removedEffect = GetEffect(1);
+            if (removedEffect == null)
+                return;
+
+            int damage = (int)(GetEffectInfo(0).CalcValue(caster, null, GetUnitOwner()) / 100.0f * removedEffect.CalculateEstimatedAmount(caster, removedEffect.GetAmount()));
+            caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDamage, new CastSpellExtraArgs()
+                .AddSpellMod(SpellValueMod.BasePoint0, damage)
+                .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Death)
+                return;
+
+            GetCaster().CastSpell(GetCaster(), SpellIds.UnstableAfflictionEnergize, true);
         }
 
         public override void Register()
         {
             AfterDispel.Add(new(HandleDispel));
+            OnEffectRemove.Add(new(HandleRemove, 1, AuraType.PeriodicDamage, AuraEffectHandleModes.Real));
         }
     }
 
