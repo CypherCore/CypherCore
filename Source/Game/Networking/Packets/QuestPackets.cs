@@ -490,6 +490,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AutoLaunched);
             _worldPacket.WriteBit(FromContentPush);
             _worldPacket.WriteBit(false);   // unused in client
+            _worldPacket.WriteBit(ResetByScheduler);
             _worldPacket.WriteBit(StartCheat);
             _worldPacket.WriteBit(DisplayPopup);
             _worldPacket.FlushBits();
@@ -538,6 +539,7 @@ namespace Game.Networking.Packets
         public bool StartCheat;
         public bool AutoLaunched;
         public bool FromContentPush;
+        public bool ResetByScheduler;
     }
 
     public class QuestGiverRequestItems : ServerPacket

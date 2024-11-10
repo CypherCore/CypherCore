@@ -458,6 +458,7 @@ namespace Game.Misc
             packet.QuestInfoID = (int)quest.QuestInfoID;
             packet.QuestSessionBonus = 0; //quest.GetQuestSessionBonus(); // this is only sent while quest session is active
             packet.AutoLaunched = autoLaunched;
+            packet.ResetByScheduler = quest.IsResetByScheduler();
             packet.DisplayPopup = displayPopup;
             packet.QuestFlags[0] = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
