@@ -400,22 +400,21 @@ namespace Scripts.Spells.Warlock
     }
 
     [Script] // 48181 - Haunt
-    class spell_warl_haunt : SpellScript
+    class spell_warl_haunt : AuraScript
     {
-        void HandleAfterHit()
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Aura aura = GetHitAura();
-            if (aura != null)
+            if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death)
             {
-                AuraEffect aurEff = aura.GetEffect(1);
-                if (aurEff != null)
-                    aurEff.SetAmount(MathFunctions.CalculatePct(GetHitDamage(), aurEff.GetAmount()));
+                Unit caster = GetCaster();
+                if (caster != null)
+                    caster.GetSpellHistory().ResetCooldown(GetId(), true);
             }
         }
 
         public override void Register()
         {
-            AfterHit.Add(new(HandleAfterHit));
+            OnEffectRemove.Add(new(HandleRemove, 1, AuraType.ModSchoolMaskDamageFromCaster, AuraEffectHandleModes.Real));
         }
     }
 
