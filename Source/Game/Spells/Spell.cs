@@ -9915,7 +9915,7 @@ namespace Game.Spells
             {
                 if (!OriginalCastItemLevel.HasValue)
                     OriginalCastItemLevel = triggeringSpell.m_castItemLevel;
-                if (!OriginalCastItemLevel.HasValue)
+                if (OriginalCastId.IsEmpty())
                     OriginalCastId = triggeringSpell.m_castId;
             }
             return this;

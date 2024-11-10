@@ -505,7 +505,7 @@ namespace Scripts.Spells.Priest
                     break;
                 case SpellIds.PowerWordRadiance:
                     // Power Word: Radiance applies Atonement at 60 % (without modifiers) of its total duration.
-                    args.AddSpellMod(SpellValueMod.DurationPct, GetEffectInfo(3).CalcValue(caster));
+                    args.AddSpellMod(SpellValueModFloat.DurationPct, GetEffectInfo(3).CalcValue(caster));
                     break;
                 default:
                     break;

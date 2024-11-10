@@ -142,7 +142,7 @@ namespace Scripts.Spells.Evoker
             GetCaster().CastSpell(GetCaster(), (uint)SpellIds.FireBreathDamage, new CastSpellExtraArgs()
                 .SetTriggeringSpell(GetSpell())
                 .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
-                .AddSpellMod(SpellValueMod.DurationPct, 100 * dotTicks)
+                .AddSpellMod(SpellValueModFloat.DurationPct, 100 * dotTicks)
                 .SetCustomArg(completedStageCount));
         }
 
