@@ -392,7 +392,12 @@ namespace Game.Scripting
             public Targets GetTarget() { return _targetType; }
         }
 
-        public class ObjectAreaTargetSelectHandler : TargetHook
+        public interface ITargetFunction
+        {
+            public virtual bool HasSameTargetFunctionAs<T>(T other) { return false; }
+        }
+
+        public class ObjectAreaTargetSelectHandler : TargetHook, ITargetFunction
         {
             SpellObjectAreaTargetSelectFnType _callImpl;
 
@@ -405,9 +410,14 @@ namespace Game.Scripting
             {
                 _callImpl(targets);
             }
+
+            public bool HasSameTargetFunctionAs(ObjectAreaTargetSelectHandler other)
+            {
+                return _callImpl.Method == other._callImpl.Method || _callImpl.Target == other._callImpl.Target;
+            }
         }
 
-        public class ObjectTargetSelectHandler : TargetHook
+        public class ObjectTargetSelectHandler : TargetHook, ITargetFunction
         {
             SpellObjectTargetSelectFnType _callImpl;
 
@@ -419,6 +429,11 @@ namespace Game.Scripting
             public void Call(ref WorldObject target)
             {
                 _callImpl(ref target);
+            }
+
+            public bool HasSameTargetFunctionAs(ObjectTargetSelectHandler other)
+            {
+                return _callImpl.Method == other._callImpl.Method || _callImpl.Target == other._callImpl.Target;
             }
         }
 

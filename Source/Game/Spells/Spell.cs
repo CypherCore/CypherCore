@@ -8194,21 +8194,34 @@ namespace Game.Spells
 
         bool CheckScriptEffectImplicitTargets(uint effIndex, uint effIndexToCheck)
         {
-            // Skip if there are not any script
-            if (m_loadedScripts.Empty())
+            bool allEffectTargetScriptsAreShared<T>(List<T> hooks, SpellInfo spellInfo, uint effIndex, uint effIndexToCheck) where T : SpellScript.EffectHook, SpellScript.ITargetFunction
+            {
+                foreach (var hook in hooks)
+                {
+                    if (!hook.IsEffectAffected(spellInfo, effIndex))
+                        continue;
+
+                    bool otherEffectHasSameTargetFunction = hooks.Any(other => other.IsEffectAffected(spellInfo, effIndexToCheck) && hook.HasSameTargetFunctionAs(other));
+                    if (!otherEffectHasSameTargetFunction)
+                        return false;
+                }
+
                 return true;
+            };
 
             foreach (var script in m_loadedScripts)
             {
-                foreach (var hook in script.OnObjectTargetSelect)
-                    if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
-                        (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
-                        return false;
+                if (!allEffectTargetScriptsAreShared(script.OnObjectTargetSelect, m_spellInfo, effIndex, effIndexToCheck))
+                    return false;
 
-                foreach (var hook in script.OnObjectAreaTargetSelect)
-                    if ((hook.IsEffectAffected(m_spellInfo, effIndex) && !hook.IsEffectAffected(m_spellInfo, effIndexToCheck)) ||
-                        (!hook.IsEffectAffected(m_spellInfo, effIndex) && hook.IsEffectAffected(m_spellInfo, effIndexToCheck)))
-                        return false;
+                if (!allEffectTargetScriptsAreShared(script.OnObjectTargetSelect, m_spellInfo, effIndexToCheck, effIndex))
+                    return false;
+
+                if (!allEffectTargetScriptsAreShared(script.OnObjectAreaTargetSelect, m_spellInfo, effIndex, effIndexToCheck))
+                    return false;
+
+                if (!allEffectTargetScriptsAreShared(script.OnObjectAreaTargetSelect, m_spellInfo, effIndexToCheck, effIndex))
+                    return false;
             }
             return true;
         }
