@@ -3658,7 +3658,7 @@ namespace Game.Entities
             GetNearPoint(obj, out x, out y, out z, distance2d, GetAbsoluteAngle(obj));
         }
 
-        public void MovePosition(Position pos, float dist, float angle)
+        public void MovePosition(Position pos, float dist, float angle, float maxHeightChange = 6.0f)
         {
             angle += GetOrientation();
             float destx = pos.posX + dist * (float)Math.Cos(angle);
@@ -3680,7 +3680,7 @@ namespace Game.Entities
             for (byte j = 0; j < 10; ++j)
             {
                 // do not allow too big z changes
-                if (Math.Abs(pos.posZ - destz) > 6)
+                if (Math.Abs(pos.posZ - destz) > maxHeightChange)
                 {
                     destx -= step * (float)Math.Cos(angle);
                     desty -= step * (float)Math.Sin(angle);
