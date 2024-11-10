@@ -274,20 +274,23 @@ namespace Game.Entities
             return false;
         }
 
-        public override SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
+        public override SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag, GetCastSpellInfoContext context)
         {
             var overrides = m_overrideSpells.LookupByKey(spellInfo.Id);
             if (!overrides.Empty())
             {
                 foreach (uint spellId in overrides)
                 {
-                    SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-                    if (newInfo != null)
-                        return GetCastSpellInfo(newInfo, triggerFlag);
+                    if (context.AddSpell(spellId))
+                    {
+                        SpellInfo newInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+                        if (newInfo != null)
+                            return GetCastSpellInfo(newInfo, triggerFlag, context);
+                    }
                 }
             }
 
-            return base.GetCastSpellInfo(spellInfo, triggerFlag);
+            return base.GetCastSpellInfo(spellInfo, triggerFlag, context);
         }
 
         public void SetOverrideSpellsId(uint overrideSpellsId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.OverrideSpellsID), overrideSpellsId); }
@@ -3879,7 +3882,8 @@ namespace Game.Entities
             }
 
             // Check possible spell cast overrides
-            spellInfo = castingUnit.GetCastSpellInfo(spellInfo, triggerFlag);
+            GetCastSpellInfoContext overrideContext = new();
+            spellInfo = castingUnit.GetCastSpellInfo(spellInfo, triggerFlag, overrideContext);
             if (spellInfo.IsPassive())
             {
                 CancelPendingCastRequest();

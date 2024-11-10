@@ -944,14 +944,14 @@ namespace Game.Entities
             spell.Finish(result);
         }
 
-        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag)
+        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag, GetCastSpellInfoContext context)
         {
             SpellInfo findMatchingAuraEffectIn(AuraType type)
             {
                 foreach (AuraEffect auraEffect in GetAuraEffectsByType(type))
                 {
                     bool matches = auraEffect.GetMiscValue() != 0 ? auraEffect.GetMiscValue() == spellInfo.Id : auraEffect.IsAffectingSpell(spellInfo);
-                    if (matches)
+                    if (matches && context.AddSpell((uint)auraEffect.GetAmount()))
                     {
                         SpellInfo info = Global.SpellMgr.GetSpellInfo((uint)auraEffect.GetAmount(), GetMap().GetDifficultyID());
                         if (info != null)
@@ -979,14 +979,14 @@ namespace Game.Entities
             if (newInfo != null)
             {
                 triggerFlag &= ~TriggerCastFlags.IgnoreCastTime;
-                return GetCastSpellInfo(newInfo, triggerFlag);
+                return GetCastSpellInfo(newInfo, triggerFlag, context);
             }
 
             newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpellsTriggered);
             if (newInfo != null)
             {
                 triggerFlag |= TriggerCastFlags.IgnoreCastTime;
-                return GetCastSpellInfo(newInfo, triggerFlag);
+                return GetCastSpellInfo(newInfo, triggerFlag, context);
             }
 
             return spellInfo;
@@ -4601,5 +4601,27 @@ namespace Game.Entities
         public bool HasVisibleAura(AuraApplication aurApp) { return m_visibleAuras.Contains(aurApp); }
         public void SetVisibleAuraUpdate(AuraApplication aurApp) { m_visibleAurasToUpdate.Add(aurApp); }
         public void RemoveVisibleAuraUpdate(AuraApplication aurApp) { m_visibleAurasToUpdate.Remove(aurApp); }
+    }
+
+    public class GetCastSpellInfoContext
+    {
+        uint[] VisitedSpells = new uint[5];
+
+        public bool AddSpell(uint spellId)
+        {
+            if (VisitedSpells.Contains(spellId))
+                return false; // already exists
+
+            for (int i = 0; i < VisitedSpells.Length; ++i)
+            {
+                if (VisitedSpells[i] != 0u)
+                    continue;
+
+                VisitedSpells[i] = spellId;
+                return true;
+            }
+
+            return false;
+        }
     }
 }
