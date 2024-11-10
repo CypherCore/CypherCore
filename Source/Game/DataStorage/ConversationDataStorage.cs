@@ -99,11 +99,30 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actors. DB table `conversation_actors` is empty.");
             }
 
+            // TODO: Remove this hack when NextConversationLineID is changed to uint32
+            uint getNextConversationLineId(ConversationLineRecord conversationLine)
+            {
+                if (conversationLine != null && conversationLine.NextConversationLineID != 0)
+                {
+                    uint FirstLineId = 60000; // Arbitrary id to cover the affected rows
+
+                    if (conversationLine.Id > FirstLineId && conversationLine.NextConversationLineID < (CliDB.ConversationLineStorage.GetNumRows() - ushort.MaxValue - 1))
+                        return (uint)(ushort.MaxValue + conversationLine.NextConversationLineID + 1);
+
+                    return (uint)conversationLine.NextConversationLineID;
+                }
+
+                return 0u;
+            };
+
             // Validate FirstLineId
             Dictionary<uint, uint> prevConversationLineIds = new();
             foreach (var conversationLine in CliDB.ConversationLineStorage.Values)
-                if (conversationLine.NextConversationLineID != 0)
-                    prevConversationLineIds[conversationLine.NextConversationLineID] = conversationLine.Id;
+            {
+                uint nextConversationLineId = getNextConversationLineId(conversationLine);
+                if (nextConversationLineId != 0)
+                    prevConversationLineIds[nextConversationLineId] = conversationLine.Id;
+            }
 
             uint getFirstLineIdFromAnyLineId(uint lineId)
             {
@@ -149,10 +168,11 @@ namespace Game.DataStorage
                         else
                             Log.outError(LogFilter.Sql, "Table `conversation_line_template` has missing template for line (ID: {0}) in Conversation {1}, skipped", currentConversationLine.Id, conversationTemplate.Id);
 
-                        if (currentConversationLine.NextConversationLineID == 0)
+                        uint nextConversationLineId = getNextConversationLineId(currentConversationLine);
+                        if (nextConversationLineId == 0)
                             break;
 
-                        currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(currentConversationLine.NextConversationLineID);
+                        currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(nextConversationLineId);
                     }
 
                     _conversationTemplateStorage[conversationTemplate.Id] = conversationTemplate;
