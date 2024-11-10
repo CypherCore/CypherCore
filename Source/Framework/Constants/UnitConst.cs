@@ -401,15 +401,21 @@ namespace Framework.Constants
         BasePoint29,
         BasePoint30,
         BasePoint31,
-        End,
-        RadiusMod,
-        MaxTargets,
+        BasePointEnd,
+
+        MaxTargets = BasePointEnd,
         AuraStack,
-        CritChance,
-        DurationPct,
         Duration,
         ParentSpellTargetCount,
-        ParentSpellTargetIndex
+        ParentSpellTargetIndex,
+        IntEnd,
+    }
+
+    public enum SpellValueModFloat
+    {
+        RadiusMod = SpellValueMod.IntEnd,
+        CritChance,
+        DurationPct,
     }
 
     public enum CombatRating

@@ -7805,7 +7805,7 @@ namespace Game.Spells
 
         public void SetSpellValue(SpellValueMod mod, int value)
         {
-            if (mod < SpellValueMod.End)
+            if (mod < SpellValueMod.IntEnd)
             {
                 m_spellValue.EffectBasePoints[(int)mod] = value;
                 m_spellValue.CustomBasePointsMask |= 1u << (int)mod;
@@ -7814,20 +7814,11 @@ namespace Game.Spells
 
             switch (mod)
             {
-                case SpellValueMod.RadiusMod:
-                    m_spellValue.RadiusMod = (float)value / 10000;
-                    break;
                 case SpellValueMod.MaxTargets:
                     m_spellValue.MaxAffectedTargets = (uint)value;
                     break;
                 case SpellValueMod.AuraStack:
                     m_spellValue.AuraStackAmount = value;
-                    break;
-                case SpellValueMod.CritChance:
-                    m_spellValue.CriticalChance = value / 100.0f; // @todo ugly /100 remove when basepoints are double
-                    break;
-                case SpellValueMod.DurationPct:
-                    m_spellValue.DurationMul = (float)value / 100.0f;
                     break;
                 case SpellValueMod.Duration:
                     m_spellValue.Duration = value;
@@ -7837,6 +7828,24 @@ namespace Game.Spells
                     break;
                 case SpellValueMod.ParentSpellTargetIndex:
                     m_spellValue.ParentSpellTargetIndex = value;
+                    break;
+            }
+        }
+
+        public void SetSpellValue(SpellValueModFloat mod, float value)
+        {
+            switch (mod)
+            {
+                case SpellValueModFloat.RadiusMod:
+                    m_spellValue.RadiusMod = value;
+                    break;
+                case SpellValueModFloat.CritChance:
+                    m_spellValue.CriticalChance = value;
+                    break;
+                case SpellValueModFloat.DurationPct:
+                    m_spellValue.DurationMul = value / 100.0f;
+                    break;
+                default:
                     break;
             }
         }
@@ -9804,22 +9813,44 @@ namespace Game.Spells
         }
     }
 
-    public class CastSpellExtraArgs
+    public class CastSpellExtraArgsInit
     {
         public TriggerCastFlags TriggerFlags;
         public Item CastItem;
         public Spell TriggeringSpell;
         public AuraEffect TriggeringAura;
-        public ObjectGuid OriginalCaster = ObjectGuid.Empty;
+        public ObjectGuid OriginalCaster;
         public Difficulty CastDifficulty;
-        public ObjectGuid OriginalCastId = ObjectGuid.Empty;
+        public ObjectGuid OriginalCastId;
         public int? OriginalCastItemLevel;
-        public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
-        public object CustomArg;
+        public SpellValueOverride Value;
 
+        public List<SpellValueOverride> SpellValueOverrides = new();
+        public object CustomArg;
         public ActionResultSetter<SpellCastResult> ScriptResult;
         public bool ScriptWaitsForSpellHit;
 
+        public struct SpellValueOverride
+        {
+            public SpellValueOverride(SpellValueMod mod, int val)
+            {
+                Type = (int)mod;
+                IntValue = val;
+            }
+            public SpellValueOverride(SpellValueModFloat mod, float val)
+            {
+                Type = (int)mod;
+                FloatValue = val;
+            }
+
+            public int Type;
+            public float FloatValue;
+            public int IntValue;
+        }
+    }
+
+    public class CastSpellExtraArgs : CastSpellExtraArgsInit
+    {
         public CastSpellExtraArgs() { }
 
         public CastSpellExtraArgs(bool triggered)
@@ -9857,7 +9888,12 @@ namespace Game.Spells
 
         public CastSpellExtraArgs(SpellValueMod mod, int val)
         {
-            SpellValueOverrides.Add(mod, val);
+            SpellValueOverrides.Add(new SpellValueOverride(mod, val));
+        }
+
+        public CastSpellExtraArgs(SpellValueModFloat mod, float val) 
+        { 
+            SpellValueOverrides.Add(new SpellValueOverride(mod, val));
         }
 
         public CastSpellExtraArgs SetTriggerFlags(TriggerCastFlags flag)
@@ -9877,8 +9913,10 @@ namespace Game.Spells
             TriggeringSpell = triggeringSpell;
             if (triggeringSpell != null)
             {
-                OriginalCastItemLevel = triggeringSpell.m_castItemLevel;
-                OriginalCastId = triggeringSpell.m_castId;
+                if (!OriginalCastItemLevel.HasValue)
+                    OriginalCastItemLevel = triggeringSpell.m_castItemLevel;
+                if (!OriginalCastItemLevel.HasValue)
+                    OriginalCastId = triggeringSpell.m_castId;
             }
             return this;
         }
@@ -9909,7 +9947,13 @@ namespace Game.Spells
 
         public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, int val)
         {
-            SpellValueOverrides.Add(mod, val);
+            SpellValueOverrides.Add(new SpellValueOverride(mod, val));
+            return this;
+        }
+
+        public CastSpellExtraArgs AddSpellMod(SpellValueModFloat mod, float val)
+        {
+            SpellValueOverrides.Add(new SpellValueOverride(mod, val));
             return this;
         }
 
