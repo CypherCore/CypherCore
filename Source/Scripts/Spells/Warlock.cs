@@ -7,6 +7,7 @@ using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using static Global;
 
@@ -14,6 +15,7 @@ namespace Scripts.Spells.Warlock
 {
     struct SpellIds
     {
+        public const uint AbsoluteCorruption = 196103;
         public const uint CorruptionDamage = 146739;
         public const uint CreateHealthstone = 23517;
         public const uint DemonicCircleAllowCast = 62388;
@@ -55,11 +57,43 @@ namespace Scripts.Spells.Warlock
         public const uint PriestShadowWordDeath = 32409;
     }
 
+    // 146739 - Corruption
+    [Script] // 445474 - Wither
+    class spell_warl_absolute_corruption : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.AbsoluteCorruption, 0));
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.AbsoluteCorruption);
+        }
+
+        void HandleApply(uint effIndex)
+        {
+            Aura absoluteCorruption = GetCaster().GetAura(SpellIds.AbsoluteCorruption);
+            if (absoluteCorruption != null)
+            {
+                TimeSpan duration = GetHitUnit().IsPvP()
+                    ? TimeSpan.FromSeconds(absoluteCorruption.GetSpellInfo().GetEffect(0).CalcValue())
+                    : TimeSpan.FromMilliseconds(-1);
+
+                GetHitAura().SetMaxDuration((int)duration.TotalMilliseconds);
+                GetHitAura().SetDuration((int)duration.TotalMilliseconds);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleApply, 0, SpellEffectName.ApplyAura));
+        }
+    }
+
     [Script] // 710 - Banish
     class spell_warl_banish : SpellScript
     {
-        public spell_warl_banish() { }
-
         void HandleBanish(SpellMissInfo missInfo)
         {
             if (missInfo != SpellMissInfo.Immune)
