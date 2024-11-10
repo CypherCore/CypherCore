@@ -755,7 +755,7 @@ namespace Game.Entities
                 {
                     if (effect.GetMiscValue() == (int)power)
                     {
-                        uint effectAmount = (uint)effect.GetAmount();
+                        int effectAmount = effect.GetAmount();
                         uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
 
                         float oldValueCheck = oldVal;
