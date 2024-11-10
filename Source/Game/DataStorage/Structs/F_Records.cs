@@ -92,6 +92,36 @@ namespace Game.DataStorage
         public bool IsContestedGuardFaction() { return HasFlag(FactionTemplateFlags.ContestedGuard); }
     }
 
+    public sealed class FlightCapabilityRecord
+    {
+        public uint Id;
+        public float AirFriction;
+        public float MaxVel;
+        public float Unknown1000_2;
+        public float DoubleJumpVelMod;
+        public float LiftCoefficient;
+        public float GlideStartMinHeight;
+        public float AddImpulseMaxSpeed;
+        public float BankingRateMin;
+        public float BankingRateMax;
+        public float PitchingRateDownMin;
+        public float PitchingRateDownMax;
+        public float PitchingRateUpMin;
+        public float PitchingRateUpMax;
+        public float TurnVelocityThresholdMin;
+        public float TurnVelocityThresholdMax;
+        public float SurfaceFriction;
+        public float OverMaxDeceleration;
+        public float Unknown1000_17;
+        public float Unknown1000_18;
+        public float Unknown1000_19;
+        public float Unknown1000_20;
+        public float Unknown1000_21;
+        public float LaunchSpeedCoefficient;
+        public float VigorRegenMaxVelCoefficient;
+        public int SpellID;
+    }
+
     public sealed class FriendshipRepReactionRecord
     {
         public uint Id;

@@ -147,6 +147,7 @@ namespace Game.DataStorage
             ExpectedStatModStorage = ReadDB2<ExpectedStatModRecord>("ExpectedStatMod.db2", HotfixStatements.SEL_EXPECTED_STAT_MOD);
             FactionStorage = ReadDB2<FactionRecord>("Faction.db2", HotfixStatements.SEL_FACTION, HotfixStatements.SEL_FACTION_LOCALE);
             FactionTemplateStorage = ReadDB2<FactionTemplateRecord>("FactionTemplate.db2", HotfixStatements.SEL_FACTION_TEMPLATE);
+            FlightCapabilityStorage = ReadDB2<FlightCapabilityRecord>("FlightCapability.db2", HotfixStatements.SEL_FLIGHT_CAPABILITY);
             FriendshipRepReactionStorage = ReadDB2<FriendshipRepReactionRecord>("FriendshipRepReaction.db2", HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, HotfixStatements.SEL_FRIENDSHIP_REP_REACTION_LOCALE);
             FriendshipReputationStorage = ReadDB2<FriendshipReputationRecord>("FriendshipReputation.db2", HotfixStatements.SEL_FRIENDSHIP_REPUTATION, HotfixStatements.SEL_FRIENDSHIP_REPUTATION_LOCALE);
             GameObjectArtKitStorage = ReadDB2<GameObjectArtKitRecord>("GameObjectArtKit.db2", HotfixStatements.SEL_GAMEOBJECT_ART_KIT);
@@ -594,6 +595,7 @@ namespace Game.DataStorage
         public static DB6Storage<ExpectedStatModRecord> ExpectedStatModStorage;
         public static DB6Storage<FactionRecord> FactionStorage;
         public static DB6Storage<FactionTemplateRecord> FactionTemplateStorage;
+        public static DB6Storage<FlightCapabilityRecord> FlightCapabilityStorage;
         public static DB6Storage<FriendshipRepReactionRecord> FriendshipRepReactionStorage;
         public static DB6Storage<FriendshipReputationRecord> FriendshipReputationStorage;
         public static DB6Storage<GameObjectArtKitRecord> GameObjectArtKitStorage;

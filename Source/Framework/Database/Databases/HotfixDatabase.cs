@@ -216,7 +216,7 @@ namespace Framework.Database
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // CfgCategories.db2
-            PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES, "SELECT ID, Name, LocaleMask, CreateCharsetMask, ExistingCharsetMask, Flags, `Order`" +        
+            PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES, "SELECT ID, Name, LocaleMask, CreateCharsetMask, ExistingCharsetMask, Flags, `Order`" +
                 " FROM cfg_categories WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES_LOCALE, "SELECT ID, Name_lang FROM cfg_categories_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
@@ -498,6 +498,13 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_FACTION_TEMPLATE, "SELECT ID, Faction, Flags, FactionGroup, FriendGroup, EnemyGroup, Enemies1, Enemies2, Enemies3, " +
                 "Enemies4, Enemies5, Enemies6, Enemies7, Enemies8, Friend1, Friend2, Friend3, Friend4, Friend5, Friend6, Friend7, Friend8" +
                 " FROM faction_template WHERE (`VerifiedBuild` > 0) = ?");
+
+            // FlightCapability.db2
+            PrepareStatement(HotfixStatements.SEL_FLIGHT_CAPABILITY, "SELECT ID, AirFriction, MaxVel, Unknown1000_2, DoubleJumpVelMod, LiftCoefficient, " +
+                "GlideStartMinHeight, AddImpulseMaxSpeed, BankingRateMin, BankingRateMax, PitchingRateDownMin, PitchingRateDownMax, PitchingRateUpMin, " +
+                "PitchingRateUpMax, TurnVelocityThresholdMin, TurnVelocityThresholdMax, SurfaceFriction, OverMaxDeceleration, Unknown1000_17, Unknown1000_18, " +
+                "Unknown1000_19, Unknown1000_20, Unknown1000_21, LaunchSpeedCoefficient, VigorRegenMaxVelCoefficient, SpellID FROM flight_capability" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // FriendshipRepReaction.db2
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, "SELECT ID, Reaction, FriendshipRepID, ReactionThreshold, OverrideColor" +
@@ -1862,6 +1869,8 @@ namespace Framework.Database
         SEL_FACTION_LOCALE,
 
         SEL_FACTION_TEMPLATE,
+
+        SEL_FLIGHT_CAPABILITY,
 
         SEL_FRIENDSHIP_REP_REACTION,
         SEL_FRIENDSHIP_REP_REACTION_LOCALE,
