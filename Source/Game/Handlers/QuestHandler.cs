@@ -810,12 +810,22 @@ namespace Game
                 if (questLineQuests.Empty())
                     continue;
 
+                bool isQuestLineCompleted = true;
                 foreach (var questLineQuest in questLineQuests)
                 {
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questLineQuest.QuestID);
-                    if (quest != null && _player.CanTakeQuest(quest, false))
-                        response.QuestLineXQuestIDs.Add(questLineQuest.Id);
+                    if (quest != null)
+                    {
+                        if (_player.CanTakeQuest(quest, false))
+                            response.QuestLineXQuestIDs.Add(questLineQuest.Id);
+
+                        if (isQuestLineCompleted && !_player.GetQuestRewardStatus(questLineQuest.QuestID))
+                            isQuestLineCompleted = false;
+                    }
                 }
+
+                if (!isQuestLineCompleted)
+                    response.QuestLineIDs.Add(questLineId);
             }
 
             var quests = Global.ObjectMgr.GetUiMapQuestsList(uiMap.Id);

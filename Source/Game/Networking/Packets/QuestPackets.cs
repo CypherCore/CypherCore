@@ -960,6 +960,7 @@ namespace Game.Networking.Packets
         public uint UiMapID;
         public List<uint> QuestLineXQuestIDs = new();
         public List<uint> QuestIDs = new();
+        public List<uint> QuestLineIDs = new();
 
         public UiMapQuestLinesResponse() : base(ServerOpcodes.UiMapQuestLinesResponse, ConnectionType.Instance) { }
 
@@ -968,11 +969,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(UiMapID);
             _worldPacket.WriteInt32(QuestLineXQuestIDs.Count);
             _worldPacket.WriteInt32(QuestIDs.Count);
+            _worldPacket.WriteInt32(QuestLineIDs.Count);
 
             foreach (var questLineQuestID in QuestLineXQuestIDs)
                 _worldPacket.WriteUInt32(questLineQuestID);
 
             foreach (var questID in QuestIDs)
+                _worldPacket.WriteUInt32(questID);
+
+            foreach (var questID in QuestLineIDs)
                 _worldPacket.WriteUInt32(questID);
         }
     }
