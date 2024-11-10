@@ -154,6 +154,111 @@ namespace Game.Entities
 
         public float GetSpeedRate(UnitMoveType mtype) { return m_speed_rate[(int)mtype]; }
 
+        void SetFlightCapabilityID(int flightCapabilityId, bool clientUpdate)
+        {
+            if (flightCapabilityId != 0 && !CliDB.FlightCapabilityStorage.HasRecord((uint)flightCapabilityId))
+                return;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FlightCapabilityID), flightCapabilityId);
+
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.AirFriction, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.MaxVel, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.LiftCoefficient, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.DoubleJumpVelMod, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.GlideStartMinHeight, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.AddImpulseMaxSpeed, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.BankingRate, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.PitchingRateDown, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.PitchingRateUp, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.TurnVelocityThreshold, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.SurfaceFriction, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.OverMaxDeceleration, clientUpdate);
+            UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.LaunchSpeedCoefficient, clientUpdate);
+        }
+
+        void UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle speedType, bool clientUpdate)
+        {
+            FlightCapabilityRecord flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(GetFlightCapabilityID());
+            if (flightCapabilityEntry == null)
+                flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(1);
+
+            (ServerOpcodes opcode, float newValue) = speedType switch
+            {
+                AdvFlyingRateTypeSingle.AirFriction => (ServerOpcodes.MoveSetAdvFlyingAirFriction, flightCapabilityEntry.AirFriction),
+                AdvFlyingRateTypeSingle.MaxVel => (ServerOpcodes.MoveSetAdvFlyingMaxVel, flightCapabilityEntry.MaxVel),
+                AdvFlyingRateTypeSingle.LiftCoefficient => (ServerOpcodes.MoveSetAdvFlyingLiftCoefficient, flightCapabilityEntry.LiftCoefficient),
+                AdvFlyingRateTypeSingle.DoubleJumpVelMod => (ServerOpcodes.MoveSetAdvFlyingDoubleJumpVelMod, flightCapabilityEntry.DoubleJumpVelMod),
+                AdvFlyingRateTypeSingle.GlideStartMinHeight => (ServerOpcodes.MoveSetAdvFlyingGlideStartMinHeight, flightCapabilityEntry.GlideStartMinHeight),
+                AdvFlyingRateTypeSingle.AddImpulseMaxSpeed => (ServerOpcodes.MoveSetAdvFlyingAddImpulseMaxSpeed, flightCapabilityEntry.AddImpulseMaxSpeed),
+                AdvFlyingRateTypeSingle.SurfaceFriction => (ServerOpcodes.MoveSetAdvFlyingSurfaceFriction, flightCapabilityEntry.SurfaceFriction),
+                AdvFlyingRateTypeSingle.OverMaxDeceleration => (ServerOpcodes.MoveSetAdvFlyingOverMaxDeceleration, flightCapabilityEntry.OverMaxDeceleration),
+                AdvFlyingRateTypeSingle.LaunchSpeedCoefficient => (ServerOpcodes.MoveSetAdvFlyingLaunchSpeedCoefficient, flightCapabilityEntry.LaunchSpeedCoefficient),
+                _ => (ServerOpcodes.Max, 0)
+            };
+
+            if (m_advFlyingSpeed[(int)speedType] == newValue)
+                return;
+
+            m_advFlyingSpeed[(int)speedType] = newValue;
+
+            if (!clientUpdate)
+                return;
+
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            if (playerMover != null)
+            {
+                SetAdvFlyingSpeed selfpacket = new(opcode);
+                selfpacket.MoverGUID = GetGUID();
+                selfpacket.SequenceIndex = m_movementCounter++;
+                selfpacket.Speed = newValue;
+                playerMover.GetSession().SendPacket(selfpacket);
+            }
+        }
+
+        void UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange speedType, bool clientUpdate)
+        {
+            FlightCapabilityRecord flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(GetFlightCapabilityID());
+            if (flightCapabilityEntry == null)
+                flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(1);
+
+            (ServerOpcodes opcode, float min, float max) = speedType switch
+            {
+                AdvFlyingRateTypeRange.BankingRate => (ServerOpcodes.MoveSetAdvFlyingBankingRate, flightCapabilityEntry.BankingRateMin, flightCapabilityEntry.BankingRateMax),
+                AdvFlyingRateTypeRange.PitchingRateDown => (ServerOpcodes.MoveSetAdvFlyingPitchingRateDown, flightCapabilityEntry.PitchingRateDownMin, flightCapabilityEntry.PitchingRateDownMax),
+                AdvFlyingRateTypeRange.PitchingRateUp => (ServerOpcodes.MoveSetAdvFlyingPitchingRateUp, flightCapabilityEntry.PitchingRateUpMin, flightCapabilityEntry.PitchingRateUpMax),
+                AdvFlyingRateTypeRange.TurnVelocityThreshold => (ServerOpcodes.MoveSetAdvFlyingTurnVelocityThreshold, flightCapabilityEntry.TurnVelocityThresholdMin, flightCapabilityEntry.TurnVelocityThresholdMax),
+                _ => (ServerOpcodes.Max, 0, 0)
+            };
+
+            if (m_advFlyingSpeed[(int)speedType] == min && m_advFlyingSpeed[(int)speedType + 1] == max)
+                return;
+
+            m_advFlyingSpeed[(int)speedType] = min;
+            m_advFlyingSpeed[(int)speedType + 1] = max;
+
+            if (!clientUpdate)
+                return;
+
+            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            if (playerMover != null)
+            {
+                SetAdvFlyingSpeedRange selfpacket = new(opcode);
+                selfpacket.MoverGUID = GetGUID();
+                selfpacket.SequenceIndex = m_movementCounter++;
+                selfpacket.SpeedMin = min;
+                selfpacket.SpeedMax = max;
+                playerMover.GetSession().SendPacket(selfpacket);
+            }
+        }
+
+        int GetFlightCapabilityID() { return m_unitData.FlightCapabilityID; }
+
+        public float GetAdvFlyingSpeed(AdvFlyingRateTypeSingle speedType) { return m_advFlyingSpeed[(int)speedType]; }
+
+        public float GetAdvFlyingSpeedMin(AdvFlyingRateTypeRange speedType) { return m_advFlyingSpeed[(int)speedType]; }
+
+        public float GetAdvFlyingSpeedMax(AdvFlyingRateTypeRange speedType) { return m_advFlyingSpeed[(int)speedType + 1]; }
+
         public virtual MovementGeneratorType GetDefaultMovementType()
         {
             return MovementGeneratorType.Idle;
@@ -254,7 +359,7 @@ namespace Game.Entities
                 init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
             init.SetFacing(point.GetPositionX(), point.GetPositionY(), point.GetPositionZ());
 
-            //GetMotionMaster()->LaunchMoveSpline(std::move(init), EVENT_FACE, MOTION_PRIORITY_HIGHEST);
+            //GetMotionMaster().LaunchMoveSpline(std::move(init), EVENT_FACE, MOTION_PRIORITY_HIGHEST);
             UpdateSplineMovement((uint)init.Launch());
             Creature creature = ToCreature();
             if (creature != null)

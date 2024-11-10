@@ -68,6 +68,8 @@ namespace Game.Entities
             for (byte i = 0; i < (int)UnitMoveType.Max; ++i)
                 m_speed_rate[i] = 1.0f;
 
+            SetFlightCapabilityID(0, false);
+
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
             m_unitData = new UnitData();

@@ -112,6 +112,28 @@ namespace Framework.Constants
         End
     }
 
+    public enum AdvFlyingRateTypeSingle
+    {
+        AirFriction = 0,
+        MaxVel = 1,
+        LiftCoefficient = 2,
+        DoubleJumpVelMod = 3,
+        GlideStartMinHeight = 4,
+        AddImpulseMaxSpeed = 5,
+        SurfaceFriction = 14,
+        OverMaxDeceleration = 15,
+        LaunchSpeedCoefficient = 16,
+        Max = 17
+    }
+
+    public enum AdvFlyingRateTypeRange
+    {
+        BankingRate = 6,
+        PitchingRateDown = 8,
+        PitchingRateUp = 10,
+        TurnVelocityThreshold = 12
+    }
+
     public enum DamageEffectType
     {
         Direct = 0,                            // used for normal weapon damage (not for class abilities or spells)

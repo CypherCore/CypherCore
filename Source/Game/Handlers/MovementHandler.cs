@@ -607,6 +607,29 @@ namespace Game
             }
         }
 
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingAddImpulseMaxSpeedAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingAirFrictionAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingDoubleJumpVelModAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingGlideStartMinHeightAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingLaunchSpeedCoefficientAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingLiftCoefficientAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingMaxVelAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingOverMaxDecelerationAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingSurfaceFrictionAck)]
+        void HandleSetAdvFlyingSpeedAck(MovementSpeedAck speedAck)
+        {
+            GetPlayer().ValidateMovementInfo(speedAck.Ack.Status);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingBankingRateAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingPitchingRateDownAck)] 
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingPitchingRateUpAck)]
+        [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingTurnVelocityThresholdAck)]
+        void HandleSetAdvFlyingSpeedRangeAck(MovementSpeedRangeAck speedRangeAck)
+        {
+            GetPlayer().ValidateMovementInfo(speedRangeAck.Ack.Status);
+        }
+
         [WorldPacketHandler(ClientOpcodes.SetActiveMover)]
         void HandleSetActiveMover(SetActiveMover packet)
         {

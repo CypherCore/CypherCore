@@ -23,6 +23,7 @@ namespace Game.Entities
 
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];
+        float[] m_advFlyingSpeed = new float[(int)AdvFlyingRateTypeSingle.Max];
         List<AbstractFollower> m_followingMe = new();
         public MoveSpline MoveSpline { get; set; }
         MotionMaster i_motionMaster;

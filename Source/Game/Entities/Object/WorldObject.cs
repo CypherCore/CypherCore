@@ -355,23 +355,23 @@ namespace Game.Entities
                     data.WriteFloat(1.0f);                                       // MovementForcesModMagnitude
                 }
 
-                data.WriteFloat(2.0f);                                           // advFlyingAirFriction
-                data.WriteFloat(65.0f);                                          // advFlyingMaxVel
-                data.WriteFloat(1.0f);                                           // advFlyingLiftCoefficient
-                data.WriteFloat(3.0f);                                           // advFlyingDoubleJumpVelMod
-                data.WriteFloat(10.0f);                                          // advFlyingGlideStartMinHeight
-                data.WriteFloat(100.0f);                                         // advFlyingAddImpulseMaxSpeed
-                data.WriteFloat(90.0f);                                          // advFlyingMinBankingRate
-                data.WriteFloat(140.0f);                                         // advFlyingMaxBankingRate
-                data.WriteFloat(180.0f);                                         // advFlyingMinPitchingRateDown
-                data.WriteFloat(360.0f);                                         // advFlyingMaxPitchingRateDown
-                data.WriteFloat(90.0f);                                          // advFlyingMinPitchingRateUp
-                data.WriteFloat(270.0f);                                         // advFlyingMaxPitchingRateUp
-                data.WriteFloat(30.0f);                                          // advFlyingMinTurnVelocityThreshold
-                data.WriteFloat(80.0f);                                          // advFlyingMaxTurnVelocityThreshold
-                data.WriteFloat(2.75f);                                          // advFlyingSurfaceFriction
-                data.WriteFloat(7.0f);                                           // advFlyingOverMaxDeceleration
-                data.WriteFloat(0.4f);                                           // advFlyingLaunchSpeedCoefficient
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.AirFriction));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.MaxVel));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.LiftCoefficient));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.DoubleJumpVelMod));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.GlideStartMinHeight));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.AddImpulseMaxSpeed));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMin(AdvFlyingRateTypeRange.BankingRate));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMax(AdvFlyingRateTypeRange.BankingRate));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMin(AdvFlyingRateTypeRange.PitchingRateDown));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMax(AdvFlyingRateTypeRange.PitchingRateDown));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMin(AdvFlyingRateTypeRange.PitchingRateUp));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMax(AdvFlyingRateTypeRange.PitchingRateUp));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMin(AdvFlyingRateTypeRange.TurnVelocityThreshold));
+                data.WriteFloat(unit.GetAdvFlyingSpeedMax(AdvFlyingRateTypeRange.TurnVelocityThreshold));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.SurfaceFriction));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.OverMaxDeceleration));
+                data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.LaunchSpeedCoefficient));
 
                 data.WriteBit(HasSpline);
                 data.FlushBits();

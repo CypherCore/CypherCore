@@ -532,6 +532,40 @@ namespace Game.Networking.Packets
         public float Speed = 1.0f;
     }
 
+    class SetAdvFlyingSpeed : ServerPacket
+    {
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex;
+        public float Speed = 1.0f;
+
+        public SetAdvFlyingSpeed(ServerOpcodes opcode) : base(opcode) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteFloat(Speed);
+        }
+    }
+
+    class SetAdvFlyingSpeedRange : ServerPacket
+    {
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex;
+        public float SpeedMin = 1.0f;
+        public float SpeedMax = 1.0f;
+
+        public SetAdvFlyingSpeedRange(ServerOpcodes opcode) : base(opcode) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteFloat(SpeedMin);
+            _worldPacket.WriteFloat(SpeedMax);
+        }
+    }
+
     public class MoveSplineSetFlag : ServerPacket
     {
         public MoveSplineSetFlag(ServerOpcodes opcode) : base(opcode, ConnectionType.Instance) { }
@@ -840,8 +874,8 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        int AckIndex;
-        int MoveTime;
+        public int AckIndex;
+        public int MoveTime;
     }
 
     public class MovementAckMessage : ClientPacket
@@ -868,6 +902,22 @@ namespace Game.Networking.Packets
 
         public MovementAck Ack;
         public float Speed;
+    }
+
+    class MovementSpeedRangeAck : ClientPacket
+    {
+        public MovementAck Ack;
+        public float SpeedMin = 1.0f;
+        public float SpeedMax = 1.0f;
+
+        public MovementSpeedRangeAck(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Ack.Read(_worldPacket);
+            SpeedMin = _worldPacket.ReadFloat();
+            SpeedMax = _worldPacket.ReadFloat();
+        }
     }
 
     public class SetActiveMover : ClientPacket
@@ -1263,7 +1313,7 @@ namespace Game.Networking.Packets
             Ticks = _worldPacket.ReadUInt32();
         }
     }
-    
+
     //Structs
     public struct MovementAck
     {
@@ -1355,14 +1405,14 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(TierTransitionID);
-            data .WriteUInt32(StartTime);
+            data.WriteUInt32(StartTime);
             data.WriteUInt32(EndTime);
             data.WriteUInt8(AnimTier);
         }
     }
 
     public class MonsterSplineUnknown901
-    {    
+    {
         public Array<Inner> Data = new(16);
 
         public void Write(WorldPacket data)
