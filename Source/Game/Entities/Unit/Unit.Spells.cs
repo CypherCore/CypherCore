@@ -958,9 +958,13 @@ namespace Game.Entities
                         {
                             if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr8.IgnoreSpellcastOverrideCost))
                                 triggerFlag |= TriggerCastFlags.IgnorePowerAndReagentCost;
+                            else
+                                triggerFlag &= ~TriggerCastFlags.IgnorePowerAndReagentCost;
 
                             if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr11.IgnoreSpellcastOverrideShapeshiftRequirements))
                                 triggerFlag |= TriggerCastFlags.IgnoreShapeshift;
+                            else
+                                triggerFlag &= ~TriggerCastFlags.IgnoreShapeshift;
 
                             return info;
 
@@ -973,13 +977,16 @@ namespace Game.Entities
 
             SpellInfo newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpells);
             if (newInfo != null)
-                return newInfo;
+            {
+                triggerFlag &= ~TriggerCastFlags.IgnoreCastTime;
+                return GetCastSpellInfo(newInfo, triggerFlag);
+            }
 
             newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpellsTriggered);
             if (newInfo != null)
             {
                 triggerFlag |= TriggerCastFlags.IgnoreCastTime;
-                return newInfo;
+                return GetCastSpellInfo(newInfo, triggerFlag);
             }
 
             return spellInfo;
