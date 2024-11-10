@@ -20,7 +20,7 @@ namespace Framework.Constants
         public const int MaxHolidayDurations = 10;
         public const int MaxHolidayDates = 26;
         public const int MaxHolidayFlags = 10;
-        public const int DefaultMaxLevel = 70;
+        public const int DefaultMaxLevel = 80;
         public const int MaxLevel = 123;
         public const int StrongMaxLevel = 255;
         public const int MaxOverrideSpell = 10;
