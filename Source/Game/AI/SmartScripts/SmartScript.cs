@@ -2559,6 +2559,21 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.CreditQuestObjectiveTalkTo:
+                {
+                    if (_me == null)
+                        break;
+
+                    foreach (WorldObject target in targets)
+                    {
+                        Player player = target?.ToPlayer();
+                        if (player == null)
+                            continue;
+
+                        player.TalkedToCreature(_me.GetEntry(), _me.GetGUID());
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;

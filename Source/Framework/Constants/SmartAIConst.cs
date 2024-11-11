@@ -390,6 +390,7 @@ namespace Framework.Constants
         TriggerGameEvent = 150, // eventId, useSaiTargetAsGameEventSource
         DoAction = 151,
         CompleteQuest = 152, // QuestId. Regular quests with objectives can't be completed with this action (only quests with QUEST_FLAGS_COMPLETION_EVENT, QUEST_FLAGS_COMPLETION_AREA_TRIGGER or QUEST_FLAGS_TRACKING_EVENT)
+        CreditQuestObjectiveTalkTo = 153,
         End
     }
 

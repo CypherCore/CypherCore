@@ -816,6 +816,7 @@ namespace Game.AI
                 SmartActions.TriggerGameEvent => Marshal.SizeOf(typeof(SmartAction.TriggerGameEvent)),
                 SmartActions.DoAction => Marshal.SizeOf(typeof(SmartAction.DoAction)),
                 SmartActions.CompleteQuest => Marshal.SizeOf(typeof(SmartAction.Quest)),
+                SmartActions.CreditQuestObjectiveTalkTo => 0,
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
@@ -2189,6 +2190,7 @@ namespace Game.AI
                     break;
                 }
                 case SmartActions.CompleteQuest:
+                {
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
                     if (quest != null)
                     {
@@ -2204,6 +2206,16 @@ namespace Game.AI
                         return false;
                     }
                     break;
+                }
+                case SmartActions.CreditQuestObjectiveTalkTo:
+                {
+                    if (e.GetScriptType() != SmartScriptType.Creature)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-valid SourceType (only valid for SourceType {SmartScriptType.Creature}), skipped.");
+                        return false;
+                    }
+                    break;
+                }
                 // No longer supported
                 case SmartActions.CallAreaexploredoreventhappens:
                 case SmartActions.CallGroupeventhappens:
