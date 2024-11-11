@@ -2293,9 +2293,16 @@ namespace Game.Entities
                         if (player.GetVehicle() != null)
                             return;
 
+                        if (HasFlag(GameObjectFlags.InUse))
+                            return;
+
+                        if (!MeetsInteractCondition(player))
+                            return;
+
                         player.RemoveAurasByType(AuraType.ModStealth);
                         player.RemoveAurasByType(AuraType.ModInvisibility);
-                        return;                                     //we don;t need to delete flag ... it is despawned!
+                        spellId = GetGoInfo().FlagStand.pickupSpell;
+                        spellCaster = null;
                     }
                     break;
                 }
