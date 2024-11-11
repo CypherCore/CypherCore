@@ -6487,7 +6487,10 @@ namespace Game
                         if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == Class.DemonHunter)
                             continue;
 
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Dragonflight && _class == Class.Evoker)
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Dragonflight && (_class == Class.Evoker || race == Race.DracthyrAlliance || race == Race.DracthyrHorde))
+                            continue;
+
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.TheWarWithin && (race == Race.EarthenDwarfHorde || race == Race.EarthenDwarfAlliance))
                             continue;
 
                         // fatal error if no level 1 data

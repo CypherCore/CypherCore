@@ -1943,6 +1943,7 @@ namespace Game
                         case Race.Vulpera:
                             stmt.AddValue(1, 2776);
                             break;
+                        case Race.PandarenNeutral:
                         case Race.PandarenAlliance:
                         case Race.PandarenHorde:
                             stmt.AddValue(1, 905);
@@ -1950,6 +1951,10 @@ namespace Game
                         case Race.DracthyrAlliance:
                         case Race.DracthyrHorde:
                             stmt.AddValue(1, 138);
+                            break;
+                        case Race.EarthenDwarfHorde:
+                        case Race.EarthenDwarfAlliance:
+                            stmt.AddValue(1, 140);
                             break;
                         default:
                             Log.outError(LogFilter.Player, $"Could not find language data for race ({factionChangeInfo.RaceID}).");
