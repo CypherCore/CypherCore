@@ -176,25 +176,37 @@ namespace Game.Entities
             UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.LaunchSpeedCoefficient, clientUpdate);
         }
 
-        void UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle speedType, bool clientUpdate)
+        public void UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle speedType, bool clientUpdate)
         {
             FlightCapabilityRecord flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(GetFlightCapabilityID());
             if (flightCapabilityEntry == null)
                 flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(1);
 
-            (ServerOpcodes opcode, float newValue) = speedType switch
+            (ServerOpcodes opcode, float newValue, AuraType rateAura) = speedType switch
             {
-                AdvFlyingRateTypeSingle.AirFriction => (ServerOpcodes.MoveSetAdvFlyingAirFriction, flightCapabilityEntry.AirFriction),
-                AdvFlyingRateTypeSingle.MaxVel => (ServerOpcodes.MoveSetAdvFlyingMaxVel, flightCapabilityEntry.MaxVel),
-                AdvFlyingRateTypeSingle.LiftCoefficient => (ServerOpcodes.MoveSetAdvFlyingLiftCoefficient, flightCapabilityEntry.LiftCoefficient),
-                AdvFlyingRateTypeSingle.DoubleJumpVelMod => (ServerOpcodes.MoveSetAdvFlyingDoubleJumpVelMod, flightCapabilityEntry.DoubleJumpVelMod),
-                AdvFlyingRateTypeSingle.GlideStartMinHeight => (ServerOpcodes.MoveSetAdvFlyingGlideStartMinHeight, flightCapabilityEntry.GlideStartMinHeight),
-                AdvFlyingRateTypeSingle.AddImpulseMaxSpeed => (ServerOpcodes.MoveSetAdvFlyingAddImpulseMaxSpeed, flightCapabilityEntry.AddImpulseMaxSpeed),
-                AdvFlyingRateTypeSingle.SurfaceFriction => (ServerOpcodes.MoveSetAdvFlyingSurfaceFriction, flightCapabilityEntry.SurfaceFriction),
-                AdvFlyingRateTypeSingle.OverMaxDeceleration => (ServerOpcodes.MoveSetAdvFlyingOverMaxDeceleration, flightCapabilityEntry.OverMaxDeceleration),
-                AdvFlyingRateTypeSingle.LaunchSpeedCoefficient => (ServerOpcodes.MoveSetAdvFlyingLaunchSpeedCoefficient, flightCapabilityEntry.LaunchSpeedCoefficient),
-                _ => (ServerOpcodes.Max, 0)
+                AdvFlyingRateTypeSingle.AirFriction => (ServerOpcodes.MoveSetAdvFlyingAirFriction, flightCapabilityEntry.AirFriction, AuraType.ModAdvFlyingAirFriction),
+                AdvFlyingRateTypeSingle.MaxVel => (ServerOpcodes.MoveSetAdvFlyingMaxVel, flightCapabilityEntry.MaxVel, AuraType.ModAdvFlyingMaxVel),
+                AdvFlyingRateTypeSingle.LiftCoefficient => (ServerOpcodes.MoveSetAdvFlyingLiftCoefficient, flightCapabilityEntry.LiftCoefficient, AuraType.ModAdvFlyingLiftCoef),
+                AdvFlyingRateTypeSingle.DoubleJumpVelMod => (ServerOpcodes.MoveSetAdvFlyingDoubleJumpVelMod, flightCapabilityEntry.DoubleJumpVelMod, AuraType.None),
+                AdvFlyingRateTypeSingle.GlideStartMinHeight => (ServerOpcodes.MoveSetAdvFlyingGlideStartMinHeight, flightCapabilityEntry.GlideStartMinHeight, AuraType.None),
+                AdvFlyingRateTypeSingle.AddImpulseMaxSpeed => (ServerOpcodes.MoveSetAdvFlyingAddImpulseMaxSpeed, flightCapabilityEntry.AddImpulseMaxSpeed, AuraType.ModAdvFlyingAddImpulseMaxSpeed),
+                AdvFlyingRateTypeSingle.SurfaceFriction => (ServerOpcodes.MoveSetAdvFlyingSurfaceFriction, flightCapabilityEntry.SurfaceFriction, AuraType.None),
+                AdvFlyingRateTypeSingle.OverMaxDeceleration => (ServerOpcodes.MoveSetAdvFlyingOverMaxDeceleration, flightCapabilityEntry.OverMaxDeceleration, AuraType.ModAdvFlyingOverMaxDeceleration),
+                AdvFlyingRateTypeSingle.LaunchSpeedCoefficient => (ServerOpcodes.MoveSetAdvFlyingLaunchSpeedCoefficient, flightCapabilityEntry.LaunchSpeedCoefficient, AuraType.None),
+                _ => (ServerOpcodes.Max, 0, AuraType.None)
             };
+
+            if (rateAura != AuraType.None)
+            {
+                // take only lowest negative and highest positive auras - these effects do not stack
+                int neg = GetMaxNegativeAuraModifier(rateAura, mod => mod.GetAmount() > 0 && mod.GetAmount() < 100);
+                if (neg != 0)
+                    MathFunctions.ApplyPct(ref newValue, neg);
+
+                int pos = GetMaxPositiveAuraModifier(rateAura, mod => mod.GetAmount() > 100);
+                if (pos != 0)
+                    MathFunctions.ApplyPct(ref newValue, pos);
+            }
 
             if (m_advFlyingSpeed[(int)speedType] == newValue)
                 return;
@@ -215,20 +227,38 @@ namespace Game.Entities
             }
         }
 
-        void UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange speedType, bool clientUpdate)
+        public void UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange speedType, bool clientUpdate)
         {
             FlightCapabilityRecord flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(GetFlightCapabilityID());
             if (flightCapabilityEntry == null)
                 flightCapabilityEntry = CliDB.FlightCapabilityStorage.LookupByKey(1);
 
-            (ServerOpcodes opcode, float min, float max) = speedType switch
+            (ServerOpcodes opcode, float min, float max, AuraType rateAura) = speedType switch
             {
-                AdvFlyingRateTypeRange.BankingRate => (ServerOpcodes.MoveSetAdvFlyingBankingRate, flightCapabilityEntry.BankingRateMin, flightCapabilityEntry.BankingRateMax),
-                AdvFlyingRateTypeRange.PitchingRateDown => (ServerOpcodes.MoveSetAdvFlyingPitchingRateDown, flightCapabilityEntry.PitchingRateDownMin, flightCapabilityEntry.PitchingRateDownMax),
-                AdvFlyingRateTypeRange.PitchingRateUp => (ServerOpcodes.MoveSetAdvFlyingPitchingRateUp, flightCapabilityEntry.PitchingRateUpMin, flightCapabilityEntry.PitchingRateUpMax),
-                AdvFlyingRateTypeRange.TurnVelocityThreshold => (ServerOpcodes.MoveSetAdvFlyingTurnVelocityThreshold, flightCapabilityEntry.TurnVelocityThresholdMin, flightCapabilityEntry.TurnVelocityThresholdMax),
-                _ => (ServerOpcodes.Max, 0, 0)
+                AdvFlyingRateTypeRange.BankingRate => (ServerOpcodes.MoveSetAdvFlyingBankingRate, flightCapabilityEntry.BankingRateMin, flightCapabilityEntry.BankingRateMax, AuraType.ModAdvFlyingBankingRate),
+                AdvFlyingRateTypeRange.PitchingRateDown => (ServerOpcodes.MoveSetAdvFlyingPitchingRateDown, flightCapabilityEntry.PitchingRateDownMin, flightCapabilityEntry.PitchingRateDownMax, AuraType.ModAdvFlyingPitchingRateDown),
+                AdvFlyingRateTypeRange.PitchingRateUp => (ServerOpcodes.MoveSetAdvFlyingPitchingRateUp, flightCapabilityEntry.PitchingRateUpMin, flightCapabilityEntry.PitchingRateUpMax, AuraType.ModAdvFlyingPitchingRateUp),
+                AdvFlyingRateTypeRange.TurnVelocityThreshold => (ServerOpcodes.MoveSetAdvFlyingTurnVelocityThreshold, flightCapabilityEntry.TurnVelocityThresholdMin, flightCapabilityEntry.TurnVelocityThresholdMax, AuraType.None),
+                _ => (ServerOpcodes.Max, 0, 0, AuraType.None)
             };
+
+            if (rateAura != AuraType.None)
+            {
+                // take only lowest negative and highest positive auras - these effects do not stack
+                int neg = GetMaxNegativeAuraModifier(rateAura, mod => mod.GetAmount() > 0 && mod.GetAmount() < 100);
+                if (neg != 0)
+                {
+                    MathFunctions.ApplyPct(ref min, neg);
+                    MathFunctions.ApplyPct(ref max, neg);
+                }
+
+                int pos = GetMaxPositiveAuraModifier(rateAura, mod => mod.GetAmount() > 100);
+                if (pos != 0)
+                {
+                    MathFunctions.ApplyPct(ref min, pos);
+                    MathFunctions.ApplyPct(ref max, pos);
+                }
+            }
 
             if (m_advFlyingSpeed[(int)speedType] == min && m_advFlyingSpeed[(int)speedType + 1] == max)
                 return;

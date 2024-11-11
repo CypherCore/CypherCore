@@ -520,18 +520,18 @@ namespace Framework.Constants
         ModifiedRaidInstance = 510, // NYI; Related to "Fated" raid affixes
         ApplyProfessionEffect = 511, // Nyi; Miscvalue[0] = Professioneffectid
         Unk512 = 512,
-        Unk513 = 513,
-        Unk514 = 514,
-        Unk515 = 515,
+        ModAdvFlyingAirFriction = 513,
+        ModAdvFlyingMaxVel = 514,
+        ModAdvFlyingLiftCoef = 515,
         Unk516 = 516,
         Unk517 = 517,
-        Unk518 = 518,
+        ModAdvFlyingAddImpulseMaxSpeed = 518,
         ModCooldownRecoveryRateAll = 519, // Nyi; Applies To All Spells, Not Filtered By Familyflags Or Label
-        Unk520 = 520,
-        Unk521 = 521,
-        Unk522 = 522,
+        ModAdvFlyingBankingRate = 520,
+        ModAdvFlyingPitchingRateDown = 521,
+        ModAdvFlyingPitchingRateUp = 522,
         Unk523 = 523,
-        Unk524 = 524,
+        ModAdvFlyingOverMaxDeceleration = 524,
         DisplayProfessionEquipment = 525, // Nyi; Miscvalue[0] = Profession (Enum, Not Id)
         Unk526 = 526,
         Unk527 = 527,

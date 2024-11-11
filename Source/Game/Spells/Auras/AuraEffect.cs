@@ -2888,6 +2888,49 @@ namespace Game.Spells
             aurApp.GetTarget().UpdateMovementForcesModMagnitude();
         }
 
+        [AuraEffectHandler(AuraType.ModAdvFlyingAirFriction)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingMaxVel)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingLiftCoef)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingAddImpulseMaxSpeed)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingBankingRate)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingPitchingRateDown)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingPitchingRateUp)]
+        [AuraEffectHandler(AuraType.ModAdvFlyingOverMaxDeceleration)]
+        void HandleAuraModAdvFlyingSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            switch (GetAuraType())
+            {
+                case AuraType.ModAdvFlyingAirFriction:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.AirFriction, true);
+                    break;
+                case AuraType.ModAdvFlyingMaxVel:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.MaxVel, true);
+                    break;
+                case AuraType.ModAdvFlyingLiftCoef:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.LiftCoefficient, true);
+                    break;
+                case AuraType.ModAdvFlyingAddImpulseMaxSpeed:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.AddImpulseMaxSpeed, true);
+                    break;
+                case AuraType.ModAdvFlyingBankingRate:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.BankingRate, true);
+                    break;
+                case AuraType.ModAdvFlyingPitchingRateDown:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.PitchingRateDown, true);
+                    break;
+                case AuraType.ModAdvFlyingPitchingRateUp:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeRange.PitchingRateUp, true);
+                    break;
+                case AuraType.ModAdvFlyingOverMaxDeceleration:
+                    target.UpdateAdvFlyingSpeed(AdvFlyingRateTypeSingle.OverMaxDeceleration, true);
+                    break;
+            }
+        }
+
         /*********************************************************/
         /***                     IMMUNITY                      ***/
         /*********************************************************/
