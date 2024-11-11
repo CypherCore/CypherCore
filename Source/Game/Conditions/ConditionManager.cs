@@ -84,7 +84,11 @@ namespace Game
                         var refe = ConditionStorage[ConditionSourceType.ReferenceCondition].LookupByKey(new ConditionId(condition.ReferenceId, 0, 0));
                         if (refe != null)
                         {
-                            if (!IsObjectMeetToConditionList(sourceInfo, refe))
+                            bool condMeets = IsObjectMeetToConditionList(sourceInfo, refe);
+                            if (condition.NegativeCondition)
+                                condMeets = !condMeets;
+
+                            if (!condMeets)
                                 elseGroupStore[condition.ElseGroup] = false;
                         }
                         else
@@ -391,8 +395,6 @@ namespace Game
                         Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in value2 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue2);
                     if (cond.ConditionValue3 != 0)
                         Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in value3 ({2})!", rowType, iSourceTypeOrReferenceId, cond.ConditionValue3);
-                    if (cond.NegativeCondition)
-                        Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in NegativeCondition ({2})!", rowType, iSourceTypeOrReferenceId, cond.NegativeCondition);
                     if (cond.SourceEntry != 0 && iSourceTypeOrReferenceId < 0)
                         Log.outError(LogFilter.Sql, "Condition {0} {1} has useless data in SourceEntry ({2})!", rowType, iSourceTypeOrReferenceId, cond.SourceEntry);
                 }
