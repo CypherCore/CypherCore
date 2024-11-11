@@ -1385,7 +1385,7 @@ namespace Game.Entities
             int roll = RandomHelper.IRand(0, 9999);
 
             uint attackerLevel = GetLevelForTarget(victim);
-            uint victimLevel = GetLevelForTarget(this);
+            uint victimLevel = victim.GetLevelForTarget(this);
 
             // check if attack comes from behind, nobody can parry or block if attacker is behind
             bool canParryOrBlock = victim.HasInArc((float)Math.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection);
