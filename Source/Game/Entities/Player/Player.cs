@@ -5788,11 +5788,11 @@ namespace Game.Entities
             {
                 AuraType.ModFear, AuraType.Transform, AuraType.WaterWalk,
                 AuraType.FeatherFall, AuraType.Hover, AuraType.SafeFall,
-                AuraType.Fly, AuraType.ModIncreaseMountedFlightSpeed, AuraType.None
+                AuraType.Fly, AuraType.ModIncreaseMountedFlightSpeed, AuraType.AdvFlying
             };
-            foreach (var aura in auratypes)
+            foreach (var auraType in auratypes)
             {
-                var auraList = GetAuraEffectsByType(aura);
+                var auraList = GetAuraEffectsByType(auraType);
                 if (!auraList.Empty())
                     auraList.First().HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
             }

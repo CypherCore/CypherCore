@@ -154,7 +154,7 @@ namespace Game.Entities
 
         public float GetSpeedRate(UnitMoveType mtype) { return m_speed_rate[(int)mtype]; }
 
-        void SetFlightCapabilityID(int flightCapabilityId, bool clientUpdate)
+        public void SetFlightCapabilityID(int flightCapabilityId, bool clientUpdate)
         {
             if (flightCapabilityId != 0 && !CliDB.FlightCapabilityStorage.HasRecord((uint)flightCapabilityId))
                 return;
@@ -1053,8 +1053,11 @@ namespace Game.Entities
                 {
                     var capability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
                     if (capability != null) // aura may get removed by interrupt flag, reapply
+                    {
+                        SetFlightCapabilityID(capability.FlightCapabilityID, true);
                         if (!HasAura(capability.ModSpellAuraID))
                             CastSpell(this, capability.ModSpellAuraID, new CastSpellExtraArgs(aurEff));
+                    }
                 }
             }
         }
@@ -1731,7 +1734,7 @@ namespace Game.Entities
             RemoveNpcFlag(NPCFlags.SpellClick | NPCFlags.PlayerVehicle);
         }
 
-        bool SetCanAdvFly(bool enable)
+        public bool SetCanAdvFly(bool enable)
         {
             if (enable == HasExtraUnitMovementFlag2(MovementFlags3.CanAdvFly))
                 return false;

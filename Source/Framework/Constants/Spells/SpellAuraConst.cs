@@ -453,7 +453,7 @@ namespace Framework.Constants
         ModLeech = 443, // NYI
         Unk444 = 444,
         Unk445 = 445,
-        Unk446 = 446,
+        AdvFlying = 446,
         ModXpFromCreatureType = 447,
         Unk448 = 448,
         Unk449 = 449,

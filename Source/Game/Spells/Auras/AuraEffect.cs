@@ -2219,7 +2219,10 @@ namespace Game.Spells
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
+                    {
+                        target.SetFlightCapabilityID(mountCapability.FlightCapabilityID, true);
                         target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(this));
+                    }
                 }
             }
             else
@@ -2239,6 +2242,8 @@ namespace Game.Spells
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
                         target.RemoveAurasDueToSpell(mountCapability.ModSpellAuraID, target.GetGUID());
+
+                    target.SetFlightCapabilityID(0, true);
                 }
             }
         }
@@ -2371,6 +2376,18 @@ namespace Game.Spells
             }
 
             target.SetCanTurnWhileFalling(apply);
+        }
+
+        [AuraEffectHandler(AuraType.AdvFlying)]
+        void HandleModAdvFlying(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            target.SetCanDoubleJump(apply || target.HasAura(196055));
+            target.SetCanFly(apply);
+            target.SetCanAdvFly(apply);
         }
 
         [AuraEffectHandler(AuraType.IgnoreMovementForces)]
