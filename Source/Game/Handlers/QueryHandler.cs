@@ -344,5 +344,21 @@ namespace Game
 
             SendPacket(realmQueryResponse);
         }
+
+        [WorldPacketHandler(ClientOpcodes.QueryTreasurePicker)]
+        void HandleQueryTreasurePicker(QueryTreasurePicker queryTreasurePicker)
+        {
+            Quest questInfo = Global.ObjectMgr.GetQuestTemplate(queryTreasurePicker.QuestID);
+            if (questInfo == null)
+                return;
+
+            TreasurePickerResponse treasurePickerResponse = new();
+            treasurePickerResponse.QuestID = queryTreasurePicker.QuestID;
+            treasurePickerResponse.TreasurePickerID = queryTreasurePicker.TreasurePickerID;
+
+            // TODO: Missing treasure picker implementation
+
+            _player.SendPacket(treasurePickerResponse);
+        }
     }
 }

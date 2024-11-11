@@ -564,6 +564,36 @@ namespace Game.Networking.Packets
         public VirtualRealmNameInfo NameInfo;
     }
 
+    class QueryTreasurePicker : ClientPacket
+    {
+        public uint QuestID;
+        public uint TreasurePickerID;
+
+        public QueryTreasurePicker(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            QuestID = _worldPacket.ReadUInt32();
+            TreasurePickerID = _worldPacket.ReadUInt32();
+        }
+    }
+
+    class TreasurePickerResponse : ServerPacket
+    {
+        public uint QuestID;
+        public uint TreasurePickerID;
+        public TreasurePickerPick Pick;
+
+        public TreasurePickerResponse() : base(ServerOpcodes.TreasurePickerResponse, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteUInt32(TreasurePickerID);
+            Pick.Write(_worldPacket);
+        }
+    }
+
     //Structs
     public class PlayerGuidLookupData
     {
@@ -764,5 +794,94 @@ namespace Game.Networking.Packets
     {
         public uint QuestID;
         public List<uint> NPCs = new();
+    }
+
+    struct TreasurePickItem
+    {
+        public ItemInstance Item;
+        public uint Quantity;
+        public QuestRewardContextFlags? ContextFlags;
+
+        public void Write(WorldPacket data)
+        {
+            Item.Write(data);
+            data.WriteUInt32(Quantity);
+            data.WriteBit(ContextFlags.HasValue);
+            data.FlushBits();
+
+            if (ContextFlags.HasValue)
+                data.WriteInt32((int)ContextFlags.Value);
+        }
+    }
+
+    struct TreasurePickCurrency
+    {
+        public uint CurrencyID;
+        public uint Quantity;
+        public QuestRewardContextFlags? ContextFlags;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(CurrencyID);
+            data.WriteUInt32(Quantity);
+            data.WriteBit(ContextFlags.HasValue);
+            data.FlushBits();
+
+            if (ContextFlags.HasValue)
+                data.WriteInt32((int)ContextFlags.Value);
+        }
+    }
+
+    class TreasurePickerBonus
+    {
+        public List<TreasurePickItem> Items = new();
+        public List<TreasurePickCurrency> Currencies = new();
+        public ulong Money;
+        public bool Unknown;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Items.Count);
+            data.WriteInt32(Currencies.Count);
+            data.WriteUInt64(Money);
+            data.WriteBit(Unknown);
+            data.FlushBits();
+
+            foreach (TreasurePickItem treasurePickerItem in Items)
+                treasurePickerItem.Write(data);
+
+            foreach (TreasurePickCurrency treasurePickCurrency in Currencies)
+                treasurePickCurrency.Write(data);
+        }
+    }
+
+    class TreasurePickerPick
+    {
+        public List<TreasurePickItem> Items = new();
+        public List<TreasurePickCurrency> Currencies = new();
+        public List<TreasurePickerBonus> Bonuses = new();
+        public ulong Money;
+        public int Flags;
+        public bool IsChoice;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Items.Count);
+            data.WriteInt32(Currencies.Count);
+            data.WriteUInt64(Money);
+            data.WriteInt32(Bonuses.Count);
+            data.WriteInt32(Flags);
+            data.WriteBit(IsChoice);
+            data.FlushBits();
+
+            foreach (TreasurePickCurrency treasurePickCurrency in Currencies)
+                treasurePickCurrency.Write(data);
+
+            foreach (TreasurePickItem treasurePickItem in Items)
+                treasurePickItem.Write(data);
+
+            foreach (TreasurePickerBonus treasurePickerBonus in Bonuses)
+                treasurePickerBonus.Write(data);
+        }
     }
 }
