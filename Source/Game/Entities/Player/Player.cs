@@ -2356,7 +2356,8 @@ namespace Game.Entities
 
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Flying | MovementFlag.CanFly) && GetSession().GetSecurity() == AccountTypes.Player &&
                 !m_unitMovedByMe.HasAuraType(AuraType.Fly) &&
-                !m_unitMovedByMe.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed),
+                !m_unitMovedByMe.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) &&
+                !m_unitMovedByMe.HasAuraType(AuraType.AdvFlying),
                 MovementFlag.Flying | MovementFlag.CanFly);
 
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.DisableGravity | MovementFlag.CanFly) && mi.HasMovementFlag(MovementFlag.Falling),
