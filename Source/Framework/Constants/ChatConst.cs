@@ -45,8 +45,9 @@ namespace Framework.Constants
         NotInLfgNotice = 0x21,           //+ "[%S] You Must Be Queued In Looking For Group Before Joining This Channel."; -- The User Must Be In The Looking For Group System To Join Lfg Chat Channels.
         VoiceOnNotice = 0x22,           //+ "[%S] Channel Voice Enabled By %S.";
         VoiceOffNotice = 0x23,            //+ "[%S] Channel Voice Disabled By %S.";
-        TrialRestricted = 0x24,
-        NotAllowedInChannel = 0x25
+        VoiceOnNoAnnounceNotice = 0x24,           // same as CHAT_VOICE_ON_NOTICE but no chat mode change announcement
+        TrialRestricted = 0x25,           //+ "[%s] Free Trial accounts cannot send messages to this channel. |cffffd000|Hstorecategory:gametime|h[Click To Upgrade]|h|r"
+        NotAllowedInChannel = 0x26            //+ "That operation is not permitted in this channel."
     }
 
     public enum ChannelFlags

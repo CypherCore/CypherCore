@@ -677,19 +677,21 @@ namespace Game.Chat
 
     struct VoiceOnAppend : IChannelAppender
     {
-        public VoiceOnAppend(ObjectGuid guid)
+        ChatNotify notificationType;
+        ObjectGuid _guid;
+
+        public VoiceOnAppend(ObjectGuid guid, bool announce = true)
         {
             _guid = guid;
+            notificationType = announce ? ChatNotify.VoiceOnNotice : ChatNotify.VoiceOnNoAnnounceNotice;
         }
 
-        public ChatNotify GetNotificationType() => ChatNotify.VoiceOnNotice;
+        public ChatNotify GetNotificationType() => notificationType;
 
         public void Append(ChannelNotify data)
         {
             data.SenderGuid = _guid;
         }
-
-        ObjectGuid _guid;
     }
 
     struct VoiceOffAppend : IChannelAppender
