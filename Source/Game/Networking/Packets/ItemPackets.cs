@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(VendorGUID);
             _worldPacket.WriteUInt32(Muid);
-            _worldPacket.WriteUInt8((byte)Reason);
+            _worldPacket.WriteUInt32((uint)Reason);
         }
 
         public ObjectGuid VendorGUID;

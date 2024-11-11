@@ -145,14 +145,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Vendor);
-            _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WriteInt32(Reason);
             _worldPacket.WriteInt32(Items.Count);
 
             foreach (VendorItemPkt item in Items)
                 item.Write(_worldPacket);
         }
 
-        public byte Reason = 0;
+        public int Reason;
         public List<VendorItemPkt> Items = new();
         public ObjectGuid Vendor;
     }
@@ -428,7 +428,6 @@ namespace Game.Networking.Packets
             data.WriteUInt64(Price);
             data.WriteInt32(MuID);
             data.WriteInt32(Type);
-            data.WriteInt32(Durability);
             data.WriteInt32(StackCount);
             data.WriteInt32(Quantity);
             data.WriteInt32(ExtendedCostID);
@@ -446,7 +445,6 @@ namespace Game.Networking.Packets
         public ItemInstance Item = new();
         public int Quantity = -1;
         public ulong Price;
-        public int Durability;
         public int StackCount;
         public int ExtendedCostID;
         public int PlayerConditionFailed;

@@ -965,6 +965,8 @@ namespace Game.Networking.Packets
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
         public TimeSpan PingDuration;
+        public uint CreatureID;
+        public uint SpellOverrideNameID;
 
         public SendPingUnit(WorldPacket packet) : base(packet) { }
 
@@ -975,6 +977,14 @@ namespace Game.Networking.Packets
             Type = (PingSubjectType)_worldPacket.ReadUInt8();
             PinFrameID = _worldPacket.ReadUInt32();
             PingDuration = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
+
+            bool hasCreatureID = _worldPacket.HasBit();
+            bool hasSpellOverrideNameID = _worldPacket.HasBit();
+            if (hasCreatureID)
+                CreatureID = _worldPacket.ReadUInt32();
+
+            if (hasSpellOverrideNameID)
+                SpellOverrideNameID = _worldPacket.ReadUInt32();
         }
     }
 
@@ -985,6 +995,8 @@ namespace Game.Networking.Packets
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
         public TimeSpan PingDuration;
+        public uint? CreatureID;
+        public uint? SpellOverrideNameID;
 
         public ReceivePingUnit() : base(ServerOpcodes.ReceivePingUnit) { }
 
@@ -995,6 +1007,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
             _worldPacket.WriteInt32((int)PingDuration.TotalMilliseconds);
+            _worldPacket.WriteBit(CreatureID.HasValue);
+            _worldPacket.WriteBit(SpellOverrideNameID.HasValue);
+            _worldPacket.FlushBits();
+
+            if (CreatureID.HasValue)
+                _worldPacket.WriteUInt32(CreatureID.Value);
+
+            if (SpellOverrideNameID.HasValue)
+                _worldPacket.WriteUInt32(SpellOverrideNameID.Value);
         }
     }
 

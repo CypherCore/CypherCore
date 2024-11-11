@@ -609,16 +609,16 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Items.Count);
             _worldPacket.WriteUInt32(Unknown830);
-            _worldPacket.WriteUInt32(TotalCount);
             _worldPacket.WriteUInt32(DesiredDelay);
+            foreach (AuctionItem item in Items)
+                item.Write(_worldPacket);
+
             _worldPacket.WriteBits((int)ListType, 2);
             _worldPacket.WriteBit(HasMoreResults);
             _worldPacket.FlushBits();
 
             BucketKey.Write(_worldPacket);
-
-            foreach (AuctionItem item in Items)
-                item.Write(_worldPacket);
+            _worldPacket.WriteUInt32(TotalCount);
         }
     }
 

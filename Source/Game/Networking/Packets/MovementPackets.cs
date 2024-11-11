@@ -1241,7 +1241,7 @@ namespace Game.Networking.Packets
 
             public void Write(WorldPacket data)
             {
-                data.WriteUInt16((ushort)MessageID);
+                data.WriteUInt32((uint)MessageID);
                 data.WriteUInt32(SequenceIndex);
                 data.WriteBit(Speed.HasValue);
                 data.WriteBit(SpeedRange != null);

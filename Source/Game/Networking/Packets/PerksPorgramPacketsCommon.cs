@@ -15,6 +15,7 @@ namespace Game.Networking.Packets
         public int Price;
         public long AvailableUntil;
         public bool Disabled;
+        public bool Field_41;
 
         public void Write(WorldPacket data)
         {
@@ -28,6 +29,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Price);
             data.WriteInt64(AvailableUntil);
             data.WriteBit(Disabled);
+            data.WriteBit(Field_41);
             data.FlushBits();
         }
     }

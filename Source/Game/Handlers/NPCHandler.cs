@@ -477,7 +477,6 @@ namespace Game
                         price -= MathFunctions.CalculatePct(price, priceMod);
 
                     item.MuID = (int)slot + 1;
-                    item.Durability = (int)itemTemplate.MaxDurability;
                     item.ExtendedCostID = (int)vendorItem.ExtendedCost;
                     item.Type = (int)vendorItem.Type;
                     item.Quantity = leftInStock;

@@ -1155,7 +1155,7 @@ namespace Game.Networking.Packets
         {
             Guid = _worldPacket.ReadPackedGuid();
             CastID = _worldPacket.ReadPackedGuid();
-            MoveMsgID = _worldPacket.ReadUInt16();
+            MoveMsgID = _worldPacket.ReadUInt32();
             SpellID = _worldPacket.ReadUInt32();
             Pitch = _worldPacket.ReadFloat();
             Speed = _worldPacket.ReadFloat();
@@ -1170,7 +1170,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Guid;
         public ObjectGuid CastID;
-        public ushort MoveMsgID;
+        public uint MoveMsgID;
         public uint SpellID;
         public float Pitch;
         public float Speed;
@@ -1348,6 +1348,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(AttackPower);
             data.WriteInt32(SpellPower);
             data.WriteUInt32(Armor);
+            data.WriteInt32(Unknown_1105_1);
+            data.WriteInt32(Unknown_1105_2);
             data.WriteBits(PowerData.Count, 9);
             data.FlushBits();
 
@@ -1363,6 +1365,8 @@ namespace Game.Networking.Packets
         int AttackPower;
         int SpellPower;
         uint Armor;
+        int Unknown_1105_1;
+        int Unknown_1105_2;
         List<SpellLogPowerData> PowerData = new();
     }
 
