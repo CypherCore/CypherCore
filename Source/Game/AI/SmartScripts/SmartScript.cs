@@ -3217,17 +3217,19 @@ namespace Game.AI
                 case SmartEvents.Death:
                 case SmartEvents.Evade:
                 case SmartEvents.ReachedHome:
+                case SmartEvents.Reset:
                 case SmartEvents.CorpseRemoved:
                 case SmartEvents.AiInit:
                 case SmartEvents.TransportAddplayer:
                 case SmartEvents.TransportRemovePlayer:
+                case SmartEvents.AreatriggerEnter:
                 case SmartEvents.JustSummoned:
-                case SmartEvents.Reset:
                 case SmartEvents.JustCreated:
                 case SmartEvents.FollowCompleted:
                 case SmartEvents.OnSpellclick:
                 case SmartEvents.OnDespawn:
                 case SmartEvents.SendEventTrigger:
+                case SmartEvents.AreatriggerExit:
                     ProcessAction(e, unit, var0, var1, bvar, spell, gob);
                     break;
                 case SmartEvents.GossipHello:
@@ -3432,13 +3434,6 @@ namespace Game.AI
                 case SmartEvents.TransportAddcreature:
                 {
                     if (e.Event.transportAddCreature.creature != 0 && var0 != e.Event.transportAddCreature.creature)
-                        return;
-                    ProcessAction(e, unit, var0);
-                    break;
-                }
-                case SmartEvents.AreatriggerOntrigger:
-                {
-                    if (e.Event.areatrigger.id != 0 && var0 != e.Event.areatrigger.id)
                         return;
                     ProcessAction(e, unit, var0);
                     break;

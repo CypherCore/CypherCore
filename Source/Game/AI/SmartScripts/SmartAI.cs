@@ -1207,7 +1207,12 @@ namespace Game.AI
 
         public override void OnUnitEnter(Unit unit)
         {
-            GetScript().ProcessEventsFor(SmartEvents.AreatriggerOntrigger, unit);
+            GetScript().ProcessEventsFor(SmartEvents.AreatriggerEnter, unit);
+        }
+
+        public override void OnUnitExit(Unit unit)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.AreatriggerExit, unit);
         }
 
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)

@@ -188,7 +188,7 @@ namespace Framework.Constants
         TransportRemovePlayer = 43,      // None
         TransportRelocate = 44,      // Pointid
         InstancePlayerEnter = 45,      // Team (0 Any), Cooldownmin, Cooldownmax
-        AreatriggerOntrigger = 46,      // Triggerid(0 Any)
+        AreatriggerEnter = 46,      // None
         QuestAccepted = 47,      // None
         QuestObjCompletion = 48,      // None
         QuestCompletion = 49,      // None
@@ -230,6 +230,7 @@ namespace Framework.Constants
         OnSpellStart = 85,      // SpellID, CooldownMin, CooldownMax
         OnDespawn = 86,      // NONE
         SendEventTrigger = 87, // NONE
+        AreatriggerExit = 88,      // None
 
         End
     }

@@ -121,7 +121,7 @@ namespace Game.AI
                         {
                             if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)temp.EntryOrGuid, false)) == null)
                             {
-                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsServerSide false) does not exist, skipped loading.");
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadFromDB: AreaTrigger entry ({temp.EntryOrGuid} IsCustom false) does not exist, skipped loading.");
                                 continue;
                             }
                             break;
@@ -371,7 +371,7 @@ namespace Game.AI
                 case SmartEvents.FollowCompleted:
                 case SmartEvents.OnSpellclick:
                 case SmartEvents.GoLootStateChanged:
-                case SmartEvents.AreatriggerOntrigger:
+                case SmartEvents.AreatriggerEnter:
                 case SmartEvents.IcLos:
                 case SmartEvents.OocLos:
                 case SmartEvents.DistanceCreature:
@@ -395,6 +395,7 @@ namespace Game.AI
                 case SmartEvents.SceneCancel:
                 case SmartEvents.SceneComplete:
                 case SmartEvents.SendEventTrigger:
+                case SmartEvents.AreatriggerExit:
                     return true;
                 default:
                     return false;
@@ -585,7 +586,7 @@ namespace Game.AI
                 SmartEvents.TransportRemovePlayer => 0,
                 SmartEvents.TransportRelocate => Marshal.SizeOf(typeof(SmartEvent.TransportRelocate)),
                 SmartEvents.InstancePlayerEnter => Marshal.SizeOf(typeof(SmartEvent.InstancePlayerEnter)),
-                SmartEvents.AreatriggerOntrigger => Marshal.SizeOf(typeof(SmartEvent.Areatrigger)),
+                SmartEvents.AreatriggerEnter => 0,
                 SmartEvents.QuestAccepted => 0,
                 SmartEvents.QuestObjCompletion => 0,
                 SmartEvents.QuestCompletion => 0,
@@ -625,6 +626,7 @@ namespace Game.AI
                 SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnDespawn => 0,
                 SmartEvents.SendEventTrigger => 0,
+                SmartEvents.AreatriggerExit => 0,
                 _ => Marshal.SizeOf(typeof(SmartEvent.Raw)),
             };
 
@@ -1173,18 +1175,6 @@ namespace Game.AI
                             return false;
                         break;
                     }
-                    case SmartEvents.AreatriggerOntrigger:
-                    {
-                        if (e.Event.areatrigger.id != 0 && (e.GetScriptType() == SmartScriptType.AreaTriggerEntity || e.GetScriptType() == SmartScriptType.AreaTriggerEntityCustom))
-                        {
-                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} areatrigger param not supported for SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY and SMART_SCRIPT_TYPE_AREATRIGGER_ENTITY_CUSTOM, skipped.");
-                            return false;
-                        }
-
-                        if (e.Event.areatrigger.id != 0 && !IsAreaTriggerValid(e, e.Event.areatrigger.id))
-                            return false;
-                        break;
-                    }
                     case SmartEvents.TextOver:
                     {
                         if (!IsTextValid(e, e.Event.textOver.textGroupID))
@@ -1339,6 +1329,8 @@ namespace Game.AI
                     case SmartEvents.WaypointResumed:
                     case SmartEvents.WaypointStopped:
                     case SmartEvents.WaypointEnded:
+                    case SmartEvents.AreatriggerEnter:
+                    case SmartEvents.AreatriggerExit:
                     case SmartEvents.GossipSelect:
                     case SmartEvents.GossipHello:
                     case SmartEvents.JustCreated:
@@ -2382,15 +2374,6 @@ namespace Game.AI
             }
             return true;
         }
-        static bool IsAreaTriggerValid(SmartScriptHolder e, uint entry)
-        {
-            if (!CliDB.AreaTriggerStorage.ContainsKey(entry))
-            {
-                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent AreaTrigger entry {entry}, skipped.");
-                return false;
-            }
-            return true;
-        }
         static bool IsSoundValid(SmartScriptHolder e, uint entry)
         {
             if (!CliDB.SoundKitStorage.ContainsKey(entry))
@@ -2504,7 +2487,7 @@ namespace Game.AI
                 SmartEvents.TransportRemovePlayer => SmartScriptTypeMaskId.Transport,
                 SmartEvents.TransportRelocate => SmartScriptTypeMaskId.Transport,
                 SmartEvents.InstancePlayerEnter => SmartScriptTypeMaskId.Instance,
-                SmartEvents.AreatriggerOntrigger => SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartEvents.AreatriggerEnter => SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity,
                 SmartEvents.QuestAccepted => SmartScriptTypeMaskId.Quest,
                 SmartEvents.QuestObjCompletion => SmartScriptTypeMaskId.Quest,
                 SmartEvents.QuestRewarded => SmartScriptTypeMaskId.Quest,
@@ -2546,6 +2529,7 @@ namespace Game.AI
                 SmartEvents.OnSpellStart => SmartScriptTypeMaskId.Creature,
                 SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
                 SmartEvents.SendEventTrigger => SmartScriptTypeMaskId.Event,
+                SmartEvents.AreatriggerExit => SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity,
                 _ => 0,
             };
 
@@ -2694,9 +2678,6 @@ namespace Game.AI
 
         [FieldOffset(16)]
         public InstancePlayerEnter instancePlayerEnter;
-
-        [FieldOffset(16)]
-        public Areatrigger areatrigger;
 
         [FieldOffset(16)]
         public TextOver textOver;
@@ -2866,10 +2847,6 @@ namespace Game.AI
             public uint team;
             public uint cooldownMin;
             public uint cooldownMax;
-        }
-        public struct Areatrigger
-        {
-            public uint id;
         }
         public struct TextOver
         {

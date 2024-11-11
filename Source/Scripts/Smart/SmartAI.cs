@@ -17,13 +17,19 @@ namespace Scripts.Smart
 
         public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
-            if (!player.IsAlive())
-                return false;
-
-            Log.outDebug(LogFilter.ScriptsAi, "AreaTrigger {0} is using SmartTrigger script", trigger.Id);
+            Log.outDebug(LogFilter.ScriptsAi, $"AreaTrigger {trigger.Id} is using SmartTrigger script");
             SmartScript script = new();
             script.OnInitialize(player, trigger);
-            script.ProcessEventsFor(SmartEvents.AreatriggerOntrigger, player, trigger.Id);
+            script.ProcessEventsFor(SmartEvents.AreatriggerEnter, player);
+            return true;
+        }
+
+        public override bool OnExit(Player player, AreaTriggerRecord trigger)
+        {
+            Log.outDebug(LogFilter.ScriptsAi, $"AreaTrigger {trigger.Id} exit is using SmartTrigger script");
+            SmartScript script = new();
+            script.OnInitialize(player, trigger);
+            script.ProcessEventsFor(SmartEvents.AreatriggerExit, player);
             return true;
         }
     }
