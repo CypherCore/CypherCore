@@ -78,7 +78,7 @@ namespace Game.Entities
             SetRestBonus(restType, totalRestBonus);
         }
 
-        public void SetRestFlag(RestFlag restFlag, uint triggerId = 0)
+        public void SetRestFlag(RestFlag restFlag)
         {
             RestFlag oldRestMask = _restFlagMask;
             _restFlagMask |= restFlag;
@@ -88,9 +88,6 @@ namespace Game.Entities
                 _restTime = GameTime.GetGameTime();
                 _player.SetPlayerFlag(PlayerFlags.Resting);
             }
-
-            if (triggerId != 0)
-                _innAreaTriggerId = triggerId;
         }
 
         public void RemoveRestFlag(RestFlag restFlag)
@@ -161,5 +158,6 @@ namespace Game.Entities
         public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
         public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
         public uint GetInnTriggerId() { return _innAreaTriggerId; }
+        public void SetInnTriggerID(uint id) { _innAreaTriggerId = id; }
     }
 }

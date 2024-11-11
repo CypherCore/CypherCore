@@ -433,37 +433,6 @@ namespace Game.Entities
                     m_weaponChangeTimer -= diff;
             }
 
-            if (m_zoneUpdateTimer > 0)
-            {
-                if (diff >= m_zoneUpdateTimer)
-                {
-                    // On zone update tick check if we are still in an inn if we are supposed to be in one
-                    if (_restMgr.HasRestFlag(RestFlag.Tavern))
-                    {
-                        AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(_restMgr.GetInnTriggerId());
-                        if (atEntry == null || !IsInAreaTrigger(atEntry))
-                            _restMgr.RemoveRestFlag(RestFlag.Tavern);
-                    }
-
-                    uint newzone, newarea;
-                    GetZoneAndAreaId(out newzone, out newarea);
-
-                    if (m_zoneUpdateId != newzone)
-                        UpdateZone(newzone, newarea);                // also update area
-                    else
-                    {
-                        // use area updates as well
-                        // needed for free far all arenas for example
-                        if (m_areaUpdateId != newarea)
-                            UpdateArea(newarea);
-
-                        m_zoneUpdateTimer = 1 * Time.InMilliseconds;
-                    }
-                }
-                else
-                    m_zoneUpdateTimer -= diff;
-            }
-
             if (IsAlive())
             {
                 RegenTimer += diff;
@@ -570,8 +539,14 @@ namespace Game.Entities
             // Group update
             SendUpdateToOutOfRangeGroupMembers();
 
-            // Indoor/Outdoor aura requirements
-            CheckOutdoorsAuraRequirements();
+            // Updating Zone and AreaId. This will also trigger spell_area and phasing related updates
+            UpdateZoneAndAreaId();
+
+            // Updating auras which can only be used inside or outside (such as Mounts)
+            UpdateIndoorsOutdoorsAuras();
+
+            // Updating the resting state when entering resting places
+            UpdateTavernRestingState();
         }
 
         public override void SetDeathState(DeathState s)
@@ -6596,10 +6571,35 @@ namespace Game.Entities
             SendPacket(new ExplorationExperience(Experience, Area));
         }
 
-        public void CheckOutdoorsAuraRequirements()
+        public void UpdateZoneAndAreaId()
+        {
+            GetZoneAndAreaId(out uint newzone, out uint newarea);
+
+            if (m_zoneUpdateId != newzone)
+                UpdateZone(newzone, newarea);                // also update area
+            else
+            {
+                // use area updates as well
+                // needed for free far all arenas for example
+                if (m_areaUpdateId != newarea)
+                    UpdateArea(newarea);
+            }
+        }
+
+        public void UpdateIndoorsOutdoorsAuras()
         {
             if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck))
                 RemoveAurasWithAttribute(IsOutdoors() ? SpellAttr0.OnlyIndoors : SpellAttr0.OnlyOutdoors);
+        }
+
+        public void UpdateTavernRestingState()
+        {
+            var atEntry = CliDB.AreaTriggerStorage.LookupByKey(_restMgr.GetInnTriggerId());
+
+            if (_restMgr.HasRestFlag(RestFlag.Tavern) && (atEntry == null || !IsInAreaTrigger(atEntry)))
+                _restMgr.RemoveRestFlag(RestFlag.Tavern);
+            else if (!_restMgr.HasRestFlag(RestFlag.Tavern) && IsInAreaTrigger(atEntry))
+                _restMgr.SetRestFlag(RestFlag.Tavern);
         }
 
         public void SendSysMessage(CypherStrings str, params object[] args)

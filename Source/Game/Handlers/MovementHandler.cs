@@ -209,7 +209,7 @@ namespace Game
                     Unit.ProcSkillsAndAuras(plrMover, null, new ProcFlagsInit(ProcFlags.Jump), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 }
 
-                // Whenever a player stops a movement action, an indoor/outdoor check is being performed
+                // Whenever a player stops a movement action, several position based checks and updates are being performed
                 switch (opcode)
                 {
                     case ClientOpcodes.MoveSetFly:
@@ -220,7 +220,9 @@ namespace Game
                     case ClientOpcodes.MoveStopSwim:
                     case ClientOpcodes.MoveStopPitch:
                     case ClientOpcodes.MoveStopAscend:
-                        plrMover.CheckOutdoorsAuraRequirements();
+                        plrMover.UpdateZoneAndAreaId();
+                        plrMover.UpdateIndoorsOutdoorsAuras();
+                        plrMover.UpdateTavernRestingState();
                         break;
                     default:
                         break;

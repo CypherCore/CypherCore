@@ -211,7 +211,6 @@ namespace Game.Entities
         public bool IsDebugAreaTriggers { get; set; }
         uint m_zoneUpdateId;
         uint m_areaUpdateId;
-        uint m_zoneUpdateTimer;
 
         uint m_ChampioningFaction;
         byte m_fishingSteps;

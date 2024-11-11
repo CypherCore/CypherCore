@@ -245,7 +245,7 @@ namespace Game
             {
                 // set resting flag we are in the inn
                 if (packet.Entered)
-                    player.GetRestMgr().SetRestFlag(RestFlag.Tavern, atEntry.Id);
+                    player.GetRestMgr().SetInnTriggerID(atEntry.Id);
                 else
                     player.GetRestMgr().RemoveRestFlag(RestFlag.Tavern);
 

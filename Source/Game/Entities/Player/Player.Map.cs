@@ -154,7 +154,6 @@ namespace Game.Entities
 
             uint oldZone = m_zoneUpdateId;
             m_zoneUpdateId = newZone;
-            m_zoneUpdateTimer = 1 * Time.InMilliseconds;
 
             GetMap().UpdatePlayerZoneStats(oldZone, newZone);
 
