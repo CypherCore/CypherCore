@@ -96,7 +96,7 @@ namespace Game.Networking
 
         public WorldPacket(byte[] data) : base(data)
         {
-            opcode = ReadUInt16();
+            opcode = ReadUInt32();
         }
 
         public ObjectGuid ReadPackedGuid()

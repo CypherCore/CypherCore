@@ -362,7 +362,7 @@ namespace Game.Networking
             if (packetSize > 0x400 && _worldCrypt.IsInitialized)
             {
                 buffer.WriteInt32(packetSize + 2);
-                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
+                buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((uint)opcode), 4), data, (uint)packetSize));
 
                 byte[] compressedData;
                 uint compressedSize = CompressPacket(data, opcode, out compressedData);
@@ -376,9 +376,9 @@ namespace Game.Networking
             }
 
             buffer = new ByteBuffer();
-            buffer.WriteUInt16((ushort)opcode);
+            buffer.WriteUInt32((uint)opcode);
             buffer.WriteBytes(data);
-            packetSize += 2 /*opcode*/;
+            packetSize += 4 /*opcode*/;
 
             data = buffer.GetData();
 
@@ -401,7 +401,7 @@ namespace Game.Networking
 
         public uint CompressPacket(byte[] data, ServerOpcodes opcode, out byte[] outData)
         {
-            byte[] uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
+            byte[] uncompressedData = BitConverter.GetBytes((uint)opcode).Combine(data);
 
             uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
             outData = new byte[bufferSize];

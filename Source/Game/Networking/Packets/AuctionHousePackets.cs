@@ -341,13 +341,6 @@ namespace Game.Networking.Packets
             }
         }
     }
-
-    class AuctionRequestFavoriteList : ClientPacket
-    {
-        public AuctionRequestFavoriteList(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
     
     class AuctionSellCommodity : ClientPacket
     {

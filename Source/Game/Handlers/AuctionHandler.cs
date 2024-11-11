@@ -528,8 +528,7 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AuctionRequestFavoriteList)]
-        void HandleAuctionRequestFavoriteList(AuctionRequestFavoriteList requestFavoriteList)
+        void SendAuctionFavoriteList()
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_FAVORITE_AUCTIONS);
             stmt.AddValue(0, _player.GetGUID().GetCounter());

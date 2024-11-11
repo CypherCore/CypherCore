@@ -358,7 +358,7 @@ namespace Game
 
             // TODO: Missing treasure picker implementation
 
-            _player.SendPacket(treasurePickerResponse);
+            SendPacket(treasurePickerResponse);
         }
     }
 }
