@@ -3132,6 +3132,9 @@ namespace Game.Entities
                 moneyReward = (uint)(GetQuestMoneyReward(quest) + (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney)));
             }
 
+            if (quest.HasFlag(QuestFlags.TrackingEvent))
+                return;
+
             QuestGiverQuestComplete packet = new();
 
             packet.QuestID = questId;
