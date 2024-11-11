@@ -53,7 +53,7 @@ namespace Framework.Constants
         // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
         MaskNoMonsterMove = Done,
         // Unused, not suported flags
-        MaskUnused = NoSpline | EnterCycle | Frozen | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
+        MaskUnused = NoSpline | Frozen | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
             | Unknown_0x800000 | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
     }
 }

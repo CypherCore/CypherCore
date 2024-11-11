@@ -222,7 +222,13 @@ namespace Game.Networking.Packets
             if (!moveSpline.IsCyclic())                                                 // Destination
                 data.WriteVector3(moveSpline.FinalDestination());
             else
-                data.WriteVector3(Vector3.Zero);
+            {
+                var spline = moveSpline.spline;
+                if (spline.GetPointCount() <= 1)
+                    data.WriteVector3(Vector3.Zero);
+                else
+                    data.WriteVector3(spline.GetPoint(spline.Last() - 1));
+            }
 
             bool hasSplineMove = data.WriteBit(!moveSpline.Finalized() && !moveSpline.splineIsFacingOnly);
             data.FlushBits();
