@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Framework.IO;
 using Game.AI;
 using Game.BattleFields;
 using Game.DataStorage;
@@ -165,7 +166,12 @@ namespace Game.Entities
             buffer.WriteUInt8((byte)tempObjectType);
 
             BuildMovementUpdate(buffer, flags, target);
-            BuildValuesCreate(buffer, target);
+
+            WorldPacket tempBuffer = new();
+            BuildValuesCreate(tempBuffer, target);
+            buffer.WriteUInt32(tempBuffer.GetSize());
+            buffer.WriteBytes(tempBuffer);
+
             data.AddUpdateBlock(buffer);
         }
 
@@ -190,7 +196,10 @@ namespace Game.Entities
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
-            BuildValuesUpdate(buffer, target);
+            WorldPacket tempBuffer = new();
+            BuildValuesUpdate(tempBuffer, target);
+            buffer.WriteUInt32(tempBuffer.GetSize());
+            buffer.WriteBytes(tempBuffer);
 
             data.AddUpdateBlock(buffer);
         }
@@ -201,7 +210,10 @@ namespace Game.Entities
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
-            BuildValuesUpdateWithFlag(buffer, flags, target);
+            WorldPacket tempBuffer = new();
+            BuildValuesUpdateWithFlag(tempBuffer, flags, target);
+            buffer.WriteUInt32(tempBuffer.GetSize());
+            buffer.WriteBytes(tempBuffer);
 
             data.AddUpdateBlock(buffer);
         }
@@ -821,8 +833,8 @@ namespace Game.Entities
 
         public virtual Loot GetLootForPlayer(Player player) { return null; }
 
-        public abstract void BuildValuesCreate(WorldPacket data, Player target);
-        public abstract void BuildValuesUpdate(WorldPacket data, Player target);
+        public virtual void BuildValuesCreate(WorldPacket data, Player target) { }
+        public virtual void BuildValuesUpdate(WorldPacket data, Player target) { }
 
         public void SetUpdateFieldValue<T>(IUpdateField<T> updateField, T newValue)
         {

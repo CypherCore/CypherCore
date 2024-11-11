@@ -3274,30 +3274,22 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
 
-            buffer.WriteUInt8((byte)flags);
-            m_objectData.WriteCreate(buffer, flags, this, target);
-            m_gameObjectData.WriteCreate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
+            data.WriteUInt8((byte)flags);
+            m_objectData.WriteCreate(data, flags, this, target);
+            m_gameObjectData.WriteCreate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
 
-            buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(buffer, flags, this, target);
+                m_objectData.WriteUpdate(data, flags, this, target);
 
             if (m_values.HasChanged(TypeId.GameObject))
-                m_gameObjectData.WriteUpdate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
+                m_gameObjectData.WriteUpdate(data, flags, this, target);
         }
 
         public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedGameObjectMask, Player target)

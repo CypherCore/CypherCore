@@ -149,34 +149,26 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
 
-            buffer.WriteUInt8((byte)flags);
-            m_objectData.WriteCreate(buffer, flags, this, target);
-            m_itemData.WriteCreate(buffer, flags, this, target);
-            m_azeriteEmpoweredItemData.WriteCreate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
+            data.WriteUInt8((byte)flags);
+            m_objectData.WriteCreate(data, flags, this, target);
+            m_itemData.WriteCreate(data, flags, this, target);
+            m_azeriteEmpoweredItemData.WriteCreate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
 
+            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(buffer, flags, this, target);
+                m_objectData.WriteUpdate(data, flags, this, target);
 
             if (m_values.HasChanged(TypeId.Item))
-                m_itemData.WriteUpdate(buffer, flags, this, target);
+                m_itemData.WriteUpdate(data, flags, this, target);
 
             if (m_values.HasChanged(TypeId.AzeriteEmpoweredItem))
-                m_azeriteEmpoweredItemData.WriteUpdate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
-            data.WriteBytes(buffer);
+                m_azeriteEmpoweredItemData.WriteUpdate(data, flags, this, target);
         }
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteEmpoweredItemMask, Player target)

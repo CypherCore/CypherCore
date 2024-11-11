@@ -9,6 +9,7 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
+using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
@@ -3689,6 +3690,103 @@ namespace Game.Entities
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
+
+        public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
+        {
+            UpdateFieldFlag flags = UpdateFieldFlag.None;
+            if (GetOwnerGUID() == target.GetGUID())
+                flags |= UpdateFieldFlag.Owner;
+
+            if (HasDynamicFlag(UnitDynFlags.SpecialInfo))
+                if (HasAuraTypeWithCaster(AuraType.Empathy, target.GetGUID()))
+                    flags |= UpdateFieldFlag.Empath;
+
+            return flags;
+        }
+
+        public override void BuildValuesCreate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            data.WriteUInt8((byte)flags);
+            m_objectData.WriteCreate(data, flags, this, target);
+            m_unitData.WriteCreate(data, flags, this, target);
+        }
+
+        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
+
+            if (m_values.HasChanged(TypeId.Object))
+                m_objectData.WriteUpdate(data, flags, this, target);
+
+            if (m_values.HasChanged(TypeId.Unit))
+                m_unitData.WriteUpdate(data, flags, this, target);
+        }
+
+        public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
+        {
+            UpdateMask valuesMask = new((int)TypeId.Max);
+            valuesMask.Set((int)TypeId.Unit);
+
+            data.WriteUInt32(valuesMask.GetBlock(0));
+
+            UpdateMask mask = m_unitData.GetStaticUpdateMask();
+            m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
+            m_unitData.WriteUpdate(data, mask, true, this, target);
+        }
+
+        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, Player target)
+        {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
+            UpdateMask valuesMask = new((int)TypeId.Max);
+            if (requestedObjectMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Object);
+
+            UpdateMask unitMask = requestedUnitMask;
+            m_unitData.FilterDisallowedFieldsMaskForFlag(unitMask, flags);
+            if (unitMask.IsAnySet())
+                valuesMask.Set((int)TypeId.Unit);
+
+            WorldPacket buffer = new();
+            buffer.WriteUInt32(valuesMask.GetBlock(0));
+
+            if (valuesMask[(int)TypeId.Object])
+                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+
+            if (valuesMask[(int)TypeId.Unit])
+                m_unitData.WriteUpdate(buffer, requestedUnitMask, true, this, target);
+
+            WorldPacket buffer1 = new();
+            buffer1.WriteUInt8((byte)UpdateType.Values);
+            buffer1.WritePackedGuid(GetGUID());
+            buffer1.WriteUInt32(buffer.GetSize());
+            buffer1.WriteBytes(buffer.GetData());
+
+            data.AddUpdateBlock(buffer1);
+        }
+
+        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        {
+            Creature Owner;
+            ObjectFieldData ObjectMask = new();
+            UnitData UnitMask = new();
+
+            public ValuesUpdateForPlayerWithMaskSender(Creature owner)
+            {
+                Owner = owner;
+            }
+
+            public void Invoke(Player player)
+            {
+                UpdateData udata = new(Owner.GetMapId());
+
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), UnitMask.GetUpdateMask(), player);
+
+                udata.BuildPacket(out UpdateObject packet);
+                player.SendPacket(packet);
+            }
+        }
     }
 
     public class VendorItemCount

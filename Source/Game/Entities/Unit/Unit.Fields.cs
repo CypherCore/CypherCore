@@ -126,28 +126,6 @@ namespace Game.Entities
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
-
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
-        {
-            Unit Owner;
-            ObjectFieldData ObjectMask = new();
-            UnitData UnitMask = new();
-
-            public ValuesUpdateForPlayerWithMaskSender(Unit owner)
-            {
-                Owner = owner;
-            }
-
-            public void Invoke(Player player)
-            {
-                UpdateData udata = new(Owner.GetMapId());
-
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), UnitMask.GetUpdateMask(), player);
-
-                udata.BuildPacket(out UpdateObject packet);
-                player.SendPacket(packet);
-            }
-        }
     }
 
     public struct DiminishingReturn

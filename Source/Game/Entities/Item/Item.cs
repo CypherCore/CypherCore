@@ -1273,31 +1273,22 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
 
-            m_objectData.WriteCreate(buffer, flags, this, target);
-            m_itemData.WriteCreate(buffer, flags, this, target);
-
-            data.WriteUInt32(buffer.GetSize() + 1);
             data.WriteUInt8((byte)flags);
-            data.WriteBytes(buffer);
+            m_objectData.WriteCreate(data, flags, this, target);
+            m_itemData.WriteCreate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new();
 
+            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(buffer, flags, this, target);
+                m_objectData.WriteUpdate(data, flags, this, target);
 
             if (m_values.HasChanged(TypeId.Item))
-                m_itemData.WriteUpdate(buffer, flags, this, target);
-
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
-            data.WriteBytes(buffer);
+                m_itemData.WriteUpdate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
@@ -1305,15 +1296,11 @@ namespace Game.Entities
             UpdateMask valuesMask = new((int)TypeId.Max);
             valuesMask.Set((int)TypeId.Item);
 
-            WorldPacket buffer = new();
             UpdateMask mask = m_itemData.GetStaticUpdateMask();
 
-            buffer.WriteUInt32(valuesMask.GetBlock(0));
+            data.WriteUInt32(valuesMask.GetBlock(0));
             m_itemData.AppendAllowedFieldsMaskForFlag(mask, flags);
-            m_itemData.WriteUpdate(buffer, mask, true, this, target);
-
-            data.WriteUInt32(buffer.GetSize());
-            data.WriteBytes(buffer);
+            m_itemData.WriteUpdate(data, mask, true, this, target);
         }
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
