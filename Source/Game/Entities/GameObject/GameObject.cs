@@ -2632,8 +2632,22 @@ namespace Game.Entities
                 SpellCastResult castResult = CastSpell(user, spellId);
                 if (castResult == SpellCastResult.Success)
                 {
-                    if (GetGoType() == GameObjectTypes.NewFlag)
-                        HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.Taken, user.ToPlayer()));
+                    switch (GetGoType())
+                    {
+                        case GameObjectTypes.NewFlag:
+                            HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.Taken, user.ToPlayer()));
+                            break;
+                        case GameObjectTypes.FlagStand:
+                            SetFlag(GameObjectFlags.InUse);
+                            ZoneScript zonescript = GetZoneScript();
+                            if (zonescript != null)
+                                zonescript.OnFlagTaken(this, user?.ToPlayer());
+
+                            Delete();
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

@@ -54,6 +54,11 @@ namespace Game.Maps
 
         public virtual bool CanCaptureFlag(AreaTrigger areaTrigger, Player player) { return false; }
         public virtual void OnCaptureFlag(AreaTrigger areaTrigger, Player player) { }
+
+        // This hook is used with GAMEOBJECT_TYPE_FLAGSTAND. Newer gameobjects use GAMEOBJECT_TYPE_NEW_FLAG and should use `OnFlagStateChange`
+        public virtual void OnFlagTaken(GameObject flag, Player player) { }
+        // This hook is used with GAMEOBJECT_TYPE_FLAGSTAND. Newer gameobjects use GAMEOBJECT_TYPE_NEW_FLAG and should use `OnFlagStateChange`. The GameObject doesn't exist anymore, but the ObjectGuid does
+        public virtual void OnFlagDropped(ObjectGuid flagGuid, Player player) { }
     }
 
     public class ControlZoneHandler

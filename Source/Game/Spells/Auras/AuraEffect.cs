@@ -6004,15 +6004,28 @@ namespace Game.Spells
 
             if (!apply && aurApp.GetRemoveMode() != AuraRemoveMode.Default)
             {
-                GameObject gameObjectCaster = target.GetMap().GetGameObject(GetCasterGUID());
-                if (gameObjectCaster != null)
+                if (GetCasterGUID().IsGameObject())
                 {
-                    if (gameObjectCaster.GetGoType() == GameObjectTypes.NewFlag)
+                    GameObjectTemplate gobTemplate = Global.ObjectMgr.GetGameObjectTemplate(GetCasterGUID().GetEntry());
+                    if (gobTemplate != null)
                     {
-                        gameObjectCaster.HandleCustomTypeCommand(new SetNewFlagState(FlagState.Dropped, target));
-                        GameObject droppedFlag = gameObjectCaster.SummonGameObject(gameObjectCaster.GetGoInfo().NewFlag.FlagDrop, target.GetPosition(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration / 1000), GameObjectSummonType.TimedDespawn);
-                        if (droppedFlag != null)
-                            droppedFlag.SetOwnerGUID(gameObjectCaster.GetGUID());
+                        if (gobTemplate.type == GameObjectTypes.NewFlag)
+                        {
+                            GameObject gameObjectCaster = target.GetMap().GetGameObject(GetCasterGUID());
+                            if (gameObjectCaster != null)
+                            {
+                                gameObjectCaster.HandleCustomTypeCommand(new SetNewFlagState(FlagState.Dropped, target));
+                                GameObject droppedFlag = gameObjectCaster.SummonGameObject(gameObjectCaster.GetGoInfo().NewFlag.FlagDrop, target.GetPosition(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration / 1000), GameObjectSummonType.TimedDespawn);
+                                if (droppedFlag != null)
+                                    droppedFlag.SetOwnerGUID(gameObjectCaster.GetGUID());
+                            }
+                        }
+                        else if (gobTemplate.type == GameObjectTypes.FlagStand)
+                        {
+                            ZoneScript zonescript = target.FindZoneScript();
+                            if (zonescript != null)
+                                zonescript.OnFlagDropped(GetCasterGUID(), target);
+                        }
                     }
                 }
             }
