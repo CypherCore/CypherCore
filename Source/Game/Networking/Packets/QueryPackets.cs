@@ -874,11 +874,11 @@ namespace Game.Networking.Packets
             data.WriteBit(IsChoice);
             data.FlushBits();
 
-            foreach (TreasurePickCurrency treasurePickCurrency in Currencies)
-                treasurePickCurrency.Write(data);
-
             foreach (TreasurePickItem treasurePickItem in Items)
                 treasurePickItem.Write(data);
+
+            foreach (TreasurePickCurrency treasurePickCurrency in Currencies)
+                treasurePickCurrency.Write(data);
 
             foreach (TreasurePickerBonus treasurePickerBonus in Bonuses)
                 treasurePickerBonus.Write(data);
