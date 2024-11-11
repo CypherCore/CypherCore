@@ -7915,11 +7915,8 @@ namespace Game.Entities
             return flags;
         }
 
-        public override void BuildValuesCreate(WorldPacket data, Player target)
+        public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-
-            data.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(data, flags, this, target);
             m_unitData.WriteCreate(data, flags, this, target);
             m_playerData.WriteCreate(data, flags, this, target);
@@ -7927,10 +7924,8 @@ namespace Game.Entities
                 m_activePlayerData.WriteCreate(data, flags, this, target);
         }
 
-        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-
             data.WriteUInt32((uint)(m_values.GetChangedObjectTypeMask() & ~((target != this ? 1 : 0) << (int)TypeId.ActivePlayer)));
             if (m_values.HasChanged(TypeId.Object))
                 m_objectData.WriteUpdate(data, flags, this, target);

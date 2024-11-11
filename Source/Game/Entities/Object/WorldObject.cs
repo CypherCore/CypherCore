@@ -167,9 +167,12 @@ namespace Game.Entities
 
             BuildMovementUpdate(buffer, flags, target);
 
+            UpdateFieldFlag fieldFlags = GetUpdateFieldFlagsFor(target);
+
             WorldPacket tempBuffer = new();
-            BuildValuesCreate(tempBuffer, target);
+            BuildValuesCreate(tempBuffer, fieldFlags, target);
             buffer.WriteUInt32(tempBuffer.GetSize());
+            buffer.WriteUInt8((byte)fieldFlags);
             buffer.WriteBytes(tempBuffer);
 
             data.AddUpdateBlock(buffer);
@@ -196,8 +199,10 @@ namespace Game.Entities
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
+            UpdateFieldFlag fieldFlags = GetUpdateFieldFlagsFor(target);
+
             WorldPacket tempBuffer = new();
-            BuildValuesUpdate(tempBuffer, target);
+            BuildValuesUpdate(tempBuffer, fieldFlags, target);
             buffer.WriteUInt32(tempBuffer.GetSize());
             buffer.WriteBytes(tempBuffer);
 
@@ -833,8 +838,8 @@ namespace Game.Entities
 
         public virtual Loot GetLootForPlayer(Player player) { return null; }
 
-        public virtual void BuildValuesCreate(WorldPacket data, Player target) { }
-        public virtual void BuildValuesUpdate(WorldPacket data, Player target) { }
+        public virtual void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
+        public virtual void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
 
         public void SetUpdateFieldValue<T>(IUpdateField<T> updateField, T newValue)
         {

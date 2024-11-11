@@ -3271,19 +3271,14 @@ namespace Game.Entities
             return ObjectAccessor.GetGameObject(this, m_linkedTrap);
         }
 
-        public override void BuildValuesCreate(WorldPacket data, Player target)
+        public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-
-            data.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(data, flags, this, target);
             m_gameObjectData.WriteCreate(data, flags, this, target);
         }
 
-        public override void BuildValuesUpdate(WorldPacket data, Player target)
+        public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-
             data.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
                 m_objectData.WriteUpdate(data, flags, this, target);
