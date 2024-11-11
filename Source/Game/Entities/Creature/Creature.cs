@@ -3691,19 +3691,6 @@ namespace Game.Entities
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
 
-        public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
-        {
-            UpdateFieldFlag flags = UpdateFieldFlag.None;
-            if (GetOwnerGUID() == target.GetGUID())
-                flags |= UpdateFieldFlag.Owner;
-
-            if (HasDynamicFlag(UnitDynFlags.SpecialInfo))
-                if (HasAuraTypeWithCaster(AuraType.Empathy, target.GetGUID()))
-                    flags |= UpdateFieldFlag.Empath;
-
-            return flags;
-        }
-
         public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
             m_objectData.WriteCreate(data, flags, this, target);

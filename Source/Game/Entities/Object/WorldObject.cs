@@ -801,7 +801,6 @@ namespace Game.Entities
         public virtual void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
             data.WriteUInt32(0);
-            data.WriteUInt32(0);
         }
 
         public void AddToObjectUpdateIfNeeded()
@@ -4200,5 +4199,41 @@ namespace Game.Entities
         public ObjectGuid? OwnerGuid;
         public ObjectGuid? PrivateObjectOwnerGuid;
         public GameObjectTypes? GameObjectType;
+    }
+
+    public class UpdateFieldHolder
+    {
+        UpdateMask _changesMask = new((int)TypeId.Max);
+
+        public HasChangesMask ModifyValue(HasChangesMask updateData)
+        {
+            _changesMask.Set(updateData.Bit);
+            return updateData;
+        }
+
+        public void ClearChangesMask(HasChangesMask updateData)
+        {
+            _changesMask.Reset(updateData.Bit);
+            updateData.ClearChangesMask();
+        }
+
+        public void ClearChangesMask<U>(HasChangesMask updateData, ref UpdateField<U> updateField) where U : new()
+        {
+            _changesMask.Reset(updateData.Bit);
+
+            IHasChangesMask hasChangesMask = (IHasChangesMask)updateField._value;
+            if (hasChangesMask != null)
+                hasChangesMask.ClearChangesMask();
+        }
+
+        public uint GetChangedObjectTypeMask()
+        {
+            return _changesMask.GetBlock(0);
+        }
+
+        public bool HasChanged(TypeId index)
+        {
+            return _changesMask[(int)index];
+        }
     }
 }

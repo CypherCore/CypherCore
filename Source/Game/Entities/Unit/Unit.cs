@@ -2460,6 +2460,19 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
+        public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
+        {
+            UpdateFieldFlag flags = UpdateFieldFlag.None;
+            if (target == this || GetOwnerGUID() == target.GetGUID())
+                flags |= UpdateFieldFlag.Owner;
+
+            if (HasDynamicFlag(UnitDynFlags.SpecialInfo))
+                if (HasAuraTypeWithCaster(AuraType.Empathy, target.GetGUID()))
+                    flags |= UpdateFieldFlag.Empath;
+
+            return flags;
+        }
+
         public override void DestroyForPlayer(Player target)
         {
             Battleground bg = target.GetBattleground();

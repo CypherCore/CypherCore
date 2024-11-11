@@ -9,42 +9,6 @@ using System.Linq;
 
 namespace Game.Entities
 {
-    public class UpdateFieldHolder
-    {
-        UpdateMask _changesMask = new((int)TypeId.Max);
-
-        public HasChangesMask ModifyValue(HasChangesMask updateData)
-        {
-            _changesMask.Set(updateData.Bit);
-            return updateData;
-        }
-
-        public void ClearChangesMask(HasChangesMask updateData)
-        {
-            _changesMask.Reset(updateData.Bit);
-            updateData.ClearChangesMask();
-        }
-
-        public void ClearChangesMask<U>(HasChangesMask updateData, ref UpdateField<U> updateField) where U : new()
-        {
-            _changesMask.Reset(updateData.Bit);
-
-            IHasChangesMask hasChangesMask = (IHasChangesMask)updateField._value;
-            if (hasChangesMask != null)
-                hasChangesMask.ClearChangesMask();
-        }
-
-        public uint GetChangedObjectTypeMask()
-        {
-            return _changesMask.GetBlock(0);
-        }
-
-        public bool HasChanged(TypeId index)
-        {
-            return _changesMask[(int)index];
-        }
-    }
-
     public interface IUpdateField<T>
     {
         void SetValue(T value);
@@ -249,7 +213,7 @@ namespace Game.Entities
 
         public bool HasChanged(int index)
         {
-            return (_updateMask[index / 32] & (1 << (index % 32))) != 0;
+            return (_updateMask[UpdateMask.GetBlockIndex(index)] & UpdateMask.GetBlockFlag(index)) != 0;
         }
 
         public void WriteUpdateMask(WorldPacket data, int bitsForSize = 32)
