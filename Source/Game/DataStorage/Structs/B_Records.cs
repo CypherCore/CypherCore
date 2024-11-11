@@ -122,8 +122,8 @@ namespace Game.DataStorage
     public sealed class BroadcastTextDurationRecord
     {
         public uint Id;
-        public uint BroadcastTextID;
         public int Locale;
         public int Duration;
+        public uint BroadcastTextID;
     }
 }

@@ -56,6 +56,7 @@ namespace Game.Spells
                 AttributesEx12 = (SpellAttr12)_misc.Attributes[12];
                 AttributesEx13 = (SpellAttr13)_misc.Attributes[13];
                 AttributesEx14 = (SpellAttr14)_misc.Attributes[14];
+                AttributesEx15 = (SpellAttr15)_misc.Attributes[15];
                 CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(_misc.CastingTimeIndex);
                 DurationEntry = CliDB.SpellDurationStorage.LookupByKey(_misc.DurationIndex);
                 RangeEntry = CliDB.SpellRangeStorage.LookupByKey(_misc.RangeIndex);
@@ -3786,22 +3787,23 @@ namespace Game.Spells
             return _visuals;
         }
 
-        public bool HasAttribute(SpellAttr0 attribute) { return Convert.ToBoolean(Attributes & attribute); }
-        public bool HasAttribute(SpellAttr1 attribute) { return Convert.ToBoolean(AttributesEx & attribute); }
-        public bool HasAttribute(SpellAttr2 attribute) { return Convert.ToBoolean(AttributesEx2 & attribute); }
-        public bool HasAttribute(SpellAttr3 attribute) { return Convert.ToBoolean(AttributesEx3 & attribute); }
-        public bool HasAttribute(SpellAttr4 attribute) { return Convert.ToBoolean(AttributesEx4 & attribute); }
-        public bool HasAttribute(SpellAttr5 attribute) { return Convert.ToBoolean(AttributesEx5 & attribute); }
-        public bool HasAttribute(SpellAttr6 attribute) { return Convert.ToBoolean(AttributesEx6 & attribute); }
-        public bool HasAttribute(SpellAttr7 attribute) { return Convert.ToBoolean(AttributesEx7 & attribute); }
-        public bool HasAttribute(SpellAttr8 attribute) { return Convert.ToBoolean(AttributesEx8 & attribute); }
-        public bool HasAttribute(SpellAttr9 attribute) { return Convert.ToBoolean(AttributesEx9 & attribute); }
-        public bool HasAttribute(SpellAttr10 attribute) { return Convert.ToBoolean(AttributesEx10 & attribute); }
-        public bool HasAttribute(SpellAttr11 attribute) { return Convert.ToBoolean(AttributesEx11 & attribute); }
-        public bool HasAttribute(SpellAttr12 attribute) { return Convert.ToBoolean(AttributesEx12 & attribute); }
-        public bool HasAttribute(SpellAttr13 attribute) { return Convert.ToBoolean(AttributesEx13 & attribute); }
-        public bool HasAttribute(SpellAttr14 attribute) { return Convert.ToBoolean(AttributesEx14 & attribute); }
-        public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
+        public bool HasAttribute(SpellAttr0 attribute) { return (Attributes & attribute) != 0; }
+        public bool HasAttribute(SpellAttr1 attribute) { return (AttributesEx & attribute) != 0; }
+        public bool HasAttribute(SpellAttr2 attribute) { return (AttributesEx2 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr3 attribute) { return (AttributesEx3 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr4 attribute) { return (AttributesEx4 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr5 attribute) { return (AttributesEx5 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr6 attribute) { return (AttributesEx6 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr7 attribute) { return (AttributesEx7 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr8 attribute) { return (AttributesEx8 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr9 attribute) { return (AttributesEx9 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr10 attribute) { return (AttributesEx10 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr11 attribute) { return (AttributesEx11 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr12 attribute) { return (AttributesEx12 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr13 attribute) { return (AttributesEx13 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr14 attribute) { return (AttributesEx14 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr15 attribute) { return (AttributesEx15 & attribute) != 0; }
+        public bool HasAttribute(SpellCustomAttributes attribute) { return (AttributesCu & attribute) != 0; }
 
         public bool CanBeInterrupted(WorldObject interruptCaster, Unit interruptTarget, bool ignoreImmunity = false)
         {
@@ -3843,6 +3845,7 @@ namespace Game.Spells
         public SpellAttr12 AttributesEx12 { get; set; }
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellAttr14 AttributesEx14 { get; set; }
+        public SpellAttr15 AttributesEx15 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
         public ulong Stances { get; set; }

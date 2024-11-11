@@ -446,7 +446,7 @@ namespace Game.DataStorage
     public sealed class SpellMiscRecord
     {
         public uint Id;
-        public int[] Attributes = new int[15];
+        public int[] Attributes = new int[16];
         public byte DifficultyID;
         public ushort CastingTimeIndex;
         public ushort DurationIndex;

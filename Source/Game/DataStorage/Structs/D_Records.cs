@@ -48,6 +48,7 @@ namespace Game.DataStorage
         public uint GroupSizeHealthCurveID;
         public uint GroupSizeDmgCurveID;
         public uint GroupSizeSpellPointsCurveID;
+        public int Unknown1105;
 
         public bool HasFlag(DifficultyFlags difficultyFlags) { return (Flags & (ushort)difficultyFlags) != 0; }
     }

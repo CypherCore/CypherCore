@@ -196,8 +196,6 @@ namespace Game.DataStorage
         public uint Id;
         public ushort SecondaryID;
         public int Flags;
-        public int ChrRacesID;
-        public int Sex;
         public uint ChrModelID;
         public int SortIndex;
         public int ChrCustomizationCategoryID;

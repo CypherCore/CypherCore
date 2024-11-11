@@ -449,14 +449,14 @@ namespace Game.DataStorage
             }
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(15786) ||               // last area added in 11.0.2 (56647)
-                !CharTitlesStorage.ContainsKey(854) ||                // last char title added in 11.0.2 (56647)
+            if (!AreaTableStorage.ContainsKey(15913) ||               // last area added in 11.0.5 (57171)
+                !CharTitlesStorage.ContainsKey(871) ||                // last char title added in 11.0.5 (57171)
                 !FlightCapabilityStorage.ContainsKey(1) ||            // default flight capability (required)
-                !GemPropertiesStorage.ContainsKey(4251) ||            // last gem property added in 11.0.2 (56647)
-                !ItemStorage.ContainsKey(232498) ||                   // last item added in 11.0.2 (56647)
-                !ItemExtendedCostStorage.ContainsKey(9369) ||         // last item extended cost added in 11.0.2 (56647)
-                !MapStorage.ContainsKey(2786) ||                      // last map added in 11.0.2 (56647)
-                !SpellNameStorage.ContainsKey(471174))                // last spell added in 11.0.2 (56647)
+                !GemPropertiesStorage.ContainsKey(4251) ||            // last gem property added in 11.0.5 (57171)
+                !ItemStorage.ContainsKey(233014) ||                   // last item added in 11.0.5 (57171)
+                !ItemExtendedCostStorage.ContainsKey(9647) ||         // last item extended cost added in 11.0.5 (57171)
+                !MapStorage.ContainsKey(2792) ||                      // last map added in 11.0.5 (57171)
+                !SpellNameStorage.ContainsKey(474722))                // last spell added in 11.0.5 (57171)
             {
                 Log.outFatal(LogFilter.ServerLoading, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Environment.Exit(1);

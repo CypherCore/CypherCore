@@ -53,6 +53,7 @@ namespace Game.DataStorage
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
         public byte MentorCharLevel;
+        public byte MaxPremadeGroupSize;
         public uint ContentTuningID;
         public LfgFlags[] Flags = new LfgFlags[2];
 
