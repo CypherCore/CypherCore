@@ -1782,6 +1782,9 @@ namespace Game.Maps
                 }
             }
 
+            if (!transData.HasData())
+                return;
+
             UpdateObject packet;
             transData.BuildPacket(out packet);
             player.SendPacket(packet);
@@ -1798,6 +1801,9 @@ namespace Game.Maps
                     player.m_visibleTransports.Remove(transport.GetGUID());
                 }
             }
+
+            if (!transData.HasData())
+                return;
 
             UpdateObject packet;
             transData.BuildPacket(out packet);
@@ -1828,6 +1834,9 @@ namespace Game.Maps
                     player.m_visibleTransports.Remove(transport.GetGUID());
                 }
             }
+
+            if (!transData.HasData())
+                return;
 
             UpdateObject packet;
             transData.BuildPacket(out packet);
