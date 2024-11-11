@@ -883,6 +883,15 @@ namespace Game.Networking.Packets
     {
         public PlayObjectSound() : base(ServerOpcodes.PlayObjectSound) { }
 
+        public PlayObjectSound(ObjectGuid targetObjectGUID, ObjectGuid sourceObjectGUID, uint soundKitID, Vector3 position, int broadcastTextID) : base(ServerOpcodes.PlayObjectSound)
+        {
+            TargetObjectGUID = targetObjectGUID;
+            SourceObjectGUID = sourceObjectGUID;
+            SoundKitID = soundKitID;
+            Position = position;
+            BroadcastTextID = broadcastTextID;
+        }
+
         public override void Write()
         {
             _worldPacket.WriteUInt32(SoundKitID);

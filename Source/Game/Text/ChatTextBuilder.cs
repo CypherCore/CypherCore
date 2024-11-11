@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Networking;
 using Game.Networking.Packets;
 using System.Collections.Generic;
 
@@ -24,12 +25,16 @@ namespace Game.Chat
         string Text;
         uint AchievementId;
         Locale Locale;
+        uint PlayerConditionID;
 
         // caches
         public ChatPkt UntranslatedPacket;
         public ChatPkt TranslatedPacket;
+        public EmoteMessage EmotePacket;
+        public ServerPacket SoundPacket;
 
-        public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS)
+        public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS,
+            uint broadcastTextId = 0, ushort emoteId = 0, uint soundKitId = 0, SoundKitPlayType soundKitPlayType = SoundKitPlayType.Normal, uint playerConditionId = 0)
         {
             Type = chatType;
             Language = language;
@@ -38,14 +43,46 @@ namespace Game.Chat
             Text = message;
             AchievementId = achievementId;
             Locale = locale;
+            PlayerConditionID = playerConditionId;
 
             UntranslatedPacket = new();
             UntranslatedPacket.Initialize(Type, Language, Sender, Receiver, Text, AchievementId, "", Locale);
             UntranslatedPacket.Write();
+
+            if (sender != null && sender.IsUnit() && emoteId != 0)
+            {
+                EmotePacket = new();
+                EmotePacket.Guid = sender.GetGUID();
+                EmotePacket.EmoteID = emoteId;
+                EmotePacket.Write();
+            }
+
+            SoundPacket = null;
+            if (soundKitId != 0)
+            {
+                if (soundKitPlayType == SoundKitPlayType.Normal)
+                {
+                    SoundPacket = new PlaySound(sender != null ? sender.GetGUID() : ObjectGuid.Empty, soundKitId, broadcastTextId);
+                }
+                else if (soundKitPlayType == SoundKitPlayType.ObjectSound)
+                {
+                    SoundPacket = new PlayObjectSound(receiver != null ? receiver.GetGUID() : ObjectGuid.Empty, sender != null ? sender.GetGUID() : ObjectGuid.Empty, soundKitId, receiver != null ? receiver.GetWorldLocation() : new Position(0, 0, 0), (int)broadcastTextId);
+                }
+                SoundPacket.Write();
+            }
         }
 
         public void Invoke(Player player)
         {
+            if (!player.MeetPlayerCondition(PlayerConditionID))
+                return;
+
+            if (SoundPacket != null)
+                player.SendPacket(SoundPacket);
+
+            if (EmotePacket != null)
+                player.SendPacket(EmotePacket);
+
             if (Language == Language.Universal || Language == Language.Addon || Language == Language.AddonLogged || player.CanUnderstandLanguage(Language))
             {
                 player.SendPacket(UntranslatedPacket);
@@ -62,7 +99,7 @@ namespace Game.Chat
             player.SendPacket(TranslatedPacket);
         }
     }
-    
+
     public class BroadcastTextBuilder : MessageBuilder
     {
         public BroadcastTextBuilder(WorldObject obj, ChatMsg msgtype, uint textId, Gender gender, WorldObject target = null, uint achievementId = 0)
@@ -78,7 +115,23 @@ namespace Game.Chat
         public override ChatPacketSender Invoke(Locale locale = Locale.enUS)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
-            return new ChatPacketSender(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, locale);
+            Unit unitSender = _source?.ToUnit();
+            Gender gender = unitSender != null ? unitSender.GetGender() : Gender.Unknown;
+            uint soundKitId = bct != null ? bct.SoundKitID[gender == Gender.Female ? 1 : 0] : 0;
+
+            return new ChatPacketSender(_msgType,
+                bct != null ? (Language)bct.LanguageID : Language.Universal,
+                _source,
+                _target,
+                bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "",
+                _achievementId,
+                locale,
+                bct != null ? bct.Id : 0,
+                bct != null ? bct.EmotesID : (ushort)0,
+                soundKitId,
+                SoundKitPlayType.Normal,
+                bct != null ? (uint)bct.ConditionID : 0
+            );
         }
 
         WorldObject _source;
