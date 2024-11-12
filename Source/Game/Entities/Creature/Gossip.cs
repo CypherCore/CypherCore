@@ -130,7 +130,7 @@ namespace Game.Misc
                 {
                     GossipMenuItemsLocale gossipMenuLocale = Global.ObjectMgr.GetGossipMenuItemsLocale(menuItem.MenuID, menuItem.OrderIndex);
                     if (gossipMenuLocale != null)
-                        ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strBoxText);
+                        ObjectManager.GetLocaleString(gossipMenuLocale.BoxText, GetLocale(), ref strOptionText);
                 }
             }
 
