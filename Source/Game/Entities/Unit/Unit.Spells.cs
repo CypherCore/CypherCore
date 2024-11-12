@@ -2752,6 +2752,7 @@ namespace Game.Entities
                 SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(clickInfo.spellId, caster.GetMap().GetDifficultyID());
                 // if (!spellEntry) should be checked at npc_spellclick load
 
+                SpellCastResult castResult = SpellCastResult.Success;
                 if (seatId > -1)
                 {
                     byte i = 0;
@@ -2777,7 +2778,7 @@ namespace Game.Entities
                         CastSpellExtraArgs args = new(flags);
                         args.OriginalCaster = origCasterGUID;
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, seatId + 1);
-                        caster.CastSpell(target, clickInfo.spellId, args);
+                        castResult = caster.CastSpell(target, clickInfo.spellId, args);
                     }
                     else    // This can happen during Player._LoadAuras
                     {
@@ -2798,7 +2799,7 @@ namespace Game.Entities
                 else
                 {
                     if (IsInMap(caster))
-                        caster.CastSpell(target, spellEntry.Id, new CastSpellExtraArgs().SetOriginalCaster(origCasterGUID));
+                        castResult = caster.CastSpell(target, spellEntry.Id, new CastSpellExtraArgs().SetOriginalCaster(origCasterGUID));
                     else
                     {
                         AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
@@ -2809,7 +2810,7 @@ namespace Game.Entities
                     }
                 }
 
-                spellClickHandled = true;
+                spellClickHandled = castResult == SpellCastResult.Success;
             }
 
             Creature creature = ToCreature();
