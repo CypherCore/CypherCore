@@ -22,6 +22,8 @@ namespace Game.Entities
             ObjectTypeMask |= TypeMask.AzeriteEmpoweredItem;
             ObjectTypeId = TypeId.AzeriteEmpoweredItem;
 
+            m_entityFragments.Add(EntityFragment.Tag_AzeriteEmpoweredItem, false);
+
             m_azeriteEmpoweredItemData = new AzeriteEmpoweredItemData();
         }
 
@@ -181,6 +183,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.AzeriteEmpoweredItem);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

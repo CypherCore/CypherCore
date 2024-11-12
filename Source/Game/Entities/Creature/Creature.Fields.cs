@@ -82,6 +82,7 @@ namespace Game.Entities
         uint m_boundaryCheckTime;                         // (msecs) remaining time for next evade boundary check
 
         // vendor items
+        VendorData m_vendorData;
         List<VendorItemCount> m_vendorItemCounts = new();
 
         internal Dictionary<ObjectGuid, Loot> m_personalLoot = new();

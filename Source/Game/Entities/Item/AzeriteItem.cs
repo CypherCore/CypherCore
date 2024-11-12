@@ -22,6 +22,8 @@ namespace Game.Entities
             ObjectTypeMask |= TypeMask.AzeriteItem;
             ObjectTypeId = TypeId.AzeriteItem;
 
+            m_entityFragments.Add(EntityFragment.Tag_AzeriteItem, false);
+
             SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.DEBUGknowledgeWeek), -1);
         }
 
@@ -457,6 +459,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.AzeriteItem);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

@@ -114,6 +114,7 @@ namespace Game.Entities
             m_updateFlag.ServerTime = true;
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
+            m_updateFlag.GameObject = true;
         }
 
         public override void Dispose()
@@ -164,7 +165,6 @@ namespace Game.Entities
             }
 
             _pathProgress = goinfo.MoTransport.allowstopping == 0 ? Time.GetMSTime() /*might be called before world update loop begins, don't use GameTime*/ % tInfo.TotalPathTime : 0;
-            SetPathProgressForClient((float)_pathProgress / (float)tInfo.TotalPathTime);
             SetObjectScale(goinfo.size);
             SetPeriod(tInfo.TotalPathTime);
             SetEntry(goinfo.entry);
@@ -227,8 +227,6 @@ namespace Game.Entities
                 // reset cycle
                 _eventsToTrigger.SetAll(true);
             }
-
-            SetPathProgressForClient((float)_pathProgress / (float)GetTransportPeriod());
 
             uint timer = _pathProgress % GetTransportPeriod();
 
@@ -760,7 +758,7 @@ namespace Game.Entities
         {
             return _transportInfo.PathLegs[_currentPathLeg].MapId;
         }
-        
+
         public HashSet<WorldObject> GetPassengers() { return _passengers; }
 
         public ObjectGuid GetTransportGUID() { return GetGUID(); }
@@ -769,6 +767,11 @@ namespace Game.Entities
         public uint GetTransportPeriod() { return m_gameObjectData.Level; }
         public void SetPeriod(uint period) { SetLevel(period); }
         public uint GetTimer() { return _pathProgress; }
+        public bool IsStopRequested() { return _requestStopTimestamp.HasValue; }
+        public bool IsStopped()
+        {
+            return HasDynamicFlag(GameObjectDynamicLowFlags.Stopped);
+        }
 
         TransportTemplate _transportInfo;
 

@@ -209,6 +209,8 @@ namespace Framework.Constants
         VaultKeeper = 0x20000000,     // Void Storage
         WildBattlePet = 0x40000000,     // Pet That Player Can Fight (Battle Pet)
         BlackMarket = 0x80000000,     // Black Market
+
+        VendorMask = Vendor | VendorAmmo | VendorFood | VendorPoison | VendorReagent
     }
 
     public enum NPCFlags2
@@ -727,5 +729,15 @@ namespace Framework.Constants
     {
         None = 0,
         Empty = 1
+    }
+
+    public enum VendorDataTypeFlags
+    {
+        Generic = 0x01,
+        Ammo = 0x02,
+        Food = 0x04,
+        Poison = 0x08,
+        Reagent = 0x10,
+        Petition = 0x20,
     }
 }

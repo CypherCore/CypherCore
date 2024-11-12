@@ -18,6 +18,8 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
+            m_entityFragments.Add(EntityFragment.Tag_DynamicObject, false);
+
             m_dynamicObjectData = new DynamicObjectData();
         }
 
@@ -258,6 +260,7 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
         {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
@@ -266,6 +269,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.DynamicObject);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

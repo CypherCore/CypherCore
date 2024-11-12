@@ -1717,12 +1717,14 @@ namespace Scripts.World.NpcsSpecial
 
                 if (owner.HasAchieved(ArgentSquireIds.AchievementPonyUp) && !me.HasAura(ArgentSquireIds.AuraTiredS) && !me.HasAura(ArgentSquireIds.AuraTiredG))
                 {
-                    me.SetNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
+                    me.SetVendor(NPCFlags.Vendor, true);
+                    me.SetNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox);
                     return;
                 }
             }
 
-            me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox | NPCFlags.Vendor);
+            me.SetVendor(NPCFlags.VendorMask, false);
+            me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox);
         }
 
         public override bool OnGossipSelect(Player player, uint menuId, uint gossipListId)
@@ -1731,7 +1733,8 @@ namespace Scripts.World.NpcsSpecial
             {
                 case ArgentSquireIds.GossipOptionBank:
                 {
-                    me.RemoveNpcFlag(NPCFlags.Mailbox | NPCFlags.Vendor);
+                    me.SetVendor(NPCFlags.VendorMask, false);
+                    me.RemoveNpcFlag(NPCFlags.Mailbox);
                     uint _bankAura = IsArgentSquire() ? ArgentSquireIds.AuraBankS : ArgentSquireIds.AuraBankG;
                     if (!me.HasAura(_bankAura))
                         DoCastSelf(_bankAura);
@@ -1753,7 +1756,8 @@ namespace Scripts.World.NpcsSpecial
                 }
                 case ArgentSquireIds.GossipOptionMail:
                 {
-                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Vendor);
+                    me.SetVendor(NPCFlags.VendorMask, false);
+                    me.RemoveNpcFlag(NPCFlags.Banker);
                     uint _mailAura = IsArgentSquire() ? ArgentSquireIds.AuraPostmanS : ArgentSquireIds.AuraPostmanG;
                     if (!me.HasAura(_mailAura))
                         DoCastSelf(_mailAura);

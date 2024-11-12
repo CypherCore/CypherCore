@@ -31,6 +31,8 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
 
+            m_entityFragments.Add(EntityFragment.Tag_GameObject, false);
+
             m_respawnDelayTime = 300;
             m_despawnDelay = 0;
             m_lootState = LootState.NotReady;
@@ -298,6 +300,7 @@ namespace Game.Entities
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.ParentRotation), new Quaternion(goInfo.DestructibleBuilding.DestructibleModelRec, 0f, 0f, 0f));
                     break;
                 case GameObjectTypes.Transport:
+                    m_updateFlag.GameObject = true;
                     m_goTypeImpl = new GameObjectType.Transport(this);
 
                     if (goInfo.Transport.startOpen != 0)
@@ -3289,6 +3292,7 @@ namespace Game.Entities
 
         public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedGameObjectMask, Player target)
         {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
@@ -3297,6 +3301,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.GameObject);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -3328,22 +3333,11 @@ namespace Game.Entities
             return null;
         }
 
+        public float? GetPathProgressForClient() { return m_transportPathProgress; }
+
         public void SetPathProgressForClient(float progress)
         {
-            DoWithSuppressingObjectUpdates(() =>
-            {
-                ObjectFieldData dynflagMask = new();
-                dynflagMask.MarkChanged(m_objectData.DynamicFlags);
-                bool marked = (m_objectData.GetUpdateMask() & dynflagMask.GetUpdateMask()).IsAnySet();
-
-                uint dynamicFlags = (uint)GetDynamicFlags();
-                dynamicFlags &= 0xFFFF; // remove high bits
-                dynamicFlags |= (uint)(progress * 65535.0f) << 16;
-                ReplaceAllDynamicFlags((GameObjectDynamicLowFlags)dynamicFlags);
-
-                if (!marked)
-                    m_objectData.ClearChanged(m_objectData.DynamicFlags);
-            });
+            m_transportPathProgress = progress;
         }
 
         public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
@@ -3943,6 +3937,7 @@ namespace Game.Entities
         bool m_respawnCompatibilityMode;
         ushort _animKitId;
         uint _worldEffectID;
+        float? m_transportPathProgress;
 
         VignetteData m_vignette;
 

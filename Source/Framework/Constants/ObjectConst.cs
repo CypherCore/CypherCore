@@ -39,7 +39,7 @@ namespace Framework.Constants
         SceneObject = 0x1000,
         Conversation = 0x2000,
 
-        Seer = Player | Unit | DynamicObject,
+        Seer = Unit | Player | DynamicObject,
         WorldObject = Unit | GameObject | DynamicObject | Corpse | AreaTrigger | SceneObject | Conversation
     }
 

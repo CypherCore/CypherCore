@@ -25,6 +25,8 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.SceneObject = true;
 
+            m_entityFragments.Add(EntityFragment.Tag_SceneObject, false);
+
             m_sceneObjectData = new();
             _stationaryPosition = new();
         }
@@ -139,6 +141,7 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedSceneObjectMask, Player target)
         {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
@@ -147,6 +150,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.SceneObject);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

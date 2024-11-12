@@ -3802,8 +3802,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetLootSpecId());
 
                 ss.Clear();
-                for (int i = 0; i < m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Size(); ++i)
-                    ss.Append($"{(uint)(m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][i] >> 32) & 0xFFFFFFFF)} ");
+                for (int i = 0; i < m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values.Size(); ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values[i] >> 32) & 0xFFFFFFFF)} ");
 
                 stmt.AddValue(index++, ss.ToString());
 
@@ -3958,8 +3958,8 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetLootSpecId());
 
                 ss.Clear();
-                for (int i = 0; i < m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Size(); ++i)
-                    ss.Append($"{(uint)(m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][i] >> 32) & 0xFFFFFFFF)} ");
+                for (int i = 0; i < m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values.Size(); ++i)
+                    ss.Append($"{(uint)(m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values[i] >> 32) & 0xFFFFFFFF)} ");
 
                 stmt.AddValue(index++, ss.ToString());
 

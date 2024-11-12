@@ -23,6 +23,8 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Conversation = true;
 
+            m_entityFragments.Add(EntityFragment.Tag_Conversation, false);
+
             m_conversationData = new ConversationData();
         }
 
@@ -305,6 +307,7 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
         {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
@@ -313,6 +316,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.Conversation);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

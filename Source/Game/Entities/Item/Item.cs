@@ -24,6 +24,8 @@ namespace Game.Entities
             ObjectTypeMask |= TypeMask.Item;
             ObjectTypeId = TypeId.Item;
 
+            m_entityFragments.Add(EntityFragment.Tag_Item, false);
+
             m_itemData = new ItemData();
 
             uState = ItemUpdateState.New;
@@ -1310,6 +1312,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.Item);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

@@ -316,8 +316,16 @@ namespace Game.Entities
             if (cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Worldevent))
                 npcFlags |= Global.GameEventMgr.GetNPCFlag(this);
 
+            if (IsVendor() && !npcFlags.HasAnyFlag((ulong)NPCFlags.VendorMask))
+                SetVendor(NPCFlags.VendorMask, false);
+
             ReplaceAllNpcFlags((NPCFlags)(npcFlags & 0xFFFFFFFF));
             ReplaceAllNpcFlags2((NPCFlags2)(npcFlags >> 32));
+
+            if (npcFlags.HasAnyFlag((ulong)NPCFlags.VendorMask))
+                SetVendor((NPCFlags)npcFlags & NPCFlags.VendorMask, true);
+
+            SetPetitioner(npcFlags.HasAnyFlag((ulong)NPCFlags.Petitioner));
 
             // if unit is in combat, keep this flag
             unitFlags &= ~(uint)UnitFlags.InCombat;
@@ -3081,6 +3089,62 @@ namespace Game.Entities
             return vCount.count;
         }
 
+        public void SetVendor(NPCFlags flags, bool apply)
+        {
+            flags &= NPCFlags.VendorMask;
+            VendorDataTypeFlags vendorFlags = (VendorDataTypeFlags)((uint)flags >> 7);
+            if (apply)
+            {
+                if (m_vendorData == null)
+                {
+                    m_entityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
+                    m_vendorData = new();
+                }
+
+                SetNpcFlag(flags);
+                SetUpdateFieldFlagValue(m_values.ModifyValue(m_vendorData).ModifyValue(m_vendorData.Flags), (int)vendorFlags);
+            }
+            else if (m_vendorData != null)
+            {
+                RemoveNpcFlag(flags);
+                RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_vendorData).ModifyValue(m_vendorData.Flags), (int)vendorFlags);
+                if (m_vendorData.Flags == 0)
+                {
+                    m_values.ModifyValue(m_vendorData);
+                    AddToObjectUpdateIfNeeded();
+                    m_vendorData = null;
+                    m_entityFragments.Remove(EntityFragment.FVendor_C);
+                }
+            }
+        }
+
+        void SetPetitioner(bool apply)
+        {
+            if (apply)
+            {
+                if (m_vendorData == null)
+                {
+                    m_entityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
+                    m_vendorData = new();
+                }
+
+                SetNpcFlag(NPCFlags.Petitioner);
+                SetUpdateFieldFlagValue(m_values.ModifyValue(m_vendorData).ModifyValue(m_vendorData.Flags), (int)VendorDataTypeFlags.Petition);
+            }
+            else if (m_vendorData != null)
+            {
+                RemoveNpcFlag(NPCFlags.Petitioner);
+                RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_vendorData).ModifyValue(m_vendorData.Flags), (int)VendorDataTypeFlags.Petition);
+                if (m_vendorData.Flags == 0)
+                {
+                    m_values.ModifyValue(m_vendorData);
+                    AddToObjectUpdateIfNeeded();
+                    m_vendorData = null;
+                    m_entityFragments.Remove(EntityFragment.FVendor_C);
+                }
+            }
+        }
+
         public override string GetName(Locale locale = Locale.enUS)
         {
             if (locale != Locale.enUS)
@@ -3695,17 +3759,26 @@ namespace Game.Entities
         {
             m_objectData.WriteCreate(data, flags, this, target);
             m_unitData.WriteCreate(data, flags, this, target);
+
+            if (m_vendorData != null)
+                m_vendorData.WriteCreate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            if ((m_entityFragments.ContentsChangedMask & m_entityFragments.GetUpdateMaskFor(EntityFragment.CGObject)) != 0)
+            {
+                data.WriteUInt32(m_values.GetChangedObjectTypeMask());
 
-            if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(data, flags, this, target);
+                if (m_values.HasChanged(TypeId.Object))
+                    m_objectData.WriteUpdate(data, flags, this, target);
 
-            if (m_values.HasChanged(TypeId.Unit))
-                m_unitData.WriteUpdate(data, flags, this, target);
+                if (m_values.HasChanged(TypeId.Unit))
+                    m_unitData.WriteUpdate(data, flags, this, target);
+            }
+
+            if (m_vendorData != null && (m_entityFragments.ContentsChangedMask & m_entityFragments.GetUpdateMaskFor(EntityFragment.FVendor_C)) != 0)
+                m_vendorData.WriteUpdate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
@@ -3733,6 +3806,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.Unit);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -3748,6 +3822,14 @@ namespace Game.Entities
             buffer1.WriteBytes(buffer.GetData());
 
             data.AddUpdateBlock(buffer1);
+        }
+
+        public override void ClearUpdateMask(bool remove)
+        {
+            if (m_vendorData != null)
+                m_values.ClearChangesMask(m_vendorData);
+
+            base.ClearUpdateMask(remove);
         }
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>

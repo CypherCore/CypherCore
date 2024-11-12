@@ -28,6 +28,8 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.AreaTrigger = true;
 
+            m_entityFragments.Add(EntityFragment.Tag_AreaTrigger, false);
+
             m_areaTriggerData = new AreaTriggerFieldData();
 
             _spline = new();
@@ -1348,6 +1350,7 @@ namespace Game.Entities
 
         public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
         {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
@@ -1356,6 +1359,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.AreaTrigger);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

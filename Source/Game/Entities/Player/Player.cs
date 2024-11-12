@@ -6485,8 +6485,8 @@ namespace Game.Entities
             int offset = (areaEntry.AreaBit / PlayerConst.ExploredZonesBits);
             ulong val = 1ul << (areaEntry.AreaBit % PlayerConst.ExploredZonesBits);
 
-            if (offset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Size()
-                || (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][offset] & val) == 0)
+            if (offset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values.Size()
+                || (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values[offset] & val) == 0)
             {
                 AddExploredZones(offset, val);
 
@@ -6540,13 +6540,15 @@ namespace Game.Entities
         public void AddExploredZones(int pos, ulong mask)
         {
             BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
-            SetUpdateFieldFlagValue(bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.ExploredZonesIndex, pos), mask);
+            BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.ExploredZonesIndex);
+            SetUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, pos), mask);
         }
 
         public void RemoveExploredZones(int pos, ulong mask)
         {
             BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
-            RemoveUpdateFieldFlagValue(bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.ExploredZonesIndex, pos), mask);
+            BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.ExploredZonesIndex);
+            RemoveUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, pos), mask);
         }
 
         public bool HasExploredZone(uint areaId)
@@ -6559,11 +6561,11 @@ namespace Game.Entities
                 return false;
 
             int playerIndexOffset = area.AreaBit / PlayerConst.ExploredZonesBits;
-            if (playerIndexOffset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Size())
+            if (playerIndexOffset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values.Size())
                 return false;
 
             ulong mask = 1ul << (area.AreaBit % PlayerConst.ExploredZonesBits);
-            return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex][playerIndexOffset] & mask) != 0;
+            return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.ExploredZonesIndex].Values[playerIndexOffset] & mask) != 0;
         }
 
         void SendExplorationExperience(uint Area, uint Experience)
@@ -7976,6 +7978,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.ActivePlayer);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])

@@ -24,6 +24,8 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
+            m_entityFragments.Add(EntityFragment.Tag_Corpse, false);
+
             m_corpseData = new();
 
             m_time = GameTime.GetGameTime();
@@ -235,6 +237,7 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
         {
+            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
@@ -243,6 +246,7 @@ namespace Game.Entities
                 valuesMask.Set((int)TypeId.Corpse);
 
             WorldPacket buffer = new();
+            BuildEntityFragmentsForValuesUpdateForPlayerWithMask(buffer, flags);
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
