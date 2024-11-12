@@ -219,7 +219,7 @@ namespace Game.Maps
                         if (pathPoints[eventPointIndex].ArrivalEventID != 0)
                         {
                             TransportPathEvent Event = new();
-                            Event.Timestamp = totalTime + eventSplineTime + leg.Duration;
+                            Event.Timestamp = totalTime + eventSplineTime + leg.Duration + delaySum;
                             Event.EventId = pathPoints[eventPointIndex].ArrivalEventID;
                             outEvents.Add(Event);
                         }
@@ -227,7 +227,7 @@ namespace Game.Maps
                         if (pathPoints[eventPointIndex].DepartureEventID != 0)
                         {
                             TransportPathEvent Event = new();
-                            Event.Timestamp = totalTime + eventSplineTime + leg.Duration + (pausePointIndex == eventPointIndex ? pathPoints[eventPointIndex].Delay * Time.InMilliseconds : 0);
+                            Event.Timestamp = totalTime + eventSplineTime + leg.Duration + delaySum + (pausePointIndex == eventPointIndex ? pathPoints[eventPointIndex].Delay * Time.InMilliseconds : 0);
                             Event.EventId = pathPoints[eventPointIndex].DepartureEventID;
                             outEvents.Add(Event);
                         }
@@ -269,7 +269,7 @@ namespace Game.Maps
                 if (pathPoints[eventPointIndex].ArrivalEventID != 0)
                 {
                     TransportPathEvent Event = new();
-                    Event.Timestamp = totalTime + eventSplineTime + leg.Duration;
+                    Event.Timestamp = totalTime + eventSplineTime + leg.Duration + delaySum;
                     Event.EventId = pathPoints[eventPointIndex].ArrivalEventID;
                     outEvents.Add(Event);
                 }
@@ -277,7 +277,7 @@ namespace Game.Maps
                 if (pathPoints[eventPointIndex].DepartureEventID != 0)
                 {
                     TransportPathEvent Event = new();
-                    Event.Timestamp = totalTime + eventSplineTime + leg.Duration;
+                    Event.Timestamp = totalTime + eventSplineTime + leg.Duration + delaySum;
                     Event.EventId = pathPoints[eventPointIndex].DepartureEventID;
                     outEvents.Add(Event);
                 }
@@ -360,7 +360,7 @@ namespace Game.Maps
 
             transport.TotalPathTime = totalTime;
         }
-        
+
         public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
         {
             if (!_transportAnimations.ContainsKey(transportEntry))
