@@ -210,8 +210,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBits(Info.PortraitTurnInText.GetByteCount(), 10);
                 _worldPacket.WriteBits(Info.PortraitTurnInName.GetByteCount(), 8);
                 _worldPacket.WriteBits(Info.QuestCompletionLog.GetByteCount(), 11);
-                _worldPacket.WriteBit(Info.ReadyForTranslation);
                 _worldPacket.WriteBit(Info.ResetByScheduler);
+                _worldPacket.WriteBit(Info.ReadyForTranslation);
                 _worldPacket.FlushBits();
 
                 foreach (QuestObjective questObjective in Info.Objectives)
