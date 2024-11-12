@@ -66,8 +66,8 @@ namespace Game.Entities
 
         public EntityFragment[] UpdateableIds = [EntityFragment.End, EntityFragment.End];
         public byte[] UpdateableMasks = new byte[2];
-        public byte UpdateableCount = 0;
-        public byte ContentsChangedMask = EntityDefinitionsConst.CGObjectActiveMask;
+        public byte UpdateableCount;
+        public byte ContentsChangedMask;
 
         public void Add(EntityFragment fragment, bool update)
         {
@@ -101,7 +101,10 @@ namespace Game.Entities
                 {
                     UpdateableMasks[i] = (byte)(1 << maskIndex++);
                     if (IsIndirectFragment(UpdateableIds[i]))
+                    {
+                        ContentsChangedMask |= UpdateableMasks[i]; // set the first bit to true to activate fragment
                         UpdateableMasks[i] |= (byte)(1 << maskIndex++);
+                    }
                 }
             }
 
