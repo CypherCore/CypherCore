@@ -212,12 +212,12 @@ namespace Game
 
             if (srcPlr != null)
             {
-                CreatureTextBuilder builder = new(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget, textEntry.BroadcastTextId, (ushort)textEntry.emote, finalSound, finalPlayType, (uint)bct.ConditionID);
+                CreatureTextBuilder builder = new(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget, textEntry.BroadcastTextId, (ushort)textEntry.emote, finalSound, finalPlayType, (uint)(bct != null ? bct.ConditionID : 0));
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
             else
             {
-                CreatureTextBuilder builder = new(finalSource, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget, textEntry.BroadcastTextId, (ushort)textEntry.emote, finalSound, finalPlayType, (uint)bct.ConditionID);
+                CreatureTextBuilder builder = new(finalSource, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget, textEntry.BroadcastTextId, (ushort)textEntry.emote, finalSound, finalPlayType, (uint)(bct != null ? bct.ConditionID : 0));
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
 
