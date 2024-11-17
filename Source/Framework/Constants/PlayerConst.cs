@@ -69,6 +69,8 @@ namespace Framework.Constants
         public const uint CurrencyMaxCapAncientMana = 2000;
 
         public const float MaxAreaSpiritHealerRange = 20.0f;
+
+        public const float TeleportMinLoadScreenDistance = 200.0f;
     }
 
     public struct MoneyConstants

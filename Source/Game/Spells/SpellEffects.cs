@@ -621,11 +621,12 @@ namespace Game.Spells
                 // Custom loading screen
                 uint customLoadingScreenId = (uint)effectInfo.MiscValue;
                 if (customLoadingScreenId != 0)
-                    player.SendPacket(new CustomLoadScreen(m_spellInfo.Id, customLoadingScreenId));
+                    if (targetDest.GetMapId() != unitTarget.GetMapId() || !unitTarget.IsInDist2d(targetDest, PlayerConst.TeleportMinLoadScreenDistance))
+                        player.SendPacket(new CustomLoadScreen(m_spellInfo.Id, customLoadingScreenId));
 
                 TeleportToOptions options = GetTeleportOptions(m_caster, unitTarget, m_destTargets[effectInfo.EffectIndex]);
 
-                player.TeleportTo(targetDest, options);
+                player.TeleportTo(targetDest, options, null, m_spellInfo.Id);
             }
             else if (targetDest.GetMapId() == unitTarget.GetMapId())
                 unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);

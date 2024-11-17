@@ -529,7 +529,7 @@ namespace Game.Entities
             //we should execute delayed teleports only for alive(!) players
             //because we don't want player's ghost teleported from graveyard
             if (IsHasDelayedTeleport() && IsAlive())
-                TeleportTo(teleportDest, m_teleport_options);
+                TeleportTo(teleportDest, m_teleport_options, m_teleportSpellId);
         }
 
         public override void Heartbeat()
@@ -1965,17 +1965,17 @@ namespace Game.Entities
 
         void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
 
-        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null)
+        public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null, uint teleportSpellId = 0)
         {
-            return TeleportTo(new TeleportLocation() { Location = new WorldLocation(mapid, x, y, z, orientation), InstanceId = instanceId }, options);
+            return TeleportTo(new TeleportLocation() { Location = new WorldLocation(mapid, x, y, z, orientation), InstanceId = instanceId }, options, teleportSpellId);
         }
 
-        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null)
+        public bool TeleportTo(WorldLocation loc, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null, uint teleportSpellId = 0)
         {
-            return TeleportTo(new TeleportLocation() { Location = loc, InstanceId = instanceId }, options);
+            return TeleportTo(new TeleportLocation() { Location = loc, InstanceId = instanceId }, options, teleportSpellId);
         }
 
-        public bool TeleportTo(TeleportLocation teleportLocation, TeleportToOptions options = TeleportToOptions.None)
+        public bool TeleportTo(TeleportLocation teleportLocation, TeleportToOptions options = TeleportToOptions.None, uint teleportSpellId = 0)
         {
             if (!GridDefines.IsValidMapCoord(teleportLocation.Location))
             {
@@ -2053,6 +2053,7 @@ namespace Game.Entities
                     //lets save teleport destination for player
                     teleportDest = teleportLocation;
                     m_teleport_options = options;
+                    m_teleportSpellId = teleportSpellId;
                     return true;
                 }
 
@@ -2072,6 +2073,7 @@ namespace Game.Entities
                 // this will be used instead of the current location in SaveToDB
                 teleportDest = teleportLocation;
                 m_teleport_options = options;
+                m_teleportSpellId = teleportSpellId;
                 SetFallInformation(0, GetPositionZ());
 
                 // code for finish transfer called in WorldSession.HandleMovementOpcodes()
@@ -2119,6 +2121,7 @@ namespace Game.Entities
                     //lets save teleport destination for player
                     teleportDest = teleportLocation;
                     m_teleport_options = options;
+                    m_teleportSpellId = teleportSpellId;
                     return true;
                 }
 
@@ -2173,6 +2176,8 @@ namespace Game.Entities
                     TransferPending transferPending = new();
                     transferPending.MapID = (int)teleportLocation.Location.GetMapId();
                     transferPending.OldMapPosition = teleportLocation.Location.GetPosition();
+                    if (teleportSpellId != 0)
+                        transferPending.TransferSpellID = (int)teleportSpellId;
 
                     if (teleportLocation.TransportGuid.HasValue)
                     {
@@ -2201,6 +2206,7 @@ namespace Game.Entities
 
                 teleportDest = teleportLocation;
                 m_teleport_options = options;
+                m_teleportSpellId = teleportSpellId;
                 SetFallInformation(0, GetPositionZ());
                 // if the player is saved before worldportack (at logout for example)
                 // this will be used instead of the current location in SaveToDB

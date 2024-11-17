@@ -85,6 +85,7 @@ namespace Game.Entities
         float m_lastFallZ;
         TeleportLocation teleportDest;
         TeleportToOptions m_teleport_options;
+        uint m_teleportSpellId;
         int m_newWorldCounter;
         bool mSemaphoreTeleport_Near;
         bool mSemaphoreTeleport_Far;
