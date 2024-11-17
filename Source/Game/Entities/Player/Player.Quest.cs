@@ -2126,14 +2126,11 @@ namespace Game.Entities
 
                 if (quest.IsTurnIn() && CanTakeQuest(quest, false))
                 {
+                    bool isTrivial = GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff));
                     if (quest.IsRepeatable())
-                    {
-                        if (GetLevel() > (GetQuestLevel(quest) + WorldConfig.GetIntValue(WorldCfg.QuestLowLevelHideDiff)))
-                            result |= QuestGiverStatus.RepeatableTurnin;
-                        else
-                            result |= QuestGiverStatus.TrivialRepeatableTurnin;
-                    }
-                    result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RewardCompleteNoPOI : QuestGiverStatus.RewardCompletePOI;
+                        result |= isTrivial ? QuestGiverStatus.TrivialRepeatableTurnin : QuestGiverStatus.RepeatableTurnin;
+                    else
+                        result |= isTrivial ? QuestGiverStatus.Trivial : QuestGiverStatus.Quest;
                 }
             }
 
