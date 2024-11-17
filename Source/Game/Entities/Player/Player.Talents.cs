@@ -96,12 +96,12 @@ namespace Game.Entities
             if (spellInfo == null)
                 return;
 
-            RemoveSpell(talent.SpellID, true);
+            RemoveSpell(talent.SpellID);
 
             // search for spells that the talent teaches and unlearn them
             foreach (var spellEffectInfo in spellInfo.GetEffects())
                 if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                    RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                    RemoveSpell(spellEffectInfo.TriggerSpell);
 
             if (talent.OverridesSpellID != 0)
                 RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
@@ -320,12 +320,12 @@ namespace Game.Entities
                 if (spellInfo == null)
                     continue;
 
-                RemoveSpell(talentInfo.SpellID, true);
+                RemoveSpell(talentInfo.SpellID);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                     if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                        RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                        RemoveSpell(spellEffectInfo.TriggerSpell);
 
                 if (talentInfo.OverridesSpellID != 0)
                     RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
@@ -337,12 +337,12 @@ namespace Game.Entities
                 if (spellInfo == null)
                     continue;
 
-                RemoveSpell(talentInfo.SpellID, true);
+                RemoveSpell(talentInfo.SpellID);
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                     if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
-                        RemoveSpell(spellEffectInfo.TriggerSpell, true);
+                        RemoveSpell(spellEffectInfo.TriggerSpell);
 
                 if (talentInfo.OverridesSpellID != 0)
                     RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
@@ -802,7 +802,7 @@ namespace Game.Entities
             if (spellInfo == null)
                 return;
 
-            RemoveSpell(talent.SpellID, true);
+            RemoveSpell(talent.SpellID);
 
             // Move this to toggle ?
             if (talent.OverridesSpellID != 0)
@@ -827,7 +827,7 @@ namespace Game.Entities
                 {
                     if (enable)
                     {
-                        LearnSpell(pvpTalentInfo.SpellID, false);
+                        LearnSpell(pvpTalentInfo.SpellID, true);
                         if (pvpTalentInfo.OverridesSpellID != 0)
                             AddOverrideSpell(pvpTalentInfo.OverridesSpellID, pvpTalentInfo.SpellID);
                     }
@@ -835,7 +835,7 @@ namespace Game.Entities
                     {
                         if (pvpTalentInfo.OverridesSpellID != 0)
                             RemoveOverrideSpell(pvpTalentInfo.OverridesSpellID, pvpTalentInfo.SpellID);
-                        RemoveSpell(pvpTalentInfo.SpellID, true);
+                        RemoveSpell(pvpTalentInfo.SpellID);
                     }
                 }
             }

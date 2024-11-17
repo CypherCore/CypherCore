@@ -337,7 +337,7 @@ namespace Game.Entities
                         for (int j = 0; j < specSpells.Count; ++j)
                         {
                             SpecializationSpellsRecord specSpell = specSpells[j];
-                            RemoveSpell(specSpell.SpellID, true);
+                            RemoveSpell(specSpell.SpellID);
                             if (specSpell.OverridesSpellID != 0)
                                 RemoveOverrideSpell(specSpell.OverridesSpellID, specSpell.SpellID);
                         }
