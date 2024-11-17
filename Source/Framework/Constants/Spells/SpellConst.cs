@@ -2715,9 +2715,13 @@ namespace Framework.Constants
     public enum ProcFlags2
     {
         None = 0x00,
-        TargetDies = 0x01,
-        Knockback = 0x02,
-        CastSuccessful = 0x04
+        TargetDies = 0x01, // 32 Kill or assist in killing target (not restricted to killing blow)
+        Knockback = 0x02, // 33 Knockback
+        CastSuccessful = 0x04, // 34 Cast Successful
+
+        SuccessfulDispel = 0x10,    // 36 Successful dispel
+
+        DoEmote = 0x40     // 38 Do Emote
     }
 
     public enum ProcFlagsSpellPhase
