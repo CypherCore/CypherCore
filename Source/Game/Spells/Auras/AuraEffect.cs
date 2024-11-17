@@ -2586,6 +2586,21 @@ namespace Game.Spells
             target.SetControlled(false, UnitState.Fleeing);
         }
 
+        static void HandleAuraDisableGravity(Unit target, bool apply)
+        {
+            // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
+            if (!apply)
+                if (target.HasAuraType(AuraType.ModRootDisableGravity)
+                    || target.HasAuraType(AuraType.ModStunDisableGravity)
+                    || target.HasAuraType(AuraType.DisableGravity)
+                    || (target.IsCreature() && target.ToCreature().IsFloating()))
+                    return;
+
+            if (target.SetDisableGravity(apply))
+                if (!apply && !target.IsFlying())
+                    target.GetMotionMaster().MoveFall();
+        }
+
         [AuraEffectHandler(AuraType.ModRootDisableGravity)]
         void HandleAuraModRootAndDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -2596,13 +2611,7 @@ namespace Game.Spells
 
             target.SetControlled(apply, UnitState.Root);
 
-            // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
-            if (!apply && (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModRootDisableGravity) || (target.IsCreature() && target.ToCreature().IsFloating())))
-                return;
-
-            if (target.SetDisableGravity(apply))
-                if (!apply && !target.IsFlying())
-                    target.GetMotionMaster().MoveFall();
+            HandleAuraDisableGravity(target, apply);
         }
 
         [AuraEffectHandler(AuraType.ModStunDisableGravity)]
@@ -2618,13 +2627,18 @@ namespace Game.Spells
             if (apply)
                 target.GetThreatManager().EvaluateSuppressed();
 
-            // Do not remove DisableGravity if there are more than this auraEffect of that kind on the unit or if it's a creature with DisableGravity on its movement template.
-            if (!apply && (target.HasAuraType(GetAuraType()) || target.HasAuraType(AuraType.ModStunDisableGravity) || (target.IsCreature() && target.ToCreature().IsFloating())))
+            HandleAuraDisableGravity(target, apply);
+        }
+
+        [AuraEffectHandler(AuraType.DisableGravity)]
+        void HandleAuraDisableGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
-            if (target.SetDisableGravity(apply))
-                if (!apply && !target.IsFlying())
-                    target.GetMotionMaster().MoveFall();
+            Unit target = aurApp.GetTarget();
+
+            HandleAuraDisableGravity(target, apply);
         }
 
         /***************************/

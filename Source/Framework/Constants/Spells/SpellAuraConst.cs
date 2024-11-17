@@ -495,7 +495,7 @@ namespace Framework.Constants
         ModMovementForceMagnitude = 485,
         Unk486 = 486,
         CosmeticMounted = 487,
-        Unk488 = 488,
+        DisableGravity = 488,
         ModAlternativeDefaultLanguage = 489, // NYI
         Unk490 = 490,
         Unk491 = 491,
