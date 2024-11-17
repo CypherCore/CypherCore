@@ -588,6 +588,9 @@ namespace Game.Entities
                 }
                 while (auraResult.NextRow());
             }
+
+            // TODO: finish dragonriding - this forces old flight mode
+            AddAura(404468, this);
         }
         bool _LoadHomeBind(SQLResult result)
         {

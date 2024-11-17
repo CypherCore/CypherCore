@@ -4459,6 +4459,12 @@ namespace Game.Entities
                 spellInfo.AttributesEx4 |= SpellAttr4.AuraIsBuff;
             });
 
+            // TODO: temporary, remove with dragonriding
+            ApplySpellFix( [404468], spellInfo =>
+            {
+                spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
+            });
+
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 // Fix range for trajectory triggered spell
