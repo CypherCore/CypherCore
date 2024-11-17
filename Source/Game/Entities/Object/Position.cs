@@ -16,6 +16,21 @@ namespace Game.Entities
         public float posZ;
         public float Orientation;
 
+        public Position() { }
+
+        public Position(float x = 0f, float y = 0f)
+        {
+            posX = x;
+            posY = y;
+        }
+
+        public Position(float x = 0f, float y = 0f, float z = 0f)
+        {
+            posX = x;
+            posY = y;
+            posZ = z;
+        }
+
         public Position(float x = 0f, float y = 0f, float z = 0f, float o = 0f)
         {
             posX = x;
@@ -407,11 +422,24 @@ namespace Game.Entities
 
         public Position _newPosition = new();
 
-        public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0)
+        public WorldLocation()
+        {
+            _mapId = 0xFFFFFFFF;
+        }
+
+        public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0) : base(x, y)
         {
             _mapId = mapId;
-            Relocate(x, y, z, o);
         }
+        public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0) : base(x, y, z)
+        {
+            _mapId = mapId;
+        }
+        public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0) : base(x, y, z, o)
+        {
+            _mapId = mapId;
+        }
+
         public WorldLocation(uint mapId, Position pos)
         {
             _mapId = mapId;
@@ -440,7 +468,7 @@ namespace Game.Entities
             Relocate(loc);
         }
 
-        public void WorldRelocate(uint mapId = 0xFFFFFFFF, float x = 0.0f, float y = 0.0f, float z = 0.0f, float o = 0.0f)
+        public void WorldRelocate(uint mapId, float x, float y, float z, float o)
         {
             _mapId = mapId;
             Relocate(x, y, z, o);

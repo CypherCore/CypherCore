@@ -266,20 +266,16 @@ namespace Game.Garrisons
 
         void Enter()
         {
-            WorldLocation loc = new(_siteLevel.MapID);
-            loc.Relocate(_owner);
-            _owner.TeleportTo(loc, TeleportToOptions.Seamless);
+            MapRecord map = CliDB.MapStorage.LookupByKey(_siteLevel.MapID);
+            if (map != null && _owner.GetMapId() == map.ParentMapID)
+                _owner.TeleportTo(new WorldLocation(_siteLevel.MapID, _owner), TeleportToOptions.Seamless);
         }
 
         void Leave()
         {
             MapRecord map = CliDB.MapStorage.LookupByKey(_siteLevel.MapID);
-            if (map != null)
-            {
-                WorldLocation loc = new((uint)map.ParentMapID);
-                loc.Relocate(_owner);
-                _owner.TeleportTo(loc, TeleportToOptions.Seamless);
-            }
+            if (map != null && _owner.GetMapId() == _siteLevel.MapID)
+                _owner.TeleportTo(new WorldLocation((uint)map.ParentMapID, _owner), TeleportToOptions.Seamless);
         }
 
         public uint GetFaction()
