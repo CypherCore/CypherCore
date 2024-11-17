@@ -1636,16 +1636,17 @@ namespace Game.DataStorage
             Difficulty NotUsed = Difficulty.None;
             return GetDefaultMapDifficulty(mapId, ref NotUsed);
         }
+
         public MapDifficultyRecord GetDefaultMapDifficulty(uint mapId, ref Difficulty difficulty)
         {
-            var dicMapDiff = _mapDifficulties.LookupByKey(mapId);
-            if (dicMapDiff == null)
+            var difficultiesForMap = _mapDifficulties.LookupByKey(mapId);
+            if (difficultiesForMap == null)
                 return null;
 
-            if (dicMapDiff.Empty())
+            if (difficultiesForMap.Empty())
                 return null;
 
-            foreach (var pair in dicMapDiff)
+            foreach (var pair in difficultiesForMap)
             {
                 DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(pair.Key);
                 if (difficultyEntry == null)
@@ -1658,9 +1659,9 @@ namespace Game.DataStorage
                 }
             }
 
-            difficulty = (Difficulty)dicMapDiff.First().Key;
+            difficulty = (Difficulty)difficultiesForMap.First().Key;
 
-            return dicMapDiff.First().Value;
+            return difficultiesForMap.First().Value;
         }
 
         public MapDifficultyRecord GetMapDifficultyData(uint mapId, Difficulty difficulty)
