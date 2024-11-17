@@ -83,6 +83,7 @@ public class RealmManager : Singleton<RealmManager>
                 }
 
                 var realm = new Realm();
+                realm.Name = name;
                 realm.Addresses.Add(externalAddress);
                 realm.Addresses.Add(localAddress);
                 realm.Port = result.Read<ushort>(4);
@@ -127,7 +128,7 @@ public class RealmManager : Singleton<RealmManager>
 
         if (_currentRealmId.HasValue)
         {
-            var realm = _realms.LookupByKey(_currentRealmId.Value);
+            var realm = _realms.LookupByKey(_currentRealmId);
             if (realm != null)
                 _currentRealmId = realm.Id;    // fill other fields of realm id
         }

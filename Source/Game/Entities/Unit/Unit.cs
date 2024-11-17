@@ -24,6 +24,7 @@ namespace Game.Entities
     {
         public Unit(bool isWorldObject) : base(isWorldObject)
         {
+            m_unitData = new UnitData();
             MoveSpline = new MoveSpline();
             i_motionMaster = new MotionMaster(this);
             m_combatManager = new CombatManager(this);
@@ -74,7 +75,7 @@ namespace Game.Entities
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
-            m_unitData = new UnitData();
+
         }
 
         public override void Dispose()

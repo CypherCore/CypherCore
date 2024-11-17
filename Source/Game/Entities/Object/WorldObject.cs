@@ -172,11 +172,13 @@ namespace Game.Entities
             UpdateFieldFlag fieldFlags = GetUpdateFieldFlagsFor(target);
 
             WorldPacket tempBuffer = new();
+            tempBuffer.WriteUInt8((byte)fieldFlags);
+            BuildEntityFragments(tempBuffer, m_entityFragments.GetIds());
+            tempBuffer.WriteUInt8(1);  // IndirectFragmentActive: CGObject
             BuildValuesCreate(tempBuffer, fieldFlags, target);
+
+
             buffer.WriteUInt32(tempBuffer.GetSize());
-            buffer.WriteUInt8((byte)fieldFlags);
-            BuildEntityFragments(buffer, m_entityFragments.GetIds());
-            buffer.WriteUInt8(1);  // IndirectFragmentActive: CGObject
             buffer.WriteBytes(tempBuffer);
 
             data.AddUpdateBlock(buffer);
@@ -3879,7 +3881,7 @@ namespace Game.Entities
         public TypeMask ObjectTypeMask { get; set; }
         protected TypeId ObjectTypeId { get; set; }
         protected CreateObjectBits m_updateFlag;
-        public EntityFragmentsHolder m_entityFragments;
+        public EntityFragmentsHolder m_entityFragments = new();
         ObjectGuid m_guid;
         bool _isNewObject;
         bool _isDestroyedObject;

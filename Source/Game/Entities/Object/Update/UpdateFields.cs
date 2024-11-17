@@ -4337,7 +4337,7 @@ namespace Game.Entities
 
     public class TraitSubTreeCache
     {
-        public List<TraitEntry> Entries;
+        public List<TraitEntry> Entries = new();
         public int TraitSubTreeID;
         public uint Active;
 

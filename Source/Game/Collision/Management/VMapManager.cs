@@ -191,8 +191,8 @@ namespace Game.Collision
                 if (iLoadedModelFiles.TryGetValue(filename, out worldmodel))
                     return worldmodel.Model;
 
-                var model = new ManagedModel(filename);
-                if (!model.Model.ReadFile(VMapPath + filename))
+                worldmodel = new ManagedModel(filename);
+                if (!worldmodel.Model.ReadFile(VMapPath + filename))
                 {
                     Log.outError(LogFilter.Server, $"VMapManager: could not load '{filename}'");
                     return null;
@@ -200,10 +200,8 @@ namespace Game.Collision
 
                 Log.outDebug(LogFilter.Maps, $"VMapManager: loading file '{filename}'");
 
-                model = worldmodel;
-
-                iLoadedModelFiles.Add(filename, model);
-                return model.Model;
+                iLoadedModelFiles.Add(filename, worldmodel);
+                return worldmodel.Model;
             }
         }
 
@@ -271,7 +269,7 @@ namespace Game.Collision
 
     public class ManagedModel
     {
-        public WorldModel Model;
+        public WorldModel Model = new();
         string _name; // valid only while model is held in VMapManager2::iLoadedModelFiles
 
         public ManagedModel(string name)

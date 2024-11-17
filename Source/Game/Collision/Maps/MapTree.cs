@@ -90,7 +90,7 @@ namespace Game.Collision
             LoadResult result = LoadResult.FileNotFound;
 
             TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
-            if (fileResult.TileFile != null)
+            if (fileResult.TileFile != null && fileResult.SpawnIndicesFile != null)
             {
                 result = LoadResult.Success;
                 using BinaryReader reader = new(fileResult.TileFile);
@@ -127,7 +127,7 @@ namespace Game.Collision
                                 continue;
                             }
 
-                            if (iTreeValues[referencedVal].GetWorldModel() == null)
+                            if (iTreeValues[referencedVal]?.GetWorldModel() == null)
                                 iTreeValues[referencedVal] = new ModelInstance(spawn, model);
 
                             iTreeValues[referencedVal].AddTileReference();

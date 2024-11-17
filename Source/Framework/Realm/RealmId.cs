@@ -52,7 +52,7 @@ namespace Framework.Realm
 
         public override int GetHashCode()
         {
-            return new { Site, Region, Index }.GetHashCode();
+            return new { Index }.GetHashCode();
         }
     }
 }

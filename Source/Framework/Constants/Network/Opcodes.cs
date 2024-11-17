@@ -883,7 +883,6 @@ namespace Framework.Constants
         WorldPortResponse = 0x350025,
         WrapItem = 0x320000,
 
-        Max = 0x5040,
         Unknown = 0xbadd
     }
 
@@ -2100,7 +2099,6 @@ namespace Framework.Constants
         CompressedPacket = 0x3E000A,
         MultiplePackets = 0x3E0009,
 
-        Max = 0x5040,
         Unknown = 0xbadd,
         None = 0
     }

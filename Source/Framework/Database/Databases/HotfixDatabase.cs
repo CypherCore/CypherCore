@@ -47,6 +47,7 @@ namespace Framework.Database
             // AreaTable.db2
             PrepareStatement(HotfixStatements.SEL_AREA_TABLE, "SELECT ID, ZoneName, AreaName, ContinentID, ParentAreaID, AreaBit, SoundProviderPref, " +
                 "SoundProviderPrefUnderwater, AmbienceID, UwAmbience, ZoneMusic, UwZoneMusic, IntroSound, UwIntroSound, FactionGroupMask, AmbientMultiplier, " +
+                "SoundProviderPrefUnderwater, AmbienceID, UwAmbience, ZoneMusic, UwZoneMusic, IntroSound, UwIntroSound, FactionGroupMask, AmbientMultiplier, " +
                 "MountFlags, PvpCombatWorldStateID, WildBattlePetLevelMin, WildBattlePetLevelMax, WindSettingsID, ContentTuningID, Flags1, Flags2, " +
                 "LiquidTypeID1, LiquidTypeID2, LiquidTypeID3, LiquidTypeID4 FROM area_table WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_AREA_TABLE_LOCALE, "SELECT ID, AreaName_lang FROM area_table_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
@@ -782,7 +783,7 @@ namespace Framework.Database
 
             // ItemModifiedAppearance.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE, "SELECT ID, ItemID, ItemAppearanceModifierID, ItemAppearanceID, OrderIndex, " +
-                "TransmogSourceTypeEnum Flags, FROM item_modified_appearance WHERE (`VerifiedBuild` > 0) = ?");
+                "TransmogSourceTypeEnum, Flags FROM item_modified_appearance WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemModifiedAppearanceExtra.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE_EXTRA, "SELECT ID, IconFileDataID, UnequippedIconFileDataID, SheatheType, " +

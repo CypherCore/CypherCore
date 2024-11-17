@@ -245,7 +245,7 @@ namespace Game.Networking
             WorldPacket packet = new(_packetBuffer.GetData());
             _packetBuffer.Reset();
 
-            if (packet.GetOpcode() >= (int)ClientOpcodes.Max)
+            if (!packet.IsValidOpcode())
             {
                 Log.outError(LogFilter.Network, $"WorldSocket.ReadData(): client {GetRemoteIpAddress()} sent wrong opcode (opcode: {packet.GetOpcode()})");
                 Log.outError(LogFilter.Network, $"Header: {_headerBuffer.GetData().ToHexString()} Data: {_packetBuffer.GetData().ToHexString()}");
@@ -361,7 +361,7 @@ namespace Game.Networking
             int packetSize = data.Length;
             if (packetSize > 0x400 && _worldCrypt.IsInitialized)
             {
-                buffer.WriteInt32(packetSize + 2);
+                buffer.WriteInt32(packetSize + 4);
                 buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((uint)opcode), 4), data, (uint)packetSize));
 
                 byte[] compressedData;

@@ -15,7 +15,7 @@ namespace Game.Movement
     public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
     {
         uint _pathId;
-        WaypointPath _path;
+        WaypointPath _path = new();
         int _currentNode;
 
         TimeTracker _duration;
@@ -28,8 +28,8 @@ namespace Game.Movement
         bool _repeating;
         bool _generatePath;
 
-        TimeTracker _moveTimer;
-        TimeTracker _nextMoveTime;
+        TimeTracker _moveTimer = new();
+        TimeTracker _nextMoveTime = new();
         List<int> _waypointTransitionSplinePoints = new();
         int _waypointTransitionSplinePointsIndex;
         bool _isReturningToStart;

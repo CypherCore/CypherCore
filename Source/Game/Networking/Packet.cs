@@ -82,6 +82,11 @@ namespace Game.Networking
 
         public ConnectionType GetConnection() { return connectionType; }
 
+        public bool IsValidOpcode()
+        {
+            return _worldPacket.IsValidOpcode();
+        }
+
         byte[] buffer;
         ConnectionType connectionType;
         protected WorldPacket _worldPacket;
@@ -208,6 +213,48 @@ namespace Game.Networking
 
         public DateTime GetReceivedTime() { return m_receivedTime; }
         public void SetReceiveTime(DateTime receivedTime) { m_receivedTime = receivedTime; }
+
+        public bool IsValidOpcode()
+        {
+            int opcodeArrayIndex = GetOpcodeArrayIndex(opcode);
+            return opcodeArrayIndex >= 0 && opcodeArrayIndex < 1699;
+        }
+
+        int GetOpcodeArrayIndex(uint opcode)
+        {
+            int idInGroup = (int)(opcode & 0xFFFF);
+            switch (opcode >> 16)
+            {
+                case 0x2A: return idInGroup < 26 ? idInGroup + 0 : -1;
+                case 0x2C: return idInGroup < 47 ? idInGroup + 26 : -1;
+                case 0x2D: return idInGroup < 3 ? idInGroup + 73 : -1;
+                case 0x2E: return idInGroup < 33 ? idInGroup + 76 : -1;
+                case 0x30: return idInGroup < 739 ? idInGroup + 109 : -1;
+                case 0x31: return idInGroup < 298 ? idInGroup + 848 : -1;
+                case 0x32: return idInGroup < 12 ? idInGroup + 1146 : -1;
+                case 0x33: return idInGroup < 130 ? idInGroup + 1158 : -1;
+                case 0x35: return idInGroup < 396 ? idInGroup + 1288 : -1;
+                case 0x36: return idInGroup < 15 ? idInGroup + 1684 : -1;
+                case 0x37: return idInGroup < 831 ? idInGroup + 0 : -1;
+                case 0x38: return idInGroup < 10 ? idInGroup + 831 : -1;
+                case 0x3B: return idInGroup < 18 ? idInGroup + 841 : -1;
+                case 0x3C: return idInGroup < 33 ? idInGroup + 859 : -1;
+                case 0x3D: return idInGroup < 49 ? idInGroup + 892 : -1;
+                case 0x3E: return idInGroup < 11 ? idInGroup + 941 : -1;
+                case 0x3F: return idInGroup < 12 ? idInGroup + 952 : -1;
+                case 0x41: return idInGroup < 82 ? idInGroup + 964 : -1;
+                case 0x43: return idInGroup < 67 ? idInGroup + 1046 : -1;
+                case 0x45: return idInGroup < 32 ? idInGroup + 1113 : -1;
+                case 0x47: return idInGroup < 1 ? idInGroup + 1145 : -1;
+                case 0x48: return idInGroup < 118 ? idInGroup + 1146 : -1;
+                case 0x4A: return idInGroup < 46 ? idInGroup + 1264 : -1;
+                case 0x4B: return idInGroup < 41 ? idInGroup + 1310 : -1;
+                case 0x4D: return idInGroup < 85 ? idInGroup + 1351 : -1;
+                case 0x4E: return idInGroup < 8 ? idInGroup + 1436 : -1;
+                case 0x50: return idInGroup < 1 ? idInGroup + 1444 : -1;
+                default: return -1;
+            }
+        }
 
         uint opcode;
         DateTime m_receivedTime; // only set for a specific set of opcodes, for performance reasons.

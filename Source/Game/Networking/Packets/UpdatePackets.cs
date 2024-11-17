@@ -11,9 +11,6 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt16(MapID);
-            _worldPacket.WriteUInt32(NumObjUpdates);
-            _worldPacket.WriteBit(true); // unk
             _worldPacket.WriteBytes(Data);
         }
 

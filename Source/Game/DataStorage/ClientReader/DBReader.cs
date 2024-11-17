@@ -405,7 +405,7 @@ namespace Game.DataStorage
                 if (fieldIndex >= _fieldMeta.Length)
                 {
                     if (_refId != -1)
-                        f.SetValue(obj, (uint)_refId);
+                        f.SetValue(obj, Convert.ChangeType(_refId, f.FieldType));
                     continue;
                 }
 

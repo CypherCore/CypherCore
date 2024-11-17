@@ -443,7 +443,12 @@ namespace Game.DataStorage
 
             foreach (var (_, pathProperty) in CliDB.PathPropertyStorage)
                 if (CliDB.PathStorage.HasRecord(pathProperty.PathID))
+                {
+                    if (!_paths.ContainsKey(pathProperty.PathID))
+                        _paths[pathProperty.PathID] = new();
+
                     _paths[pathProperty.PathID].Properties.Add(pathProperty);
+                }
 
             foreach (var group in PhaseXPhaseGroupStorage.Values)
             {
@@ -594,9 +599,9 @@ namespace Game.DataStorage
                 }
             }
 
-            Dictionary<Tuple<uint, int>, UiMapLinkRecord> uiMapLinks = new();
+            Dictionary<Tuple<uint, uint>, UiMapLinkRecord> uiMapLinks = new();
             foreach (UiMapLinkRecord uiMapLink in UiMapLinkStorage.Values)
-                uiMapLinks[Tuple.Create(uiMapLink.ParentUiMapID, uiMapLink.ChildUiMapID)] = uiMapLink;
+                uiMapLinks[Tuple.Create(uiMapLink.ParentUiMapID, (uint)uiMapLink.ChildUiMapID)] = uiMapLink;
 
             foreach (UiMapRecord uiMap in UiMapStorage.Values)
             {
@@ -2361,7 +2366,7 @@ namespace Game.DataStorage
         Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
         Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
-        Dictionary<uint, PathDb2> _paths;
+        Dictionary<uint, PathDb2> _paths = new();
         MultiMap<uint, uint> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<uint, byte> _pvpItemBonus = new();

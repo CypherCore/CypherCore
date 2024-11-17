@@ -27,8 +27,8 @@ namespace Game
 
             var oldMSTime = Time.GetMSTime();
 
-            //                                          0       1         2
-            SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags FROM waypoint_path");
+            //                                          0       1         2      3
+            SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags, Velocity FROM waypoint_path");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint paths. DB table `waypoint_path` is empty!");

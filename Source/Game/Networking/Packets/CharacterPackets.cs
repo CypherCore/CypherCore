@@ -55,7 +55,7 @@ namespace Game.Networking.Packets
             foreach (WarbandGroup warbandGroup in WarbandGroups)
                 warbandGroup.Write(_worldPacket);
 
-            foreach (CharacterInfoBasic charInfo in Characters)
+            foreach (CharacterInfo charInfo in Characters)
                 charInfo.Write(_worldPacket);
 
             foreach (RegionwideCharacterListEntry charInfo in RegionwideCharacters)
@@ -77,7 +77,7 @@ namespace Game.Networking.Packets
         public int MaxCharacterLevel = 1;
         public uint? DisabledClassesMask = new();
 
-        public List<CharacterInfoBasic> Characters = new(); // all characters on the list
+        public List<CharacterInfo> Characters = new(); // all characters on the list
         public List<RegionwideCharacterListEntry> RegionwideCharacters = new();
         public List<RaceUnlock> RaceUnlockData = new();
         public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
@@ -260,7 +260,7 @@ namespace Game.Networking.Packets
             public uint PetCreatureFamilyId;
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[19];
-            public CustomTabardInfo PersonalTabard;
+            public CustomTabardInfo PersonalTabard = new();
 
             public struct VisualItemInfo
             {
@@ -332,7 +332,7 @@ namespace Game.Networking.Packets
         public struct CharacterInfo
         {
             public CharacterInfoBasic Basic;
-            public CharacterRestrictionAndMailData RestrictionsAndMails;
+            public CharacterRestrictionAndMailData RestrictionsAndMails = new();
 
             public CharacterInfo(SQLFields fields)
             {

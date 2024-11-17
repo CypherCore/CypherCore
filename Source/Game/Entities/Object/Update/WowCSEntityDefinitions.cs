@@ -50,7 +50,6 @@ namespace Game.Entities
         public const byte CGObjectActiveMask = 0x1;
         public const byte CGObjectChangedMask = 0x2;
         public const byte CGObjectUpdateMask = CGObjectActiveMask | CGObjectChangedMask;
-
     }
 
     public class EntityFragmentsHolder
@@ -75,15 +74,16 @@ namespace Game.Entities
 
             (int, bool) insertSorted(ref EntityFragment[] arr, ref byte count, EntityFragment f)
             {
-                //auto where = std::ranges::lower_bound(arr.begin(), arr.begin() + count, f);
-                var where = Array.IndexOf(arr, f);
-                if (where != -1)
-                    return (where, false);
+                var whereIndex = Array.IndexOf(arr, f);
+                if (whereIndex != -1)
+                    return (whereIndex, false);
 
-                arr.SetValue(f, where);
-                arr = arr[^1..^0].Concat(arr[..^1]).ToArray();
+                whereIndex = Array.IndexOf(arr, EntityFragment.End);
+
+                arr.SetValue(f, whereIndex);
+                Array.Sort(arr);
                 ++count;
-                return (where, true);
+                return (whereIndex, true);
             };
 
             if (!insertSorted(ref Ids, ref Count, fragment).Item2)
@@ -120,7 +120,7 @@ namespace Game.Entities
                 if (where != -1)
                 {
                     arr.SetValue(EntityFragment.End, where);
-                    arr = arr[^1..^0].Concat(arr[..^1]).ToArray();
+                    Array.Sort(arr);
                     --count;
                     return (where, true);
                 }

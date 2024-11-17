@@ -30,6 +30,8 @@ namespace Framework.ClientBuild
                         build.HotfixVersion = hotfixVersion.ToCharArray();
 
                     build.Build = result.Read<uint>(4);
+
+                    _builds.Add(build);
                 }
                 while (result.NextRow());
             }
@@ -169,11 +171,31 @@ namespace Framework.ClientBuild
         }
     }
 
-    public class ClientBuildVariantId
+    public struct ClientBuildVariantId
     {
         public int Platform;
         public int Arch;
         public int Type;
+
+        public override int GetHashCode()
+        {
+            return Platform.GetHashCode() ^ Arch.GetHashCode() ^ Type.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this == (ClientBuildVariantId)obj;
+        }
+
+        public static bool operator ==(ClientBuildVariantId left, ClientBuildVariantId right)
+        {
+            return left.Platform == right.Platform && left.Arch == right.Arch && left.Type == right.Type;
+        }
+
+        public static bool operator !=(ClientBuildVariantId left, ClientBuildVariantId right)
+        {
+            return !(left == right);
+        }
     }
 
     public class ClientBuildAuthKey

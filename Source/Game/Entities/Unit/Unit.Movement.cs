@@ -193,7 +193,7 @@ namespace Game.Entities
                 AdvFlyingRateTypeSingle.SurfaceFriction => (ServerOpcodes.MoveSetAdvFlyingSurfaceFriction, flightCapabilityEntry.SurfaceFriction, AuraType.None),
                 AdvFlyingRateTypeSingle.OverMaxDeceleration => (ServerOpcodes.MoveSetAdvFlyingOverMaxDeceleration, flightCapabilityEntry.OverMaxDeceleration, AuraType.ModAdvFlyingOverMaxDeceleration),
                 AdvFlyingRateTypeSingle.LaunchSpeedCoefficient => (ServerOpcodes.MoveSetAdvFlyingLaunchSpeedCoefficient, flightCapabilityEntry.LaunchSpeedCoefficient, AuraType.None),
-                _ => (ServerOpcodes.Max, 0, AuraType.None)
+                _ => (ServerOpcodes.Unknown, 0, AuraType.None)
             };
 
             if (rateAura != AuraType.None)
@@ -239,7 +239,7 @@ namespace Game.Entities
                 AdvFlyingRateTypeRange.PitchingRateDown => (ServerOpcodes.MoveSetAdvFlyingPitchingRateDown, flightCapabilityEntry.PitchingRateDownMin, flightCapabilityEntry.PitchingRateDownMax, AuraType.ModAdvFlyingPitchingRateDown),
                 AdvFlyingRateTypeRange.PitchingRateUp => (ServerOpcodes.MoveSetAdvFlyingPitchingRateUp, flightCapabilityEntry.PitchingRateUpMin, flightCapabilityEntry.PitchingRateUpMax, AuraType.ModAdvFlyingPitchingRateUp),
                 AdvFlyingRateTypeRange.TurnVelocityThreshold => (ServerOpcodes.MoveSetAdvFlyingTurnVelocityThreshold, flightCapabilityEntry.TurnVelocityThresholdMin, flightCapabilityEntry.TurnVelocityThresholdMax, AuraType.None),
-                _ => (ServerOpcodes.Max, 0, 0, AuraType.None)
+                _ => (ServerOpcodes.Unknown, 0, 0, AuraType.None)
             };
 
             if (rateAura != AuraType.None)

@@ -58,7 +58,7 @@ namespace WorldServer
                 ExitNow();
 
             // Set server offline (not connectable)
-            DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag | {LegacyRealmFlags.Offline} WHERE id = '{realmId}'");
+            DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag | {(uint)LegacyRealmFlags.Offline} WHERE id = '{realmId}'");
 
             if (!Global.WorldMgr.SetInitialWorldSettings())
                 ExitNow();
@@ -94,7 +94,7 @@ namespace WorldServer
             }
 
             // set server online (allow connecting now)
-            DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag & ~{LegacyRealmFlags.Offline}, population = 0 WHERE id = '{realmId}'");
+            DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag & ~{(uint)LegacyRealmFlags.Offline}, population = 0 WHERE id = '{realmId}'");
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -129,7 +129,7 @@ namespace WorldServer
                 Global.ScriptMgr.Unload();
 
                 // set server offline
-                DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag | {LegacyRealmFlags.Offline} WHERE id = '{realmId}'");
+                DB.Login.DirectExecute($"UPDATE realmlist SET flag = flag | {(uint)LegacyRealmFlags.Offline} WHERE id = '{realmId}'");
                 Global.RealmMgr.Close();
 
                 ClearOnlineAccounts(realmId);

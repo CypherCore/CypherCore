@@ -70,7 +70,10 @@ namespace Game
             {
                 do
                 {
-                    EnumCharactersResult.CharacterInfoBasic charInfo = new(result.GetFields());
+                    charResult.Characters.Add(new EnumCharactersResult.CharacterInfo(result.GetFields()));
+
+
+                    EnumCharactersResult.CharacterInfoBasic charInfo = charResult.Characters.Last().Basic;
 
                     var customizationsForChar = customizations.LookupByKey(charInfo.Guid.GetCounter());
                     if (!customizationsForChar.Empty())
@@ -105,8 +108,6 @@ namespace Game
                         Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, false);
 
                     charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.ExperienceLevel);
-
-                    charResult.Characters.Add(charInfo);
                 }
                 while (result.NextRow() && charResult.Characters.Count < 200);
             }
@@ -149,14 +150,14 @@ namespace Game
             {
                 do
                 {
-                    EnumCharactersResult.CharacterInfoBasic charInfo = new(result.GetFields());
+                    charEnum.Characters.Add(new EnumCharactersResult.CharacterInfo(result.GetFields()));
+
+                    EnumCharactersResult.CharacterInfoBasic charInfo = charEnum.Characters.Last().Basic;
 
                     Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
                     if (!Global.CharacterCacheStorage.HasCharacterCacheEntry(charInfo.Guid)) // This can happen if characters are inserted into the database manually. Core hasn't loaded name data yet.
                         Global.CharacterCacheStorage.AddCharacterCacheEntry(charInfo.Guid, GetAccountId(), charInfo.Name, charInfo.SexId, charInfo.RaceId, (byte)charInfo.ClassId, charInfo.ExperienceLevel, true);
-
-                    charEnum.Characters.Add(charInfo);
                 }
                 while (result.NextRow());
             }

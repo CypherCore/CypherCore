@@ -385,9 +385,10 @@ namespace Game
             if (packet == null)
                 return;
 
-            if (packet.GetOpcode() == ServerOpcodes.Unknown || packet.GetOpcode() == ServerOpcodes.Max)
+            if (!packet.IsValidOpcode())
             {
-                Log.outError(LogFilter.Network, "Prevented sending of UnknownOpcode to {0}", GetPlayerInfo());
+                string specialName = packet.GetOpcode() == ServerOpcodes.Unknown ? "UNKNOWN_OPCODE" : "INVALID_OPCODE";
+                Log.outError(LogFilter.Network, $"Prevented sending of {specialName} (0x{packet.GetOpcode():04X}) to {GetPlayerInfo()}");
                 return;
             }
 
