@@ -552,7 +552,7 @@ namespace Game.Entities
                 bool hasAttached = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached);
                 bool hasFaceMovementDir = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir);
                 bool hasFollowsTerrain = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain);
-                bool hasUnk1 = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.Unk1);
+                bool hasAlwaysExterior = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.AlwaysExterior);
                 bool hasUnknown1025 = false;
                 bool hasTargetRollPitchYaw = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasTargetRollPitchYaw);
                 bool hasScaleCurveID = createProperties != null && createProperties.ScaleCurveId != 0;
@@ -569,7 +569,7 @@ namespace Game.Entities
                 data.WriteBit(hasAttached);
                 data.WriteBit(hasFaceMovementDir);
                 data.WriteBit(hasFollowsTerrain);
-                data.WriteBit(hasUnk1);
+                data.WriteBit(hasAlwaysExterior);
                 data.WriteBit(hasUnknown1025);
                 data.WriteBit(hasTargetRollPitchYaw);
                 data.WriteBit(hasScaleCurveID);
@@ -4052,7 +4052,7 @@ namespace Game.Entities
         public uint TransportID;
         public float Magnitude;
         public MovementForceType Type;
-        public int Unused910;
+        public int MovementForceID;
 
         public void Read(WorldPacket data)
         {
@@ -4061,7 +4061,7 @@ namespace Game.Entities
             Direction = data.ReadVector3();
             TransportID = data.ReadUInt32();
             Magnitude = data.ReadFloat();
-            Unused910 = data.ReadInt32();
+            MovementForceID = data.ReadInt32();
             Type = (MovementForceType)data.ReadBits<byte>(2);
         }
 

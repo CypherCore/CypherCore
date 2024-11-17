@@ -84,19 +84,19 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(CanAccept);
-            _worldPacket.WriteBit(MightCRZYou);
             _worldPacket.WriteBit(IsXRealm);
-            _worldPacket.WriteBit(MustBeBNetFriend);
+            _worldPacket.WriteBit(IsXNativeRealm);
+            _worldPacket.WriteBit(ShouldSquelch);
             _worldPacket.WriteBit(AllowMultipleRoles);
             _worldPacket.WriteBit(QuestSessionActive);
             _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
-            _worldPacket.WriteBit(Unused1102);
+            _worldPacket.WriteBit(IsCrossFaction);
 
             InviterRealm.Write(_worldPacket);
 
             _worldPacket.WritePackedGuid(InviterGUID);
             _worldPacket.WritePackedGuid(InviterBNetAccountId);
-            _worldPacket.WriteUInt16(Unk1);
+            _worldPacket.WriteUInt16(InviterCfgRealmID);
             _worldPacket.WriteUInt8(ProposedRoles);
             _worldPacket.WriteInt32(LfgSlots.Count);
             _worldPacket.WriteInt32(LfgCompletedMask);
@@ -107,12 +107,11 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(LfgSlot);
         }
 
-        public bool MightCRZYou;
-        public bool MustBeBNetFriend;
+        public bool ShouldSquelch;
         public bool AllowMultipleRoles;
         public bool QuestSessionActive;
-        public bool Unused1102;
-        public ushort Unk1;
+        public bool IsCrossFaction;
+        public ushort InviterCfgRealmID;
 
         public bool CanAccept;
 
@@ -124,6 +123,7 @@ namespace Game.Networking.Packets
 
         // Realm
         public bool IsXRealm;
+        public bool IsXNativeRealm;
 
         // Lfg
         public byte ProposedRoles;
@@ -362,8 +362,11 @@ namespace Game.Networking.Packets
 
                     MemberStats.PetStats.Auras.Add(aura);
                 }
-
             }
+
+            MemberStats.ChromieTime.ConditionalFlags = player.m_playerData.CtrOptions.GetValue().ConditionalFlags;
+            MemberStats.ChromieTime.FactionGroup = (int)player.m_playerData.CtrOptions.GetValue().FactionGroup;
+            MemberStats.ChromieTime.ChromieTimeExpansionMask = player.m_playerData.CtrOptions.GetValue().ChromieTimeExpansionMask;
         }
 
         public bool ForEnemy;
@@ -1163,15 +1166,15 @@ namespace Game.Networking.Packets
 
     public struct CTROptions
     {
-        public uint ContentTuningConditionMask;
-        public int Unused901;
-        public uint ExpansionLevelMask;
+        public uint ConditionalFlags;
+        public int FactionGroup;
+        public uint ChromieTimeExpansionMask;
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ContentTuningConditionMask);
-            data.WriteInt32(Unused901);
-            data.WriteUInt32(ExpansionLevelMask);
+            data.WriteUInt32(ConditionalFlags);
+            data.WriteInt32(FactionGroup);
+            data.WriteUInt32(ChromieTimeExpansionMask);
         }
     }
 

@@ -71,7 +71,7 @@ namespace Game.Entities
 
             if (mapDifficulty.ItemContextPickerID != 0)
             {
-                uint contentTuningId = Global.DB2Mgr.GetRedirectedContentTuningId((uint)mapDifficulty.ContentTuningID, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                uint contentTuningId = Global.DB2Mgr.GetRedirectedContentTuningId((uint)mapDifficulty.ContentTuningID, player.m_playerData.CtrOptions.GetValue().ConditionalFlags);
 
                 ItemContextPickerEntryRecord selectedPickerEntry = null;
                 foreach (var itemContextPickerEntry in CliDB.ItemContextPickerEntryStorage.Values)

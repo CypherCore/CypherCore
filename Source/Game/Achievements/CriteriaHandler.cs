@@ -3381,7 +3381,7 @@ namespace Game.Achievements
                     return (referencePlayer.m_activePlayerData.RuneforgePowers[block] & (1u << (int)bit)) != 0;
                 }
                 case ModifierTreeType.PlayerInChromieTimeForScaling: // 304
-                    if ((referencePlayer.m_playerData.CtrOptions._value.ContentTuningConditionMask & 1) == 0)
+                    if ((referencePlayer.m_playerData.CtrOptions._value.ConditionalFlags & 1) == 0)
                         return false;
                     break;
                 case ModifierTreeType.IsRaFRecruit: // 305

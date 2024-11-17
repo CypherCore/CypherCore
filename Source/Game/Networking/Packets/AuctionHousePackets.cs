@@ -722,7 +722,7 @@ namespace Game.Networking.Packets
         public uint ItemID;
         public ushort ItemLevel;
         public ushort? BattlePetSpeciesID;
-        public ushort? SuffixItemNameDescriptionID;
+        public ushort? ItemSuffix;
 
         public AuctionBucketKey() { }
 
@@ -735,7 +735,7 @@ namespace Game.Networking.Packets
                 BattlePetSpeciesID = key.BattlePetSpeciesId;
 
             if (key.SuffixItemNameDescriptionId != 0)
-                SuffixItemNameDescriptionID = key.SuffixItemNameDescriptionId;
+                ItemSuffix = key.SuffixItemNameDescriptionId;
         }
 
         public AuctionBucketKey(WorldPacket data)
@@ -750,7 +750,7 @@ namespace Game.Networking.Packets
                 BattlePetSpeciesID = data.ReadUInt16();
 
             if (hasSuffixItemNameDescriptionId)
-                SuffixItemNameDescriptionID = data.ReadUInt16();
+                ItemSuffix = data.ReadUInt16();
         }
 
         public void Write(WorldPacket data)
@@ -758,14 +758,14 @@ namespace Game.Networking.Packets
             data.WriteBits(ItemID, 20);
             data.WriteBit(BattlePetSpeciesID.HasValue);
             data.WriteBits(ItemLevel, 11);
-            data.WriteBit(SuffixItemNameDescriptionID.HasValue);
+            data.WriteBit(ItemSuffix.HasValue);
             data.FlushBits();
 
             if (BattlePetSpeciesID.HasValue)
                 data.WriteUInt16(BattlePetSpeciesID.Value);
 
-            if (SuffixItemNameDescriptionID.HasValue)
-                data.WriteUInt16(SuffixItemNameDescriptionID.Value);
+            if (ItemSuffix.HasValue)
+                data.WriteUInt16(ItemSuffix.Value);
         }
     }
 
@@ -885,7 +885,7 @@ namespace Game.Networking.Packets
         public byte? MaxBattlePetQuality;
         public byte? MaxBattlePetLevel;
         public byte? BattlePetBreedID;
-        public uint? Unk901_1;
+        public uint? BattlePetLevelMask;
         public bool ContainsOwnerItem;
         public bool ContainsOnlyCollectedAppearances;
 
@@ -905,7 +905,7 @@ namespace Game.Networking.Packets
             data.WriteBit(MaxBattlePetQuality.HasValue);
             data.WriteBit(MaxBattlePetLevel.HasValue);
             data.WriteBit(BattlePetBreedID.HasValue);
-            data.WriteBit(Unk901_1.HasValue);
+            data.WriteBit(BattlePetLevelMask.HasValue);
             data.WriteBit(ContainsOwnerItem);
             data.WriteBit(ContainsOnlyCollectedAppearances);
             data.FlushBits();
@@ -919,8 +919,8 @@ namespace Game.Networking.Packets
             if (BattlePetBreedID.HasValue)
                 data.WriteUInt8(BattlePetBreedID.Value);
 
-            if (Unk901_1.HasValue)
-                data.WriteUInt32(Unk901_1.Value);
+            if (BattlePetLevelMask.HasValue)
+                data.WriteUInt32(BattlePetLevelMask.Value);
         }
     }
 

@@ -24,8 +24,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(PvpSeasonID);
             _worldPacket.WriteInt32(Unknown1027_1);
             _worldPacket.WriteBit(WeeklyRewardChestsEnabled);
-            _worldPacket.WriteBit(Unknown1027_2);
-            _worldPacket.WriteBit(Unknown1027_3);
+            _worldPacket.WriteBit(CurrentArenaSeasonUsesTeams);
+            _worldPacket.WriteBit(PreviousArenaSeasonUsesTeams);
             _worldPacket.FlushBits();
         }
 
@@ -37,8 +37,8 @@ namespace Game.Networking.Packets
         public int ConquestWeeklyProgressCurrencyID;
         public int Unknown1027_1;
         public bool WeeklyRewardChestsEnabled;
-        public bool Unknown1027_2;
-        public bool Unknown1027_3;
+        public bool CurrentArenaSeasonUsesTeams;
+        public bool PreviousArenaSeasonUsesTeams;
     }
 
     public class AreaSpiritHealerQuery : ClientPacket
@@ -167,7 +167,7 @@ namespace Game.Networking.Packets
             Hdr.Write(_worldPacket);
             _worldPacket.WriteUInt32(AverageWaitTime);
             _worldPacket.WriteUInt32(WaitTime);
-            _worldPacket.WriteInt32(Unused920);
+            _worldPacket.WriteInt32(SpecSelected);
             _worldPacket.WriteBit(AsGroup);
             _worldPacket.WriteBit(EligibleForMatchmaking);
             _worldPacket.WriteBit(SuspendedQueue);
@@ -180,7 +180,7 @@ namespace Game.Networking.Packets
         public bool SuspendedQueue;
         public bool EligibleForMatchmaking;
         public uint WaitTime;
-        public int Unused920;
+        public int SpecSelected;
     }
 
     public class BattlefieldStatusFailed : ServerPacket
@@ -582,8 +582,8 @@ namespace Game.Networking.Packets
         public int Ranking;
         public int SeasonPlayed;
         public int SeasonWon;
-        public int Unused1;
-        public int Unused2;
+        public int SeasonFactionPlayed;
+        public int SeasonFactionWon;
         public int WeeklyPlayed;
         public int WeeklyWon;
         public int RoundsSeasonPlayed;
@@ -594,9 +594,9 @@ namespace Game.Networking.Packets
         public int LastWeeksBestRating;
         public int BestSeasonRating;
         public int PvpTierID;
-        public int Unused3;
-        public int Unused4;
-        public int Rank;
+        public int SeasonPvpTier;
+        public int BestWeeklyPvpTier;
+        public int BestSeasonPvpTierEnum;
         public bool Disqualified;
 
         public void Write(WorldPacket data)
@@ -605,8 +605,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(Ranking);
             data.WriteInt32(SeasonPlayed);
             data.WriteInt32(SeasonWon);
-            data.WriteInt32(Unused1);
-            data.WriteInt32(Unused2);
+            data.WriteInt32(SeasonFactionPlayed);
+            data.WriteInt32(SeasonFactionWon);
             data.WriteInt32(WeeklyPlayed);
             data.WriteInt32(WeeklyWon);
             data.WriteInt32(RoundsSeasonPlayed);
@@ -617,9 +617,9 @@ namespace Game.Networking.Packets
             data.WriteInt32(LastWeeksBestRating);
             data.WriteInt32(BestSeasonRating);
             data.WriteInt32(PvpTierID);
-            data.WriteInt32(Unused3);
-            data.WriteInt32(Unused4);
-            data.WriteInt32(Rank);
+            data.WriteInt32(SeasonPvpTier);
+            data.WriteInt32(BestWeeklyPvpTier);
+            data.WriteInt32(BestSeasonPvpTierEnum);
             data.WriteBit(Disqualified);
             data.FlushBits();
         }

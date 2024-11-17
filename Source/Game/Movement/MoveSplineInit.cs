@@ -184,7 +184,7 @@ namespace Game.Movement
             MonsterMove packet = new();
             packet.MoverGUID = unit.GetGUID();
             packet.Pos = new Vector3(loc.X, loc.Y, loc.Z);
-            packet.SplineData.StopDistanceTolerance = 2;
+            packet.SplineData.StopSplineStyle = 2;
             packet.SplineData.Id = move_spline.GetId();
 
             if (transport)

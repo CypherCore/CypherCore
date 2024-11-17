@@ -36,10 +36,10 @@ namespace Framework.Constants
         HasAttached = 0x04,
         HasFaceMovementDir = 0x08,
         HasFollowsTerrain = 0x10, // NYI
-        Unk1 = 0x20,
+        AlwaysExterior = 0x20,
         HasTargetRollPitchYaw = 0x40, // NYI
         HasAnimId = 0x80, // DEPRECATED
-        Unk3 = 0x100,
+        VisualAnimIsDecay = 0x100,
         HasAnimKitId = 0x200, // DEPRECATED
         HasCircularMovement = 0x400, // DEPRECATED
         Unk5 = 0x800,

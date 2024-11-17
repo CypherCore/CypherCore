@@ -1537,17 +1537,17 @@ namespace Game.Networking.Packets
 
     public struct SpellSupportInfo
     {
-        public ObjectGuid CasterGUID;
-        public int SpellID;
-        public int Amount;
-        public float Percentage;
+        public ObjectGuid Supporter;
+        public int SupportSpellID;
+        public int AmountRaw;
+        public float AmountPortion;
 
         public void Write(WorldPacket data)
         {
-            data.WritePackedGuid(CasterGUID);
-            data.WriteInt32(SpellID);
-            data.WriteInt32(Amount);
-            data.WriteFloat(Percentage);
+            data.WritePackedGuid(Supporter);
+            data.WriteInt32(SupportSpellID);
+            data.WriteInt32(AmountRaw);
+            data.WriteFloat(AmountPortion);
         }
     }
 
@@ -1780,7 +1780,7 @@ namespace Game.Networking.Packets
         public int ItemID;
         public int DataSlotIndex;
         public int Quantity;
-        public byte? Unknown_1000;
+        public byte? Source;
 
         public void Read(WorldPacket data)
         {
@@ -1788,7 +1788,7 @@ namespace Game.Networking.Packets
             DataSlotIndex = data.ReadInt32();
             Quantity = data.ReadInt32();
             if (data.HasBit())
-                Unknown_1000 = data.ReadUInt8();
+                Source = data.ReadUInt8();
         }
     }
 

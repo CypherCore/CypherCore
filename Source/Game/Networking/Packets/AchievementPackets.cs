@@ -58,27 +58,27 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(CriteriaID);
             _worldPacket.WriteUInt64(Quantity);
             _worldPacket.WritePackedGuid(PlayerGUID);
-            _worldPacket.WriteUInt32(Unused_10_1_5);
             _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt32(StateFlags);
             CurrentTime.Write(_worldPacket);
             _worldPacket.WriteInt64(ElapsedTime);
             _worldPacket.WriteInt64(CreationTime);
-            _worldPacket.WriteBit(RafAcceptanceID.HasValue);
+            _worldPacket.WriteBit(DynamicID.HasValue);
             _worldPacket.FlushBits();
 
-            if (RafAcceptanceID.HasValue)
-                _worldPacket.WriteUInt64(RafAcceptanceID.Value);
+            if (DynamicID.HasValue)
+                _worldPacket.WriteUInt64(DynamicID.Value);
         }
 
         public uint CriteriaID;
         public ulong Quantity;
         public ObjectGuid PlayerGUID;
-        public uint Unused_10_1_5;
+        public uint StateFlags;
         public uint Flags;
         public WowTime CurrentTime;
         public long ElapsedTime;
         public long CreationTime;
-        public ulong? RafAcceptanceID;
+        public ulong? DynamicID;
     }
 
     class AccountCriteriaUpdate : ServerPacket
@@ -180,8 +180,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
                 _worldPacket.WriteUInt64(progress.Quantity);
                 _worldPacket.WritePackedGuid(progress.PlayerGUID);
-                _worldPacket.WriteInt32(progress.Unused_10_1_5);
                 _worldPacket.WriteInt32(progress.Flags);
+                _worldPacket.WriteInt32(progress.StateFlags);
             }
         }
 
@@ -321,27 +321,27 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Id);
             data.WriteUInt64(Quantity);
             data.WritePackedGuid(Player);
-            data.WriteUInt32(Unused_10_1_5);
             data.WriteUInt32(Flags);
+            data.WriteUInt32(StateFlags);
             Date.Write(data);
             data.WriteInt64(TimeFromStart);
             data.WriteInt64(TimeFromCreate);
-            data.WriteBit(RafAcceptanceID.HasValue);
+            data.WriteBit(DynamicID.HasValue);
             data.FlushBits();
 
-            if (RafAcceptanceID.HasValue)
-                data.WriteUInt64(RafAcceptanceID.Value);
+            if (DynamicID.HasValue)
+                data.WriteUInt64(DynamicID.Value);
         }
 
         public uint Id;
         public ulong Quantity;
         public ObjectGuid Player;
-        public uint Unused_10_1_5;
+        public uint StateFlags;
         public uint Flags;
         public WowTime Date;
         public long TimeFromStart;
         public long TimeFromCreate;
-        public ulong? RafAcceptanceID;
+        public ulong? DynamicID;
     }
 
     public struct GuildCriteriaProgress
@@ -352,8 +352,8 @@ namespace Game.Networking.Packets
         public WowTime DateUpdated;
         public ulong Quantity;
         public ObjectGuid PlayerGUID;
-        public int Unused_10_1_5;
         public int Flags;
+        public int StateFlags;
     }
 
     public class AllAchievements

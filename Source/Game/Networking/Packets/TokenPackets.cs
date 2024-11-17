@@ -12,10 +12,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            UnkInt = _worldPacket.ReadUInt32();
+            ClientToken = _worldPacket.ReadUInt32();
         }
 
-        public uint UnkInt;
+        public uint ClientToken;
     }
 
     class CommerceTokenGetLogResponse : ServerPacket
@@ -24,30 +24,30 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(UnkInt);
+            _worldPacket.WriteUInt32(ClientToken);
             _worldPacket.WriteUInt32((uint)Result);
-            _worldPacket.WriteInt32(AuctionableTokenAuctionableList.Count);
+            _worldPacket.WriteInt32(AuctionableTokens.Count);
 
-            foreach (AuctionableTokenInfo auctionableTokenAuctionable in AuctionableTokenAuctionableList)
+            foreach (AuctionableTokenInfo auctionableTokenAuctionable in AuctionableTokens)
             {
-                _worldPacket.WriteUInt64(auctionableTokenAuctionable.UnkInt1);
-                _worldPacket.WriteInt64(auctionableTokenAuctionable.UnkInt2);
-                _worldPacket.WriteUInt64(auctionableTokenAuctionable.BuyoutPrice);
-                _worldPacket.WriteUInt32(auctionableTokenAuctionable.Owner);
+                _worldPacket.WriteUInt64(auctionableTokenAuctionable.Id);
+                _worldPacket.WriteInt64(auctionableTokenAuctionable.LastUpdate);
+                _worldPacket.WriteUInt64(auctionableTokenAuctionable.Price);
+                _worldPacket.WriteUInt32(auctionableTokenAuctionable.Status);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.DurationLeft);
             }
         }
 
-        public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
+        public uint ClientToken;
         public TokenResult Result;
-        List<AuctionableTokenInfo> AuctionableTokenAuctionableList = new();
+        List<AuctionableTokenInfo> AuctionableTokens = new();
 
         struct AuctionableTokenInfo
         {
-            public ulong UnkInt1;
-            public long UnkInt2;
-            public uint Owner;
-            public ulong BuyoutPrice;
+            public ulong Id;
+            public long LastUpdate;
+            public uint Status;
+            public ulong Price;
             public uint DurationLeft;
         }
     }
@@ -58,10 +58,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            UnkInt = _worldPacket.ReadUInt32();
+            ClientToken = _worldPacket.ReadUInt32();
         }
 
-        public uint UnkInt;
+        public uint ClientToken;
     }
 
     class CommerceTokenGetMarketPriceResponse : ServerPacket
@@ -70,15 +70,15 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(CurrentMarketPrice);
-            _worldPacket.WriteUInt32(UnkInt);
-            _worldPacket.WriteUInt32((uint)Result);
-            _worldPacket.WriteUInt32(AuctionDuration);
+            _worldPacket.WriteUInt64(PriceGuarantee);
+            _worldPacket.WriteUInt32(ClientToken);
+            _worldPacket.WriteUInt32((uint)ServerToken);
+            _worldPacket.WriteUInt32(PriceLockDurationSeconds);
         }
 
-        public ulong CurrentMarketPrice;
-        public uint UnkInt; // send CMSG_REQUEST_WOW_TOKEN_MARKET_PRICE
-        public TokenResult Result;
-        public uint AuctionDuration; // preset auction duration enum
+        public ulong PriceGuarantee;
+        public uint ClientToken;
+        public TokenResult ServerToken;
+        public uint PriceLockDurationSeconds;
     }
 }

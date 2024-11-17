@@ -2748,22 +2748,22 @@ namespace Game.Entities
 
     public class CTROptions
     {
-        public uint ContentTuningConditionMask;
-        public uint Field_4;
-        public uint ExpansionLevelMask;
+        public uint ConditionalFlags;
+        public uint FactionGroup;
+        public uint ChromieTimeExpansionMask;
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt32(ContentTuningConditionMask);
-            data.WriteUInt32(Field_4);
-            data.WriteUInt32(ExpansionLevelMask);
+            data.WriteUInt32(ConditionalFlags);
+            data.WriteUInt32(FactionGroup);
+            data.WriteUInt32(ChromieTimeExpansionMask);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
         {
-            data.WriteUInt32(ContentTuningConditionMask);
-            data.WriteUInt32(Field_4);
-            data.WriteUInt32(ExpansionLevelMask);
+            data.WriteUInt32(ConditionalFlags);
+            data.WriteUInt32(FactionGroup);
+            data.WriteUInt32(ChromieTimeExpansionMask);
         }
     }
 
@@ -8050,7 +8050,7 @@ namespace Game.Entities
 
     public class VisualAnim : HasChangesMask
     {
-        public UpdateField<bool> Field_C = new(0, 1);
+        public UpdateField<bool> IsDecay = new(0, 1);
         public UpdateField<int> AnimationDataID = new(0, 2);
         public UpdateField<uint> AnimKitID = new(0, 3);
         public UpdateField<uint> AnimProgress = new(0, 4);
@@ -8062,7 +8062,7 @@ namespace Game.Entities
             data.WriteInt32(AnimationDataID);
             data.WriteUInt32(AnimKitID);
             data.WriteUInt32(AnimProgress);
-            data.WriteBit(Field_C);
+            data.WriteBit(IsDecay);
             data.FlushBits();
         }
 
@@ -8078,7 +8078,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteBit(Field_C);
+                    data.WriteBit(IsDecay);
                 }
             }
             data.FlushBits();
@@ -8102,7 +8102,7 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Field_C);
+            ClearChangesMask(IsDecay);
             ClearChangesMask(AnimationDataID);
             ClearChangesMask(AnimKitID);
             ClearChangesMask(AnimProgress);

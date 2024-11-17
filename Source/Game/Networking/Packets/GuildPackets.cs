@@ -209,16 +209,16 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint nameLen = _worldPacket.ReadBits<uint>(9);
-            bool hasUnused910 = _worldPacket.HasBit();
+            bool hasArenaTeam = _worldPacket.HasBit();
 
             Name = _worldPacket.ReadString(nameLen);
 
-            if (hasUnused910)
-                Unused910 = _worldPacket.ReadInt32();
+            if (hasArenaTeam)
+                ArenaTeam = _worldPacket.ReadInt32();
         }
 
         public string Name;
-        public int? Unused910;
+        public int? ArenaTeam;
     }
 
     public class GuildInvite : ServerPacket
@@ -1700,7 +1700,7 @@ namespace Game.Networking.Packets
     public class GuildRewardItem
     {
         public uint ItemID;
-        public uint Unk4;
+        public uint AchievementLogic;
         public List<uint> AchievementsRequired = new();
         public RaceMask<ulong> RaceMask;
         public int MinGuildLevel;
@@ -1710,7 +1710,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ItemID);
-            data.WriteUInt32(Unk4);
+            data.WriteUInt32(AchievementLogic);
             data.WriteInt32(AchievementsRequired.Count);
             data.WriteUInt64(RaceMask.RawValue);
             data.WriteInt32(MinGuildLevel);

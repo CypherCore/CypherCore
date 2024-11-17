@@ -408,11 +408,11 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt8(Slot);
             _worldPacket.WriteInt32(SlotInBag);
-            _worldPacket.WriteInt32(QuestLogItemID);
+            _worldPacket.WriteInt32(ProxyItemID);
             _worldPacket.WriteUInt32(Quantity);
             _worldPacket.WriteUInt32(QuantityInInventory);
             _worldPacket.WriteInt32(QuantityInQuestLog);
-            _worldPacket.WriteInt32(DungeonEncounterID);
+            _worldPacket.WriteInt32(EncounterID);
             _worldPacket.WriteInt32(BattlePetSpeciesID);
             _worldPacket.WriteInt32(BattlePetBreedID);
             _worldPacket.WriteUInt8(BattlePetBreedQuality);
@@ -424,10 +424,10 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(Pushed);
             _worldPacket.WriteBit(Created);
-            _worldPacket.WriteBit(Unused_1017);
-            _worldPacket.WriteBits((uint)DisplayText, 3);
+            _worldPacket.WriteBit(FakeQuestItem);
+            _worldPacket.WriteBits((uint)ChatNotifyType, 3);
             _worldPacket.WriteBit(IsBonusRoll);
-            _worldPacket.WriteBit(IsEncounterLoot);
+            _worldPacket.WriteBit(IsPersonalLoot);
             _worldPacket.WriteBit(CraftingData != null);
             _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.FlushBits();
@@ -445,12 +445,12 @@ namespace Game.Networking.Packets
         public byte Slot;
         public int SlotInBag;
         public ItemInstance Item = new();
-        public int QuestLogItemID;// Item ID used for updating quest progress
+        public int ProxyItemID;// Item ID used for updating quest progress
                                   // only set if different than real ID (similar to CreatureTemplate.KillCredit)
         public uint Quantity;
         public uint QuantityInInventory;
         public int QuantityInQuestLog;
-        public int DungeonEncounterID;
+        public int EncounterID;
         public int BattlePetSpeciesID;
         public int BattlePetBreedID;
         public byte BattlePetBreedQuality;
@@ -460,11 +460,11 @@ namespace Game.Networking.Packets
         public CraftingData CraftingData;
         public uint? FirstCraftOperationID;
         public bool Pushed;
-        public DisplayType DisplayText;
+        public DisplayType ChatNotifyType;
         public bool Created;
-        public bool Unused_1017;
+        public bool FakeQuestItem;
         public bool IsBonusRoll;
-        public bool IsEncounterLoot;
+        public bool IsPersonalLoot;
 
         public enum DisplayType
         {

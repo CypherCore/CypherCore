@@ -17,7 +17,7 @@ namespace Game.Networking.Packets
         {
             QueueAsGroup = _worldPacket.HasBit();
             bool hasPartyIndex = _worldPacket.HasBit();
-            Unknown = _worldPacket.HasBit();
+            Mercenary = _worldPacket.HasBit();
             Roles = (LfgRoles)_worldPacket.ReadUInt32();
             var slotsCount = _worldPacket.ReadInt32();
 
@@ -29,7 +29,7 @@ namespace Game.Networking.Packets
         }
 
         public bool QueueAsGroup;
-        public bool Unknown;       // Always false in 7.2.5
+        public bool Mercenary;
         public byte? PartyIndex;
         public LfgRoles Roles;
         public List<uint> Slots = new();
@@ -184,7 +184,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Joined);
             _worldPacket.WriteBit(LfgJoined);
             _worldPacket.WriteBit(Queued);
-            _worldPacket.WriteBit(Unused);
+            _worldPacket.WriteBit(Brawl);
             _worldPacket.FlushBits();
         }
 
@@ -200,7 +200,7 @@ namespace Game.Networking.Packets
         public bool Joined;
         public bool LfgJoined;
         public bool Queued;
-        public bool Unused;
+        public bool Brawl;
     }
 
     class RoleChosen : ServerPacket
@@ -368,10 +368,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(CompletedMask);
             _worldPacket.WriteUInt32(EncounterMask);
             _worldPacket.WriteInt32(Players.Count);
-            _worldPacket.WriteUInt8(Unused);
+            _worldPacket.WriteUInt8(PromisedShortageRolePriority);
             _worldPacket.WriteBit(ValidCompletedMask);
             _worldPacket.WriteBit(ProposalSilent);
-            _worldPacket.WriteBit(IsRequeue);
+            _worldPacket.WriteBit(FailedByMyParty);
             _worldPacket.FlushBits();
 
             foreach (var player in Players)
@@ -385,10 +385,10 @@ namespace Game.Networking.Packets
         public byte State;
         public uint CompletedMask;
         public uint EncounterMask;
-        public byte Unused;
+        public byte PromisedShortageRolePriority;
         public bool ValidCompletedMask;
         public bool ProposalSilent;
-        public bool IsRequeue;
+        public bool FailedByMyParty;
         public List<LFGProposalUpdatePlayer> Players = new();
     }
 
@@ -532,19 +532,19 @@ namespace Game.Networking.Packets
             }
 
             data.WriteBit(RewardSpellID.HasValue);
-            data.WriteBit(Unused1.HasValue);
-            data.WriteBit(Unused2.HasValue);
+            data.WriteBit(ArtifactXPCategory.HasValue);
+            data.WriteBit(ArtifactXP.HasValue);
             data.WriteBit(Honor.HasValue);
             data.FlushBits();
 
             if (RewardSpellID.HasValue)
                 data.WriteInt32(RewardSpellID.Value);
 
-            if (Unused1.HasValue)
-                data.WriteInt32(Unused1.Value);
+            if (ArtifactXPCategory.HasValue)
+                data.WriteInt32(ArtifactXPCategory.Value);
 
-            if (Unused2.HasValue)
-                data.WriteUInt64(Unused2.Value);
+            if (ArtifactXP.HasValue)
+                data.WriteUInt64(ArtifactXP.Value);
 
             if (Honor.HasValue)
                 data.WriteInt32(Honor.Value);
@@ -557,8 +557,8 @@ namespace Game.Networking.Packets
         public List<LfgPlayerQuestRewardCurrency> Currency = new();
         public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new();
         public int? RewardSpellID;                              // Only used by SMSG_LFG_PLAYER_INFO
-        public int? Unused1;
-        public ulong? Unused2;
+        public int? ArtifactXPCategory;
+        public ulong? ArtifactXP;
         public int? Honor;                                      // Only used by SMSG_REQUEST_PVP_REWARDS_RESPONSE
     }
 
@@ -754,7 +754,7 @@ namespace Game.Networking.Packets
             Id = data.ReadUInt32();
             Type = (RideType)data.ReadUInt32();
             Time = data.ReadInt64();
-            Unknown925 = data.HasBit();
+            IsCrossFaction = data.HasBit();
             data.ResetBitPos();
         }
 
@@ -764,7 +764,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Id);
             data.WriteUInt32((uint)Type);
             data.WriteInt64(Time);
-            data.WriteBit(Unknown925);
+            data.WriteBit(IsCrossFaction);
             data.FlushBits();
         }
 
@@ -772,7 +772,7 @@ namespace Game.Networking.Packets
         public uint Id;
         public RideType Type;
         public long Time;
-        public bool Unknown925;
+        public bool IsCrossFaction;
     }
 
     public enum RideType

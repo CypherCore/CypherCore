@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -125,19 +124,19 @@ namespace Game.Networking.Packets
             bool hasCalendarInfo = _worldPacket.HasBit();
             bool hasPetInfo = _worldPacket.HasBit();
             bool hasGuildInfo = _worldPacket.HasBit();
-            bool hasLFGListSearchResult = _worldPacket.HasBit();
-            bool hasLFGListApplicant = _worldPacket.HasBit();
-            bool hasClubMessage = _worldPacket.HasBit();
+            bool hasLfgListEntryInfo = _worldPacket.HasBit();
+            bool hasLfgListAppInfo = _worldPacket.HasBit();
+            bool hasVoiceChatInfo = _worldPacket.HasBit();
             bool hasClubFinderResult = _worldPacket.HasBit();
-            bool hasUnk910 = _worldPacket.HasBit();
+            bool hasArenaTeamInfo = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
 
-            if (hasClubMessage)
+            if (hasVoiceChatInfo)
             {
-                SupportTicketCommunityMessage communityMessage = new();
-                communityMessage.IsPlayerUsingVoice = _worldPacket.HasBit();
-                CommunityMessage = communityMessage;
+                SupportTicketVoiceChatInfo voiceChatInfo = new();
+                voiceChatInfo.TargetIsCurrentlyInVoiceChatWithPlayer = _worldPacket.HasBit();
+                VoiceChatInfo = voiceChatInfo;
                 _worldPacket.ResetBitPos();
             }
 
@@ -169,28 +168,28 @@ namespace Game.Networking.Packets
                 GuildInfo.Value.Read(_worldPacket);
             }
 
-            if (hasLFGListSearchResult)
+            if (hasLfgListEntryInfo)
             {
-                LFGListSearchResult = new();
-                LFGListSearchResult.Value.Read(_worldPacket);
+                LfgListEntryInfo = new();
+                LfgListEntryInfo.Value.Read(_worldPacket);
             }
 
-            if (hasLFGListApplicant)
+            if (hasLfgListAppInfo)
             {
-                LFGListApplicant = new();
-                LFGListApplicant.Value.Read(_worldPacket);
+                LfgListAppInfo = new();
+                LfgListAppInfo.Value.Read(_worldPacket);
             }
 
             if (hasClubFinderResult)
             {
-                ClubFinderResult = new();
-                ClubFinderResult.Value.Read(_worldPacket);
+                ClubFinderInfo = new();
+                ClubFinderInfo.Value.Read(_worldPacket);
             }
 
-            if (hasUnk910)
+            if (hasArenaTeamInfo)
             {
-                Unused910 = new();
-                Unused910.Value.Read(_worldPacket);
+                ArenaTeamInfo = new();
+                ArenaTeamInfo.Value.Read(_worldPacket);
             }
         }
 
@@ -206,11 +205,11 @@ namespace Game.Networking.Packets
         public SupportTicketCalendarEventInfo? CalenderInfo;
         public SupportTicketPetInfo? PetInfo;
         public SupportTicketGuildInfo? GuildInfo;
-        public SupportTicketLFGListSearchResult? LFGListSearchResult;
-        public SupportTicketLFGListApplicant? LFGListApplicant;
-        public SupportTicketCommunityMessage? CommunityMessage;
-        public SupportTicketClubFinderResult? ClubFinderResult;
-        public SupportTicketUnused910? Unused910;
+        public SupportTicketLFGListEntryInfo? LfgListEntryInfo;
+        public SupportTicketLFGListApplicant? LfgListAppInfo;
+        public SupportTicketVoiceChatInfo? VoiceChatInfo;
+        public SupportTicketClubFinderInfo? ClubFinderInfo;
+        public SupportTicketArenaTeamInfo? ArenaTeamInfo;
 
         public struct SupportTicketChatLine
         {
@@ -383,88 +382,88 @@ namespace Game.Networking.Packets
             public string GuildName;
         }
 
-        public struct SupportTicketLFGListSearchResult
+        public struct SupportTicketLFGListEntryInfo
         {
+            public RideTicket Ticket;
+            public uint ActivityID;
+            public byte FactionID;
+            public ObjectGuid LastTouchedName;
+            public ObjectGuid LastTouchedComment;
+            public ObjectGuid LastTouchedVoiceChat;
+            public ObjectGuid LastTouchedAny;
+            public ObjectGuid PartyGuid;
+            public string Name;
+            public string Comment;
+            public string VoiceChat;
+
             public void Read(WorldPacket data)
             {
-                RideTicket = new RideTicket();
-                RideTicket.Read(data);
+                Ticket = new RideTicket();
+                Ticket.Read(data);
 
-                GroupFinderActivityID = data.ReadUInt32();
-                Unknown1007 = data.ReadUInt8();
-                LastTitleAuthorGuid = data.ReadPackedGuid();
-                LastDescriptionAuthorGuid = data.ReadPackedGuid();
-                LastVoiceChatAuthorGuid = data.ReadPackedGuid();
-                ListingCreatorGuid = data.ReadPackedGuid();
-                Unknown735 = data.ReadPackedGuid();
+                ActivityID = data.ReadUInt32();
+                FactionID = data.ReadUInt8();
+                LastTouchedName = data.ReadPackedGuid();
+                LastTouchedComment = data.ReadPackedGuid();
+                LastTouchedVoiceChat = data.ReadPackedGuid();
+                LastTouchedAny = data.ReadPackedGuid();
+                PartyGuid = data.ReadPackedGuid();
 
-                byte titleLength = data.ReadBits<byte>(10);
-                byte descriptionLength = data.ReadBits<byte>(11);
+                byte nameLength = data.ReadBits<byte>(10);
+                byte commentLength = data.ReadBits<byte>(11);
                 byte voiceChatLength = data.ReadBits<byte>(8);
 
-                Title = data.ReadString(titleLength);
-                Description = data.ReadString(descriptionLength);
+                Name = data.ReadString(nameLength);
+                Comment = data.ReadString(commentLength);
                 VoiceChat = data.ReadString(voiceChatLength);
             }
-
-            public RideTicket RideTicket;
-            public uint GroupFinderActivityID;
-            public byte Unknown1007;
-            public ObjectGuid LastTitleAuthorGuid;
-            public ObjectGuid LastDescriptionAuthorGuid;
-            public ObjectGuid LastVoiceChatAuthorGuid;
-            public ObjectGuid ListingCreatorGuid;
-            public ObjectGuid Unknown735;
-            public string Title;
-            public string Description;
-            public string VoiceChat;
         }
 
         public struct SupportTicketLFGListApplicant
         {
+            public RideTicket Ticket;
+            public string Comment;
+
             public void Read(WorldPacket data)
             {
-                RideTicket = new RideTicket();
-                RideTicket.Read(data);
+                Ticket = new RideTicket();
+                Ticket.Read(data);
 
                 Comment = data.ReadString(data.ReadBits<uint>(9));
             }
-
-            public RideTicket RideTicket;
-            public string Comment;
         }
 
-        public struct SupportTicketCommunityMessage
+        public struct SupportTicketVoiceChatInfo
         {
-            public bool IsPlayerUsingVoice;
+            public bool TargetIsCurrentlyInVoiceChatWithPlayer;
         }
 
-        public struct SupportTicketClubFinderResult
+        public struct SupportTicketClubFinderInfo
         {
-            public ulong ClubFinderPostingID;
+            public ulong PostingID;
             public ulong ClubID;
-            public ObjectGuid ClubFinderGUID;
-            public string ClubName;
+            public ObjectGuid GuildID;
+            public string PostingDescription;
 
             public void Read(WorldPacket data)
             {
-                ClubFinderPostingID = data.ReadUInt64();
+                PostingID = data.ReadUInt64();
                 ClubID = data.ReadUInt64();
-                ClubFinderGUID = data.ReadPackedGuid();
-                ClubName = data.ReadString(data.ReadBits<uint>(12));
+                GuildID = data.ReadPackedGuid();
+                PostingDescription = data.ReadString(data.ReadBits<uint>(12));
             }
         }
 
-        public struct SupportTicketUnused910
+        public struct SupportTicketArenaTeamInfo
         {
-            public string field_0;
-            public ObjectGuid field_104;
+            public string ArenaTeamName;
+            public ObjectGuid ArenaTeamID;
 
             public void Read(WorldPacket data)
             {
-                uint field_0Length = data.ReadBits<uint>(7);
-                field_104 = data.ReadPackedGuid();
-                field_0 = data.ReadString(field_0Length);
+                uint arenaTeamNameLength = data.ReadBits<uint>(7);
+                ArenaTeamID = data.ReadPackedGuid();
+                ArenaTeamName = data.ReadString(arenaTeamNameLength);
             }
         }
     }

@@ -89,8 +89,8 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid ScenarioGUID;
         public int ScenarioID;
-        public int Unk1;
-        public byte Unk2;
+        public int TimeRemain;
+        public byte Reason;
 
         public ScenarioVacate() : base(ServerOpcodes.ScenarioVacate, ConnectionType.Instance) { }
 
@@ -98,8 +98,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(ScenarioGUID);
             _worldPacket.WriteInt32(ScenarioID);
-            _worldPacket.WriteInt32(Unk1);
-            _worldPacket.WriteBits(Unk2, 2);
+            _worldPacket.WriteInt32(TimeRemain);
+            _worldPacket.WriteBits(Reason, 2);
             _worldPacket.FlushBits();
         }
     }

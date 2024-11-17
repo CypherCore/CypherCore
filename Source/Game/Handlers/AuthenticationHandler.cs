@@ -79,7 +79,7 @@ namespace Game
             SetTimeZoneInformation packet = new();
             packet.ServerTimeTZ = clientSupportedTZ;
             packet.GameTimeTZ = clientSupportedTZ;
-            packet.ServerRegionalTZ = clientSupportedTZ;
+            packet.ServerRegionalTimeTZ = clientSupportedTZ;
 
             SendPacket(packet);//enabled it
         }
@@ -91,7 +91,7 @@ namespace Game
             features.BpayStoreDisabledByParentalControls = false;
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
             features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
-            features.MaxCharactersPerRealm = WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm);
+            features.MaxCharactersOnThisRealm = WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm);
             features.MinimumExpansionLevel = (int)Expansion.Classic;
             features.MaximumExpansionLevel = WorldConfig.GetIntValue(WorldCfg.Expansion);
 

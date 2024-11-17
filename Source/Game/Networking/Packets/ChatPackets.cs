@@ -191,7 +191,7 @@ namespace Game.Networking.Packets
             Clear();
 
             SenderGUID.Clear();
-            SenderAccountGUID.Clear();
+            SenderWowAccount.Clear();
             SenderGuildGUID.Clear();
             TargetGUID.Clear();
             SenderName = "";
@@ -226,7 +226,7 @@ namespace Game.Networking.Packets
             Player playerSender = sender.ToPlayer();
             if (playerSender != null)
             {
-                SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
+                SenderWowAccount = playerSender.GetSession().GetAccountGUID();
                 _ChatFlags = playerSender.GetChatFlags();
 
                 SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
@@ -248,7 +248,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)_Language);
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WritePackedGuid(SenderGuildGUID);
-            _worldPacket.WritePackedGuid(SenderAccountGUID);
+            _worldPacket.WritePackedGuid(SenderWowAccount);
             _worldPacket.WritePackedGuid(TargetGUID);
             _worldPacket.WriteUInt32(TargetVirtualAddress);
             _worldPacket.WriteUInt32(SenderVirtualAddress);
@@ -263,7 +263,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(ChatText.GetByteCount(), 12);
             _worldPacket.WriteBit(HideChatLog);
             _worldPacket.WriteBit(FakeSenderName);
-            _worldPacket.WriteBit(Unused_801.HasValue);
+            _worldPacket.WriteBit(BroadcastTextID.HasValue);
             _worldPacket.WriteBit(ChannelGUID.HasValue);
             _worldPacket.FlushBits();
 
@@ -273,8 +273,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteString(Channel);
             _worldPacket.WriteString(ChatText);
 
-            if (Unused_801.HasValue)
-                _worldPacket.WriteUInt32(Unused_801.Value);
+            if (BroadcastTextID.HasValue)
+                _worldPacket.WriteUInt32(BroadcastTextID.Value);
 
             if (ChannelGUID.HasValue)
                 _worldPacket.WritePackedGuid(ChannelGUID.Value);
@@ -284,7 +284,7 @@ namespace Game.Networking.Packets
         public Language _Language = Language.Universal;
         public ObjectGuid SenderGUID;
         public ObjectGuid SenderGuildGUID;
-        public ObjectGuid SenderAccountGUID;
+        public ObjectGuid SenderWowAccount;
         public ObjectGuid TargetGUID;
         public uint SenderVirtualAddress;
         public uint TargetVirtualAddress;
@@ -297,7 +297,7 @@ namespace Game.Networking.Packets
         public ChatFlags _ChatFlags;
         public float DisplayTime;
         public uint SpellID;
-        public uint? Unused_801;
+        public uint? BroadcastTextID;
         public bool HideChatLog;
         public bool FakeSenderName;
         public ObjectGuid? ChannelGUID;

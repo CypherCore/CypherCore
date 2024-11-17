@@ -1192,7 +1192,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(Unk);
+            _worldPacket.WriteInt32(ItemCollectionType);
 
             // both lists have to have the same size
             _worldPacket.WriteInt32(Heirlooms.Count);
@@ -1207,7 +1207,7 @@ namespace Game.Networking.Packets
 
         public bool IsFullUpdate;
         public Dictionary<uint, HeirloomData> Heirlooms = new();
-        public int Unk;
+        public int ItemCollectionType;
     }
 
     class MountSpecial : ClientPacket

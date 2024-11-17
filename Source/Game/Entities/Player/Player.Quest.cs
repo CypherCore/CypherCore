@@ -41,7 +41,7 @@ namespace Game.Entities
 
         int GetQuestMinLevel(uint contentTuningId)
         {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ConditionalFlags);
             if (questLevels.HasValue)
             {
                 ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(GetRace());
@@ -65,7 +65,7 @@ namespace Game.Entities
 
         public int GetQuestLevel(uint contentTuningId)
         {
-            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+            var questLevels = Global.DB2Mgr.GetContentTuningData(contentTuningId, m_playerData.CtrOptions.GetValue().ConditionalFlags);
             if (questLevels.HasValue)
             {
                 int minLevel = GetQuestMinLevel(contentTuningId);
@@ -3269,11 +3269,11 @@ namespace Game.Entities
             packet.Slot = InventorySlots.Bag0;
             packet.SlotInBag = 0;
             packet.Item.ItemID = itemTemplate.GetId();
-            packet.QuestLogItemID = itemTemplate.QuestLogItemId;
+            packet.ProxyItemID = itemTemplate.QuestLogItemId;
             packet.Quantity = count;
             packet.QuantityInInventory = (uint)GetQuestObjectiveData(obj);
-            packet.DisplayText = ItemPushResult.DisplayType.EncounterLoot;
-            packet.Unused_1017 = true;
+            packet.ChatNotifyType = ItemPushResult.DisplayType.EncounterLoot;
+            packet.FakeQuestItem = true;
 
             if (GetGroup() != null && !itemTemplate.HasFlag(ItemFlags3.DontReportLootLogToParty))
                 GetGroup().BroadcastPacket(packet, true);

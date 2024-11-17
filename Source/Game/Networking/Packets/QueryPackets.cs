@@ -614,6 +614,7 @@ namespace Game.Networking.Packets
                 Sex = player.GetNativeGender();
                 ClassID = player.GetClass();
                 Level = (byte)player.GetLevel();
+                PvpFaction = (byte)(player.GetTeamId() == BattleGroundTeamId.Alliance ? 1 : 0);
                 TimerunningSeasonID = player.m_activePlayerData.TimerunningSeasonID;
 
                 DeclinedNames names = player.GetDeclinedNames();
@@ -632,6 +633,7 @@ namespace Game.Networking.Packets
                 Sex = characterInfo.Sex;
                 ClassID = characterInfo.ClassId;
                 Level = characterInfo.Level;
+                PvpFaction = (byte)(Player.TeamIdForRace(characterInfo.RaceId) == BattleGroundTeamId.Alliance ? 1 : 0);
             }
 
             IsDeleted = characterInfo.IsDeleted;
@@ -662,7 +664,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Sex);
             data.WriteUInt8((byte)ClassID);
             data.WriteUInt8(Level);
-            data.WriteUInt8(Unused915);
+            data.WriteUInt8(PvpFaction);
             data.WriteInt32(TimerunningSeasonID);
             data.WriteString(Name);
         }
@@ -678,25 +680,25 @@ namespace Game.Networking.Packets
         public Gender Sex = Gender.None;
         public Class ClassID = Class.None;
         public byte Level;
-        public byte Unused915;
+        public byte PvpFaction;
         public int TimerunningSeasonID;
         public DeclinedName DeclinedNames = new();
     }
 
-    public class NameCacheUnused920
+    public class GuildGuidLookupData
     {
-        public uint Unused1;
-        public ObjectGuid Unused2;
-        public string Unused3 = "";
+        public uint VirtualRealmAddress;
+        public ObjectGuid Guid;
+        public string Name = "";
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Unused1);
-            data.WritePackedGuid(Unused2);
-            data.WriteBits(Unused3.GetByteCount(), 7);
+            data.WriteUInt32(VirtualRealmAddress);
+            data.WritePackedGuid(Guid);
+            data.WriteBits(Name.GetByteCount(), 7);
             data.FlushBits();
 
-            data.WriteString(Unused3);
+            data.WriteString(Name);
         }
     }
 
@@ -705,21 +707,21 @@ namespace Game.Networking.Packets
         public ObjectGuid Player;
         public byte Result; // 0 - full packet, != 0 - only guid
         public PlayerGuidLookupData Data;
-        public NameCacheUnused920 Unused920;
+        public GuildGuidLookupData GuildData;
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Result);
             data.WritePackedGuid(Player);
             data.WriteBit(Data != null);
-            data.WriteBit(Unused920 != null);
+            data.WriteBit(GuildData != null);
             data.FlushBits();
 
             if (Data != null)
                 Data.Write(data);
 
-            if (Unused920 != null)
-                Unused920.Write(data);
+            if (GuildData != null)
+                GuildData.Write(data);
         }
     }
 
@@ -837,14 +839,14 @@ namespace Game.Networking.Packets
         public List<TreasurePickItem> Items = new();
         public List<TreasurePickCurrency> Currencies = new();
         public ulong Money;
-        public bool Unknown;
+        public bool Context;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Items.Count);
             data.WriteInt32(Currencies.Count);
             data.WriteUInt64(Money);
-            data.WriteBit(Unknown);
+            data.WriteBit(Context);
             data.FlushBits();
 
             foreach (TreasurePickItem treasurePickerItem in Items)

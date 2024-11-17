@@ -77,13 +77,13 @@ namespace Game.Networking.Packets
             uint titleLen = _worldPacket.ReadBits<uint>(7);
 
             Unit = _worldPacket.ReadPackedGuid();
-            Unused910 = _worldPacket.ReadUInt32();
+            Muid = _worldPacket.ReadUInt32();
             Title = _worldPacket.ReadString(titleLen);
         }
 
         public ObjectGuid Unit;
         public string Title;
-        public uint Unused910;
+        public uint Muid;
     }
 
     public class PetitionShowSignatures : ClientPacket

@@ -2267,12 +2267,12 @@ namespace Game.Entities
                         return;
 
                     //required lvl checks!
-                    var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player.m_playerData.CtrOptions.GetValue().ConditionalFlags);
                     if (userLevels.HasValue)
                         if (player.GetLevel() < userLevels.Value.MaxLevel)
                             return;
 
-                    var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer.m_playerData.CtrOptions.GetValue().ConditionalFlags);
                     if (targetLevels.HasValue)
                         if (targetPlayer.GetLevel() < targetLevels.Value.MaxLevel)
                             return;
@@ -3826,7 +3826,7 @@ namespace Game.Entities
                 Player player = target.ToPlayer();
                 if (player != null)
                 {
-                    var userLevels = Global.DB2Mgr.GetContentTuningData(GetGoInfo().ContentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    var userLevels = Global.DB2Mgr.GetContentTuningData(GetGoInfo().ContentTuningId, player.m_playerData.CtrOptions.GetValue().ConditionalFlags);
                     if (userLevels.HasValue)
                         return (byte)Math.Clamp(player.GetLevel(), userLevels.Value.MinLevel, userLevels.Value.MaxLevel);
                 }

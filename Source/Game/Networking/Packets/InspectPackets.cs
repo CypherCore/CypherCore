@@ -276,10 +276,30 @@ namespace Game.Networking.Packets
 
     public struct PVPBracketData
     {
+        public int Rating;
+        public int RatingID;
+        public int Rank;
+        public int WeeklyPlayed;
+        public int WeeklyWon;
+        public int SeasonPlayed;
+        public int SeasonWon;
+        public int WeeklyBestRating;
+        public int LastWeeksBestRating;
+        public int Tier;
+        public int WeeklyBestTier;
+        public int SeasonBestRating;
+        public int SeasonBestTierEnum;
+        public int RoundsSeasonPlayed;
+        public int RoundsSeasonWon;
+        public int RoundsWeeklyPlayed;
+        public int RoundsWeeklyWon;
+        public byte Bracket;
+        public bool Disqualified;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Bracket);
-            data.WriteInt32(Unused3);
+            data.WriteInt32(RatingID);
             data.WriteInt32(Rating);
             data.WriteInt32(Rank);
             data.WriteInt32(WeeklyPlayed);
@@ -287,11 +307,11 @@ namespace Game.Networking.Packets
             data.WriteInt32(SeasonPlayed);
             data.WriteInt32(SeasonWon);
             data.WriteInt32(WeeklyBestRating);
+            data.WriteInt32(LastWeeksBestRating);
+            data.WriteInt32(Tier);
+            data.WriteInt32(WeeklyBestTier);
             data.WriteInt32(SeasonBestRating);
-            data.WriteInt32(PvpTierID);
-            data.WriteInt32(WeeklyBestWinPvpTierID);
-            data.WriteInt32(Unused1);
-            data.WriteInt32(Unused2);
+            data.WriteInt32(SeasonBestTierEnum);
             data.WriteInt32(RoundsSeasonPlayed);
             data.WriteInt32(RoundsSeasonWon);
             data.WriteInt32(RoundsWeeklyPlayed);
@@ -299,26 +319,6 @@ namespace Game.Networking.Packets
             data.WriteBit(Disqualified);
             data.FlushBits();
         }
-
-        public int Rating;
-        public int Rank;
-        public int WeeklyPlayed;
-        public int WeeklyWon;
-        public int SeasonPlayed;
-        public int SeasonWon;
-        public int WeeklyBestRating;
-        public int SeasonBestRating;
-        public int PvpTierID;
-        public int WeeklyBestWinPvpTierID;
-        public int Unused1;
-        public int Unused2;
-        public int Unused3;
-        public int RoundsSeasonPlayed;
-        public int RoundsSeasonWon;
-        public int RoundsWeeklyPlayed;
-        public int RoundsWeeklyWon;
-        public byte Bracket;
-        public bool Disqualified;
     }
 
     public class TraitInspectInfo

@@ -359,7 +359,7 @@ namespace Game.Networking.Packets
 
             data.WriteUInt32(movementForce.TransportID);
             data.WriteFloat(movementForce.Magnitude);
-            data.WriteInt32(movementForce.Unused910);
+            data.WriteInt32(movementForce.MovementForceID);
             data.WriteBits((byte)movementForce.Type, 2);
             data.FlushBits();
         }
@@ -1467,7 +1467,7 @@ namespace Game.Networking.Packets
             data.WriteBits((byte)Face, 2);
             data.WriteBits(Points.Count, 16);
             data.WriteBit(VehicleExitVoluntary);
-            data.WriteBit(Interpolate);
+            data.WriteBit(TaxiSmoothing);
             data.WriteBits(PackedDeltas.Count, 16);
             data.WriteBit(SplineFilter != null);
             data.WriteBit(SpellEffectExtraData.HasValue);
@@ -1520,7 +1520,7 @@ namespace Game.Networking.Packets
         public List<Vector3> Points = new(); // Spline path
         public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by flags
         public bool VehicleExitVoluntary;
-        public bool Interpolate;
+        public bool TaxiSmoothing;
         public ObjectGuid TransportGUID;
         public sbyte VehicleSeat = -1;
         public List<Vector3> PackedDeltas = new();
@@ -1545,14 +1545,14 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(Id);
             data.WriteBit(CrzTeleport);
-            data.WriteBits(StopDistanceTolerance, 3);
+            data.WriteBits(StopSplineStyle, 3);
 
             Move.Write(data);
         }
 
         public uint Id;
         public bool CrzTeleport;
-        public byte StopDistanceTolerance;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)
+        public byte StopSplineStyle;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)
         public MovementSpline Move;
     }
 

@@ -46,7 +46,7 @@ namespace Game
             EnumCharactersResult charResult = new();
             charResult.Success = true;
             charResult.IsDeletedCharacters = holder.IsDeletedCharacters();
-            charResult.DisabledClassesMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
+            charResult.ClassDisableMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
 
             if (!charResult.IsDeletedCharacters)
                 _legitCharacters.Clear();
@@ -116,8 +116,8 @@ namespace Game
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
-                raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
-                raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
+                raceUnlock.HasUnlockedLicense = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
+                raceUnlock.HasUnlockedAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
                     /* || HasAccountAchievement(requirement.second.AchievementId)*/);
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
@@ -144,7 +144,7 @@ namespace Game
             EnumCharactersResult charEnum = new();
             charEnum.Success = true;
             charEnum.IsDeletedCharacters = true;
-            charEnum.DisabledClassesMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
+            charEnum.ClassDisableMask = WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask);
 
             if (!result.IsEmpty())
             {
@@ -1126,7 +1126,7 @@ namespace Game
             features.ComplaintStatus = (byte)ComplaintStatus.EnabledWithAutoIgnore;
             features.CfgRealmID = 2;
             features.CfgRealmRecID = 0;
-            features.TokenPollTimeSeconds = 300;
+            features.CommercePricePollTimeSeconds = 300;
             features.VoiceEnabled = false;
             features.BrowserEnabled = false; // Has to be false, otherwise client will crash if "Customer Support" is opened
 
@@ -1135,7 +1135,7 @@ namespace Game
             europaTicketSystemStatus.ThrottleState.PerMilliseconds = 60000;
             europaTicketSystemStatus.ThrottleState.TryCount = 1;
             europaTicketSystemStatus.ThrottleState.LastResetTimeBeforeNow = 111111;
-            features.TutorialsEnabled = true;
+            features.TutorialEnabled = true;
             features.NPETutorialsEnabled = true;
             // END OF DUMMY VALUES
 
@@ -1148,11 +1148,10 @@ namespace Game
 
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
             features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
-            features.WarModeFeatureEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemWarModeEnabled);
-            features.IsMuted = !CanSpeak();
+            features.WarModeEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemWarModeEnabled);
+            features.IsChatMuted = !CanSpeak();
 
-
-            features.TextToSpeechFeatureEnabled = false;
+            features.SpeakForMeAllowed = false;
 
             SendPacket(features);
         }

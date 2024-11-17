@@ -2436,7 +2436,7 @@ namespace Game.Entities
                 {
                     uint maxLevel = (uint)Global.DB2Mgr.GetCurveXAxisRange(item.GetBonus().PlayerLevelToItemLevelCurveId).Item2;
 
-                    var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.m_playerData.CtrOptions._value.ContentTuningConditionMask, true);
+                    var contentTuning = Global.DB2Mgr.GetContentTuningData(item.GetBonus().ContentTuningId, player.m_playerData.CtrOptions._value.ConditionalFlags, true);
                     if (contentTuning.HasValue)
                         maxLevel = Math.Min(maxLevel, (uint)contentTuning.Value.MaxLevel);
 

@@ -15,7 +15,7 @@ namespace Game
             CommerceTokenGetLogResponse response = new();
 
             // @todo: fix 6.x implementation
-            response.UnkInt = commerceTokenGetLog.UnkInt;
+            response.ClientToken = commerceTokenGetLog.ClientToken;
             response.Result = TokenResult.Success;
 
             SendPacket(response);
@@ -27,9 +27,9 @@ namespace Game
             CommerceTokenGetMarketPriceResponse response = new();
 
             // @todo: 6.x fix implementation
-            response.CurrentMarketPrice = 300000000;
-            response.UnkInt = commerceTokenGetMarketPrice.UnkInt;
-            response.Result = TokenResult.Success;
+            response.PriceGuarantee = 300000000;
+            response.ClientToken = commerceTokenGetMarketPrice.ClientToken;
+            response.ServerToken = TokenResult.Success;
             //packet.ReadUInt32("UnkInt32");
 
             SendPacket(response);

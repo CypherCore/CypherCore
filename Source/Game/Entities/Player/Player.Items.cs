@@ -2444,7 +2444,7 @@ namespace Game.Entities
 
             packet.Item = new ItemInstance(item);
 
-            packet.QuestLogItemID = item.GetTemplate().QuestLogItemId;
+            packet.ProxyItemID = item.GetTemplate().QuestLogItemId;
             packet.Quantity = quantity;
             packet.QuantityInInventory = GetItemCount(item.GetEntry());
 
@@ -2460,15 +2460,15 @@ namespace Game.Entities
             packet.ItemGUID = item.GetGUID();
 
             packet.Pushed = pushed;
-            packet.DisplayText = ItemPushResult.DisplayType.Normal;
+            packet.ChatNotifyType = ItemPushResult.DisplayType.Normal;
             packet.Created = created;
             //packet.IsBonusRoll;
 
             if (dungeonEncounterId != 0)
             {
-                packet.DisplayText = ItemPushResult.DisplayType.EncounterLoot;
-                packet.DungeonEncounterID = (int)dungeonEncounterId;
-                packet.IsEncounterLoot = true;
+                packet.ChatNotifyType = ItemPushResult.DisplayType.EncounterLoot;
+                packet.EncounterID = (int)dungeonEncounterId;
+                packet.IsPersonalLoot = true;
             }
 
             if (broadcast && GetGroup() != null && !item.GetTemplate().HasFlag(ItemFlags3.DontReportLootLogToParty))

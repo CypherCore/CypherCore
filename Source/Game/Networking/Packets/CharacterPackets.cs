@@ -29,11 +29,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Success);
             _worldPacket.WriteBit(Realmless);
             _worldPacket.WriteBit(IsDeletedCharacters);
-            _worldPacket.WriteBit(IsNewPlayerRestrictionSkipped);
-            _worldPacket.WriteBit(IsNewPlayerRestricted);
-            _worldPacket.WriteBit(IsNewPlayer);
-            _worldPacket.WriteBit(IsTrialAccountRestricted);
-            _worldPacket.WriteBit(DisabledClassesMask.HasValue);
+            _worldPacket.WriteBit(IgnoreNewPlayerRestrictions);
+            _worldPacket.WriteBit(IsRestrictedNewPlayer);
+            _worldPacket.WriteBit(IsNewcomerChatCompleted);
+            _worldPacket.WriteBit(IsRestrictedTrial);
+            _worldPacket.WriteBit(ClassDisableMask.HasValue);
             _worldPacket.WriteBit(DontCreateCharacterDisplays);
             _worldPacket.WriteInt32(Characters.Count);
             _worldPacket.WriteInt32(RegionwideCharacters.Count);
@@ -43,8 +43,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(RaceLimitDisables.Count);
             _worldPacket.WriteInt32(WarbandGroups.Count);
 
-            if (DisabledClassesMask.HasValue)
-                _worldPacket.WriteUInt32(DisabledClassesMask.Value);
+            if (ClassDisableMask.HasValue)
+                _worldPacket.WriteUInt32(ClassDisableMask.Value);
 
             foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
                 unlockedConditionalAppearance.Write(_worldPacket);
@@ -68,14 +68,14 @@ namespace Game.Networking.Packets
         public bool Success;
         public bool Realmless;
         public bool IsDeletedCharacters; // used for character undelete list
-        public bool IsNewPlayerRestrictionSkipped; // allows client to skip new player restrictions
-        public bool IsNewPlayerRestricted; // forbids using level boost and class trials
-        public bool IsNewPlayer; // forbids hero classes and allied races
-        public bool IsTrialAccountRestricted;
+        public bool IgnoreNewPlayerRestrictions; // allows client to skip new player restrictions
+        public bool IsRestrictedNewPlayer; // forbids using level boost and class trials
+        public bool IsNewcomerChatCompleted; // forbids hero classes and allied races
+        public bool IsRestrictedTrial;
         public bool DontCreateCharacterDisplays;
 
         public int MaxCharacterLevel = 1;
-        public uint? DisabledClassesMask = new();
+        public uint? ClassDisableMask = new();
 
         public List<CharacterInfo> Characters = new(); // all characters on the list
         public List<RegionwideCharacterListEntry> RegionwideCharacters = new();
@@ -150,7 +150,7 @@ namespace Game.Networking.Packets
 
                 StringArray equipment = new(fields.Read<string>(17), ' ');
                 ListPosition = fields.Read<byte>(19);
-                LastPlayedTime = fields.Read<long>(20);
+                LastActiveTime = fields.Read<long>(20);
 
                 var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
                 if (spec != null)
@@ -197,7 +197,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32((uint)Flags);
                 data.WriteUInt32((uint)Flags2);
                 data.WriteUInt32(Flags3);
-                data.WriteUInt8(unkWod61x);
+                data.WriteUInt8(CantLoginReason);
 
                 data.WriteUInt32(PetCreatureDisplayId);
                 data.WriteUInt32(PetExperienceLevel);
@@ -206,8 +206,8 @@ namespace Game.Networking.Packets
                 foreach (var visualItem in VisualItems)
                     visualItem.Write(data);
 
-                data.WriteInt32(Unknown703);
-                data.WriteInt64(LastPlayedTime);
+                data.WriteInt32(SaveVersion);
+                data.WriteInt64(LastActiveTime);
                 data.WriteInt32(LastLoginVersion);
                 PersonalTabard.Write(data);
 
@@ -248,10 +248,10 @@ namespace Game.Networking.Packets
             public CharacterCustomizeFlags Flags2; // Character customization flags @see enum CharacterCustomizeFlags
             public uint Flags3; // Character flags 3 @todo research
             public bool FirstLogin;
-            public byte unkWod61x;
-            public long LastPlayedTime;
+            public byte CantLoginReason;
+            public long LastActiveTime;
             public short SpecID;
-            public int Unknown703;
+            public int SaveVersion;
             public int LastLoginVersion;
             public uint OverrideSelectScreenFileDataID;
             public int TimerunningSeasonID;
@@ -295,7 +295,7 @@ namespace Game.Networking.Packets
         public class CharacterRestrictionAndMailData
         {
             public bool BoostInProgress; ///< @todo
-            public uint Flags4;
+            public uint RestrictionFlags;
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
             public bool RpeResetAvailable;
@@ -310,7 +310,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(RpeResetQuestClearAvailable);
                 data.FlushBits();
 
-                data.WriteUInt32(Flags4);
+                data.WriteUInt32(RestrictionFlags);
                 data.WriteInt32(MailSenders.Count);
                 data.WriteInt32(MailSenderTypes.Count);
 
@@ -373,46 +373,46 @@ namespace Game.Networking.Packets
 
         public struct RaceUnlock
         {
+            public int RaceID;
+            public bool HasUnlockedLicense;
+            public bool HasUnlockedAchievement;
+            public bool HasHeritageArmorUnlockAchievement;
+            public bool HideRaceOnClient;
+            public bool Unused1027;
+
             public void Write(WorldPacket data)
             {
                 data.WriteInt32(RaceID);
-                data.WriteBit(HasExpansion);
-                data.WriteBit(HasAchievement);
-                data.WriteBit(HasHeritageArmor);
-                data.WriteBit(IsLocked);
+                data.WriteBit(HasUnlockedLicense);
+                data.WriteBit(HasUnlockedAchievement);
+                data.WriteBit(HasHeritageArmorUnlockAchievement);
+                data.WriteBit(HideRaceOnClient);
                 data.WriteBit(Unused1027);
                 data.FlushBits();
             }
-
-            public int RaceID;
-            public bool HasExpansion;
-            public bool HasAchievement;
-            public bool HasHeritageArmor;
-            public bool IsLocked;
-            public bool Unused1027;
         }
 
         public struct UnlockedConditionalAppearance
         {
+            public int AchievementID;
+            public int ConditionalType;
+
             public void Write(WorldPacket data)
             {
                 data.WriteInt32(AchievementID);
-                data.WriteInt32(Unused);
+                data.WriteInt32(ConditionalType);
             }
-
-            public int AchievementID;
-            public int Unused;
         }
 
         public struct RaceLimitDisableInfo
         {
             public int RaceID;
-            public int BlockReason;
+            public int Reason;
 
             public void Write(WorldPacket data)
             {
                 data.WriteInt32(RaceID);
-                data.WriteInt32(BlockReason);
+                data.WriteInt32(Reason);
             }
         }
     }
