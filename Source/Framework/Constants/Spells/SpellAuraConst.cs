@@ -287,8 +287,8 @@ namespace Framework.Constants
         Unk277 = 277,  // Old ModMaxAffectedTargets. Unused 4.3.4
         ModDisarmRanged = 278,
         InitializeImages = 279,
-        ProvideSpellFocus = 280,
-        ModGuildReputationGainPct = 281, // NYI
+        ModArmorPenetrationPct = 280,
+        ProvideSpellFocus = 281,
         ModBaseHealthPct = 282,
         ModHealingReceived = 283,  // Possibly Only For Some Spell Family Class Spells
         Linked = 284,

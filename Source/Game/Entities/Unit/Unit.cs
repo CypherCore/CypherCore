@@ -3833,10 +3833,13 @@ namespace Game.Entities
                         armor = (float)Math.Floor(MathFunctions.AddPct(ref armor, -eff.GetAmount()));
                 }
 
-                // Apply Player CR_ARMOR_PENETRATION rating
+                // Apply Player CR_ARMOR_PENETRATION rating and buffs from stances\specializations etc.
                 if (attacker.IsPlayer())
                 {
                     float arpPct = attacker.ToPlayer().GetRatingBonusValue(CombatRating.ArmorPenetration);
+
+                    Item weapon = attacker.ToPlayer().GetWeaponForAttack(attackType, true);
+                    arpPct += attacker.GetTotalAuraModifier(AuraType.ModArmorPenetrationPct, aurEff => aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon));
 
                     // no more than 100%
                     MathFunctions.RoundToInterval(ref arpPct, 0.0f, 100.0f);
