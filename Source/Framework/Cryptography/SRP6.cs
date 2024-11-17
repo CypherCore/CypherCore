@@ -328,10 +328,12 @@ namespace Framework.Cryptography
             BigInteger x = new(xBytes, true, true);
             if ((xBytes[0] & 0x80) != 0)
             {
-                byte[] fix = new byte[65];
-                fix[64] = 1;
+                byte[] fix = [1, ..new byte[64]];
                 x -= new BigInteger(fix, true);
             }
+
+            if (x.Sign == -1)
+                return x += N - 1;
 
             return x % (N - 1);
         }
