@@ -1512,7 +1512,6 @@ namespace Game.Spells
             {
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
-                case SummonCategory.Unk:
                     if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
                     {
                         SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
@@ -1614,6 +1613,7 @@ namespace Game.Spells
                     summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                     break;
                 }
+                case SummonCategory.PossessedVehicle:
                 case SummonCategory.Vehicle:
                 {
                     if (unitCaster == null)

@@ -3711,12 +3711,12 @@ namespace Game.Maps
                     case SummonCategory.Puppet:
                         mask = UnitTypeMask.Puppet;
                         break;
+                    case SummonCategory.PossessedVehicle:
                     case SummonCategory.Vehicle:
                         mask = UnitTypeMask.Minion;
                         break;
                     case SummonCategory.Wild:
                     case SummonCategory.Ally:
-                    case SummonCategory.Unk:
                     {
                         switch (properties.Title)
                         {

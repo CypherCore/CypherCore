@@ -150,7 +150,6 @@ namespace Game.AI
                     return true;
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
-                case SummonCategory.Unk:
                     if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
                         return true;
                     switch (properties.Title)

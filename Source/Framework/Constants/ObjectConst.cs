@@ -130,9 +130,8 @@ namespace Framework.Constants
         Ally = 1,
         Pet = 2,
         Puppet = 3,
-        Vehicle = 4,
-        Unk = 5  // as of patch 3.3.5a only Bone Spike in Icecrown Citadel
-        // uses this category
+        PossessedVehicle = 4,
+        Vehicle = 5  // Wild, but Ride Spell will be cast
     }
 
     public enum SummonTitle
