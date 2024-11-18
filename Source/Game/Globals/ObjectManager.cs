@@ -1826,7 +1826,7 @@ namespace Game
             creature.SubName = fields.Read<string>(5);
             creature.TitleAlt = fields.Read<string>(6);
             creature.IconName = fields.Read<string>(7);
-            creature.RequiredExpansion = fields.Read<uint>(8);
+            creature.RequiredExpansion = fields.Read<int>(8);
             creature.VignetteID = fields.Read<uint>(9);
             creature.Faction = fields.Read<uint>(10);
             creature.Npcflag = fields.Read<ulong>(11);

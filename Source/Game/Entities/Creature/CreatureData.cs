@@ -23,7 +23,7 @@ namespace Game.Entities
         public string IconName;
         public List<uint> GossipMenuIds = new();
         public Dictionary<Difficulty, CreatureDifficulty> difficultyStorage = new();
-        public uint RequiredExpansion;
+        public int RequiredExpansion;
         public uint VignetteID;
         public uint Faction;
         public ulong Npcflag;
@@ -184,7 +184,7 @@ namespace Game.Entities
             stats.EnergyMulti = creatureDifficulty.ManaModifier;
 
             stats.CreatureMovementInfoID = MovementId;
-            stats.RequiredExpansion = RequiredExpansion;
+            stats.RequiredExpansion = (uint)RequiredExpansion;
             stats.HealthScalingExpansion = creatureDifficulty.HealthScalingExpansion;
             stats.VignetteID = VignetteID;
             stats.Class = (int)UnitClass;

@@ -4272,7 +4272,7 @@ namespace Game.AI
                 return false;
 
             bool smart = true;
-            if (creature.GetAI<SmartAI>() == null)
+            if (creature.GetAI() is not SmartAI || creature.GetAI<SmartAI>() == null)
                 smart = false;
 
             if (!smart && !silent)

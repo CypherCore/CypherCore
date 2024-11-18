@@ -208,16 +208,17 @@ namespace Game.Entities
             UpdateFieldFlag fieldFlags = GetUpdateFieldFlagsFor(target);
 
             WorldPacket tempBuffer = new();
-            BuildValuesUpdate(tempBuffer, fieldFlags, target);
-            buffer.WriteUInt32(tempBuffer.GetSize());
-            buffer.WriteUInt8((byte)(fieldFlags.HasFlag(UpdateFieldFlag.Owner) ? 1 : 0));
-            buffer.WriteUInt8((byte)(m_entityFragments.IdsChanged ? 1 : 0));
+            tempBuffer.WriteUInt8((byte)(fieldFlags.HasFlag(UpdateFieldFlag.Owner) ? 1 : 0));
+            tempBuffer.WriteUInt8((byte)(m_entityFragments.IdsChanged ? 1 : 0));
             if (m_entityFragments.IdsChanged)
             {
-                buffer.WriteUInt8((byte)EntityFragmentSerializationType.Full);
-                BuildEntityFragments(buffer, m_entityFragments.GetIds());
+                tempBuffer.WriteUInt8((byte)EntityFragmentSerializationType.Full);
+                BuildEntityFragments(tempBuffer, m_entityFragments.GetIds());
             }
-            buffer.WriteUInt8(m_entityFragments.ContentsChangedMask);
+            tempBuffer.WriteUInt8(m_entityFragments.ContentsChangedMask);
+
+            BuildValuesUpdate(tempBuffer, fieldFlags, target);
+            buffer.WriteUInt32(tempBuffer.GetSize());
             buffer.WriteBytes(tempBuffer);
 
             data.AddUpdateBlock(buffer);
@@ -4243,23 +4244,29 @@ namespace Game.Entities
 
         public HasChangesMask ModifyValue(HasChangesMask updateData)
         {
-            _changesMask.Set(updateData.Bit);
+            _owner.m_entityFragments.ContentsChangedMask |= _owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
+            if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
+                _changesMask.Set(updateData.Bit);
             return updateData;
         }
 
         public void ClearChangesMask(HasChangesMask updateData)
         {
-            _changesMask.Reset(updateData.Bit);
+            _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
+            if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
+                _changesMask.Reset(updateData.Bit);
+
             updateData.ClearChangesMask();
         }
 
         public void ClearChangesMask<U>(HasChangesMask updateData, ref UpdateField<U> updateField) where U : new()
         {
-            _changesMask.Reset(updateData.Bit);
+            _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
+            if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
+                _changesMask.Reset(updateData.Bit);
 
-            IHasChangesMask hasChangesMask = (IHasChangesMask)updateField._value;
-            if (hasChangesMask != null)
-                hasChangesMask.ClearChangesMask();
+            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
+                ((IHasChangesMask)updateField._value).ClearChangesMask();
         }
 
         public uint GetChangedObjectTypeMask()
@@ -4270,66 +4277,6 @@ namespace Game.Entities
         public bool HasChanged(TypeId index)
         {
             return _changesMask[(int)index];
-        }
-
-        //New shit
-        /*HasChangesMask ModifyValue(HasChangesMask updateData)
-        {
-            _owner.m_entityFragments.ContentsChangedMask |= _owner.m_entityFragments.GetUpdateMaskFor(WowCS::EntityFragment(BlockBit));
-            if constexpr(WowCS::EntityFragment(BlockBit) == WowCS::EntityFragment::CGObject)
-                _changesMask |= UpdateMaskHelpers::GetBlockFlag(Bit);
-
-            return { (static_cast<Derived*>(owner)->* field)._value };
-        }*/
-
-        public UpdateField<U> ModifyValue<U>(UpdateField<U> updateField) where U : new()
-        {
-            _owner.m_entityFragments.ContentsChangedMask |= _owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateField.BlockBit);
-            if ((EntityFragment)updateField.BlockBit == EntityFragment.CGObject)
-                _changesMask.Set(updateField.Bit);
-
-            return updateField;
-        }
-
-        public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField) where U : new()
-        {
-            _owner.m_entityFragments.ContentsChangedMask |= _owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateField.BlockBit);
-            if ((EntityFragment)updateField.BlockBit == EntityFragment.CGObject)
-                _changesMask.Set(updateField.Bit);
-
-            return updateField;
-        }
-
-        public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField, uint dummy) where U : new()
-        {
-            _owner.m_entityFragments.ContentsChangedMask |= _owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateField.BlockBit);
-            if ((EntityFragment)updateField.BlockBit == EntityFragment.CGObject)
-                _changesMask.Set(updateField.Bit);
-
-            if (!updateField.HasValue())
-                updateField.SetValue(new U());
-
-            return updateField;
-        }
-
-        void ClearChangesMask<U>(UpdateField<U> updateField) where U : new()
-        {
-            _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateField.BlockBit);
-            if ((EntityFragment)updateField.BlockBit == EntityFragment.CGObject)
-                _changesMask.Reset(updateField.Bit);
-
-            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
-                ((IHasChangesMask)updateField._value).ClearChangesMask();
-        }
-
-        void ClearChangesMask<U>(OptionalUpdateField<U> updateField) where U : new()
-        {
-            _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateField.BlockBit);
-            if ((EntityFragment)updateField.BlockBit == EntityFragment.CGObject)
-                _changesMask.Reset(updateField.Bit);
-
-            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
-                ((IHasChangesMask)updateField._value).ClearChangesMask();
         }
     }
 }
