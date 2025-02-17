@@ -197,7 +197,6 @@ namespace Game.DataStorage
         public int MountSpecialSpellVisualKitID;
 
         public bool HasFlag(MountFlags mountFlags) { return (Flags & (int)mountFlags) != 0; }
-        public bool IsSelfMount() { return HasFlag(MountFlags.SelfMount); }
     }
 
     public sealed class MountCapabilityRecord
@@ -214,6 +213,15 @@ namespace Game.DataStorage
         public int FlightCapabilityID;
 
         public bool HasFlag(MountCapabilityFlags mountCapabilityFlags) { return (Flags & (int)mountCapabilityFlags) != 0; }
+    }
+
+    public sealed class MountEquipmentRecord
+    {
+        public uint Id;
+        public int Item;
+        public int BuffSpell;
+        public int Unknown820;
+        public uint LearnedBySpell;
     }
 
     public sealed class MountTypeXCapabilityRecord

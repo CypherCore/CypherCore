@@ -5681,6 +5681,43 @@ namespace Game.Spells
             Conversation.CreateConversation((uint)effectInfo.MiscValue, unitTarget, destTarget.GetPosition(), unitTarget.GetGUID(), GetSpellInfo());
         }
 
+        [SpellEffectHandler(SpellEffectName.ApplyMountEquipment)]
+        void EffectApplyMountEquipment()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
+                return;
+
+            Player playerTarget = unitTarget.ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            foreach (var (_, mountEquipment) in CliDB.MountEquipmentStorage)
+            {
+                if (mountEquipment.LearnedBySpell == effectInfo.TriggerSpell)
+                {
+                    playerTarget.LearnSpell(mountEquipment.LearnedBySpell, false, 0, true);
+                    var mountAuras = playerTarget.GetAuraEffectsByType(AuraType.Mounted);
+                    if (!mountAuras.Empty())
+                    {
+                        var mountEntry = Global.DB2Mgr.GetMount(mountAuras.FirstOrDefault().GetId());
+                        if (mountEntry != null && !mountEntry.HasFlag(MountFlags.MountEquipmentEffectsSuppressed))
+                            playerTarget.CastSpell(playerTarget, (uint)mountEquipment.BuffSpell, true);
+                    }
+                }
+                else
+                {
+                    playerTarget.RemoveOwnedAura((uint)mountEquipment.BuffSpell);
+                    playerTarget.RemoveSpell(mountEquipment.LearnedBySpell, false, false, true);
+                }
+            }
+
+            ApplyMountEquipmentResult applyMountEquipmentResult = new();
+            applyMountEquipmentResult.ItemGUID = m_castItemGUID;
+            applyMountEquipmentResult.ItemID = m_castItemEntry;
+            applyMountEquipmentResult.Result = ApplyMountEquipmentResult.ApplyResult.Success;
+            playerTarget.SendPacket(applyMountEquipmentResult);
+        }
+
         [SpellEffectHandler(SpellEffectName.SendChatMessage)]
         void EffectSendChatMessage()
         {

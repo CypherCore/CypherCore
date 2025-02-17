@@ -244,6 +244,7 @@ namespace Game.DataStorage
             ModifierTreeStorage = ReadDB2<ModifierTreeRecord>("ModifierTree.db2", HotfixStatements.SEL_MODIFIER_TREE);
             MountCapabilityStorage = ReadDB2<MountCapabilityRecord>("MountCapability.db2", HotfixStatements.SEL_MOUNT_CAPABILITY);
             MountStorage = ReadDB2<MountRecord>("Mount.db2", HotfixStatements.SEL_MOUNT, HotfixStatements.SEL_MOUNT_LOCALE);
+            MountEquipmentStorage = ReadDB2<MountEquipmentRecord>("MountEquipment.db2", HotfixStatements.SEL_MOUNT_EQUIPMENT);
             MountTypeXCapabilityStorage = ReadDB2<MountTypeXCapabilityRecord>("MountTypeXCapability.db2", HotfixStatements.SEL_MOUNT_TYPE_X_CAPABILITY);
             MountXDisplayStorage = ReadDB2<MountXDisplayRecord>("MountXDisplay.db2", HotfixStatements.SEL_MOUNT_X_DISPLAY);
             MovieStorage = ReadDB2<MovieRecord>("Movie.db2", HotfixStatements.SEL_MOVIE);
@@ -693,6 +694,7 @@ namespace Game.DataStorage
         public static DB6Storage<ModifierTreeRecord> ModifierTreeStorage;
         public static DB6Storage<MountCapabilityRecord> MountCapabilityStorage;
         public static DB6Storage<MountRecord> MountStorage;
+        public static DB6Storage<MountEquipmentRecord> MountEquipmentStorage;
         public static DB6Storage<MountTypeXCapabilityRecord> MountTypeXCapabilityStorage;
         public static DB6Storage<MountXDisplayRecord> MountXDisplayStorage;
         public static DB6Storage<MovieRecord> MovieStorage;

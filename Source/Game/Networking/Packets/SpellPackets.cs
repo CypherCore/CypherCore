@@ -1243,6 +1243,29 @@ namespace Game.Networking.Packets
         public uint Result;
     }
 
+    class ApplyMountEquipmentResult : ServerPacket
+    {
+        public ObjectGuid ItemGUID;
+        public uint ItemID;
+        public ApplyResult Result = ApplyResult.Success;
+
+        public enum ApplyResult
+        {
+            Success = 0,
+            Failure = 1
+        }
+
+        public ApplyMountEquipmentResult() : base(ServerOpcodes.ApplyMountEquipmentResult, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(ItemGUID);
+            _worldPacket.WriteUInt32(ItemID);
+            _worldPacket.WriteBits(Result, 1);
+            _worldPacket.FlushBits();
+        }
+    }
+
     class MissileCancel : ServerPacket
     {
         public MissileCancel() : base(ServerOpcodes.MissileCancel) { }

@@ -962,6 +962,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_MOUNT_CAPABILITY, "SELECT ID, Flags, ReqRidingSkill, ReqAreaID, ReqSpellAuraID, ReqSpellKnownID, ModSpellAuraID, " +
                 "ReqMapID, PlayerConditionID, FlightCapabilityID FROM mount_capability WHERE (`VerifiedBuild` > 0) = ?");
 
+            // MountEquipment.db2
+            PrepareStatement(HotfixStatements.SEL_MOUNT_EQUIPMENT, "SELECT ID, Item, BuffSpell, Unknown820, LearnedBySpell FROM mount_equipment" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // MountTypeXCapability.db2
             PrepareStatement(HotfixStatements.SEL_MOUNT_TYPE_X_CAPABILITY, "SELECT ID, MountTypeID, MountCapabilityID, OrderIndex FROM mount_type_x_capability" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
@@ -2094,6 +2098,8 @@ namespace Framework.Database
         SEL_MOUNT_LOCALE,
 
         SEL_MOUNT_CAPABILITY,
+
+        SEL_MOUNT_EQUIPMENT,
 
         SEL_MOUNT_TYPE_X_CAPABILITY,
 

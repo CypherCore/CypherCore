@@ -2169,7 +2169,7 @@ namespace Game.Spells
                         var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
                         if (mountDisplays != null)
                         {
-                            if (mountEntry.IsSelfMount())
+                            if (mountEntry.HasFlag(MountFlags.IsSelfMount))
                             {
                                 displayId = SharedConst.DisplayIdHiddenMount;
                             }
@@ -2191,6 +2191,17 @@ namespace Game.Spells
                         // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
                         //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
                         //    creatureEntry = mountVehicle->VehicleCreatureId;
+
+                        if (mode.HasFlag(AuraEffectHandleModes.Real) && !mountEntry.HasFlag(MountFlags.MountEquipmentEffectsSuppressed))
+                        {
+                            Player playerTarget = target.ToPlayer();
+                            if (playerTarget != null)
+                            {
+                                var mountEquipment = CliDB.MountEquipmentStorage.Values.FirstOrDefault(record => playerTarget.HasSpell(record.LearnedBySpell));
+                                if (mountEquipment != null)
+                                    playerTarget.CastSpell(playerTarget, (uint)mountEquipment.BuffSpell, this);
+                            }
+                        }
                     }
 
                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creatureEntry);
@@ -2234,7 +2245,11 @@ namespace Game.Spells
                 // need to remove ALL arura related to mounts, this will stop client crash with broom stick
                 // and never endless flying after using Headless Horseman's Mount
                 if (mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                {
                     target.RemoveAurasByType(AuraType.Mounted);
+                    foreach (var (_, mountEquipmentStore) in CliDB.MountEquipmentStorage)
+                        target.RemoveOwnedAura((uint)mountEquipmentStore.BuffSpell);
+                }
 
                 if (mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 {

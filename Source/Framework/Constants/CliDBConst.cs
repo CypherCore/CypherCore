@@ -1889,11 +1889,19 @@ namespace Framework.Constants
 
     public enum MountFlags : int
     {
-        SelfMount = 0x02,                   // Player becomes the mount himself
-        FactionSpecific = 0x04,
-        PreferredSwimming = 0x10,
-        PreferredWaterWalking = 0x20,
-        HideIfUnknown = 0x40
+        ServerOnly = 0x01,
+        IsSelfMount = 0x02,
+        ExcludeFromJournalIfFactionDoesntMatch = 0x04,
+        AllowMountedCombat = 0x08,
+        SummonRandomFavorWhileUnderwater = 0x10,
+        SummonRandomFavorWhileAtWaterSurface = 0x20,
+        ExcludeFromJournalIfNotLearned = 0x40,
+        SummonRandomDoNotFavorWhenGrounded = 0x80,
+        ShowInSpellbook = 0x100,
+        AddToActionBarOnLearn = 0x200,
+        NotForUseAsATaxi = 0x400,
+        MountEquipmentEffectsSuppressed = 0x800,
+        DisablePlayerMountPreview = 0x1000,
     }
 
     public enum PathPropertyIndex

@@ -5166,4 +5166,52 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 296837 - Comfortable Rider's Barding
+    class spell_gen_comfortable_riders_barding : AuraScript
+    {
+        static uint SPELL_DAZED = 1604;
+
+        bool _apply;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SPELL_DAZED);
+        }
+
+        void HandleEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().ApplySpellImmune(GetId(), SpellImmunity.Id, SPELL_DAZED, _apply);
+        }
+
+        public override void Register()
+        {
+            _apply = true;
+            OnEffectApply.Add(new EffectApplyHandler(HandleEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            _apply = false;
+            OnEffectRemove.Add(new EffectApplyHandler(HandleEffect, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script] // 297091 - Parachute
+    class spell_gen_saddlechute : AuraScript
+    {
+        static uint SPELL_PARACHUTE = 297092;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SPELL_PARACHUTE);
+        }
+
+        void TriggerParachute(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            if (target.IsFlying() || target.IsFalling())
+                target.CastSpell(target, SPELL_PARACHUTE, new CastSpellExtraArgs(TriggerCastFlags.DontReportCastError));
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(TriggerParachute, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
 }
