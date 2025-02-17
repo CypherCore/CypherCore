@@ -93,7 +93,8 @@ namespace Framework.Constants
         NoInterract = 0x80,
         InvertedMovement = 0x100,
         InteractCond = 0x200,               // Cannot interact (requires GO_DYNFLAG_LO_ACTIVATE to enable interaction clientside)
-        Highlight = 0x4000 // Allows object highlight when GO_DYNFLAG_LO_ACTIVATE are set, not only when player is on quest determined by Data fields
+        Highlight = 0x4000, // Allows object highlight when GO_DYNFLAG_LO_ACTIVATE are set, not only when player is on quest determined by Data fields
+        StateTransitionAnimDone = 0x8000,      // don't play state transition anim on entering visibility
     }
 
     public enum GameObjectFlags

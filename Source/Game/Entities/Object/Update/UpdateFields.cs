@@ -108,7 +108,7 @@ namespace Game.Entities
                 GameObject gameObject = obj.ToGameObject();
                 if (gameObject != null)
                 {
-                    GameObjectDynamicLowFlags dynFlags = 0;
+                    GameObjectDynamicLowFlags dynFlags = GameObjectDynamicLowFlags.StateTransitionAnimDone;
                     switch (gameObject.GetGoType())
                     {
                         case GameObjectTypes.Button:
