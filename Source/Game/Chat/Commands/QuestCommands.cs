@@ -184,18 +184,9 @@ namespace Game.Chat
                     }
                     break;
                 }
-                case QuestObjectiveType.Monster:
+                case QuestObjectiveType.Currency:
                 {
-                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
-                    if (creatureInfo != null)
-                        for (var z = 0; z < obj.Amount; ++z)
-                            player.KilledMonster(creatureInfo, ObjectGuid.Empty);
-                    break;
-                }
-                case QuestObjectiveType.GameObject:
-                {
-                    for (var z = 0; z < obj.Amount; ++z)
-                        player.KillCreditGO((uint)obj.ObjectID);
+                    player.ModifyCurrency((uint)obj.ObjectID, obj.Amount, CurrencyGainSource.Cheat);
                     break;
                 }
                 case QuestObjectiveType.MinReputation:
@@ -225,12 +216,12 @@ namespace Game.Chat
                     player.ModifyMoney(obj.Amount);
                     break;
                 }
-                case QuestObjectiveType.PlayerKills:
-                {
-                    for (var z = 0; z < obj.Amount; ++z)
-                        player.KilledPlayerCredit(ObjectGuid.Empty);
+                case QuestObjectiveType.ProgressBar:
+                    // do nothing
                     break;
-                }
+                default:
+                    player.UpdateQuestObjectiveProgress(obj.Type, obj.ObjectID, obj.Amount);
+                    break;
             }
         }
     }
