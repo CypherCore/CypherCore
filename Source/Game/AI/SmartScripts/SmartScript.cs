@@ -1228,10 +1228,9 @@ namespace Game.AI
                 }
                 case SmartActions.SetDisableGravity:
                 {
-                    if (!IsSmart())
-                        break;
-
-                    ((SmartAI)_me.GetAI()).SetDisableGravity(e.Action.setDisableGravity.disable != 0);
+                    foreach (WorldObject target in targets)
+                        if (IsCreature(target))
+                            target.ToCreature().SetFloating(e.Action.setDisableGravity.disable != 0);
                     break;
                 }
                 case SmartActions.SetRun:
@@ -1980,7 +1979,7 @@ namespace Game.AI
                 {
                     foreach (var target in targets)
                         if (IsCreature(target))
-                            target.ToCreature().SetControlled(e.Action.setRoot.root != 0, UnitState.Root);
+                            target.ToCreature().SetSessile(e.Action.setRoot.root != 0);
                     break;
                 }
                 case SmartActions.SummonCreatureGroup:

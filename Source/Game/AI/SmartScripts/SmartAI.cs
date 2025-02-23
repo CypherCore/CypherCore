@@ -770,11 +770,6 @@ namespace Game.AI
             _run = run;
         }
 
-        public void SetDisableGravity(bool disable = true)
-        {
-            me.SetDisableGravity(disable);
-        }
-
         public void SetEvadeDisabled(bool disable)
         {
             _evadeDisabled = disable;
