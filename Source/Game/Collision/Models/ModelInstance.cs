@@ -132,6 +132,7 @@ namespace Game.Collision
                 // calculate world height (zDist in model coords):
                 // assume WMO not tilted (wouldn't make much sense anyway)
                 liqHeight = zDist * iScale + iPos.Z;
+                liqHeight = (iInvRot.Multiply(new Vector3(pModel.X, pModel.Y, zDist)) * iScale + iPos).Z;
                 return true;
             }
             return false;
