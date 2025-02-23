@@ -2528,12 +2528,13 @@ namespace Game.Entities
             UpdateVisibleObjectInteractions(true, false, false, true);
         }
 
-        public void KilledMonster(CreatureTemplate cInfo, ObjectGuid guid)
+        public void KilledMonster(Creature creature)
         {
-            Cypher.Assert(cInfo != null);
+            Cypher.Assert(creature != null);
 
-            if (cInfo.Entry != 0)
-                KilledMonsterCredit(cInfo.Entry, guid);
+            CreatureTemplate cInfo = creature.GetCreatureTemplate();
+
+            KilledMonsterCredit(cInfo.Entry, creature.GetGUID());
 
             for (byte i = 0; i < 2; ++i)
                 if (cInfo.KillCredit[i] != 0)

@@ -199,7 +199,7 @@ namespace Game.Entities
                 Creature target = _victim.ToCreature();
                 if (target != null)
                 {
-                    player.KilledMonster(target.GetCreatureTemplate(), target.GetGUID());
+                    player.KilledMonster(target);
                     player.UpdateCriteria(CriteriaType.KillAnyCreature, (ulong)target.GetCreatureType(), 1, 0, target);
                 }
             }
