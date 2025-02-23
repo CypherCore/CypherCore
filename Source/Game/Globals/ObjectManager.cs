@@ -7659,24 +7659,8 @@ namespace Game
                     _questObjectives[obj.Id] = obj;
 
                     // Check storage index for objectives which store data
-                    if (obj.StorageIndex < 0)
-                    {
-                        switch (obj.Type)
-                        {
-                            case QuestObjectiveType.Monster:
-                            case QuestObjectiveType.Item:
-                            case QuestObjectiveType.GameObject:
-                            case QuestObjectiveType.TalkTo:
-                            case QuestObjectiveType.PlayerKills:
-                            case QuestObjectiveType.AreaTrigger:
-                            case QuestObjectiveType.WinPetBattleAgainstNpc:
-                            case QuestObjectiveType.ObtainCurrency:
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid StorageIndex = {2} for objective type {3}", qinfo.Id, obj.Id, obj.StorageIndex, obj.Type);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                    if (obj.IsStoringValue() && obj.StorageIndex < 0)
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has invalid StorageIndex = {obj.StorageIndex} for objective type {obj.Type}");
 
                     switch (obj.Type)
                     {
