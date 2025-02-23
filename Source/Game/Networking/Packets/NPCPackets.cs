@@ -58,15 +58,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FriendshipFactionID);
             _worldPacket.WriteInt32(GossipOptions.Count);
             _worldPacket.WriteInt32(GossipText.Count);
-            _worldPacket.WriteBit(TextID.HasValue);
+            _worldPacket.WriteBit(RandomTextID.HasValue);
             _worldPacket.WriteBit(BroadcastTextID.HasValue);
             _worldPacket.FlushBits();
 
             foreach (ClientGossipOptions options in GossipOptions)
                 options.Write(_worldPacket);
 
-            if (TextID.HasValue)
-                _worldPacket.WriteInt32(TextID.Value);
+            if (RandomTextID.HasValue)
+                _worldPacket.WriteInt32(RandomTextID.Value);
 
             if (BroadcastTextID.HasValue)
                 _worldPacket.WriteInt32(BroadcastTextID.Value);
@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
         public int FriendshipFactionID;
         public ObjectGuid GossipGUID;
         public List<ClientGossipText> GossipText = new();
-        public int? TextID; // in classic variants this still holds npc_text id
+        public int? RandomTextID; // in classic variants this still holds npc_text id
         public int? BroadcastTextID;
         public uint GossipID;
         public uint LfgDungeonsID;

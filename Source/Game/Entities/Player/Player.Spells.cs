@@ -2164,7 +2164,7 @@ namespace Game.Entities
                 LearnedSpells learnedSpells = new();
                 LearnedSpellInfo learnedSpellInfo = new();
                 learnedSpellInfo.SpellID = spellId;
-                learnedSpellInfo.IsFavorite = favorite;
+                learnedSpellInfo.Favorite = favorite;
                 learnedSpellInfo.TraitDefinitionID = traitDefinitionId;
                 learnedSpells.SuppressMessaging = suppressMessaging;
                 learnedSpells.ClientLearnedSpellData.Add(learnedSpellInfo);

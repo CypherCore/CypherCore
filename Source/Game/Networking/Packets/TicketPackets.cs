@@ -260,7 +260,7 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 Timestamp = data.ReadInt64();
-                AuthorGUID = data.ReadPackedGuid();
+                PlayerGuid = data.ReadPackedGuid();
 
                 bool hasClubID = data.HasBit();
                 bool hasChannelGUID = data.HasBit();
@@ -272,36 +272,36 @@ namespace Game.Networking.Packets
                     ClubID = data.ReadUInt64();
 
                 if (hasChannelGUID)
-                    ChannelGUID = data.ReadPackedGuid();
+                    ChannelGuid = data.ReadPackedGuid();
 
                 if (hasRealmAddress)
                 {
-                    SenderRealm senderRealm = new();
-                    senderRealm.VirtualRealmAddress = data.ReadUInt32();
-                    senderRealm.field_4 = data.ReadUInt16();
-                    senderRealm.field_6 = data.ReadUInt8();
-                    RealmAddress = senderRealm;
+                    ServerSpec senderRealm = new();
+                    senderRealm.Realm = data.ReadUInt32();
+                    senderRealm.Server = data.ReadUInt16();
+                    senderRealm.Type = data.ReadUInt8();
+                    WorldServer = senderRealm;
                 }
 
                 if (hasSlashCmd)
-                    SlashCmd = data.ReadInt32();
+                    Cmd = data.ReadInt32();
 
                 Text = data.ReadString(textLength);
             }
 
-            public struct SenderRealm
+            public struct ServerSpec
             {
-                public uint VirtualRealmAddress;
-                public ushort field_4;
-                public byte field_6;
+                public uint Realm;
+                public ushort Server;
+                public byte Type;
             }
 
             public long Timestamp;
-            public ObjectGuid AuthorGUID;
+            public ObjectGuid PlayerGuid;
             public ulong? ClubID;
-            public ObjectGuid? ChannelGUID;
-            public SenderRealm? RealmAddress;
-            public int? SlashCmd;
+            public ObjectGuid? ChannelGuid;
+            public ServerSpec? WorldServer;
+            public int? Cmd;
             public string Text;
         }
 

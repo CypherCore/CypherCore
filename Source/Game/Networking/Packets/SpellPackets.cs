@@ -2081,22 +2081,22 @@ namespace Game.Networking.Packets
     public struct LearnedSpellInfo
     {
         public uint SpellID;
-        public bool IsFavorite;
-        public int? field_8;
+        public bool Favorite;
+        public int? EquipableSpellInvSlot;
         public int? Superceded;
         public int? TraitDefinitionID;
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(SpellID);
-            data.WriteBit(IsFavorite);
-            data.WriteBit(field_8.HasValue);
+            data.WriteBit(Favorite);
+            data.WriteBit(EquipableSpellInvSlot.HasValue);
             data.WriteBit(Superceded.HasValue);
             data.WriteBit(TraitDefinitionID.HasValue);
             data.FlushBits();
 
-            if (field_8.HasValue)
-                data.WriteInt32(field_8.Value);
+            if (EquipableSpellInvSlot.HasValue)
+                data.WriteInt32(EquipableSpellInvSlot.Value);
 
             if (Superceded.HasValue)
                 data.WriteInt32(Superceded.Value);
@@ -2162,15 +2162,15 @@ namespace Game.Networking.Packets
             data.WriteInt32(RecoveryTime);
             data.WriteInt32(CategoryRecoveryTime);
             data.WriteFloat(ModRate);
-            data.WriteBit(unused622_1.HasValue);
-            data.WriteBit(unused622_2.HasValue);
+            data.WriteBit(RecoveryTimeStartOffset.HasValue);
+            data.WriteBit(CategoryRecoveryTimeStartOffset.HasValue);
             data.WriteBit(OnHold);
             data.FlushBits();
 
-            if (unused622_1.HasValue)
-                data.WriteUInt32(unused622_1.Value);
-            if (unused622_2.HasValue)
-                data.WriteUInt32(unused622_2.Value);
+            if (RecoveryTimeStartOffset.HasValue)
+                data.WriteUInt32(RecoveryTimeStartOffset.Value);
+            if (CategoryRecoveryTimeStartOffset.HasValue)
+                data.WriteUInt32(CategoryRecoveryTimeStartOffset.Value);
         }
 
         public uint SpellID;
@@ -2180,8 +2180,8 @@ namespace Game.Networking.Packets
         public int CategoryRecoveryTime;
         public float ModRate = 1.0f;
         public bool OnHold;
-        uint? unused622_1;   // This field is not used for anything in the client in 6.2.2.20444
-        uint? unused622_2;   // This field is not used for anything in the client in 6.2.2.20444
+        uint? RecoveryTimeStartOffset;
+        uint? CategoryRecoveryTimeStartOffset;
     }
 
     public class SpellChargeEntry
