@@ -1270,7 +1270,7 @@ namespace Game.Spells
             }
 
             if (gameObjTarget != null)
-                gameObjTarget.Use(player);
+                gameObjTarget.Use(player, true);
             else if (itemTarget != null)
             {
                 itemTarget.SetItemFlag(ItemFieldFlags.Unlocked);

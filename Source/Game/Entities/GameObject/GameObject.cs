@@ -1684,12 +1684,14 @@ namespace Game.Entities
                 SetGoState(GameObjectState.Ready);
         }
 
-        public void Use(Unit user)
+        public void Use(Unit user, bool ignoreCastInProgress = false)
         {
             // by default spell caster is user
             Unit spellCaster = user;
             uint spellId = 0;
-            bool triggered = false;
+            CastSpellExtraArgs spellArgs = new();
+            if (ignoreCastInProgress)
+                spellArgs.TriggerFlags |= TriggerCastFlags.IgnoreCastInProgress;
 
             Player playerUser = user.ToPlayer();
             if (playerUser != null)
@@ -2101,7 +2103,7 @@ namespace Game.Entities
 
                                 if (fishingPool != null)
                                 {
-                                    fishingPool.Use(player);
+                                    fishingPool.Use(player, ignoreCastInProgress);
                                     SetLootState(LootState.JustDeactivated);
                                 }
                                 else
@@ -2177,7 +2179,7 @@ namespace Game.Entities
                         player.CastSpell(player, info.Ritual.animSpell, true);
 
                         // for this case, summoningRitual.spellId is always triggered
-                        triggered = true;
+                        spellArgs.TriggerFlags = TriggerCastFlags.FullMask;
                     }
 
                     // full amount unique participants including original summoner
@@ -2193,7 +2195,7 @@ namespace Game.Entities
                             // spell have reagent and mana cost but it not expected use its
                             // it triggered spell in fact casted at currently channeled GO
                             spellId = 61993;
-                            triggered = true;
+                            spellArgs.TriggerFlags = TriggerCastFlags.FullMask;
                         }
 
                         // Cast casterTargetSpell at a random GO user
@@ -2636,10 +2638,10 @@ namespace Game.Entities
                 Global.OutdoorPvPMgr.HandleCustomSpell(player1, spellId, this);
 
             if (spellCaster != null)
-                spellCaster.CastSpell(user, spellId, triggered);
+                spellCaster.CastSpell(user, spellId, spellArgs);
             else
             {
-                SpellCastResult castResult = CastSpell(user, spellId);
+                SpellCastResult castResult = CastSpell(user, spellId, spellArgs);
                 if (castResult == SpellCastResult.Success)
                 {
                     switch (GetGoType())
