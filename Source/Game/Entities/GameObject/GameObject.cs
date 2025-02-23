@@ -2752,6 +2752,16 @@ namespace Game.Entities
             return base.GetName(locale);
         }
 
+        public bool HasLabel(int gameobjectLabel)
+        {
+            return GetLabels().Contains(gameobjectLabel);
+        }
+
+        public List<int> GetLabels()
+        {
+            return Global.DB2Mgr.GetGameObjectLabels(GetEntry());
+        }
+
         public void UpdatePackedRotation()
         {
             const int PACK_YZ = 1 << 20;

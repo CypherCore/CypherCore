@@ -4473,6 +4473,20 @@ namespace Game.Spells
                 unitTarget.ToPlayer().RewardPlayerAndGroupAtEvent((uint)creatureEntry, unitTarget);
         }
 
+        [SpellEffectHandler(SpellEffectName.KillCreditLabel1)]
+        [SpellEffectHandler(SpellEffectName.KillCreditLabel2)]
+        void EffectKillCreditLabel()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player playerTarget = unitTarget?.ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            playerTarget.UpdateQuestObjectiveProgress(QuestObjectiveType.KillWithLabel, effectInfo.MiscValue, Math.Max(1, effectInfo.MiscValueB));
+        }
+
         [SpellEffectHandler(SpellEffectName.QuestFail)]
         void EffectQuestFail()
         {

@@ -127,6 +127,7 @@ namespace Game.DataStorage
             CreatureDisplayInfoStorage = ReadDB2<CreatureDisplayInfoRecord>("CreatureDisplayInfo.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO);
             CreatureDisplayInfoExtraStorage = ReadDB2<CreatureDisplayInfoExtraRecord>("CreatureDisplayInfoExtra.db2", HotfixStatements.SEL_CREATURE_DISPLAY_INFO_EXTRA);
             CreatureFamilyStorage = ReadDB2<CreatureFamilyRecord>("CreatureFamily.db2", HotfixStatements.SEL_CREATURE_FAMILY, HotfixStatements.SEL_CREATURE_FAMILY_LOCALE);
+            CreatureLabelStorage = ReadDB2<CreatureLabelRecord>("CreatureLabel.db2", HotfixStatements.SEL_CREATURE_LABEL);
             CreatureModelDataStorage = ReadDB2<CreatureModelDataRecord>("CreatureModelData.db2", HotfixStatements.SEL_CREATURE_MODEL_DATA);
             CreatureTypeStorage = ReadDB2<CreatureTypeRecord>("CreatureType.db2", HotfixStatements.SEL_CREATURE_TYPE, HotfixStatements.SEL_CREATURE_TYPE_LOCALE);
             CriteriaStorage = ReadDB2<CriteriaRecord>("Criteria.db2", HotfixStatements.SEL_CRITERIA);
@@ -152,6 +153,7 @@ namespace Game.DataStorage
             FriendshipReputationStorage = ReadDB2<FriendshipReputationRecord>("FriendshipReputation.db2", HotfixStatements.SEL_FRIENDSHIP_REPUTATION, HotfixStatements.SEL_FRIENDSHIP_REPUTATION_LOCALE);
             GameObjectArtKitStorage = ReadDB2<GameObjectArtKitRecord>("GameObjectArtKit.db2", HotfixStatements.SEL_GAMEOBJECT_ART_KIT);
             GameObjectDisplayInfoStorage = ReadDB2<GameObjectDisplayInfoRecord>("GameObjectDisplayInfo.db2", HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO);
+            GameObjectLabelStorage = ReadDB2<GameObjectLabelRecord>("GameObjectLabel.db2", HotfixStatements.SEL_GAMEOBJECT_LABEL);
             GameObjectsStorage = ReadDB2<GameObjectsRecord>("GameObjects.db2", HotfixStatements.SEL_GAMEOBJECTS, HotfixStatements.SEL_GAMEOBJECTS_LOCALE);
             GarrAbilityStorage = ReadDB2<GarrAbilityRecord>("GarrAbility.db2", HotfixStatements.SEL_GARR_ABILITY, HotfixStatements.SEL_GARR_ABILITY_LOCALE);
             GarrBuildingStorage = ReadDB2<GarrBuildingRecord>("GarrBuilding.db2", HotfixStatements.SEL_GARR_BUILDING, HotfixStatements.SEL_GARR_BUILDING_LOCALE);
@@ -577,6 +579,7 @@ namespace Game.DataStorage
         public static DB6Storage<CreatureDisplayInfoRecord> CreatureDisplayInfoStorage;
         public static DB6Storage<CreatureDisplayInfoExtraRecord> CreatureDisplayInfoExtraStorage;
         public static DB6Storage<CreatureFamilyRecord> CreatureFamilyStorage;
+        public static DB6Storage<CreatureLabelRecord> CreatureLabelStorage;
         public static DB6Storage<CreatureModelDataRecord> CreatureModelDataStorage;
         public static DB6Storage<CreatureTypeRecord> CreatureTypeStorage;
         public static DB6Storage<CriteriaRecord> CriteriaStorage;
@@ -602,6 +605,7 @@ namespace Game.DataStorage
         public static DB6Storage<FriendshipReputationRecord> FriendshipReputationStorage;
         public static DB6Storage<GameObjectArtKitRecord> GameObjectArtKitStorage;
         public static DB6Storage<GameObjectDisplayInfoRecord> GameObjectDisplayInfoStorage;
+        public static DB6Storage<GameObjectLabelRecord> GameObjectLabelStorage;
         public static DB6Storage<GameObjectsRecord> GameObjectsStorage;
         public static DB6Storage<GarrAbilityRecord> GarrAbilityStorage;
         public static DB6Storage<GarrBuildingRecord> GarrBuildingStorage;

@@ -467,6 +467,19 @@ namespace Game.Conditions
                     }
                     break;
                 }
+                case ConditionTypes.Label:
+                {
+                    Creature creature = obj.ToCreature();
+                    if (creature != null)
+                        condMeets = creature.HasLabel((int)ConditionValue1);
+                    else
+                    {
+                        GameObject go = obj.ToGameObject();
+                        if (go != null)
+                            condMeets = go.HasLabel((int)ConditionValue1);
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -592,6 +605,9 @@ namespace Game.Conditions
                     mask |= GridMapTypeMask.All & ~GridMapTypeMask.Player;
                     break;
                 case ConditionTypes.StringId:
+                    mask |= GridMapTypeMask.Creature | GridMapTypeMask.GameObject;
+                    break;
+                case ConditionTypes.Label:
                     mask |= GridMapTypeMask.Creature | GridMapTypeMask.GameObject;
                     break;
                 default:

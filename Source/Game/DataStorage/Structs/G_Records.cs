@@ -38,6 +38,13 @@ namespace Game.DataStorage
         }
     }
 
+    public sealed class GameObjectLabelRecord
+    {
+        public uint Id;
+        public int LabelID;
+        public uint GameObjectID;
+    }
+
     public sealed class GameObjectsRecord
     {
         public LocalizedString Name;

@@ -393,6 +393,9 @@ namespace Framework.Database
                 "IconFileID, SkillLine1, SkillLine2 FROM creature_family WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CREATURE_FAMILY_LOCALE, "SELECT ID, Name_lang FROM creature_family_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
+            // CreatureLabel.db2
+            PrepareStatement(HotfixStatements.SEL_CREATURE_LABEL, "SELECT ID, LabelID, CreatureDifficultyID FROM creature_label WHERE (`VerifiedBuild` > 0) = ?");
+
             // CreatureModelData.db2
             PrepareStatement(HotfixStatements.SEL_CREATURE_MODEL_DATA, "SELECT ID, GeoBox1, GeoBox2, GeoBox3, GeoBox4, GeoBox5, GeoBox6, Flags, FileDataID, WalkSpeed, " +
                 "RunSpeed, BloodID, FootprintTextureID, FootprintTextureLength, FootprintTextureWidth, FootprintParticleScale, FoleyMaterialID, " +
@@ -527,6 +530,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO, "SELECT ID, GeoBoxMinX, GeoBoxMinY, GeoBoxMinZ, GeoBoxMaxX, GeoBoxMaxY, GeoBoxMaxZ, " +
                 "FileDataID, ObjectEffectPackageID, OverrideLootEffectScale, OverrideNameScale, AlternateDisplayType, ClientCreatureDisplayInfoID, " +
                 "ClientItemID, Unknown1100 FROM gameobject_display_info WHERE (`VerifiedBuild` > 0) = ?");
+
+            // GameobjectLabel.db2
+            PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_LABEL, "SELECT ID, LabelID, GameObjectID FROM gameobject_label WHERE (`VerifiedBuild` > 0) = ?");
 
             // Gameobjects.db2
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECTS, "SELECT Name, PosX, PosY, PosZ, Rot1, Rot2, Rot3, Rot4, ID, OwnerID, DisplayID, Scale, TypeID, " +
@@ -1828,6 +1834,8 @@ namespace Framework.Database
         SEL_CREATURE_FAMILY,
         SEL_CREATURE_FAMILY_LOCALE,
 
+        SEL_CREATURE_LABEL,
+
         SEL_CREATURE_MODEL_DATA,
 
         SEL_CREATURE_TYPE,
@@ -1886,6 +1894,8 @@ namespace Framework.Database
         SEL_GAMEOBJECT_ART_KIT,
 
         SEL_GAMEOBJECT_DISPLAY_INFO,
+
+        SEL_GAMEOBJECT_LABEL,
 
         SEL_GAMEOBJECTS,
         SEL_GAMEOBJECTS_LOCALE,

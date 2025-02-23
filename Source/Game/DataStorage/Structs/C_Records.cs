@@ -507,6 +507,13 @@ namespace Game.DataStorage
         public short[] SkillLine = new short[2];
     }
 
+    public sealed class CreatureLabelRecord
+    {
+        public uint Id;
+        public int LabelID;
+        public uint CreatureDifficultyID;
+    }
+
     public sealed class CreatureModelDataRecord
     {
         public uint Id;

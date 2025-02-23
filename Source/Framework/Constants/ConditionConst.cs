@@ -64,6 +64,7 @@ namespace Framework.Constants
         PlayerCondition = 56,        // PlayerConditionId       0              0                  true if player satisfies PlayerCondition
         PrivateObject = 57,          // 0                       0              0                  true if entity is private object
         StringId = 58,
+        Label = 59,                  // Label                   0              0                  true if creature/gameobject has specified Label in CreatureLabel.db2/GameObjectLabel.db2
         Max
     }
 

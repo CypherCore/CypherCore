@@ -1650,6 +1650,7 @@ namespace Game
                 case ConditionTypes.Gamemaster:
                 case ConditionTypes.PrivateObject:
                 case ConditionTypes.StringId:
+                case ConditionTypes.Label:
                     break;
                 case ConditionTypes.DifficultyId:
                     if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))
@@ -2624,7 +2625,7 @@ namespace Game
                 case UnitConditionVariable.IsMounted:
                     return unit.GetMountDisplayId() != 0 ? 1 : 0;
                 case UnitConditionVariable.Label:
-                    break;
+                    return unit.IsCreature() && unit.ToCreature().HasLabel(value) ? value : 0;
                 case UnitConditionVariable.IsMySummon:
                     return (otherUnit != null && (otherUnit.GetCharmerGUID() == unit.GetGUID() || otherUnit.GetCreatorGUID() == unit.GetGUID())) ? 1 : 0;
                 case UnitConditionVariable.IsSummoner:
@@ -2986,7 +2987,8 @@ namespace Game
             new ConditionTypeInfo("Scene In Progress",    true, false, false, false),
             new ConditionTypeInfo("Player Condition",     true, false, false, false),
             new ConditionTypeInfo("Private Object",       false,false, false, false),
-            new ConditionTypeInfo("String ID",            true, false, false, true)
+            new ConditionTypeInfo("String ID",            true, false, false, true),
+            new ConditionTypeInfo("Label",                true, false, false, false)
         };
 
         public struct ConditionTypeInfo

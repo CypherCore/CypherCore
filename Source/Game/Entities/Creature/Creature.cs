@@ -3160,6 +3160,16 @@ namespace Game.Entities
             return base.GetName(locale);
         }
 
+        public bool HasLabel(int cretureLabel)
+        {
+            return GetLabels().Contains(cretureLabel);
+        }
+
+        public List<int> GetLabels()
+        {
+            return Global.DB2Mgr.GetCreatureLabels(GetCreatureDifficulty().CreatureDifficultyID);
+        }
+
         public virtual int GetPetAutoSpellSize()
         {
             return SharedConst.MaxSpellCharm;

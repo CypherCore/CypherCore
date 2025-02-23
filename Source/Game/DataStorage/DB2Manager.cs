@@ -255,6 +255,9 @@ namespace Game.DataStorage
             foreach (ContentTuningXLabelRecord contentTuningXLabel in ContentTuningXLabelStorage.Values)
                 _contentTuningLabels.Add((contentTuningXLabel.ContentTuningID, contentTuningXLabel.LabelID));
 
+            foreach (var (_, creatureLabel) in CreatureLabelStorage)
+                _creatureLabels.Add(creatureLabel.CreatureDifficultyID, creatureLabel.LabelID);
+
             foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
                 _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);
 
@@ -282,7 +285,7 @@ namespace Game.DataStorage
                     _factionTeams.Add(faction.ParentFactionID, faction.Id);
 
             foreach (FriendshipRepReactionRecord friendshipRepReaction in FriendshipRepReactionStorage.Values)
-                _friendshipRepReactions.Add((uint)friendshipRepReaction.FriendshipRepID, friendshipRepReaction);
+                _friendshipRepReactions.Add(friendshipRepReaction.FriendshipRepID, friendshipRepReaction);
 
             foreach (var key in _friendshipRepReactions.Keys)
                 _friendshipRepReactions[key].Sort(new FriendshipRepReactionRecordComparer());
@@ -296,6 +299,9 @@ namespace Game.DataStorage
                 if (gameObjectDisplayInfo.GeoBoxMax.Z < gameObjectDisplayInfo.GeoBoxMin.Z)
                     Extensions.Swap(ref gameObjectDisplayInfo.GeoBox[5], ref gameObjectDisplayInfo.GeoBox[2]);
             }
+
+            foreach (var (_, gameobjectLabel) in GameObjectLabelStorage)
+                _gameobjectLabels.Add(gameobjectLabel.GameObjectID, gameobjectLabel.LabelID);
 
             foreach (HeirloomRecord heirloom in HeirloomStorage.Values)
                 _heirlooms[heirloom.ItemID] = heirloom;
@@ -1175,6 +1181,11 @@ namespace Game.DataStorage
             return petFamily.Name[locale][0] != '\0' ? petFamily.Name[locale] : "";
         }
 
+        public List<int> GetCreatureLabels(int creatureDifficultyId)
+        {
+            return _creatureLabels.LookupByKey(creatureDifficultyId);
+        }
+
         public CurrencyContainerRecord GetCurrencyContainerForCurrencyQuantity(uint currencyId, int quantity)
         {
             foreach (var record in _currencyContainers.LookupByKey(currencyId))
@@ -1509,6 +1520,11 @@ namespace Game.DataStorage
         public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(uint friendshipRepID)
         {
             return _friendshipRepReactions.LookupByKey(friendshipRepID);
+        }
+
+        public List<int> GetGameObjectLabels(uint gameobjectId)
+        {
+            return _gameobjectLabels.LookupByKey(gameobjectId);
         }
 
         public uint GetGlobalCurveId(GlobalCurve globalCurveType)
@@ -2341,6 +2357,7 @@ namespace Game.DataStorage
         Dictionary<int, ConditionalChrModelRecord> _conditionalChrModelsByChrModelId = new();
         Dictionary<uint, List<ConditionalContentTuningRecord>> _conditionalContentTuning = new();
         List<(uint, int)> _contentTuningLabels = new();
+        MultiMap<uint, int> _creatureLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
         MultiMap<uint, Vector2> _curvePoints = new();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
@@ -2349,6 +2366,7 @@ namespace Game.DataStorage
         MultiMap<uint, uint> _factionTeams = new();
         MultiMap<uint, FriendshipRepReactionRecord> _friendshipRepReactions = new();
         Dictionary<uint, HeirloomRecord> _heirlooms = new();
+        MultiMap<uint, int> _gameobjectLabels = new();
         MultiMap<uint, uint> _glyphBindableSpells = new();
         MultiMap<uint, ChrSpecialization> _glyphRequiredSpecs = new();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();

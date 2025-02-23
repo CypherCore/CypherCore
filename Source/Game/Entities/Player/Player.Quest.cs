@@ -2539,6 +2539,9 @@ namespace Game.Entities
             for (byte i = 0; i < 2; ++i)
                 if (cInfo.KillCredit[i] != 0)
                     KilledMonsterCredit(cInfo.KillCredit[i]);
+
+            foreach (int label in creature.GetLabels())
+                UpdateQuestObjectiveProgress(QuestObjectiveType.KillWithLabel, label, 1, creature.GetGUID());
         }
 
         public void KilledMonsterCredit(uint entry, ObjectGuid guid = default)
@@ -3025,6 +3028,7 @@ namespace Game.Entities
                 case QuestObjectiveType.HaveCurrency:
                 case QuestObjectiveType.ObtainCurrency:
                 case QuestObjectiveType.IncreaseReputation:
+                case QuestObjectiveType.KillWithLabel:
                     if (GetQuestSlotObjectiveData(slot, objective) < objective.Amount)
                         return false;
                     break;
