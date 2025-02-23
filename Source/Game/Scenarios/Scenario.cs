@@ -167,7 +167,7 @@ namespace Game.Scenarios
                 ScenarioProgressUpdate progressUpdate = new();
                 progressUpdate.CriteriaProgress.Id = criteria.Id;
                 progressUpdate.CriteriaProgress.Quantity = progress.Counter;
-                progressUpdate.CriteriaProgress.Player = progress.PlayerGUID;
+                progressUpdate.CriteriaProgress.Player = _guid;
                 progressUpdate.CriteriaProgress.Date.SetUtcTimeFromUnixTime(progress.Date);
                 progressUpdate.CriteriaProgress.Date += receiver.GetSession().GetTimezoneOffset();
                 if (criteria.Entry.StartTimer != 0)
@@ -354,7 +354,7 @@ namespace Game.Scenarios
                 criteriaProgress.Quantity = progress.Counter;
                 criteriaProgress.Date.SetUtcTimeFromUnixTime(progress.Date);
                 criteriaProgress.Date += player.GetSession().GetTimezoneOffset();
-                criteriaProgress.Player = progress.PlayerGUID;
+                criteriaProgress.Player = _guid;
                 criteriasProgress.Add(criteriaProgress);
             }
 
