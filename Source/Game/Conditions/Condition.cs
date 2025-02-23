@@ -591,6 +591,9 @@ namespace Game.Conditions
                 case ConditionTypes.PrivateObject:
                     mask |= GridMapTypeMask.All & ~GridMapTypeMask.Player;
                     break;
+                case ConditionTypes.StringId:
+                    mask |= GridMapTypeMask.Creature | GridMapTypeMask.GameObject;
+                    break;
                 default:
                     Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");
                     break;
