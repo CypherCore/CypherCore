@@ -2308,6 +2308,12 @@ namespace Game.Guilds
             if (member == null) // Shouldn't happen, just in case
                 return;
 
+            // HACK: client doesn't query entire tab content if it had received SMSG_GUILD_BANK_LIST in this session
+            // but we broadcast bank updates to entire guild when *ANYONE* changes anything, incorrectly initializing clients
+            // tab content with only data for that change
+            if (!fullUpdate && tabId < _GetPurchasedTabsSize())
+                fullUpdate = true;
+
             GuildBankQueryResults packet = new();
 
             packet.Money = m_bankMoney;
@@ -2342,7 +2348,7 @@ namespace Game.Guilds
                             GuildBankItemInfo itemInfo = new();
 
                             itemInfo.Slot = slotId;
-                            itemInfo.Item.ItemID = tabItem.GetEntry();
+                            itemInfo.Item = new ItemInstance(tabItem);
                             itemInfo.Count = (int)tabItem.GetCount();
                             itemInfo.Charges = Math.Abs(tabItem.GetSpellCharges());
                             itemInfo.EnchantmentID = (int)tabItem.GetEnchantmentId(EnchantmentSlot.Perm);
