@@ -6942,9 +6942,19 @@ namespace Game.Spells
                         if (targetItem == null)
                             return SpellCastResult.ItemNotFound;
 
-                        // required level has to be checked also! Exploit fix
-                        if (targetItem.GetItemLevel(targetItem.GetOwner()) < m_spellInfo.BaseLevel || (targetItem.GetRequiredLevel() != 0 && targetItem.GetRequiredLevel() < m_spellInfo.BaseLevel))
-                            return SpellCastResult.Lowlevel;
+                        // Apply item level restriction
+                        if (!m_spellInfo.HasAttribute(SpellAttr2.AllowLowLevelBuff))
+                        {
+                            uint requiredLevel = (uint)targetItem.GetRequiredLevel();
+                            if (requiredLevel == 0)
+                                requiredLevel = targetItem.GetItemLevel(targetItem.GetOwner());
+
+                            if (requiredLevel < m_spellInfo.BaseLevel)
+                                return SpellCastResult.Lowlevel;
+                        }
+                        if ((m_CastItem != null || effectInfo.IsEffect(SpellEffectName.EnchantItemPrismatic))
+                            && m_spellInfo.MaxLevel > 0 && targetItem.GetItemLevel(targetItem.GetOwner()) > m_spellInfo.MaxLevel)
+                            return SpellCastResult.Highlevel;
 
                         bool isItemUsable = false;
                         foreach (ItemEffectRecord itemEffect in targetItem.GetEffects())
@@ -7009,14 +7019,18 @@ namespace Game.Spells
                                 return SpellCastResult.NotTradeable;
                         }
 
-                        // Apply item level restriction if the enchanting spell has max level restrition set
-                        if (m_CastItem != null && m_spellInfo.MaxLevel > 0)
+                        // Apply item level restriction
+                        if (!m_spellInfo.HasAttribute(SpellAttr2.AllowLowLevelBuff))
                         {
-                            if (item.GetTemplate().GetBaseItemLevel() < m_CastItem.GetTemplate().GetBaseRequiredLevel())
+                            uint requiredLevel = (uint)item.GetRequiredLevel();
+                            if (requiredLevel == 0)
+                                requiredLevel = item.GetItemLevel(item.GetOwner());
+
+                            if (requiredLevel < m_spellInfo.BaseLevel)
                                 return SpellCastResult.Lowlevel;
-                            if (item.GetTemplate().GetBaseItemLevel() > m_spellInfo.MaxLevel)
-                                return SpellCastResult.Highlevel;
                         }
+                        if (m_CastItem != null && m_spellInfo.MaxLevel > 0 && item.GetItemLevel(item.GetOwner()) > m_spellInfo.MaxLevel)
+                            return SpellCastResult.Highlevel;
                         break;
                     }
                     case SpellEffectName.EnchantHeldItem:
