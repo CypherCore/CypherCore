@@ -3380,7 +3380,13 @@ namespace Game.Entities
             GetSpellHistory().ResetCooldowns(p =>
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key, Difficulty.None);
-                return spellInfo.RecoveryTime < 10 * Time.Minute * Time.InMilliseconds && spellInfo.CategoryRecoveryTime < 10 * Time.Minute * Time.InMilliseconds && !spellInfo.HasAttribute(SpellAttr6.DoNotResetCooldownInArena);
+                TimeSpan cooldown = TimeSpan.Zero;
+                TimeSpan categoryCooldown = TimeSpan.Zero;
+                uint categoryId = 0;
+                SpellHistory.GetCooldownDurations(spellInfo, p.Value.ItemId, ref cooldown, ref categoryId, ref categoryCooldown);
+                return cooldown < TimeSpan.FromMinutes(10)
+                && categoryCooldown < TimeSpan.FromMinutes(10)
+                && !spellInfo.HasAttribute(SpellAttr6.DoNotResetCooldownInArena);
             }, true);
 
             // pet cooldowns
