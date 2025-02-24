@@ -70,386 +70,391 @@ namespace Game.Achievements
 
             List<Criteria> criteriaList = GetCriteriaByType(type, (uint)miscValue1);
             foreach (Criteria criteria in criteriaList)
+                UpdateCriteria(criteria, miscValue1, miscValue2, miscValue3, refe, referencePlayer);
+        }
+
+        public void UpdateCriteria(Criteria criteria, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null, Player referencePlayer = null)
+        {
+            var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+            if (!CanUpdateCriteria(criteria, trees, miscValue1, miscValue2, miscValue3, refe, referencePlayer))
+                return;
+
+            // requirements not found in the dbc
+            CriteriaDataSet data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
+            if (data != null && !data.Meets(referencePlayer, refe, (uint)miscValue1, (uint)miscValue2))
+                return;
+
+            switch (criteria.Entry.Type)
             {
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
-                if (!CanUpdateCriteria(criteria, trees, miscValue1, miscValue2, miscValue3, refe, referencePlayer))
-                    continue;
-
-                // requirements not found in the dbc
-                CriteriaDataSet data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
-                if (data != null)
-                    if (!data.Meets(referencePlayer, refe, (uint)miscValue1, (uint)miscValue2))
-                        continue;
-
-                switch (type)
+                // std. case: increment at 1
+                case CriteriaType.WinBattleground:
+                case CriteriaType.TotalRespecs:
+                case CriteriaType.LoseDuel:
+                case CriteriaType.ItemsPostedAtAuction:
+                case CriteriaType.AuctionsWon:    /* FIXME: for online player only currently */
+                case CriteriaType.RollAnyNeed:
+                case CriteriaType.RollAnyGreed:
+                case CriteriaType.AbandonAnyQuest:
+                case CriteriaType.BuyTaxi:
+                case CriteriaType.AcceptSummon:
+                case CriteriaType.LootAnyItem:
+                case CriteriaType.ObtainAnyItem:
+                case CriteriaType.DieAnywhere:
+                case CriteriaType.CompleteDailyQuest:
+                case CriteriaType.ParticipateInBattleground:
+                case CriteriaType.DieOnMap:
+                case CriteriaType.DieInInstance:
+                case CriteriaType.KilledByCreature:
+                case CriteriaType.KilledByPlayer:
+                case CriteriaType.DieFromEnviromentalDamage:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.GainAura:
+                case CriteriaType.CastSpell:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.UseItem:
+                case CriteriaType.RollNeed:
+                case CriteriaType.RollGreed:
+                case CriteriaType.DoEmote:
+                case CriteriaType.UseGameobject:
+                case CriteriaType.CatchFishInFishingHole:
+                case CriteriaType.WinDuel:
+                case CriteriaType.DeliverKillingBlowToClass:
+                case CriteriaType.DeliverKillingBlowToRace:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.EarnHonorableKill:
+                case CriteriaType.KillPlayer:
+                case CriteriaType.DeliveredKillingBlow:
+                case CriteriaType.PVPKillInArea:
+                case CriteriaType.WinArena: // This also behaves like CriteriaType::WinAnyRankedArena
+                case CriteriaType.ParticipateInArena:
+                case CriteriaType.PlayerTriggerGameEvent:
+                case CriteriaType.Login:
+                case CriteriaType.AnyoneTriggerGameEventScenario:
+                case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
+                case CriteriaType.CompleteAnyScenario:
+                case CriteriaType.CompleteScenario:
+                case CriteriaType.BattlePetReachLevel:
+                case CriteriaType.ActivelyEarnPetLevel:
+                case CriteriaType.DefeatDungeonEncounter:
+                case CriteriaType.PlaceGarrisonBuilding:
+                case CriteriaType.ActivateAnyGarrisonBuilding:
+                case CriteriaType.LearnAnyHeirloom:
+                case CriteriaType.LearnAnyTransmog:
+                case CriteriaType.HonorLevelIncrease:
+                case CriteriaType.PrestigeLevelIncrease:
+                case CriteriaType.LearnAnyTransmogInSlot:
+                case CriteriaType.CompleteAnyReplayQuest:
+                case CriteriaType.BuyItemsFromVendors:
+                case CriteriaType.SellItemsToVendors:
+                case CriteriaType.ReachMaxLevel:
+                case CriteriaType.LearnTaxiNode:
+                    SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
+                    break;
+                // std case: increment at miscValue1
+                case CriteriaType.MoneyEarnedFromSales:
+                case CriteriaType.MoneySpentOnRespecs:
+                case CriteriaType.MoneyEarnedFromQuesting:
+                case CriteriaType.MoneySpentOnTaxis:
+                case CriteriaType.MoneySpentAtBarberShop:
+                case CriteriaType.MoneySpentOnPostage:
+                case CriteriaType.MoneyLootedFromCreatures:
+                case CriteriaType.MoneyEarnedFromAuctions:/* FIXME: for online player only currently */
+                case CriteriaType.TotalDamageTaken:
+                case CriteriaType.TotalHealReceived:
+                case CriteriaType.CompletedLFGDungeon:
+                case CriteriaType.CompletedLFGDungeonWithStrangers:
+                case CriteriaType.DamageDealt:
+                case CriteriaType.HealingDone:
+                case CriteriaType.EarnArtifactXPForAzeriteItem:
+                case CriteriaType.GainLevels:
+                case CriteriaType.EarnArtifactXP:
+                    SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
+                    break;
+                case CriteriaType.KillCreature:
+                case CriteriaType.KillAnyCreature:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.AcquireItem:
+                case CriteriaType.LootItem:
+                case CriteriaType.CurrencyGained:
+                    SetCriteriaProgress(criteria, miscValue2, referencePlayer, ProgressType.Accumulate);
+                    break;
+                // std case: high value at miscValue1
+                case CriteriaType.HighestAuctionBid:
+                case CriteriaType.HighestAuctionSale: /* FIXME: for online player only currently */
+                case CriteriaType.HighestDamageDone:
+                case CriteriaType.HighestDamageTaken:
+                case CriteriaType.HighestHealCast:
+                case CriteriaType.HighestHealReceived:
+                case CriteriaType.AnyArtifactPowerRankPurchased:
+                case CriteriaType.AzeriteLevelReached:
+                case CriteriaType.ReachRenownLevel:
+                    SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
+                    break;
+                case CriteriaType.ReachLevel:
+                    SetCriteriaProgress(criteria, referencePlayer.GetLevel(), referencePlayer);
+                    break;
+                case CriteriaType.SkillRaised:
+                    uint skillvalue = referencePlayer.GetBaseSkillValue((SkillType)criteria.Entry.Asset);
+                    if (skillvalue != 0)
+                SetCriteriaProgress(criteria, skillvalue, referencePlayer);
+                    break;
+                case CriteriaType.AchieveSkillStep:
+                    uint maxSkillvalue = referencePlayer.GetPureMaxSkillValue((SkillType)criteria.Entry.Asset);
+                    if (maxSkillvalue != 0)
+                SetCriteriaProgress(criteria, maxSkillvalue, referencePlayer);
+                    break;
+                case CriteriaType.CompleteQuestsCount:
+                    SetCriteriaProgress(criteria, (ulong)referencePlayer.GetRewardedQuestCount(), referencePlayer);
+                    break;
+                case CriteriaType.CompleteAnyDailyQuestPerDay:
                 {
-                    // std. case: increment at 1
-                    case CriteriaType.WinBattleground:
-                    case CriteriaType.TotalRespecs:
-                    case CriteriaType.LoseDuel:
-                    case CriteriaType.ItemsPostedAtAuction:
-                    case CriteriaType.AuctionsWon:    /* FIXME: for online player only currently */
-                    case CriteriaType.RollAnyNeed:
-                    case CriteriaType.RollAnyGreed:
-                    case CriteriaType.AbandonAnyQuest:
-                    case CriteriaType.BuyTaxi:
-                    case CriteriaType.AcceptSummon:
-                    case CriteriaType.LootAnyItem:
-                    case CriteriaType.ObtainAnyItem:
-                    case CriteriaType.DieAnywhere:
-                    case CriteriaType.CompleteDailyQuest:
-                    case CriteriaType.ParticipateInBattleground:
-                    case CriteriaType.DieOnMap:
-                    case CriteriaType.DieInInstance:
-                    case CriteriaType.KilledByCreature:
-                    case CriteriaType.KilledByPlayer:
-                    case CriteriaType.DieFromEnviromentalDamage:
-                    case CriteriaType.BeSpellTarget:
-                    case CriteriaType.GainAura:
-                    case CriteriaType.CastSpell:
-                    case CriteriaType.LandTargetedSpellOnTarget:
-                    case CriteriaType.WinAnyRankedArena:
-                    case CriteriaType.UseItem:
-                    case CriteriaType.RollNeed:
-                    case CriteriaType.RollGreed:
-                    case CriteriaType.DoEmote:
-                    case CriteriaType.UseGameobject:
-                    case CriteriaType.CatchFishInFishingHole:
-                    case CriteriaType.WinDuel:
-                    case CriteriaType.DeliverKillingBlowToClass:
-                    case CriteriaType.DeliverKillingBlowToRace:
-                    case CriteriaType.TrackedWorldStateUIModified:
-                    case CriteriaType.EarnHonorableKill:
-                    case CriteriaType.KillPlayer:
-                    case CriteriaType.DeliveredKillingBlow:
-                    case CriteriaType.PVPKillInArea:
-                    case CriteriaType.WinArena: // This also behaves like CriteriaType.WinAnyRankedArena
-                    case CriteriaType.ParticipateInArena:
-                    case CriteriaType.PlayerTriggerGameEvent:
-                    case CriteriaType.Login:
-                    case CriteriaType.AnyoneTriggerGameEventScenario:
-                    case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
-                    case CriteriaType.CompleteAnyScenario:
-                    case CriteriaType.CompleteScenario:
-                    case CriteriaType.BattlePetReachLevel:
-                    case CriteriaType.ActivelyEarnPetLevel:
-                    case CriteriaType.DefeatDungeonEncounter:
-                    case CriteriaType.PlaceGarrisonBuilding:
-                    case CriteriaType.ActivateAnyGarrisonBuilding:
-                    case CriteriaType.LearnAnyHeirloom:
-                    case CriteriaType.LearnAnyTransmog:
-                    case CriteriaType.HonorLevelIncrease:
-                    case CriteriaType.PrestigeLevelIncrease:
-                    case CriteriaType.LearnAnyTransmogInSlot:
-                    case CriteriaType.CompleteAnyReplayQuest:
-                    case CriteriaType.BuyItemsFromVendors:
-                    case CriteriaType.SellItemsToVendors:
-                    case CriteriaType.ReachMaxLevel:
-                    case CriteriaType.LearnTaxiNode:
+                    long nextDailyResetTime = Global.WorldMgr.GetNextDailyQuestsResetTime();
+                    CriteriaProgress progress = GetCriteriaProgress(criteria);
+
+                    if (miscValue1 == 0) // Login case.
+                    {
+                        // reset if player missed one day.
+                        if (progress != null && progress.Date < (nextDailyResetTime - 2 * Time.Day))
+                            SetCriteriaProgress(criteria, 0, referencePlayer, ProgressType.Set);
+                        return;
+                    }
+
+                    ProgressType progressType;
+                    if (progress == null)
+                        // 1st time. Start count.
+                        progressType = ProgressType.Set;
+                    else if (progress.Date < (nextDailyResetTime - 2 * Time.Day))
+                        // last progress is older than 2 days. Player missed 1 day => Restart count.
+                        progressType = ProgressType.Set;
+                    else if (progress.Date < (nextDailyResetTime - Time.Day))
+                        // last progress is between 1 and 2 days. => 1st time of the day.
+                        progressType = ProgressType.Accumulate;
+                    else
+                        // last progress is within the day before the reset => Already counted today.
+                        return;
+
+                    SetCriteriaProgress(criteria, 1, referencePlayer, progressType);
+                    break;
+                }
+                case CriteriaType.CompleteQuestsInZone:
+                {
+                    if (miscValue1 != 0)
+                    {
                         SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
-                        break;
-                    // std case: increment at miscValue1
-                    case CriteriaType.MoneyEarnedFromSales:
-                    case CriteriaType.MoneySpentOnRespecs:
-                    case CriteriaType.MoneyEarnedFromQuesting:
-                    case CriteriaType.MoneySpentOnTaxis:
-                    case CriteriaType.MoneySpentAtBarberShop:
-                    case CriteriaType.MoneySpentOnPostage:
-                    case CriteriaType.MoneyLootedFromCreatures:
-                    case CriteriaType.MoneyEarnedFromAuctions:/* FIXME: for online player only currently */
-                    case CriteriaType.TotalDamageTaken:
-                    case CriteriaType.TotalHealReceived:
-                    case CriteriaType.CompletedLFGDungeon:
-                    case CriteriaType.CompletedLFGDungeonWithStrangers:
-                    case CriteriaType.DamageDealt:
-                    case CriteriaType.HealingDone:
-                    case CriteriaType.EarnArtifactXPForAzeriteItem:
-                    case CriteriaType.GainLevels:
-                    case CriteriaType.EarnArtifactXP:
-                        SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
-                        break;
-                    case CriteriaType.KillCreature:
-                    case CriteriaType.KillAnyCreature:
-                    case CriteriaType.GetLootByType:
-                    case CriteriaType.AcquireItem:
-                    case CriteriaType.LootItem:
-                    case CriteriaType.CurrencyGained:
-                        SetCriteriaProgress(criteria, miscValue2, referencePlayer, ProgressType.Accumulate);
-                        break;
-                    // std case: high value at miscValue1
-                    case CriteriaType.HighestAuctionBid:
-                    case CriteriaType.HighestAuctionSale: /* FIXME: for online player only currently */
-                    case CriteriaType.HighestDamageDone:
-                    case CriteriaType.HighestDamageTaken:
-                    case CriteriaType.HighestHealCast:
-                    case CriteriaType.HighestHealReceived:
-                    case CriteriaType.AnyArtifactPowerRankPurchased:
-                    case CriteriaType.AzeriteLevelReached:
-                    case CriteriaType.ReachRenownLevel:
+                    }
+                    else // login case
+                    {
+                        uint counter = 0;
+
+                        var rewQuests = referencePlayer.GetRewardedQuests();
+                        foreach (uint rewQuest in rewQuests)
+                        {
+                            Quest  quest = Global.ObjectMgr.GetQuestTemplate(rewQuest);
+                            if (quest != null && quest.QuestSortID >= 0 && quest.QuestSortID == criteria.Entry.Asset)
+                                ++counter;
+                        }
+
+                        SetCriteriaProgress(criteria, counter, referencePlayer, ProgressType.Highest);
+                    }
+                    break;
+                }
+                case CriteriaType.MaxDistFallenWithoutDying:
+                    // miscValue1 is the ingame fallheight*100 as stored in dbc
+                    SetCriteriaProgress(criteria, miscValue1, referencePlayer);
+                    break;
+                case CriteriaType.EarnAchievement:
+                case CriteriaType.CompleteQuest:
+                case CriteriaType.LearnOrKnowSpell:
+                case CriteriaType.RevealWorldMapOverlay:
+                case CriteriaType.GotHaircut:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.EquipItem:
+                case CriteriaType.EnterAreaTriggerWithActionSet:
+                case CriteriaType.LeaveAreaTriggerWithActionSet:
+                case CriteriaType.LearnedNewPet:
+                case CriteriaType.EnterArea:
+                case CriteriaType.LeaveArea:
+                case CriteriaType.RecruitGarrisonFollower:
+                case CriteriaType.LearnHeirloom:
+                case CriteriaType.ActivelyReachLevel:
+                case CriteriaType.CollectTransmogSetFromGroup:
+                case CriteriaType.EnterTopLevelArea:
+                case CriteriaType.LeaveTopLevelArea:
+                    SetCriteriaProgress(criteria, 1, referencePlayer);
+                    break;
+                case CriteriaType.BankSlotsPurchased:
+                    SetCriteriaProgress(criteria, referencePlayer.GetBankBagSlotCount(), referencePlayer);
+                    break;
+                case CriteriaType.ReputationGained:
+                {
+                    int reputation = referencePlayer.GetReputationMgr().GetReputation(criteria.Entry.Asset);
+                    if (reputation > 0)
+                        SetCriteriaProgress(criteria, (ulong)reputation, referencePlayer);
+                    break;
+                }
+                case CriteriaType.TotalExaltedFactions:
+                    SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetExaltedFactionCount(), referencePlayer);
+                    break;
+                case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.LearnTradeskillSkillLine:
+                {
+                    uint spellCount = 0;
+                    foreach (var (spellId, _) in referencePlayer.GetSpellMap())
+                    {
+                        var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
+                        foreach (var skillLineRecord in bounds)
+                        {
+                            if (skillLineRecord.SkillLine == criteria.Entry.Asset)
+                            {
+                                // do not add couter twice if by any chance skill is listed twice in dbc (eg. skill 777 and spell 22717)
+                                ++spellCount;
+                                break;
+                            }
+                        }
+                    }
+
+                    SetCriteriaProgress(criteria, spellCount, referencePlayer);
+                    break;
+                }
+                case CriteriaType.TotalReveredFactions:
+                    SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetReveredFactionCount(), referencePlayer);
+                    break;
+                case CriteriaType.TotalHonoredFactions:
+                    SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetHonoredFactionCount(), referencePlayer);
+                    break;
+                case CriteriaType.TotalFactionsEncountered:
+                    SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetVisibleFactionCount(), referencePlayer);
+                    break;
+                case CriteriaType.HonorableKills:
+                    SetCriteriaProgress(criteria, referencePlayer.m_activePlayerData.LifetimeHonorableKills, referencePlayer);
+                    break;
+                case CriteriaType.MostMoneyOwned:
+                    SetCriteriaProgress(criteria, referencePlayer.GetMoney(), referencePlayer, ProgressType.Highest);
+                    break;
+                case CriteriaType.EarnAchievementPoints:
+                    if (miscValue1 == 0)
+                        return;
+                    SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
+                    break;
+                case CriteriaType.EarnPersonalArenaRating:
+                {
+                    uint reqTeamType = criteria.Entry.Asset;
+
+                    if (miscValue1 != 0)
+                    {
+                        if (miscValue2 != reqTeamType)
+                            return;
+
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
-                        break;
-                    case CriteriaType.ReachLevel:
-                        SetCriteriaProgress(criteria, referencePlayer.GetLevel(), referencePlayer);
-                        break;
-                    case CriteriaType.SkillRaised:
-                        uint skillvalue = referencePlayer.GetBaseSkillValue((SkillType)criteria.Entry.Asset);
-                        if (skillvalue != 0)
-                            SetCriteriaProgress(criteria, skillvalue, referencePlayer);
-                        break;
-                    case CriteriaType.AchieveSkillStep:
-                        uint maxSkillvalue = referencePlayer.GetPureMaxSkillValue((SkillType)criteria.Entry.Asset);
-                        if (maxSkillvalue != 0)
-                            SetCriteriaProgress(criteria, maxSkillvalue, referencePlayer);
-                        break;
-                    case CriteriaType.CompleteQuestsCount:
-                        SetCriteriaProgress(criteria, (uint)referencePlayer.GetRewardedQuestCount(), referencePlayer);
-                        break;
-                    case CriteriaType.CompleteAnyDailyQuestPerDay:
-                    {
-                        long nextDailyResetTime = Global.WorldMgr.GetNextDailyQuestsResetTime();
-                        CriteriaProgress progress = GetCriteriaProgress(criteria);
-
-                        if (miscValue1 == 0) // Login case.
-                        {
-                            // reset if player missed one day.
-                            if (progress != null && progress.Date < (nextDailyResetTime - 2 * Time.Day))
-                                SetCriteriaProgress(criteria, 0, referencePlayer);
-                            continue;
-                        }
-
-                        ProgressType progressType;
-                        if (progress == null)
-                            // 1st time. Start count.
-                            progressType = ProgressType.Set;
-                        else if (progress.Date < (nextDailyResetTime - 2 * Time.Day))
-                            // last progress is older than 2 days. Player missed 1 day => Restart count.
-                            progressType = ProgressType.Set;
-                        else if (progress.Date < (nextDailyResetTime - Time.Day))
-                            // last progress is between 1 and 2 days. => 1st time of the day.
-                            progressType = ProgressType.Accumulate;
-                        else
-                            // last progress is within the day before the reset => Already counted today.
-                            continue;
-
-                        SetCriteriaProgress(criteria, 1, referencePlayer, progressType);
-                        break;
                     }
-                    case CriteriaType.CompleteQuestsInZone:
+                    else // login case
                     {
-                        if (miscValue1 != 0)
+                        for (byte arena_slot = 0; arena_slot < SharedConst.MaxArenaSlot; ++arena_slot)
                         {
-                            SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
-                        }
-                        else // login case
-                        {
-                            uint counter = 0;
-
-                            var rewQuests = referencePlayer.GetRewardedQuests();
-                            foreach (var id in rewQuests)
-                            {
-                                Quest quest = Global.ObjectMgr.GetQuestTemplate(id);
-                                if (quest != null && quest.QuestSortID >= 0 && quest.QuestSortID == criteria.Entry.Asset)
-                                    ++counter;
-                            }
-                            SetCriteriaProgress(criteria, counter, referencePlayer);
-                        }
-                        break;
-                    }
-                    case CriteriaType.MaxDistFallenWithoutDying:
-                        // miscValue1 is the ingame fallheight*100 as stored in dbc
-                        SetCriteriaProgress(criteria, miscValue1, referencePlayer);
-                        break;
-                    case CriteriaType.EarnAchievement:
-                    case CriteriaType.CompleteQuest:
-                    case CriteriaType.LearnOrKnowSpell:
-                    case CriteriaType.RevealWorldMapOverlay:
-                    case CriteriaType.GotHaircut:
-                    case CriteriaType.EquipItemInSlot:
-                    case CriteriaType.EquipItem:
-                    case CriteriaType.EnterAreaTriggerWithActionSet:
-                    case CriteriaType.LeaveAreaTriggerWithActionSet:
-                    case CriteriaType.LearnedNewPet:
-                    case CriteriaType.EnterArea:
-                    case CriteriaType.LeaveArea:
-                    case CriteriaType.RecruitGarrisonFollower:
-                    case CriteriaType.LearnHeirloom:
-                    case CriteriaType.ActivelyReachLevel:
-                    case CriteriaType.CollectTransmogSetFromGroup:
-                    case CriteriaType.EnterTopLevelArea:
-                    case CriteriaType.LeaveTopLevelArea:
-                        SetCriteriaProgress(criteria, 1, referencePlayer);
-                        break;
-                    case CriteriaType.BankSlotsPurchased:
-                        SetCriteriaProgress(criteria, referencePlayer.GetBankBagSlotCount(), referencePlayer);
-                        break;
-                    case CriteriaType.ReputationGained:
-                    {
-                        int reputation = referencePlayer.GetReputationMgr().GetReputation(criteria.Entry.Asset);
-                        if (reputation > 0)
-                            SetCriteriaProgress(criteria, (uint)reputation, referencePlayer);
-                        break;
-                    }
-                    case CriteriaType.TotalExaltedFactions:
-                        SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetExaltedFactionCount(), referencePlayer);
-                        break;
-                    case CriteriaType.LearnSpellFromSkillLine:
-                    case CriteriaType.LearnTradeskillSkillLine:
-                    {
-                        uint spellCount = 0;
-                        foreach (var (spellId, _) in referencePlayer.GetSpellMap())
-                        {
-                            var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
-                            foreach (var skill in bounds)
-                            {
-                                if (skill.SkillLine == criteria.Entry.Asset)
-                                {
-                                    // do not add couter twice if by any chance skill is listed twice in dbc (eg. skill 777 and spell 22717)
-                                    ++spellCount;
-                                    break;
-                                }
-                            }
-                        }
-                        SetCriteriaProgress(criteria, spellCount, referencePlayer);
-                        break;
-                    }
-                    case CriteriaType.TotalReveredFactions:
-                        SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetReveredFactionCount(), referencePlayer);
-                        break;
-                    case CriteriaType.TotalHonoredFactions:
-                        SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetHonoredFactionCount(), referencePlayer);
-                        break;
-                    case CriteriaType.TotalFactionsEncountered:
-                        SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetVisibleFactionCount(), referencePlayer);
-                        break;
-                    case CriteriaType.HonorableKills:
-                        SetCriteriaProgress(criteria, referencePlayer.m_activePlayerData.LifetimeHonorableKills, referencePlayer);
-                        break;
-                    case CriteriaType.MostMoneyOwned:
-                        SetCriteriaProgress(criteria, referencePlayer.GetMoney(), referencePlayer, ProgressType.Highest);
-                        break;
-                    case CriteriaType.EarnAchievementPoints:
-                        if (miscValue1 == 0)
-                            continue;
-                        SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
-                        break;
-                    case CriteriaType.EarnPersonalArenaRating:
-                    {
-                        uint reqTeamType = criteria.Entry.Asset;
-
-                        if (miscValue1 != 0)
-                        {
-                            if (miscValue2 != reqTeamType)
+                            uint teamId = referencePlayer.GetArenaTeamId(arena_slot);
+                            if (teamId == 0)
                                 continue;
 
-                            SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
-                        }
-                        else // login case
-                        {
+                            ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
+                            if (team == null || team.GetArenaType() != reqTeamType)
+                                continue;
 
-                            for (byte arena_slot = 0; arena_slot < SharedConst.MaxArenaSlot; ++arena_slot)
+                            ArenaTeamMember member = team.GetMember(referencePlayer.GetGUID());
+                            if (member != null)
                             {
-                                uint teamId = referencePlayer.GetArenaTeamId(arena_slot);
-                                if (teamId == 0)
-                                    continue;
-
-                                ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
-                                if (team == null || team.GetArenaType() != reqTeamType)
-                                    continue;
-
-                                ArenaTeamMember member = team.GetMember(referencePlayer.GetGUID());
-                                if (member != null)
-                                {
-                                    SetCriteriaProgress(criteria, member.PersonalRating, referencePlayer, ProgressType.Highest);
-                                    break;
-                                }
+                                SetCriteriaProgress(criteria, member.PersonalRating, referencePlayer, ProgressType.Highest);
+                                break;
                             }
                         }
-                        break;
+
                     }
-                    case CriteriaType.UniquePetsOwned:
-                        SetCriteriaProgress(criteria, referencePlayer.GetSession().GetBattlePetMgr().GetPetUniqueSpeciesCount(), referencePlayer);
-                        break;
-                    case CriteriaType.GuildAttainedLevel:
-                        SetCriteriaProgress(criteria, miscValue1, referencePlayer);
-                        break;
-                    // FIXME: not triggered in code as result, need to implement
-                    case CriteriaType.RunInstance:
-                    case CriteriaType.EarnTeamArenaRating:
-                    case CriteriaType.EarnTitle:
-                    case CriteriaType.MoneySpentOnGuildRepair:
-                    case CriteriaType.CreatedItemsByCastingSpell:
-                    case CriteriaType.FishInAnyPool:
-                    case CriteriaType.GuildBankTabsPurchased:
-                    case CriteriaType.EarnGuildAchievementPoints:
-                    case CriteriaType.WinAnyBattleground:
-                    case CriteriaType.EarnBattlegroundRating:
-                    case CriteriaType.GuildTabardCreated:
-                    case CriteriaType.CompleteQuestsCountForGuild:
-                    case CriteriaType.HonorableKillsForGuild:
-                    case CriteriaType.KillAnyCreatureForGuild:
-                    case CriteriaType.CompleteAnyResearchProject:
-                    case CriteriaType.CompleteGuildChallenge:
-                    case CriteriaType.CompleteAnyGuildChallenge:
-                    case CriteriaType.CompletedLFRDungeon:
-                    case CriteriaType.AbandonedLFRDungeon:
-                    case CriteriaType.KickInitiatorInLFRDungeon:
-                    case CriteriaType.KickVoterInLFRDungeon:
-                    case CriteriaType.KickTargetInLFRDungeon:
-                    case CriteriaType.GroupedTankLeftEarlyInLFRDungeon:
-                    case CriteriaType.AccountObtainPetThroughBattle:
-                    case CriteriaType.WinPetBattle:
-                    case CriteriaType.PlayerObtainPetThroughBattle:
-                    case CriteriaType.ActivateGarrisonBuilding:
-                    case CriteriaType.UpgradeGarrison:
-                    case CriteriaType.StartAnyGarrisonMissionWithFollowerType:
-                    case CriteriaType.SucceedAnyGarrisonMissionWithFollowerType:
-                    case CriteriaType.SucceedGarrisonMission:
-                    case CriteriaType.RecruitAnyGarrisonFollower:
-                    case CriteriaType.LearnAnyGarrisonBlueprint:
-                    case CriteriaType.CollectGarrisonShipment:
-                    case CriteriaType.ItemLevelChangedForGarrisonFollower:
-                    case CriteriaType.LevelChangedForGarrisonFollower:
-                    case CriteriaType.LearnToy:
-                    case CriteriaType.LearnAnyToy:
-                    case CriteriaType.FindResearchObject:
-                    case CriteriaType.ExhaustAnyResearchSite:
-                    case CriteriaType.CompleteInternalCriteria:
-                    case CriteriaType.CompleteAnyChallengeMode:
-                    case CriteriaType.KilledAllUnitsInSpawnRegion:
-                    case CriteriaType.CompleteChallengeMode:
-                    case CriteriaType.CreatedItemsByCastingSpellWithLimit:
-                    case CriteriaType.BattlePetAchievementPointsEarned:
-                    case CriteriaType.ReleasedSpirit:
-                    case CriteriaType.AccountKnownPet:
-                    case CriteriaType.KickInitiatorInLFGDungeon:
-                    case CriteriaType.KickVoterInLFGDungeon:
-                    case CriteriaType.KickTargetInLFGDungeon:
-                    case CriteriaType.AbandonedLFGDungeon:
-                    case CriteriaType.GroupedTankLeftEarlyInLFGDungeon:
-                    case CriteriaType.StartGarrisonMission:
-                    case CriteriaType.QualityUpgradedForGarrisonFollower:
-                    case CriteriaType.CompleteResearchGarrisonTalent:
-                    case CriteriaType.RecruitAnyGarrisonTroop:
-                    case CriteriaType.CompleteAnyWorldQuest:
-                    case CriteriaType.ParagonLevelIncreaseWithFaction:
-                    case CriteriaType.PlayerHasEarnedHonor:
-                    case CriteriaType.ChooseRelicTalent:
-                    case CriteriaType.AccountHonorLevelReached:
-                    case CriteriaType.MythicPlusCompleted:
-                    case CriteriaType.SocketAnySoulbindConduit:
-                    case CriteriaType.ObtainAnyItemWithCurrencyValue:
-                    case CriteriaType.EarnExpansionLevel:
-                    case CriteriaType.LearnTransmog:
-                        break;                                   // Not implemented yet :(
+                    break;
                 }
+                case CriteriaType.UniquePetsOwned:
+                    SetCriteriaProgress(criteria, referencePlayer.GetSession().GetBattlePetMgr().GetPetUniqueSpeciesCount(), referencePlayer);
+                    break;
+                case CriteriaType.GuildAttainedLevel:
+                    SetCriteriaProgress(criteria, miscValue1, referencePlayer);
+                    break;
+                // FIXME: not triggered in code as result, need to implement
+                case CriteriaType.RunInstance:
+                case CriteriaType.EarnTeamArenaRating:
+                case CriteriaType.EarnTitle:
+                case CriteriaType.MoneySpentOnGuildRepair:
+                case CriteriaType.CreatedItemsByCastingSpell:
+                case CriteriaType.FishInAnyPool:
+                case CriteriaType.GuildBankTabsPurchased:
+                case CriteriaType.EarnGuildAchievementPoints:
+                case CriteriaType.WinAnyBattleground:
+                case CriteriaType.EarnBattlegroundRating:
+                case CriteriaType.GuildTabardCreated:
+                case CriteriaType.CompleteQuestsCountForGuild:
+                case CriteriaType.HonorableKillsForGuild:
+                case CriteriaType.KillAnyCreatureForGuild:
+                case CriteriaType.CompleteAnyResearchProject:
+                case CriteriaType.CompleteGuildChallenge:
+                case CriteriaType.CompleteAnyGuildChallenge:
+                case CriteriaType.CompletedLFRDungeon:
+                case CriteriaType.AbandonedLFRDungeon:
+                case CriteriaType.KickInitiatorInLFRDungeon:
+                case CriteriaType.KickVoterInLFRDungeon:
+                case CriteriaType.KickTargetInLFRDungeon:
+                case CriteriaType.GroupedTankLeftEarlyInLFRDungeon:
+                case CriteriaType.AccountObtainPetThroughBattle:
+                case CriteriaType.WinPetBattle:
+                case CriteriaType.PlayerObtainPetThroughBattle:
+                case CriteriaType.ActivateGarrisonBuilding:
+                case CriteriaType.UpgradeGarrison:
+                case CriteriaType.StartAnyGarrisonMissionWithFollowerType:
+                case CriteriaType.SucceedAnyGarrisonMissionWithFollowerType:
+                case CriteriaType.SucceedGarrisonMission:
+                case CriteriaType.RecruitAnyGarrisonFollower:
+                case CriteriaType.LearnAnyGarrisonBlueprint:
+                case CriteriaType.CollectGarrisonShipment:
+                case CriteriaType.ItemLevelChangedForGarrisonFollower:
+                case CriteriaType.LevelChangedForGarrisonFollower:
+                case CriteriaType.LearnToy:
+                case CriteriaType.LearnAnyToy:
+                case CriteriaType.FindResearchObject:
+                case CriteriaType.ExhaustAnyResearchSite:
+                case CriteriaType.CompleteInternalCriteria:
+                case CriteriaType.CompleteAnyChallengeMode:
+                case CriteriaType.KilledAllUnitsInSpawnRegion:
+                case CriteriaType.CompleteChallengeMode:
+                case CriteriaType.CreatedItemsByCastingSpellWithLimit:
+                case CriteriaType.BattlePetAchievementPointsEarned:
+                case CriteriaType.ReleasedSpirit:
+                case CriteriaType.AccountKnownPet:
+                case CriteriaType.KickInitiatorInLFGDungeon:
+                case CriteriaType.KickVoterInLFGDungeon:
+                case CriteriaType.KickTargetInLFGDungeon:
+                case CriteriaType.AbandonedLFGDungeon:
+                case CriteriaType.GroupedTankLeftEarlyInLFGDungeon:
+                case CriteriaType.StartGarrisonMission:
+                case CriteriaType.QualityUpgradedForGarrisonFollower:
+                case CriteriaType.CompleteResearchGarrisonTalent:
+                case CriteriaType.RecruitAnyGarrisonTroop:
+                case CriteriaType.CompleteAnyWorldQuest:
+                case CriteriaType.ParagonLevelIncreaseWithFaction:
+                case CriteriaType.PlayerHasEarnedHonor:
+                case CriteriaType.ChooseRelicTalent:
+                case CriteriaType.AccountHonorLevelReached:
+                case CriteriaType.MythicPlusCompleted:
+                case CriteriaType.SocketAnySoulbindConduit:
+                case CriteriaType.ObtainAnyItemWithCurrencyValue:
+                case CriteriaType.EarnExpansionLevel:
+                case CriteriaType.LearnTransmog:
+                default:
+                    break;                          // Not implemented yet :(
+            }
 
-                foreach (CriteriaTree tree in trees)
-                {
-                    if (IsCompletedCriteriaTree(tree))
-                        CompletedCriteriaTree(tree, referencePlayer);
+            foreach (CriteriaTree tree in trees)
+            {
+                if (IsCompletedCriteriaTree(tree))
+                    CompletedCriteriaTree(tree, referencePlayer);
 
-                    AfterCriteriaTreeUpdate(tree, referencePlayer);
-                }
+                AfterCriteriaTreeUpdate(tree, referencePlayer);
             }
         }
 
@@ -3769,336 +3774,336 @@ namespace Game.Achievements
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
+{
+    Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new();
+
+    Dictionary<uint, CriteriaTree> _criteriaTrees = new();
+    Dictionary<uint, Criteria> _criteria = new();
+    Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new();
+
+    MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
+
+    // store criterias by type to speed up lookup
+    MultiMap<CriteriaType, Criteria> _criteriasByType = new();
+    MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+    MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
+    MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+    MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
+
+    MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
+    MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
+
+    CriteriaManager()
     {
-        Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new();
-
-        Dictionary<uint, CriteriaTree> _criteriaTrees = new();
-        Dictionary<uint, Criteria> _criteria = new();
-        Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new();
-
-        MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
-
-        // store criterias by type to speed up lookup
-        MultiMap<CriteriaType, Criteria> _criteriasByType = new();
-        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
-        MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
-        MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
-        MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
-
-        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
-
-        CriteriaManager()
+        for (var i = 0; i < (int)CriteriaType.Count; ++i)
         {
-            for (var i = 0; i < (int)CriteriaType.Count; ++i)
-            {
-                _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
-                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
-            }
-
-            for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
-                _criteriasByStartEvent[i] = new();
-
-            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-                _criteriasByFailEvent[i] = new();
-
+            _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
+            _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
         }
 
-        public void LoadCriteriaModifiersTree()
+        for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
+            _criteriasByStartEvent[i] = new();
+
+        for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
+            _criteriasByFailEvent[i] = new();
+
+    }
+
+    public void LoadCriteriaModifiersTree()
+    {
+        uint oldMSTime = Time.GetMSTime();
+
+        if (CliDB.ModifierTreeStorage.Empty())
         {
-            uint oldMSTime = Time.GetMSTime();
-
-            if (CliDB.ModifierTreeStorage.Empty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 criteria modifiers.");
-                return;
-            }
-
-            // Load modifier tree nodes
-            foreach (var tree in CliDB.ModifierTreeStorage.Values)
-            {
-                ModifierTreeNode node = new();
-                node.Entry = tree;
-                _criteriaModifiers[node.Entry.Id] = node;
-            }
-
-            // Build tree
-            foreach (var treeNode in _criteriaModifiers.Values)
-            {
-                ModifierTreeNode parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
-                if (parentNode != null)
-                    parentNode.Children.Add(treeNode);
-            }
-
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded 0 criteria modifiers.");
+            return;
         }
 
-        T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
+        // Load modifier tree nodes
+        foreach (var tree in CliDB.ModifierTreeStorage.Values)
         {
-            CriteriaTreeRecord cur = tree;
-            var obj = map.LookupByKey(tree.Id);
-            while (obj == null)
-            {
-                if (cur.Parent == 0)
-                    break;
-
-                cur = CliDB.CriteriaTreeStorage.LookupByKey(cur.Parent);
-                if (cur == null)
-                    break;
-
-                obj = map.LookupByKey(cur.Id);
-            }
-
-            if (obj == null)
-                return default;
-
-            return obj;
+            ModifierTreeNode node = new();
+            node.Entry = tree;
+            _criteriaModifiers[node.Entry.Id] = node;
         }
 
-        public void LoadCriteriaList()
+        // Build tree
+        foreach (var treeNode in _criteriaModifiers.Values)
         {
-            uint oldMSTime = Time.GetMSTime();
+            ModifierTreeNode parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
+            if (parentNode != null)
+                parentNode.Children.Add(treeNode);
+        }
 
-            Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
-            foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
-                if (achievement.CriteriaTree != 0)
-                    achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
+        Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+    }
 
-            Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new();
-            foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
+    T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
+    {
+        CriteriaTreeRecord cur = tree;
+        var obj = map.LookupByKey(tree.Id);
+        while (obj == null)
+        {
+            if (cur.Parent == 0)
+                break;
+
+            cur = CliDB.CriteriaTreeStorage.LookupByKey(cur.Parent);
+            if (cur == null)
+                break;
+
+            obj = map.LookupByKey(cur.Id);
+        }
+
+        if (obj == null)
+            return default;
+
+        return obj;
+    }
+
+    public void LoadCriteriaList()
+    {
+        uint oldMSTime = Time.GetMSTime();
+
+        Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
+        foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
+            if (achievement.CriteriaTree != 0)
+                achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
+
+        Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new();
+        foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
+        {
+            if (scenarioStep.CriteriaTreeId != 0)
+                scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
+        }
+
+        Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new();
+        foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
+        {
+            foreach (QuestObjective objective in pair.Value.Objectives)
             {
-                if (scenarioStep.CriteriaTreeId != 0)
-                    scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
-            }
-
-            Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new();
-            foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
-            {
-                foreach (QuestObjective objective in pair.Value.Objectives)
-                {
-                    if (objective.Type != QuestObjectiveType.CriteriaTree)
-                        continue;
-
-                    if (objective.ObjectID != 0)
-                        questObjectiveCriteriaTreeIds[(uint)objective.ObjectID] = objective;
-                }
-            }
-
-            // Load criteria tree nodes
-            foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
-            {
-                // Find linked achievement
-                AchievementRecord achievement = GetEntry(achievementCriteriaTreeIds, tree);
-                ScenarioStepRecord scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
-                QuestObjective questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
-                if (achievement == null && scenarioStep == null && questObjective == null)
+                if (objective.Type != QuestObjectiveType.CriteriaTree)
                     continue;
 
-                CriteriaTree criteriaTree = new();
-                criteriaTree.Id = tree.Id;
-                criteriaTree.Achievement = achievement;
-                criteriaTree.ScenarioStep = scenarioStep;
-                criteriaTree.QuestObjective = questObjective;
-                criteriaTree.Entry = tree;
-
-                _criteriaTrees[criteriaTree.Entry.Id] = criteriaTree;
+                if (objective.ObjectID != 0)
+                    questObjectiveCriteriaTreeIds[(uint)objective.ObjectID] = objective;
             }
+        }
 
-            // Build tree
-            foreach (var pair in _criteriaTrees)
+        // Load criteria tree nodes
+        foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
+        {
+            // Find linked achievement
+            AchievementRecord achievement = GetEntry(achievementCriteriaTreeIds, tree);
+            ScenarioStepRecord scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
+            QuestObjective questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
+            if (achievement == null && scenarioStep == null && questObjective == null)
+                continue;
+
+            CriteriaTree criteriaTree = new();
+            criteriaTree.Id = tree.Id;
+            criteriaTree.Achievement = achievement;
+            criteriaTree.ScenarioStep = scenarioStep;
+            criteriaTree.QuestObjective = questObjective;
+            criteriaTree.Entry = tree;
+
+            _criteriaTrees[criteriaTree.Entry.Id] = criteriaTree;
+        }
+
+        // Build tree
+        foreach (var pair in _criteriaTrees)
+        {
+            CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
+            if (parent != null)
+                parent.Children.Add(pair.Value);
+
+            if (CliDB.CriteriaStorage.HasRecord(pair.Value.Entry.CriteriaID))
+                _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
+        }
+
+        for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
+            _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
+
+        // Load criteria
+        uint criterias = 0;
+        uint guildCriterias = 0;
+        uint scenarioCriterias = 0;
+        uint questObjectiveCriterias = 0;
+        foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
+        {
+            Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
+            Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
+            Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
+
+            var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
+            if (treeList.Empty())
+                continue;
+
+            Criteria criteria = new();
+            criteria.Id = criteriaEntry.Id;
+            criteria.Entry = criteriaEntry;
+            criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
+
+            _criteria[criteria.Id] = criteria;
+
+            List<uint> scenarioIds = new();
+            foreach (CriteriaTree tree in treeList)
             {
-                CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
-                if (parent != null)
-                    parent.Children.Add(pair.Value);
+                tree.Criteria = criteria;
 
-                if (CliDB.CriteriaStorage.HasRecord(pair.Value.Entry.CriteriaID))
-                    _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
-            }
-
-            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-                _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
-
-            // Load criteria
-            uint criterias = 0;
-            uint guildCriterias = 0;
-            uint scenarioCriterias = 0;
-            uint questObjectiveCriterias = 0;
-            foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
-            {
-                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
-                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
-                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
-
-                var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
-                if (treeList.Empty())
-                    continue;
-
-                Criteria criteria = new();
-                criteria.Id = criteriaEntry.Id;
-                criteria.Entry = criteriaEntry;
-                criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
-
-                _criteria[criteria.Id] = criteria;
-
-                List<uint> scenarioIds = new();
-                foreach (CriteriaTree tree in treeList)
+                AchievementRecord achievement = tree.Achievement;
+                if (achievement != null)
                 {
-                    tree.Criteria = criteria;
-
-                    AchievementRecord achievement = tree.Achievement;
-                    if (achievement != null)
-                    {
-                        if (achievement.Flags.HasAnyFlag(AchievementFlags.Guild))
-                            criteria.FlagsCu |= CriteriaFlagsCu.Guild;
-                        else if (achievement.Flags.HasAnyFlag(AchievementFlags.Account))
-                            criteria.FlagsCu |= CriteriaFlagsCu.Account;
-                        else
-                            criteria.FlagsCu |= CriteriaFlagsCu.Player;
-                    }
-                    else if (tree.ScenarioStep != null)
-                    {
-                        criteria.FlagsCu |= CriteriaFlagsCu.Scenario;
-                        scenarioIds.Add(tree.ScenarioStep.ScenarioID);
-                    }
-                    else if (tree.QuestObjective != null)
-                        criteria.FlagsCu |= CriteriaFlagsCu.QuestObjective;
+                    if (achievement.Flags.HasAnyFlag(AchievementFlags.Guild))
+                        criteria.FlagsCu |= CriteriaFlagsCu.Guild;
+                    else if (achievement.Flags.HasAnyFlag(AchievementFlags.Account))
+                        criteria.FlagsCu |= CriteriaFlagsCu.Account;
+                    else
+                        criteria.FlagsCu |= CriteriaFlagsCu.Player;
                 }
-
-                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Player | CriteriaFlagsCu.Account))
+                else if (tree.ScenarioStep != null)
                 {
-                    ++criterias;
-                    _criteriasByType.Add(criteriaEntry.Type, criteria);
-                    if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
+                    criteria.FlagsCu |= CriteriaFlagsCu.Scenario;
+                    scenarioIds.Add(tree.ScenarioStep.ScenarioID);
+                }
+                else if (tree.QuestObjective != null)
+                    criteria.FlagsCu |= CriteriaFlagsCu.QuestObjective;
+            }
+
+            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Player | CriteriaFlagsCu.Account))
+            {
+                ++criterias;
+                _criteriasByType.Add(criteriaEntry.Type, criteria);
+                if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
+                {
+                    if (criteriaEntry.Type != CriteriaType.RevealWorldMapOverlay)
+                        _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
+                    else
                     {
-                        if (criteriaEntry.Type != CriteriaType.RevealWorldMapOverlay)
-                            _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
-                        else
+                        var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteriaEntry.Asset);
+                        if (worldOverlayEntry == null)
+                            break;
+
+                        for (byte j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
                         {
-                            var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteriaEntry.Asset);
-                            if (worldOverlayEntry == null)
-                                break;
-
-                            for (byte j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
+                            if (worldOverlayEntry.AreaID[j] != 0)
                             {
-                                if (worldOverlayEntry.AreaID[j] != 0)
-                                {
-                                    bool valid = true;
-                                    for (byte i = 0; i < j; ++i)
-                                        if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
-                                            valid = false;
-                                    if (valid)
-                                        _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
-                                }
+                                bool valid = true;
+                                for (byte i = 0; i < j; ++i)
+                                    if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
+                                        valid = false;
+                                if (valid)
+                                    _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
                             }
                         }
                     }
                 }
-
-                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Guild))
-                {
-                    ++guildCriterias;
-                    _guildCriteriasByType.Add(criteriaEntry.Type, criteria);
-                }
-
-                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Scenario))
-                {
-                    ++scenarioCriterias;
-                    foreach (uint scenarioId in scenarioIds)
-                        _scenarioCriteriasByTypeAndScenarioId[(int)criteriaEntry.Type].Add(scenarioId, criteria);
-                }
-
-                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
-                {
-                    ++questObjectiveCriterias;
-                    _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
-                }
-
-                if (criteriaEntry.StartEvent != 0)
-                    _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
-
-                if (criteriaEntry.FailEvent != 0)
-                    _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
-        }
-
-        public void LoadCriteriaData()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            _criteriaDataMap.Clear();                              // need for reload case
-
-            SQLResult result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
-            if (result.IsEmpty())
+            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Guild))
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
-                return;
+                ++guildCriterias;
+                _guildCriteriasByType.Add(criteriaEntry.Type, criteria);
             }
 
-            uint count = 0;
-            do
+            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Scenario))
             {
-                uint criteria_id = result.Read<uint>(0);
-
-                Criteria criteria = GetCriteria(criteria_id);
-                if (criteria == null)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` contains data for non-existing criteria (Entry: {0}). Ignored.", criteria_id);
-                    continue;
-                }
-
-                CriteriaDataType dataType = (CriteriaDataType)result.Read<byte>(1);
-                string scriptName = result.Read<string>(4);
-                uint scriptId = 0;
-                if (!scriptName.IsEmpty())
-                {
-                    if (dataType != CriteriaDataType.Script)
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data type (Entry: {0}, type {1}), useless data.", criteria_id, dataType);
-                    else
-                        scriptId = Global.ObjectMgr.GetScriptId(scriptName);
-                }
-
-                CriteriaData data = new(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
-
-                if (!data.IsValid(criteria))
-                    continue;
-
-                // this will allocate empty data set storage
-                CriteriaDataSet dataSet = new();
-                dataSet.SetCriteriaId(criteria_id);
-
-                // add real data only for not NONE data types
-                if (data.DataType != CriteriaDataType.None)
-                    dataSet.Add(data);
-
-                _criteriaDataMap[criteria_id] = dataSet;
-                // counting data by and data types
-                ++count;
+                ++scenarioCriterias;
+                foreach (uint scenarioId in scenarioIds)
+                    _scenarioCriteriasByTypeAndScenarioId[(int)criteriaEntry.Type].Add(scenarioId, criteria);
             }
-            while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} additional criteria data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
+            {
+                ++questObjectiveCriterias;
+                _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
+            }
+
+            if (criteriaEntry.StartEvent != 0)
+                _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
+
+            if (criteriaEntry.FailEvent != 0)
+                _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
         }
 
-        public CriteriaTree GetCriteriaTree(uint criteriaTreeId)
+        Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+    }
+
+    public void LoadCriteriaData()
+    {
+        uint oldMSTime = Time.GetMSTime();
+
+        _criteriaDataMap.Clear();                              // need for reload case
+
+        SQLResult result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
+        if (result.IsEmpty())
         {
-            return _criteriaTrees.LookupByKey(criteriaTreeId);
+            Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
+            return;
         }
 
-        public Criteria GetCriteria(uint criteriaId)
+        uint count = 0;
+        do
         {
-            return _criteria.LookupByKey(criteriaId);
-        }
+            uint criteria_id = result.Read<uint>(0);
 
-        public ModifierTreeNode GetModifierTree(uint modifierTreeId)
-        {
-            return _criteriaModifiers.LookupByKey(modifierTreeId);
-        }
+            Criteria criteria = GetCriteria(criteria_id);
+            if (criteria == null)
+            {
+                Log.outError(LogFilter.Sql, "Table `criteria_data` contains data for non-existing criteria (Entry: {0}). Ignored.", criteria_id);
+                continue;
+            }
 
-        public static CriteriaType[] GetRetroactivelyUpdateableCriteriaTypes() =>
-        [
-            CriteriaType.CompleteResearchProject,
+            CriteriaDataType dataType = (CriteriaDataType)result.Read<byte>(1);
+            string scriptName = result.Read<string>(4);
+            uint scriptId = 0;
+            if (!scriptName.IsEmpty())
+            {
+                if (dataType != CriteriaDataType.Script)
+                    Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data type (Entry: {0}, type {1}), useless data.", criteria_id, dataType);
+                else
+                    scriptId = Global.ObjectMgr.GetScriptId(scriptName);
+            }
+
+            CriteriaData data = new(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
+
+            if (!data.IsValid(criteria))
+                continue;
+
+            // this will allocate empty data set storage
+            CriteriaDataSet dataSet = new();
+            dataSet.SetCriteriaId(criteria_id);
+
+            // add real data only for not NONE data types
+            if (data.DataType != CriteriaDataType.None)
+                dataSet.Add(data);
+
+            _criteriaDataMap[criteria_id] = dataSet;
+            // counting data by and data types
+            ++count;
+        }
+        while (result.NextRow());
+
+        Log.outInfo(LogFilter.ServerLoading, "Loaded {0} additional criteria data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+    }
+
+    public CriteriaTree GetCriteriaTree(uint criteriaTreeId)
+    {
+        return _criteriaTrees.LookupByKey(criteriaTreeId);
+    }
+
+    public Criteria GetCriteria(uint criteriaId)
+    {
+        return _criteria.LookupByKey(criteriaId);
+    }
+
+    public ModifierTreeNode GetModifierTree(uint modifierTreeId)
+    {
+        return _criteriaModifiers.LookupByKey(modifierTreeId);
+    }
+
+    public static CriteriaType[] GetRetroactivelyUpdateableCriteriaTypes() =>
+    [
+        CriteriaType.CompleteResearchProject,
             CriteriaType.CompleteAnyResearchProject,
             CriteriaType.ReachLevel,
             CriteriaType.SkillRaised,
@@ -4150,139 +4155,139 @@ namespace Game.Achievements
             CriteriaType.EarnAchievementPoints,
             CriteriaType.BattlePetAchievementPointsEarned,
             CriteriaType.EarnAchievement // criteria possibly completed by retroactive scan, must be last
-        ];
+    ];
 
-        bool IsCriteriaTypeStoredByAsset(CriteriaType type)
+    bool IsCriteriaTypeStoredByAsset(CriteriaType type)
+    {
+        switch (type)
         {
-            switch (type)
-            {
-                case CriteriaType.KillCreature:
-                case CriteriaType.WinBattleground:
-                case CriteriaType.SkillRaised:
-                case CriteriaType.EarnAchievement:
-                case CriteriaType.CompleteQuestsInZone:
-                case CriteriaType.ParticipateInBattleground:
-                case CriteriaType.KilledByCreature:
-                case CriteriaType.CompleteQuest:
-                case CriteriaType.BeSpellTarget:
-                case CriteriaType.CastSpell:
-                case CriteriaType.TrackedWorldStateUIModified:
-                case CriteriaType.PVPKillInArea:
-                case CriteriaType.LearnOrKnowSpell:
-                case CriteriaType.AcquireItem:
-                case CriteriaType.AchieveSkillStep:
-                case CriteriaType.UseItem:
-                case CriteriaType.LootItem:
-                case CriteriaType.RevealWorldMapOverlay:
-                case CriteriaType.ReputationGained:
-                case CriteriaType.EquipItemInSlot:
-                case CriteriaType.DeliverKillingBlowToClass:
-                case CriteriaType.DeliverKillingBlowToRace:
-                case CriteriaType.DoEmote:
-                case CriteriaType.EquipItem:
-                case CriteriaType.UseGameobject:
-                case CriteriaType.GainAura:
-                case CriteriaType.CatchFishInFishingHole:
-                case CriteriaType.LearnSpellFromSkillLine:
-                case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
-                case CriteriaType.GetLootByType:
-                case CriteriaType.LandTargetedSpellOnTarget:
-                case CriteriaType.LearnTradeskillSkillLine:
-                case CriteriaType.DefeatDungeonEncounter:
-                case CriteriaType.LearnToy:
-                case CriteriaType.LearnAnyTransmog:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
-        {
-            if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
-            {
-                if (_criteriasByAsset[(int)type].ContainsKey(asset))
-                    return _criteriasByAsset[(int)type][asset];
-
-                return new List<Criteria>();
-            }
-
-            return _criteriasByType.LookupByKey(type);
-        }
-
-        public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
-        {
-            return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
-        }
-
-        public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
-        {
-            return _criteriasByStartEvent[(int)startEvent];
-        }
-
-        public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
-        {
-            return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
-        }
-
-        public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
-        {
-            return _criteriasByFailEvent[(int)failEvent];
-        }
-
-        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
-        {
-            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
-        }
-
-        public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
-        {
-            return _guildCriteriasByType.LookupByKey(type);
-        }
-
-        public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
-        {
-            return _questObjectiveCriteriasByType[type];
-        }
-
-        public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
-        {
-            return _criteriaTreeByCriteria.LookupByKey(criteriaId);
-        }
-
-        public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
-        {
-            return _criteriaDataMap.LookupByKey(criteria.Id);
-        }
-
-        public static bool IsGroupCriteriaType(CriteriaType type)
-        {
-            switch (type)
-            {
-                case CriteriaType.KillCreature:
-                case CriteriaType.WinBattleground:
-                case CriteriaType.BeSpellTarget:       // NYI
-                case CriteriaType.WinAnyRankedArena:
-                case CriteriaType.GainAura:            // NYI
-                case CriteriaType.WinAnyBattleground:  // NYI
-                    return true;
-                default:
-                    break;
-            }
-
-            return false;
-        }
-
-        public static void WalkCriteriaTree(CriteriaTree tree, Action<CriteriaTree> func)
-        {
-            foreach (CriteriaTree node in tree.Children)
-                WalkCriteriaTree(node, func);
-
-            func(tree);
+            case CriteriaType.KillCreature:
+            case CriteriaType.WinBattleground:
+            case CriteriaType.SkillRaised:
+            case CriteriaType.EarnAchievement:
+            case CriteriaType.CompleteQuestsInZone:
+            case CriteriaType.ParticipateInBattleground:
+            case CriteriaType.KilledByCreature:
+            case CriteriaType.CompleteQuest:
+            case CriteriaType.BeSpellTarget:
+            case CriteriaType.CastSpell:
+            case CriteriaType.TrackedWorldStateUIModified:
+            case CriteriaType.PVPKillInArea:
+            case CriteriaType.LearnOrKnowSpell:
+            case CriteriaType.AcquireItem:
+            case CriteriaType.AchieveSkillStep:
+            case CriteriaType.UseItem:
+            case CriteriaType.LootItem:
+            case CriteriaType.RevealWorldMapOverlay:
+            case CriteriaType.ReputationGained:
+            case CriteriaType.EquipItemInSlot:
+            case CriteriaType.DeliverKillingBlowToClass:
+            case CriteriaType.DeliverKillingBlowToRace:
+            case CriteriaType.DoEmote:
+            case CriteriaType.EquipItem:
+            case CriteriaType.UseGameobject:
+            case CriteriaType.GainAura:
+            case CriteriaType.CatchFishInFishingHole:
+            case CriteriaType.LearnSpellFromSkillLine:
+            case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
+            case CriteriaType.GetLootByType:
+            case CriteriaType.LandTargetedSpellOnTarget:
+            case CriteriaType.LearnTradeskillSkillLine:
+            case CriteriaType.DefeatDungeonEncounter:
+            case CriteriaType.LearnToy:
+            case CriteriaType.LearnAnyTransmog:
+                return true;
+            default:
+                return false;
         }
     }
 
-    public class ModifierTreeNode
+    public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
+    {
+        if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
+        {
+            if (_criteriasByAsset[(int)type].ContainsKey(asset))
+                return _criteriasByAsset[(int)type][asset];
+
+            return new List<Criteria>();
+        }
+
+        return _criteriasByType.LookupByKey(type);
+    }
+
+    public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
+    {
+        return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
+    }
+
+    public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
+    {
+        return _criteriasByStartEvent[(int)startEvent];
+    }
+
+    public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
+    {
+        return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
+    }
+
+    public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
+    {
+        return _criteriasByFailEvent[(int)failEvent];
+    }
+
+    public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
+    {
+        return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+    }
+
+    public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
+    {
+        return _guildCriteriasByType.LookupByKey(type);
+    }
+
+    public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
+    {
+        return _questObjectiveCriteriasByType[type];
+    }
+
+    public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
+    {
+        return _criteriaTreeByCriteria.LookupByKey(criteriaId);
+    }
+
+    public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
+    {
+        return _criteriaDataMap.LookupByKey(criteria.Id);
+    }
+
+    public static bool IsGroupCriteriaType(CriteriaType type)
+    {
+        switch (type)
+        {
+            case CriteriaType.KillCreature:
+            case CriteriaType.WinBattleground:
+            case CriteriaType.BeSpellTarget:       // NYI
+            case CriteriaType.WinAnyRankedArena:
+            case CriteriaType.GainAura:            // NYI
+            case CriteriaType.WinAnyBattleground:  // NYI
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    public static void WalkCriteriaTree(CriteriaTree tree, Action<CriteriaTree> func)
+    {
+        foreach (CriteriaTree node in tree.Children)
+            WalkCriteriaTree(node, func);
+
+        func(tree);
+    }
+}
+
+public class ModifierTreeNode
 {
     public ModifierTreeRecord Entry;
     public List<ModifierTreeNode> Children = new();
