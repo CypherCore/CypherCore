@@ -22,8 +22,8 @@ namespace Game
         public void CheckAllQuestObjectiveCriteria(Player referencePlayer)
         {
             // suppress sending packets
-            for (CriteriaType i = 0; i < CriteriaType.Count; ++i)
-                UpdateCriteria(i, 0, 0, 0, null, referencePlayer);
+            foreach (CriteriaType criteriaType in CriteriaManager.GetRetroactivelyUpdateableCriteriaTypes())
+                UpdateCriteria(criteriaType, 0, 0, 0, null, referencePlayer);
         }
 
         public override void Reset()

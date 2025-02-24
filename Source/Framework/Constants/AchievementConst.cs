@@ -613,7 +613,7 @@ namespace Framework.Constants
         TotalFactionsEncountered = 89,  // Total factions encountered
         LootAnyItem = 90,  // Loot any item
         ObtainAnyItem = 91,  // Obtain any item
-        AnyoneTriggerGameEventScenario = 92,  /*NYI*/ // Anyone will Trigger game event "{GameEvents}" (Scenario Only)
+        AnyoneTriggerGameEventScenario = 92,  // Anyone will Trigger game event "{GameEvents}" (Scenario Only)
         RollAnyNeed = 93,  // Roll any number on need
         RollAnyGreed = 94,  // Roll any number on greed
         ReleasedSpirit = 95,  /*NYI*/ // Released Spirit
@@ -742,7 +742,7 @@ namespace Framework.Constants
         CompleteAnyReplayQuest = 218, // Complete Any Replay Quest
         BuyItemsFromVendors = 219, // Buy items from vendors
         SellItemsToVendors = 220, // Sell items to vendors
-        ReachMaxLevel = 221, /*NYI*/ // Reach Max Level
+        ReachMaxLevel = 221, // Reach Max Level
         MemorizeSpell = 222, /*NYI*/ // Memorize Spell "{Spell}"
         LearnTransmogIllusion = 223, /*NYI*/ // Learn Transmog Illusion
         LearnAnyTransmogIllusion = 224, /*NYI*/ // Learn Any Transmog Illusion

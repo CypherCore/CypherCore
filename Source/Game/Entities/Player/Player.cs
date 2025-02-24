@@ -5453,6 +5453,8 @@ namespace Game.Entities
             UpdateCriteria(CriteriaType.ActivelyReachLevel, level);
             if (level > oldLevel)
                 UpdateCriteria(CriteriaType.GainLevels, level - oldLevel);
+            if (IsMaxLevel())
+                UpdateCriteria(CriteriaType.ReachMaxLevel);
 
             PushQuests();
 
