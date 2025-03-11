@@ -4208,14 +4208,14 @@ namespace Game.Entities
     public class QuestSession : HasChangesMask
     {
         public UpdateField<ObjectGuid> Owner = new(0, 1);
-        public UpdateFieldArray<ulong> QuestCompleted = new(950, 2, 3);
+        public UpdateFieldArray<ulong> QuestCompleted = new(1000, 2, 3);
 
-        public QuestSession() : base(953) { }
+        public QuestSession() : base(1003) { }
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
             data.WritePackedGuid(Owner);
-            for (int i = 0; i < 950; ++i)
+            for (int i = 0; i < 1000; ++i)
             {
                 data.WriteUInt64(QuestCompleted[i]);
             }
@@ -4227,8 +4227,8 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlocksMask(0), 30);
-            for (uint i = 0; i < 30; ++i)
+            data.WriteBits(changesMask.GetBlocksMask(0), 32);
+            for (uint i = 0; i < 32; ++i)
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
@@ -4242,7 +4242,7 @@ namespace Game.Entities
             }
             if (changesMask[2])
             {
-                for (int i = 0; i < 950; ++i)
+                for (int i = 0; i < 1000; ++i)
                 {
                     if (changesMask[3 + i])
                     {
