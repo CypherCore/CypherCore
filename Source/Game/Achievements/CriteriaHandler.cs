@@ -1240,6 +1240,10 @@ namespace Game.Achievements
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
+                case CriteriaType.ReachMaxLevel:
+                    if (!referencePlayer.IsMaxLevel())
+                        return false;
+                    break;
                 case CriteriaType.LearnTaxiNode:
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
