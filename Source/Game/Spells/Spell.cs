@@ -8839,6 +8839,7 @@ namespace Game.Spells
         public int[] AuraBasePoints = new int[SpellConst.MaxEffects];
         public bool Positive = true;
         public UnitAura HitAura;
+        public ProcFlagsHit ProcHitMask;
 
         Unit _spellHitTarget; // changed for example by reflect
         bool _enablePVP;         // need to enable PVP at DoDamageAndTriggers?
@@ -8943,7 +8944,6 @@ namespace Game.Spells
                 ProcFlagsInit procAttacker = spell.m_procAttacker;
                 ProcFlagsInit procVictim = spell.m_procVictim;
                 ProcFlagsSpellType procSpellType = ProcFlagsSpellType.None;
-                ProcFlagsHit hitMask = ProcFlagsHit.None;
 
                 // Spells with this flag cannot trigger if effect is cast on self
                 bool canEffectTrigger = spell.unitTarget.CanProc();
@@ -9028,11 +9028,11 @@ namespace Game.Spells
                     int addhealth = spell.m_healing;
                     if (IsCrit)
                     {
-                        hitMask |= ProcFlagsHit.Critical;
+                        ProcHitMask |= ProcFlagsHit.Critical;
                         addhealth = Unit.SpellCriticalHealingBonus(caster, spell.m_spellInfo, addhealth, null);
                     }
                     else
-                        hitMask |= ProcFlagsHit.Normal;
+                        ProcHitMask |= ProcFlagsHit.Normal;
 
                     healInfo = new(caster, spell.unitTarget, (uint)addhealth, spell.m_spellInfo, spell.m_spellInfo.GetSchoolMask());
                     caster.HealBySpell(healInfo, IsCrit);
@@ -9052,7 +9052,7 @@ namespace Game.Spells
                     // Check damage immunity
                     if (spell.unitTarget.IsImmunedToDamage(caster, spell.m_spellInfo))
                     {
-                        hitMask = ProcFlagsHit.Immune;
+                        ProcHitMask = ProcFlagsHit.Immune;
                         spell.m_damage = 0;
 
                         // no packet found in sniffs
@@ -9065,7 +9065,7 @@ namespace Game.Spells
                         caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit, MissCondition == SpellMissInfo.Block, spell);
                         Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
-                        hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
+                        ProcHitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
                         procVictim.Or(ProcFlags.TakeAnyDamage);
 
                         spell.m_damage = (int)damageInfo.damage;
@@ -9087,7 +9087,7 @@ namespace Game.Spells
                     // Do triggers for unit
                     if (canEffectTrigger)
                     {
-                        spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, spell.m_attackType, hitMask);
+                        spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, spell.m_attackType, ProcHitMask);
                         procSpellType |= ProcFlagsSpellType.Damage;
                     }
                 }
@@ -9097,11 +9097,11 @@ namespace Game.Spells
                 {
                     // Fill base damage struct (unitTarget - is real spell target)
                     SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask);
-                    hitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
+                    ProcHitMask |= Unit.CreateProcHitMask(damageInfo, MissCondition);
                     // Do triggers for unit
                     if (canEffectTrigger)
                     {
-                        spellDamageInfo = new(damageInfo, DamageEffectType.NoDamage, spell.m_attackType, hitMask);
+                        spellDamageInfo = new(damageInfo, DamageEffectType.NoDamage, spell.m_attackType, ProcHitMask);
                         procSpellType |= ProcFlagsSpellType.NoDmgHeal;
                     }
 
@@ -9117,7 +9117,7 @@ namespace Game.Spells
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
-                    Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
+                    Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, ProcHitMask, spell, spellDamageInfo, healInfo);
 
                     // item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
                     if (caster.IsPlayer() && procSpellType.HasAnyFlag(ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal))
@@ -9129,7 +9129,7 @@ namespace Game.Spells
                 }
 
                 // set hitmask for finish procs
-                spell.m_hitMask |= hitMask;
+                spell.m_hitMask |= ProcHitMask;
                 spell.m_procSpellType |= procSpellType;
 
                 // _spellHitTarget can be null if spell is missed in DoSpellHitOnUnit

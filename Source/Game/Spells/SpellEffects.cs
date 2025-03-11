@@ -1795,7 +1795,7 @@ namespace Game.Spells
 
             CallScriptSuccessfulDispel(effectInfo.EffectIndex);
 
-            m_hitMask |= ProcFlagsHit.Dispel;
+            m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Dispel;
         }
 
         [SpellEffectHandler(SpellEffectName.DualWield)]
@@ -2571,7 +2571,7 @@ namespace Game.Spells
                         int duration = m_spellInfo.GetDuration();
                         duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
                         unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
-                        m_hitMask |= ProcFlagsHit.Interrupt;
+                        m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Interrupt;
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);
                     }
@@ -3882,7 +3882,7 @@ namespace Game.Spells
                 dispel_list.RemoveAt(0);
             }
 
-            m_hitMask |= ProcFlagsHit.Dispel;
+            m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Dispel;
         }
 
         [SpellEffectHandler(SpellEffectName.ResurrectPet)]
@@ -4444,7 +4444,7 @@ namespace Game.Spells
             }
             m_caster.SendMessageToSet(spellDispellLog, true);
 
-            m_hitMask |= ProcFlagsHit.Dispel;
+            m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Dispel;
         }
 
         [SpellEffectHandler(SpellEffectName.KillCredit)]
