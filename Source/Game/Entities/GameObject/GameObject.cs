@@ -1258,17 +1258,6 @@ namespace Game.Entities
             return gInfo.type == GameObjectTypes.Transport || gInfo.type == GameObjectTypes.MapObjTransport;
         }
 
-        // is Dynamic transport = non-stop Transport
-        public bool IsDynTransport()
-        {
-            // If something is marked as a transport, don't transmit an out of range packet for it.
-            GameObjectTemplate gInfo = GetGoInfo();
-            if (gInfo == null)
-                return false;
-
-            return gInfo.type == GameObjectTypes.MapObjTransport || gInfo.type == GameObjectTypes.Transport;
-        }
-
         public bool IsDestructibleBuilding()
         {
             GameObjectTemplate gInfo = GetGoInfo();
