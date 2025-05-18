@@ -5909,6 +5909,19 @@ namespace Game.Spells
 
             unitTarget.ToPlayer()?.RepopAtGraveyard();
         }
+
+        [SpellEffectHandler(SpellEffectName.UpdateInteractions)]
+        void EffectUpdateInteractions()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            target.UpdateVisibleObjectInteractions(true, false, true, true);
+        }
     }
 
     public class DispelableAura
