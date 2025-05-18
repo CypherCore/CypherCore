@@ -63,6 +63,8 @@ namespace Game.DataStorage
         public uint Id;
         public long RaceMask;
         public string FailureDescription;
+        public ushort MinLevel;
+        public ushort MaxLevel;
         public int ClassMask;
         public uint SkillLogic;
         public int LanguageID;

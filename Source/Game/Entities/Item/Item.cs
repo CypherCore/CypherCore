@@ -2576,10 +2576,10 @@ namespace Game.Entities
         public void SetItemFlag(ItemFieldFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public void RemoveItemFlag(ItemFieldFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
         public void ReplaceAllItemFlags(ItemFieldFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags), (uint)flags); }
-        public bool HasItemFlag2(ItemFieldFlags2 flag) { return (m_itemData.DynamicFlags2 & (uint)flag) != 0; }
-        public void SetItemFlag2(ItemFieldFlags2 flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
-        public void RemoveItemFlag2(ItemFieldFlags2 flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
-        public void ReplaceAllItemFlags2(ItemFieldFlags2 flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.DynamicFlags2), (uint)flags); }
+        public bool HasItemZoneFlag(ItemZoneFlags flag) { return (m_itemData.ZoneFlags & (uint)flag) != 0; }
+        public void SetItemZoneFlag(ItemZoneFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ZoneFlags), (uint)flags); }
+        public void RemoveItemZoneFlag(ItemZoneFlags flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ZoneFlags), (uint)flags); }
+        public void ReplaceAllItemZoneFlags(ItemZoneFlags flags) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ZoneFlags), (uint)flags); }
 
         public Bag ToBag() { return IsBag() ? this as Bag : null; }
         public AzeriteItem ToAzeriteItem() { return IsAzeriteItem() ? this as AzeriteItem : null; }

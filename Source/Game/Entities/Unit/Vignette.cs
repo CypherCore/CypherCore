@@ -21,6 +21,11 @@ namespace Game.Entities
             }
         }
 
+        public static void UpdateHealth(VignetteData vignette, Unit owner)
+        {
+            vignette.HealthPercent = (float)(owner.GetHealth()) / (float)(owner.GetMaxHealth()); // converted to percentage in lua
+        }
+
         public static void SendVignetteUpdate(VignetteData vignette, WorldObject owner)
         {
             if (!owner.IsInWorld)
@@ -72,6 +77,9 @@ namespace Game.Entities
             vignette.Data = vignetteData;
             vignette.ZoneID = owner.GetZoneId(); // not updateable
             UpdatePosition(vignette, owner);
+            Unit unitOwner = owner.ToUnit();
+            if (unitOwner != null)
+                UpdateHealth(vignette, unitOwner);
 
             if (vignetteData.IsInfiniteAOI())
                 owner.GetMap().AddInfiniteAOIVignette(vignette);
@@ -84,6 +92,9 @@ namespace Game.Entities
         public static void Update(VignetteData vignette, WorldObject owner)
         {
             UpdatePosition(vignette, owner);
+            Unit unitOwner = owner.ToUnit();
+            if (unitOwner != null)
+                UpdateHealth(vignette, unitOwner);
 
             if (vignette.Data.IsInfiniteAOI())
                 vignette.NeedUpdate = true;
@@ -129,6 +140,7 @@ namespace Game.Entities
         public uint ZoneID;
         public uint WMOGroupID;
         public uint WMODoodadPlacementID;
+        public float HealthPercent = 1.0f;
         public bool NeedUpdate;
 
         public void FillPacket(VignetteDataSet dataSet)
@@ -142,6 +154,7 @@ namespace Game.Entities
             data.ZoneID = ZoneID;
             data.WMOGroupID = WMOGroupID;
             data.WMODoodadPlacementID = WMODoodadPlacementID;
+            data.HealthPercent = HealthPercent;
 
             dataSet.Data.Add(data);
         }

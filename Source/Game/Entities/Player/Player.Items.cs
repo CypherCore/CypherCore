@@ -1508,7 +1508,7 @@ namespace Game.Entities
                     }
                 }
 
-                pItem.SetItemFlag2(ItemFieldFlags2.Equipped);
+                pItem.SetItemZoneFlag(ItemZoneFlags.Equipped);
 
                 if (IsInWorld && update)
                 {
@@ -1681,7 +1681,7 @@ namespace Game.Entities
                 byte slot = (byte)(pos & 255);
                 VisualizeItem(slot, pItem);
 
-                pItem.SetItemFlag2(ItemFieldFlags2.Equipped);
+                pItem.SetItemZoneFlag(ItemZoneFlags.Equipped);
 
                 if (IsInWorld)
                 {
@@ -1792,7 +1792,7 @@ namespace Game.Entities
 
                         _ApplyItemMods(pItem, slot, false, update);
 
-                        pItem.RemoveItemFlag2(ItemFieldFlags2.Equipped);
+                        pItem.RemoveItemZoneFlag(ItemZoneFlags.Equipped);
 
                         // remove item dependent auras and casts (only weapon and armor slots)
                         if (slot < ProfessionSlots.End)

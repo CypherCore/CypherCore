@@ -16,6 +16,9 @@ namespace Game.Networking.Packets
         public uint ZoneID;
         public uint WMOGroupID;
         public uint WMODoodadPlacementID;
+        public float HealthPercent = 1.0f;
+        public ushort RecommendedGroupSizeMin;
+        public ushort RecommendedGroupSizeMax;
 
         public void Write(WorldPacket data)
         {
@@ -25,6 +28,9 @@ namespace Game.Networking.Packets
             data.WriteUInt32(ZoneID);
             data.WriteUInt32(WMOGroupID);
             data.WriteUInt32(WMODoodadPlacementID);
+            data.WriteFloat(HealthPercent);
+            data.WriteUInt16(RecommendedGroupSizeMin);
+            data.WriteUInt16(RecommendedGroupSizeMax);
         }
     }
 

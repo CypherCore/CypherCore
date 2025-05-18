@@ -2420,15 +2420,22 @@ namespace Game.Entities
             if (questBit == 0)
                 return;
 
-            uint fieldOffset = (uint)((questBit - 1) / ActivePlayerData.QuestCompletedBitsPerBlock);
-            if (fieldOffset >= ActivePlayerData.QuestCompletedBitsSize)
-                return;
-
+            int fieldOffset = (int)((questBit - 1) / ActivePlayerData.QuestCompletedBitsPerBlock);
             ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
+            if (fieldOffset < ActivePlayerData.QuestCompletedBitsSize)
+            {
+                if (completed)
+                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted,fieldOffset), flag);
+                else
+                    RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, fieldOffset), flag);
+            }
+
+            BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+            BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.CharacterQuestCompletedIndex);
             if (completed)
-                SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, (int)fieldOffset), flag);
+                SetUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, fieldOffset), flag);
             else
-                RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, (int)fieldOffset), flag);
+                RemoveUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, fieldOffset), flag);
         }
 
         public void AreaExploredOrEventHappens(uint questId)
@@ -2857,7 +2864,8 @@ namespace Game.Entities
                         return objective;
                 }
                 return null;
-            };
+            }
+            ;
 
             QuestObjective objective = findObjectiveForItem((int)itemId);
             if (objective != null)
@@ -2892,7 +2900,8 @@ namespace Game.Entities
                     return true;
 
                 return false;
-            };
+            }
+            ;
 
             bool hasObjectiveTypeForCurrency(QuestObjectiveType type) => m_questObjectiveStatus.LookupByKey((type, currencyId)).Any(isCompletableObjective);
             if (hasObjectiveTypeForCurrency(QuestObjectiveType.Currency))

@@ -926,7 +926,13 @@ namespace Framework.Constants
     public enum PlayerDataFlag
     {
         ExploredZonesIndex = 1,
-        CharacterIndex = 2,
-        AccountIndex = 3
+        CharacterDataIndex = 2,
+        AccountDataIndex = 3,
+        CharacterTaxiNodesIndex = 4,
+        AccountTaxiNodesIndex = 5,
+        AccountCombinedQuestsIndex = 6,
+        AccountCombinedQuestRewardsIndex = 7,
+        CharacterContentpushIndex = 8,
+        CharacterQuestCompletedIndex = 9,
     }
 }

@@ -2618,6 +2618,13 @@ namespace Framework.Constants
         Unk331 = 331,
         Unk332 = 332,
         Unk333 = 333,
+        Unk334 = 334,
+        Unk335 = 335,
+        Unk336 = 336,
+        Unk337 = 337,
+        Unk338 = 338,
+        Unk339 = 339,
+        Unk340 = 340,
 
         TotalSpellEffects
     }

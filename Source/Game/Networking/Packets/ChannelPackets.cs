@@ -100,6 +100,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Channel.GetByteCount(), 7);
             _worldPacket.WriteBits(ChannelWelcomeMsg.GetByteCount(), 11);
             _worldPacket.WriteUInt32((uint)ChannelFlags);
+            _worldPacket.WriteUInt8(Unknown1107);
             _worldPacket.WriteInt32(ChatChannelID);
             _worldPacket.WriteUInt64(InstanceID);
             _worldPacket.WritePackedGuid(ChannelGUID);
@@ -113,6 +114,7 @@ namespace Game.Networking.Packets
         public ChannelFlags ChannelFlags;
         public string Channel = "";
         public ObjectGuid ChannelGUID;
+        public byte Unknown1107;
     }
 
     public class ChannelNotifyLeft : ServerPacket

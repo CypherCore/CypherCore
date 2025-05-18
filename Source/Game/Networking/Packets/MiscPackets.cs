@@ -585,18 +585,21 @@ namespace Game.Networking.Packets
 
     public class StandStateChange : ClientPacket
     {
+        public UnitStandStateType StandState;
+
         public StandStateChange(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            StandState = (UnitStandStateType)_worldPacket.ReadUInt32();
+            StandState = (UnitStandStateType)_worldPacket.ReadUInt8();
         }
-
-        public UnitStandStateType StandState;
     }
 
     public class StandStateUpdate : ServerPacket
     {
+        uint AnimKitID;
+        UnitStandStateType State;
+
         public StandStateUpdate(UnitStandStateType state, uint animKitId) : base(ServerOpcodes.StandStateUpdate)
         {
             State = state;
@@ -605,12 +608,9 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(AnimKitID);
             _worldPacket.WriteUInt8((byte)State);
+            _worldPacket.WriteUInt32(AnimKitID);
         }
-
-        uint AnimKitID;
-        UnitStandStateType State;
     }
 
     public class SetAnimTier : ServerPacket
@@ -630,6 +630,13 @@ namespace Game.Networking.Packets
 
     public class StartMirrorTimer : ServerPacket
     {
+        public MirrorTimerType Timer;
+        public int Scale;
+        public int MaxValue;
+        public int SpellID;
+        public int Value;
+        public bool Paused;
+
         public StartMirrorTimer(MirrorTimerType timer, int value, int maxValue, int scale, int spellID, bool paused) : base(ServerOpcodes.StartMirrorTimer)
         {
             Timer = timer;
@@ -642,7 +649,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)Timer);
+            _worldPacket.WriteUInt8((byte)Timer);
             _worldPacket.WriteInt32(Value);
             _worldPacket.WriteInt32(MaxValue);
             _worldPacket.WriteInt32(Scale);
@@ -650,17 +657,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Paused);
             _worldPacket.FlushBits();
         }
-
-        public int Scale;
-        public int MaxValue;
-        public MirrorTimerType Timer;
-        public int SpellID;
-        public int Value;
-        public bool Paused;
     }
 
     public class PauseMirrorTimer : ServerPacket
     {
+        public MirrorTimerType Timer;
+        public bool Paused = true;
+
         public PauseMirrorTimer(MirrorTimerType timer, bool paused) : base(ServerOpcodes.PauseMirrorTimer)
         {
             Timer = timer;
@@ -669,17 +672,16 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)Timer);
+            _worldPacket.WriteUInt8((byte)Timer);
             _worldPacket.WriteBit(Paused);
             _worldPacket.FlushBits();
         }
-
-        public bool Paused = true;
-        public MirrorTimerType Timer;
     }
 
     public class StopMirrorTimer : ServerPacket
     {
+        public MirrorTimerType Timer;
+
         public StopMirrorTimer(MirrorTimerType timer) : base(ServerOpcodes.StopMirrorTimer)
         {
             Timer = timer;
@@ -687,10 +689,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32((int)Timer);
+            _worldPacket.WriteUInt8((byte)Timer);
         }
-
-        public MirrorTimerType Timer;
     }
 
     public class ExplorationExperience : ServerPacket

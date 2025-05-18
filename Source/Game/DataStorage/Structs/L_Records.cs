@@ -50,6 +50,9 @@ namespace Game.DataStorage
         public byte MinCountTank;
         public byte MinCountHealer;
         public byte MinCountDamage;
+        public byte MaxPremadeCountTank;
+        public byte MaxPremadeCountHealer;
+        public byte MaxPremadeCountDamage;
         public ushort BonusReputationAmount;
         public ushort MentorItemLevel;
         public byte MentorCharLevel;

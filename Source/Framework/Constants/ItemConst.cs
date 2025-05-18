@@ -1085,7 +1085,7 @@ namespace Framework.Constants
         Unk26 = 0x80000000 // ?
     }
 
-    public enum ItemFieldFlags2
+    public enum ItemZoneFlags
     {
         Equipped = 0x1
     }
@@ -1372,6 +1372,7 @@ namespace Framework.Constants
         CantDeleteInAccountBank = 127,// Items Must Be Moved Out Of The Warband Bank To Be Deleted.
         BankNotAccessible = 128,// This Character Does Not Have Access To This Bank.
         CantTradeAccountItem = 129,// You Can't Trade An Item From The Warband Bank.
+        AccountMoneyLocked = 130,// You cannot withdraw or deposit gold from the warband bank currently; please try again later.
     }
 
     public enum BankType

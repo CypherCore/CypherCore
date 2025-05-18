@@ -849,9 +849,18 @@ namespace Game.Networking.Packets
 
     public class LogoutComplete : ServerPacket
     {
+        SwitchGameModeData SwitchGameMode;
+
         public LogoutComplete() : base(ServerOpcodes.LogoutComplete) { }
 
-        public override void Write() { }
+        public override void Write()
+        {
+            _worldPacket.WriteBit(SwitchGameMode != null);
+            _worldPacket.FlushBits();
+
+            if (SwitchGameMode != null)
+                SwitchGameMode.Write(_worldPacket);
+        }
     }
 
     public class LogoutCancel : ClientPacket
@@ -1321,6 +1330,58 @@ namespace Game.Networking.Packets
 
             foreach (WarbandGroupMember member in Members)
                 member.Write(data);
+        }
+    }
+
+    class GameModeData
+    {
+        public int Unknown_1107_0;
+        public ObjectGuid Guid;
+        public byte GameMode;
+        public int MapID = 0;
+        public byte Unknown_1107_1;
+        public byte Unknown_1107_2;
+        public byte Unknown_1107_3;
+        public Array<ChrCustomizationChoice> Customizations = new(250);
+        public Array<ChrCustomizationChoice> Unknown_1107_4 = new(250);
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Unknown_1107_0);
+            data.WritePackedGuid(Guid);
+            data.WriteUInt8(GameMode);
+            data.WriteInt32(MapID);
+            data.WriteUInt8(Unknown_1107_1);
+            data.WriteUInt8(Unknown_1107_2);
+            data.WriteUInt8(Unknown_1107_3);
+            data.WriteInt32(Customizations.Count);
+            data.WriteInt32(Unknown_1107_4.Count);
+
+            foreach (ChrCustomizationChoice customization in Customizations)
+            {
+                data.WriteUInt32(customization.ChrCustomizationOptionID);
+                data.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
+
+            foreach (ChrCustomizationChoice customization in Unknown_1107_4)
+            {
+                data.WriteUInt32(customization.ChrCustomizationOptionID);
+                data.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
+        }
+    }
+
+    class SwitchGameModeData
+    {
+        public bool IsFastLogin;
+        public GameModeData Current;
+        public GameModeData New;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits(IsFastLogin, 1);
+            Current.Write(data);
+            New.Write(data);
         }
     }
 }

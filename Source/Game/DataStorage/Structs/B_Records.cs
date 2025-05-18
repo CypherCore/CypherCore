@@ -111,7 +111,7 @@ namespace Game.DataStorage
         public int LanguageID;
         public int ConditionID;
         public ushort EmotesID;
-        public byte Flags;
+        public ushort Flags;
         public uint ChatBubbleDurationMs;
         public int VoiceOverPriorityID;
         public uint[] SoundKitID = new uint[2];

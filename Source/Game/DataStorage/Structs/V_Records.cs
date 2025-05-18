@@ -129,6 +129,8 @@ namespace Game.DataStorage
         public sbyte VignetteType;
         public int RewardQuestID;
         public int UiWidgetSetID;
+        public int UiMapPinInfoID;
+        public sbyte ObjectiveType;
 
         public bool HasFlag(VignetteFlags vignetteFlags) { return (Flags & (int)vignetteFlags) != 0; }
         public bool IsInfiniteAOI()

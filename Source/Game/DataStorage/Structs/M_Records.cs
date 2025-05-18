@@ -122,8 +122,8 @@ namespace Game.DataStorage
 
     public sealed class MapDifficultyRecord
     {
-        public uint Id;
         public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
+        public uint Id;
         public uint DifficultyID;
         public int LockID;
         public MapDifficultyResetInterval ResetInterval;

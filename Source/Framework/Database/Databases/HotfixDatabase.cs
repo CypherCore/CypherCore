@@ -895,8 +895,9 @@ namespace Framework.Database
             // LfgDungeons.db2
             PrepareStatement(HotfixStatements.SEL_LFG_DUNGEONS, "SELECT ID, Name, Description, TypeID, Subtype, Faction, IconTextureFileID, RewardsBgTextureFileID, " +
                 "PopupBgTextureFileID, ExpansionLevel, MapID, DifficultyID, MinGear, GroupID, OrderIndex, RequiredPlayerConditionId, RandomID, ScenarioID, " +
-                "FinalEncounterID, CountTank, CountHealer, CountDamage, MinCountTank, MinCountHealer, MinCountDamage, BonusReputationAmount, MentorItemLevel, " +
-                "MentorCharLevel, MaxPremadeGroupSize, ContentTuningID, Flags1, Flags2 FROM lfg_dungeons WHERE (`VerifiedBuild` > 0) = ?");
+                "FinalEncounterID, CountTank, CountHealer, CountDamage, MinCountTank, MinCountHealer, MinCountDamage, MaxPremadeCountTank, " +
+                "MaxPremadeCountHealer, MaxPremadeCountDamage, BonusReputationAmount, MentorItemLevel, MentorCharLevel, MaxPremadeGroupSize, ContentTuningID, " +
+                "Flags1, Flags2 FROM lfg_dungeons WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_LFG_DUNGEONS_LOCALE, "SELECT ID, Name_lang, Description_lang FROM lfg_dungeons_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
 
@@ -940,7 +941,7 @@ namespace Framework.Database
                 " AND locale = ?");
 
             // MapDifficulty.db2
-            PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY, "SELECT ID, Message, DifficultyID, LockID, ResetInterval, MaxPlayers, ItemContext, " +
+            PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY, "SELECT Message, ID, DifficultyID, LockID, ResetInterval, MaxPlayers, ItemContext, " +
                 "ItemContextPickerID, Flags, ContentTuningID, WorldStateExpressionID, MapID FROM map_difficulty WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_LOCALE, "SELECT ID, Message_lang FROM map_difficulty_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
@@ -1028,8 +1029,8 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_PHASE_X_PHASE_GROUP, "SELECT ID, PhaseID, PhaseGroupID FROM phase_x_phase_group WHERE (`VerifiedBuild` > 0) = ?");
 
             // PlayerCondition.db2
-            PrepareStatement(HotfixStatements.SEL_PLAYER_CONDITION, "SELECT ID, RaceMask, FailureDescription, ClassMask, SkillLogic, LanguageID, MinLanguage, " +
-                "MaxLanguage, MaxFactionID, MaxReputation, ReputationLogic, CurrentPvpFaction, PvpMedal, PrevQuestLogic, CurrQuestLogic, " +
+            PrepareStatement(HotfixStatements.SEL_PLAYER_CONDITION, "SELECT ID, RaceMask, FailureDescription, MinLevel, MaxLevel, ClassMask, SkillLogic, LanguageID, " +
+                "MinLanguage, MaxLanguage, MaxFactionID, MaxReputation, ReputationLogic, CurrentPvpFaction, PvpMedal, PrevQuestLogic, CurrQuestLogic, " +
                 "CurrentCompletedQuestLogic, SpellLogic, ItemLogic, ItemFlags, AuraSpellLogic, WorldStateExpressionID, WeatherID, PartyStatus, " +
                 "LifetimeMaxPVPRank, AchievementLogic, Gender, NativeGender, AreaLogic, LfgLogic, CurrencyLogic, QuestKillID, QuestKillLogic, " +
                 "MinExpansionLevel, MaxExpansionLevel, MinAvgItemLevel, MaxAvgItemLevel, MinAvgEquippedItemLevel, MaxAvgEquippedItemLevel, PhaseUseFlags, " +
@@ -1624,7 +1625,7 @@ namespace Framework.Database
 
             // Vignette.db2
             PrepareStatement(HotfixStatements.SEL_VIGNETTE, "SELECT ID, Name, PlayerConditionID, VisibleTrackingQuestID, QuestFeedbackEffectID, Flags, MaxHeight, " +
-                "MinHeight, VignetteType, RewardQuestID, UiWidgetSetID FROM vignette WHERE (`VerifiedBuild` > 0) = ?");
+                "MinHeight, VignetteType, RewardQuestID, UiWidgetSetID, UiMapPinInfoID, ObjectiveType FROM vignette WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_VIGNETTE_LOCALE, "SELECT ID, Name_lang FROM vignette_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // WmoAreaTable.db2

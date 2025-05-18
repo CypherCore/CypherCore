@@ -95,19 +95,19 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(SellAllJunkEnabled);
 
             _worldPacket.WriteBit(GroupFinderEnabled);
-            _worldPacket.WriteBit(LfdEnabled);
-            _worldPacket.WriteBit(LfrEnabled);
             _worldPacket.WriteBit(IsPremadeGroupEnabled);
-            _worldPacket.WriteBit(PremadeGroupsEnabled);
+            _worldPacket.WriteBit(UseActivePlayerDataQuestCompleted);
             _worldPacket.WriteBit(false); // unused 10.2.7
             _worldPacket.WriteBit(GuildEventsEditsEnabled);
             _worldPacket.WriteBit(GuildTradeSkillsEnabled);
-
             _worldPacket.WriteBits(Unknown1027.GetByteCount(), 7);
             _worldPacket.WriteBit(BNSendWhisperUseV2Services);
-
             _worldPacket.WriteBit(BNSendGameDataUseV2Services);
             _worldPacket.WriteBit(IsAccountCurrencyTransferEnabled);
+
+            _worldPacket.WriteBit(false); // unused 11.0.7
+            _worldPacket.WriteBit(LobbyMatchmakerQueueFromMainlineEnabled);
+            _worldPacket.WriteBit(CanSendLobbyMatchmakerPartyCustomizations);
 
             _worldPacket.FlushBits();
 
@@ -207,15 +207,15 @@ namespace Game.Networking.Packets
         public bool IsPlayerContentTrackingEnabled;
         public bool SellAllJunkEnabled;
         public bool GroupFinderEnabled = true;  // classic only
-        public bool LfdEnabled = true;  // classic only
-        public bool LfrEnabled = true;  // classic only
         public bool IsPremadeGroupEnabled = true;  // classic only
-        public bool PremadeGroupsEnabled = true;
+        public bool UseActivePlayerDataQuestCompleted = false; ///< Uses ActivePlayerData::QuestCompleted (legacy) to store completed quest bits instead of ActivePlayerData::BitVectors[9]
         public bool GuildEventsEditsEnabled = true;
         public bool GuildTradeSkillsEnabled = true;
         public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
         public bool BNSendGameDataUseV2Services = true; ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
         public bool IsAccountCurrencyTransferEnabled;
+        public bool LobbyMatchmakerQueueFromMainlineEnabled;
+        public bool CanSendLobbyMatchmakerPartyCustomizations;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -487,11 +487,13 @@ namespace Game.Networking.Packets
     {
         public int Rule;
         public int Value;
+        public float ValueF;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Rule);
             data.WriteInt32(Value);
+            data.WriteFloat(ValueF);
         }
     }
 

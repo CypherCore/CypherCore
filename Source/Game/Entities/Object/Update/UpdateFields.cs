@@ -396,7 +396,7 @@ namespace Game.Entities
         public UpdateField<ulong> ArtifactXP = new(0, 15);
         public UpdateField<byte> ItemAppearanceModID = new(0, 16);
         public UpdateField<ItemModList> Modifiers = new(0, 17);
-        public UpdateField<uint> DynamicFlags2 = new(0, 18);
+        public UpdateField<uint> ZoneFlags = new(0, 18);
         public UpdateField<ItemBonusKey> ItemBonusKey = new(0, 19);
         public UpdateField<ushort> DEBUGItemLevel = new(0, 20);
         public UpdateFieldArray<int> SpellCharges = new(5, 21, 22);
@@ -441,7 +441,7 @@ namespace Game.Entities
             data.WriteInt32(Gems.Size());
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
-                data.WriteUInt32(DynamicFlags2);
+                data.WriteUInt32(ZoneFlags);
             }
             ItemBonusKey.GetValue().Write(data);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
@@ -584,7 +584,7 @@ namespace Game.Entities
                 }
                 if (changesMask[18])
                 {
-                    data.WriteUInt32(DynamicFlags2);
+                    data.WriteUInt32(ZoneFlags);
                 }
                 if (changesMask[19])
                 {
@@ -640,7 +640,7 @@ namespace Game.Entities
             ClearChangesMask(ArtifactXP);
             ClearChangesMask(ItemAppearanceModID);
             ClearChangesMask(Modifiers);
-            ClearChangesMask(DynamicFlags2);
+            ClearChangesMask(ZoneFlags);
             ClearChangesMask(ItemBonusKey);
             ClearChangesMask(DEBUGItemLevel);
             ClearChangesMask(SpellCharges);
@@ -4208,17 +4208,14 @@ namespace Game.Entities
     public class QuestSession : HasChangesMask
     {
         public UpdateField<ObjectGuid> Owner = new(0, 1);
-        public UpdateFieldArray<ulong> QuestCompleted = new(1000, 2, 3);
+        public UpdateField<BitVector> QuestCompleted = new(0, 2);
 
-        public QuestSession() : base(1003) { }
+        public QuestSession() : base(3) { }
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
             data.WritePackedGuid(Owner);
-            for (int i = 0; i < 1000; ++i)
-            {
-                data.WriteUInt64(QuestCompleted[i]);
-            }
+            QuestCompleted.GetValue().WriteCreate(data, owner, receiver);
         }
 
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
@@ -4227,10 +4224,7 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlocksMask(0), 32);
-            for (uint i = 0; i < 32; ++i)
-                if (changesMask.GetBlock(i) != 0)
-                    data.WriteBits(changesMask.GetBlock(i), 32);
+            data.WriteBits(changesMask.GetBlock(0), 3);
 
             data.FlushBits();
             if (changesMask[0])
@@ -4239,15 +4233,10 @@ namespace Game.Entities
                 {
                     data.WritePackedGuid(Owner);
                 }
-            }
-            if (changesMask[2])
-            {
-                for (int i = 0; i < 1000; ++i)
+
+                if (changesMask[2])
                 {
-                    if (changesMask[3 + i])
-                    {
-                        data.WriteUInt64(QuestCompleted[i]);
-                    }
+                    QuestCompleted.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
                 }
             }
         }

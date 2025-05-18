@@ -704,7 +704,7 @@ namespace Game.Networking.Packets
             data.WriteBit(VotePassed);
             data.WriteBit(MyVoteCompleted);
             data.WriteBit(MyVote);
-            data.WriteBits(Reason.GetByteCount(), 8);
+            data.WriteBits(Reason.GetByteCount(), 9);
             data.WritePackedGuid(Target);
             data.WriteUInt32(TotalVotes);
             data.WriteUInt32(BootVotes);

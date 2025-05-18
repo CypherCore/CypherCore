@@ -52,6 +52,51 @@ namespace Framework.Cryptography
         public byte[] Digest { get; private set; }
     }
 
+    public class Sha512
+    {
+        public Sha512()
+        {
+            sha = SHA512.Create();
+            sha.Initialize();
+        }
+
+        public void Process(byte[] data, int length)
+        {
+            sha.TransformBlock(data, 0, length, data, 0);
+        }
+
+        public void Process(uint data)
+        {
+            var bytes = BitConverter.GetBytes(data);
+
+            sha.TransformBlock(bytes, 0, 4, bytes, 0);
+        }
+
+        public void Process(string data)
+        {
+            var bytes = Encoding.UTF8.GetBytes(data);
+
+            sha.TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+        }
+
+        public void Finish(byte[] data)
+        {
+            sha.TransformFinalBlock(data, 0, data.Length);
+
+            Digest = sha.Hash;
+        }
+
+        public void Finish(byte[] data, int offset, int length)
+        {
+            sha.TransformFinalBlock(data, offset, length);
+
+            Digest = sha.Hash;
+        }
+
+        SHA512 sha;
+        public byte[] Digest { get; private set; }
+    }
+
     public class HmacHash : HMACSHA1
     {
         public HmacHash(byte[] key) : base(key)
@@ -100,6 +145,42 @@ namespace Framework.Cryptography
     public class HmacSha256 : HMACSHA256
     {
         public HmacSha256(byte[] key) : base(key)
+        {
+            Initialize();
+        }
+
+        public void Process(byte[] data, int length)
+        {
+            TransformBlock(data, 0, length, data, 0);
+        }
+
+        public void Process(uint data)
+        {
+            var bytes = BitConverter.GetBytes(data);
+
+            TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+        }
+
+        public void Process(string data)
+        {
+            var bytes = Encoding.ASCII.GetBytes(data);
+
+            TransformBlock(bytes, 0, bytes.Length, bytes, 0);
+        }
+
+        public void Finish(byte[] data, int length)
+        {
+            TransformFinalBlock(data, 0, length);
+
+            Digest = Hash;
+        }
+
+        public byte[] Digest { get; private set; }
+    }
+
+    public class HmacSha512 : HMACSHA512
+    {
+        public HmacSha512(byte[] key) : base(key)
         {
             Initialize();
         }

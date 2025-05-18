@@ -54,9 +54,13 @@ namespace Game.Networking.Packets
 
                 _worldPacket.WriteBits(c.Url.GetByteCount(), 11);
                 _worldPacket.WriteBits(c.WaitTimeOverrideMessage.GetByteCount(), 10);
+                _worldPacket.WriteBits(c.Title, 24);
+                _worldPacket.WriteBits(c.Description, 24);
 
                 _worldPacket.WriteString(c.Url);
                 _worldPacket.WriteString(c.WaitTimeOverrideMessage);
+                _worldPacket.WriteString(c.Title);
+                _worldPacket.WriteString(c.Description);
             }
         }
 
@@ -72,6 +76,8 @@ namespace Game.Networking.Packets
             public int WaitTimeOverrideMinutes;
             public string Url;
             public string WaitTimeOverrideMessage;
+            public string Title;
+            public string Description;
         }
     }
 
