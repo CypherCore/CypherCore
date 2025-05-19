@@ -492,6 +492,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo immunity infos...");
             Global.SpellMgr.LoadSpellInfoImmunities();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo target caps...");
+            Global.SpellMgr.LoadSpellInfoTargetCaps();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading PetFamilySpellsStore Data...");
             Global.SpellMgr.LoadPetFamilySpellsStore();
 

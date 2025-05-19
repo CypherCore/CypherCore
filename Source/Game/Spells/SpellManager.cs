@@ -4460,7 +4460,7 @@ namespace Game.Entities
             });
 
             // TODO: temporary, remove with dragonriding
-            ApplySpellFix( [404468], spellInfo =>
+            ApplySpellFix([404468], spellInfo =>
             {
                 spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
             });
@@ -4627,7 +4627,26 @@ namespace Game.Entities
                 spellInfo._LoadImmunityInfo();
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo immunity infos in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo immunity infos in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public void LoadSpellInfoTargetCaps()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // Eye Beam
+            ApplySpellFix([198030], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, 198013, 4, null, null);
+            });
+
+            // Volatile Agony
+            ApplySpellFix([453035], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(8, 0, 453034, 1, null, null);
+            });
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadPetFamilySpellsStore()

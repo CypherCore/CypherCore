@@ -2265,35 +2265,48 @@ namespace Game.Spells
             }
         }
 
-        void _LoadSqrtTargetLimit(int maxTargets, int numNonDiminishedTargets, uint? maxTargetsEffectValueHolder, uint? numNonDiminishedTargetsEffectValueHolder)
+        public void _LoadSqrtTargetLimit(int maxTargets, int numNonDiminishedTargets, uint? maxTargetsValueHolderSpell, uint? maxTargetsValueHolderEffect,
+            uint? numNonDiminishedTargetsValueHolderSpell, uint? numNonDiminishedTargetsValueHolderEffect)
         {
             SqrtDamageAndHealingDiminishing.MaxTargets = maxTargets;
             SqrtDamageAndHealingDiminishing.NumNonDiminishedTargets = numNonDiminishedTargets;
 
-            if (maxTargetsEffectValueHolder.HasValue)
+            if (maxTargetsValueHolderEffect.HasValue)
             {
-                if (maxTargetsEffectValueHolder < GetEffects().Count)
+                SpellInfo maxTargetValueHolder = this;
+                if (maxTargetsValueHolderSpell.HasValue)
+                    maxTargetValueHolder = Global.SpellMgr.GetSpellInfo(maxTargetsValueHolderSpell.Value, Difficulty);
+
+                if (maxTargetValueHolder == null)
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {maxTargetsValueHolderSpell} does not exist");
+                else if (maxTargetsValueHolderEffect >= maxTargetValueHolder.GetEffects().Count)
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {maxTargetValueHolder.Id} does not have effect {maxTargetsValueHolderEffect.Value}");
+                else
                 {
-                    SpellEffectInfo valueHolder = GetEffect(maxTargetsEffectValueHolder.Value);
+                    SpellEffectInfo valueHolder = maxTargetValueHolder.GetEffect(maxTargetsValueHolderEffect.Value);
                     int expectedValue = valueHolder.CalcBaseValue(null, null, 0, -1);
                     if (maxTargets != expectedValue)
-                        Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {Id} has different value in effect {maxTargetsEffectValueHolder.Value} than expected, recheck target caps (expected {maxTargets}, got {expectedValue})");
+                        Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {maxTargetValueHolder.Id} has different value in effect {maxTargetsValueHolderEffect.Value} than expected, recheck target caps (expected {maxTargets}, got {expectedValue})");
                 }
-                else
-                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {Id} does not have effect {maxTargetsEffectValueHolder.Value}");
             }
 
-            if (numNonDiminishedTargetsEffectValueHolder.HasValue)
+            if (numNonDiminishedTargetsValueHolderEffect.HasValue)
             {
-                if (numNonDiminishedTargetsEffectValueHolder < GetEffects().Count)
+                SpellInfo numNonDiminishedTargetsValueHolder = this;
+                if (numNonDiminishedTargetsValueHolderSpell.HasValue)
+                    numNonDiminishedTargetsValueHolder = Global.SpellMgr.GetSpellInfo(numNonDiminishedTargetsValueHolderSpell.Value, Difficulty);
+
+                if (numNonDiminishedTargetsValueHolder == null)
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {maxTargetsValueHolderSpell} does not exist");
+                else if (numNonDiminishedTargetsValueHolderEffect >= numNonDiminishedTargetsValueHolder.GetEffects().Count)
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {numNonDiminishedTargetsValueHolder.Id} does not have effect {maxTargetsValueHolderEffect.Value}");
+                else
                 {
-                    SpellEffectInfo valueHolder = GetEffect(numNonDiminishedTargetsEffectValueHolder.Value);
+                    SpellEffectInfo valueHolder = numNonDiminishedTargetsValueHolder.GetEffect(numNonDiminishedTargetsValueHolderEffect.Value);
                     int expectedValue = valueHolder.CalcBaseValue(null, null, 0, -1);
                     if (numNonDiminishedTargets != expectedValue)
-                        Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {Id} has different value in effect {numNonDiminishedTargetsEffectValueHolder.Value} than expected, recheck target caps (expected {numNonDiminishedTargets}, got {expectedValue})");
+                        Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {numNonDiminishedTargetsValueHolder.Id} has different value in effect {numNonDiminishedTargetsValueHolderEffect.Value} than expected, recheck target caps (expected {numNonDiminishedTargets}, got {expectedValue})");
                 }
-                else
-                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {Id} does not have effect {numNonDiminishedTargetsEffectValueHolder.Value}");
             }
         }
 
