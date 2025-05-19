@@ -6104,6 +6104,9 @@ namespace Game.Entities
                 case LootItemType.Currency:
                     ModifyCurrency(item.itemid, (int)item.count, CurrencyGainSource.Loot);
                     break;
+                case LootItemType.TrackingQuest:
+                    // nothing to do, already handled
+                    break;
             }
 
             if (ffaItem != null)
@@ -6212,7 +6215,7 @@ namespace Game.Entities
             SendPacket(packet);
 
             // add 'this' player as one of the players that are looting 'loot'
-            loot.OnLootOpened(GetMap(), GetGUID());
+            loot.OnLootOpened(GetMap(), this);
             m_AELootView[loot.GetGUID()] = loot;
 
             if (loot.loot_type == LootType.Corpse && !loot.GetOwnerGUID().IsItem())

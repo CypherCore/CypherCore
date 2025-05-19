@@ -369,7 +369,7 @@ namespace Framework.Constants
         CommandNpcShowlootMoney = 292,
         CommandNpcShowlootLabel2 = 293,
         CommandNpcShowlootSublabel = 294,
-        CommandNpcShowlootEntry2 = 295,
+        CommandNpcShowlootTrackingQuest = 295,
         CommandNpcShowLootCurrency = 296,
 
         // End

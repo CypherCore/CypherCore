@@ -1509,8 +1509,9 @@ namespace Framework.Constants
 
     public enum LootStoreItemType
     {
-        Item        = 0,
-        Reference   = 1,
+        Item = 0,
+        Reference = 1,
         Currency = 2,
+        TrackingQuest = 3
     }
 }

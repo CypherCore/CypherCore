@@ -524,7 +524,7 @@ namespace Game.Chat
             if (itemTemplate != null)
                 name = itemTemplate.GetName(handler.GetSessionDbcLocale());
 
-            handler.SendSysMessage(alternateString ? CypherStrings.CommandNpcShowlootEntry2 : CypherStrings.CommandNpcShowlootEntry,
+            handler.SendSysMessage(CypherStrings.CommandNpcShowlootEntry, alternateString ? 6 : 3 /*number of bytes from following string*/, "\xE2\x94\x80\xE2\x94\x80",
                 itemCount, ItemConst.ItemQualityColors[(int)(itemTemplate != null ? itemTemplate.GetQuality() : ItemQuality.Poor)], itemId, name, itemId);
         }
 
@@ -537,6 +537,23 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.CommandNpcShowLootCurrency, alternateString ? 6 : 3 /*number of bytes from following string*/, "\u2500\u2500",
                 count, ItemConst.ItemQualityColors[currency != null ? currency.Quality : (int)ItemQuality.Poor], currencyId, count, name, currencyId);
+        }
+
+        static void _ShowLootTrackingQuestCurrencyEntry(CommandHandler handler, uint questId, bool alternateString = false)
+        {
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+            string name = "Unknown quest";
+            if (quest != null)
+            {
+                name = quest.LogTitle;
+                if (handler.GetSessionDbcLocale() != Locale.enUS)
+                {
+                    QuestTemplateLocale localeData = Global.ObjectMgr.GetQuestLocale(questId);
+                    if (localeData != null)
+                        ObjectManager.GetLocaleString(localeData.LogTitle, handler.GetSessionDbcLocale(), ref name);
+                }
+            }
+            handler.SendSysMessage(CypherStrings.CommandNpcShowlootTrackingQuest, alternateString ? 6 : 3 /*number of bytes from following string*/, "\xE2\x94\x80\xE2\x94\x80", questId, name, questId);
         }
 
         static void _IterateNotNormalLootMap(CommandHandler handler, MultiMap<ObjectGuid, NotNormalLootItem> map, List<LootItem> items)
@@ -564,6 +581,9 @@ namespace Game.Chat
                             case LootItemType.Currency:
                                 _ShowLootCurrencyEntry(handler, item.itemid, item.count, true);
                                 break;
+                            case LootItemType.TrackingQuest:
+                                _ShowLootTrackingQuestCurrencyEntry(handler, item.itemid, true);
+                                break;
                         }
                     }
                 }
@@ -589,6 +609,9 @@ namespace Game.Chat
                             case LootItemType.Currency:
                                 _ShowLootCurrencyEntry(handler, item.itemid, item.count);
                                 break;
+                            case LootItemType.TrackingQuest:
+                                _ShowLootTrackingQuestCurrencyEntry(handler, item.itemid);
+                                break;
                         }
                     }
                 }
@@ -607,6 +630,9 @@ namespace Game.Chat
                                 break;
                             case LootItemType.Currency:
                                 _ShowLootCurrencyEntry(handler, item.itemid, item.count);
+                                break;
+                            case LootItemType.TrackingQuest:
+                                _ShowLootTrackingQuestCurrencyEntry(handler, item.itemid);
                                 break;
                         }
                     }

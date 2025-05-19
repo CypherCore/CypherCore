@@ -54,6 +54,10 @@ namespace Game.Loots
                     type = LootItemType.Currency;
                     freeforall = true;
                     break;
+                case LootStoreItemType.TrackingQuest:
+                    type = LootItemType.TrackingQuest;
+                    freeforall = true;
+                    break;
                 default:
                     break;
             }
@@ -73,6 +77,8 @@ namespace Game.Loots
                     return ItemAllowedForPlayer(player, loot, itemid, needs_quest, follow_loot_rules, false, conditions);
                 case LootItemType.Currency:
                     return CurrencyAllowedForPlayer(player, itemid, needs_quest, conditions);
+                case LootItemType.TrackingQuest:
+                    return TrackingQuestAllowedForPlayer(player, itemid, conditions);
                 default:
                     break;
             }
@@ -89,6 +95,8 @@ namespace Game.Loots
                         strictUsabilityCheck, lootStoreItem.conditions);
                 case LootStoreItemType.Currency:
                     return CurrencyAllowedForPlayer(player, lootStoreItem.itemid, lootStoreItem.needs_quest, lootStoreItem.conditions);
+                case LootStoreItemType.TrackingQuest:
+                    return TrackingQuestAllowedForPlayer(player, lootStoreItem.itemid, lootStoreItem.conditions);
                 default:
                     break;
             }
@@ -168,6 +176,18 @@ namespace Game.Loots
 
             // check quest requirements
             if (needs_quest && !player.HasQuestForCurrency(currencyId))
+                return false;
+
+            return true;
+        }
+
+        public static bool TrackingQuestAllowedForPlayer(Player player, uint questId, ConditionsReference conditions)
+        {
+            // DB conditions check
+            if (!conditions.Meets(player))
+                return false;
+
+            if (player.IsQuestCompletedBitSet(questId))
                 return false;
 
             return true;
@@ -781,6 +801,14 @@ namespace Game.Loots
                     items.Add(generatedLoot);
                     break;
                 }
+                case LootStoreItemType.TrackingQuest:
+                {
+                    LootItem generatedLoot = new(item);
+                    generatedLoot.count = 1;
+                    generatedLoot.LootListId = (uint)items.Count;
+                    items.Add(generatedLoot);
+                    break;
+                }
                 default:
                     break;
             }
@@ -834,6 +862,11 @@ namespace Game.Loots
                     case LootItemType.Currency:
                         player.ModifyCurrency(lootItem.itemid, (int)lootItem.count, CurrencyGainSource.Loot);
                         break;
+                    case LootItemType.TrackingQuest:
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate(lootItem.itemid);
+                        if (quest != null)
+                            player.RewardQuest(quest, LootItemType.Item, 0, player, false);
+                        break;
                 }
                 if (ffaitem != null)
                     ffaitem.is_looted = true;
@@ -846,6 +879,22 @@ namespace Game.Loots
 
             return allLooted;
         }
+
+        void AutoStoreTrackingQuests(Player player, List<NotNormalLootItem> ffaItems)
+        {
+            foreach (NotNormalLootItem ffaItem in ffaItems)
+            {
+                if (items[ffaItem.LootListId].type != LootItemType.TrackingQuest)
+                    continue;
+
+                --unlootedCount;
+                ffaItem.is_looted = true;
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(items[ffaItem.LootListId].itemid);
+                if (quest != null)
+                    player.RewardQuest(quest, LootItemType.Item, 0, player, false);
+            }
+        }
+
 
         public void LootMoney()
         {
@@ -965,7 +1014,13 @@ namespace Game.Loots
             }
 
             if (!ffaItems.Empty())
+            {
+                // TODO: flag immediately for loot that is supposed to be mailed if unlooted, otherwise flag when sending SMSG_LOOT_RESPONSE
+                //if (_mailUnlootedItems)
+                //    AutoStoreTrackingQuests(player, *ffaItems);
+
                 PlayerFFAItems[player.GetGUID()] = ffaItems;
+            }
         }
 
         public void NotifyItemRemoved(byte lootListId, Map map)
@@ -999,9 +1054,9 @@ namespace Game.Loots
             }
         }
 
-        public void OnLootOpened(Map map, ObjectGuid looter)
+        public void OnLootOpened(Map map, Player looter)
         {
-            AddLooter(looter);
+            AddLooter(looter.GetGUID());
             if (!_wasOpened)
             {
                 _wasOpened = true;
@@ -1033,19 +1088,21 @@ namespace Game.Loots
                 }
                 else if (_lootMethod == LootMethod.MasterLoot)
                 {
-                    if (looter == _lootMaster)
+                    if (looter.GetGUID() == _lootMaster)
                     {
-                        Player lootMaster = Global.ObjAccessor.GetPlayer(map, looter);
-                        if (lootMaster != null)
-                        {
-                            MasterLootCandidateList masterLootCandidateList = new();
-                            masterLootCandidateList.LootObj = GetGUID();
-                            masterLootCandidateList.Players = _allowedLooters;
-                            lootMaster.SendPacket(masterLootCandidateList);
-                        }
+                        MasterLootCandidateList masterLootCandidateList = new();
+                        masterLootCandidateList.LootObj = GetGUID();
+                        masterLootCandidateList.Players = _allowedLooters;
+                        looter.SendPacket(masterLootCandidateList);
                     }
                 }
             }
+
+            // Flag tracking quests as completed after all items were scanned for this player (some might depend on this quest not being completed)
+            //if (!_mailUnlootedItems)
+            var ffaItems = PlayerFFAItems.LookupByKey(looter.GetGUID());
+            if (ffaItems != null)
+                AutoStoreTrackingQuests(looter, ffaItems);
         }
 
         public bool HasAllowedLooter(ObjectGuid looter)
@@ -1163,6 +1220,7 @@ namespace Game.Loots
                         LootItemData lootItem = new();
                         lootItem.LootListID = (byte)item.LootListId;
                         lootItem.UIType = uiType.Value;
+                        lootItem.Type = (byte)item.type;
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new(item);
                         packet.Items.Add(lootItem);

@@ -532,6 +532,8 @@ namespace Game.Loots
 
                     return RandomHelper.randChance(chance * qualityModifier);
                 }
+                case LootStoreItemType.TrackingQuest:
+                    return RandomHelper.randChance(chance);
                 default:
                     break;
             }
@@ -607,6 +609,40 @@ namespace Game.Loots
                     if (maxcount < mincount)                        // wrong max count
                     {
                         Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: MaxCount ({maxcount}) less that MinCount ({mincount}) - skipped");
+                        return false;
+                    }
+                    break;
+                }
+                case LootStoreItemType.TrackingQuest:
+                {
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(itemid);
+                    if (quest == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: quest does not exist - skipped");
+                        return false;
+                    }
+
+                    if (!quest.HasFlag(QuestFlags.TrackingEvent))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: quest is not a tracking flag - skipped");
+                        return false;
+                    }
+
+                    if (chance == 0 && groupid == 0)                // Zero chance is allowed for grouped entries only
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: equal-chanced grouped entry, but group not defined - skipped");
+                        return false;
+                    }
+
+                    if (chance != 0 && chance < 0.0001f)            // loot with low chance
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: low chance ({chance}) - skipped");
+                        return false;
+                    }
+
+                    if (mincount != 1 || maxcount != 0)                  // wrong count
+                    {
+                        Log.outError(LogFilter.Sql, $"Table '{store.GetName()}' Entry {entry} ItemType {type} Item {itemid}: tracking quest has count other than 1 (MinCount {maxcount} MaxCount {mincount}) - skipped");
                         return false;
                     }
                     break;
@@ -804,6 +840,7 @@ namespace Game.Loots
                 {
                     case LootStoreItemType.Item:
                     case LootStoreItemType.Currency:
+                    case LootStoreItemType.TrackingQuest:
                         // Plain entries (not a reference, not grouped)
                         // Chance is already checked, just add
                         if (personalLooter == null || LootItem.AllowedForPlayer(personalLooter, item, true))
@@ -899,6 +936,7 @@ namespace Game.Loots
                         break;
                     }
                     case LootStoreItemType.Currency:
+                    case LootStoreItemType.TrackingQuest:
                     {
                         // Plain entries (not a reference, not grouped)
                         // Chance is already checked, just add
@@ -949,6 +987,8 @@ namespace Game.Loots
                 switch (lootStoreItem.type)
                 {
                     case LootStoreItemType.Item:
+                    case LootStoreItemType.Currency:
+                    case LootStoreItemType.TrackingQuest:
                         if (LootItem.AllowedForPlayer(player, lootStoreItem, strictUsabilityCheck))
                             return true;                                    // active quest drop found
                         break;
@@ -987,6 +1027,10 @@ namespace Game.Loots
                         continue;
                     case LootStoreItemType.Currency:
                         if (li.type != LootItemType.Currency)
+                            continue;
+                        break;
+                    case LootStoreItemType.TrackingQuest:
+                        if (li.type != LootItemType.TrackingQuest)
                             continue;
                         break;
                     default:

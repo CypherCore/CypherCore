@@ -68,7 +68,8 @@ namespace Framework.Constants
     public enum LootItemType
     {
         Item = 0,
-        Currency = 1
+        Currency = 1,
+        TrackingQuest = 2
     }
 
     public enum LootError
