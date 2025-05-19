@@ -430,6 +430,7 @@ namespace Game.Entities
         public uint Blocked { get; set; }
         public HitInfo HitInfo { get; set; }
         public VictimState TargetState { get; set; }
+        public uint RageGained { get; set; }
 
         // Helper
         public WeaponAttackType AttackType { get; set; }

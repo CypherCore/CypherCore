@@ -236,7 +236,7 @@ namespace Game.Chat
             {
                 Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
                 if (target != attacker)
-                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0);
+                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0, 0);
                 return true;
             }
 
@@ -260,7 +260,7 @@ namespace Game.Chat
                 uint resist = dmgInfo.GetResist();
                 Unit.DealDamageMods(attacker, target, ref damage, ref absorb);
                 Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, schoolmask, null, false);
-                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage, absorb, resist, VictimState.Hit, 0);
+                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage, absorb, resist, VictimState.Hit, 0, 0);
                 return true;
             }
 

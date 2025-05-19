@@ -2661,16 +2661,6 @@ namespace Game.Entities
                 }
             }
 
-            // Rage from Damage made (only from direct weapon damage)
-            if (attacker != null && cleanDamage != null && (cleanDamage.attackType == WeaponAttackType.BaseAttack || cleanDamage.attackType == WeaponAttackType.OffAttack) && damagetype == DamageEffectType.Direct && attacker != victim && attacker.GetPowerType() == PowerType.Rage)
-            {
-                uint rage = (uint)(attacker.GetBaseAttackTime(cleanDamage.attackType) / 1000.0f * 1.75f);
-                if (cleanDamage.attackType == WeaponAttackType.OffAttack)
-                    rage /= 2;
-
-                attacker.RewardRage(rage);
-            }
-
             if (damageDone == 0)
                 return 0;
 
@@ -3284,7 +3274,7 @@ namespace Game.Entities
             }
         }
 
-        public void RewardRage(uint baseRage)
+        public int RewardRage(uint baseRage)
         {
             float addRage = baseRage;
 
@@ -3293,7 +3283,7 @@ namespace Game.Entities
 
             addRage *= WorldConfig.GetFloatValue(WorldCfg.RatePowerRageIncome);
 
-            ModifyPower(PowerType.Rage, (int)(addRage * 10));
+            return ModifyPower(PowerType.Rage, (int)(addRage * 10), false);
         }
 
         public float GetPPMProcChance(uint WeaponSpeed, float PPM, SpellInfo spellProto)

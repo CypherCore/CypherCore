@@ -560,7 +560,7 @@ namespace Game.Entities
                     return AttackSwingErr.BadFacing;
 
                 return null;
-            };
+            }
 
             if (IsAttackReady(WeaponAttackType.BaseAttack))
             {
@@ -600,6 +600,19 @@ namespace Game.Entities
                 else
                     SetAttackTimer(WeaponAttackType.OffAttack, 100);
             }
+        }
+
+        // Calculates the normalized rage amount per weapon swing
+        static uint CalcMeleeAttackRageGain(Unit attacker, WeaponAttackType attType)
+        {
+            if (attacker == null || (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack))
+                return 0;
+
+            uint rage = (uint)(attacker.GetBaseAttackTime(attType) / 1000.0f * 1.75f);
+            if (attType == WeaponAttackType.OffAttack)
+                rage /= 2;
+
+            return rage;
         }
 
         public void AttackerStateUpdate(Unit victim, WeaponAttackType attType = WeaponAttackType.BaseAttack, bool extra = false)
@@ -670,6 +683,17 @@ namespace Game.Entities
                             damageInfo.HitInfo |= HitInfo.FakeDamage;
                     }
 
+                    // Rage reward
+                    if (this != victim && damageInfo.HitOutCome != MeleeHitOutcome.Miss && GetPowerType() == PowerType.Rage)
+                    {
+                        uint rageReward = CalcMeleeAttackRageGain(this, attType);
+                        if (rageReward != 0)
+                        {
+                            damageInfo.HitInfo |= HitInfo.RageGain;
+                            damageInfo.RageGained = (uint)RewardRage(rageReward);
+                        }
+                    }
+
                     SendAttackStateUpdate(damageInfo);
 
                     _lastDamagedTargetGuid = victim.GetGUID();
@@ -689,7 +713,7 @@ namespace Game.Entities
                     if (attType == WeaponAttackType.OffAttack)
                         hitInfo |= HitInfo.OffHand;
 
-                    SendAttackStateUpdate(hitInfo, victim, GetMeleeDamageSchoolMask(), 0, 0, 0, VictimState.Hit, 0);
+                    SendAttackStateUpdate(hitInfo, victim, GetMeleeDamageSchoolMask(), 0, 0, 0, VictimState.Hit, 0, 0);
                 }
             }
         }
@@ -714,7 +738,7 @@ namespace Game.Entities
             return victim;
         }
 
-        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, uint Damage, uint AbsorbDamage, uint Resist, VictimState TargetState, uint BlockedAmount)
+        public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, uint Damage, uint AbsorbDamage, uint Resist, VictimState TargetState, uint BlockedAmount, uint RageGained)
         {
             CalcDamageInfo dmgInfo = new();
             dmgInfo.HitInfo = HitInfo;
@@ -727,6 +751,7 @@ namespace Game.Entities
             dmgInfo.Resist = Resist;
             dmgInfo.TargetState = TargetState;
             dmgInfo.Blocked = BlockedAmount;
+            dmgInfo.RageGained = RageGained;
             SendAttackStateUpdate(dmgInfo);
         }
 
@@ -751,6 +776,8 @@ namespace Game.Entities
 
             packet.VictimState = (byte)damageInfo.TargetState;
             packet.BlockAmount = (int)damageInfo.Blocked;
+            packet.RageGained = (int)damageInfo.RageGained;
+
             packet.LogData.Initialize(damageInfo.Attacker);
 
             ContentTuningParams contentTuningParams = new();
@@ -1178,6 +1205,7 @@ namespace Game.Entities
             damageInfo.Blocked = 0;
             damageInfo.HitInfo = 0;
             damageInfo.TargetState = 0;
+            damageInfo.RageGained = 0;
 
             damageInfo.AttackType = attackType;
             damageInfo.ProcAttacker = new ProcFlagsInit();
