@@ -2415,6 +2415,20 @@ namespace Game.Entities
             RemoveUpdateFieldFlagValue(questLog.ModifyValue(questLog.ObjectiveFlags), 1u << objectiveIndex);
         }
 
+        public bool IsQuestCompletedBitSet(uint questId)
+        {
+            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
+            if (questBit == 0)
+                return false;
+
+            int fieldOffset = (int)(questBit - 1) / ActivePlayerData.QuestCompletedBitsPerBlock;
+            if (fieldOffset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.CharacterQuestCompletedIndex].Values.Size())
+                return false;
+
+            ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
+            return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.CharacterQuestCompletedIndex].Values[fieldOffset] & flag) != 0;
+        }
+
         void SetQuestCompletedBit(uint questBit, bool completed)
         {
             if (questBit == 0)
@@ -2425,7 +2439,7 @@ namespace Game.Entities
             if (fieldOffset < ActivePlayerData.QuestCompletedBitsSize)
             {
                 if (completed)
-                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted,fieldOffset), flag);
+                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, fieldOffset), flag);
                 else
                     RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, fieldOffset), flag);
             }

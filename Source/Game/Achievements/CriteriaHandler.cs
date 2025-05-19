@@ -1848,10 +1848,8 @@ namespace Game.Achievements
                     break;
                 }
                 case ModifierTreeType.PlayerHasCompletedQuest: // 110
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
-                    if (questBit != 0)
-                        if ((referencePlayer.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
-                            return false;
+                    if (!referencePlayer.IsQuestCompletedBitSet(reqValue))
+                        return false;
                     break;
                 case ModifierTreeType.PlayerIsReadyToTurnInQuest: // 111
                     if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)

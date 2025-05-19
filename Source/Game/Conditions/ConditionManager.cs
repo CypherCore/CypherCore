@@ -2066,11 +2066,7 @@ namespace Game
                     results[i] = true;
 
                 for (var i = 0; i < condition.PrevQuestID.Length; ++i)
-                {
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(condition.PrevQuestID[i]);
-                    if (questBit != 0)
-                        results[i] = (player.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) != 0;
-                }
+                    results[i] = player.IsQuestCompletedBitSet(condition.PrevQuestID[i]);
 
                 if (!PlayerConditionLogic(condition.PrevQuestLogic, results))
                     return false;
