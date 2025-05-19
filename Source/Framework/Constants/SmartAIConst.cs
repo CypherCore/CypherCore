@@ -415,7 +415,7 @@ namespace Framework.Constants
         InvokerParty = 16,   // Invoker'S Party Members
         PlayerRange = 17,   // Min, Max
         PlayerDistance = 18,   // Maxdist
-        ClosestCreature = 19,   // Creatureentry(0any), Maxdist, Dead?, StringId
+        ClosestCreature = 19,   // Creatureentry(0any), Maxdist, findCreatureAliveState, StringId
         ClosestGameobject = 20,   // Entry(0any), Maxdist, StringId
         ClosestPlayer = 21,   // Maxdist
         ActionInvokerVehicle = 22,   // Unit'S Vehicle Who Caused This Event To Occur

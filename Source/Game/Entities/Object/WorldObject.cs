@@ -4181,7 +4181,7 @@ namespace Game.Entities
         public FindCreatureOptions SetCreatureId(uint creatureId) { CreatureId = creatureId; return this; }
         public FindCreatureOptions SetStringId(string stringId) { StringId = stringId; return this; }
 
-        public FindCreatureOptions SetIsAlive(bool isAlive) { IsAlive = isAlive; return this; }
+        public FindCreatureOptions SetIsAlive(FindCreatureAliveState isAlive) { IsAlive = isAlive; return this; }
         public FindCreatureOptions SetIsInCombat(bool isInCombat) { IsInCombat = isInCombat; return this; }
         public FindCreatureOptions SetIsSummon(bool isSummon) { IsSummon = isSummon; return this; }
 
@@ -4199,7 +4199,7 @@ namespace Game.Entities
         public uint? CreatureId;
         public string StringId;
 
-        public bool? IsAlive;
+        public FindCreatureAliveState? IsAlive;
         public bool? IsInCombat;
         public bool? IsSummon;
 

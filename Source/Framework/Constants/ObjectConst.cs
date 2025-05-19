@@ -258,4 +258,14 @@ namespace Framework.Constants
         FromRedirect = 0x01,
         HasRedirected = 0x02
     }
+
+    public enum FindCreatureAliveState
+    {
+        Alive = 0, // includes feign death
+        Dead = 1, // excludes feign death
+        EffectivelyAlive = 2, // excludes feign death
+        EffectivelyDead = 3, // includes feign death
+
+        Max
+    }
 }

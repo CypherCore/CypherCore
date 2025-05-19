@@ -2918,7 +2918,7 @@ namespace Game.AI
                     }
 
                     Creature target = refObj.FindNearestCreatureWithOptions(e.Target.unitClosest.dist != 0 ? e.Target.unitClosest.dist : 100,
-                        new FindCreatureOptions() { CreatureId = e.Target.unitClosest.entry, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null, IsAlive = e.Target.unitClosest.dead == 0 });
+                        new FindCreatureOptions() { CreatureId = e.Target.unitClosest.entry, StringId = !e.Target.param_string.IsEmpty() ? e.Target.param_string : null, IsAlive = (FindCreatureAliveState)e.Target.unitClosest.findCreatureAliveState });
 
                     if (target != null)
                         targets.Add(target);

@@ -497,7 +497,11 @@ namespace Game.AI
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Target.farthest.isInLos);
                     break;
                 case SmartTargets.ClosestCreature:
-                    TC_SAI_IS_BOOLEAN_VALID(e, e.Target.unitClosest.dead);
+                    if (e.Target.unitClosest.findCreatureAliveState < (uint)FindCreatureAliveState.Alive || e.Target.unitClosest.findCreatureAliveState >= (uint)FindCreatureAliveState.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has invalid alive state {e.Target.unitClosest.findCreatureAliveState}");
+                        return false;
+                    }
                     break;
                 case SmartTargets.ClosestEnemy:
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Target.closestAttackable.playerOnly);
@@ -3969,7 +3973,7 @@ namespace Game.AI
         {
             public uint entry;
             public uint dist;
-            public uint dead;
+            public uint findCreatureAliveState;
         }
         public struct GoClosest
         {

@@ -2468,8 +2468,38 @@ namespace Game.Maps
             if (i_args.StringId != null && !u.HasStringId(i_args.StringId))
                 return false;
 
-            if (i_args.IsAlive.HasValue && u.IsAlive() != i_args.IsAlive)
-                return false;
+            if (i_args.IsAlive.HasValue)
+            {
+                switch (i_args.IsAlive.Value)
+                {
+                    case FindCreatureAliveState.Alive:
+                    {
+                        if (!u.IsAlive())
+                            return false;
+                        break;
+                    }
+                    case FindCreatureAliveState.Dead:
+                    {
+                        if (u.IsAlive())
+                            return false;
+                        break;
+                    }
+                    case FindCreatureAliveState.EffectivelyAlive:
+                    {
+                        if (!u.IsAlive() || u.HasUnitFlag2(UnitFlags2.FeignDeath))
+                            return false;
+                        break;
+                    }
+                    case FindCreatureAliveState.EffectivelyDead:
+                    {
+                        if (u.IsAlive() && !u.HasUnitFlag2(UnitFlags2.FeignDeath))
+                            return false;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            }
 
             if (i_args.IsSummon.HasValue && u.IsSummon() != i_args.IsSummon)
                 return false;
