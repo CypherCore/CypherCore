@@ -1821,7 +1821,6 @@ namespace Framework.Constants
         RateRestOfflineInTavernOrCity,
         RateRestOfflineInWilderness,
         RateSkillDiscovery,
-        RateTalent,
         RateXpExplore,
         RateXpGuildModifier,
         RateXpKill,

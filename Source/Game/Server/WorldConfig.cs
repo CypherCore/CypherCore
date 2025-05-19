@@ -117,12 +117,6 @@ namespace Game
             Values[WorldCfg.RateAuctionCut] = GetDefaultValue("Rate.Auction.Cut", 1.0f);
             Values[WorldCfg.RateHonor] = GetDefaultValue("Rate.Honor", 1.0f);
             Values[WorldCfg.RateInstanceResetTime] = GetDefaultValue("Rate.InstanceResetTime", 1.0f);
-            Values[WorldCfg.RateTalent] = GetDefaultValue("Rate.Talent", 1.0f);
-            if ((float)Values[WorldCfg.RateTalent] < 0.0f)
-            {
-                Log.outError(LogFilter.ServerLoading, "Rate.Talent ({0}) must be > 0. Using 1 instead.", Values[WorldCfg.RateTalent]);
-                Values[WorldCfg.RateTalent] = 1.0f;
-            }
             Values[WorldCfg.RateMovespeed] = GetDefaultValue("Rate.MoveSpeed", 1.0f);
             if ((float)Values[WorldCfg.RateMovespeed] < 0.0f)
             {
