@@ -439,7 +439,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellEffect((SpellIds.AbyssalReverie, 0));
         }
 
-        void CalculateHealingBonus(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        void CalculateHealingBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
         {
             spell_pri_atonement.TriggerArgs args = (spell_pri_atonement.TriggerArgs)GetSpell().m_customArg;
             if (args == null || (args.DamageSchoolMask & SpellSchoolMask.Shadow) == 0)
@@ -919,7 +919,7 @@ namespace Scripts.Spells.Priest
             && ValidateSpellEffect((SpellIds.DivineService, 0));
         }
 
-        void CalculateHealingBonus(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        void CalculateHealingBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
         {
             AuraEffect divineServiceEffect = GetCaster().GetAuraEffect(SpellIds.DivineService, 0);
             if (divineServiceEffect != null)
@@ -1183,7 +1183,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellEffect((SpellIds.FocusedMending, 0));
         }
 
-        void CalculateHealingBonus(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        void CalculateHealingBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
         {
             AuraEffect focusedMendingEffect = GetCaster().GetAuraEffect(SpellIds.FocusedMending, 0);
             if (focusedMendingEffect != null)
@@ -1574,7 +1574,7 @@ namespace Scripts.Spells.Priest
             }
         }
 
-        void CalculateDamageBonus(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamageBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             Aura atonement = GetCaster().GetAura(SpellIds.Atonement);
             if (atonement == null)
@@ -1680,7 +1680,7 @@ namespace Scripts.Spells.Priest
             _damageIncrease = mindDevourer.GetAmount();
         }
 
-        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             MathFunctions.AddPct(ref pctMod, _damageIncrease);
         }
@@ -1966,7 +1966,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
         }
 
-        void CalculateDamageBonus(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamageBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(SpellIds.PowerOfTheDarkSide, 0);
             if (powerOfTheDarkSide != null)
@@ -1988,7 +1988,7 @@ namespace Scripts.Spells.Priest
             return ValidateSpellInfo(SpellIds.PowerOfTheDarkSide);
         }
 
-        void CalculateHealingBonus(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        void CalculateHealingBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
         {
             AuraEffect powerOfTheDarkSide = GetCaster().GetAuraEffect(SpellIds.PowerOfTheDarkSide, 0);
             if (powerOfTheDarkSide != null)
@@ -3003,7 +3003,7 @@ namespace Scripts.Spells.Priest
             && ValidateSpellEffect((spellInfo.Id, 4));
         }
 
-        void HandleDamageCalculation(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void HandleDamageCalculation(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             if (victim.HealthBelowPct(GetEffectInfo(1).CalcValue(GetCaster())))
                 MathFunctions.AddPct(ref pctMod, GetEffectInfo(2).CalcValue(GetCaster()));

@@ -942,7 +942,7 @@ namespace Scripts.Spells.Generic
     [Script] // 64208 - Consumption
     class spell_gen_consumption : SpellScript
     {
-        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             SpellInfo createdBySpell = SpellMgr.GetSpellInfo(GetCaster().m_unitData.CreatedBySpell, GetCastDifficulty());
             if (createdBySpell != null)
@@ -5100,7 +5100,7 @@ namespace Scripts.Spells.Generic
            );
         }
 
-        void CalculateHealingBonus(Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+        void CalculateHealingBonus(SpellEffectInfo spellEffectInfo, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
         {
             MathFunctions.AddPct(ref pctMod, MajorPlayerHealingCooldownHelpers.GetBonusMultiplier(GetCaster(), GetSpellInfo().Id));
         }

@@ -161,7 +161,7 @@ namespace Scripts.Spells.Evoker
             && spellInfo.GetEffect(2).IsAura(AuraType.ModSilence); // validate we are removing the correct effect
         }
 
-        void AddBonusUpfrontDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void AddBonusUpfrontDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             int empowerLevel = (int)GetSpell().m_customArg;
             if (empowerLevel == 0)

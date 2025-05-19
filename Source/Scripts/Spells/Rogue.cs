@@ -293,7 +293,7 @@ namespace Scripts.Spells.Rogue
     [Script] // 32645 - Envenom
     class spell_rog_envenom : SpellScript
     {
-        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             pctMod *= GetSpell().GetPowerTypeCostAmount(PowerType.ComboPoints).GetValueOrDefault(0);
 
@@ -311,7 +311,7 @@ namespace Scripts.Spells.Rogue
     [Script] // 196819 - Eviscerate
     class spell_rog_eviscerate : SpellScript
     {
-        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             pctMod *= GetSpell().GetPowerTypeCostAmount(PowerType.ComboPoints).GetValueOrDefault(0);
 

@@ -164,7 +164,7 @@ namespace Game.Scripting
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
         public delegate SpellCastResult SpellCheckCastFnType();
-        public delegate void DamageAndHealingCalcFnType(Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
+        public delegate void DamageAndHealingCalcFnType(SpellEffectInfo spellEffectInfo, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
         public delegate void SpellOnResistAbsorbCalculateFnType(DamageInfo damageInfo, ref uint resistAmount, ref int absorbAmount);
         public delegate void SpellEffectFnType(uint index);
         public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
@@ -212,9 +212,9 @@ namespace Game.Scripting
                 _callImpl = handler;
             }
 
-            public void Call(Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+            public void Call(SpellEffectInfo spellEffectInfo, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
             {
-                _callImpl(victim, ref damageOrHealing, ref flatMod, ref pctMod);
+                _callImpl(spellEffectInfo, victim, ref damageOrHealing, ref flatMod, ref pctMod);
             }
         }
 

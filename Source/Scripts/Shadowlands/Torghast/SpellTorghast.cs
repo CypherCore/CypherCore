@@ -89,7 +89,7 @@ namespace Scripts.Shadowlands.Torghast
     [Script] // 305060 - Yel'Shir's Powerglove
     class spell_torghast_yelshirs_powerglove : SpellScript
     {
-        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             SpellInfo triggeringSpell = GetTriggeringSpell();
             if (triggeringSpell != null)

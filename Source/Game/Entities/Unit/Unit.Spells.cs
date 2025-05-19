@@ -68,7 +68,7 @@ namespace Game.Entities
             void callDamageScript(ref int dmg, ref int flatMod, ref float pctMod)
             {
                 if (spell != null)
-                    spell.CallScriptCalcDamageHandlers(victim, ref dmg, ref flatMod, ref pctMod);
+                    spell.CallScriptCalcDamageHandlers(spellEffectInfo, victim, ref dmg, ref flatMod, ref pctMod);
                 else if (aurEff != null)
                     aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref dmg, ref flatMod, ref pctMod);
             }
@@ -483,7 +483,7 @@ namespace Game.Entities
             }
 
             if (spell != null)
-                spell.CallScriptCalcHealingHandlers(victim, ref healamount, ref DoneTotal, ref DoneTotalMod);
+                spell.CallScriptCalcHealingHandlers(spellEffectInfo, victim, ref healamount, ref DoneTotal, ref DoneTotalMod);
             else if (aurEff != null)
                 aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref healamount, ref DoneTotal, ref DoneTotalMod);
 

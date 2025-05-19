@@ -435,7 +435,7 @@ namespace Scripts.Spells.Azerite
             return ValidateSpellEffect((SpellEchoingBladesTrait, 2));
         }
 
-        void CalculateDamage(Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
         {
             AuraEffect trait = GetCaster().GetAuraEffect(SpellEchoingBladesTrait, 2);
             if (trait != null)

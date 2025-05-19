@@ -3876,7 +3876,7 @@ namespace Game.Entities
             return (uint)Math.Max(damage * (1.0f - mitigation), 0.0f);
         }
 
-        public int MeleeDamageBonusDone(Unit victim, int damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, Mechanics mechanic = default, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, Spell spell = null, AuraEffect aurEff = null)
+        public int MeleeDamageBonusDone(Unit victim, int damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellEffectInfo spellEffectInfo = null, Mechanics mechanic = default, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, Spell spell = null, AuraEffect aurEff = null)
         {
             if (victim == null || damage == 0)
                 return 0;
@@ -3976,7 +3976,7 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
             if (spell != null)
-                spell.CallScriptCalcDamageHandlers(victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
+                spell.CallScriptCalcDamageHandlers(spellEffectInfo, victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
             else if (aurEff != null)
                 aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref damage, ref DoneFlatBenefit, ref DoneTotalMod);
 
