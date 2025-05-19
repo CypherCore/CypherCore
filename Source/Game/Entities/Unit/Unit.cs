@@ -1645,6 +1645,41 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ShapeshiftForm), (byte)form);
         }
 
+        void CancelTravelShapeshiftForm(AuraRemoveMode removeMode = AuraRemoveMode.Default, bool force = false) { CancelShapeshiftForm(true, removeMode, force); }
+
+        void CancelShapeshiftForm(bool onlyTravelShapeshiftForm = false, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool force = false)
+        {
+            ShapeShiftForm form = GetShapeshiftForm();
+            if (form == ShapeShiftForm.None)
+                return;
+
+            bool isTravelShapeshiftForm()
+            {
+                var shapeInfo = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
+                if (shapeInfo != null)
+                {
+                    if (shapeInfo.MountTypeID != 0)
+                        return true;
+
+                    if (shapeInfo.Id == (uint)ShapeShiftForm.TravelForm || shapeInfo.Id == (uint)ShapeShiftForm.AquaticForm)
+                        return true;
+                }
+
+                return false;
+            }
+
+            if (onlyTravelShapeshiftForm && !isTravelShapeshiftForm())
+                return;
+
+            var shapeshifts = GetAuraEffectsByType(AuraType.ModShapeshift);
+            foreach (AuraEffect aurEff in shapeshifts)
+            {
+                SpellInfo spellInfo = aurEff.GetBase().GetSpellInfo();
+                if (force || (!spellInfo.HasAttribute(SpellAttr0.NoAuraCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive()))
+                    aurEff.GetBase().Remove(removeMode);
+            }
+        }
+
         // creates aura application instance and registers it in lists
         // aura application effects are handled separately to prevent aura list corruption
         public AuraApplication _CreateAuraApplication(Aura aura, uint effMask)
@@ -2873,7 +2908,8 @@ namespace Game.Entities
                                         return true;
 
                                     return false;
-                                };
+                                }
+                                ;
 
                                 bool isCastDelayed()
                                 {

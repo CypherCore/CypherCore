@@ -2024,7 +2024,7 @@ namespace Game.Entities
             {
                 // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
                 if (pair.Value.GetSpellInfo().CheckLocation(GetMapId(), m_zoneUpdateId, newArea, this) != SpellCastResult.SpellCastOk)
-                    RemoveOwnedAura(pair);
+                    RemoveOwnedAura(pair, AuraRemoveMode.Interrupt);
             }
 
             // some auras applied at subzone enter

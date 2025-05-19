@@ -938,6 +938,18 @@ namespace Game.Entities
             return true;
         }
 
+        void CancelMountAura(bool force)
+        {
+            if (!HasAuraType(AuraType.Mounted))
+                return;
+
+            RemoveAurasByType(AuraType.Mounted, aurApp =>
+            {
+                SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
+                return force || (!spellInfo.HasAttribute(SpellAttr0.NoAuraCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive());
+            });
+        }
+
         public MountCapabilityRecord GetMountCapability(uint mountType)
         {
             if (mountType == 0)
@@ -1042,6 +1054,14 @@ namespace Game.Entities
         {
             if (IsLoading())
                 return;
+
+            var spellShapeshiftForm = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
+            if (spellShapeshiftForm != null)
+            {
+                uint mountType = spellShapeshiftForm.MountTypeID;
+                if (mountType != 0 && GetMountCapability(mountType) == null)
+                    CancelTravelShapeshiftForm(AuraRemoveMode.Interrupt);
+            }
 
             var mounts = GetAuraEffectsByType(AuraType.Mounted);
             foreach (AuraEffect aurEff in mounts.ToArray())
