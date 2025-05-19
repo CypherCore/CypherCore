@@ -156,11 +156,7 @@ namespace Game.Entities
         public void DailyReset()
         {
             foreach (uint questId in m_activePlayerData.DailyQuestsCompleted)
-            {
-                uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-                if (questBit != 0)
-                    SetQuestCompletedBit(questBit, false);
-            }
+                SetQuestCompletedBit(questId, false);
 
             DailyQuestsReset dailyQuestsReset = new();
             dailyQuestsReset.Count = m_activePlayerData.DailyQuestsCompleted.Size();
@@ -207,11 +203,7 @@ namespace Game.Entities
                 return;
 
             foreach (uint questId in m_weeklyquests)
-            {
-                uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-                if (questBit != 0)
-                    SetQuestCompletedBit(questBit, false);
-            }
+                SetQuestCompletedBit(questId, false);
 
             for (ushort slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
             {
@@ -253,9 +245,7 @@ namespace Game.Entities
             {
                 if (completedTime < eventStartTime)
                 {
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-                    if (questBit != 0)
-                        SetQuestCompletedBit(questBit, false);
+                    SetQuestCompletedBit(questId, false);
 
                     eventList.Remove(questId);
                 }
@@ -271,11 +261,7 @@ namespace Game.Entities
                 return;
 
             foreach (uint questId in m_monthlyquests)
-            {
-                uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-                if (questBit != 0)
-                    SetQuestCompletedBit(questBit, false);
-            }
+                SetQuestCompletedBit(questId, false);
 
             m_monthlyquests.Clear();
             // DB data deleted in caller
@@ -1203,9 +1189,7 @@ namespace Game.Entities
             // make full db save
             SaveToDB(false);
 
-            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-            if (questBit != 0)
-                SetQuestCompletedBit(questBit, true);
+            SetQuestCompletedBit(questId, true);
 
             if (quest.HasFlag(QuestFlags.Pvp))
             {
@@ -1256,9 +1240,7 @@ namespace Game.Entities
             m_RewardedQuests.Add(questId);
             m_RewardedQuestsSave[questId] = QuestSaveType.Default;
 
-            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-            if (questBit != 0)
-                SetQuestCompletedBit(questBit, true);
+            SetQuestCompletedBit(questId, true);
         }
 
         public void FailQuest(uint questId)
@@ -1952,9 +1934,7 @@ namespace Game.Entities
                 m_RewardedQuestsSave[questId] = QuestSaveType.ForceDelete;
             }
 
-            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
-            if (questBit != 0)
-                SetQuestCompletedBit(questBit, false);
+            SetQuestCompletedBit(questId, false);
 
             // Remove seasonal quest also
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -2429,8 +2409,9 @@ namespace Game.Entities
             return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.CharacterQuestCompletedIndex].Values[fieldOffset] & flag) != 0;
         }
 
-        void SetQuestCompletedBit(uint questBit, bool completed)
+        void SetQuestCompletedBit(uint questId, bool completed)
         {
+            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(questId);
             if (questBit == 0)
                 return;
 

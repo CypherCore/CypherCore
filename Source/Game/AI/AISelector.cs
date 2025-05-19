@@ -110,5 +110,14 @@ namespace Game.AI
                 _ => new GameObjectAI(go),
             };
         }
+
+        public static ConversationAI SelectConversationAI(Conversation conversation)
+        {
+            ConversationAI ai = Global.ScriptMgr.GetConversationAI(conversation);
+            if ( ai != null)
+                return ai;
+
+            return new NullConversationAI(conversation, Global.ObjectMgr.GetScriptId("NullConversationAI", false));
+        }
     }
 }

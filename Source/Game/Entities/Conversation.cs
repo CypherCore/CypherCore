@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.AI;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Networking;
@@ -43,6 +44,8 @@ namespace Game.Entities
             //- Remove the Conversation from the accessor and from all lists of objects in world
             if (IsInWorld)
             {
+                _ai.OnRemove();
+
                 base.RemoveFromWorld();
                 GetMap().GetObjectsStore().Remove(GetGUID());
             }
@@ -50,7 +53,7 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            Global.ScriptMgr.OnConversationUpdate(this, diff);
+            _ai.OnUpdate(diff);
 
             if (GetDuration() > TimeSpan.FromMilliseconds(diff))
             {
@@ -116,12 +119,12 @@ namespace Game.Entities
             SetEntry(conversationEntry);
             SetObjectScale(1.0f);
 
+            AI_Initialize();
+
             _textureKitId = conversationTemplate.TextureKitId;
 
             foreach (var actor in conversationTemplate.Actors)
                 new ConversationActorFillVisitor(this, creator, map, actor).Invoke(actor);
-
-            Global.ScriptMgr.OnConversationCreate(this, creator);
 
             List<ConversationLine> lines = new();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
@@ -165,7 +168,7 @@ namespace Game.Entities
             // conversations are despawned 5-20s after LastLineEndTime
             _duration += TimeSpan.FromSeconds(10);
 
-            Global.ScriptMgr.OnConversationCreate(this, creator);
+            _ai.OnCreate(creator);
         }
 
         public bool Start()
@@ -193,7 +196,7 @@ namespace Game.Entities
             if (!GetMap().AddToMap(this))
                 return false;
 
-            Global.ScriptMgr.OnConversationStart(this);
+            _ai.OnStart();
             return true;
         }
 
@@ -284,6 +287,20 @@ namespace Game.Entities
             return actor.ToCreature();
         }
 
+        void AI_Initialize()
+        {
+            AI_Destroy();
+            _ai = AISelector.SelectConversationAI(this);
+            _ai.OnInitialize();
+        }
+
+        void AI_Destroy()
+        {
+            _ai = null;
+        }
+
+        public ConversationAI GetAI() { return _ai; }
+
         public uint GetScriptId()
         {
             return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
@@ -362,6 +379,8 @@ namespace Game.Entities
 
         Dictionary<(Locale locale, uint lineId), TimeSpan> _lineStartTimes = new();
         TimeSpan[] _lastLineEndTimes = new TimeSpan[(int)Locale.Total];
+
+        ConversationAI _ai;
 
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {

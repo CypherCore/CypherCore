@@ -632,7 +632,8 @@ namespace Game.Entities
                 stmt.AddValue(5, homebind.GetPositionZ());
                 stmt.AddValue(6, homebind.GetOrientation());
                 DB.Characters.Execute(stmt);
-            };
+            }
+            ;
 
             if (!ok && HasAtLoginFlag(AtLoginFlags.FirstLogin))
             {
@@ -869,11 +870,7 @@ namespace Game.Entities
                         // Skip loading special quests - they are also added to rewarded quests but only once and remain there forever
                         // instead add them separately from load daily/weekly/monthly/seasonal
                         if (!quest.IsDailyOrWeekly() && !quest.IsMonthly() && !quest.IsSeasonal())
-                        {
-                            uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
-                            if (questBit != 0)
-                                SetQuestCompletedBit(questBit, true);
-                        }
+                            SetQuestCompletedBit(quest_id, true);
 
                         for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
                             GetSession().GetCollectionMgr().AddItemAppearance(quest.RewardChoiceItemId[i]);
@@ -929,9 +926,7 @@ namespace Game.Entities
                         continue;
 
                     AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
-                    if (questBit != 0)
-                        SetQuestCompletedBit(questBit, true);
+                    SetQuestCompletedBit(quest_id, true);
 
                     Log.outDebug(LogFilter.Player, "Daily quest ({0}) cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
@@ -954,9 +949,7 @@ namespace Game.Entities
                         continue;
 
                     m_weeklyquests.Add(quest_id);
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
-                    if (questBit != 0)
-                        SetQuestCompletedBit(questBit, true);
+                    SetQuestCompletedBit(quest_id, true);
 
                     Log.outDebug(LogFilter.Player, "Weekly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
@@ -984,10 +977,7 @@ namespace Game.Entities
                         m_seasonalquests[event_id] = new();
 
                     m_seasonalquests[event_id][quest_id] = completedTime;
-
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
-                    if (questBit != 0)
-                        SetQuestCompletedBit(questBit, true);
+                    SetQuestCompletedBit(quest_id, true);
 
                     Log.outDebug(LogFilter.Player, "Seasonal quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
@@ -996,12 +986,8 @@ namespace Game.Entities
 
             m_SeasonalQuestChanged = false;
         }
-        void _LoadMonthlyQuestStatus()
+        void _LoadMonthlyQuestStatus(SQLResult result)
         {
-            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_MONTHLY);
-            stmt.AddValue(0, GetGUID().GetCounter());
-            SQLResult result = DB.Characters.Query(stmt);
-
             m_monthlyquests.Clear();
 
             if (!result.IsEmpty())
@@ -1014,9 +1000,7 @@ namespace Game.Entities
                         continue;
 
                     m_monthlyquests.Add(quest_id);
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(quest_id);
-                    if (questBit != 0)
-                        SetQuestCompletedBit(questBit, true);
+                    SetQuestCompletedBit(quest_id, true);
 
                     Log.outDebug(LogFilter.Player, "Monthly quest {0} cooldown for player (GUID: {1})", quest_id, GetGUID().ToString());
                 }
@@ -3447,6 +3431,7 @@ namespace Game.Entities
             _LoadDailyQuestStatus(holder.GetResult(PlayerLoginQueryLoad.DailyQuestStatus));
             _LoadWeeklyQuestStatus(holder.GetResult(PlayerLoginQueryLoad.WeeklyQuestStatus));
             _LoadSeasonalQuestStatus(holder.GetResult(PlayerLoginQueryLoad.SeasonalQuestStatus));
+            _LoadMonthlyQuestStatus(holder.GetResult(PlayerLoginQueryLoad.MonthlyQuestStatus));
             _LoadRandomBGStatus(holder.GetResult(PlayerLoginQueryLoad.RandomBg));
 
             // after spell and quest load
@@ -3705,7 +3690,8 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             characterTransaction.Append(stmt);
 
-            static float finiteAlways(float f) { return float.IsFinite(f) ? f : 0.0f; };
+            static float finiteAlways(float f) { return float.IsFinite(f) ? f : 0.0f; }
+            ;
 
             if (create)
             {

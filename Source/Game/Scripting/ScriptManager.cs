@@ -601,6 +601,18 @@ namespace Game.Scripting
             return RunScriptRet<AreaTriggerScript>(p => entered ? p.OnTrigger(player, trigger) : p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
         }
 
+        public bool CanCreateConversationAI(uint scriptId)
+        {
+            return GetScriptRegistry<ConversationScript>().GetScriptById(scriptId) == null;
+        }
+
+        public ConversationAI GetConversationAI(Conversation conversation)
+        {
+            Cypher.Assert(conversation != null);
+
+            return RunScriptRet<ConversationScript, ConversationAI>(p => p.GetAI(conversation), conversation.GetScriptId());
+        }
+
         //BattlefieldScript
         public BattleField CreateBattlefield(uint scriptId, Map map)
         {
@@ -1042,36 +1054,6 @@ namespace Game.Scripting
             Cypher.Assert(areaTrigger != null);
 
             return RunScriptRet<AreaTriggerEntityScript, AreaTriggerAI>(p => p.GetAI(areaTrigger), areaTrigger.GetScriptId(), null);
-        }
-
-        // ConversationScript
-        public void OnConversationCreate(Conversation conversation, Unit creator)
-        {
-            Cypher.Assert(conversation != null);
-
-            RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
-        }
-
-        public void OnConversationStart(Conversation conversation)
-        {
-            Cypher.Assert(conversation != null);
-
-            RunScript<ConversationScript>(script => script.OnConversationStart(conversation), conversation.GetScriptId());
-        }
-
-        public void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
-        {
-            Cypher.Assert(conversation != null);
-            Cypher.Assert(sender != null);
-
-            RunScript<ConversationScript>(script => script.OnConversationLineStarted(conversation, lineId, sender), conversation.GetScriptId());
-        }
-
-        public void OnConversationUpdate(Conversation conversation, uint diff)
-        {
-            Cypher.Assert(conversation != null);
-
-            RunScript<ConversationScript>(script => script.OnConversationUpdate(conversation, diff), conversation.GetScriptId());
         }
 
         //SceneScript

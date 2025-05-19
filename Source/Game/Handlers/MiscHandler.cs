@@ -446,9 +446,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ConversationLineStarted)]
         void HandleConversationLineStarted(ConversationLineStarted conversationLineStarted)
         {
-            Conversation convo = ObjectAccessor.GetConversation(_player, conversationLineStarted.ConversationGUID);
-            if (convo != null)
-                Global.ScriptMgr.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player);
+            Conversation conversation = ObjectAccessor.GetConversation(_player, conversationLineStarted.ConversationGUID);
+            if (conversation != null)
+                conversation.GetAI().OnLineStarted(conversationLineStarted.LineID, _player);
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestLatestSplashScreen)]

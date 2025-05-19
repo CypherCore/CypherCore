@@ -328,7 +328,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
     }
 
     [Script] // 922 - The Invasion Begins
-    class conversation_the_invasion_begins : ConversationScript
+    class conversation_the_invasion_begins : ConversationAI
     {
         const int ConvoLineTriggerFacing = 2529;
         const int ConvoLineStartPath = 2288;
@@ -345,9 +345,9 @@ namespace Scripts.BrokenIsles.ZoneMardum
         ObjectGuid _cyanaGUID;
         ObjectGuid _sevisGUID;
 
-        public conversation_the_invasion_begins() : base("conversation_the_invasion_begins") { }
+        public conversation_the_invasion_begins(Conversation conversation) : base(conversation) { }
 
-        public override void OnConversationCreate(Conversation conversation, Unit creator)
+        public override void OnCreate(Unit creator)
         {
             Creature kaynObject = creator.FindNearestCreatureWithOptions(10.0f, new FindCreatureOptions() { CreatureId = TheInvasionBeginsConst.NpcKaynSunfuryInvasionBegins, IgnorePhases = true });
             Creature jayceObject = creator.FindNearestCreatureWithOptions(10.0f, new FindCreatureOptions() { CreatureId = TheInvasionBeginsConst.NpcJayceDarkweaverInvasionBegins, IgnorePhases = true });
@@ -379,7 +379,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             conversation.Start();
         }
 
-        public override void OnConversationStart(Conversation conversation)
+        public override void OnStart()
         {
             Locale privateOwnerLocale = conversation.GetPrivateObjectOwnerLocale();
 
@@ -388,12 +388,12 @@ namespace Scripts.BrokenIsles.ZoneMardum
             {
                 _scheduler.Schedule(illidariFacingLineStarted, _ =>
                 {
-                    StartCloneChannel(conversation.GetActorUnit(ConvoActorIdxKayn).GetGUID(), conversation);
-                    StartCloneChannel(conversation.GetActorUnit(ConvoActorIdxKorvas).GetGUID(), conversation);
-                    StartCloneChannel(_jayceGUID, conversation);
-                    StartCloneChannel(_allariGUID, conversation);
-                    StartCloneChannel(_cyanaGUID, conversation);
-                    StartCloneChannel(_sevisGUID, conversation);
+                    StartCloneChannel(conversation.GetActorUnit(ConvoActorIdxKayn).GetGUID());
+                    StartCloneChannel(conversation.GetActorUnit(ConvoActorIdxKorvas).GetGUID());
+                    StartCloneChannel(_jayceGUID);
+                    StartCloneChannel(_allariGUID);
+                    StartCloneChannel(_cyanaGUID);
+                    StartCloneChannel(_sevisGUID);
                 });
             }
 
@@ -421,16 +421,16 @@ namespace Scripts.BrokenIsles.ZoneMardum
                     kaynClone.SetSheath(SheathState.Melee);
                     kaynClone.SetNpcFlag(NPCFlags.QuestGiver);
 
-                    StartCloneMovement(conversation.GetActorUnit(ConvoActorIdxKorvas).GetGUID(), TheInvasionBeginsConst.PathKorvasinvasionBegins, TheInvasionBeginsConst.AnimDhRun, conversation);
-                    StartCloneMovement(_jayceGUID, TheInvasionBeginsConst.PathJayceInvasionBegins, 0, conversation);
-                    StartCloneMovement(_allariGUID, TheInvasionBeginsConst.PathAllariInvasionBegins, TheInvasionBeginsConst.AnimDhRunAllari, conversation);
-                    StartCloneMovement(_cyanaGUID, TheInvasionBeginsConst.PathCyanaInvasionBegins, 0, conversation);
-                    StartCloneMovement(_sevisGUID, TheInvasionBeginsConst.PathSevisinvasionBegins, TheInvasionBeginsConst.AnimDhRun, conversation);
+                    StartCloneMovement(conversation.GetActorUnit(ConvoActorIdxKorvas).GetGUID(), TheInvasionBeginsConst.PathKorvasinvasionBegins, TheInvasionBeginsConst.AnimDhRun);
+                    StartCloneMovement(_jayceGUID, TheInvasionBeginsConst.PathJayceInvasionBegins, 0);
+                    StartCloneMovement(_allariGUID, TheInvasionBeginsConst.PathAllariInvasionBegins, TheInvasionBeginsConst.AnimDhRunAllari);
+                    StartCloneMovement(_cyanaGUID, TheInvasionBeginsConst.PathCyanaInvasionBegins, 0);
+                    StartCloneMovement(_sevisGUID, TheInvasionBeginsConst.PathSevisinvasionBegins, TheInvasionBeginsConst.AnimDhRun);
                 });
             }
         }
 
-        void StartCloneChannel(ObjectGuid guid, Conversation conversation)
+        void StartCloneChannel(ObjectGuid guid)
         {
             Unit privateObjectOwner = ObjAccessor.GetUnit(conversation, conversation.GetPrivateObjectOwner());
             if (privateObjectOwner == null)
@@ -443,7 +443,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             clone.CastSpell(privateObjectOwner, TheInvasionBeginsConst.SpellTrackTargetInChannel, false);
         }
 
-        void StartCloneMovement(ObjectGuid cloneGUID, uint pathId, uint animKit, Conversation conversation)
+        void StartCloneMovement(ObjectGuid cloneGUID, uint pathId, uint animKit)
         {
             Creature clone = ObjectAccessor.GetCreature(conversation, cloneGUID);
             if (clone == null)
@@ -455,7 +455,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
                 clone.SetAIAnimKitId((ushort)animKit);
         }
 
-        public override void OnConversationUpdate(Conversation conversation, uint diff)
+        public override void OnUpdate(uint diff)
         {
             _scheduler.Update(diff);
         }

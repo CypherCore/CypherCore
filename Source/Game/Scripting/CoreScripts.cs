@@ -247,13 +247,24 @@ namespace Game.Scripting
         public virtual BattlegroundScript GetBattlegroundScript(BattlegroundMap map) { return null; }
     }
 
+    public class GenericConversationScript<Script> : ConversationScript where Script : ConversationAI
+    {
+        public GenericConversationScript(string name) : base(name) { }
+
+        public override ConversationAI GetAI(Conversation conversation)
+        {
+            return (Script)Activator.CreateInstance(typeof(Script), [conversation]);
+        }
+    }
+
     class GenericBattlegroundMapScript<Script> : BattlegroundMapScript where Script : BattlegroundScript
     {
         public GenericBattlegroundMapScript(string name, uint mapId) : base(name, mapId) { }
 
         public override BattlegroundScript GetBattlegroundScript(BattlegroundMap map)
         {
-            return (Script)Activator.CreateInstance(typeof(Script), new object[] { map });
+
+            return (Script)Activator.CreateInstance(typeof(Script), [map]);
         }
     }
 
@@ -806,17 +817,8 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Called when Conversation is created but not added to Map yet.
-        public virtual void OnConversationCreate(Conversation conversation, Unit creator) { }
-
-        // Called when Conversation is started
-        public virtual void OnConversationStart(Conversation conversation) { }
-
-        // Called when player sends CMSG_CONVERSATION_LINE_STARTED with valid conversation guid
-        public virtual void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender) { }
-
-        // Called for each update tick
-        public virtual void OnConversationUpdate(Conversation conversation, uint diff) { }
+        // Called when a ConversationAI object is needed for the conversation.
+        public virtual ConversationAI GetAI(Conversation conversation) { return null; }
     }
 
     public class SceneScript : ScriptObject
