@@ -159,15 +159,14 @@ namespace Game
                         }
                     }
 
-                    _player.PlayerTalkClass.SendCloseGossip();
-
-                    if (quest.HasFlag(QuestFlags.LaunchGossipAccept))
+                    if (quest.HasFlag(QuestFlags.LaunchGossipAccept) && !quest.HasFlagEx(QuestFlagsEx.SuppressGossipAccept))
                     {
                         void launchGossip(WorldObject worldObject)
                         {
                             _player.PlayerTalkClass.ClearMenus();
                             _player.PrepareGossipMenu(worldObject, _player.GetGossipMenuForSource(worldObject), true);
                             _player.SendPreparedGossip(worldObject);
+                            _player.PlayerTalkClass.GetInteractionData().IsLaunchedByQuest = true;
                         }
 
                         Creature creature = obj.ToCreature();
@@ -180,6 +179,8 @@ namespace Game
                                 launchGossip(go);
                         }
                     }
+                    else
+                        _player.PlayerTalkClass.SendCloseGossip();
 
                     return;
                 }

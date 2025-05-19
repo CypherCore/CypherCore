@@ -436,7 +436,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CloseInteraction)]
         void HandleCloseInteraction(CloseInteraction closeInteraction)
         {
-            if (_player.PlayerTalkClass.GetInteractionData().SourceGuid == closeInteraction.SourceGuid)
+            if (_player.PlayerTalkClass.GetInteractionData().IsLaunchedByQuest)
+                _player.PlayerTalkClass.GetInteractionData().IsLaunchedByQuest = false;
+            else if (_player.PlayerTalkClass.GetInteractionData().SourceGuid == closeInteraction.SourceGuid)
                 _player.PlayerTalkClass.GetInteractionData().Reset();
 
             if (_player.GetStableMaster() == closeInteraction.SourceGuid)
