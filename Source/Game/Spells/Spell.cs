@@ -4716,7 +4716,7 @@ namespace Game.Spells
             if (unitCaster == null)
                 return;
 
-            if (m_CastItem != null || m_triggeredByAuraSpell != null)
+            if (m_CastItem != null || m_spellInfo.HasAttribute(SpellAttr6.DoNotConsumeResources))
                 return;
 
             //Don't take power if the spell is cast while .cheat power is enabled.
@@ -4774,7 +4774,7 @@ namespace Game.Spells
             if (unitCaster == null)
                 return;
 
-            if (m_CastItem != null || m_triggeredByAuraSpell != null)
+            if (m_CastItem != null || m_spellInfo.HasAttribute(SpellAttr6.DoNotConsumeResources))
                 return;
 
             //Don't take power if the spell is cast while .cheat power is enabled.
@@ -4868,7 +4868,7 @@ namespace Game.Spells
                 return;
 
             // do not take reagents for these item casts
-            if (m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost))
+            if ((m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)) || m_spellInfo.HasAttribute(SpellAttr6.DoNotConsumeResources))
                 return;
 
             Player p_caster = m_caster.ToPlayer();

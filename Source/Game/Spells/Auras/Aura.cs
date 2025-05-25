@@ -350,12 +350,15 @@ namespace Game.Spells
             m_lastProcAttemptTime = (DateTime.Now - TimeSpan.FromSeconds(10));
             m_lastProcSuccessTime = (DateTime.Now - TimeSpan.FromSeconds(120));
 
-            foreach (SpellPowerRecord power in m_spellInfo.PowerCosts)
-                if (power != null && (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f))
-                    m_periodicCosts.Add(power);
+            if (!m_spellInfo.HasAttribute(SpellAttr6.DoNotConsumeResources))
+            {
+                foreach (SpellPowerRecord power in m_spellInfo.PowerCosts)
+                    if (power != null && (power.ManaPerSecond != 0 || power.PowerPctPerSecond > 0.0f))
+                        m_periodicCosts.Add(power);
 
-            if (!m_periodicCosts.Empty())
-                m_timeCla = 1 * Time.InMilliseconds;
+                if (!m_periodicCosts.Empty())
+                    m_timeCla = 1 * Time.InMilliseconds;
+            }
 
             m_maxDuration = CalcMaxDuration(createInfo.Caster);
             m_duration = m_maxDuration;

@@ -5143,7 +5143,7 @@ namespace Game.Spells
                 Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
                 if (triggerCaster != null)
                 {
-                    triggerCaster.CastSpell(target, triggerSpellId, new CastSpellExtraArgs(this));
+                    triggerCaster.CastSpell(target, triggerSpellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost)).TriggeringAura = this);
                     Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} Trigger {1}", GetId(), triggeredSpellInfo.Id);
                 }
             }
@@ -5167,6 +5167,7 @@ namespace Game.Spells
                 if (triggerCaster != null)
                 {
                     CastSpellExtraArgs args = new(this);
+                    args.SetTriggerFlags(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
                     for (int i = 0; i < SpellConst.MaxEffects; ++i)
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, GetAmount());
 
@@ -5712,7 +5713,9 @@ namespace Game.Spells
             if (triggeredSpellInfo != null)
             {
                 Log.outDebug(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Triggering spell {triggeredSpellInfo.Id} from aura {GetId()} proc");
-                triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo.Id, new CastSpellExtraArgs(this).SetTriggeringSpell(eventInfo.GetProcSpell()));
+                triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo.Id, new CastSpellExtraArgs(this)
+                    .SetTriggeringSpell(eventInfo.GetProcSpell())
+                    .SetTriggerFlags(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost)));
             }
             else if (triggerSpellId != 0 && GetAuraType() != AuraType.Dummy)
                 Log.outError(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Spell {GetId()} has non-existent spell {triggerSpellId} in EffectTriggered[{GetEffIndex()}] and is therefore not triggered.");
@@ -5736,6 +5739,7 @@ namespace Game.Spells
             if (triggeredSpellInfo != null)
             {
                 CastSpellExtraArgs args = new(this);
+                args.SetTriggerFlags(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
                 args.SetTriggeringSpell(eventInfo.GetProcSpell());
                 args.AddSpellMod(SpellValueMod.BasePoint0, GetAmount());
                 triggerCaster.CastSpell(triggerTarget, triggerSpellId, args);

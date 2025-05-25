@@ -1907,7 +1907,7 @@ namespace Framework.Constants
         NotAnAttack = 0x04, /*Nyi*/ // Not An Attack
         CanAssistImmunePc = 0x08, // Can Assist Immune Pc
         IgnoreForModTimeRate = 0x10, /*Nyi, Time Rate Not Implemented*/ // Ignore For Mod Time Rate
-        DoNotConsumeResources = 0x20, // Do Not Consume Resources
+        DoNotConsumeResources = 0x20, // Do Not Consume Resources Requires power/reagents to cast but doesn't consume them
         FloatingCombatTextOnCast = 0x40, // Floating Combat Text On Cast (Client Only)
         AuraIsWeaponProc = 0x80, // Aura Is Weapon Proc
         DoNotChainToCrowdControlledTargets = 0x100, // Do Not Chain To Crowd-Controlled Targets Description Implicit Targeting (Chaining And Area Targeting) Will Not Impact Crowd Controlled Targets

@@ -309,7 +309,7 @@ namespace Game.Spells
                 targets.Update(caster); // refresh pointers stored in targets
 
                 // original caster guid only for GO cast
-                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
                 args.SetOriginalCaster(originalCaster);
                 args.OriginalCastId = originalCastId;
                 args.OriginalCastItemLevel = itemLevel;
@@ -389,7 +389,7 @@ namespace Game.Spells
                 }
             }
 
-            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
             args.SetOriginalCaster(m_originalCasterGUID);
             args.SetTriggeringSpell(this);
             args.SetCustomArg(m_customArg);
@@ -464,7 +464,7 @@ namespace Game.Spells
                     return;
             }
 
-            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
             args.SetTriggeringSpell(this);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
