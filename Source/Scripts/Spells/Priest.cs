@@ -420,7 +420,7 @@ namespace Scripts.Spells.Priest
         void UpdateSinsOfTheManyValue()
         {
             // Note: the damage dimish starts at the 6th application as of 10.0.5.
-            float[] damageByStack = { 40.0f, 40.0f, 40.0f, 40.0f, 40.0f, 35.0f, 30.0f, 25.0f, 20.0f, 15.0f, 11.0f, 8.0f, 5.0f, 4.0f, 3.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f };
+            float[] damageByStack = { 20.0f, 20.0f, 20.0f, 20.0f, 20.0f, 17.5f, 15.0f, 12.5f, 10.0f, 7.5f, 5.5f, 4.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f, 0.75f, 0.63f, 0.5f };
 
             foreach (uint effectIndex in new[] { 0, 1, 2 })
             {
