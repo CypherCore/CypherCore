@@ -3002,12 +3002,12 @@ namespace Game.Spells
             }
 
             Item targetItem = m_targets.GetItemTarget();
-            if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost))
-            {
-                // Powers have to be taken before SendSpellGo
+            // Powers have to be taken before SendSpellGo
+            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
                 TakePower();
-                TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
-            }
+
+            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreReagentCost))
+                TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot            
             else if (targetItem != null)
             {
                 // Not own traded item (in trader trade slot) req. reagents including triggered spell case
@@ -4044,11 +4044,11 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
                 castFlags |= SpellCastFlags.Projectile;                        // arrows/bullets visual
 
-            if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
+            if ((m_caster.IsPlayer() || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
-            if (m_caster.IsTypeId(TypeId.Player) && m_caster.ToPlayer().GetClass() == Class.Deathknight &&
-                HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerAndReagentCost))
+            if (m_caster.IsPlayer() && m_caster.ToPlayer().GetClass() == Class.Deathknight &&
+                HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
             {
                 castFlags |= SpellCastFlags.NoGCD;                   // same as in SMSG_SPELL_START
                 castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
@@ -5369,7 +5369,7 @@ namespace Game.Spells
             if (castResult != SpellCastResult.SpellCastOk)
                 return castResult;
 
-            if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost))
+            if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerCost))
             {
                 castResult = CheckPower();
                 if (castResult != SpellCastResult.SpellCastOk)
@@ -6772,7 +6772,7 @@ namespace Game.Spells
             // do not take reagents for these item casts
             if (!(m_CastItem != null && m_CastItem.GetTemplate().HasFlag(ItemFlags.NoReagentCost)))
             {
-                bool checkReagents = !Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnorePowerAndReagentCost) && !player.CanNoReagentCast(m_spellInfo);
+                bool checkReagents = !Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreReagentCost) && !player.CanNoReagentCast(m_spellInfo);
                 // Not own traded item (in trader trade slot) requires reagents even if triggered spell
                 if (!checkReagents)
                 {

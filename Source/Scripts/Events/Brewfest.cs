@@ -243,7 +243,7 @@ namespace Scripts.Events.Brewfest
             PreventHitDefaultEffect(effIndex);
             // All this spells trigger a spell that requires reagents; if the
             // triggered spell is cast as "triggered", reagents are not consumed
-            GetHitUnit().CastSpell(null, GetEffectInfo().TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost);
+            GetHitUnit().CastSpell(null, GetEffectInfo().TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnoreReagentCost);
         }
 
         public override void Register()

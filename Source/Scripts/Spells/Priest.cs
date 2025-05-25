@@ -2730,7 +2730,7 @@ namespace Scripts.Spells.Priest
             Unit target = ObjAccessor.GetUnit(caster, _raptureTarget);
             if (target != null)
                 caster.CastSpell(target, SpellIds.PowerWordShield,
-                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress)
+                    new CastSpellExtraArgs(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreCastInProgress)
                     .SetTriggeringSpell(GetSpell()));
         }
 
@@ -3466,7 +3466,7 @@ namespace Scripts.Spells.Priest
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.VampiricTouch, new CastSpellExtraArgs()
                 .SetTriggeringSpell(GetSpell())
-                .SetTriggerFlags(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreCastTime | TriggerCastFlags.DontReportCastError));
+                .SetTriggerFlags(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.IgnoreCastTime | TriggerCastFlags.DontReportCastError));
         }
 
         public override void Register()

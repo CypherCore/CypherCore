@@ -1579,13 +1579,13 @@ namespace Framework.Constants
         None = 0x0,   //! Not Triggered
         IgnoreGCD = 0x01,   //! Will Ignore Gcd
         IgnoreSpellAndCategoryCD = 0x02,   //! Will Ignore Spell And Category Cooldowns
-        IgnorePowerAndReagentCost = 0x04,   //! Will Ignore Power And Reagent Cost
+        IgnorePowerCost = 0x04,   //! Will Ignore Power Cost
         IgnoreCastItem = 0x08,   //! Will Not Take Away Cast Item Or Update Related Achievement Criteria
         IgnoreAuraScaling = 0x10,   //! Will Ignore Aura Scaling
         IgnoreCastInProgress = 0x20,   //! Will Not Check If A Current Cast Is In Progress
         IgnoreCastTime = 0x40,   //! Will always be instantly cast
         CastDirectly = 0x80,   //! In Spell.Prepare, Will Be Cast Directly Without Setting Containers For Executed Spell
-        // reuse = 0x100,   //
+        IgnoreReagentCost = 0x04,   //! Will Ignore Reagent Cost
         IgnoreSetFacing = 0x200,   //! Will Not Adjust Facing To Target (If Any)
         IgnoreShapeshift = 0x400,   //! Will Ignore Shapeshift Checks
         // reuse = 0x800,   //

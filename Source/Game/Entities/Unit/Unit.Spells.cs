@@ -957,9 +957,9 @@ namespace Game.Entities
                         if (info != null)
                         {
                             if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr8.IgnoreSpellcastOverrideCost))
-                                triggerFlag |= TriggerCastFlags.IgnorePowerAndReagentCost;
+                                triggerFlag |= TriggerCastFlags.IgnorePowerCost;
                             else
-                                triggerFlag &= ~TriggerCastFlags.IgnorePowerAndReagentCost;
+                                triggerFlag &= ~TriggerCastFlags.IgnorePowerCost;
 
                             if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr11.IgnoreSpellcastOverrideShapeshiftRequirements))
                                 triggerFlag |= TriggerCastFlags.IgnoreShapeshift;

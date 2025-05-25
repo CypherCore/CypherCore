@@ -1241,7 +1241,7 @@ namespace Scripts.Spells.Druid
             if (targetList.Empty())
                 return;
 
-            rejuvCaster.CastSpell(targetList.SelectRandom(), SpellIds.Rejuvenation, TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerAndReagentCost | TriggerCastFlags.IgnoreCastInProgress);
+            rejuvCaster.CastSpell(targetList.SelectRandom(), SpellIds.Rejuvenation, TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreCastInProgress);
         }
 
         public override void Register()

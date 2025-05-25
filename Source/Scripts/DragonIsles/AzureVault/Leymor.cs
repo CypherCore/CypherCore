@@ -65,7 +65,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
             if (instance.GetData(DataTypes.LeymorIntroDone) != 0)
                 return;
 
-            me.SetUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+            me.SetImmuneToAll(true);
             DoCastSelf(SpellIds.Stasis);
         }
 
@@ -81,7 +81,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
                     _scheduler.Schedule(TimeSpan.FromSeconds(1), _ =>
                     {
                         me.RemoveAurasDueToSpell(SpellIds.Stasis);
-                        me.RemoveUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                        me.SetImmuneToAll(false);
                         DoCastSelf(SpellIds.ArcaneEruption);
                         Talk(MiscConst.SayAnnounceAwaken);
                     });
