@@ -102,7 +102,7 @@ namespace Game.AI
             if (me.IsEngaged())
                 return;
 
-            if (me.HasReactState(ReactStates.Aggressive) && me.CanStartAttack(who, false))
+            if (me.HasReactState(ReactStates.Aggressive) && me.CanStartAttack(who, false) && (me.IsAggroGracePeriodExpired() || me.GetMap().Instanceable()))
                 me.EngageWithTarget(who);
         }
 

@@ -360,6 +360,31 @@ namespace Game.Maps
         bool isCreature;
     }
 
+    public class CreatureAggroGracePeriodExpiredNotifier : Notifier
+    {
+        Creature i_creature;
+
+        public CreatureAggroGracePeriodExpiredNotifier(Creature c)
+        {
+            i_creature = c;
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            foreach (var creature in objs)
+            {
+                CreatureUnitRelocationWorker(creature, i_creature);
+                CreatureUnitRelocationWorker(i_creature, creature);
+            }
+        }
+
+        public override void Visit(IList<Player> objs)
+        {
+            foreach (var player in objs)
+                CreatureUnitRelocationWorker(i_creature, player);
+        }
+    }
+    
     public class PacketSenderRef : IDoWork<Player>
     {
         ServerPacket Data;

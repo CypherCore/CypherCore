@@ -638,6 +638,16 @@ namespace Game.Entities
 
             // Creatures with CREATURE_STATIC_FLAG_2_FORCE_PARTY_MEMBERS_INTO_COMBAT periodically force party members into combat
             ForcePartyMembersIntoCombat();
+
+            // creatures should only attack surroundings initially after heartbeat has passed or until attacked
+            if (!_aggroGracePeriodExpired)
+            {
+                _aggroGracePeriodExpired = true;
+
+                // trigger MoveInLineOfSight
+                CreatureAggroGracePeriodExpiredNotifier notifier = new(this);
+                Cell.VisitAllObjects(this, notifier, GetVisibilityRange());
+            }
         }
 
         public void Regenerate(PowerType power)
@@ -1079,6 +1089,8 @@ namespace Game.Entities
         public override void AtEngage(Unit target)
         {
             base.AtEngage(target);
+
+            _aggroGracePeriodExpired = true;
 
             GetThreatManager().ResetUpdateTimer();
 
@@ -1680,6 +1692,8 @@ namespace Game.Entities
 
         void SetInteractSpellId(int interactSpellId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.InteractSpellID), interactSpellId); }
 
+        public bool IsAggroGracePeriodExpired() { return _aggroGracePeriodExpired; }
+
         public void OverrideSparringHealthPct(List<float> healthPct)
         {
             _sparringHealthPct = healthPct.SelectRandom();
@@ -2148,6 +2162,7 @@ namespace Game.Entities
                         ai.Reset();
 
                     triggerJustAppeared = true;
+                    _aggroGracePeriodExpired = false;
 
                     uint poolid = GetCreatureData() != null ? GetCreatureData().poolId : 0;
                     if (poolid != 0)

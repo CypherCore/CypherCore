@@ -69,6 +69,8 @@ namespace Game.Entities
         bool triggerJustAppeared;
         bool m_respawnCompatibilityMode;
 
+        bool _aggroGracePeriodExpired;
+
         public uint[] m_spells = new uint[SharedConst.MaxCreatureSpells];
 
         // Timers
