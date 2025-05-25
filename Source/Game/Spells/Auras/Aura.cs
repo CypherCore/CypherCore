@@ -952,7 +952,7 @@ namespace Game.Spells
                 if (m_spellInfo.StackAmount == 0)
                     stackAmount = 1;
                 else
-                    stackAmount = (int)m_spellInfo.StackAmount;
+                    stackAmount = (int)maxStackAmount;
             }
             // we're out of stacks, remove
             else if (stackAmount <= 0)
