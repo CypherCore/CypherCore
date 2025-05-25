@@ -1087,6 +1087,7 @@ namespace Game.Entities
             ZLiquidStatus oldLiquidStatus = GetLiquidStatus();
             base.ProcessPositionDataChanged(data);
             ProcessTerrainStatusUpdate(oldLiquidStatus, data.LiquidInfo);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CurrentAreaID), data.AreaId);
         }
 
         public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
