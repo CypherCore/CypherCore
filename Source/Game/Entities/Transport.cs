@@ -172,7 +172,6 @@ namespace Game.Entities
             SetGoState(goinfo.MoTransport.allowstopping == 0 ? GameObjectState.Ready : GameObjectState.Active);
             SetGoType(GameObjectTypes.MapObjTransport);
             SetGoAnimProgress(255);
-            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
             SetName(goinfo.name);
             SetLocalRotation(0.0f, 0.0f, 0.0f, 1.0f);
             SetParentRotation(Quaternion.Identity);

@@ -1514,7 +1514,7 @@ namespace Game
                 foreach (Criteria criteria in criteriaList)
                     if (criteria.Entry.Asset != 0)
                         _eventStorage.Add(criteria.Entry.Asset);
-            };
+            }
 
             CriteriaType[] eventCriteriaTypes = { CriteriaType.PlayerTriggerGameEvent, CriteriaType.AnyoneTriggerGameEventScenario };
             foreach (CriteriaType criteriaType in eventCriteriaTypes)
@@ -5804,6 +5804,26 @@ namespace Game
 
         void OnDeleteSpawnData(SpawnData data)
         {
+            if (data.spawnTrackingData != null)
+            {
+                SpawnTrackingTemplateData spawnTrackingData = GetSpawnTrackingData(data.spawnTrackingData.SpawnTrackingId);
+                Cypher.Assert(spawnTrackingData != null, $"Creature data for ({data.type},{data.SpawnId}) is being deleted and has invalid spawn tracking id {data.spawnTrackingData.SpawnTrackingId}!");
+
+                var pair = _spawnTrackingMapStorage.LookupByKey(data.spawnTrackingData.SpawnTrackingId);
+                bool erased = false;
+                foreach (var it in pair.ToList())
+                {
+                    if (it != data)
+                        continue;
+
+                    _spawnTrackingMapStorage.Remove(data.spawnTrackingData.SpawnTrackingId, it);
+                    erased = true;
+                }
+
+                if (!erased)
+                    Log.outFatal(LogFilter.Misc, $"Spawn data ({data.type},{data.SpawnId}) being removed is member of spawn tracking {data.spawnTrackingData.SpawnTrackingId}, but not actually listed in the lookup table for that spawn tracking!");
+            }
+
             var templateIt = _spawnGroupDataStorage.LookupByKey(data.spawnGroupData.groupId);
             Cypher.Assert(templateIt != null, $"Creature data for ({data.type},{data.SpawnId}) is being deleted and has invalid spawn group index {data.spawnGroupData.groupId}!");
 
@@ -9094,6 +9114,341 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} points_of_interest locale strings in {1} ms", _pointOfInterestLocaleStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
+        public void LoadSpawnTrackingTemplates()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _spawnTrackingDataStorage.Clear();
+
+            //                                               0                1      2        3           4
+            SQLResult result = DB.World.Query("SELECT SpawnTrackingId, MapId, PhaseId, PhaseGroup, PhaseUseFlags FROM spawn_tracking_template");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 spawn tracking templates. DB table `spawn_tracking_template` is empty!");
+                return;
+            }
+
+            do
+            {
+                uint spawnTrackingId = result.Read<uint>(0);
+                uint mapId = result.Read<uint>(1);
+
+                if (!CliDB.MapStorage.HasRecord(mapId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_template` references non-existing map {mapId}, skipped");
+                    continue;
+                }
+
+                SpawnTrackingTemplateData data = new();
+                data.SpawnTrackingId = spawnTrackingId;
+                data.MapId = mapId;
+                data.PhaseId = result.Read<uint>(2);
+                data.PhaseGroup = result.Read<uint>(3);
+                data.PhaseUseFlags = result.Read<byte>(4);
+
+                if (data.PhaseGroup != 0 && data.PhaseId != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_template` has spawn tracking (Id: {data.SpawnTrackingId}) with `PhaseId` and `PhaseGroup` set, `PhaseGroup` set to 0");
+                    data.PhaseGroup = 0;
+                }
+
+                if (data.PhaseId != 0)
+                {
+                    if (!CliDB.PhaseStorage.HasRecord(data.PhaseId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spawn_tracking_template` has spawn tracking (Id: {data.SpawnTrackingId}) referencing non-existing `PhaseId` {data.PhaseId}, set to 0");
+                        data.PhaseId = 0;
+                    }
+                }
+
+                if (data.PhaseGroup != 0)
+                {
+                    if (Global.DB2Mgr.GetPhasesForGroup(data.PhaseGroup) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spawn_tracking_template` has spawn tracking (Id: {data.SpawnTrackingId}) referencing non-existing `PhaseGroup` {data.PhaseGroup}, set to 0");
+                        data.PhaseGroup = 0;
+                    }
+                }
+
+                if ((data.PhaseUseFlags & ~(byte)PhaseUseFlagsValues.All) != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_template` has spawn tracking (Id: {data.SpawnTrackingId}) referencing unknown `PhaseUseFlags`, removed unknown value.");
+                    data.PhaseUseFlags &= (byte)PhaseUseFlagsValues.All;
+                }
+
+                if ((data.PhaseUseFlags & (byte)PhaseUseFlagsValues.AlwaysVisible) != 0 && (data.PhaseUseFlags & (byte)PhaseUseFlagsValues.Inverse) != 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_template` has spawn tracking (Id: {data.SpawnTrackingId}) with `PhaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE, removing PHASE_USE_FLAGS_INVERSE.");
+                    data.PhaseUseFlags &= (byte)~PhaseUseFlagsValues.Inverse;
+                }
+
+                _spawnTrackingDataStorage[spawnTrackingId] = data;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_spawnTrackingDataStorage.Count} spawn tracking templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public SpawnTrackingTemplateData GetSpawnTrackingData(uint spawnTrackingId)
+        {
+            return _spawnTrackingDataStorage.LookupByKey(spawnTrackingId);
+        }
+
+        public List<SpawnMetadata> GetSpawnMetadataForSpawnTracking(uint spawnTrackingId) { return _spawnTrackingMapStorage.LookupByKey(spawnTrackingId); }
+
+        public List<QuestObjective> GetSpawnTrackingQuestObjectiveList(uint spawnTrackingId) { return _spawnTrackingQuestObjectiveStorage.LookupByKey(spawnTrackingId); }
+
+        public bool IsQuestObjectiveForSpawnTracking(uint spawnTrackingId, uint questObjectiveId)
+        {
+            var questObjectiveList = _spawnTrackingQuestObjectiveStorage.LookupByKey(spawnTrackingId);
+            if (questObjectiveList != null)
+                if (questObjectiveList.Find(p => p.Id == questObjectiveId) != null)
+                    return true;
+
+            return false;
+        }
+
+        public void LoadSpawnTrackingQuestObjectives()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _spawnTrackingQuestObjectiveStorage.Clear();
+
+            //                                               0                1
+            SQLResult result = DB.World.Query("SELECT SpawnTrackingId, QuestObjectiveId FROM spawn_tracking_quest_objective");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 spawn tracking quest objectives. DB table `spawn_tracking_quest_objective` is empty!");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint spawnTrackingId = result.Read<uint>(0);
+                uint objectiveId = result.Read<uint>(1);
+
+                if (GetSpawnTrackingData(spawnTrackingId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_quest_objective` has quest objective {objectiveId} assigned to spawn tracking {spawnTrackingId}, but spawn tracking does not exist!");
+                    continue;
+                }
+
+                QuestObjective questObjective = GetQuestObjective(objectiveId);
+                if (questObjective == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_quest_objective` has quest objective {objectiveId} assigned to spawn tracking {spawnTrackingId}, but quest objective does not exist!");
+                    continue;
+                }
+
+                _spawnTrackingQuestObjectiveStorage.Add(spawnTrackingId, questObjective);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spawn tracking quest objectives in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public void LoadSpawnTrackings()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _spawnTrackingMapStorage.Clear();
+
+            //                                               0                1          2        3
+            SQLResult result = DB.World.Query("SELECT SpawnTrackingId, SpawnType, SpawnId, QuestObjectiveId FROM spawn_tracking");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 spawn tracking members. DB table `spawn_tracking` is empty!");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                uint spawnTrackingId = result.Read<uint>(0);
+                SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
+                ulong spawnId = result.Read<ulong>(2);
+                uint objectiveId = result.Read<uint>(3);
+
+                if (!SpawnData.TypeIsValid(spawnType))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn data with invalid type {spawnType} listed for spawn tracking {spawnTrackingId}. Skipped.");
+                    continue;
+                }
+                else if (spawnType == SpawnObjectType.AreaTrigger)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has areatrigger spawn ({spawnType}) listed for spawn tracking {spawnTrackingId}. Skipped.");
+                    continue;
+                }
+
+                SpawnMetadata data = GetSpawnMetadata(spawnType, spawnId);
+                if (data == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn ({spawnType},{spawnId}) not found, but is listed as a member of spawn tracking {spawnTrackingId}!");
+                    continue;
+                }
+                else if (data.spawnTrackingData != null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn ({spawnType},{spawnId}) is listed as a member of spawn tracking {spawnTrackingId}, but is already a member of spawn tracking {data.spawnTrackingData.SpawnTrackingId}. Skipped.");
+                    continue;
+                }
+
+                SpawnTrackingTemplateData spawnTrackingTemplateData = GetSpawnTrackingData(spawnTrackingId);
+                if (spawnTrackingTemplateData == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} assigned to spawn ({spawnType},{spawnId}), but spawn tracking does not exist!");
+                    continue;
+                }
+
+                if (!IsQuestObjectiveForSpawnTracking(spawnTrackingId, objectiveId))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} assigned to spawn ({spawnType},{spawnId}), but spawn tracking is not linked to quest objective {objectiveId}. Skipped.");
+                    continue;
+                }
+
+                if (spawnTrackingTemplateData.MapId != data.MapId)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} (map {spawnTrackingTemplateData.MapId}) assigned to spawn ({spawnType},{spawnId}), but spawn has map {data.MapId} - spawn NOT added to spawn tracking!");
+                    continue;
+                }
+
+                SpawnData spawnData = data.ToSpawnData();
+                if (spawnTrackingTemplateData.PhaseId != spawnData.PhaseId || spawnTrackingTemplateData.PhaseGroup != spawnData.PhaseGroup || spawnTrackingTemplateData.PhaseUseFlags != (byte)spawnData.PhaseUseFlags)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} with phase info (PhaseId: {spawnTrackingTemplateData.PhaseId}, PhaseGroup: {spawnTrackingTemplateData.PhaseGroup}, PhaseUseFlags: {spawnTrackingTemplateData.PhaseUseFlags}), ",
+                        $"but spawn ({spawnType},{spawnId}) has different phase info (PhaseId: {spawnData.PhaseId}, PhaseGroup: {spawnData.PhaseGroup}, PhaseUseFlags: {spawnData.PhaseUseFlags}) - spawn NOT added to spawn tracking!");
+                    continue;
+                }
+
+                data.spawnTrackingData = spawnTrackingTemplateData;
+                data.spawnTrackingQuestObjectiveId = objectiveId;
+                _spawnTrackingMapStorage.Add(spawnTrackingId, data);
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spawn tracking members in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
+        public void LoadSpawnTrackingStates()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                               0          1        2      3        4                   5            6               7
+            SQLResult result = DB.World.Query("SELECT SpawnType, SpawnId, State, Visible, StateSpellVisualId, StateAnimId, StateAnimKitId, StateWorldEffects FROM spawn_tracking_state");
+
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 spawn tracking states. DB table `spawn_tracking_state` is empty!");
+                return;
+            }
+
+            uint count = 0;
+
+            do
+            {
+                SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(0);
+                ulong spawnId = result.Read<ulong>(1);
+                SpawnTrackingState state = (SpawnTrackingState)result.Read<byte>(2);
+
+                if (!SpawnData.TypeIsValid(spawnType))
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` has spawn data with invalid type {spawnType}. Skipped.");
+                    continue;
+                }
+                else if (spawnType == SpawnObjectType.AreaTrigger)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` has areatrigger spawn ({spawnType}). Skipped.");
+                    continue;
+                }
+
+                SpawnMetadata data = GetSpawnMetadata(spawnType, spawnId);
+                if (data == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` has spawn ({spawnType},{spawnId}) not found!");
+                    continue;
+                }
+                else if (data.spawnTrackingData == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` has spawn ({spawnType},{spawnId}) with spawn tracking states, but is not part of a spawn tracking. Skipped.");
+                    continue;
+                }
+
+                if (state >= SpawnTrackingState.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` has spawn ({spawnType},{spawnId}) with invalid state type {state}. Skipped.");
+                    continue;
+                }
+
+                SpawnTrackingStateData spawnTrackingStateData = data.spawnTrackingStates[(int)state];
+                spawnTrackingStateData.Visible = result.Read<bool>(3);
+
+                if (!result.IsNull(4))
+                {
+                    spawnTrackingStateData.StateSpellVisualId = result.Read<uint>(4);
+                    if (!CliDB.SpellVisualStorage.HasRecord(spawnTrackingStateData.StateSpellVisualId.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` references invalid StateSpellVisualId {spawnTrackingStateData.StateSpellVisualId} for spawn ({spawnType},{spawnId}), set to none.");
+                        spawnTrackingStateData.StateSpellVisualId = null;
+                    }
+                }
+
+                if (!result.IsNull(5))
+                {
+                    spawnTrackingStateData.StateAnimId = result.Read<ushort>(5);
+                    if (spawnTrackingStateData.StateAnimId != Global.DB2Mgr.GetEmptyAnimStateID() && !CliDB.AnimationDataStorage.HasRecord(spawnTrackingStateData.StateAnimId.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` references invalid StateAnimId {spawnTrackingStateData.StateAnimId} for spawn ({spawnType},{spawnId}), set to none.");
+                        spawnTrackingStateData.StateAnimId = null;
+                    }
+                }
+
+                if (!result.IsNull(6))
+                {
+                    spawnTrackingStateData.StateAnimKitId = result.Read<ushort>(6);
+                    if (!CliDB.AnimKitStorage.HasRecord(spawnTrackingStateData.StateAnimKitId.Value))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` references invalid StateAnimKitId {spawnTrackingStateData.StateAnimKitId} for spawn ({spawnType},{spawnId}), set to none.");
+                        spawnTrackingStateData.StateAnimKitId = null;
+                    }
+                }
+
+                if (!result.IsNull(7))
+                {
+                    List<uint> worldEffectList = new();
+                    foreach (var worldEffectsStr in result.Read<string>(7).Split(','))
+                    {
+                        if (!uint.TryParse(worldEffectsStr, out uint worldEffectId))
+                            continue;
+
+                        if (!CliDB.WorldEffectStorage.HasRecord(worldEffectId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` references invalid StateAnimKitId {worldEffectId} for spawn ({spawnType},{spawnId}). Skipped.");
+                            continue;
+                        }
+
+                        worldEffectList.Add(worldEffectId);
+                    }
+
+                    if (!worldEffectList.Empty())
+                        spawnTrackingStateData.StateWorldEffects = worldEffectList;
+                }
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} spawn tracking states in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         public CreatureLocale GetCreatureLocale(uint entry)
         {
             return _creatureLocaleStorage.LookupByKey(entry);
@@ -10237,7 +10592,7 @@ namespace Game
             SQLResult result = DB.World.Query("SELECT CreatureId, CurrencyId FROM creature_quest_currency ORDER BY CreatureId, CurrencyId ASC");
             if (result.IsEmpty())
             {
-                Log.outInfo(LogFilter.ServerLoading, ">> Loaded 0 creature quest currencies. DB table `creature_quest_currency` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded 0 creature quest currencies. DB table `creature_quest_currency` is empty.");
                 return;
             }
 
@@ -11242,6 +11597,9 @@ namespace Game
         Dictionary<uint, QuestObjective> _questObjectives = new();
         Dictionary<uint, QuestGreeting>[] _questGreetingStorage = new Dictionary<uint, QuestGreeting>[2];
         Dictionary<uint, QuestGreetingLocale>[] _questGreetingLocaleStorage = new Dictionary<uint, QuestGreetingLocale>[2];
+        Dictionary<uint, SpawnTrackingTemplateData> _spawnTrackingDataStorage = new();
+        MultiMap<uint, SpawnMetadata> _spawnTrackingMapStorage = new();
+        MultiMap<uint, QuestObjective> _spawnTrackingQuestObjectiveStorage = new();
 
         //Scripts
         ScriptNameContainer _scriptNamesStorage = new();

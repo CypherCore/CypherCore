@@ -58,7 +58,10 @@ namespace Game.Maps
         public ulong SpawnId;
         public uint MapId = 0xFFFFFFFF;
         public bool dbData = true;
-        public SpawnGroupTemplateData spawnGroupData = null;
+        public SpawnGroupTemplateData spawnGroupData;
+        public SpawnTrackingTemplateData spawnTrackingData;
+        public uint spawnTrackingQuestObjectiveId;
+        public SpawnTrackingStateData[] spawnTrackingStates = new SpawnTrackingStateData[(int)SpawnTrackingState.Max];
 
         public static bool TypeInMask(SpawnObjectType type, SpawnObjectTypeMask mask) { return ((1 << (int)type) & (int)mask) != 0; }
         public static bool TypeHasData(SpawnObjectType type) { return type < SpawnObjectType.NumSpawnTypesWithData; }
@@ -70,5 +73,23 @@ namespace Game.Maps
         }
 
         public SpawnData ToSpawnData() { return TypeHasData(type) ? (SpawnData)this : null; }
+    }
+
+    public class SpawnTrackingTemplateData
+    {
+        public uint SpawnTrackingId;
+        public uint MapId;
+        public uint PhaseId;
+        public uint PhaseGroup;
+        public byte PhaseUseFlags;
+    }
+
+    public class SpawnTrackingStateData
+    {
+        public bool Visible = true;
+        public uint? StateSpellVisualId;
+        public ushort? StateAnimId;
+        public ushort? StateAnimKitId;
+        public List<uint> StateWorldEffects = new();
     }
 }

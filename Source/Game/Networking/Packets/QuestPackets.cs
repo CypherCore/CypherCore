@@ -994,6 +994,52 @@ namespace Game.Networking.Packets
         }
     }
 
+    class SpawnTrackingUpdate : ClientPacket
+    {
+        public List<SpawnTrackingRequestInfo> SpawnTrackingRequests = new();
+
+        public SpawnTrackingUpdate(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            var spawnTrackingRequestCount = _worldPacket.ReadUInt32();
+            for (var i = 0; i < spawnTrackingRequestCount; i++)
+            {
+                var spawnTrackingRequestInfo = new SpawnTrackingRequestInfo();
+                spawnTrackingRequestInfo.Read(_worldPacket);
+                SpawnTrackingRequests.Add(spawnTrackingRequestInfo);
+            }
+        }
+
+    }
+
+    class QuestPOIUpdateResponse : ServerPacket
+    {
+        public List<SpawnTrackingResponseInfo> SpawnTrackingResponses = new();
+
+        public QuestPOIUpdateResponse() : base(ServerOpcodes.QuestPoiUpdateResponse, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(SpawnTrackingResponses.Count);
+
+            foreach (SpawnTrackingResponseInfo spawnTrackingResponseInfo in SpawnTrackingResponses)
+                spawnTrackingResponseInfo.Write(_worldPacket);
+        }
+    }
+
+    class ForceSpawnTrackingUpdate : ServerPacket
+    {
+        public uint QuestID;
+
+        public ForceSpawnTrackingUpdate() : base(ServerOpcodes.ForceSpawnTrackingUpdate, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(QuestID);
+        }
+    }
+
     //Structs
     public class QuestGiverInfo
     {
@@ -1531,6 +1577,42 @@ namespace Game.Networking.Packets
 
             if (MawPower.HasValue)
                 MawPower.Value.Write(data);
+        }
+    }
+
+    struct SpawnTrackingRequestInfo
+    {
+        public int ObjectTypeMask;
+        public int ObjectID;
+        public uint SpawnTrackingID;
+
+        public void Read(WorldPacket data)
+        {
+            ObjectTypeMask = data.ReadInt32();
+            ObjectID = data.ReadInt32();
+            SpawnTrackingID = data.ReadUInt32();
+        }
+    }
+
+    class SpawnTrackingResponseInfo
+    {
+        public uint SpawnTrackingID;
+        public int ObjectID;
+        public int PhaseID;
+        public int PhaseGroupID;
+        public int PhaseUseFlags;
+        public bool Visible = true;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(SpawnTrackingID);
+            data.WriteInt32(ObjectID);
+            data.WriteInt32(PhaseID);
+            data.WriteInt32(PhaseGroupID);
+            data.WriteInt32(PhaseUseFlags);
+
+            data.WriteBit(Visible);
+            data.FlushBits();
         }
     }
 }

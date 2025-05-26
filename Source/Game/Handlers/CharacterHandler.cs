@@ -2732,6 +2732,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusObjectivesCriteriaProgress, stmt);
 
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.QuestStatusSpawnTracking, stmt);
+
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_QUESTSTATUS_DAILY);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.DailyQuestStatus, stmt);
@@ -2992,6 +2996,7 @@ namespace Game
         QuestStatusObjectives,
         QuestStatusObjectivesCriteria,
         QuestStatusObjectivesCriteriaProgress,
+        QuestStatusSpawnTracking,
         DailyQuestStatus,
         Reputation,
         Inventory,

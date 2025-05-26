@@ -9,6 +9,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
+using System;
 
 namespace Game
 {
@@ -416,6 +417,7 @@ namespace Game
                         }
                     }
 
+                    GetPlayer().SendForceSpawnTrackingUpdate(questId);
                     GetPlayer().SetQuestSlot(packet.Entry, 0);
                     GetPlayer().TakeQuestSourceItem(questId, true); // remove quest src item from player
                     GetPlayer().AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements. 
@@ -835,6 +837,69 @@ namespace Game
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (quest != null && _player.CanTakeQuest(quest, false))
                     response.QuestIDs.Add(questId);
+            }
+
+            SendPacket(response);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SpawnTrackingUpdate)]
+        void HandleSpawnTrackingUpdate(SpawnTrackingUpdate spawnTrackingUpdate)
+        {
+            QuestPOIUpdateResponse response = new();
+
+            bool hasObjectTypeRequested(TypeMask objectTypeMask, SpawnObjectType objectType)
+            {
+                if (objectTypeMask.HasAnyFlag(TypeMask.Unit))
+                    return objectType == SpawnObjectType.Creature;
+                else if (objectTypeMask.HasAnyFlag(TypeMask.GameObject))
+                    return objectType == SpawnObjectType.GameObject;
+
+                return false;
+            }
+
+            foreach (var requestInfo in spawnTrackingUpdate.SpawnTrackingRequests)
+            {
+                SpawnTrackingResponseInfo responseInfo = new();
+                responseInfo.SpawnTrackingID = requestInfo.SpawnTrackingID;
+                responseInfo.ObjectID = requestInfo.ObjectID;
+
+                var spawnTrackingTemplateData = Global.ObjectMgr.GetSpawnTrackingData(requestInfo.SpawnTrackingID);
+                QuestObjective activeQuestObjective = _player.GetActiveQuestObjectiveForForSpawnTracking(requestInfo.SpawnTrackingID);
+
+                // Send phase info if map is the same or spawn tracking related quests are taken or completed
+                if (spawnTrackingTemplateData != null && (_player.GetMapId() == spawnTrackingTemplateData.MapId || activeQuestObjective != null))
+                {
+                    responseInfo.PhaseID = (int)spawnTrackingTemplateData.PhaseId;
+                    responseInfo.PhaseGroupID = (int)spawnTrackingTemplateData.PhaseGroup;
+                    responseInfo.PhaseUseFlags = spawnTrackingTemplateData.PhaseUseFlags;
+
+                    // Send spawn visibility data if available
+                    if (requestInfo.ObjectTypeMask != 0 && (requestInfo.ObjectTypeMask & (int)(TypeMask.Unit | TypeMask.GameObject)) != 0)
+                    {
+                        // There should only be one entity
+                        foreach (var data in Global.ObjectMgr.GetSpawnMetadataForSpawnTracking(requestInfo.SpawnTrackingID))
+                        {
+                            var spawnData = data.ToSpawnData();
+                            if (spawnData == null)
+                                continue;
+
+                            if (spawnData.Id != requestInfo.ObjectID)
+                                continue;
+
+                            if (!hasObjectTypeRequested((TypeMask)requestInfo.ObjectTypeMask, data.type))
+                                continue;
+
+                            if (activeQuestObjective != null)
+                            {
+                                SpawnTrackingState state = _player.GetSpawnTrackingStateByObjective(requestInfo.SpawnTrackingID, activeQuestObjective.Id);
+                                responseInfo.Visible = data.spawnTrackingStates[(int)state].Visible;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                response.SpawnTrackingResponses.Add(responseInfo);
             }
 
             SendPacket(response);

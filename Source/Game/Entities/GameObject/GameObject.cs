@@ -283,8 +283,6 @@ namespace Game.Entities
             SetGoState(goState);
             SetGoArtKit(artKit);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpawnTrackingStateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
-
             switch (goInfo.type)
             {
                 case GameObjectTypes.FishingHole:
@@ -1127,6 +1125,8 @@ namespace Game.Entities
 
             PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
             PhasingHandler.InitDbVisibleMapId(GetPhaseShift(), data.terrainSwapMap);
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.StateWorldEffectsQuestObjectiveID), data != null ? data.spawnTrackingQuestObjectiveId : 0);
 
             if (data.spawntimesecs >= 0)
             {
@@ -2729,6 +2729,24 @@ namespace Game.Entities
         }
 
         public string GetStringId(StringIdType type) { return m_stringIds[(int)type]; }
+
+        public override SpawnTrackingStateData GetSpawnTrackingStateDataForPlayer(Player player)
+        {
+            if (player == null)
+                return null;
+
+            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(SpawnObjectType.GameObject, GetSpawnId());
+            if (data != null)
+            {
+                if (data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
+                {
+                    SpawnTrackingState state = player.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId);
+                    return data.spawnTrackingStates[(int)state];
+                }
+            }
+
+            return null;
+        }
 
         public override string GetName(Locale locale = Locale.enUS)
         {

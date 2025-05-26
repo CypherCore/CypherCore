@@ -995,6 +995,7 @@ namespace Game
         public long AcceptTime;
         public uint Timer;
         public bool Explored;
+        public List<(sbyte, uint)> SpawnTrackingList = new();
     }
 
     public class QuestGreeting

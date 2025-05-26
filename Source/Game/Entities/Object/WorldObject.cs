@@ -867,6 +867,8 @@ namespace Game.Entities
 
         public virtual Loot GetLootForPlayer(Player player) { return null; }
 
+        public virtual SpawnTrackingStateData GetSpawnTrackingStateDataForPlayer(Player player) { return null; }
+
         public virtual void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
         public virtual void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
 
@@ -1272,6 +1274,15 @@ namespace Game.Entities
             if (!obj.IsPrivateObject() && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions((uint)obj.GetTypeId(), obj.GetEntry(), this))
                 return false;
 
+            // Spawn tracking
+            Player player = ToPlayer();
+            if (player != null)
+            {
+                SpawnTrackingStateData spawnTrackingStateData = obj.GetSpawnTrackingStateDataForPlayer(player);
+                if (spawnTrackingStateData != null && !spawnTrackingStateData.Visible)
+                    return false;
+            }
+
             bool corpseVisibility = false;
             if (distanceCheck)
             {
@@ -1304,7 +1315,6 @@ namespace Game.Entities
                 }
 
                 WorldObject viewpoint = this;
-                Player player = ToPlayer();
                 if (player != null)
                     viewpoint = player.GetViewpoint();
 

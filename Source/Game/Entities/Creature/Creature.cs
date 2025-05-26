@@ -338,7 +338,7 @@ namespace Game.Entities
 
             ReplaceAllDynamicFlags(UnitDynFlags.None);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateWorldEffectsQuestObjectiveID), data != null ? data.spawnTrackingQuestObjectiveId : 0);
 
             SetCanDualWield(cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
@@ -3024,6 +3024,24 @@ namespace Game.Entities
         }
 
         public string GetStringId(StringIdType type) { return m_stringIds[(int)type]; }
+
+        public override SpawnTrackingStateData GetSpawnTrackingStateDataForPlayer(Player player)
+        {
+            if (player == null)
+                return null;
+
+            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(SpawnObjectType.Creature, GetSpawnId());
+            if (data != null)
+            {
+                if (data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
+                {
+                    SpawnTrackingState state = player.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId);
+                    return data.spawnTrackingStates[(int)state];
+                }
+            }
+
+            return null;
+        }
 
         public VendorItemData GetVendorItems()
         {

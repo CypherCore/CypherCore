@@ -803,6 +803,18 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices...");
             Global.ObjectMgr.LoadPlayerChoices();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Tracking Templates...");
+            Global.ObjectMgr.LoadSpawnTrackingTemplates();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Tracking Quest Objectives...");
+            Global.ObjectMgr.LoadSpawnTrackingQuestObjectives();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Tracking Spawns...");
+            Global.ObjectMgr.LoadSpawnTrackings();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading Spawn Tracking Spawn States...");
+            Global.ObjectMgr.LoadSpawnTrackingStates();
+
             if (WorldConfig.GetBoolValue(WorldCfg.LoadLocales))
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices Locales...");

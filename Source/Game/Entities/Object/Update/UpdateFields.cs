@@ -160,6 +160,11 @@ namespace Game.Entities
 
                         if (!gameObject.MeetsInteractCondition(receiver))
                             dynFlags |= GameObjectDynamicLowFlags.NoInterract;
+
+                        var data = Global.ObjectMgr.GetSpawnMetadata(SpawnObjectType.GameObject, gameObject.GetSpawnId());
+                        if (data != null && data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
+                            if (receiver.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId) != SpawnTrackingState.Active)
+                                dynFlags &= ~GameObjectDynamicLowFlags.Activate;
                     }
 
                     unitDynFlags = (uint)dynFlags;
@@ -1278,14 +1283,15 @@ namespace Game.Entities
             data.WriteUInt32(GetViewerDependentNpcFlags(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentNpcFlags2(this, owner, receiver));
 
-            data.WriteUInt32(StateSpellVisualID);
-            data.WriteUInt32(StateAnimID);
-            data.WriteUInt32(StateAnimKitID);
-            data.WriteInt32(StateWorldEffectIDs.GetValue().Count);
+            data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
+            var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+            data.WriteInt32(stateWorldEffects.Count);
             data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
             data.WriteInt32(SpellOverrideNameID);
-            for (int i = 0; i < StateWorldEffectIDs.GetValue().Count; ++i)
-                data.WriteUInt32(StateWorldEffectIDs.GetValue()[i]);
+            for (int i = 0; i < stateWorldEffects.Count; ++i)
+                data.WriteUInt32(stateWorldEffects[i]);
 
             data.WritePackedGuid(Charm);
             data.WritePackedGuid(Summon);
@@ -1514,11 +1520,11 @@ namespace Game.Entities
                 }
                 if (changesMask[2])
                 {
-                    var list = StateWorldEffectIDs.GetValue();
-                    data.WriteBits(list.Count, 32);
-                    for (int i = 0; i < list.Count; ++i)
+                    var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+                    data.WriteBits(stateWorldEffects.Count, 32);
+                    for (int i = 0; i < stateWorldEffects.Count; ++i)
                     {
-                        data.WriteUInt32(list[i]);
+                        data.WriteUInt32(stateWorldEffects[i]);
                     }
                 }
             }
@@ -1594,15 +1600,15 @@ namespace Game.Entities
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(StateSpellVisualID);
+                    data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
                 }
                 if (changesMask[10])
                 {
-                    data.WriteUInt32(StateAnimID);
+                    data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
                 }
                 if (changesMask[11])
                 {
-                    data.WriteUInt32(StateAnimKitID);
+                    data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
                 }
                 if (changesMask[12])
                 {
@@ -2476,6 +2482,63 @@ namespace Game.Entities
 
             }
             return interactSpellId;
+        }
+        List<uint> GetViewerDependentStateWorldEffectIDs(UnitData unitData, Unit unit, Player receiver)
+        {
+            List<uint> stateWorldEffects = unitData.StateWorldEffectIDs;
+
+            if (unit.IsCreature())
+            {
+                var spawnTrackingStateData = unit.GetSpawnTrackingStateDataForPlayer(receiver);
+                if (spawnTrackingStateData != null)
+                    stateWorldEffects = spawnTrackingStateData.StateWorldEffects;
+            }
+
+            return stateWorldEffects;
+        }
+
+
+        uint GetViewerDependentStateSpellVisualID(UnitData unitData, Unit unit, Player receiver)
+        {
+            uint stateSpellVisual = unitData.StateSpellVisualID;
+
+            if (unit.IsCreature())
+            {
+                var spawnTrackingStateData = unit.GetSpawnTrackingStateDataForPlayer(receiver);
+                if (spawnTrackingStateData != null)
+                    stateSpellVisual = spawnTrackingStateData.StateSpellVisualId.GetValueOrDefault(0);
+            }
+
+            return stateSpellVisual;
+        }
+
+
+        uint GetViewerDependentStateAnimID(UnitData unitData, Unit unit, Player receiver)
+        {
+            uint stateAnimId = Global.DB2Mgr.GetEmptyAnimStateID();
+
+            if (unit.IsCreature())
+            {
+                var spawnTrackingStateData = unit.GetSpawnTrackingStateDataForPlayer(receiver);
+                if (spawnTrackingStateData != null)
+                    stateAnimId = spawnTrackingStateData.StateAnimId.GetValueOrDefault((ushort)stateAnimId);
+            }
+
+            return stateAnimId;
+        }
+
+        uint GetViewerDependentStateAnimKitID(UnitData unitData, Unit unit, Player receiver)
+        {
+            uint stateAnimKitId = unitData.StateAnimKitID;
+
+            if (unit.IsCreature())
+            {
+                var spawnTrackingStateData = unit.GetSpawnTrackingStateDataForPlayer(receiver);
+                if (spawnTrackingStateData != null)
+                    stateAnimKitId = spawnTrackingStateData.StateAnimKitId.GetValueOrDefault(0);
+            }
+
+            return stateAnimKitId;
         }
     }
 
@@ -7505,25 +7568,26 @@ namespace Game.Entities
         {
             data.WriteUInt32(DisplayID);
             data.WriteUInt32(SpellVisualID);
-            data.WriteUInt32(StateSpellVisualID);
-            data.WriteUInt32(SpawnTrackingStateAnimID);
-            data.WriteUInt32(SpawnTrackingStateAnimKitID);
-            data.WriteInt32(((List<uint>)StateWorldEffectIDs).Count);
+            data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
+            var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+            data.WriteInt32(stateWorldEffects.Count);
             data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
-            for (int i = 0; i < ((List<uint>)StateWorldEffectIDs).Count; ++i)
+            for (int i = 0; i < stateWorldEffects.Count; ++i)
             {
-                data.WriteUInt32(((List<uint>)StateWorldEffectIDs)[i]);
+                data.WriteUInt32(stateWorldEffects[i]);
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
-            data.WriteUInt32(GetViewerGameObjectFlags(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentGameObjectFlags(this, owner, receiver));
             Quaternion rotation = ParentRotation;
             data.WriteFloat(rotation.X);
             data.WriteFloat(rotation.Y);
             data.WriteFloat(rotation.Z);
             data.WriteFloat(rotation.W);
             data.WriteUInt32(FactionTemplate);
-            data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
+            data.WriteInt8(GetViewerDependentGameObjectState(this, owner, receiver));
             data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
             data.WriteUInt32(ArtKit);
@@ -7558,10 +7622,11 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteBits(((List<uint>)StateWorldEffectIDs).Count, 32);
-                    for (int i = 0; i < ((List<uint>)StateWorldEffectIDs).Count; ++i)
+                    var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+                    data.WriteBits(stateWorldEffects.Count, 32);
+                    for (int i = 0; i < stateWorldEffects.Count; ++i)
                     {
-                        data.WriteUInt32(((List<uint>)StateWorldEffectIDs)[i]);
+                        data.WriteUInt32(stateWorldEffects[i]);
                     }
                 }
             }
@@ -7616,15 +7681,15 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(StateSpellVisualID);
+                    data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(SpawnTrackingStateAnimID);
+                    data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(SpawnTrackingStateAnimKitID);
+                    data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
                 }
                 if (changesMask[9])
                 {
@@ -7640,7 +7705,7 @@ namespace Game.Entities
                 }
                 if (changesMask[12])
                 {
-                    data.WriteUInt32(GetViewerGameObjectFlags(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentGameObjectFlags(this, owner, receiver));
                 }
                 if (changesMask[13])
                 {
@@ -7655,7 +7720,7 @@ namespace Game.Entities
                 }
                 if (changesMask[15])
                 {
-                    data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
+                    data.WriteInt8(GetViewerDependentGameObjectState(this, owner, receiver));
                 }
                 if (changesMask[16])
                 {
@@ -7725,7 +7790,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerGameObjectFlags(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentGameObjectFlags(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
             uint flags = gameObjectData.Flags;
             if (gameObject.GetGoType() == GameObjectTypes.Chest)
@@ -7735,10 +7800,55 @@ namespace Game.Entities
             return flags;
         }
 
-        sbyte GetViewerGameObjectState(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        sbyte GetViewerDependentGameObjectState(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
             return (sbyte)gameObject.GetGoStateFor(receiver.GetGUID());
         }
+
+        List<uint> GetViewerDependentStateWorldEffectIDs(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        {
+            List<uint> stateWorldEffects = gameObjectData.StateWorldEffectIDs;
+
+            var spawnTrackingStateData = gameObject.GetSpawnTrackingStateDataForPlayer(receiver);
+            if (spawnTrackingStateData != null)
+                stateWorldEffects = spawnTrackingStateData.StateWorldEffects;
+
+            return stateWorldEffects;
+        }
+
+        uint GetViewerDependentStateSpellVisualID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        {
+            uint stateSpellVisual = gameObjectData.StateSpellVisualID;
+
+            var spawnTrackingStateData = gameObject.GetSpawnTrackingStateDataForPlayer(receiver);
+            if (spawnTrackingStateData != null)
+                stateSpellVisual = spawnTrackingStateData.StateSpellVisualId.GetValueOrDefault(0);
+
+            return stateSpellVisual;
+        }
+
+        uint GetViewerDependentStateAnimID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        {
+            uint stateAnimId = Global.DB2Mgr.GetEmptyAnimStateID();
+
+            var spawnTrackingStateData = gameObject.GetSpawnTrackingStateDataForPlayer(receiver);
+            if (spawnTrackingStateData != null)
+                stateAnimId = spawnTrackingStateData.StateAnimId.GetValueOrDefault((ushort)stateAnimId);
+
+            return stateAnimId;
+        }
+
+        uint GetViewerDependentStateAnimKitID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        {
+            uint stateAnimKitId = gameObjectData.SpawnTrackingStateAnimKitID;
+
+            var spawnTrackingStateData = gameObject.GetSpawnTrackingStateDataForPlayer(receiver);
+            if (spawnTrackingStateData != null)
+                stateAnimKitId = spawnTrackingStateData.StateAnimKitId.GetValueOrDefault(0);
+
+            return stateAnimKitId;
+        }
+
     }
 
     public class DynamicObjectData : HasChangesMask

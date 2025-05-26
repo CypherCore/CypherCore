@@ -621,4 +621,12 @@ namespace Framework.Constants
         FirstCompletionBonus = 0x1,
         RepeatCompletionBonus = 0x2
     }
+
+    public enum SpawnTrackingState
+    {
+        None = 0,
+        Active = 1,
+        Complete = 2,
+        Max
+    }
 }

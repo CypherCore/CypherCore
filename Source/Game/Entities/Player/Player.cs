@@ -5524,7 +5524,6 @@ namespace Game.Entities
             }
 
             SetDisplayId(model.DisplayID, true);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), DB2Mgr.GetEmptyAnimStateID());
         }
 
         //Creature

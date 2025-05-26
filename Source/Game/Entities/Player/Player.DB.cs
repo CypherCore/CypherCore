@@ -821,9 +821,11 @@ namespace Game.Entities
                     uint questID = result.Read<uint>(0);
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
+                    if (quest == null)
+                        continue;
 
                     var questStatusData = m_QuestStatus.LookupByKey(questID);
-                    if (questStatusData != null && questStatusData.Slot < SharedConst.MaxQuestLogSize && quest != null)
+                    if (questStatusData != null && questStatusData.Slot < SharedConst.MaxQuestLogSize)
                     {
                         byte storageIndex = result.Read<byte>(1);
 
@@ -845,6 +847,42 @@ namespace Game.Entities
                 while (result.NextRow());
             }
         }
+
+        void _LoadQuestStatusObjectiveSpawnTrackings(SQLResult result)
+        {
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint questID = result.Read<uint>(0);
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
+                    if (quest == null)
+                        continue;
+
+                    var itr = m_QuestStatus.LookupByKey(questID);
+                    if (itr != null && itr.Slot < SharedConst.MaxQuestLogSize)
+                    {
+                        QuestStatusData questStatusData = itr;
+                        sbyte storageIndex = result.Read<sbyte>(1);
+                        var objectiveItr = quest.Objectives.Find(objective => objective.StorageIndex == storageIndex);
+                        if (objectiveItr != null)
+                        {
+                            uint spawnTrackingId = result.Read<uint>(2);
+
+                            if (Global.ObjectMgr.IsQuestObjectiveForSpawnTracking(spawnTrackingId, objectiveItr.Id))
+                                questStatusData.SpawnTrackingList.Add((storageIndex, spawnTrackingId));
+                            else
+                                Log.outError(LogFilter.Player, $"Player::_LoadQuestStatusObjectiveSpawnTrackings: Player '{GetName()}' ({GetGUID()}) has objective {objectiveItr.Id} (quest {questID}) with unrelated spawn tracking {spawnTrackingId}.");
+                        }
+                        else
+                            Log.outError(LogFilter.Player, $"Player::_LoadQuestStatusObjectiveSpawnTrackings: Player '{GetName()}' ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
+                    }
+                    else
+                        Log.outError(LogFilter.Player, $"Player::_LoadQuestStatusObjectiveSpawnTrackings: Player {GetName()} ({GetGUID()}) does not have quest {questID} but has objective spawn trackings for it.");
+                } while (result.NextRow());
+            }
+        }
+
         void _LoadQuestStatusRewarded(SQLResult result)
         {
             if (!result.IsEmpty())
@@ -2189,6 +2227,22 @@ namespace Game.Entities
                             stmt.AddValue(3, GetQuestSlotObjectiveData(data.Slot, obj));
                             trans.Append(stmt);
                         }
+
+                        // Save spawn trackings
+                        stmt = CharacterDatabase.GetPreparedStatement( CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING_BY_QUEST);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, save.Key);
+                        trans.Append(stmt);
+
+                        foreach (var (questObjectiveStorageIndex, spawnTrackingId) in data.SpawnTrackingList)
+                        {
+                            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CHAR_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING);
+                            stmt.AddValue(0, GetGUID().GetCounter());
+                            stmt.AddValue(1, save.Key);
+                            stmt.AddValue(2, questObjectiveStorageIndex);
+                            stmt.AddValue(3, spawnTrackingId);
+                            trans.Append(stmt);
+                        }
                     }
                 }
                 else
@@ -2200,6 +2254,11 @@ namespace Game.Entities
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_BY_QUEST);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, save.Key);
+                    trans.Append(stmt);
+
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING_BY_QUEST);
                     stmt.AddValue(0, GetGUID().GetCounter());
                     stmt.AddValue(1, save.Key);
                     trans.Append(stmt);
@@ -3427,6 +3486,7 @@ namespace Game.Entities
             // after spell load, learn rewarded spell if need also
             _LoadQuestStatus(holder.GetResult(PlayerLoginQueryLoad.QuestStatus));
             _LoadQuestStatusObjectives(holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectives));
+            _LoadQuestStatusObjectiveSpawnTrackings(holder.GetResult(PlayerLoginQueryLoad.QuestStatusSpawnTracking));
             _LoadQuestStatusRewarded(holder.GetResult(PlayerLoginQueryLoad.QuestStatusRew));
             _LoadDailyQuestStatus(holder.GetResult(PlayerLoginQueryLoad.DailyQuestStatus));
             _LoadWeeklyQuestStatus(holder.GetResult(PlayerLoginQueryLoad.WeeklyQuestStatus));
@@ -4404,6 +4464,10 @@ namespace Game.Entities
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING);
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
