@@ -397,8 +397,6 @@ namespace Game.DataStorage
             WorldMapOverlayStorage = ReadDB2<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
             WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
-            Global.DB2Mgr.LoadStores();
-
             foreach (var entry in TaxiPathStorage.Values)
             {
                 if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
@@ -412,7 +410,7 @@ namespace Game.DataStorage
             uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
             foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
                 if (pathLength[entry.PathID] < entry.NodeIndex + 1)
-                    pathLength[entry.PathID] = (uint)entry.NodeIndex + 1u;
+                    pathLength[entry.PathID] = (uint)Math.Max(pathLength[entry.PathID], entry.NodeIndex + 1u);
 
             // Set path length
             for (uint i = 0; i < pathCount; ++i)
@@ -465,7 +463,7 @@ namespace Game.DataStorage
                 Environment.Exit(1);
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Initialized {0} DB2 data storages in {1} ms", loadedFileCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Initialized {loadedFileCount} DB2 data storages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
 
             return availableDb2Locales;
         }

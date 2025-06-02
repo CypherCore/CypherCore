@@ -37,8 +37,10 @@ namespace Game.DataStorage
             }
         }
 
-        public void LoadStores()
+        public void IndexLoadedStores()
         {
+            uint oldMSTime = Time.GetMSTime();
+
             foreach (var areaGroupMember in AreaGroupMemberStorage.Values)
                 _areaGroupMembers.Add(areaGroupMember.AreaGroupID, areaGroupMember.AreaID);
 
@@ -688,6 +690,8 @@ namespace Game.DataStorage
 
             foreach (PvpStatRecord pvpStat in PvpStatStorage.Values)
                 _pvpStatIdsByMap.Add(pvpStat.MapID, pvpStat.Id);
+
+            Log.outInfo(LogFilter.ServerLoading, $"Indexed DB2 data stores in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public IDB2Storage GetStorage(uint type)

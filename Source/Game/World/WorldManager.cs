@@ -415,19 +415,19 @@ namespace Game
 
             DB.Login.Execute($"UPDATE realmlist SET icon = {(byte)server_type}, timezone = {realm_zone} WHERE id = '{Global.RealmMgr.GetCurrentRealmId().Index}'");      // One-time query
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
+            if (!GameObjectModel.LoadGameObjectModelList())
+            {
+                Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models (part of vmaps), objects using WMO models will crash the client - server shutting down!");
+                return false;
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
             // Load DB2s
             m_availableDbcLocaleMask = CliDB.LoadStores(_dataPath, m_defaultDbcLocale);
             if (m_availableDbcLocaleMask == null || !m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
             {
                 Log.outFatal(LogFilter.ServerLoading, $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
-                return false;
-            }
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
-            if (!GameObjectModel.LoadGameObjectModelList())
-            {
-                Log.outFatal(LogFilter.ServerLoading, "Unable to load gameobject models (part of vmaps), objects using WMO models will crash the client - server shutting down!");
                 return false;
             }
 
@@ -439,6 +439,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix optional data...");
             Global.DB2Mgr.LoadHotfixOptionalData(m_availableDbcLocaleMask);
+
+            Log.outInfo(LogFilter.ServerLoading, "Indexing loaded data stores...");
+            Global.DB2Mgr.IndexLoadedStores();
 
             //- Load M2 fly by cameras
             M2Storage.LoadM2Cameras(_dataPath);
