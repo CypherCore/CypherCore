@@ -1729,7 +1729,6 @@ namespace Framework.Constants
         PdumpNoPaths,
         PersistentCharacterCleanFlags,
         PlayerAllowCommands,
-        PortInstance,
         PortWorld,
         PreserveCustomChannelDuration,
         PreserveCustomChannelInterval,

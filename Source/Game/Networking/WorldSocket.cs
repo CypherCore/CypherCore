@@ -57,7 +57,6 @@ namespace Game.Networking
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;
-            _serverChallenge = Array.Empty<byte>().GenerateRandomKey(32);
             _worldCrypt = new WorldCrypt();
 
             _encryptKey = new byte[32];
@@ -448,6 +447,8 @@ namespace Game.Networking
 
         void HandleSendAuthSession()
         {
+            _serverChallenge = Array.Empty<byte>().GenerateRandomKey(32);
+
             AuthChallenge challenge = new();
             challenge.Challenge = _serverChallenge;
             challenge.DosChallenge = new byte[32].GenerateRandomKey(32);

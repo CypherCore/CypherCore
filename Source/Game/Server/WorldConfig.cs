@@ -259,16 +259,9 @@ namespace Game
                 int val = GetDefaultValue("WorldServerPort", 8085);
                 if (val != (int)Values[WorldCfg.PortWorld])
                     Log.outError(LogFilter.ServerLoading, "WorldServerPort option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.PortWorld]);
-
-                val = GetDefaultValue("InstanceServerPort", 8086);
-                if (val != (int)Values[WorldCfg.PortInstance])
-                    Log.outError(LogFilter.ServerLoading, "InstanceServerPort option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.PortInstance]);
             }
             else
-            {
                 Values[WorldCfg.PortWorld] = GetDefaultValue("WorldServerPort", 8085);
-                Values[WorldCfg.PortInstance] = GetDefaultValue("InstanceServerPort", 8086);
-            }
 
             // Config values are in "milliseconds" but we handle SocketTimeOut only as "seconds" so divide by 1000
             Values[WorldCfg.SocketTimeoutTime] = GetDefaultValue("SocketTimeOutTime", 900000) / 1000;

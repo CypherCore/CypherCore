@@ -24,25 +24,14 @@ namespace Game.Networking
             if (!base.StartNetwork(bindIp, port, threadCount))
                 return false;
 
-            _instanceAcceptor = new AsyncAcceptor();
-            if (!_instanceAcceptor.Start(bindIp, WorldConfig.GetIntValue(WorldCfg.PortInstance)))
-            {
-                Log.outError(LogFilter.Network, "StartNetwork failed to start instance AsyncAcceptor");
-                return false;
-            }
-
             Acceptor.AsyncAcceptSocket(OnSocketAccept);
-            _instanceAcceptor.AsyncAcceptSocket(OnSocketOpen);
 
             return true;
         }
 
         public override void StopNetwork()
         {
-            _instanceAcceptor.Close();
             base.StopNetwork();
-
-            _instanceAcceptor = null;
         }
 
         public override void OnSocketOpen(Socket sock)
@@ -70,7 +59,6 @@ namespace Game.Networking
             Global.WorldSocketMgr.OnSocketOpen(sock);
         }
 
-        AsyncAcceptor _instanceAcceptor;
         int _socketSendBufferSize;
         bool _tcpNoDelay;
     }

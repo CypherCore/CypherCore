@@ -492,7 +492,7 @@ namespace Game
             ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;
             connectTo.Serial = serial;
-            connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
+            connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortWorld);
             connectTo.Con = (byte)ConnectionType.Instance;
 
             if (instanceAddress != null)
