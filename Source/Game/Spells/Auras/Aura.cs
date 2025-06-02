@@ -209,6 +209,16 @@ namespace Game.Spells
             }
         }
 
+        public void AddEffectToApplyEffectMask(uint spellEffectIndex)
+        {
+            if ((_effectsToApply & (1 << (int)spellEffectIndex)) != 0)
+                return;
+
+            _effectsToApply |= 1u << (int)spellEffectIndex;
+            if (Aura.EffectTypeNeedsSendingAmount(GetBase().GetEffect(spellEffectIndex).GetAuraType()))
+                _flags |= AuraFlags.Scalable;
+        }
+
         public void SetNeedClientUpdate()
         {
             if (_needClientUpdate || GetRemoveMode() != AuraRemoveMode.None)

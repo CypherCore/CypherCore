@@ -684,7 +684,7 @@ namespace Game.Spells
             if (aurApp == null)
                 aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << (int)effectInfo.EffectIndex);
             else
-                aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << (int)effectInfo.EffectIndex, false);
+                aurApp.AddEffectToApplyEffectMask(effectInfo.EffectIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.UnlearnSpecialization)]
