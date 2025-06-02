@@ -1067,12 +1067,7 @@ namespace Game.Entities
             _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear);
             _spline.InitLengths();
 
-            // should be sent in object create packets only
-            DoWithSuppressingObjectUpdates(() =>
-            {
-                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
-                m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
-            });
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
 
             if (IsInWorld)
             {
