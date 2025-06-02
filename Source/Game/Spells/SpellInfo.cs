@@ -677,6 +677,19 @@ namespace Game.Spells
             return false;
         }
 
+        public bool IsUpdatingTemporaryAuraValuesBySpellMod()
+        {
+            switch (Id)
+            {
+                case 384669:    // Overflowing Maelstrom
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
+
         public bool CanPierceImmuneAura(SpellInfo auraSpellInfo)
         {
             // Dispels other auras on immunity, check if this spell makes the unit immune to aura

@@ -461,56 +461,55 @@ namespace Game.Spells
                 return;
             // reapply some passive spells after add/remove related spellmods
             // Warning: it is a dead loop if 2 auras each other amount-shouldn't happen
-            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
+            uint? recalculateEffectIndex = null;
             switch ((SpellModOp)GetMiscValue())
             {
                 case SpellModOp.Points:
-                    recalculateEffectMask.SetAll(true);
                     break;
                 case SpellModOp.PointsIndex0:
-                    recalculateEffectMask.Set(0, true);
+                    recalculateEffectIndex = 0;
                     break;
                 case SpellModOp.PointsIndex1:
-                    recalculateEffectMask.Set(1, true);
+                    recalculateEffectIndex = 1;
                     break;
                 case SpellModOp.PointsIndex2:
-                    recalculateEffectMask.Set(2, true);
+                    recalculateEffectIndex = 2;
                     break;
                 case SpellModOp.PointsIndex3:
-                    recalculateEffectMask.Set(3, true);
+                    recalculateEffectIndex = 3;
                     break;
                 case SpellModOp.PointsIndex4:
-                    recalculateEffectMask.Set(4, true);
+                    recalculateEffectIndex = 4;
                     break;
                 default:
-                    break;
+                    return;
             }
 
-            if (recalculateEffectMask.Any())
-            {
-                if (triggeredBy == null)
-                    triggeredBy = this;
+            if (triggeredBy == null)
+                triggeredBy = this;
 
-                ObjectGuid guid = target.GetGUID();
-                var auras = target.GetAppliedAuras();
-                foreach (var iter in auras)
+            ObjectGuid guid = target.GetGUID();
+            var auras = target.GetAppliedAuras();
+            foreach (var (_, aurApp) in auras)
+            {
+                Aura aura = aurApp.GetBase();
+                // only passive and permament auras-active auras should have amount set on spellcast and not be affected
+                // if aura is cast by others, it will not be affected
+                if ((!aura.IsPassive() && !aura.IsPermanent() && !GetSpellInfo().IsUpdatingTemporaryAuraValuesBySpellMod())
+                    || aura.GetCasterGUID() != guid || !aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
+                    continue;
+
+                if (recalculateEffectIndex.HasValue)
                 {
-                    Aura aura = iter.Value.GetBase();
-                    // only passive and permament auras-active auras should have amount set on spellcast and not be affected
-                    // if aura is cast by others, it will not be affected
-                    if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
-                    {
-                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
-                        {
-                            if (recalculateEffectMask[(int)i])
-                            {
-                                AuraEffect aurEff = aura.GetEffect(i);
-                                if (aurEff != null)
-                                    if (aurEff != triggeredBy)
-                                        aurEff.RecalculateAmount(triggeredBy);
-                            }
-                        }
-                    }
+                    AuraEffect aurEff = aura.GetEffect(recalculateEffectIndex.Value);
+                    if (aurEff != null && aurEff != triggeredBy)
+                        aurEff.RecalculateAmount(triggeredBy);
+                }
+                else
+                {
+                    foreach (AuraEffect aurEff in aura.GetAuraEffects())
+                        if (aurEff != triggeredBy)
+                            aurEff.RecalculateAmount(triggeredBy);
                 }
             }
         }
