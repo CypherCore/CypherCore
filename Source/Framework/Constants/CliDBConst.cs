@@ -2191,9 +2191,12 @@ namespace Framework.Constants
         ShowOnMapBorder = 0x04,
         ShowIfClientPassesCondition = 0x08,
         UsePlayerFavoriteMount = 0x10,
-        EndPointPnly = 0x20,
+        EndPointOnly = 0x20,
         IgnoreForFindNearest = 0x40,
         DoNotShowInWorldMapUI = 0x80,
+        ShowNpcMinimapAtlasIfClientPassesCondition = 0x100,
+        MapLayerTransition = 0x200,
+        NotAccountWide = 0x400
     }
 
     [Flags]
