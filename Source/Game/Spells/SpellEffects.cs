@@ -1136,7 +1136,9 @@ namespace Game.Spells
                 return;
 
             Cypher.Assert(dynObjAura.GetDynobjOwner() != null);
-            dynObjAura._ApplyEffectForTargets(effectInfo.EffectIndex);
+            for (uint i = 0; i < m_spellInfo.GetEffects().Count; ++i)
+                if (m_spellInfo.GetEffect(i).IsEffect(SpellEffectName.PersistentAreaAura))
+                    dynObjAura._ApplyEffectForTargets(i);
         }
 
         [SpellEffectHandler(SpellEffectName.Energize)]
