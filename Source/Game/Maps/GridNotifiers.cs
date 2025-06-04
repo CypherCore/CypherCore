@@ -1667,7 +1667,7 @@ namespace Game.Maps
 
     public class UnitListSearcher : Notifier
     {
-        PhaseShift i_phaseShift;
+        public PhaseShift i_phaseShift;
         List<Unit> i_objects;
         ICheck<Unit> i_check;
 

@@ -2759,30 +2759,31 @@ namespace Game.Spells
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
         {
-            if (GetSpellInfo().HasAttribute(SpellAttr7.DisableAuraWhileDead) && !GetUnitOwner().IsAlive())
+            Unit unitOwner = GetUnitOwner();
+            if (GetSpellInfo().HasAttribute(SpellAttr7.DisableAuraWhileDead) && !unitOwner.IsAlive())
                 return;
 
             Unit refe = caster;
             if (refe == null)
-                refe = GetUnitOwner();
+                refe = unitOwner;
 
             // add non area aura targets
             // static applications go through spell system first, so we assume they meet conditions
-            foreach (var targetPair in _staticApplications)
+            foreach (var (targetGuid, effectMask) in _staticApplications)
             {
-                Unit target = Global.ObjAccessor.GetUnit(GetUnitOwner(), targetPair.Key);
-                if (target == null && targetPair.Key == GetUnitOwner().GetGUID())
-                    target = GetUnitOwner();
+                Unit target = Global.ObjAccessor.GetUnit(unitOwner, targetGuid);
+                if (target == null && targetGuid == unitOwner.GetGUID())
+                    target = unitOwner;
 
                 if (target != null)
-                    targets.Add(target, targetPair.Value);
+                    targets.Add(target, effectMask);
             }
 
             // skip area update if owner is not in world!
-            if (!GetUnitOwner().IsInWorld)
+            if (!unitOwner.IsInWorld)
                 return;
 
-            if (GetUnitOwner().HasAuraState(AuraStateType.Banished, GetSpellInfo(), caster))
+            if (unitOwner.HasAuraState(AuraStateType.Banished, GetSpellInfo(), caster))
                 return;
 
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
@@ -2794,7 +2795,7 @@ namespace Game.Spells
                 if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
                     continue;
 
-                List<WorldObject> units = new();
+                List<Unit> units = new();
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
                 float radius = spellEffectInfo.CalcRadius(refe);
@@ -2818,22 +2819,22 @@ namespace Game.Spells
                         extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                         break;
                     case SpellEffectName.ApplyAreaAuraPet:
-                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                            units.Add(GetUnitOwner());
+                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(unitOwner, refe, condList))
+                            units.Add(unitOwner);
                         goto case SpellEffectName.ApplyAreaAuraOwner;
                     /* fallthrough */
                     case SpellEffectName.ApplyAreaAuraOwner:
                     {
-                        Unit owner = GetUnitOwner().GetCharmerOrOwner();
+                        Unit owner = unitOwner.GetCharmerOrOwner();
                         if (owner != null)
-                            if (GetUnitOwner().IsWithinDistInMap(owner, radius))
+                            if (unitOwner.IsWithinDistInMap(owner, radius))
                                 if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
                                     units.Add(owner);
                         break;
                     }
                     case SpellEffectName.ApplyAuraOnPet:
                     {
-                        Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
+                        Unit pet = Global.ObjAccessor.GetUnit(unitOwner, unitOwner.GetPetGUID());
                         if (pet != null)
                             if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, refe, condList))
                                 units.Add(pet);
@@ -2841,8 +2842,8 @@ namespace Game.Spells
                     }
                     case SpellEffectName.ApplyAreaAuraSummons:
                     {
-                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                            units.Add(GetUnitOwner());
+                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(unitOwner, refe, condList))
+                            units.Add(unitOwner);
                         selectionType = SpellTargetCheckTypes.Summoned;
                         break;
                     }
@@ -2853,22 +2854,22 @@ namespace Game.Spells
                     var containerTypeMask = Spell.GetSearcherTypeMask(GetSpellInfo(), spellEffectInfo, SpellTargetObjectTypes.Unit, condList);
                     if (containerTypeMask != 0)
                     {
-                        WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                        WorldObjectListSearcher searcher = new(GetUnitOwner(), units, check, containerTypeMask);
+                        WorldObjectSpellAreaTargetCheck check = new(radius, unitOwner, refe, unitOwner, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                        UnitListSearcher searcher = new(unitOwner, units, check);
                         searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
-                        Spell.SearchTargets(searcher, containerTypeMask, GetUnitOwner(), GetUnitOwner(), radius + extraSearchRadius);
+                        Spell.SearchTargets(searcher, containerTypeMask, unitOwner, unitOwner, radius + extraSearchRadius);
 
                         // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                        units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                        units.RemoveAll(unit => !unit.IsSelfOrInSameMap(unitOwner));
                     }
                 }
 
-                foreach (WorldObject unit in units)
+                foreach (Unit unit in units)
                 {
-                    if (!targets.ContainsKey(unit.ToUnit()))
-                        targets[unit.ToUnit()] = 0;
+                    if (!targets.ContainsKey(unit))
+                        targets[unit] = 0;
 
-                    targets[unit.ToUnit()] |= 1u << (int)spellEffectInfo.EffectIndex;
+                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
                 }
             }
         }
@@ -2929,11 +2930,12 @@ namespace Game.Spells
         public DynObjAura(AuraCreateInfo createInfo) : base(createInfo)
         {
             LoadScripts();
-            Cypher.Assert(GetDynobjOwner() != null);
-            Cypher.Assert(GetDynobjOwner().IsInWorld);
-            Cypher.Assert(GetDynobjOwner().GetMap() == createInfo.Caster.GetMap());
+            DynamicObject dynObjOwner = GetDynobjOwner();
+            Cypher.Assert(dynObjOwner != null);
+            Cypher.Assert(dynObjOwner.IsInWorld);
+            Cypher.Assert(dynObjOwner.GetMap() == createInfo.Caster.GetMap());
             _InitEffects(createInfo._auraEffectMask, createInfo.Caster, createInfo.BaseAmount);
-            GetDynobjOwner().SetAura(this);
+            dynObjOwner.SetAura(this);
 
         }
 
@@ -2946,8 +2948,9 @@ namespace Game.Spells
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
         {
-            Unit dynObjOwnerCaster = GetDynobjOwner().GetCaster();
-            float radius = GetDynobjOwner().GetRadius();
+            DynamicObject dynObjOwner = GetDynobjOwner();
+            Unit dynObjOwnerCaster = dynObjOwner.GetCaster();
+            float radius = dynObjOwner.GetRadius();
 
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
@@ -2962,12 +2965,12 @@ namespace Game.Spells
                 List<Unit> targetList = new();
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
-                WorldObjectSpellAreaTargetCheck check = new(radius, GetDynobjOwner(), dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                UnitListSearcher searcher = new(GetDynobjOwner(), targetList, check);
-                Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
+                WorldObjectSpellAreaTargetCheck check = new(radius, dynObjOwner, dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                UnitListSearcher searcher = new(dynObjOwner, targetList, check);
+                Cell.VisitAllObjects(dynObjOwner, searcher, radius);
 
                 // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));
+                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(dynObjOwner));
 
                 foreach (var unit in targetList)
                 {
