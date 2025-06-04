@@ -4646,6 +4646,12 @@ namespace Game.Entities
                 spellInfo._LoadSqrtTargetLimit(8, 0, 453034, 1, null, null);
             });
 
+            // Fel Barrage
+            ApplySpellFix([258926], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, null, 1, null, null);
+            });
+
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
