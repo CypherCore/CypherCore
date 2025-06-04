@@ -4592,7 +4592,8 @@ namespace Game.Entities
             else
                 m_deathExpireTime = now + PlayerConst.DeathExpireStep;
         }
-        int CalculateCorpseReclaimDelay(bool load = false)
+        
+        public int CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
             if (load && corpse == null)
@@ -4629,7 +4630,8 @@ namespace Game.Entities
 
             return (int)(delay * Time.InMilliseconds);
         }
-        void SendCorpseReclaimDelay(int delay)
+        
+        public void SendCorpseReclaimDelay(int delay)
         {
             CorpseReclaimDelay packet = new();
             packet.Remaining = (uint)delay;
