@@ -4050,8 +4050,11 @@ namespace Game.Spells
             if (m_caster.IsPlayer() && m_caster.ToPlayer().GetClass() == Class.Deathknight &&
                 HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
             {
-                castFlags |= SpellCastFlags.NoGCD;                   // same as in SMSG_SPELL_START
-                castFlags |= SpellCastFlags.RuneList;                    // rune cooldowns list
+                castFlags |= SpellCastFlags.NoGCD; // not needed, but it's being sent according to sniffs
+
+                // Only send rune cooldowns when there has been a change
+                if (m_runesState != m_caster.ToPlayer().GetRunesState())
+                    castFlags |= SpellCastFlags.RuneList; // rune cooldowns list
             }
 
             if (m_targets.HasTraj())
@@ -4843,12 +4846,15 @@ namespace Game.Spells
             Player player = m_caster.ToPlayer();
             m_runesState = player.GetRunesState();                 // store previous state
 
+            if (!didHit)
+                return;
+
             int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
             for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
             {
                 if (player.GetRuneCooldown(i) == 0 && runeCost > 0)
                 {
-                    player.SetRuneCooldown(i, didHit ? player.GetRuneBaseCooldown() : RuneCooldowns.Miss);
+                    player.SetRuneCooldown(i, player.GetRuneBaseCooldown());
                     --runeCost;
                 }
             }
