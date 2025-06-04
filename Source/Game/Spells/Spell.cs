@@ -4051,10 +4051,7 @@ namespace Game.Spells
                 HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
             {
                 castFlags |= SpellCastFlags.NoGCD; // not needed, but it's being sent according to sniffs
-
-                // Only send rune cooldowns when there has been a change
-                if (m_runesState != m_caster.ToPlayer().GetRunesState())
-                    castFlags |= SpellCastFlags.RuneList; // rune cooldowns list
+                castFlags |= SpellCastFlags.RuneList; // rune cooldowns list
             }
 
             if (m_targets.HasTraj())
@@ -4579,7 +4576,7 @@ namespace Game.Spells
 
                     healPrediction = prediction;
                 }
-            };
+            }
 
             if (IsEmpowerSpell())
             {
@@ -8243,7 +8240,7 @@ namespace Game.Spells
                 }
 
                 return true;
-            };
+            }
 
             foreach (var script in m_loadedScripts)
             {
@@ -9918,8 +9915,8 @@ namespace Game.Spells
             SpellValueOverrides.Add(new SpellValueOverride(mod, val));
         }
 
-        public CastSpellExtraArgs(SpellValueModFloat mod, float val) 
-        { 
+        public CastSpellExtraArgs(SpellValueModFloat mod, float val)
+        {
             SpellValueOverrides.Add(new SpellValueOverride(mod, val));
         }
 
