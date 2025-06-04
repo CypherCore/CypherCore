@@ -266,13 +266,14 @@ namespace Game.Entities
 
         public uint? SpellForVisuals;
 
-        public uint TimeToTarget;
         public uint TimeToTargetScale;
 
         public AreaTriggerScaleCurveTemplate OverrideScale;
         public AreaTriggerScaleCurveTemplate ExtraScale;
 
         public AreaTriggerShapeInfo Shape = new();
+
+        public float Speed = 1.0f;
         public List<Vector3> SplinePoints = new();
         public AreaTriggerOrbitInfo OrbitInfo;
 

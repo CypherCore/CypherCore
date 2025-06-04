@@ -418,8 +418,7 @@ namespace Scripts.World.Areatriggers
                 PathGenerator path = new(at);
                 path.CalculatePath(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ(), false);
 
-                float timeToTarget = at.GetDistance(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ()) * 144.5f;
-                at.InitSplines(path.GetPath(), (uint)timeToTarget);
+                at.InitSplines(path.GetPath());
             }
         }
 

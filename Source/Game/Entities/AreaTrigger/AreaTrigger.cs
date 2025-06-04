@@ -32,7 +32,6 @@ namespace Game.Entities
 
             m_areaTriggerData = new AreaTriggerFieldData();
 
-            _spline = new();
             _stationaryPosition = new();
         }
 
@@ -195,8 +194,6 @@ namespace Game.Entities
 
             UpdateShape();
 
-            uint timeToTarget = GetCreateProperties().TimeToTarget != 0 ? GetCreateProperties().TimeToTarget : m_areaTriggerData.Duration;
-
             if (GetCreateProperties().OrbitInfo != null)
             {
                 AreaTriggerOrbitInfo orbit = GetCreateProperties().OrbitInfo;
@@ -205,11 +202,11 @@ namespace Game.Entities
                 else
                     orbit.Center = new(pos.posX, pos.posY, pos.posZ);
 
-                InitOrbit(orbit, timeToTarget);
+                InitOrbit(orbit, GetCreateProperties().Speed);
             }
             else if (GetCreateProperties().HasSplines())
             {
-                InitSplineOffsets(GetCreateProperties().SplinePoints, timeToTarget);
+                InitSplineOffsets(GetCreateProperties().SplinePoints);
             }
 
             // movement on transport of areatriggers on unit is handled by themself
@@ -1035,7 +1032,7 @@ namespace Game.Entities
             }
         }
 
-        void InitSplineOffsets(List<Vector3> offsets, uint timeToTarget)
+        void InitSplineOffsets(List<Vector3> offsets, float? overrideSpeed = null)
         {
             float angleSin = (float)Math.Sin(GetOrientation());
             float angleCos = (float)Math.Cos(GetOrientation());
@@ -1054,19 +1051,25 @@ namespace Game.Entities
                 rotatedPoints.Add(new Vector3(x, y, z));
             }
 
-            InitSplines(rotatedPoints.ToArray(), timeToTarget);
+            InitSplines(rotatedPoints.ToArray(), overrideSpeed);
         }
 
-        public void InitSplines(Vector3[] splinePoints, uint timeToTarget)
+        public void InitSplines(Vector3[] splinePoints, float? overrideSpeed = null)
         {
             if (splinePoints.Length < 2)
                 return;
 
             _movementTime = 0;
 
+            _spline = new Spline<int>();
             _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear);
             _spline.InitLengths();
 
+            float speed = overrideSpeed.GetValueOrDefault(GetCreateProperties().Speed);
+            if (speed <= 0.0f)
+                speed = 1.0f;
+
+            uint timeToTarget = _spline.Length() / speed * (float)Time.InMilliseconds;
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
 
             if (IsInWorld)
@@ -1083,28 +1086,28 @@ namespace Game.Entities
                 reshape.AreaTriggerSpline = new();
                 reshape.AreaTriggerSpline.ElapsedTimeForMovement = GetElapsedTimeForMovement();
                 reshape.AreaTriggerSpline.TimeToTarget = timeToTarget;
-                reshape.AreaTriggerSpline.Points = splinePoints;
+                reshape.AreaTriggerSpline.Points = _spline.GetPoints();
                 SendMessageToSet(reshape, true);
             }
 
             _reachedDestination = false;
         }
 
-        void InitOrbit(AreaTriggerOrbitInfo orbit, uint timeToTarget)
+        void InitOrbit(AreaTriggerOrbitInfo orbit, float? overrideSpeed = null)
         {
             // Circular movement requires either a center position or an attached unit
             Cypher.Assert(orbit.Center.HasValue || orbit.PathTarget.HasValue);
 
-            // should be sent in object create packets only
-            DoWithSuppressingObjectUpdates(() =>
-            {
-                SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
-                m_areaTriggerData.ClearChanged(m_areaTriggerData.TimeToTarget);
-            });
+            float speed = overrideSpeed.GetValueOrDefault(GetCreateProperties().Speed);
+            if (speed <= 0.0f)
+                speed = 1.0f;
 
+            uint timeToTarget = (uint)(orbit.Radius * 2.0f * MathF.PI * (float)Time.InMilliseconds / speed);
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OrbitPathTarget), orbit.PathTarget.GetValueOrDefault(ObjectGuid.Empty));
 
-            _orbitInfo = orbit;
+            _orbitInfo = new AreaTriggerOrbitInfo();
 
             _orbitInfo.TimeToTarget = timeToTarget;
             _orbitInfo.ElapsedTimeForMovement = 0;
@@ -1126,7 +1129,7 @@ namespace Game.Entities
 
         Position GetOrbitCenterPosition()
         {
-            if (_orbitInfo == null)
+            if (!HasOrbit())
                 return null;
 
             if (_orbitInfo.PathTarget.HasValue)
@@ -1149,7 +1152,7 @@ namespace Game.Entities
                 return GetPosition();
 
             AreaTriggerCreateProperties createProperties = GetCreateProperties();
-            AreaTriggerOrbitInfo cmi = _orbitInfo;
+            AreaTriggerOrbitInfo cmi = GetOrbit();
 
             // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
             float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;

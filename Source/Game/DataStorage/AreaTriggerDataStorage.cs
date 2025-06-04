@@ -124,8 +124,8 @@ namespace Game.DataStorage
 
             //                                                              0   1         2              3                    4
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
-                //5            6             7             8              9       10         11                 12               13            14
-                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTarget, TimeToTargetScale, " +
+                //5            6             7             8              9       10         11                 12               13                 14
+                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTargetScale, Speed, " +
                 //15     16          17          18          19          20          21          22          23          24
                 "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
@@ -185,8 +185,8 @@ namespace Game.DataStorage
                         }
                     }
 
-                    createProperties.TimeToTarget = areatriggerCreateProperties.Read<uint>(13);
-                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(14);
+                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(13);
+                    createProperties.Speed = areatriggerCreateProperties.Read<float>(14);
 
                     createProperties.Shape.TriggerType = shape;
                     unsafe
@@ -315,7 +315,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    if (createProperties.TimeToTarget != 0 || createProperties.TimeToTargetScale != 0 || createProperties.FacingCurveId != 0 || createProperties.MoveCurveId != 0)
+                    if (createProperties.TimeToTargetScale != 0)
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with time to target values");
                         continue;

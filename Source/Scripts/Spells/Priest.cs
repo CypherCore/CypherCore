@@ -960,7 +960,6 @@ namespace Scripts.Spells.Priest
         TaskScheduler _scheduler = new();
         Position _casterCurrentPosition;
         List<ObjectGuid> _affectedUnits = new();
-        float _maxTravelDistance;
 
         public areatrigger_pri_divine_star(AreaTrigger areatrigger) : base(areatrigger) { }
 
@@ -980,18 +979,15 @@ namespace Scripts.Spells.Priest
             _casterCurrentPosition = caster.GetPosition();
 
             // Note: max. distance at which the Divine Star can travel to is 1's BasePoints yards.
-            _maxTravelDistance = (float)(spellInfo.GetEffect(1).CalcValue(caster));
+            float maxTravelDistance = (float)(spellInfo.GetEffect(1).CalcValue(caster));
 
             Position destPos = _casterCurrentPosition;
-            at.MovePositionToFirstCollision(destPos, _maxTravelDistance, 0.0f);
+            at.MovePositionToFirstCollision(destPos, maxTravelDistance, 0.0f);
 
             PathGenerator firstPath = new(at);
             firstPath.CalculatePath(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ(), false);
 
-            Vector3 endPoint = firstPath.GetPath().Last();
-
-            // Note: it takes TimeSpan.FromMilliseconds(1000) to reach 1's BasePoints yards, so it takes (1000 / 1's BasePoints)ms to run 1 yard.
-            at.InitSplines(firstPath.GetPath(), (uint)(at.GetDistance(endPoint.X, endPoint.Y, endPoint.Z) * (float)(1000 / _maxTravelDistance)));
+            at.InitSplines(firstPath.GetPath());
         }
 
         public override void OnUpdate(uint diff)
@@ -1060,11 +1056,9 @@ namespace Scripts.Spells.Priest
                 Vector3[] returnSplinePoints = new Vector3[4];
 
                 returnSplinePoints[0] = at.GetPosition();
-                returnSplinePoints[1] = at.GetPosition();
-                returnSplinePoints[2] = caster.GetPosition();
-                returnSplinePoints[3] = caster.GetPosition();
+                returnSplinePoints[1] = caster.GetPosition();
 
-                at.InitSplines(returnSplinePoints, (uint)(at.GetDistance(caster) / _maxTravelDistance * 1000));
+                at.InitSplines(returnSplinePoints);
 
                 task.Repeat(TimeSpan.FromMilliseconds(250));
             });
