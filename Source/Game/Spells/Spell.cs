@@ -8476,7 +8476,7 @@ namespace Game.Spells
             m_timer = m_casttime > 0 ? m_casttime : 0;
         }
 
-        public bool IsTriggered() { return (!m_fromClient && _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask)) || !m_originalCastId.IsEmpty(); }
+        public bool IsTriggered() { return (!m_fromClient && _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IsTriggeredMask)) || !m_originalCastId.IsEmpty(); }
         public bool IsTriggeredByAura(SpellInfo auraSpellInfo) { return (auraSpellInfo == m_triggeredByAuraSpell); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
         public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.TrackTargetInChannel)); }

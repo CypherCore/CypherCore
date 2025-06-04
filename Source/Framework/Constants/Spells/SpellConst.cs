@@ -1597,6 +1597,7 @@ namespace Framework.Constants
         DontResetPeriodicTimer = 0x20000,   //! Will allow periodic aura timers to keep ticking (instead of resetting)
         DontReportCastError = 0x40000,   //! Will Return SpellFailedDontReport In Checkcast Functions
         FullMask = 0x0007FFFF, //! Used when doing CastSpell with triggered == true
+        IsTriggeredMask = FullMask & ~(IgnorePowerCost | IgnoreCastInProgress | IgnoreCastTime | IgnoreShapeshift | DontReportCastError), //!< Will be recognized by Spell::IsTriggered as triggered
 
         // debug flags (used with .cast triggered commands)
         IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
@@ -1639,7 +1640,7 @@ namespace Framework.Constants
         Unk8 = 0x80,
         Unk9 = 0x100,
         Unk10 = 0x200,
-        Unk11 = 0x400,
+        Unk11 = 0x400,           // sorts missed targets before hit targets for chain visual
         PowerLeftSelf = 0x800,
         Unk13 = 0x1000,
         Unk14 = 0x2000,
