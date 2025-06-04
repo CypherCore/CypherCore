@@ -3223,7 +3223,7 @@ namespace Game.Entities
         public float GetTransOffsetY() { return m_movementInfo.transport.pos.GetPositionY(); }
         public float GetTransOffsetZ() { return m_movementInfo.transport.pos.GetPositionZ(); }
         public float GetTransOffsetO() { return m_movementInfo.transport.pos.GetOrientation(); }
-        Position GetTransOffset() { return m_movementInfo.transport.pos; }
+        public Position GetTransOffset() { return m_movementInfo.transport.pos; }
         public uint GetTransTime() { return m_movementInfo.transport.time; }
         public sbyte GetTransSeat() { return m_movementInfo.transport.seat; }
         public virtual ObjectGuid GetTransGUID()

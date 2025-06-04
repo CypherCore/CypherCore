@@ -294,7 +294,7 @@ namespace Game.Entities
             return mSpellLearnedBySpells.LookupByKey(learnedSpellId);
         }
 
-        public SpellTargetPosition GetSpellTargetPosition(uint spell_id, uint effIndex)
+        public WorldLocation GetSpellTargetPosition(uint spell_id, uint effIndex)
         {
             return mSpellTargetPositions.LookupByKey(new KeyValuePair<uint, uint>(spell_id, effIndex));
         }
@@ -1020,20 +1020,16 @@ namespace Game.Entities
                 uint spellId = result.Read<uint>(0);
                 uint effIndex = result.Read<byte>(1);
 
-                SpellTargetPosition st = new();
-                st.target_mapId = result.Read<uint>(2);
-                st.target_X = result.Read<float>(3);
-                st.target_Y = result.Read<float>(4);
-                st.target_Z = result.Read<float>(5);
+                WorldLocation st = new(result.Read<uint>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
 
-                var mapEntry = CliDB.MapStorage.LookupByKey(st.target_mapId);
+                var mapEntry = CliDB.MapStorage.LookupByKey(st.GetMapId());
                 if (mapEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.target_mapId);
+                    Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) is using a non-existant MapID (ID: {2})", spellId, effIndex, st.GetMapId());
                     continue;
                 }
 
-                if (st.target_X == 0 && st.target_Y == 0 && st.target_Z == 0)
+                if (st.GetPositionX() == 0 && st.GetPositionY() == 0 && st.GetPositionZ() == 0)
                 {
                     Log.outError(LogFilter.Sql, "Spell (ID: {0}, EffectIndex: {1}) target coordinates not provided.", spellId, effIndex);
                     continue;
@@ -1053,14 +1049,14 @@ namespace Game.Entities
                 }
 
                 if (!result.IsNull(6))
-                    st.target_Orientation = result.Read<float>(6);
+                    st.SetOrientation(result.Read<float>(6));
                 else
                 {
-                    // target facing is in degrees for 6484 & 9268... (blizz sucks)
+                    // target facing is in degrees for 6484 & 9268...
                     if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * MathF.PI)
-                        st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing * MathF.PI / 180;
+                        st.SetOrientation(spellInfo.GetEffect(effIndex).PositionFacing * MathF.PI / 180);
                     else
-                        st.target_Orientation = spellInfo.GetEffect(effIndex).PositionFacing;
+                        st.SetOrientation(spellInfo.GetEffect(effIndex).PositionFacing);
                 }
 
                 bool hasTarget(Targets target)
@@ -1071,8 +1067,7 @@ namespace Game.Entities
 
                 if (hasTarget(Targets.DestDb) || hasTarget(Targets.DestNearbyEntryOrDB))
                 {
-                    var key = new KeyValuePair<uint, uint>(spellId, effIndex);
-                    mSpellTargetPositions[key] = st;
+                    mSpellTargetPositions[(spellId, effIndex)] = st;
                     ++count;
                 }
                 else
@@ -4947,7 +4942,7 @@ namespace Game.Entities
         Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnedBySpells = new();
-        Dictionary<KeyValuePair<uint, uint>, SpellTargetPosition> mSpellTargetPositions = new();
+        Dictionary<(uint, uint), WorldLocation> mSpellTargetPositions = new();
         MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
         MultiMap<SpellGroup, int> mSpellGroupSpell = new();
         Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();
@@ -5224,15 +5219,6 @@ namespace Game.Entities
         public float ProcsPerMinute; // if nonzero - chance to proc is equal to value * aura caster's weapon speed / 60
         public uint HitMask;        // if nonzero - bitmask for matching proc condition based on hit result, see enum ProcFlagsHit
         public EnchantProcAttributes AttributesMask; // bitmask, see EnchantProcAttributes
-    }
-
-    public class SpellTargetPosition
-    {
-        public uint target_mapId;
-        public float target_X;
-        public float target_Y;
-        public float target_Z;
-        public float target_Orientation;
     }
 
     public class CreatureImmunities

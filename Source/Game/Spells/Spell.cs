@@ -654,12 +654,12 @@ namespace Game.Spells
                         }
                         if (targetType.GetTarget() == Targets.DestNearbyEntryOrDB)
                         {
-                            SpellTargetPosition st = Global.SpellMgr.GetSpellTargetPosition(m_spellInfo.Id, spellEffectInfo.EffectIndex);
+                            WorldLocation st = Global.SpellMgr.GetSpellTargetPosition(m_spellInfo.Id, spellEffectInfo.EffectIndex);
                             if (st != null)
                             {
                                 SpellDestination dest = new(m_caster);
-                                if (st.target_mapId == m_caster.GetMapId() && m_caster.IsInDist(st.target_X, st.target_Y, st.target_Z, range))
-                                    dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation);
+                                if (st.GetMapId() == m_caster.GetMapId() && m_caster.IsInDist(st, range))
+                                    dest = new(st.GetPosition());
                                 else
                                 {
                                     float randomRadius1 = spellEffectInfo.CalcRadius(m_caster, targetIndex);
@@ -1012,14 +1012,14 @@ namespace Game.Spells
                         dest = new SpellDestination(playerCaster.GetHomebind());
                     break;
                 case Targets.DestDb:
-                    SpellTargetPosition st = Global.SpellMgr.GetSpellTargetPosition(m_spellInfo.Id, spellEffectInfo.EffectIndex);
+                    WorldLocation st = Global.SpellMgr.GetSpellTargetPosition(m_spellInfo.Id, spellEffectInfo.EffectIndex);
                     if (st != null)
                     {
                         // @todo fix this check
-                        if (m_spellInfo.HasEffect(SpellEffectName.TeleportUnits) || m_spellInfo.HasEffect(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen) || m_spellInfo.HasEffect(SpellEffectName.Bind))
-                            dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation, st.target_mapId);
-                        else if (st.target_mapId == m_caster.GetMapId())
-                            dest = new SpellDestination(st.target_X, st.target_Y, st.target_Z, st.target_Orientation);
+                        if (spellEffectInfo.IsEffect(SpellEffectName.TeleportUnits) || spellEffectInfo.IsEffect(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen) || spellEffectInfo.IsEffect(SpellEffectName.Bind))
+                            dest = new(st);
+                        else if (st.GetMapId() == m_caster.GetMapId())
+                            dest = new(st.GetPosition());
                     }
                     else
                     {
@@ -8763,38 +8763,28 @@ namespace Game.Spells
 
     public class SpellDestination
     {
-        public SpellDestination()
+        public SpellDestination() { }
+
+        public SpellDestination(float x, float y, float z, float orientation = 0.0f, uint mapId = 0xFFFFFFFF)
         {
-            Position = new WorldLocation();
-            TransportGUID = ObjectGuid.Empty;
-            TransportOffset = new Position();
+            Position = new(mapId, x, y, z, orientation);
         }
 
-        public SpellDestination(float x, float y, float z, float orientation = 0.0f, uint mapId = 0xFFFFFFFF) : this()
+        public SpellDestination(Position pos)
         {
-            Position.Relocate(x, y, z, orientation);
-            TransportGUID = ObjectGuid.Empty;
-            Position.SetMapId(mapId);
+            Position = new(0xFFFFFFFF, pos);
         }
 
-        public SpellDestination(Position pos) : this()
+        public SpellDestination(WorldLocation loc)
         {
-            Position.Relocate(pos);
-            TransportGUID = ObjectGuid.Empty;
+            Position = loc;
         }
 
-        public SpellDestination(WorldLocation loc) : this()
+        public SpellDestination(WorldObject obj)
         {
-            Position.WorldRelocate(loc);
-            TransportGUID.Clear();
-            TransportOffset.Relocate(0, 0, 0, 0);
-        }
-
-        public SpellDestination(WorldObject wObj) : this()
-        {
-            TransportGUID = wObj.GetTransGUID();
-            TransportOffset.Relocate(wObj.GetTransOffsetX(), wObj.GetTransOffsetY(), wObj.GetTransOffsetZ(), wObj.GetTransOffsetO());
-            Position.Relocate(wObj.GetPosition());
+            Position = new(obj.GetMapId(), obj);
+            TransportGUID = obj.GetTransGUID();
+            TransportOffset = obj.GetTransOffset();
         }
 
         public void Relocate(Position pos)
