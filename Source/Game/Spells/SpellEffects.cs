@@ -1101,6 +1101,10 @@ namespace Game.Spells
             if (unitCaster == null)
                 return;
 
+            // Caster not in world, might be spell triggered from aura removal
+            if (!unitCaster.IsInWorld)
+                return;
+
             // only handle at last effect
             for (uint i = effectInfo.EffectIndex + 1; i < m_spellInfo.GetEffects().Count; ++i)
                 if (m_spellInfo.GetEffect(i).IsEffect(SpellEffectName.PersistentAreaAura))
@@ -1108,11 +1112,13 @@ namespace Game.Spells
 
             Cypher.Assert(dynObjAura == null);
 
-            float radius = effectInfo.CalcRadius(unitCaster);
-
-            // Caster not in world, might be spell triggered from aura removal
-            if (!unitCaster.IsInWorld)
-                return;
+            float radius = 0.0f;
+            for (uint i = 0; i <= effectInfo.EffectIndex; ++i)
+            {
+                SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(i);
+                if (spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura))
+                    radius = Math.Max(radius, spellEffectInfo.CalcRadius(unitCaster));
+            }
 
             DynamicObject dynObj = new(false);
             if (!dynObj.CreateDynamicObject(unitCaster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), unitCaster, m_spellInfo, destTarget, radius, DynamicObjectType.AreaSpell, m_SpellVisual))
