@@ -6663,6 +6663,8 @@ namespace Game.Spells
                     SpellCastResult failReason = CheckRuneCost();
                     if (failReason != SpellCastResult.SpellCastOk)
                         return failReason;
+
+                    continue;
                 }
 
                 // Check power amount
