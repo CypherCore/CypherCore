@@ -188,6 +188,9 @@ namespace Game.Spells
             if (ConsumeCharge(spellInfo.ChargeCategoryId))
                 return;
 
+            if (_owner.HasAuraTypeWithAffectMask(AuraType.IgnoreSpellCooldown, spellInfo))
+                return;
+
             Player player = _owner.ToPlayer();
             if (player != null)
             {
