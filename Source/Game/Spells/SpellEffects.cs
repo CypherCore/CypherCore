@@ -1145,6 +1145,9 @@ namespace Game.Spells
             for (uint i = 0; i < m_spellInfo.GetEffects().Count; ++i)
                 if (m_spellInfo.GetEffect(i).IsEffect(SpellEffectName.PersistentAreaAura))
                     dynObjAura._ApplyEffectForTargets(i);
+
+            if (m_spellInfo.IsChanneled())
+                unitCaster.AddChannelObject(dynObj.GetGUID());
         }
 
         [SpellEffectHandler(SpellEffectName.Energize)]
