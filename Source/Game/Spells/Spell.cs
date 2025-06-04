@@ -6952,7 +6952,7 @@ namespace Game.Spells
                             if (requiredLevel < m_spellInfo.BaseLevel)
                                 return SpellCastResult.Lowlevel;
                         }
-                        if ((m_CastItem != null || effectInfo.IsEffect(SpellEffectName.EnchantItemPrismatic))
+                        if ((m_CastItem != null || spellEffectInfo.IsEffect(SpellEffectName.EnchantItemPrismatic))
                             && m_spellInfo.MaxLevel > 0 && targetItem.GetItemLevel(targetItem.GetOwner()) > m_spellInfo.MaxLevel)
                             return SpellCastResult.Highlevel;
 
