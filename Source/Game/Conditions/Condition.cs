@@ -637,6 +637,7 @@ namespace Game.Conditions
                 case ConditionSourceType.SmartEvent:
                 case ConditionSourceType.NpcVendor:
                 case ConditionSourceType.SpellProc:
+                case ConditionSourceType.ObjectIdVisibility:
                     return 2;
                 default:
                     return 1;

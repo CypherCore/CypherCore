@@ -312,13 +312,13 @@ namespace Game
             return true;
         }
 
-        public bool IsObjectMeetingVisibilityByObjectIdConditions(uint objectType, uint entry, WorldObject seer)
+        public bool IsObjectMeetingVisibilityByObjectIdConditions(WorldObject obj, WorldObject seer)
         {
-            var conditions = ConditionStorage[ConditionSourceType.ObjectIdVisibility].LookupByKey(new ConditionId(objectType, (int)entry, 0));
+            var conditions = ConditionStorage[ConditionSourceType.ObjectIdVisibility].LookupByKey(new ConditionId((uint)obj.GetTypeId(), (int)obj.GetEntry(), 0));
             if (conditions != null)
             {
-                Log.outDebug(LogFilter.Condition, $"IsObjectMeetingVisibilityByObjectIdConditions: found conditions for objectType {objectType} entry {entry}");
-                return IsObjectMeetToConditions(seer, conditions);
+                Log.outDebug(LogFilter.Condition, $"IsObjectMeetingVisibilityByObjectIdConditions: found conditions for objectType {obj.GetTypeId()} entry {obj.GetEntry()} guid {obj.GetGUID()}");
+                return IsObjectMeetToConditions(seer, obj, conditions);
             }
             return true;
         }
