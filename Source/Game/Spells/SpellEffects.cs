@@ -313,7 +313,8 @@ namespace Game.Spells
                 args.SetOriginalCaster(originalCaster);
                 args.OriginalCastId = originalCastId;
                 args.OriginalCastItemLevel = itemLevel;
-                if (!castItemGuid.IsEmpty() && Global.SpellMgr.GetSpellInfo(triggerSpell, caster.GetMap().GetDifficultyID()).HasAttribute(SpellAttr2.RetainItemCast))
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(triggerSpell, caster.GetMap().GetDifficultyID());
+                if (!castItemGuid.IsEmpty() && spellInfo.HasAttribute(SpellAttr2.RetainItemCast))
                 {
                     Player triggeringAuraCaster = caster?.ToPlayer();
                     if (triggeringAuraCaster != null)
@@ -322,7 +323,7 @@ namespace Game.Spells
 
                 // set basepoints for trigger with value effect
                 if (effect == SpellEffectName.TriggerSpellWithValue)
-                    for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                    for (int i = 0; i < spellInfo.GetEffects().Count; ++i)
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, value);
 
                 if (targetCount.HasValue)
@@ -395,7 +396,7 @@ namespace Game.Spells
             args.SetCustomArg(m_customArg);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
-                for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                for (int i = 0; i < spellInfo.GetEffects().Count; ++i)
                     args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
             if (targetCount.HasValue)
@@ -468,7 +469,7 @@ namespace Game.Spells
             args.SetTriggeringSpell(this);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
-                for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                for (int i = 0; i < spellInfo.GetEffects().Count; ++i)
                     args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
             unitTarget.CastSpell(m_caster, spellInfo.Id, args);

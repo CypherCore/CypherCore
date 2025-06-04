@@ -5167,7 +5167,7 @@ namespace Game.Spells
                 {
                     CastSpellExtraArgs args = new(this);
                     args.SetTriggerFlags(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
-                    for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                    for (int i = 0; i < triggeredSpellInfo.GetEffects().Count; ++i)
                         args.AddSpellMod(SpellValueMod.BasePoint0 + i, GetAmount());
 
                     triggerCaster.CastSpell(target, triggerSpellId, args);

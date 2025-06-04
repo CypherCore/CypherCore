@@ -112,7 +112,7 @@ namespace Game.Scripting
                 uint mask = 0;
                 if (_effIndex == SpellConst.EffectAll || _effIndex == SpellConst.EffectFirstFound)
                 {
-                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    for (byte i = 0; i < spellInfo.GetEffects().Count; ++i)
                     {
                         if (_effIndex == SpellConst.EffectFirstFound && mask != 0)
                             return mask;

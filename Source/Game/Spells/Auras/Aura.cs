@@ -826,12 +826,9 @@ namespace Game.Spells
                 m_timeCla = 1 * Time.InMilliseconds;
 
             // also reset periodic counters
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-            {
-                AuraEffect aurEff = GetEffect(i);
+            foreach (AuraEffect aurEff in GetAuraEffects())
                 if (aurEff != null)
                     aurEff.ResetTicks();
-            }
         }
 
         void RefreshTimers(bool resetPeriodicTimer)
@@ -851,12 +848,8 @@ namespace Game.Spells
             RefreshDuration();
 
             Unit caster = GetCaster();
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-            {
-                AuraEffect aurEff = GetEffect(i);
-                if (aurEff != null)
-                    aurEff.CalculatePeriodic(caster, resetPeriodicTimer, false);
-            }
+            foreach (AuraEffect aurEff in GetAuraEffects())
+                aurEff.CalculatePeriodic(caster, resetPeriodicTimer, false);
         }
 
         public void SetCharges(int charges)
@@ -1807,10 +1800,10 @@ namespace Game.Spells
 
             // At least one effect has to pass checks to proc aura
             uint procEffectMask = aurApp.GetEffectMask();
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                if ((procEffectMask & (1u << i)) != 0)
-                    if ((procEntry.DisableEffectsMask & (1u << i)) != 0 || !GetEffect(i).CheckEffectProc(aurApp, eventInfo))
-                        procEffectMask &= ~(1u << i);
+            foreach (AuraEffect aurEff in GetAuraEffects())
+                if ((procEffectMask & (1u << (int)aurEff.GetEffIndex())) != 0)
+                    if ((procEntry.DisableEffectsMask & (1u << (int)aurEff.GetEffIndex())) != 0 || !GetEffect(aurEff.GetEffIndex()).CheckEffectProc(aurApp, eventInfo))
+                        procEffectMask &= ~(1u << (int)aurEff.GetEffIndex());
 
             if (procEffectMask == 0)
                 return 0;

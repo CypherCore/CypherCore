@@ -2241,8 +2241,10 @@ namespace Game.Entities
 
             RemoveOwnedAura(spellId, GetGUID());
 
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+
             // remove pet auras
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            for (byte i = 0; i < spellInfo.GetEffects().Count; ++i)
             {
                 PetAura petSpell = Global.SpellMgr.GetPetAura(spellId, i);
                 if (petSpell != null)
@@ -2250,8 +2252,7 @@ namespace Game.Entities
             }
 
             // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-            if (spellInfo != null && spellInfo.IsPrimaryProfessionFirstRank())
+            if (spellInfo.IsPrimaryProfessionFirstRank())
             {
                 uint freeProfs = GetFreePrimaryProfessionPoints() + 1;
                 if (freeProfs <= WorldConfig.GetIntValue(WorldCfg.MaxPrimaryTradeSkill))
