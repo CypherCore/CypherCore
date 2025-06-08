@@ -221,7 +221,7 @@ namespace Game.Spells
 
         public void SetNeedClientUpdate()
         {
-            if (_needClientUpdate || GetRemoveMode() != AuraRemoveMode.None)
+            if (_needClientUpdate || GetSlot() >= SpellConst.MaxAuras || GetRemoveMode() != AuraRemoveMode.None)
                 return;
 
             _needClientUpdate = true;
