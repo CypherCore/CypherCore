@@ -1193,7 +1193,7 @@ namespace Game.Spells
 
         public SpellCastResult CheckExplicitTarget(WorldObject caster, WorldObject target, Item itemTarget = null)
         {
-            SpellCastTargetFlags neededTargets = GetExplicitTargetMask();
+            SpellCastTargetFlags neededTargets = (SpellCastTargetFlags)RequiredExplicitTargetMask;
             if (target == null)
             {
                 if (Convert.ToBoolean(neededTargets & (SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.GameobjectMask | SpellCastTargetFlags.CorpseMask)))
@@ -3221,31 +3221,39 @@ namespace Game.Spells
         {
             bool srcSet = false;
             bool dstSet = false;
-            SpellCastTargetFlags targetMask = Targets;
+
             // prepare target mask using effect target entries
             foreach (var effectInfo in GetEffects())
             {
                 if (!effectInfo.IsEffect())
                     continue;
 
+                SpellCastTargetFlags targetMask = 0;
                 targetMask |= effectInfo.TargetA.GetExplicitTargetMask(ref srcSet, ref dstSet);
                 targetMask |= effectInfo.TargetB.GetExplicitTargetMask(ref srcSet, ref dstSet);
 
                 // add explicit target flags based on spell effects which have SpellEffectImplicitTargetTypes.Explicit and no valid target provided
-                if (effectInfo.GetImplicitTargetType() != SpellEffectImplicitTargetTypes.Explicit)
-                    continue;
+                if (effectInfo.GetImplicitTargetType() == SpellEffectImplicitTargetTypes.Explicit)
+                {
 
-                // extend explicit target mask only if valid targets for effect could not be provided by target types
-                SpellCastTargetFlags effectTargetMask = effectInfo.GetMissingTargetMask(srcSet, dstSet, targetMask);
+                    // extend explicit target mask only if valid targets for effect could not be provided by target types
+                    SpellCastTargetFlags effectTargetMask = effectInfo.GetMissingTargetMask(srcSet, dstSet, targetMask);
 
-                // don't add explicit object/dest flags when spell has no max range
-                if (GetMaxRange(true) == 0.0f && GetMaxRange(false) == 0.0f)
-                    effectTargetMask &= ~(SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseMask | SpellCastTargetFlags.DestLocation);
+                    // don't add explicit object/dest flags when spell has no max range
+                    if (GetMaxRange(true) == 0.0f && GetMaxRange(false) == 0.0f)
+                        effectTargetMask &= ~(SpellCastTargetFlags.UnitMask | SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.CorpseMask | SpellCastTargetFlags.DestLocation);
 
-                targetMask |= effectTargetMask;
+                    targetMask |= effectTargetMask;
+                }
+
+                ExplicitTargetMask |= (uint)targetMask;
+                if (!effectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.DontFailSpellOnTargetingFailure))
+                    RequiredExplicitTargetMask |= (uint)targetMask;
             }
 
-            ExplicitTargetMask = (uint)targetMask;
+            ExplicitTargetMask |= (uint)Targets;
+            if (!HasAttribute(SpellAttr13.DoNotFailIfNoTarget))
+                RequiredExplicitTargetMask |= (uint)Targets;
         }
 
         public bool _isPositiveTarget(SpellEffectInfo effect)
@@ -3954,6 +3962,7 @@ namespace Game.Spells
         // SpellScalingEntry
         public ScalingInfo Scaling;
         public uint ExplicitTargetMask { get; set; }
+        public uint RequiredExplicitTargetMask { get; set; }
         public SpellChainNode ChainEntry { get; set; }
 
         public SqrtDamageAndHealingDiminishingStruct SqrtDamageAndHealingDiminishing;

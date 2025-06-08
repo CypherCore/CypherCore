@@ -1199,6 +1199,8 @@ namespace Game.Spells
         void SelectImplicitTargetDestTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, SpellTargetIndex targetIndex)
         {
             WorldObject target = m_targets.GetObjectTarget();
+            if (target == null)
+                return;
 
             SpellDestination dest = new(target);
 
@@ -6513,7 +6515,7 @@ namespace Game.Spells
             if (result == SpellCastResult.SpellCastOk || result == SpellCastResult.UnitNotInfront)
             {
                 // do not check targets for ground-targeted spells (we target them on top of the intended target anyway)
-                if (GetSpellInfo().ExplicitTargetMask.HasAnyFlag((uint)SpellCastTargetFlags.DestLocation))
+                if (GetSpellInfo().GetExplicitTargetMask().HasAnyFlag(SpellCastTargetFlags.DestLocation))
                     return true;
                 SelectSpellTargets();
                 //check if among target units, our WANTED target is as well (.only self cast spells return false)

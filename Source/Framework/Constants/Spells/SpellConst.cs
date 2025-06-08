@@ -2163,7 +2163,7 @@ namespace Framework.Constants
         Unk12 = 0x1000, // 12
         Unk13 = 0x2000, // 13
         Unk14 = 0x4000, // 14
-        Unk15 = 0x8000, // 15
+        DoNotFailIfNoTarget = 0x8000, // 15 Do Not Fail if No Target
         Unk16 = 0x10000, // 16
         Unk17 = 0x20000, // 17
         ActivatesRequiredShapeshift = 0x40000, // 18
