@@ -464,6 +464,8 @@ namespace Framework.Constants
         LegendaryRewardCompletePOI = 0x100000000000,
         ImportantQuestRewardCompleteNoPOI = 0x200000000000,
         ImportantQuestRewardCompletePOI = 0x400000000000,
+
+        FutureMask = Future | FutureJourneyQuest | FutureLegendaryQuest | FutureImportantQuest
     }
 
     [Flags]

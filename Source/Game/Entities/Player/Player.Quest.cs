@@ -3222,7 +3222,7 @@ namespace Game.Entities
                     packet.LaunchGossip = quest.HasFlag(QuestFlags.LaunchGossipComplete);
 
                 if (questGiver.IsQuestGiver())
-                    packet.LaunchQuest = (GetQuestDialogStatus(questGiver) & ~QuestGiverStatus.Future) != QuestGiverStatus.None;
+                    packet.LaunchQuest = (GetQuestDialogStatus(questGiver) & ~QuestGiverStatus.FutureMask) != QuestGiverStatus.None;
 
                 if (!quest.HasFlag(QuestFlags.AutoComplete))
                 {

@@ -1395,8 +1395,7 @@ namespace Game.Entities
             switch (GetGoType())
             {
                 case GameObjectTypes.QuestGiver:
-                    QuestGiverStatus questStatus = target.GetQuestDialogStatus(this);
-                    if (questStatus != QuestGiverStatus.None && questStatus != QuestGiverStatus.Future)
+                    if ((target.GetQuestDialogStatus(this) & ~QuestGiverStatus.FutureMask) != QuestGiverStatus.None)
                         return true;
                     break;
                 case GameObjectTypes.Chest:
