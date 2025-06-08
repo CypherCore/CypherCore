@@ -286,7 +286,7 @@ namespace Game.Entities
                 float angle = formationInfo.FollowAngle + MathF.PI; // for some reason, someone thought it was a great idea to invert relativ angles...
                 float dist = formationInfo.FollowDist;
 
-                if (!member.HasUnitState(UnitState.FollowFormation))
+                if (member.GetMotionMaster().GetCurrentMovementGeneratorType(MovementSlot.Default) != MovementGeneratorType.Formation)
                     member.GetMotionMaster().MoveFormation(_leader, dist, angle, formationInfo.LeaderWaypointIDs[0], formationInfo.LeaderWaypointIDs[1]);
             }
         }
