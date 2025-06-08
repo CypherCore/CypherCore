@@ -4886,7 +4886,11 @@ namespace Game.Spells
 
             int effectAmount = GetAmount();
             uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
-            float powerAmountPct = MathFunctions.GetPctOf(target.GetPower((PowerType)GetMiscValue()), target.GetMaxPower((PowerType)GetMiscValue()));
+            int maxPower = target.GetMaxPower((PowerType)GetMiscValue());
+            if (maxPower == 0)
+                return;
+
+            float powerAmountPct = MathFunctions.GetPctOf(target.GetPower((PowerType)GetMiscValue()), maxPower);
 
             switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
             {

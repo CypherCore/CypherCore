@@ -764,6 +764,9 @@ namespace Game.Entities
                         if (effect.GetAuraType() == AuraType.TriggerSpellOnPowerPct)
                         {
                             int maxPower = GetMaxPower(power);
+                            if (maxPower == 0)
+                                continue;
+
                             oldValueCheck = MathFunctions.GetPctOf(oldVal, maxPower);
                             newValueCheck = MathFunctions.GetPctOf(newVal, maxPower);
                         }
