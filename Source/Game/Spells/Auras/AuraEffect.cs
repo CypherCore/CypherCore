@@ -5887,7 +5887,15 @@ namespace Game.Spells
             if (apply)
                 player.GetSceneMgr().PlayScene((uint)GetMiscValue());
             else
+            {
+                if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire)
+                {
+                    var sceneInstanceId = player.GetSceneMgr().GetInstanceIdBySceneId((uint)GetMiscValue());
+                    if (sceneInstanceId.HasValue)
+                        player.GetSceneMgr().OnSceneComplete(sceneInstanceId.Value);
+                }
                 player.GetSceneMgr().CancelSceneBySceneId((uint)GetMiscValue());
+            }
         }
 
         [AuraEffectHandler(AuraType.AreaTrigger)]

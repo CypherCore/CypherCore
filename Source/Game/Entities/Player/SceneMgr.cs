@@ -223,6 +223,15 @@ namespace Game.Entities
             return activeSceneCount;
         }
 
+        public uint? GetInstanceIdBySceneId(uint sceneId)
+        {
+            foreach (var (instanceId, template) in _scenesByInstance)
+                if (template.SceneId == sceneId)
+                    return instanceId;
+
+            return null;
+        }
+
         public void TriggerDelayedScenes()
         {
             foreach (var playScene in _delayedScenes)
