@@ -1497,7 +1497,7 @@ namespace Game.Entities
 
                     // // We need to be immune to all types
                     return (schoolImmunityMask & schoolMask) == schoolMask;
-                };
+                }
 
                 // If m_immuneToSchool type contain this school type, IMMUNE damage.
                 if (hasImmunity(m_spellImmune[(int)SpellImmunity.School]))
@@ -2745,77 +2745,99 @@ namespace Game.Entities
                 if (!Global.ConditionMgr.IsObjectMeetingSpellClickConditions(spellClickEntry, clickInfo.spellId, clicker, this))
                     continue;
 
-                Unit caster = Convert.ToBoolean(clickInfo.castFlags & (byte)SpellClickCastFlags.CasterClicker) ? clicker : this;
-                Unit target = Convert.ToBoolean(clickInfo.castFlags & (byte)SpellClickCastFlags.TargetClicker) ? clicker : this;
-                ObjectGuid origCasterGUID = Convert.ToBoolean(clickInfo.castFlags & (byte)SpellClickCastFlags.OrigCasterOwner) ? GetOwnerGUID() : clicker.GetGUID();
-
-                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(clickInfo.spellId, caster.GetMap().GetDifficultyID());
+                spellClickHandled = HandleSpellClick(clicker, seatId, clickInfo.spellId, flags, clickInfo);
                 // if (!spellEntry) should be checked at npc_spellclick load
-
-                SpellCastResult castResult = SpellCastResult.Success;
-                if (seatId > -1)
-                {
-                    byte i = 0;
-                    bool valid = false;
-                    foreach (var spellEffectInfo in spellEntry.GetEffects())
-                    {
-                        if (spellEffectInfo.ApplyAuraName == AuraType.ControlVehicle)
-                        {
-                            valid = true;
-                            break;
-                        }
-                        ++i;
-                    }
-
-                    if (!valid)
-                    {
-                        Log.outError(LogFilter.Sql, "Spell {0} specified in npc_spellclick_spells is not a valid vehicle enter aura!", clickInfo.spellId);
-                        continue;
-                    }
-
-                    if (IsInMap(caster))
-                    {
-                        CastSpellExtraArgs args = new(flags);
-                        args.OriginalCaster = origCasterGUID;
-                        args.AddSpellMod(SpellValueMod.BasePoint0 + i, seatId + 1);
-                        castResult = caster.CastSpell(target, clickInfo.spellId, args);
-                    }
-                    else    // This can happen during Player._LoadAuras
-                    {
-                        int[] bp = new int[SpellConst.MaxEffects];
-                        foreach (var spellEffectInfo in spellEntry.GetEffects())
-                            bp[spellEffectInfo.EffectIndex] = (int)spellEffectInfo.BasePoints;
-
-                        bp[i] = seatId;
-
-                        AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
-                        createInfo.SetCaster(clicker);
-                        createInfo.SetBaseAmount(bp);
-                        createInfo.SetCasterGUID(origCasterGUID);
-
-                        Aura.TryRefreshStackOrCreate(createInfo);
-                    }
-                }
-                else
-                {
-                    if (IsInMap(caster))
-                        castResult = caster.CastSpell(target, spellEntry.Id, new CastSpellExtraArgs().SetOriginalCaster(origCasterGUID));
-                    else
-                    {
-                        AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
-                        createInfo.SetCaster(clicker);
-                        createInfo.SetCasterGUID(origCasterGUID);
-
-                        Aura.TryRefreshStackOrCreate(createInfo);
-                    }
-                }
-
-                spellClickHandled = castResult == SpellCastResult.Success;
             }
 
             Creature creature = ToCreature();
             if (creature != null && creature.IsAIEnabled())
                 creature.GetAI().OnSpellClick(clicker, ref spellClickHandled);
+        }
+
+        public bool HandleSpellClick(Unit clicker, sbyte seatId, uint spellId, TriggerCastFlags flags = TriggerCastFlags.None, SpellClickInfo spellClickInfo = null)
+        {
+            Unit caster = clicker;
+            Unit target = this;
+            ObjectGuid origCasterGUID = caster.GetGUID();
+            SpellCastResult castResult = SpellCastResult.Success;
+
+            if (spellClickInfo != null)
+            {
+                caster = (spellClickInfo.castFlags & (byte)SpellClickCastFlags.CasterClicker) != 0 ? clicker : this;
+                target = (spellClickInfo.castFlags & (byte)SpellClickCastFlags.TargetClicker) != 0 ? clicker : this;
+                origCasterGUID = (spellClickInfo.castFlags & (byte)SpellClickCastFlags.OrigCasterOwner) != 0 ? GetOwnerGUID() : clicker.GetGUID();
+            }
+
+            if (spellId == 0)
+            {
+                Log.outError(LogFilter.Sql, $"No valid spell specified for clickee {target.GetGUID()} and clicker {caster.GetGUID()}!");
+                return false;
+            }
+
+            SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellId, caster.GetMap().GetDifficultyID());
+
+            byte effectIndex = 0;
+            bool hasControlVehicleAura = false;
+            foreach (SpellEffectInfo spellEffectInfo in spellEntry.GetEffects())
+            {
+                if (spellEffectInfo.ApplyAuraName == AuraType.ControlVehicle)
+                {
+                    hasControlVehicleAura = true;
+                    break;
+                }
+
+                ++effectIndex;
+            }
+
+            if (seatId > -1)
+            {
+                if (!hasControlVehicleAura)
+                {
+                    if (spellClickInfo == null)
+                        Log.outError(LogFilter.Sql, $"RideSpell {spellId} specified in vehicle_accessory or vehicle_template_accessory is not a valid vehicle enter aura!");
+                    else
+                        Log.outError(LogFilter.Sql, $"Spell {spellId} specified in npc_spellclick_spells is not a valid vehicle enter aura!");
+                    return false;
+                }
+
+                if (IsInMap(caster))
+                {
+                    CastSpellExtraArgs args = new(flags);
+                    args.OriginalCaster = origCasterGUID;
+                    args.AddSpellMod(SpellValueMod.BasePoint0 + effectIndex, seatId + 1);
+                    castResult = caster.CastSpell(target, spellId, args);
+                }
+                else    // This can happen during Player::_LoadAuras
+                {
+                    int[] bp = new int[SpellConst.MaxEffects];
+                    foreach (SpellEffectInfo spellEffectInfo in spellEntry.GetEffects())
+                        bp[spellEffectInfo.EffectIndex] = (int)spellEffectInfo.BasePoints;
+
+                    bp[effectIndex] = seatId;
+
+                    AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
+                    createInfo.SetCaster(clicker);
+                    createInfo.SetBaseAmount(bp);
+                    createInfo.SetCasterGUID(origCasterGUID);
+
+                    Aura.TryRefreshStackOrCreate(createInfo);
+                }
+            }
+            else
+            {
+                if (IsInMap(caster))
+                    castResult = caster.CastSpell(target, spellEntry.Id, new CastSpellExtraArgs().SetOriginalCaster(origCasterGUID));
+                else
+                {
+                    AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
+                    createInfo.SetCaster(clicker);
+                    createInfo.SetCasterGUID(origCasterGUID);
+
+
+                    Aura.TryRefreshStackOrCreate(createInfo);
+                }
+            }
+            return castResult == SpellCastResult.Success;
         }
 
         public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)

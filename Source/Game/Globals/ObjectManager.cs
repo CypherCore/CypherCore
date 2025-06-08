@@ -11404,8 +11404,8 @@ namespace Game
 
             uint count = 0;
 
-            //                                          0             1              2          3           4             5
-            SQLResult result = DB.World.Query("SELECT `entry`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer` FROM `vehicle_template_accessory`");
+            //                                          0        1                  2          3         4             5              6
+            SQLResult result = DB.World.Query("SELECT `entry`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer`, `RideSpellID` FROM `vehicle_template_accessory`");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vehicle template accessories. DB table `vehicle_template_accessory` is empty.");
@@ -11420,6 +11420,18 @@ namespace Game
                 bool isMinion = result.Read<bool>(3);
                 byte summonType = result.Read<byte>(4);
                 uint summonTimer = result.Read<uint>(5);
+
+                uint? rideSpellId = null;
+                if (!result.IsNull(6))
+                {
+                    rideSpellId = result.Read<uint>(6);
+
+                    if (!Global.SpellMgr.HasSpellInfo(rideSpellId.Value, Difficulty.None))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `vehicle_template_accessory`: rideSpellId {rideSpellId} does not exist for entry {entry}.");
+                        continue;
+                    }
+                }
 
                 if (GetCreatureTemplate(entry) == null)
                 {
@@ -11439,7 +11451,7 @@ namespace Game
                     continue;
                 }
 
-                _vehicleTemplateAccessoryStore.Add(entry, new VehicleAccessory(accessory, seatId, isMinion, summonType, summonTimer));
+                _vehicleTemplateAccessoryStore.Add(entry, new VehicleAccessory(accessory, seatId, isMinion, summonType, summonTimer, rideSpellId));
 
                 ++count;
             }
@@ -11455,8 +11467,8 @@ namespace Game
 
             uint count = 0;
 
-            //                                          0             1             2          3           4             5
-            SQLResult result = DB.World.Query("SELECT `guid`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer` FROM `vehicle_accessory`");
+            //                                          0       1                  2          3         4             5              6
+            SQLResult result = DB.World.Query("SELECT `guid`, `accessory_entry`, `seat_id`, `minion`, `summontype`, `summontimer`, `RideSpellID` FROM `vehicle_accessory`");
 
             if (result.IsEmpty())
             {
@@ -11473,13 +11485,25 @@ namespace Game
                 byte uiSummonType = result.Read<byte>(4);
                 uint uiSummonTimer = result.Read<uint>(5);
 
+                uint? rideSpellId = null;
+                if (!result.IsNull(6))
+                {
+                    rideSpellId = result.Read<uint>(6);
+
+                    if (!Global.SpellMgr.HasSpellInfo(rideSpellId.Value, Difficulty.None))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `vehicle_accessory`: rideSpellId {rideSpellId} does not exist for guid {uiGUID}.");
+                        continue;
+                    }
+                }
+
                 if (GetCreatureTemplate(uiAccessory) == null)
                 {
                     Log.outError(LogFilter.Sql, "Table `vehicle_accessory`: Accessory {0} does not exist.", uiAccessory);
                     continue;
                 }
 
-                _vehicleAccessoryStore.Add(uiGUID, new VehicleAccessory(uiAccessory, uiSeat, bMinion, uiSummonType, uiSummonTimer));
+                _vehicleAccessoryStore.Add(uiGUID, new VehicleAccessory(uiAccessory, uiSeat, bMinion, uiSummonType, uiSummonTimer, rideSpellId));
 
                 ++count;
             }
