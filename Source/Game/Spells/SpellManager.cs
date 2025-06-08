@@ -4644,6 +4644,12 @@ namespace Game.Entities
                 spellInfo._LoadSqrtTargetLimit(5, 0, null, 1, null, null);
             });
 
+            // Divine Storm
+            ApplySpellFix([53385], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, null, 1, null, null);
+            });
+
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
