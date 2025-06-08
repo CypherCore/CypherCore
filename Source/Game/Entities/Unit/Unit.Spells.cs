@@ -1393,7 +1393,7 @@ namespace Game.Entities
                         if (immuneSpellInfo == null || !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                             continue;
 
-                    if (immuneSpellInfo != null && !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && caster != null && !caster.IsFriendlyTo(this))
+                    if (!(immuneSpellInfo != null && immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)) && caster != null && caster.IsFriendlyTo(this))
                         continue;
 
                     if (spellInfo.CanPierceImmuneAura(immuneSpellInfo))
@@ -1569,7 +1569,7 @@ namespace Game.Entities
                         if ((immuneAuraApply.GetMiscValue() & (int)spellInfo.GetSchoolMask()) == 0)               // Check school
                             continue;
 
-                        if (spellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || (caster != null && !IsFriendlyTo(caster))) // Harmful
+                        if (immuneAuraApply.GetSpellInfo().HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || (caster != null && !IsFriendlyTo(caster))) // Harmful
                             return true;
                     }
                 }
