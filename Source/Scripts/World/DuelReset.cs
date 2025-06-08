@@ -78,9 +78,9 @@ namespace Scripts.World.DuelReset
         static void ResetSpellCooldowns(Player player, bool onStartDuel)
         {
             // Remove cooldowns on spells that have < 10 min Cd > 30 sec and has no onHold
-            player.GetSpellHistory().ResetCooldowns(pair =>
+            player.GetSpellHistory().ResetCooldowns(cooldown =>
             {
-                SpellInfo spellInfo = SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
+                SpellInfo spellInfo = SpellMgr.GetSpellInfo(cooldown.SpellId, Difficulty.None);
                 TimeSpan remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
                 TimeSpan totalCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
                 TimeSpan categoryCooldown = TimeSpan.FromMilliseconds(spellInfo.CategoryRecoveryTime);
@@ -102,7 +102,7 @@ namespace Scripts.World.DuelReset
                     applySpellMod(categoryCooldown);
 
                 return remainingCooldown > TimeSpan.FromMilliseconds(0)
-                    && !pair.Value.OnHold
+                    && !cooldown.OnHold
                     && totalCooldown < TimeSpan.FromMinutes(10)
                     && categoryCooldown < TimeSpan.FromMinutes(10)
                     && remainingCooldown < TimeSpan.FromMinutes(10)

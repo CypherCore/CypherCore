@@ -3378,13 +3378,13 @@ namespace Game.Entities
         public void RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
         {
             // remove cooldowns on spells that have < 10 min CD
-            GetSpellHistory().ResetCooldowns(p =>
+            GetSpellHistory().ResetCooldowns(cooldownEntry =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(p.Key, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cooldownEntry.SpellId, Difficulty.None);
                 TimeSpan cooldown = TimeSpan.Zero;
                 TimeSpan categoryCooldown = TimeSpan.Zero;
                 uint categoryId = 0;
-                SpellHistory.GetCooldownDurations(spellInfo, p.Value.ItemId, ref cooldown, ref categoryId, ref categoryCooldown);
+                SpellHistory.GetCooldownDurations(spellInfo, cooldownEntry.ItemId, ref cooldown, ref categoryId, ref categoryCooldown);
                 return cooldown < TimeSpan.FromMinutes(10)
                 && categoryCooldown < TimeSpan.FromMinutes(10)
                 && !spellInfo.HasAttribute(SpellAttr6.DoNotResetCooldownInArena);

@@ -5832,9 +5832,9 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            unitTarget.GetSpellHistory().ModifyCoooldowns(itr =>
+            unitTarget.GetSpellHistory().ModifyCoooldowns(cooldown =>
             {
-                SpellInfo spellOnCooldown = Global.SpellMgr.GetSpellInfo(itr.SpellId, Difficulty.None);
+                SpellInfo spellOnCooldown = Global.SpellMgr.GetSpellInfo(cooldown.SpellId, Difficulty.None);
                 if ((int)spellOnCooldown.SpellFamilyName != effectInfo.MiscValue)
                     return false;
 
@@ -5854,7 +5854,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            unitTarget.GetSpellHistory().ModifyCoooldowns(itr => Global.SpellMgr.GetSpellInfo(itr.SpellId, Difficulty.None).CategoryId == effectInfo.MiscValue, TimeSpan.FromMilliseconds(damage));
+            unitTarget.GetSpellHistory().ModifyCoooldowns(cooldown => Global.SpellMgr.GetSpellInfo(cooldown.SpellId, Difficulty.None).CategoryId == effectInfo.MiscValue, TimeSpan.FromMilliseconds(damage));
         }
 
         [SpellEffectHandler(SpellEffectName.ModifyCharges)]
