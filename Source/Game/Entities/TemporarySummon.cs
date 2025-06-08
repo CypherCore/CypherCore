@@ -321,9 +321,7 @@ namespace Game.Entities
         {
             if (msTime != 0)
             {
-                ForcedUnsummonDelayEvent pEvent = new(this);
-
-                m_Events.AddEvent(pEvent, m_Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+                m_Events.AddEventAtOffset(new ForcedDespawnDelayEvent(this), TimeSpan.FromMilliseconds(msTime));
                 return;
             }
 
@@ -1213,21 +1211,6 @@ namespace Game.Entities
                 }
             }
         }
-    }
-
-    public class ForcedUnsummonDelayEvent : BasicEvent
-    {
-        public ForcedUnsummonDelayEvent(TempSummon owner)
-        {
-            m_owner = owner;
-        }
-        public override bool Execute(ulong e_time, uint p_time)
-        {
-            m_owner.UnSummon();
-            return true;
-        }
-
-        TempSummon m_owner;
     }
 
     public class TempSummonData

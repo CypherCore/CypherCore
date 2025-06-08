@@ -895,13 +895,8 @@ namespace Game.Spells
             if (m_dropEvent != null)
                 return;
 
-            // only units have events
-            Unit owner = m_owner.ToUnit();
-            if (owner == null)
-                return;
-
             m_dropEvent = new ChargeDropEvent(this, removeMode);
-            owner.m_Events.AddEvent(m_dropEvent, owner.m_Events.CalculateTime(TimeSpan.FromMilliseconds(delay)));
+            m_owner.m_Events.AddEventAtOffset(m_dropEvent, TimeSpan.FromMilliseconds(delay));
         }
 
         public void SetStackAmount(byte stackAmount)

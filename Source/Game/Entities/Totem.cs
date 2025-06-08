@@ -91,7 +91,7 @@ namespace Game.Entities
         {
             if (msTime != 0)
             {
-                m_Events.AddEvent(new ForcedUnsummonDelayEvent(this), m_Events.CalculateTime(TimeSpan.FromMilliseconds(msTime)));
+                m_Events.AddEventAtOffset(new ForcedDespawnDelayEvent(this), TimeSpan.FromMilliseconds(msTime));
                 return;
             }
 
