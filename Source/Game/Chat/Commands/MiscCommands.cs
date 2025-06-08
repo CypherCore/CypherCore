@@ -1972,10 +1972,7 @@ namespace Game.Chat
 
                 Player caster = handler.GetSession().GetPlayer();
                 if (caster != null)
-                {
-                    ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Spell.SendCastResult(caster, spellInfo, new Networking.Packets.SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
-                }
+                    caster.SendPacket(new DisplayGameError(GameError.ClientLockedOut));
 
                 return false;
             }

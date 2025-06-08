@@ -539,13 +539,15 @@ namespace Game
             switch (packet.ItemType)
             {
                 case ItemVendorType.Item:
-                    Item bagItem = GetPlayer().GetItemByGuid(packet.ContainerGUID);
-
                     byte bag = ItemConst.NullBag;
-                    if (bagItem != null && bagItem.IsBag())
-                        bag = bagItem.GetSlot();
-                    else if (packet.ContainerGUID == GetPlayer().GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
+                    if (packet.ContainerGUID == GetPlayer().GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
                         bag = InventorySlots.Bag0;
+                    else
+                    {
+                        Item bagItem = _player.GetItemByGuid(packet.ContainerGUID);
+                        if (bagItem != null)
+                            bag = bagItem.GetSlot();
+                    }
 
                     GetPlayer().BuyItemFromVendorSlot(packet.VendorGUID, packet.Muid, packet.Item.ItemID, (byte)packet.Quantity, bag, (byte)packet.Slot);
                     break;

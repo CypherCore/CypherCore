@@ -235,23 +235,6 @@ namespace Scripts.Events.Brewfest
         }
     }
 
-    [Script] // 43714 - Brewfest - Relay Race - Intro - Force - Player to throw- Dnd
-    class spell_brewfest_relay_race_intro_force_player_to_throw : SpellScript
-    {
-        void HandleForceCast(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-            // All this spells trigger a spell that requires reagents; if the
-            // triggered spell is cast as "triggered", reagents are not consumed
-            GetHitUnit().CastSpell(null, GetEffectInfo().TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnoreReagentCost);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new(HandleForceCast, 0, SpellEffectName.ForceCast));
-        }
-    }
-
     [Script] // 43755 - Brewfest - Daily - Relay Race - Player - Increase Mount Duration - Dnd
     class spell_brewfest_relay_race_turn_in : SpellScript
     {
