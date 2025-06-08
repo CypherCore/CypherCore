@@ -1768,7 +1768,7 @@ namespace Game
 
         static bool PlayerConditionLogic(uint logic, bool[] results)
         {
-            Cypher.Assert(results.Length < 16, "Logic array size must be equal to or less than 16");
+            Cypher.Assert(results.Length < 8, "Logic array size must be equal to or less than 8");
 
             for (var i = 0; i < results.Length; ++i)
             {
