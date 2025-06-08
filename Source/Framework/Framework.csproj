@@ -2,6 +2,7 @@
 <Import Project="..\..\default.props" />
 <PropertyGroup>
   <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  <TargetFramework>net9.0</TargetFramework>
 </PropertyGroup>
 
   <ItemGroup>

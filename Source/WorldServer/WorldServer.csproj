@@ -4,6 +4,7 @@
 	<OutputType>Exe</OutputType>
     <ApplicationIcon>Blue.ico</ApplicationIcon>
     <StartupObject>WorldServer.Server</StartupObject>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

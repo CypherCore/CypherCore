@@ -25,9 +25,9 @@ namespace System
         public static string ToHexString(this byte[] byteArray, bool reverse = false)
         {
             if (reverse)
-                return byteArray.Reverse().Aggregate("", (current, b) => current + b.ToString("X2"));
-            else
-                return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
+                byteArray.Reverse();
+            
+            return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
         }
 
         public static byte[] ToByteArray(this string str, bool reverse = false)
@@ -40,7 +40,10 @@ namespace System
                 string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
                 res[i] = Convert.ToByte(temp, 16);
             }
-            return reverse ? res.Reverse().ToArray() : res;
+            if (reverse)
+                res.Reverse();
+
+            return res;
         }
 
         public static byte[] ToByteArray(this string value, char separator)

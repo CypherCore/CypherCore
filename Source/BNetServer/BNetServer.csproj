@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <StartupObject>BNetServer.Server</StartupObject>
     <ApplicationIcon>Red.ico</ApplicationIcon>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />
