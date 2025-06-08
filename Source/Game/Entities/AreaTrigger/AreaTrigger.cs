@@ -1062,7 +1062,7 @@ namespace Game.Entities
             _movementTime = 0;
 
             _spline = new Spline<int>();
-            _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear);
+            _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear, GetStationaryO());
             _spline.InitLengths();
 
             float speed = overrideSpeed.GetValueOrDefault(GetCreateProperties().Speed);
