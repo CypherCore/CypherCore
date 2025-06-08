@@ -677,7 +677,7 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (spellAura == null || unitTarget == null)
+            if (spellAura == null || spellAura.IsRemoved() || unitTarget == null)
                 return;
 
             // register target/effect on aura
