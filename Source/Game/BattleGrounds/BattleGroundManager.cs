@@ -73,13 +73,8 @@ namespace Game.BattleGrounds
                 List<ScheduledQueueUpdate> scheduled = new();
                 Extensions.Swap(ref scheduled, ref m_QueueUpdateScheduler);
 
-                for (byte i = 0; i < scheduled.Count; i++)
-                {
-                    uint arenaMMRating = scheduled[i].ArenaMatchmakerRating;
-                    BattlegroundQueueTypeId bgQueueTypeId = scheduled[i].QueueId;
-                    BattlegroundBracketId bracket_id = scheduled[i].BracketId;
-                    GetBattlegroundQueue(bgQueueTypeId).BattlegroundQueueUpdate(diff, bracket_id, arenaMMRating);
-                }
+                foreach (var scheduledQueueUpdate in scheduled)
+                    GetBattlegroundQueue(scheduledQueueUpdate.QueueId).BattlegroundQueueUpdate(diff, scheduledQueueUpdate.BracketId, scheduledQueueUpdate.ArenaMatchmakerRating);
             }
 
             // if rating difference counts, maybe force-update queues
@@ -645,18 +640,15 @@ namespace Game.BattleGrounds
             BattlegroundTemplate bgTemplate = GetBattlegroundTemplateByTypeId(bgTypeId);
             if (bgTemplate != null)
             {
-                Dictionary<BattlegroundTypeId, float> selectionWeights = new();
-
+                List<BattlegroundTemplate> ids = new();
                 foreach (var mapId in bgTemplate.MapIDs)
                 {
                     BattlegroundTemplate bg = GetBattlegroundTemplateByMapId((uint)mapId);
                     if (bg != null)
-                    {
-                        selectionWeights.Add(bg.Id, bg.Weight);
-                    }
+                        ids.Add(bg);
                 }
 
-                return selectionWeights.SelectRandomElementByWeight(i => i.Value).Key;
+                return ids.SelectRandomElementByWeight(i => i.Weight).Id;
             }
 
             return BattlegroundTypeId.None;

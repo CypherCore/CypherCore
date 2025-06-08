@@ -1166,7 +1166,8 @@ namespace Game.Groups
 
         public GroupJoinBattlegroundResult CanJoinBattlegroundQueue(BattlegroundTemplate bgOrTemplate, BattlegroundQueueTypeId bgQueueTypeId, uint MinPlayerCount, uint MaxPlayerCount, bool isRated, uint arenaSlot, out ObjectGuid errorGuid)
         {
-            errorGuid = new ObjectGuid();
+            errorGuid = ObjectGuid.Empty;
+
             // check if this group is LFG group
             if (IsLFGGroup())
                 return GroupJoinBattlegroundResult.LfgCantUseBattleground;
@@ -1203,15 +1204,13 @@ namespace Game.Groups
                 // offline member? don't let join
                 if (member == null)
                     return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
+                errorGuid = member.GetGUID();
                 // rbac permissions
                 if (!member.CanJoinToBattleground(bgOrTemplate))
                     return GroupJoinBattlegroundResult.JoinTimedOut;
                 // don't allow cross-faction join as group
                 if (member.GetTeam() != team)
-                {
-                    errorGuid = member.GetGUID();
                     return GroupJoinBattlegroundResult.JoinTimedOut;
-                }
                 // not in the same Battleground level braket, don't let join
                 PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.GetLevel());
                 if (memberBracketEntry != bracketEntry)
@@ -1245,6 +1244,8 @@ namespace Game.Groups
                 if (isMercenary != (member.HasAura(BattlegroundConst.SpellMercenaryContractHorde) || member.HasAura(BattlegroundConst.SpellMercenaryContractAlliance)))
                     return GroupJoinBattlegroundResult.BattlegroundJoinMercenary;
             }
+
+            errorGuid = ObjectGuid.Empty;
 
             // only check for MinPlayerCount since MinPlayerCount == MaxPlayerCount for arenas...
             if (bgOrTemplate.IsArena() && memberscount != MinPlayerCount)
