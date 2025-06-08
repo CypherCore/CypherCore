@@ -1106,6 +1106,8 @@ namespace Game.AI
                     if (_me == null)
                         break;
 
+                    targets.RemoveAll(target => !target.IsUnit());
+
                     if (targets.Empty())
                         break;
 
