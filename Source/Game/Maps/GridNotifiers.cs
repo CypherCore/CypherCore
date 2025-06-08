@@ -384,7 +384,7 @@ namespace Game.Maps
                 CreatureUnitRelocationWorker(i_creature, player);
         }
     }
-    
+
     public class PacketSenderRef : IDoWork<Player>
     {
         ServerPacket Data;

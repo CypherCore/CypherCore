@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Game.Entities;
+using System.Collections.Generic;
 
 namespace Game.Maps
 {
@@ -133,7 +134,7 @@ namespace Game.Maps
             _a = new DoublePosition(pointA);
             _b = new DoublePosition(pointB);
             _c = new DoublePosition(pointC);
-            
+
             _abx = _b.GetDoublePositionX() - _a.GetDoublePositionX();
             _bcx = _c.GetDoublePositionX() - _b.GetDoublePositionX();
             _cax = _a.GetDoublePositionX() - _c.GetDoublePositionX();
@@ -216,6 +217,23 @@ namespace Game.Maps
 
         float _minZ;
         float _maxZ;
+    }
+
+    class PolygonBoundary : AreaBoundary
+    {
+        Position _origin;
+        List<Position> _vertices;
+
+        public PolygonBoundary(Position origin, List<Position> vertices, bool isInverted = false) : base(isInverted)
+        {
+            _origin = origin;
+            _vertices = vertices;
+        }
+
+        public override bool IsWithinBoundaryArea(Position pos)
+        {
+            return pos.IsInPolygon2D(_origin, _vertices);
+        }
     }
 
     class BoundaryUnionBoundary : AreaBoundary
