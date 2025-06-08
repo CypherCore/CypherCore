@@ -4900,8 +4900,7 @@ namespace Game.Spells
             if (item != null)
             {
                 foreach (ItemEffectRecord itemEffect in item.GetEffects())
-                    if (itemEffect.LegacySlotIndex <= item.m_itemData.SpellCharges.GetSize())
-                        item.SetSpellCharges(itemEffect.LegacySlotIndex, itemEffect.Charges);
+                    item.SetSpellCharges(itemEffect, itemEffect.Charges);
 
                 item.SetState(ItemUpdateState.Changed, player);
             }

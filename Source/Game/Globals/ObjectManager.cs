@@ -5019,6 +5019,9 @@ namespace Game
                 }
             }
 
+            foreach (var item in ItemTemplateStorage.Values)
+                item.Effects.Sort((x, y) => x.LegacySlotIndex.CompareTo(y.LegacySlotIndex));
+
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item templates in {1} ms", sparseCount, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
@@ -9918,8 +9921,7 @@ namespace Game
 
                 data.time = TimeSpan.FromMilliseconds(result.Read<uint>(9));
 
-                Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
-                _tempSummonDataStorage.Add(key, data);
+                _tempSummonDataStorage.Add((summonerId, summonerType, group), data);
 
                 ++count;
 
@@ -11319,8 +11321,7 @@ namespace Game
 
         public List<TempSummonData> GetSummonGroup(uint summonerId, SummonerType summonerType, byte group)
         {
-            Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
-            return _tempSummonDataStorage.LookupByKey(key);
+            return _tempSummonDataStorage.LookupByKey((summonerId, summonerType, group));
         }
 
         public bool IsReservedName(string name)
@@ -11568,7 +11569,7 @@ namespace Game
         Dictionary<uint, ReputationOnKillEntry> _repOnKillStorage = new();
         Dictionary<uint, RepSpilloverTemplate> _repSpilloverTemplateStorage = new();
         MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new();
-        MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new();
+        MultiMap<(uint, SummonerType, byte), TempSummonData> _tempSummonDataStorage = new();
         Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new();
         Dictionary<uint, PageText> _pageTextStorage = new();
         List<string> _reservedNamesStorage = new();

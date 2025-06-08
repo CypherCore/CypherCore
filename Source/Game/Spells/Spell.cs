@@ -4674,16 +4674,13 @@ namespace Game.Spells
 
             foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
             {
-                if (itemEffect.LegacySlotIndex >= m_CastItem.m_itemData.SpellCharges.GetSize())
-                    continue;
-
                 // item has limited charges
                 if (itemEffect.Charges != 0)
                 {
                     if (itemEffect.Charges < 0)
                         expendable = true;
 
-                    int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
+                    int charges = m_CastItem.GetSpellCharges(itemEffect);
 
                     // item has charges left for this slot
                     if (charges != 0 && itemEffect.SpellID == m_spellInfo.Id)
@@ -4694,7 +4691,7 @@ namespace Game.Spells
                             ++charges;
 
                         if (proto.GetMaxStackSize() == 1)
-                            m_CastItem.SetSpellCharges(itemEffect.LegacySlotIndex, charges);
+                            m_CastItem.SetSpellCharges(itemEffect, charges);
                         m_CastItem.SetState(ItemUpdateState.Changed, m_caster.ToPlayer());
                     }
 
@@ -4905,11 +4902,8 @@ namespace Game.Spells
                 {
                     foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
                     {
-                        if (itemEffect.LegacySlotIndex >= m_CastItem.m_itemData.SpellCharges.GetSize())
-                            continue;
-
                         // CastItem will be used up and does not count as reagent
-                        int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
+                        int charges = m_CastItem.GetSpellCharges(itemEffect);
                         if (itemEffect.Charges < 0 && Math.Abs(charges) < 2)
                         {
                             ++itemcount;
@@ -6714,9 +6708,8 @@ namespace Game.Spells
                     return SpellCastResult.ItemNotReady;
 
                 foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
-                    if (itemEffect.LegacySlotIndex < m_CastItem.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0)
-                        if (m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex) == 0)
-                            return SpellCastResult.NoChargesRemain;
+                    if (itemEffect.Charges != 0 && m_CastItem.GetSpellCharges(itemEffect) == 0)
+                        return SpellCastResult.NoChargesRemain;
 
                 // consumable cast item checks
                 if (proto.GetClass() == ItemClass.Consumable && m_targets.GetUnitTarget() != null)
@@ -6821,11 +6814,8 @@ namespace Game.Spells
 
                             foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
                             {
-                                if (itemEffect.LegacySlotIndex >= m_CastItem.m_itemData.SpellCharges.GetSize())
-                                    continue;
-
                                 // CastItem will be used up and does not count as reagent
-                                int charges = m_CastItem.GetSpellCharges(itemEffect.LegacySlotIndex);
+                                int charges = m_CastItem.GetSpellCharges(itemEffect);
                                 if (itemEffect.Charges < 0 && Math.Abs(charges) < 2)
                                 {
                                     ++itemcount;
@@ -7173,7 +7163,7 @@ namespace Game.Spells
                         if (item != null)
                         {
                             foreach (ItemEffectRecord itemEffect in item.GetEffects())
-                                if (itemEffect.LegacySlotIndex <= item.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0 && item.GetSpellCharges(itemEffect.LegacySlotIndex) == itemEffect.Charges)
+                                if (itemEffect.Charges != 0 && item.GetSpellCharges(itemEffect) == itemEffect.Charges)
                                     return SpellCastResult.ItemAtMaxCharges;
                         }
                         break;

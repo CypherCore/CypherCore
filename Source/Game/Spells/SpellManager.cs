@@ -4384,15 +4384,6 @@ namespace Game.Entities
                 });
             });
 
-            // Summon Living Air
-            ApplySpellFix([102207], spellInfo =>
-            {
-                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
-                {
-                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestTargetRandom);
-                });
-            });
-
             // END OF THE WANDERING ISLE SPELLS
             //
 

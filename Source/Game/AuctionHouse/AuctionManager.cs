@@ -1657,7 +1657,7 @@ namespace Game
             else
             {
                 auctionItem.Item = new ItemInstance(Items[0]);
-                auctionItem.Charges = new[] { Items[0].GetSpellCharges(0), Items[0].GetSpellCharges(1), Items[0].GetSpellCharges(2), Items[0].GetSpellCharges(3), Items[0].GetSpellCharges(4) }.Max();
+                auctionItem.Charges = Items[0].GetSpellCharges();
                 for (EnchantmentSlot enchantmentSlot = 0; enchantmentSlot < EnchantmentSlot.MaxInspected; enchantmentSlot++)
                 {
                     uint enchantId = Items[0].GetEnchantmentId(enchantmentSlot);

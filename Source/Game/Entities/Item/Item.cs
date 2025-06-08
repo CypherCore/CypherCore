@@ -54,9 +54,9 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), itemProto.MaxDurability);
             SetDurability(itemProto.MaxDurability);
 
-            for (int i = 0; i < itemProto.Effects.Count; ++i)
-                if (itemProto.Effects[i].LegacySlotIndex < 5)
-                    SetSpellCharges(itemProto.Effects[i].LegacySlotIndex, itemProto.Effects[i].Charges);
+            foreach (var effect in GetEffects())
+                if (effect != null)
+                    SetSpellCharges(effect, effect.Charges);
 
             SetExpiration(itemProto.GetDuration());
             SetCreatePlayedTime(0);
@@ -126,6 +126,42 @@ namespace Game.Entities
             SetState(ItemUpdateState.Changed, owner);                          // save new time in database
         }
 
+        int FindSpellChargesSlot(BonusData bonusData, ItemEffectRecord effect)
+        {
+            int MaxSpellChargesSlot = m_itemData.SpellCharges.GetSize();
+
+            if (effect == null)
+            {
+                // return fist effect that has charges
+                for (int i = 0; i < bonusData.EffectCount && i < MaxSpellChargesSlot; ++i)
+                    if (bonusData.Effects[i] != null && bonusData.Effects[i].Charges != 0)
+                        return i;
+
+                return MaxSpellChargesSlot;
+            }
+
+            for (int i = 0; i < bonusData.EffectCount && i < MaxSpellChargesSlot; ++i)
+                if (bonusData.Effects[i] == effect)
+                    return i;
+
+            return MaxSpellChargesSlot;
+        }
+
+        public int GetSpellCharges(ItemEffectRecord effect = null)
+        {
+            int slot = FindSpellChargesSlot(_bonusData, effect);
+            if (slot < m_itemData.SpellCharges.GetSize())
+                return m_itemData.SpellCharges[slot];
+
+            return 0;
+        }
+        public void SetSpellCharges(ItemEffectRecord effect, int value)
+        {
+            int slot = FindSpellChargesSlot(_bonusData, effect);
+            if (slot < m_itemData.SpellCharges.GetSize())
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.SpellCharges, slot), value);
+        }
+
         public virtual void SaveToDB(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -145,7 +181,7 @@ namespace Game.Entities
 
                     StringBuilder ss = new();
                     for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
-                        ss.AppendFormat("{0} ", GetSpellCharges(i));
+                        ss.AppendFormat("{0} ", m_itemData.SpellCharges[i]);
 
                     stmt.AddValue(++index, ss.ToString());
                     stmt.AddValue(++index, (uint)m_itemData.DynamicFlags);
@@ -466,10 +502,7 @@ namespace Game.Entities
             // load charges after bonuses, they can add more item effects
             var tokens = new StringArray(fields.Read<string>(6), ' ');
             for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount && i < tokens.Length; ++i)
-            {
-                if (int.TryParse(tokens[i], out int value))
-                    SetSpellCharges(i, value);
-            }
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.SpellCharges, i), int.TryParse(tokens[i], out int value) ? value : 0);
 
             SetModifier(ItemModifier.TransmogAppearanceAllSpecs, fields.Read<uint>(20));
             SetModifier(ItemModifier.TransmogAppearanceSpec1, fields.Read<uint>(21));
@@ -2620,9 +2653,6 @@ namespace Game.Entities
 
         public string GetText() { return m_text; }
         public void SetText(string text) { m_text = text; }
-
-        public int GetSpellCharges(int index = 0) { return m_itemData.SpellCharges[index]; }
-        public void SetSpellCharges(int index, int value) { SetUpdateFieldValue(ref m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.SpellCharges, index), value); }
 
         public ItemUpdateState GetState() { return uState; }
 
