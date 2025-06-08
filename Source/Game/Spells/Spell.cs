@@ -275,17 +275,6 @@ namespace Game.Spells
                             return;
                         }
                     }
-                    if (m_spellInfo.HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
-                    {
-                        bool anyNonImmuneTargetFound = m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << (int)spellEffectInfo.EffectIndex) != 0 && target.MissCondition != SpellMissInfo.Immune && target.MissCondition != SpellMissInfo.Immune2);
-
-                        if (!anyNonImmuneTargetFound)
-                        {
-                            SendCastResult(SpellCastResult.Immune);
-                            Finish(SpellCastResult.Immune);
-                            return;
-                        }
-                    }
                 }
 
                 if (m_spellInfo.IsChanneled())
@@ -307,6 +296,18 @@ namespace Game.Spells
                             break;
                         }
                     }
+                }
+            }
+
+            if (m_spellInfo.HasAttribute(SpellAttr2.FailOnAllTargetsImmune))
+            {
+                bool anyNonImmuneTargetFound = m_UniqueTargetInfo.Any(target => target.MissCondition != SpellMissInfo.Immune && target.MissCondition != SpellMissInfo.Immune2);
+
+                if (!anyNonImmuneTargetFound)
+                {
+                    SendCastResult(SpellCastResult.Immune);
+                    Finish(SpellCastResult.Immune);
+                    return;
                 }
             }
 
