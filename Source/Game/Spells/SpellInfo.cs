@@ -4312,6 +4312,41 @@ namespace Game.Spells
             return radius;
         }
 
+        public (float, float) CalcRadiusBounds(WorldObject caster, SpellTargetIndex targetIndex, Spell spell)
+        {
+            // TargetA -> TargetARadiusEntry
+            // TargetB -> TargetBRadiusEntry
+            // Aura effects have TargetARadiusEntry == TargetBRadiusEntry (mostly)
+            SpellRadiusRecord entry = TargetARadiusEntry;
+            if (targetIndex == SpellTargetIndex.TargetB && HasRadius(targetIndex))
+                entry = TargetBRadiusEntry;
+
+            (float, float) bounds = default;
+            if (entry == null)
+                return bounds;
+
+            bounds = (entry.RadiusMin, entry.RadiusMax);
+
+            if (caster != null)
+            {
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref bounds.Item2, spell);
+
+                if (!_spellInfo.HasAttribute(SpellAttr9.NoMovementRadiusBonus))
+                {
+                    Unit casterUnit = caster.ToUnit(); ;
+                    if (casterUnit != null && Spell.CanIncreaseRangeByMovement(casterUnit))
+                    {
+                        bounds.Item1 = Math.Max(bounds.Item1 - 2.0f, 0.0f);
+                        bounds.Item2 += 2.0f;
+                    }
+                }
+            }
+
+            return bounds;
+        }
+
         public SpellCastTargetFlags GetProvidedTargetMask()
         {
             return SpellInfo.GetTargetFlagMask(TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(TargetB.GetObjectType());
@@ -5123,7 +5158,7 @@ namespace Game.Spells
             new StaticData(SpellTargetObjectTypes.Unit,         SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 103 TARGET_UNIT_PASSENGER_7
             new StaticData(SpellTargetObjectTypes.Unit,         SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Cone,    SpellTargetCheckTypes.Enemy,    SpellTargetDirectionTypes.Front),       // 104 TARGET_UNIT_CONE_CASTER_TO_DEST_ENEMY
             new StaticData(SpellTargetObjectTypes.Unit,         SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Area,    SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 105 TARGET_UNIT_CASTER_AND_PASSENGERS
-            new StaticData(SpellTargetObjectTypes.Dest,         SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Channel, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 106 TARGET_DEST_CHANNEL_CASTER
+            new StaticData(SpellTargetObjectTypes.Dest,         SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 106 TARGET_DEST_NEARBY_DB
             new StaticData(SpellTargetObjectTypes.Dest,         SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Nearby,  SpellTargetCheckTypes.Entry,    SpellTargetDirectionTypes.None),        // 107 TARGET_DEST_NEARBY_ENTRY_2
             new StaticData(SpellTargetObjectTypes.Gobj,         SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Cone,    SpellTargetCheckTypes.Enemy,    SpellTargetDirectionTypes.Front),       // 108 TARGET_GAMEOBJECT_CONE_CASTER_TO_DEST_ENEMY
             new StaticData(SpellTargetObjectTypes.Gobj,         SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Cone,    SpellTargetCheckTypes.Ally,     SpellTargetDirectionTypes.Front),       // 109 TARGET_GAMEOBJECT_CONE_CASTER_TO_DEST_ALLY

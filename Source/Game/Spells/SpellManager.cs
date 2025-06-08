@@ -296,7 +296,12 @@ namespace Game.Entities
 
         public WorldLocation GetSpellTargetPosition(uint spell_id, uint effIndex)
         {
-            return mSpellTargetPositions.LookupByKey(new KeyValuePair<uint, uint>(spell_id, effIndex));
+            return mSpellTargetPositions.LookupByKey((spell_id, effIndex)).FirstOrDefault();
+        }
+
+        public List<WorldLocation> GetSpellTargetPositions(uint spell_id, uint effIndex)
+        {
+            return mSpellTargetPositions.LookupByKey((spell_id, effIndex));
         }
 
         public List<SpellGroup> GetSpellSpellGroupMapBounds(uint spell_id)
@@ -1006,21 +1011,20 @@ namespace Game.Entities
 
             mSpellTargetPositions.Clear();                                // need for reload case
 
-            //                                         0   1            2      3          4          5          6
-            SQLResult result = DB.World.Query("SELECT ID, EffectIndex, MapID, PositionX, PositionY, PositionZ, Orientation FROM spell_target_position");
+            //                                         0   1            2           3      4          5          6          7
+            SQLResult result = DB.World.Query("SELECT ID, EffectIndex, OrderIndex, MapID, PositionX, PositionY, PositionZ, Orientation FROM spell_target_position");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell target coordinates. DB table `spell_target_position` is empty.");
                 return;
             }
 
-            uint count = 0;
             do
             {
                 uint spellId = result.Read<uint>(0);
                 uint effIndex = result.Read<byte>(1);
 
-                WorldLocation st = new(result.Read<uint>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                WorldLocation st = new(result.Read<uint>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(st.GetMapId());
                 if (mapEntry == null)
@@ -1048,38 +1052,39 @@ namespace Game.Entities
                     continue;
                 }
 
-                if (!result.IsNull(6))
-                    st.SetOrientation(result.Read<float>(6));
+                SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndex);
+                if (!result.IsNull(7))
+                    st.SetOrientation(result.Read<float>(7));
                 else
                 {
                     // target facing is in degrees for 6484 & 9268...
-                    if (spellInfo.GetEffect(effIndex).PositionFacing > 2 * MathF.PI)
-                        st.SetOrientation(spellInfo.GetEffect(effIndex).PositionFacing * MathF.PI / 180);
+                    if (spellEffectInfo.PositionFacing > 2 * MathF.PI)
+                        st.SetOrientation(spellEffectInfo.PositionFacing * MathF.PI / 180);
                     else
-                        st.SetOrientation(spellInfo.GetEffect(effIndex).PositionFacing);
+                        st.SetOrientation(spellEffectInfo.PositionFacing);
                 }
 
-                bool hasTarget(Targets target)
+                bool hasTarget(Targets target) => spellEffectInfo.TargetA.GetTarget() == target || spellEffectInfo.TargetB.GetTarget() == target;
+
+                if (!hasTarget(Targets.DestNearbyDb))
                 {
-                    SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(effIndex);
-                    return spellEffectInfo.TargetA.GetTarget() == target || spellEffectInfo.TargetB.GetTarget() == target;
+                    if (!hasTarget(Targets.DestDb) && !hasTarget(Targets.DestNearbyEntryOrDB))
+                    {
+                        Log.outError(LogFilter.Sql, $"Spell (Id: {spellId}, effIndex: {effIndex}) listed in `spell_target_position` does not have a target TARGET_DEST_DB or TARGET_DEST_NEARBY_DB or TARGET_DEST_NEARBY_ENTRY_OR_DB.");
+                        continue;
+                    }
+                    if (result.Read<uint>(2) != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Spell (Id: {spellId}, effIndex: {effIndex}) listed in `spell_target_position` does not have a target TARGET_DEST_NEARBY_DB but lists multiple points, only one is allowed.");
+                        continue;
+                    }
                 }
 
-                if (hasTarget(Targets.DestDb) || hasTarget(Targets.DestNearbyEntryOrDB))
-                {
-                    mSpellTargetPositions[(spellId, effIndex)] = st;
-                    ++count;
-                }
-                else
-                {
-                    Log.outError(LogFilter.Sql, "Spell (Id: {0}, effIndex: {1}) listed in `spell_target_position` does not have target TARGET_DEST_DB (17).", spellId, effIndex);
-                    continue;
-                }
-
+                mSpellTargetPositions.Add((spellId, effIndex), st);
             }
             while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} spell teleport coordinates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mSpellTargetPositions.Count} spell teleport coordinates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadSpellGroups()
@@ -4942,7 +4947,7 @@ namespace Game.Entities
         Dictionary<uint, SpellLearnSkillNode> mSpellLearnSkills = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnSpells = new();
         MultiMap<uint, SpellLearnSpellNode> mSpellLearnedBySpells = new();
-        Dictionary<(uint, uint), WorldLocation> mSpellTargetPositions = new();
+        MultiMap<(uint, uint), WorldLocation> mSpellTargetPositions = new();
         MultiMap<uint, SpellGroup> mSpellSpellGroup = new();
         MultiMap<SpellGroup, int> mSpellGroupSpell = new();
         Dictionary<SpellGroup, SpellGroupStackRule> mSpellGroupStack = new();

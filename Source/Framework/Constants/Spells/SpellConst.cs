@@ -2916,7 +2916,7 @@ namespace Framework.Constants
         UnitPassenger7 = 103,
         UnitConeCasterToDestEnemy = 104,
         UnitCasterAndPassengers = 105,
-        DestChannelCaster = 106,
+        DestNearbyDb = 106,
         DestNearbyEntry2 = 107,
         GameobjectConeCasterToDestEnemy = 108,
         GameobjectConeCasterToDestAlly = 109,

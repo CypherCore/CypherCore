@@ -567,16 +567,6 @@ namespace Game.Spells
                     }
                     break;
                 }
-                case Targets.DestChannelCaster:
-                {
-                    SpellDestination dest = new(channeledSpell.GetCaster());
-                    if (m_spellInfo.HasAttribute(SpellAttr4.UseFacingFromSpell))
-                        dest.Position.SetOrientation(spellEffectInfo.PositionFacing);
-
-                    CallScriptDestinationTargetSelectHandlers(ref dest, spellEffectInfo.EffectIndex, targetType);
-                    m_targets.SetDst(dest);
-                    break;
-                }
                 default:
                     Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target type");
                     break;
@@ -1137,6 +1127,25 @@ namespace Game.Spells
                                 dest = new SpellDestination(summoner);
                         }
                     }
+                    break;
+                }
+                case Targets.DestNearbyDb:
+                {
+                    var radiusBounds = spellEffectInfo.CalcRadiusBounds(m_caster, targetIndex, this);
+                    List<WorldLocation> positionsInRange = new();
+                    foreach (var position in Global.SpellMgr.GetSpellTargetPositions(m_spellInfo.Id, spellEffectInfo.EffectIndex))
+                        if (m_caster.GetMapId() == position.GetMapId() && (radiusBounds == default || (!m_caster.IsInDist(position, radiusBounds.Item1) && m_caster.IsInDist(position, radiusBounds.Item2))))
+                            positionsInRange.Add(position);
+
+                    if (positionsInRange.Empty())
+                    {
+                        Log.outDebug(LogFilter.Spells, $"SPELL: unknown target coordinates for spell ID {m_spellInfo.Id}");
+                        SendCastResult(SpellCastResult.NoValidTargets);
+                        Finish(SpellCastResult.NoValidTargets);
+                        return;
+                    }
+
+                    dest = new(positionsInRange.SelectRandom().GetPosition());
                     break;
                 }
                 default:
