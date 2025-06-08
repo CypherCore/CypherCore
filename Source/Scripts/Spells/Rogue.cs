@@ -782,10 +782,9 @@ namespace Scripts.Spells.Rogue
                 damagePerCombo += t5.GetAmount();
 
             int finalDamage = damagePerCombo;
-            List<SpellPowerCost> cost = GetSpell().GetPowerCost();
-            var c = cost.Find(cost => cost.Power == PowerType.ComboPoints);
-            if (c != null)
-                finalDamage *= c.Amount;
+            int? comboPointCost = GetSpell().GetPowerTypeCostAmount(PowerType.ComboPoints);
+            if (comboPointCost.HasValue)
+                finalDamage *= comboPointCost.Value;
 
             SetHitDamage(finalDamage);
         }

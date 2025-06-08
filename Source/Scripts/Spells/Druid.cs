@@ -1761,12 +1761,11 @@ namespace Scripts.Spells.Druid
                 return;
 
             Unit caster = eventInfo.GetActor();
-            List<SpellPowerCost> costs = spell.GetPowerCost();
-            var m = costs.Find(cost => cost.Power == PowerType.Mana);
-            if (m == null)
+            int? manaCost = spell.GetPowerTypeCostAmount(PowerType.Mana);
+            if (!manaCost.HasValue)
                 return;
 
-            int amount = MathFunctions.CalculatePct(m.Amount, aurEff.GetAmount());
+            int amount = MathFunctions.CalculatePct(manaCost.Value, aurEff.GetAmount());
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(null, SpellIds.Exhilarate, args);

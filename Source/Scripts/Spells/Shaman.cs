@@ -977,11 +977,10 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            List<SpellPowerCost> costs = eventInfo.GetProcSpell().GetPowerCost();
-            var m = costs.Find(cost => cost.Power == PowerType.Mana);
-            if (m != null)
+            int? manaCost = eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Mana);
+            if (manaCost.HasValue)
             {
-                int mana = MathFunctions.CalculatePct(m.Amount, 35);
+                int mana = MathFunctions.CalculatePct(manaCost.Value, 35);
                 if (mana > 0)
                 {
                     CastSpellExtraArgs args = new(aurEff);

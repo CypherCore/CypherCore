@@ -1472,13 +1472,8 @@ namespace Scripts.Spells.Azerite
         bool CheckProc(ProcEventInfo eventInfo)
         {
             Spell spell = eventInfo.GetProcSpell();
-            if (spell != null)
-            {
-                var cost = spell.GetPowerCost();
-                var m = cost.Find(cost => cost.Power == PowerType.Mana && cost.Amount > 0);
-                if (m != null)
-                    return true;
-            }
+            if (spell != null && spell.GetPowerTypeCostAmount(PowerType.Mana) > 0)
+                return true;
 
             return false;
         }
