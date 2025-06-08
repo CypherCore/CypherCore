@@ -999,13 +999,13 @@ namespace Game
             SendPacket(auctionHelloResponse);
         }
 
-        public void SendAuctionCommandResult(uint auctionId, AuctionCommand command, AuctionResult errorCode, TimeSpan delayForNextAction, InventoryResult bagError = 0)
+        public void SendAuctionCommandResult(uint auctionId, AuctionCommand command, AuctionResult errorCode, TimeSpan delayForNextAction, InventoryResult bagResult = 0)
         {
             AuctionCommandResult auctionCommandResult = new();
             auctionCommandResult.AuctionID = auctionId;
             auctionCommandResult.Command = (int)command;
             auctionCommandResult.ErrorCode = (int)errorCode;
-            auctionCommandResult.BagResult = (int)bagError;
+            auctionCommandResult.BagResult = (int)bagResult;
             auctionCommandResult.DesiredDelay = (uint)delayForNextAction.TotalSeconds;
             SendPacket(auctionCommandResult);
         }

@@ -3147,7 +3147,7 @@ namespace Game.Entities
             return true;
         }
 
-        public bool BuyItemFromVendorSlot(ObjectGuid vendorguid, uint vendorslot, uint item, byte count, byte bag, byte slot)
+        public bool BuyItemFromVendorSlot(ObjectGuid vendorguid, uint vendorslot, uint item, uint count, byte bag, byte slot)
         {
             // cheating attempt
             if (count < 1)
@@ -3319,7 +3319,7 @@ namespace Game.Entities
                 if (count > maxCount)
                 {
                     Log.outError(LogFilter.Player, "Player {0} tried to buy {1} item id {2}, causing overflow", GetName(), count, pProto.GetId());
-                    count = (byte)maxCount;
+                    count = (uint)maxCount;
                 }
                 price = (ulong)(buyPricePerItem * count); //it should not exceed MAX_MONEY_AMOUNT
 
@@ -3340,7 +3340,7 @@ namespace Game.Entities
 
             if ((bag == ItemConst.NullBag && slot == ItemConst.NullSlot) || IsInventoryPos(bag, slot))
             {
-                if (!_StoreOrEquipNewItem(vendorslot, item, count, bag, slot, (int)price, pProto, creature, crItem, true))
+                if (!_StoreOrEquipNewItem(vendorslot, item, (byte)count, bag, slot, (int)price, pProto, creature, crItem, true))
                     return false;
             }
             else if (IsEquipmentPos(bag, slot))
@@ -3350,7 +3350,7 @@ namespace Game.Entities
                     SendEquipError(InventoryResult.NotEquippable);
                     return false;
                 }
-                if (!_StoreOrEquipNewItem(vendorslot, item, count, bag, slot, (int)price, pProto, creature, crItem, false))
+                if (!_StoreOrEquipNewItem(vendorslot, item, (byte)count, bag, slot, (int)price, pProto, creature, crItem, false))
                     return false;
             }
             else

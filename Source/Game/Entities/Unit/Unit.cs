@@ -1488,6 +1488,7 @@ namespace Game.Entities
                         case ShapeShiftForm.AquaticForm:
                             useRandom = HasAura(344338);
                             break; // Glyph of the Aquatic Chameleon
+                        case ShapeShiftForm.DireBearForm:
                         case ShapeShiftForm.BearForm:
                             useRandom = HasAura(107059);
                             break; // Glyph of the Ursol Chameleon
@@ -1778,6 +1779,7 @@ namespace Game.Entities
                     displayPower = PowerType.Energy;
                     break;
                 case ShapeShiftForm.BearForm:
+                case ShapeShiftForm.DireBearForm:
                     displayPower = PowerType.Rage;
                     break;
                 case ShapeShiftForm.TravelForm:

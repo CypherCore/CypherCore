@@ -788,6 +788,7 @@ namespace Game.Spells
                     spellId = 5421;
                     break;
                 case ShapeShiftForm.BearForm:
+                case ShapeShiftForm.DireBearForm:
                     spellId = 1178;
                     spellId2 = 21178;
                     spellId3 = 106829;
@@ -1333,6 +1334,7 @@ namespace Game.Spells
                     case ShapeShiftForm.TravelForm:
                     case ShapeShiftForm.AquaticForm:
                     case ShapeShiftForm.BearForm:
+                    case ShapeShiftForm.DireBearForm:
                     case ShapeShiftForm.FlightFormEpic:
                     case ShapeShiftForm.FlightForm:
                     case ShapeShiftForm.MoonkinForm:
@@ -1393,6 +1395,7 @@ namespace Game.Spells
                 {
                     // Nordrassil Harness - bonus
                     case ShapeShiftForm.BearForm:
+                    case ShapeShiftForm.DireBearForm:
                     case ShapeShiftForm.CatForm:
                         AuraEffect dummy = target.GetAuraEffect(37315, 0);
                         if (dummy != null)
