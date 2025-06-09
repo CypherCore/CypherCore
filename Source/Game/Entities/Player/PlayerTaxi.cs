@@ -24,10 +24,10 @@ namespace Game.Entities
             // class specific initial known nodes
             if (chrClass == Class.Deathknight)
             {
-                var factionMask = Player.TeamForRace(race) == Team.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
+                var factionMask = Player.TeamForRace(race) == Team.Horde ? DB2Manager.HordeTaxiNodesMask : DB2Manager.AllianceTaxiNodesMask;
                 m_taximask = new byte[factionMask.Length];
                 for (int i = 0; i < factionMask.Length; ++i)
-                    m_taximask[i] |= (byte)(CliDB.OldContinentsNodesMask[i] & factionMask[i]);
+                    m_taximask[i] |= (byte)(DB2Manager.OldContinentsNodesMask[i] & factionMask[i]);
             }
 
             // race specific initial known nodes: capital and taxi hub masks
@@ -102,19 +102,19 @@ namespace Game.Entities
             {
                 // load and set bits only for existing taxi nodes
                 if (uint.TryParse(split[i], out uint id))
-                    m_taximask[index] = (byte)(CliDB.TaxiNodesMask[index] & id);
+                    m_taximask[index] = (byte)(DB2Manager.TaxiNodesMask[index] & id);
             }
         }
 
         public void AppendTaximaskTo(ShowTaxiNodes data, bool all)
         {
-            data.CanLandNodes = new byte[CliDB.TaxiNodesMask.Length];
-            data.CanUseNodes = new byte[CliDB.TaxiNodesMask.Length];
+            data.CanLandNodes = new byte[DB2Manager.TaxiNodesMask.Length];
+            data.CanUseNodes = new byte[DB2Manager.TaxiNodesMask.Length];
 
             if (all)
             {
-                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanLandNodes, 0, data.CanLandNodes.Length);  // all existed nodes
-                Buffer.BlockCopy(CliDB.TaxiNodesMask, 0, data.CanUseNodes, 0, data.CanUseNodes.Length);
+                Buffer.BlockCopy(DB2Manager.TaxiNodesMask, 0, data.CanLandNodes, 0, data.CanLandNodes.Length);  // all existed nodes
+                Buffer.BlockCopy(DB2Manager.TaxiNodesMask, 0, data.CanUseNodes, 0, data.CanUseNodes.Length);
             }
             else
             {

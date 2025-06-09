@@ -42,7 +42,7 @@ namespace Game.Entities
                 uint toVertexID = CreateVertexFromFromNodeInfoIfNeeded(to);
 
                 float totalDist = 0.0f;
-                TaxiPathNodeRecord[] nodes = CliDB.TaxiPathNodesByPath[pathId];
+                TaxiPathNodeRecord[] nodes = DB2Manager.TaxiPathNodesByPath[pathId];
                 if (nodes.Length < 2)
                 {
                     edges.Add(Tuple.Create(Tuple.Create(fromVertexID, toVertexID), 0xFFFFu));

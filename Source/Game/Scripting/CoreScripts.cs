@@ -249,11 +249,16 @@ namespace Game.Scripting
 
     public class GenericConversationScript<Script> : ConversationScript where Script : ConversationAI
     {
-        public GenericConversationScript(string name) : base(name) { }
+        object[] _args;
+
+        public GenericConversationScript(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
 
         public override ConversationAI GetAI(Conversation conversation)
         {
-            return (Script)Activator.CreateInstance(typeof(Script), [conversation]);
+            return (Script)Activator.CreateInstance(typeof(Script), [conversation, _args]);
         }
     }
 

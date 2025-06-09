@@ -2624,8 +2624,9 @@ namespace Framework.Constants
         Unk336 = 336,
         Unk337 = 337,
         Unk338 = 338,
-        Unk339 = 339,
+        UiAction = 339,
         Unk340 = 340,
+        LearnWarbanScene = 341,
 
         TotalSpellEffects
     }

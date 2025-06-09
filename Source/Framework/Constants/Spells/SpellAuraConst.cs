@@ -647,6 +647,10 @@ namespace Framework.Constants
         ModExplorationExperience = 637,
         ModCriticalBlockAmount = 638,
         Unk639 = 639,
+        Unk640 = 640,
+        Unk641 = 641,
+        Unk642 = 642,
+        ModRangedAttackSpeedFlat = 643,
         Total
     }
 

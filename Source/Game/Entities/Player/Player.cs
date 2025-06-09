@@ -7304,7 +7304,7 @@ namespace Game.Entities
             // search appropriate start path node
             uint startNode = 0;
 
-            var nodeList = CliDB.TaxiPathNodesByPath[path];
+            var nodeList = DB2Manager.TaxiPathNodesByPath[path];
 
             float distPrev;
             float distNext = GetExactDistSq(nodeList[0].Loc.X, nodeList[0].Loc.Y, nodeList[0].Loc.Z);

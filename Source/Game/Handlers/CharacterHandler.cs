@@ -1986,7 +1986,7 @@ namespace Game
                         string taximaskstream = "";
 
 
-                        var factionMask = newTeamId == BattleGroundTeamId.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
+                        var factionMask = newTeamId == BattleGroundTeamId.Horde ? DB2Manager.HordeTaxiNodesMask : DB2Manager.AllianceTaxiNodesMask;
                         for (int i = 0; i < factionMask.Length; ++i)
                         {
                             // i = (315 - 1) / 8 = 39

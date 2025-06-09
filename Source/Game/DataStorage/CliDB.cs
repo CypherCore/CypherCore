@@ -395,59 +395,7 @@ namespace Game.DataStorage
             WMOAreaTableStorage = ReadDB2<WMOAreaTableRecord>("WMOAreaTable.db2", HotfixStatements.SEL_WMO_AREA_TABLE, HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE);
             WorldEffectStorage = ReadDB2<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = ReadDB2<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
-            WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
-
-            foreach (var entry in TaxiPathStorage.Values)
-            {
-                if (!TaxiPathSetBySource.ContainsKey(entry.FromTaxiNode))
-                    TaxiPathSetBySource.Add(entry.FromTaxiNode, new Dictionary<uint, TaxiPathBySourceAndDestination>());
-                TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
-            }
-
-            uint pathCount = TaxiPathStorage.GetNumRows();
-
-            // Calculate path nodes count
-            uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
-            foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
-                if (pathLength[entry.PathID] < entry.NodeIndex + 1)
-                    pathLength[entry.PathID] = (uint)Math.Max(pathLength[entry.PathID], entry.NodeIndex + 1u);
-
-            // Set path length
-            for (uint i = 0; i < pathCount; ++i)
-                TaxiPathNodesByPath[i] = new TaxiPathNodeRecord[pathLength[i]];
-
-            // fill data
-            foreach (var entry in TaxiPathNodeStorage.Values)
-                TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
-
-            var taxiMaskSize = ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8;
-            TaxiNodesMask = new byte[taxiMaskSize];
-            OldContinentsNodesMask = new byte[taxiMaskSize];
-            HordeTaxiNodesMask = new byte[taxiMaskSize];
-            AllianceTaxiNodesMask = new byte[taxiMaskSize];
-
-            foreach (var node in TaxiNodesStorage.Values)
-            {
-                if (!node.IsPartOfTaxiNetwork())
-                    continue;
-
-                // valid taxi network node
-                uint field = (node.Id - 1) / 8;
-                byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
-
-                TaxiNodesMask[field] |= submask;
-                if (node.HasFlag(TaxiNodeFlags.ShowOnHordeMap))
-                    HordeTaxiNodesMask[field] |= submask;
-                if (node.HasFlag(TaxiNodeFlags.ShowOnAllianceMap))
-                    AllianceTaxiNodesMask[field] |= submask;
-
-                uint uiMapId;
-                if (!Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId))
-                    Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId);
-
-                if (uiMapId == 985 || uiMapId == 986)
-                    OldContinentsNodesMask[field] |= submask;
-            }
+            WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);           
 
             // Check loaded DB2 files proper version
             if (!AreaTableStorage.ContainsKey(16108) ||               // last area added in 11.0.7 (58162)
@@ -862,15 +810,6 @@ namespace Game.DataStorage
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;
         public static GameTable<GtGenericMultByILvlRecord> StaminaMultByILvlGameTable;
         public static GameTable<GtXpRecord> XpGameTable;
-        #endregion
-
-        #region Taxi Collections
-        public static byte[] TaxiNodesMask;
-        public static byte[] OldContinentsNodesMask;
-        public static byte[] HordeTaxiNodesMask;
-        public static byte[] AllianceTaxiNodesMask;
-        public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
-        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
         #endregion
 
         #region Helper Methods

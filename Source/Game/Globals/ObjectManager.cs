@@ -4126,7 +4126,7 @@ namespace Game
                         {
                             if (got.MoTransport.taxiPathID != 0)
                             {
-                                if (got.MoTransport.taxiPathID >= CliDB.TaxiPathNodesByPath.Count || CliDB.TaxiPathNodesByPath[got.MoTransport.taxiPathID].Empty())
+                                if (got.MoTransport.taxiPathID >= DB2Manager.TaxiPathNodesByPath.Count || DB2Manager.TaxiPathNodesByPath[got.MoTransport.taxiPathID].Empty())
                                     Log.outError(LogFilter.Sql, "GameObject (Entry: {0} GoType: {1}) have data0={2} but TaxiPath (Id: {3}) not exist.",
                                     entry, got.type, got.MoTransport.taxiPathID, got.MoTransport.taxiPathID);
                             }
@@ -9392,7 +9392,7 @@ namespace Game
                     continue;
                 }
 
-                SpawnTrackingStateData spawnTrackingStateData = data.spawnTrackingStates[(int)state];
+                SpawnTrackingStateData spawnTrackingStateData = new();
                 spawnTrackingStateData.Visible = result.Read<bool>(3);
 
                 if (!result.IsNull(4))
@@ -9445,6 +9445,8 @@ namespace Game
                     if (!worldEffectList.Empty())
                         spawnTrackingStateData.StateWorldEffects = worldEffectList;
                 }
+
+                data.spawnTrackingStates[(int)state] = spawnTrackingStateData;
 
                 ++count;
             } while (result.NextRow());
@@ -11171,7 +11173,7 @@ namespace Game
                 byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
 
                 // skip not taxi network nodes
-                if ((CliDB.TaxiNodesMask[field] & submask) == 0)
+                if ((DB2Manager.TaxiNodesMask[field] & submask) == 0)
                     continue;
 
                 float dist2 = (node.Pos.X - x) * (node.Pos.X - x) + (node.Pos.Y - y) * (node.Pos.Y - y) + (node.Pos.Z - z) * (node.Pos.Z - z);
@@ -11196,24 +11198,17 @@ namespace Game
 
         public void GetTaxiPath(uint source, uint destination, out uint path, out uint cost)
         {
-            var pathSet = CliDB.TaxiPathSetBySource.LookupByKey(source);
-            if (pathSet == null)
+            var taxiPath = Global.DB2Mgr.GetTaxiPath(source, destination);
+            if (taxiPath != null)
+            {
+                path = taxiPath.Id;
+                cost = taxiPath.Cost;
+            }
+            else
             {
                 path = 0;
                 cost = 0;
-                return;
             }
-
-            var dest_i = pathSet.LookupByKey(destination);
-            if (dest_i == null)
-            {
-                path = 0;
-                cost = 0;
-                return;
-            }
-
-            cost = dest_i.price;
-            path = dest_i.Id;
         }
 
         public uint GetTaxiMountDisplayId(uint id, Team team, bool allowed_alt_team = false)

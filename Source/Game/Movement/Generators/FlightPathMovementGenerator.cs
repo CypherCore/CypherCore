@@ -201,10 +201,10 @@ namespace Game.Movement
             {
                 uint path, cost;
                 Global.ObjectMgr.GetTaxiPath(taxi[src], taxi[dst], out path, out cost);
-                if (path >= CliDB.TaxiPathNodesByPath.Keys.Max())
+                if (path >= DB2Manager.TaxiPathNodesByPath.Keys.Max())
                     return;
 
-                var nodes = CliDB.TaxiPathNodesByPath[path];
+                var nodes = DB2Manager.TaxiPathNodesByPath[path];
                 if (!nodes.Empty())
                 {
                     TaxiPathNodeRecord start = nodes[0];

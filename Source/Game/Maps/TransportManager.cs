@@ -46,7 +46,7 @@ namespace Game.Maps
                     continue;
                 }
 
-                if (!CliDB.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
+                if (!DB2Manager.TaxiPathNodesByPath.ContainsKey(goInfo.MoTransport.taxiPathID))
                 {
                     Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) has an invalid path specified in `gameobject_template`.`data0` ({2}) field, skipped.", entry, goInfo.name, goInfo.MoTransport.taxiPathID);
                     continue;
@@ -307,7 +307,7 @@ namespace Game.Maps
         void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
         {
             uint pathId = goInfo.MoTransport.taxiPathID;
-            TaxiPathNodeRecord[] path = CliDB.TaxiPathNodesByPath[pathId];
+            TaxiPathNodeRecord[] path = DB2Manager.TaxiPathNodesByPath[pathId];
 
             transport.Speed = (double)goInfo.MoTransport.moveSpeed;
             transport.AccelerationRate = (double)goInfo.MoTransport.accelRate;

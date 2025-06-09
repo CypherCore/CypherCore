@@ -98,7 +98,7 @@ namespace Game
 
             GetPlayer().m_taxi.AppendTaximaskTo(data, lastTaxiCheaterState);
 
-            byte[] reachableNodes = new byte[CliDB.TaxiNodesMask.Length];
+            byte[] reachableNodes = new byte[DB2Manager.TaxiNodesMask.Length];
             TaxiPathGraph.GetReachableNodesMask(CliDB.TaxiNodesStorage.LookupByKey(curloc), reachableNodes);
             for (var i = 0; i < reachableNodes.Length; ++i)
             {

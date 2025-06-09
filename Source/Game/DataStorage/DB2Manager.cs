@@ -564,6 +564,24 @@ namespace Game.DataStorage
                 _talentsByPosition[talentInfo.ClassID][talentInfo.TierID][talentInfo.ColumnIndex].Add(talentInfo);
             }
 
+            foreach (var entry in TaxiPathStorage.Values)
+                _taxiPaths[(entry.FromTaxiNode, entry.ToTaxiNode)] = entry;
+
+            uint pathCount = TaxiPathStorage.GetNumRows();
+
+            // Calculate path nodes count
+            uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
+            foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
+                pathLength[entry.PathID] = (uint)Math.Max(pathLength[entry.PathID], entry.NodeIndex + 1u);
+
+            // Set path length
+            for (uint i = 0; i < pathCount; ++i)
+                TaxiPathNodesByPath[i] = new TaxiPathNodeRecord[pathLength[i]];
+
+            // fill data
+            foreach (var entry in TaxiPathNodeStorage.Values)
+                TaxiPathNodesByPath[entry.PathID][entry.NodeIndex] = entry;
+
             foreach (ToyRecord toy in ToyStorage.Values)
                 _toys.Add(toy.ItemID);
 
@@ -687,6 +705,35 @@ namespace Game.DataStorage
 
             foreach (WMOAreaTableRecord entry in WMOAreaTableStorage.Values)
                 _wmoAreaTableLookup[Tuple.Create((short)entry.WmoID, (sbyte)entry.NameSetID, entry.WmoGroupID)] = entry;
+
+            var taxiMaskSize = ((TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8;
+            TaxiNodesMask = new byte[taxiMaskSize];
+            OldContinentsNodesMask = new byte[taxiMaskSize];
+            HordeTaxiNodesMask = new byte[taxiMaskSize];
+            AllianceTaxiNodesMask = new byte[taxiMaskSize];
+
+            foreach (var node in TaxiNodesStorage.Values)
+            {
+                if (!node.IsPartOfTaxiNetwork())
+                    continue;
+
+                // valid taxi network node
+                uint field = (node.Id - 1) / 8;
+                byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
+
+                TaxiNodesMask[field] |= submask;
+                if (node.HasFlag(TaxiNodeFlags.ShowOnHordeMap))
+                    HordeTaxiNodesMask[field] |= submask;
+                if (node.HasFlag(TaxiNodeFlags.ShowOnAllianceMap))
+                    AllianceTaxiNodesMask[field] |= submask;
+
+                uint uiMapId;
+                if (!Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Adventure, false, out uiMapId))
+                    Global.DB2Mgr.GetUiMapPosition(node.Pos.X, node.Pos.Y, node.Pos.Z, node.ContinentID, 0, 0, 0, UiMapSystem.Taxi, false, out uiMapId);
+
+                if (uiMapId == 985 || uiMapId == 986)
+                    OldContinentsNodesMask[field] |= submask;
+            }
 
             foreach (PvpStatRecord pvpStat in PvpStatStorage.Values)
                 _pvpStatIdsByMap.Add(pvpStat.MapID, pvpStat.Id);
@@ -2001,6 +2048,11 @@ namespace Game.DataStorage
             return _talentsByPosition[(int)class_][tier][column];
         }
 
+        public TaxiPathRecord GetTaxiPath(uint from, uint to)
+        {
+            return _taxiPaths.LookupByKey((from, to));
+        }
+
         public bool IsTotemCategoryCompatibleWith(uint itemTotemCategoryId, uint requiredTotemCategoryId, bool requireAllTotems = true)
         {
             if (requiredTotemCategoryId == 0)
@@ -2408,6 +2460,7 @@ namespace Game.DataStorage
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
         MultiMap<uint, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
+        Dictionary<(uint, uint), TaxiPathRecord> _taxiPaths = new();
         List<uint> _toys = new();
         Dictionary<uint, TransmogIllusionRecord> _transmogIllusionsByEnchantmentId = new();
         MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
@@ -2420,6 +2473,12 @@ namespace Game.DataStorage
         List<int> _uiMapPhases = new();
         Dictionary<Tuple<short, sbyte, int>, WMOAreaTableRecord> _wmoAreaTableLookup = new();
         MultiMap<uint, uint> _pvpStatIdsByMap = new();
+
+        public static byte[] TaxiNodesMask;
+        public static byte[] OldContinentsNodesMask;
+        public static byte[] HordeTaxiNodesMask;
+        public static byte[] AllianceTaxiNodesMask;
+        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
     }
 
     class UiMapBounds
