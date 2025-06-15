@@ -5061,7 +5061,7 @@ namespace Game.Entities
                     {
                         // Do not allow polearm to be equipped in the offhand (rare case for the only 1h polearm 41750)
                         if (type == InventoryType.Weapon && pProto.GetSubClass() == (uint)ItemSubClassWeapon.Polearm)
-                            return InventoryResult.TwoHandSkillNotFound;
+                            return InventoryResult.WrongSlot;
                         else if (type == InventoryType.Weapon)
                         {
                             if (!CanDualWield())

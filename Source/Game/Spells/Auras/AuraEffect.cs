@@ -5667,20 +5667,9 @@ namespace Game.Spells
             caster.SendSpellNonMeleeDamageLog(damageInfo);
         }
 
-        bool CanPeriodicTickCrit()
-        {
-            if (GetSpellInfo().HasAttribute(SpellAttr2.CantCrit))
-                return false;
-
-            if (GetSpellInfo().HasAttribute(SpellAttr8.PeriodicCanCrit))
-                return true;
-
-            return false;
-        }
-
         float CalcPeriodicCritChance(Unit caster)
         {
-            if (caster == null || !CanPeriodicTickCrit())
+            if (caster == null || !GetBase().CanPeriodicTickCrit())
                 return 0.0f;
 
             Player modOwner = caster.GetSpellModOwner();

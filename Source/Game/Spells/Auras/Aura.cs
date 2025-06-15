@@ -405,6 +405,17 @@ namespace Game.Spells
             }
         }
 
+        public bool CanPeriodicTickCrit()
+        {
+            if (GetSpellInfo().HasAttribute(SpellAttr2.CantCrit))
+                return false;
+
+            if (GetSpellInfo().HasAttribute(SpellAttr8.PeriodicCanCrit))
+                return true;
+
+            return false;
+        }
+
         public virtual void Dispose()
         {
             // unload scripts

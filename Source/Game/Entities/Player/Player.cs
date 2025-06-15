@@ -243,7 +243,7 @@ namespace Game.Entities
             SetInventorySlotCount(InventorySlots.DefaultSize);
 
             // set starting level
-            SetLevel(GetStartLevel(createInfo.RaceId, createInfo.ClassId, createInfo.TemplateSet));
+            SetLevel(GetStartLevel(createInfo.RaceId, createInfo.ClassId, createInfo.TemplateSet), false);
 
             InitRunes();
 

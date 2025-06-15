@@ -229,7 +229,7 @@ namespace Game
             packet.MapID = (int)corpseMapID;
             packet.ActualMapID = (int)mapID;
             packet.Position = new Vector3(x, y, z);
-            packet.Transport = ObjectGuid.Empty;
+            packet.Transport = ObjectGuid.Empty; // TODO: If corpse is on transport, send transport offsets and transport guid
             SendPacket(packet);
         }
 
@@ -240,13 +240,17 @@ namespace Game
             response.Player = queryCorpseTransport.Player;
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseTransport.Player);
-            if (player != null)
+            if (player != null && _player.IsInSameRaidWith(player))
             {
-                Corpse corpse = player.GetCorpse();
-                if (_player.IsInSameRaidWith(player) && corpse != null && !corpse.GetTransGUID().IsEmpty() && corpse.GetTransGUID() == queryCorpseTransport.Transport)
+                Corpse corpse = _player.GetCorpse();
+                if (corpse != null)
                 {
-                    response.Position = new Vector3(corpse.GetTransOffsetX(), corpse.GetTransOffsetY(), corpse.GetTransOffsetZ());
-                    response.Facing = corpse.GetTransOffsetO();
+                    Transport transport = (Transport)corpse.GetTransport();
+                    if (transport != null && transport.GetGUID() == queryCorpseTransport.Transport)
+                    {
+                        response.Position = transport.GetPosition();
+                        response.Facing = transport.GetOrientation();
+                    }
                 }
             }
 
