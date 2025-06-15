@@ -88,5 +88,8 @@ namespace Framework.Constants
         CanAdvFly = 0x02,
         AdvFlying = 0x04,
         CantSwim = 0x2000,
+        CanDrive = 0x4000,
+        DrivingFoward = 0x8000,
+        DrivingBackward = 0x10000,
     }
 }
