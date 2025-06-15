@@ -3361,19 +3361,14 @@ namespace Game.Entities
 
             UpdateCriteria(CriteriaType.BuyItemsFromVendors, 1);
 
-            if (crItem.maxcount != 0) // bought
+            if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic && pProto.GetBaseItemLevel() >= GuildConst.MinNewsItemLevel))
             {
-                if (pProto.GetQuality() > ItemQuality.Epic || (pProto.GetQuality() == ItemQuality.Epic && pProto.GetBaseItemLevel() >= GuildConst.MinNewsItemLevel))
-                {
-                    Guild guild = GetGuild();
-                    if (guild != null)
-                        guild.AddGuildNews(GuildNews.ItemPurchased, GetGUID(), 0, item);
-                }
-
-                return true;
+                Guild guild = GetGuild();
+                if (guild != null)
+                    guild.AddGuildNews(GuildNews.ItemPurchased, GetGUID(), 0, item);
             }
 
-            return false;
+            return crItem.maxcount != 0;
         }
 
         public uint GetMaxPersonalArenaRatingRequirement(uint minarenaslot)
