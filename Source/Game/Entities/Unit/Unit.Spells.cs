@@ -944,9 +944,18 @@ namespace Game.Entities
             spell.Finish(result);
         }
 
-        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo, TriggerCastFlags triggerFlag, GetCastSpellInfoContext context)
+        public (SpellInfo, TriggerCastFlags) GetCastSpellInfo(SpellInfo spellInfo)
         {
-            SpellInfo findMatchingAuraEffectIn(AuraType type)
+            GetCastSpellInfoContext context = new();
+            TriggerCastFlags triggerFlag = TriggerCastFlags.None;
+
+            var newSpellInfo = GetCastSpellInfo(spellInfo, ref triggerFlag, context);
+            return (newSpellInfo, triggerFlag);
+        }
+
+        public virtual SpellInfo GetCastSpellInfo(SpellInfo spellInfo, ref TriggerCastFlags triggerFlag, GetCastSpellInfoContext context)
+        {
+            SpellInfo findMatchingAuraEffectIn(AuraType type, ref TriggerCastFlags triggerFlag)
             {
                 foreach (AuraEffect auraEffect in GetAuraEffectsByType(type))
                 {
@@ -967,26 +976,25 @@ namespace Game.Entities
                                 triggerFlag &= ~TriggerCastFlags.IgnoreShapeshift;
 
                             return info;
-
                         }
                     }
                 }
 
                 return null;
-            }
+            };
 
-            SpellInfo newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpells);
+            SpellInfo newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpells, ref triggerFlag);
             if (newInfo != null)
             {
                 triggerFlag &= ~TriggerCastFlags.IgnoreCastTime;
-                return GetCastSpellInfo(newInfo, triggerFlag, context);
+                return GetCastSpellInfo(newInfo, ref triggerFlag, context);
             }
 
-            newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpellsTriggered);
+            newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpellsTriggered, ref triggerFlag);
             if (newInfo != null)
             {
                 triggerFlag |= TriggerCastFlags.IgnoreCastTime;
-                return GetCastSpellInfo(newInfo, triggerFlag, context);
+                return GetCastSpellInfo(newInfo, ref triggerFlag, context);
             }
 
             return spellInfo;
@@ -4644,7 +4652,7 @@ namespace Game.Entities
                 return true;
             }
 
-            return false;
+            return false;// no free slots left
         }
     }
 }
