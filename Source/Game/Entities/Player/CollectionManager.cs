@@ -539,7 +539,7 @@ namespace Game.Entities
             (int)Class.ClassMaskAllPlayable,                                                                                        //ITEM_SUBCLASS_ARMOR_MISCELLANEOUS
             (1 << ((int)Class.Priest - 1)) | (1 << ((int)Class.Mage - 1)) | (1 << ((int)Class.Warlock - 1)),                                       //ITEM_SUBCLASS_ARMOR_CLOTH
             (1 << ((int)Class.Rogue - 1)) | (1 << ((int)Class.Monk - 1)) | (1 << ((int)Class.Druid - 1)) | (1 << ((int)Class.DemonHunter - 1)),        //ITEM_SUBCLASS_ARMOR_LEATHER
-            (1 << ((int)Class.Hunter - 1)) | (1 << ((int)Class.Shaman - 1)),                                                                  //ITEM_SUBCLASS_ARMOR_MAIL
+            (1 << ((int)Class.Hunter - 1)) | (1 << ((int)Class.Shaman - 1)) | (1 << ((int)Class.Evoker - 1)),                                                                //ITEM_SUBCLASS_ARMOR_MAIL
             (1 << ((int)Class.Warrior - 1)) | (1 << ((int)Class.Paladin - 1)) | (1 << ((int)Class.Deathknight - 1)),                              //ITEM_SUBCLASS_ARMOR_PLATE
             (int)Class.ClassMaskAllPlayable,                                                                                                 //ITEM_SUBCLASS_ARMOR_BUCKLER
             (1 << ((int)Class.Warrior - 1)) | (1 << ((int)Class.Paladin - 1)) | (1 << ((int)Class.Shaman - 1)),                                    //ITEM_SUBCLASS_ARMOR_SHIELD
