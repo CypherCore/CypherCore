@@ -5735,6 +5735,12 @@ namespace Game.Entities
 
             GetSession().GetCollectionMgr().SendFavoriteAppearances();
 
+            // SMSG_ACCOUNT_WARBAND_SCENE_UPDATE
+            AccountWarbandSceneUpdate warbandSceneUpdate = new();
+            warbandSceneUpdate.IsFullUpdate = true;
+            warbandSceneUpdate.WarbandScenes = GetSession().GetCollectionMgr().GetWarbandScenes();
+            SendPacket(warbandSceneUpdate);
+
             InitialSetup initialSetup = new();
             initialSetup.ServerExpansionLevel = (byte)WorldConfig.GetIntValue(WorldCfg.Expansion);
             SendPacket(initialSetup);
@@ -7831,6 +7837,9 @@ namespace Game.Entities
 
         public void AddIllusionBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogIllusions), blockValue); }
         public void AddIllusionFlag(int slot, uint flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogIllusions, slot), flag); }
+
+        public void AddWarbandScenesBlock(uint blockValue) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WarbandScenes), blockValue); }
+        public void AddWarbandScenesFlag(int slot, uint flag) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.WarbandScenes, slot), flag); }
 
         public void AddSelfResSpell(uint spellId) { AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells), spellId); }
         public void RemoveSelfResSpell(uint spellId)

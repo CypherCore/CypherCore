@@ -3139,6 +3139,15 @@ namespace Framework.Constants
         NoPaddingAboveUiWidgets = 0x020000
     }
 
+    public enum WarbandSceneFlags
+    {
+        DoNotInclude = 0x01,
+        HiddenUntilCollected = 0x02,
+        CannotBeSaved = 0x04,
+        AwardedAutomatically = 0x08,
+        IsDefault = 0x10
+    }
+
     public enum WorldMapTransformsFlags
     {
         Dungeon = 0x04

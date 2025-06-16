@@ -27,7 +27,9 @@ namespace Game
                         break;
                     }
                 case ItemCollectionType.TransmogSetFavorite:
+                    break;
                 case ItemCollectionType.WarbandScene:
+                    GetCollectionMgr().SetWarbandSceneIsFavorite(collectionItemSetFavorite.Id, collectionItemSetFavorite.IsFavorite);
                     break;
                 default:
                     break;

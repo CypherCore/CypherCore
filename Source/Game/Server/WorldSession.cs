@@ -805,6 +805,7 @@ namespace Game
             _collectionMgr.LoadAccountMounts(holder.GetResult(AccountInfoQueryLoad.Mounts));
             _collectionMgr.LoadAccountItemAppearances(holder.GetResult(AccountInfoQueryLoad.ItemAppearances), holder.GetResult(AccountInfoQueryLoad.ItemFavoriteAppearances));
             _collectionMgr.LoadAccountTransmogIllusions(holder.GetResult(AccountInfoQueryLoad.TransmogIllusions));
+            _collectionMgr.LoadAccountWarbandScenes(holder.GetResult(AccountInfoQueryLoad.WarbandScenes));
 
             if (!m_inQueue)
                 SendAuthResponse(BattlenetRpcErrorCode.Ok, false);
@@ -1173,6 +1174,10 @@ namespace Game
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.TransmogIllusions, stmt);
+
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_WARBAND_SCENES);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.WarbandScenes, stmt);
         }
     }
 
@@ -1189,5 +1194,6 @@ namespace Game
         GlobalAccountDataIndexPerRealm,
         TutorialsIndexPerRealm,
         TransmogIllusions,
+        WarbandScenes
     }
 }

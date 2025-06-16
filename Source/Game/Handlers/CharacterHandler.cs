@@ -123,6 +123,9 @@ namespace Game
             }
 
             SendPacket(charResult);
+
+            if (!charResult.IsDeletedCharacters)
+                _collectionMgr.SendWarbandSceneCollectionData();
         }
 
         [WorldPacketHandler(ClientOpcodes.EnumCharactersDeletedByClient, Status = SessionStatus.Authed)]

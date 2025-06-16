@@ -988,6 +988,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading mount definitions...");
             CollectionMgr.LoadMountDefinitions();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading warband scene definitions...");
+            CollectionMgr.LoadWarbandSceneDefinitions();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading GM bugs...");
             Global.SupportMgr.LoadBugTickets();
 

@@ -1629,6 +1629,13 @@ namespace Framework.Database
                 "MinHeight, VignetteType, RewardQuestID, UiWidgetSetID, UiMapPinInfoID, ObjectiveType FROM vignette WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_VIGNETTE_LOCALE, "SELECT ID, Name_lang FROM vignette_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
+            // WarbandScene.db2
+            PrepareStatement(HotfixStatements.SEL_WARBAND_SCENE, "SELECT Name, Description, Source, PositionX, PositionY, PositionZ, LookAtX, LookAtY, LookAtZ, ID, " +
+                "MapID, Fov, TimeOfDay, Flags, SoundAmbienceID, Quality, TextureKit, DefaultScenePriority, SourceType FROM warband_scene" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_WARBAND_SCENE_LOCALE, "SELECT ID, Name_lang, Description_lang, Source_lang FROM warband_scene_locale" +
+                " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // WmoAreaTable.db2
             PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE, "SELECT AreaName, ID, WmoID, NameSetID, WmoGroupID, SoundProviderPref, SoundProviderPrefUnderwater, " +
                 "AmbienceID, UwAmbience, ZoneMusic, UwZoneMusic, IntroSound, UwIntroSound, AreaTableID, Flags FROM wmo_area_table" +
@@ -2434,6 +2441,9 @@ namespace Framework.Database
 
         SEL_VIGNETTE,
         SEL_VIGNETTE_LOCALE,
+
+        SEL_WARBAND_SCENE,
+        SEL_WARBAND_SCENE_LOCALE,
 
         SEL_WMO_AREA_TABLE,
         SEL_WMO_AREA_TABLE_LOCALE,

@@ -15,6 +15,7 @@ namespace Game.Entities
     public class CollectionMgr
     {
         static Dictionary<uint, uint> FactionSpecificMounts = new();
+        static List<uint> DefaultWarbandScenes = new();
 
         WorldSession _owner;
         Dictionary<uint, ToyFlags> _toys = new();
@@ -22,8 +23,9 @@ namespace Game.Entities
         Dictionary<uint, MountStatusFlags> _mounts = new();
         BitSet _appearances;
         MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
-        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new();
+        Dictionary<uint, CollectionItemState> _favoriteAppearances = new();
         BitSet _transmogIllusions;
+        Dictionary<uint, WarbandSceneCollectionItem> _warbandScenes = new();
 
         public static void LoadMountDefinitions()
         {
@@ -59,6 +61,13 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} mount definitions in {1} ms", FactionSpecificMounts.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
+        public static void LoadWarbandSceneDefinitions()
+        {
+            foreach (var (_, warbandScene) in CliDB.WarbandSceneStorage)
+                if (warbandScene.GetFlags().HasFlag(WarbandSceneFlags.AwardedAutomatically))
+                    DefaultWarbandScenes.Add(warbandScene.Id);
+        }
+
         public CollectionMgr(WorldSession owner)
         {
             _owner = owner;
@@ -68,8 +77,8 @@ namespace Game.Entities
 
         public void LoadToys()
         {
-            foreach (var pair in _toys)
-                _owner.GetPlayer().AddToy(pair.Key, (uint)pair.Value);
+            foreach (var (itemId, flags) in _toys)
+                _owner.GetPlayer().AddToy(itemId, (uint)flags);
         }
 
         public bool AddToy(uint itemId, bool isFavourite, bool hasFanfare)
@@ -435,8 +444,8 @@ namespace Game.Entities
             foreach (uint blockValue in _appearances.ToBlockRange())
                 owner.AddTransmogBlock(blockValue);
 
-            foreach (var value in _temporaryAppearances.Keys)
-                owner.AddConditionalTransmog(value);
+            foreach (var itemModifiedAppearanceId in _temporaryAppearances.Keys)
+                owner.AddConditionalTransmog(itemModifiedAppearanceId);
         }
 
         public void LoadAccountItemAppearances(SQLResult knownAppearances, SQLResult favoriteAppearances)
@@ -461,7 +470,7 @@ namespace Game.Entities
             {
                 do
                 {
-                    _favoriteAppearances[favoriteAppearances.Read<uint>(0)] = FavoriteAppearanceState.Unchanged;
+                    _favoriteAppearances[favoriteAppearances.Read<uint>(0)] = CollectionItemState.Unchanged;
                 } while (favoriteAppearances.NextRow());
             }
 
@@ -511,24 +520,24 @@ namespace Game.Entities
 
             foreach (var key in _favoriteAppearances.Keys)
             {
-                var appearanceState = _favoriteAppearances[key];
-                switch (appearanceState)
+                switch (_favoriteAppearances[key])
                 {
-                    case FavoriteAppearanceState.New:
+                    case CollectionItemState.New:
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_ITEM_FAVORITE_APPEARANCE);
                         stmt.AddValue(0, _owner.GetBattlenetAccountId());
                         stmt.AddValue(1, key);
                         trans.Append(stmt);
-                        appearanceState = FavoriteAppearanceState.Unchanged;
+                        _favoriteAppearances[key] = CollectionItemState.Unchanged;
                         break;
-                    case FavoriteAppearanceState.Removed:
+                    case CollectionItemState.Removed:
                         stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_ITEM_FAVORITE_APPEARANCE);
                         stmt.AddValue(0, _owner.GetBattlenetAccountId());
                         stmt.AddValue(1, key);
                         trans.Append(stmt);
                         _favoriteAppearances.Remove(key);
                         break;
-                    case FavoriteAppearanceState.Unchanged:
+                    case CollectionItemState.Unchanged:
+                    case CollectionItemState.Changed:
                         break;
                 }
             }
@@ -753,18 +762,18 @@ namespace Game.Entities
             if (apply)
             {
                 if (!_favoriteAppearances.ContainsKey(itemModifiedAppearanceId))
-                    _favoriteAppearances[itemModifiedAppearanceId] = FavoriteAppearanceState.New;
-                else if (apperanceState == FavoriteAppearanceState.Removed)
-                    apperanceState = FavoriteAppearanceState.Unchanged;
+                    _favoriteAppearances[itemModifiedAppearanceId] = CollectionItemState.New;
+                else if (apperanceState == CollectionItemState.Removed)
+                    apperanceState = CollectionItemState.Unchanged;
                 else
                     return;
             }
             else if (_favoriteAppearances.ContainsKey(itemModifiedAppearanceId))
             {
-                if (apperanceState == FavoriteAppearanceState.New)
+                if (apperanceState == CollectionItemState.New)
                     _favoriteAppearances.Remove(itemModifiedAppearanceId);
                 else
-                    apperanceState = FavoriteAppearanceState.Removed;
+                    apperanceState = CollectionItemState.Removed;
             }
             else
                 return;
@@ -783,9 +792,9 @@ namespace Game.Entities
         {
             AccountTransmogUpdate accountTransmogUpdate = new();
             accountTransmogUpdate.IsFullUpdate = true;
-            foreach (var pair in _favoriteAppearances)
-                if (pair.Value != FavoriteAppearanceState.Removed)
-                    accountTransmogUpdate.FavoriteAppearances.Add(pair.Key);
+            foreach (var (itemModifiedAppearanceId, state) in _favoriteAppearances)
+                if (state != CollectionItemState.Removed)
+                    accountTransmogUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
 
             _owner.SendPacket(accountTransmogUpdate);
         }
@@ -922,17 +931,171 @@ namespace Game.Entities
             return transmogIllusionId < _transmogIllusions.Count && _transmogIllusions.Get((int)transmogIllusionId);
         }
 
+        public void LoadWarbandScenes()
+        {
+            Player owner = _owner.GetPlayer();
+            foreach (var (warbandSceneId, _) in _warbandScenes)
+                owner.AddWarbandScenesFlag((int)(warbandSceneId / 32), 1u << (int)warbandSceneId % 32);
+        }
+
+        public void LoadAccountWarbandScenes(SQLResult result)
+        {
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint warbandSceneId = result.Read<uint>(0);
+                    if (!CliDB.WarbandSceneStorage.HasRecord(warbandSceneId))
+                    {
+                        if (!_warbandScenes.ContainsKey(warbandSceneId))
+                            _warbandScenes[warbandSceneId] = new();
+
+                        _warbandScenes[warbandSceneId].State = CollectionItemState.Removed;
+                        continue;
+                    }
+
+                    bool isFavorite = result.Read<bool>(1);
+                    bool hasFanfare = result.Read<bool>(2);
+
+                    if (!_warbandScenes.ContainsKey(warbandSceneId))
+                        _warbandScenes[warbandSceneId] = new();
+
+                    if (isFavorite)
+                        _warbandScenes[warbandSceneId].Flags |= WarbandSceneCollectionFlags.Favorite;
+
+                    if (hasFanfare)
+                        _warbandScenes[warbandSceneId].Flags |= WarbandSceneCollectionFlags.HasFanfare;
+
+                } while (result.NextRow());
+            }
+
+            foreach (uint warbandSceneId in DefaultWarbandScenes)
+            {
+                if (_warbandScenes.ContainsKey(warbandSceneId))
+                    continue;
+
+                _warbandScenes[warbandSceneId] = new();
+                _warbandScenes[warbandSceneId].State = CollectionItemState.New;
+            }
+        }
+
+        public void SaveAccountWarbandScenes(SQLTransaction trans)
+        {
+            PreparedStatement stmt;
+            foreach (var warbandSceneId in _warbandScenes.Keys.ToList())
+            {
+                var warbanScene = _warbandScenes[warbandSceneId];
+                switch (warbanScene.State)
+                {
+                    case CollectionItemState.New:
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_WARBAND_SCENE);
+                        stmt.AddValue(0, _owner.GetBattlenetAccountId());
+                        stmt.AddValue(1, warbandSceneId);
+                        stmt.AddValue(2, warbanScene.Flags.HasFlag(WarbandSceneCollectionFlags.Favorite));
+                        stmt.AddValue(3, warbanScene.Flags.HasFlag(WarbandSceneCollectionFlags.HasFanfare));
+                        trans.Append(stmt);
+                        warbanScene.State = CollectionItemState.Unchanged;
+                        break;
+                    case CollectionItemState.Changed:
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_WARBAND_SCENE);
+                        stmt.AddValue(0, warbanScene.Flags.HasFlag(WarbandSceneCollectionFlags.Favorite));
+                        stmt.AddValue(1, warbanScene.Flags.HasFlag(WarbandSceneCollectionFlags.HasFanfare));
+                        stmt.AddValue(2, _owner.GetBattlenetAccountId());
+                        stmt.AddValue(3, warbandSceneId);
+                        trans.Append(stmt);
+                        warbanScene.State = CollectionItemState.Unchanged;
+                        break;
+                    case CollectionItemState.Removed:
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_WARBAND_SCENE);
+                        stmt.AddValue(0, _owner.GetBattlenetAccountId());
+                        stmt.AddValue(1, warbandSceneId);
+                        trans.Append(stmt);
+                        _warbandScenes.Remove(warbandSceneId);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        public void AddWarbandScene(uint warbandSceneId)
+        {
+            if (!CliDB.WarbandSceneStorage.HasRecord(warbandSceneId))
+                return;
+
+            if (!_warbandScenes.ContainsKey(warbandSceneId))
+            {
+                _warbandScenes[warbandSceneId] = new();
+                _warbandScenes[warbandSceneId].State = CollectionItemState.New;
+            }
+
+            int blockIndex = (int)warbandSceneId / 32;
+            int bitIndex = (int)warbandSceneId % 32;
+            _owner.GetPlayer().AddWarbandScenesFlag(blockIndex, 1u << bitIndex);
+        }
+
+        public bool HasWarbandScene(uint warbandSceneId)
+        {
+            return _warbandScenes.ContainsKey(warbandSceneId);
+        }
+
+        public void SetWarbandSceneIsFavorite(uint warbandSceneId, bool apply)
+        {
+            WarbandSceneCollectionItem warbandScene = _warbandScenes.LookupByKey(warbandSceneId);
+            if (warbandScene == null)
+                return;
+
+            if (apply)
+                warbandScene.Flags |= WarbandSceneCollectionFlags.Favorite;
+            else
+                warbandScene.Flags &= ~WarbandSceneCollectionFlags.Favorite;
+
+            if (warbandScene.State == CollectionItemState.Unchanged)
+                warbandScene.State = CollectionItemState.Changed;
+        }
+
+        public void SendWarbandSceneCollectionData()
+        {
+            AccountItemCollectionData accountItemCollection = new();
+            accountItemCollection.Type = ItemCollectionType.WarbandScene;
+
+            foreach (var (warbandSceneId, data) in _warbandScenes)
+            {
+                if (data.State == CollectionItemState.Removed)
+                    continue;
+
+                ItemCollectionItemData item = new();
+                item.Id = (int)warbandSceneId;
+                item.Type = ItemCollectionType.WarbandScene;
+                item.Flags = (int)data.Flags;
+
+                accountItemCollection.Items.Add(item);
+            }
+
+            _owner.SendPacket(accountItemCollection);
+        }
+
+        public Dictionary<uint, WarbandSceneCollectionItem> GetWarbandScenes() { return _warbandScenes; }
+
         public bool HasToy(uint itemId) { return _toys.ContainsKey(itemId); }
         public Dictionary<uint, ToyFlags> GetAccountToys() { return _toys; }
         public Dictionary<uint, HeirloomData> GetAccountHeirlooms() { return _heirlooms; }
         public Dictionary<uint, MountStatusFlags> GetAccountMounts() { return _mounts; }
     }
 
-    enum FavoriteAppearanceState
+    public enum CollectionItemState
     {
+        Unchanged,
         New,
-        Removed,
-        Unchanged
+        Changed,
+        Removed
+    }
+
+    public enum WarbandSceneCollectionFlags
+    {
+        None = 0x00,
+        Favorite = 0x01,
+        HasFanfare = 0x02
     }
 
     public class HeirloomData
@@ -945,5 +1108,11 @@ namespace Game.Entities
             flags = _flags;
             bonusId = _bonusId;
         }
+    }
+
+    public class WarbandSceneCollectionItem
+    {
+        public WarbandSceneCollectionFlags Flags;
+        public CollectionItemState State;
     }
 }

@@ -1484,6 +1484,33 @@ namespace Game.Networking.Packets
         public ObjectGuid SourceGuid;
     }
 
+    class AccountWarbandSceneUpdate : ServerPacket
+    {
+        public bool IsFullUpdate;
+        public Dictionary<uint, WarbandSceneCollectionItem> WarbandScenes;
+
+        public AccountWarbandSceneUpdate() : base(ServerOpcodes.AccountWarbandSceneUpdate) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(IsFullUpdate);
+            _worldPacket.WriteInt32(WarbandScenes.Count);
+            _worldPacket.WriteInt32(WarbandScenes.Count);
+            _worldPacket.WriteInt32(WarbandScenes.Count);
+
+            foreach (var (warbandSceneId, _) in WarbandScenes)
+                _worldPacket.WriteUInt32(warbandSceneId);
+
+            foreach (var (_, data) in WarbandScenes)
+                _worldPacket.WriteBit(data.Flags.HasFlag(WarbandSceneCollectionFlags.Favorite));
+
+            foreach (var (_, data) in WarbandScenes)
+                _worldPacket.WriteBit(data.Flags.HasFlag(WarbandSceneCollectionFlags.HasFanfare));
+
+            _worldPacket.FlushBits();
+        }
+    }
+
     //Structs
     struct PhaseShiftDataPhase
     {

@@ -2,9 +2,31 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System.Numerics;
 
 namespace Game.DataStorage
 {
+    public sealed class WarbandSceneRecord
+    {
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public LocalizedString Source;
+        public Vector3 Position;
+        public Vector3 LookAt;
+        public uint Id;
+        public uint MapID;
+        public float Fov;
+        public int TimeOfDay;
+        public int Flags;
+        public int SoundAmbienceID;
+        public sbyte Quality;
+        public int TextureKit;
+        public int DefaultScenePriority;
+        public sbyte SourceType;
+
+        public WarbandSceneFlags GetFlags() { return (WarbandSceneFlags)Flags; }
+    }
+
     public sealed class WMOAreaTableRecord
     {
         public string AreaName;

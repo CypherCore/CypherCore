@@ -3470,6 +3470,7 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().LoadMounts();
             GetSession().GetCollectionMgr().LoadItemAppearances();
             GetSession().GetCollectionMgr().LoadTransmogIllusions();
+            GetSession().GetCollectionMgr().LoadWarbandScenes();
 
             LearnSpecializationSpells();
 
@@ -4111,6 +4112,7 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().SaveAccountMounts(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountTransmogIllusions(loginTransaction);
+            GetSession().GetCollectionMgr().SaveAccountWarbandScenes(loginTransaction);
 
             var currentRealmId = Global.RealmMgr.GetCurrentRealmId();
 

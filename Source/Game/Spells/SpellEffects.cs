@@ -5933,6 +5933,19 @@ namespace Game.Spells
 
             target.UpdateVisibleObjectInteractions(true, false, true, true);
         }
+
+        [SpellEffectHandler(SpellEffectName.LearnWarbanScene)]
+        void EffectLearnWarbandScene()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            target.GetSession().GetCollectionMgr().AddWarbandScene((uint)effectInfo.MiscValue);
+        }
     }
 
     public class DispelableAura
