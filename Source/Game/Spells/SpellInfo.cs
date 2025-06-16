@@ -3592,7 +3592,7 @@ namespace Game.Spells
                     case AuraType.ModWeaponCritPercent:
                     case AuraType.PowerBurn:
                     case AuraType.ModCooldown:
-                    case AuraType.ModChargeCooldown:
+                    case AuraType.ModChargeRecoveryByTypeMask:
                     case AuraType.ModIncreaseSpeed:
                     case AuraType.ModParryPercent:
                     case AuraType.SetVehicleId:

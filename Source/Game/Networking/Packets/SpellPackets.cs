@@ -527,6 +527,25 @@ namespace Game.Networking.Packets
         }
     }
 
+    class UpdateChargeCategoryCooldown : ServerPacket
+    {
+        public uint Category;
+        public float ModChange = 1.0f;
+        public float ModRate = 1.0f;
+        public bool Snapshot;
+
+        public UpdateChargeCategoryCooldown() : base(ServerOpcodes.UpdateChargeCategoryCooldown) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(Category);
+            _worldPacket.WriteFloat(ModChange);
+            _worldPacket.WriteFloat(ModRate);
+            _worldPacket.WriteBit(Snapshot);
+            _worldPacket.FlushBits();
+        }
+    }
+
     public class SpellCooldownPkt : ServerPacket
     {
         public SpellCooldownPkt() : base(ServerOpcodes.SpellCooldown, ConnectionType.Instance) { }

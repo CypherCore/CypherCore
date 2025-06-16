@@ -2084,7 +2084,8 @@ namespace Framework.Constants
     {
         CooldownScalesWithWeaponSpeed = 0x01, // unused
         CooldownStartsOnEvent = 0x04,
-        CooldownExpiresAtDailyReset = 0x08
+        CooldownExpiresAtDailyReset = 0x08,
+        IgnoreForModTimeRate = 0x40
     }
 
     [Flags]

@@ -180,7 +180,7 @@ namespace Framework.Constants
         DetectAmore = 170,
         ModSpeedNotStack = 171,
         ModMountedSpeedNotStack = 172,
-        ModRecoveryRate2 = 173,  // NYI
+        ModChargeRecoveryRateByTypeMask = 173,
         ModSpellDamageOfStatPercent = 174,  // By Defeult Intelect, Dependent From ModSpellHealingOfStatPercent
         ModSpellHealingOfStatPercent = 175,
         SpiritOfRedemption = 176,
@@ -212,7 +212,7 @@ namespace Framework.Constants
         IgnoreCombatResult = 202,
         PreventInterrupt = 203, // NYI
         PreventCorpseRelease = 204, // NYI
-        ModChargeCooldown = 205, // NYI
+        ModChargeRecoveryByTypeMask = 205,
         ModIncreaseVehicleFlightSpeed = 206,
         ModIncreaseMountedFlightSpeed = 207,
         ModIncreaseFlightSpeed = 208,

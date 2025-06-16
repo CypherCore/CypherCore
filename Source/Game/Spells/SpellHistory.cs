@@ -888,6 +888,45 @@ namespace Game.Spells
             SendSetSpellCharges(chargeCategoryId, chargeList);
         }
 
+        void UpdateChargeRecoveryRate(uint chargeCategoryId, float modChange, bool apply)
+        {
+            var categoryCharges = _categoryCharges.LookupByKey(chargeCategoryId);
+            if (categoryCharges == null || categoryCharges.Empty())
+                return;
+
+            if (modChange <= 0.0f)
+                return;
+
+            if (!apply)
+                modChange = 1.0f / modChange;
+
+            DateTime now = GameTime.GetDateAndTime();
+
+            var chargeIndex = 0;
+            var categoryEntry = categoryCharges[chargeIndex];
+            categoryEntry.RechargeEnd = now + TimeSpan.FromMilliseconds((categoryEntry.RechargeEnd - now).TotalMilliseconds * modChange);
+
+            DateTime prevEnd = categoryCharges[chargeIndex].RechargeEnd;
+
+            while (++chargeIndex != categoryCharges.Count - 1)
+            {
+                categoryEntry = categoryCharges[chargeIndex];
+                TimeSpan rechargeTime = TimeSpan.FromMilliseconds((categoryEntry.RechargeEnd - categoryEntry.RechargeStart).TotalMilliseconds * modChange);
+                categoryEntry.RechargeStart = prevEnd;
+                categoryEntry.RechargeEnd = prevEnd + rechargeTime;
+                prevEnd = categoryEntry.RechargeEnd;
+            }
+
+            Player playerOwner = GetPlayerOwner();
+            if (playerOwner != null)
+            {
+                UpdateChargeCategoryCooldown updateChargeCategoryCooldown = new();
+                updateChargeCategoryCooldown.Category = chargeCategoryId;
+                updateChargeCategoryCooldown.ModChange = modChange;
+                playerOwner.SendPacket(updateChargeCategoryCooldown);
+            }
+        }
+
         public void RestoreCharge(uint chargeCategoryId)
         {
             var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
@@ -967,6 +1006,10 @@ namespace Game.Spells
             int recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
             recoveryTime += _owner.GetTotalAuraModifierByMiscValue(AuraType.ChargeRecoveryMod, (int)chargeCategoryId);
 
+            foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModChargeRecoveryByTypeMask))
+                if ((modRecoveryRate.GetMiscValue() & chargeCategoryEntry.TypeMask) != 0)
+                    recoveryTime += modRecoveryRate.GetAmount();
+
             float recoveryTimeF = recoveryTime;
             recoveryTimeF *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
 
@@ -975,6 +1018,19 @@ namespace Game.Spells
 
             if (_owner.HasAuraTypeWithMiscvalue(AuraType.ChargeRecoveryAffectedByHasteRegen, (int)chargeCategoryId))
                 recoveryTimeF *= _owner.m_unitData.ModHasteRegen;
+
+            foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModChargeRecoveryRate))
+                if (modRecoveryRate.GetMiscValue() == chargeCategoryId)
+                    recoveryTimeF *= 100.0f / (Math.Max(modRecoveryRate.GetAmount(), -99.0f) + 100.0f);
+
+            foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModChargeRecoveryRateByTypeMask))
+                if ((modRecoveryRate.GetMiscValue() & chargeCategoryEntry.TypeMask) != 0)
+                    recoveryTimeF *= 100.0f / (Math.Max(modRecoveryRate.GetAmount(), -99.0f) + 100.0f);
+
+            if (TimeSpan.FromMilliseconds(chargeCategoryEntry.ChargeRecoveryTime) <= TimeSpan.FromHours(1)
+                && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.IgnoreForModTimeRate)
+                && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
+                recoveryTimeF *= _owner.m_unitData.ModTimeRate;
 
             return (int)Math.Floor(recoveryTimeF);
         }
