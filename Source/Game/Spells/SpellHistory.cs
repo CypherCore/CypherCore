@@ -846,6 +846,9 @@ namespace Game.Spells
             int chargeRecovery = GetChargeRecoveryTime(chargeCategoryId);
             if (chargeRecovery > 0 && GetMaxCharges(chargeCategoryId) > 0)
             {
+                if (_owner.HasAuraTypeWithMiscvalue(AuraType.IgnoreSpellChargeCooldown, (int)chargeCategoryId))
+                    return true;
+
                 DateTime recoveryStart;
                 var charges = _categoryCharges.LookupByKey(chargeCategoryId);
                 if (charges.Empty())
