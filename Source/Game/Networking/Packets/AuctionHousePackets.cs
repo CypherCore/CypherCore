@@ -512,18 +512,18 @@ namespace Game.Networking.Packets
 
     class AuctionHelloResponse : ServerPacket
     {
-        public ObjectGuid Guid;
-        public uint PurchasedItemDeliveryDelay;
-        public uint CancelledItemDeliveryDelay;
+        public ObjectGuid Auctioneer;
+        public uint PurchaseDeliveryDelay;
+        public uint CancelDeliveryDelay;
         public bool OpenForBusiness = true;
 
         public AuctionHelloResponse() : base(ServerOpcodes.AuctionHelloResponse) { }
 
         public override void Write()
         {
-            _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteUInt32(PurchasedItemDeliveryDelay);
-            _worldPacket.WriteUInt32(CancelledItemDeliveryDelay);
+            _worldPacket.WritePackedGuid(Auctioneer);
+            _worldPacket.WriteUInt32(PurchaseDeliveryDelay);
+            _worldPacket.WriteUInt32(CancelDeliveryDelay);
             _worldPacket.WriteBit(OpenForBusiness);
             _worldPacket.FlushBits();
         }

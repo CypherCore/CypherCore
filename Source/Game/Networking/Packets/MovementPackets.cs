@@ -608,6 +608,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteXYZ(OldMapPosition);
             _worldPacket.WriteBit(Ship.HasValue);
             _worldPacket.WriteBit(TransferSpellID.HasValue);
+            _worldPacket.FlushBits();
+
             if (Ship.HasValue)
             {
                 _worldPacket.WriteUInt32(Ship.Value.Id);
@@ -616,8 +618,6 @@ namespace Game.Networking.Packets
 
             if (TransferSpellID.HasValue)
                 _worldPacket.WriteInt32(TransferSpellID.Value);
-
-            _worldPacket.FlushBits();
         }
 
         public int MapID = -1;
@@ -1225,7 +1225,7 @@ namespace Game.Networking.Packets
             public float InitVertSpeed;
         }
 
-        public class SpeedRange
+        public class StateChangeRangeInfo
         {
             public float Min;
             public float Max;
@@ -1244,7 +1244,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32((uint)MessageID);
                 data.WriteUInt32(SequenceIndex);
                 data.WriteBit(Speed.HasValue);
-                data.WriteBit(SpeedRange != null);
+                data.WriteBit(Range != null);
                 data.WriteBit(KnockBack.HasValue);
                 data.WriteBit(VehicleRecID.HasValue);
                 data.WriteBit(CollisionHeight.HasValue);
@@ -1260,10 +1260,10 @@ namespace Game.Networking.Packets
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
 
-                if (SpeedRange != null)
+                if (Range != null)
                 {
-                    data.WriteFloat(SpeedRange.Min);
-                    data.WriteFloat(SpeedRange.Max);
+                    data.WriteFloat(Range.Min);
+                    data.WriteFloat(Range.Max);
                 }
 
                 if (KnockBack.HasValue)
@@ -1297,7 +1297,7 @@ namespace Game.Networking.Packets
             public ServerOpcodes MessageID;
             public uint SequenceIndex;
             public float? Speed;
-            public SpeedRange SpeedRange;
+            public StateChangeRangeInfo Range;
             public KnockBackInfo? KnockBack;
             public int? VehicleRecID;
             public CollisionHeightInfo? CollisionHeight;

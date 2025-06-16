@@ -458,6 +458,17 @@ namespace Framework.Constants
         ItemHistorySlot = 38,
     }
 
+    public enum ItemCollectionType : byte
+    {
+        None = 0,
+        Toy = 1,
+        Heirloom = 2,
+        Transmog = 3,
+        TransmogSetFavorite = 4,
+        RuneforgeLegendaryAbility = 5,
+        TransmogIllusion = 6,
+    }
+
     public enum ItemContext : byte
     {
         None = 0,

@@ -994,7 +994,7 @@ namespace Game
                 return;
 
             AuctionHelloResponse auctionHelloResponse = new();
-            auctionHelloResponse.Guid = guid;
+            auctionHelloResponse.Auctioneer = guid;
             auctionHelloResponse.OpenForBusiness = true;
             SendPacket(auctionHelloResponse);
         }

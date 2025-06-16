@@ -52,7 +52,7 @@ namespace Game
             uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
 
             WhoResponsePkt response = new();
-            response.RequestID = whoRequest.RequestID;
+            response.Token = whoRequest.Token;
 
             List<WhoListPlayerInfo> whoList = Global.WhoListStorageMgr.GetWhoList();
             foreach (WhoListPlayerInfo target in whoList)

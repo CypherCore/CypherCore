@@ -42,10 +42,10 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint areasCount = _worldPacket.ReadBits<uint>(4);
-            IsFromAddOn = _worldPacket.HasBit();
+            IsAddon = _worldPacket.HasBit();
 
             Request.Read(_worldPacket);
-            RequestID = _worldPacket.ReadUInt32();
+            Token = _worldPacket.ReadUInt32();
             Origin = _worldPacket.ReadUInt8();
 
             for (int i = 0; i < areasCount; ++i)
@@ -53,9 +53,9 @@ namespace Game.Networking.Packets
         }
 
         public WhoRequest Request = new();
-        public uint RequestID;
+        public uint Token;
         public byte Origin;   // 1 = Social, 2 = Chat, 3 = Item
-        public bool IsFromAddOn;
+        public bool IsAddon;
         public List<int> Areas= new();
     }
 
@@ -65,14 +65,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(RequestID);
+            _worldPacket.WriteUInt32(Token);
             _worldPacket.WriteBits(Response.Count, 6);
             _worldPacket.FlushBits();
 
             Response.ForEach(p => p.Write(_worldPacket));
         }
 
-        public uint RequestID;
+        public uint Token;
         public List<WhoEntry> Response = new();
     }
 

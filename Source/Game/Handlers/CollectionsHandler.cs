@@ -14,10 +14,10 @@ namespace Game
         {
             switch (collectionItemSetFavorite.Type)
             {
-                case CollectionType.Toybox:
+                case ItemCollectionType.Toy:
                     GetCollectionMgr().ToySetFavorite(collectionItemSetFavorite.Id, collectionItemSetFavorite.IsFavorite);
                     break;
-                case CollectionType.Appearance:
+                case ItemCollectionType.Transmog:
                     {
                         var pair = GetCollectionMgr().HasItemAppearance(collectionItemSetFavorite.Id);
                         if (!pair.Item1 || pair.Item2)
@@ -26,7 +26,7 @@ namespace Game
                         GetCollectionMgr().SetAppearanceIsFavorite(collectionItemSetFavorite.Id, collectionItemSetFavorite.IsFavorite);
                         break;
                     }
-                case CollectionType.TransmogSet:
+                case ItemCollectionType.TransmogSetFavorite:
                     break;
                 default:
                     break;
