@@ -1683,15 +1683,6 @@ namespace Game.Entities
 
                 // Check level, skip class spells if not high enough
                 uint requiredLevel = Math.Max(spellInfo.SpellLevel, spellInfo.BaseLevel);
-
-                // riding special cases
-                if (skillId == (uint)SkillType.Riding)
-                {
-                    if ((GetClassMask() & ((1 << ((int)Class.Deathknight - 1)) | (1 << ((int)Class.DemonHunter - 1)))) != 0
-                        && (ability.Spell == PlayerConst.SpellApprenticeRiding || ability.Spell == PlayerConst.SpellJourneymanRiding))
-                        requiredLevel = 0;
-                }
-
                 if (requiredLevel > GetLevel())
                     continue;
 

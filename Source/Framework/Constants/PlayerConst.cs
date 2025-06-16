@@ -63,8 +63,6 @@ namespace Framework.Constants
         public const uint WarmodeEnlistedSpellOutside = 269083;
 
         public const uint SpellExperienceEliminated = 206662;
-        public const uint SpellApprenticeRiding = 33389;
-        public const uint SpellJourneymanRiding = 33391;
 
         public const uint CurrencyMaxCapAncientMana = 2000;
 
