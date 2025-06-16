@@ -610,7 +610,7 @@ namespace Game.Networking.Packets
             foreach (SpellSupportInfo supportInfo in Supporters)
                 supportInfo.Write(_worldPacket);
 
-            _worldPacket.WriteBit(Unk);
+            _worldPacket.WriteBit(Crit);
             WriteLogDataBit();
             FlushBits();
 
@@ -624,7 +624,7 @@ namespace Game.Networking.Packets
         public uint AbsorbSpellID;
         public int Absorbed;
         public uint OriginalDamage;
-        public bool Unk;
+        public bool Crit;
         public List<SpellSupportInfo> Supporters = new();
     }
 
