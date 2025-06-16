@@ -119,12 +119,22 @@ namespace Framework.Constants
 
     public enum StableResult
     {
+        MaxSlots = 0,
         NotEnoughMoney = 1,                              // "you don't have enough money"
+        NotStableMaster = 2,
         InvalidSlot = 3,                              // "That slot is locked"
+        NoPet = 4,
+        AlreadyStabled = 5,
+        AlreadySummoned = 6,
+        NotFound = 7,
         StableSuccess = 8,                              // stable success
         UnstableSuccess = 9,                              // unstable/swap success
-        BuySlotSuccess = 10,                             // buy slot success
+        ReviveSuccess = 10,
         CantControlExotic = 11,                             // "you are unable to control exotic creatures"
         InternalError = 12,                             // "Internal pet error"
+        CheckForLuaHack = 13,
+        BuySlotSuccess = 14,
+        FavoriteToggle = 15,
+        PetRenamed = 16
     }
 }

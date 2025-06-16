@@ -27,6 +27,7 @@ namespace Game.DataStorage
         public uint QuestID;
         public uint OrderIndex;
         public int Flags;
+        public int Unknown1110;
     }
 
     public sealed class QuestMoneyRewardRecord

@@ -416,7 +416,7 @@ namespace Game.DataStorage
         public byte DamageType;
         public byte ContainerSlots;
         public byte RequiredPVPMedal;
-        public byte RequiredPVPRank;
+        public sbyte RequiredPVPRank;
         public sbyte RequiredLevel;
         public InventoryType inventoryType;
         public sbyte OverallQualityID;

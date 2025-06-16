@@ -138,7 +138,7 @@ namespace Game.BattleGrounds
             battlefieldStatus = new BattlefieldStatusActive();
             BuildBattlegroundStatusHeader(battlefieldStatus.Hdr, player, ticketId, joinTime, queueId);
             battlefieldStatus.ShutdownTimer = bg.GetRemainingTime();
-            battlefieldStatus.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
+            battlefieldStatus.ArenaFaction = (sbyte)(player.GetBGTeam() == Team.Horde ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
             battlefieldStatus.LeftEarly = false;
             battlefieldStatus.StartTimer = bg.GetElapsedTime();
             battlefieldStatus.Mapid = bg.GetMapId();

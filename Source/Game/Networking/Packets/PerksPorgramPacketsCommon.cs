@@ -12,6 +12,7 @@ namespace Game.Networking.Packets
         public int ItemModifiedAppearanceID;
         public int TransmogIllusionID;
         public int ToyID;
+        public int WarbandSceneID;
         public int Price;
         public int OriginalPrice;
         public long AvailableUntil;
@@ -30,6 +31,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Price);
             data.WriteInt32(OriginalPrice);
             data.WriteInt64(AvailableUntil);
+            data.WriteInt32(WarbandSceneID);
             data.WriteBit(Disabled);
             data.WriteBit(DoesNotExpire);
             data.FlushBits();

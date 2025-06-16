@@ -38,6 +38,7 @@ namespace Game.DataStorage
         public int DstItemBonusTreeID;
         public int Value;
         public int RequiredTimeEventPassed;
+        public int RequiredTimeEventNotPassed;
         public uint SrcItemBonusTreeID;
     }
 
@@ -46,7 +47,7 @@ namespace Game.DataStorage
         public uint Id;
         public sbyte RaceID;
         public sbyte ClassID;
-        public int OtherFactionRaceID;
+        public sbyte OtherFactionRaceID;
     }
 
     public sealed class CharTitlesRecord
@@ -82,7 +83,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public string Shortcut;
         public int Flags;
-        public sbyte FactionGroup;
+        public byte FactionGroup;
         public int Ruleset;
 
         public bool HasFlag(ChatChannelFlags chatChannelFlags) { return (Flags & (int)chatChannelFlags) != 0; }
@@ -92,7 +93,7 @@ namespace Game.DataStorage
     public sealed class ChrClassUIDisplayRecord
     {
         public uint Id;
-        public byte ChrClassesID;
+        public sbyte ChrClassesID;
         public uint AdvGuidePlayerConditionID;
         public uint SplashPlayerConditionID;
     }
@@ -109,7 +110,6 @@ namespace Game.DataStorage
         public string DisabledString;
         public string HyphenatedNameMale;
         public string HyphenatedNameFemale;
-        public uint Id;
         public uint CreateScreenFileDataID;
         public uint SelectScreenFileDataID;
         public uint IconFileDataID;
@@ -128,6 +128,7 @@ namespace Game.DataStorage
         public int CharacterCreationAnimLoopWaitTimeMsFallback;
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
+        public uint Id;
         public byte PrimaryStatPriority;
         public PowerType DisplayPower;
         public byte RangedAttackPowerPerAgility;
@@ -214,6 +215,7 @@ namespace Game.DataStorage
         public string ReqSource;
         public int Flags;
         public int ClassMask;
+        public int RegionGroupMask;
         public int AchievementID;
         public int QuestID;
         public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
@@ -253,9 +255,9 @@ namespace Game.DataStorage
     public sealed class ChrRaceXChrModelRecord
     {
         public uint Id;
-        public uint ChrRacesID;
+        public byte ChrRacesID;
         public int ChrModelID;
-        public int Sex;
+        public sbyte Sex;
         public int AllowedTransmogSlots;
     }
 
@@ -282,38 +284,37 @@ namespace Game.DataStorage
         public uint CinematicSequenceID;
         public uint ResSicknessSpellID;
         public int SplashSoundID;
-        public int Alliance;
-        public int RaceRelated;
-        public int UnalteredVisualRaceID;
-        public int DefaultClassID;
         public int CreateScreenFileDataID;
         public int SelectScreenFileDataID;
-        public int NeutralRaceID;
         public int LowResScreenFileDataID;
         public int[] AlteredFormStartVisualKitID = new int[3];
         public int[] AlteredFormFinishVisualKitID = new int[3];
         public int HeritageArmorAchievementID;
         public int StartingLevel;
         public int UiDisplayOrder;
-        public int MaleModelFallbackRaceID;
-        public int FemaleModelFallbackRaceID;
-        public int MaleTextureFallbackRaceID;
-        public int FemaleTextureFallbackRaceID;
         public int PlayableRaceBit;
-        public int HelmetAnimScalingRaceID;
         public int TransmogrifyDisabledSlotMask;
-        public int UnalteredVisualCustomizationRaceID;
         public float[] AlteredFormCustomizeOffsetFallback = new float[3];
         public float AlteredFormCustomizeRotationFallback;
         public float[] Unknown910_1 = new float[3];
         public float[] Unknown910_2 = new float[3];
-        public int Unknown1000;
         public sbyte BaseLanguage;
-        public sbyte CreatureType;
+        public byte CreatureType;
+        public sbyte Alliance;
+        public sbyte RaceRelated;
+        public sbyte UnalteredVisualRaceID;
+        public sbyte DefaultClassID;
+        public sbyte NeutralRaceID;
+        public sbyte MaleModelFallbackRaceID;
         public sbyte MaleModelFallbackSex;
+        public sbyte FemaleModelFallbackRaceID;
         public sbyte FemaleModelFallbackSex;
+        public sbyte MaleTextureFallbackRaceID;
         public sbyte MaleTextureFallbackSex;
+        public sbyte FemaleTextureFallbackRaceID;
         public sbyte FemaleTextureFallbackSex;
+        public sbyte HelmetAnimScalingRaceID;
+        public sbyte UnalteredVisualCustomizationRaceID;
 
         public bool HasFlag(ChrRacesFlag chrRacesFlag) { return (Flags & (int)chrRacesFlag) != 0; }
     }
@@ -488,7 +489,7 @@ namespace Game.DataStorage
         public sbyte DisplayRaceID;
         public sbyte DisplaySexID;
         public sbyte DisplayClassID;
-        public sbyte Flags;
+        public int Flags;
         public int BakeMaterialResourcesID;
         public int HDBakeMaterialResourcesID;
     }
@@ -559,7 +560,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class CriteriaRecord
@@ -627,6 +628,7 @@ namespace Game.DataStorage
         public uint RechargingAmountPerCycle;
         public uint RechargingCycleDurationMS;
         public float AccountTransferPercentage;
+        public byte OrderIndex;
         public int[] Flags = new int[2];
 
         public bool HasFlag(CurrencyTypesFlags currencyTypesFlags) { return (Flags[0] & (int)currencyTypesFlags) != 0; }

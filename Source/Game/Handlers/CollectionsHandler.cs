@@ -27,6 +27,7 @@ namespace Game
                         break;
                     }
                 case ItemCollectionType.TransmogSetFavorite:
+                case ItemCollectionType.WarbandScene:
                     break;
                 default:
                     break;

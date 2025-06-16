@@ -249,9 +249,14 @@ namespace Game.Entities
 
         public void BuildEntityFragmentsForValuesUpdateForPlayerWithMask(WorldPacket data, UpdateFieldFlag flags)
         {
+            byte contentsChangedMask = EntityDefinitionsConst.CGObjectChangedMask;
+            foreach (var updateableFragmentId in m_entityFragments.GetUpdateableIds())
+                if (EntityFragmentsHolder.IsIndirectFragment(updateableFragmentId))
+                    contentsChangedMask |= (byte)(m_entityFragments.GetUpdateMaskFor(updateableFragmentId) >> 1);   // set the "fragment exists" bit
+
             data.WriteUInt8((byte)(flags.HasFlag(UpdateFieldFlag.Owner) ? 1 : 0));
             data.WriteUInt8(0);                                  // m_entityFragments.IdsChanged
-            data.WriteUInt8(EntityDefinitionsConst.CGObjectUpdateMask);
+            data.WriteUInt8(contentsChangedMask);
         }
 
         public void BuildDestroyUpdateBlock(UpdateData data)
@@ -319,6 +324,7 @@ namespace Game.Entities
                 bool HasSpline = unit.IsSplineEnabled();
                 bool HasInertia = unit.m_movementInfo.inertia.HasValue;
                 bool HasAdvFlying = unit.m_movementInfo.advFlying.HasValue;
+                bool HasDriveStatus = unit.m_movementInfo.driveStatus.HasValue;
                 bool HasStandingOnGameObjectGUID = unit.m_movementInfo.standingOnGameObjectGUID.HasValue;
 
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
@@ -349,6 +355,9 @@ namespace Game.Entities
                 data.WriteBit(false);                                          // HeightChangeFailed
                 data.WriteBit(false);                                          // RemoteTimeValid
                 data.WriteBit(HasInertia);                                     // HasInertia
+                data.WriteBit(HasAdvFlying);                                   // HasAdvFlying
+                data.WriteBit(HasDriveStatus);                                 // HasDriveStatus
+                data.FlushBits();
 
                 if (!unit.m_movementInfo.transport.guid.IsEmpty())
                     MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
@@ -380,6 +389,14 @@ namespace Game.Entities
                         data.WriteFloat(unit.m_movementInfo.jump.cosAngle);
                         data.WriteFloat(unit.m_movementInfo.jump.xyspeed);            // Speed
                     }
+                }
+
+                if (HasDriveStatus)
+                {
+                    data.WriteBit(unit.m_movementInfo.driveStatus.Value.accelerating);
+                    data.WriteBit(unit.m_movementInfo.driveStatus.Value.drifting);
+                    data.WriteFloat(unit.m_movementInfo.driveStatus.Value.speed);
+                    data.WriteFloat(unit.m_movementInfo.driveStatus.Value.movementAngle);
                 }
 
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.Walk));
@@ -841,7 +858,6 @@ namespace Game.Entities
         {
             m_values.ClearChangesMask(m_objectData);
             m_entityFragments.IdsChanged = false;
-            m_entityFragments.ContentsChangedMask = EntityDefinitionsConst.CGObjectActiveMask;
 
             if (m_objectUpdated)
             {
@@ -3963,6 +3979,7 @@ namespace Game.Entities
         public JumpInfo jump;
         public float stepUpStartElevation { get; set; }
         public AdvFlying? advFlying;
+        public Drive? driveStatus;
         public ObjectGuid? standingOnGameObjectGUID;
 
         public MovementInfo()
@@ -4027,12 +4044,14 @@ namespace Game.Entities
             public uint prevTime;
             public uint vehicleId;
         }
+
         public struct Inertia
         {
             public int id;
             public Position force;
             public uint lifetime;
         }
+
         public struct JumpInfo
         {
             public void Reset()
@@ -4047,11 +4066,20 @@ namespace Game.Entities
             public float cosAngle;
             public float xyspeed;
         }
+
         // advflying
         public struct AdvFlying
         {
             public float forwardVelocity;
             public float upVelocity;
+        }
+
+        public struct Drive
+        {
+            public float speed;
+            public float movementAngle;
+            public bool accelerating;
+            public bool drifting;
         }
     }
 
@@ -4064,6 +4092,9 @@ namespace Game.Entities
         public float Magnitude;
         public MovementForceType Type;
         public int MovementForceID;
+        public int Unknown1110_1;
+        public int Unused1110;
+        public uint Flags;
 
         public void Read(WorldPacket data)
         {
@@ -4073,6 +4104,9 @@ namespace Game.Entities
             TransportID = data.ReadUInt32();
             Magnitude = data.ReadFloat();
             MovementForceID = data.ReadInt32();
+            Unknown1110_1 = data.ReadInt32();
+            Unused1110 = data.ReadInt32();
+            Flags = data.ReadUInt32();
             Type = (MovementForceType)data.ReadBits<byte>(2);
         }
 
@@ -4264,7 +4298,13 @@ namespace Game.Entities
         {
             _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
+            {
                 _changesMask.Reset(updateData.Bit);
+                if (!_changesMask.IsAnySet())
+                    _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
+            }
+            else
+                _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
 
             updateData.ClearChangesMask();
         }
@@ -4273,7 +4313,13 @@ namespace Game.Entities
         {
             _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
+            {
                 _changesMask.Reset(updateData.Bit);
+                if (!_changesMask.IsAnySet())
+                    _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
+            }
+            else
+                _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
 
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
                 ((IHasChangesMask)updateField._value).ClearChangesMask();

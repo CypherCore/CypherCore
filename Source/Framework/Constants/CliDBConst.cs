@@ -2031,6 +2031,7 @@ namespace Framework.Constants
         ForgeMaster = 66,
         CharacterBanker = 67,
         AccountBanker = 68,
+        ProfessionRespec = 69,
     }
 
     [Flags]

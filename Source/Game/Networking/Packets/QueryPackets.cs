@@ -87,9 +87,9 @@ namespace Game.Networking.Packets
                 for (var i = 0; i < 2; ++i)
                     _worldPacket.WriteUInt32(Stats.Flags[i]);
 
-                _worldPacket.WriteInt32(Stats.CreatureType);
+                _worldPacket.WriteInt8(Stats.CreatureType);
                 _worldPacket.WriteInt32(Stats.CreatureFamily);
-                _worldPacket.WriteInt32(Stats.Classification);
+                _worldPacket.WriteInt8(Stats.Classification);
 
                 for (var i = 0; i < SharedConst.MaxCreatureKillCredit; ++i)
                     _worldPacket.WriteUInt32(Stats.ProxyCreatureID[i]);
@@ -750,9 +750,9 @@ namespace Game.Networking.Packets
         public string Title;
         public string TitleAlt;
         public string CursorName;
-        public int CreatureType;
+        public sbyte CreatureType;
         public int CreatureFamily;
-        public int Classification;
+        public sbyte Classification;
         public CreatureDisplayStats Display = new();
         public float HpMulti;
         public float EnergyMulti;

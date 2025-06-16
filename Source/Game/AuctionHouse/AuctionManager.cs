@@ -1343,7 +1343,7 @@ namespace Game
             }
 
             AuctionWonNotification packet = new();
-            packet.Info.Initialize(auctions[0], items[0].Items[0]);
+            packet.Info.Initialize(_auctionHouse.Id, auctions[0], items[0].Items[0]);
             player.SendPacket(packet);
 
             for (int i = 0; i < auctions.Count; ++i)
@@ -1445,7 +1445,7 @@ namespace Game
                 if (bidder != null)
                 {
                     AuctionWonNotification packet = new();
-                    packet.Info.Initialize(auction, auction.Items[0]);
+                    packet.Info.Initialize(_auctionHouse.Id, auction, auction.Items[0]);
                     bidder.SendPacket(packet);
 
                     // FIXME: for offline player need also

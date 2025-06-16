@@ -576,7 +576,7 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public uint CreatureDisplayID;
-        public sbyte CreatureType;
+        public byte CreatureType;
         public int Flags;
         public int AttackIconFileID;
         public sbyte BonusActionBar;

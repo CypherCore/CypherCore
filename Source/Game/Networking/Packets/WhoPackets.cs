@@ -80,12 +80,12 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket data)
         {
-            FactionGroup = data.ReadInt32();
+            FactionGroup = data.ReadUInt8();
             Locale = data.ReadInt32();
             RequesterVirtualRealmAddress = data.ReadUInt32();
         }
 
-        public int FactionGroup;
+        public byte FactionGroup;
         public int Locale;
         public uint RequesterVirtualRealmAddress;
     }

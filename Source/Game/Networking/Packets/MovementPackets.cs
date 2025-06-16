@@ -92,6 +92,7 @@ namespace Game.Networking.Packets
             data.ReadBit(); // RemoteTimeValid
             bool hasInertia = data.HasBit();
             bool hasAdvFlying = data.HasBit();
+            bool hasDriveStatus = data.HasBit();
 
             if (hasTransport)
                 ReadTransportInfo(data, ref movementInfo.transport);
@@ -112,9 +113,9 @@ namespace Game.Networking.Packets
             if (hasAdvFlying)
             {
                 MovementInfo.AdvFlying advFlying = new();
-
                 advFlying.forwardVelocity = data.ReadFloat();
                 advFlying.upVelocity = data.ReadFloat();
+
                 movementInfo.advFlying = advFlying;
             }
 
@@ -134,6 +135,19 @@ namespace Game.Networking.Packets
                 }
             }
 
+            if (hasDriveStatus)
+            {
+                data.ResetBitPos();
+
+                MovementInfo.Drive driveStatus = new();
+                driveStatus.accelerating = data.HasBit();
+                driveStatus.drifting = data.HasBit();
+                driveStatus.speed = data.ReadFloat();
+                driveStatus.movementAngle = data.ReadFloat();
+
+                movementInfo.driveStatus = driveStatus;
+            }
+
             return movementInfo;
         }
 
@@ -145,6 +159,7 @@ namespace Game.Networking.Packets
             bool hasSpline = false; // todo 6.x send this infos
             bool hasInertia = movementInfo.inertia.HasValue;
             bool hasAdvFlying = movementInfo.advFlying.HasValue;
+            bool hasDriveStatus = movementInfo.driveStatus.HasValue;
             bool hasStandingOnGameObjectGUID = movementInfo.standingOnGameObjectGUID.HasValue;
 
             data.WritePackedGuid(movementInfo.Guid);
@@ -178,6 +193,7 @@ namespace Game.Networking.Packets
             data.WriteBit(false); // RemoteTimeValid
             data.WriteBit(hasInertia);
             data.WriteBit(hasAdvFlying);
+            data.WriteBit(hasDriveStatus);
             data.FlushBits();
 
             if (hasTransportData)
@@ -212,6 +228,14 @@ namespace Game.Networking.Packets
                     data.WriteFloat(movementInfo.jump.cosAngle);
                     data.WriteFloat(movementInfo.jump.xyspeed);
                 }
+            }
+
+            if (hasDriveStatus)
+            {
+                data.WriteBit(movementInfo.driveStatus.Value.accelerating);
+                data.WriteBit(movementInfo.driveStatus.Value.drifting);
+                data.WriteFloat(movementInfo.driveStatus.Value.speed);
+                data.WriteFloat(movementInfo.driveStatus.Value.movementAngle);
             }
         }
 
@@ -360,6 +384,9 @@ namespace Game.Networking.Packets
             data.WriteUInt32(movementForce.TransportID);
             data.WriteFloat(movementForce.Magnitude);
             data.WriteInt32(movementForce.MovementForceID);
+            data.WriteInt32(movementForce.Unknown1110_1);
+            data.WriteInt32(movementForce.Unused1110);
+            data.WriteUInt32(movementForce.Flags);
             data.WriteBits((byte)movementForce.Type, 2);
             data.FlushBits();
         }
@@ -608,6 +635,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteXYZ(OldMapPosition);
             _worldPacket.WriteBit(Ship.HasValue);
             _worldPacket.WriteBit(TransferSpellID.HasValue);
+            _worldPacket.WriteBit(TaxiPathID.HasValue);
             _worldPacket.FlushBits();
 
             if (Ship.HasValue)
@@ -618,12 +646,16 @@ namespace Game.Networking.Packets
 
             if (TransferSpellID.HasValue)
                 _worldPacket.WriteInt32(TransferSpellID.Value);
+
+            if (TaxiPathID.HasValue)
+                _worldPacket.WriteInt32(TaxiPathID.Value);
         }
 
         public int MapID = -1;
         public Position OldMapPosition;
         public ShipTransferPending? Ship;
         public int? TransferSpellID;
+        public int? TaxiPathID;
 
         public struct ShipTransferPending
         {
@@ -1252,6 +1284,7 @@ namespace Game.Networking.Packets
                 data.WriteBit(MovementForceGUID.HasValue);
                 data.WriteBit(MovementInertiaID.HasValue);
                 data.WriteBit(MovementInertiaLifetimeMs.HasValue);
+                data.WriteBit(DriveCapabilityRecID.HasValue);
                 data.FlushBits();
 
                 if (@MovementForce != null)
@@ -1292,6 +1325,9 @@ namespace Game.Networking.Packets
 
                 if (MovementInertiaLifetimeMs.HasValue)
                     data.WriteUInt32(MovementInertiaLifetimeMs.Value);
+
+                if (DriveCapabilityRecID.HasValue)
+                    data.WriteInt32(DriveCapabilityRecID.Value);
             }
 
             public ServerOpcodes MessageID;
@@ -1305,6 +1341,7 @@ namespace Game.Networking.Packets
             public ObjectGuid? MovementForceGUID;
             public int? MovementInertiaID;
             public uint? MovementInertiaLifetimeMs;
+            public int? DriveCapabilityRecID;
         }
     }
 

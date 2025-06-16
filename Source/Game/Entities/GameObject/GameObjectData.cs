@@ -1298,7 +1298,7 @@ namespace Game.Entities
             public int HeightOffset;                             // 1 Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
             public uint SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
             public uint InteractRadiusOverride;                  // 3 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint CustomizationScope;                      // 4 Customization Scope, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint CustomizationFeatureMask;                // 4 Customization Feature Mask, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Preventteleportingtheplayeroutofthebarbershopchair;// 5 Prevent teleporting the player out of the barbershop chair, enum { false, true, }; Default: false
         }
 
@@ -1476,13 +1476,14 @@ namespace Game.Entities
 
         public struct uilink
         {
-            public uint UILinkType;                              // 0 UI Link Type, enum { Adventure Journal, Obliterum Forge, Scrapping Machine, Item Interaction }; Default: Adventure Journal
+            public uint UILinkType;                              // 0 UI Link Type(Deprecated), enum { Adventure Journal, Obliterum Forge, Scrapping Machine, Item Interaction }; Default: Adventure Journal
             public uint allowMounted;                            // 1 allowMounted, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 2 Gigantic AOI, enum { false, true, }; Default: false
             public uint spellFocusType;                          // 3 spellFocusType, References: SpellFocusObject, NoValue = 0
             public uint radius;                                  // 4 radius, int, Min value: 0, Max value: 50, Default value: 10
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ItemInteractionID;                       // 6 Item Interaction ID, References: UiItemInteraction, NoValue = 0
+            public uint PlayerInteractionType;                   // 7 Player Interaction Type, enum { None, TradePartner, Item, Gossip, QuestGiver, Merchant, TaxiNode, Trainer, Banker, AlliedRaceDetailsGiver, GuildBanker, Registrar, Vendor, PetitionVendor, GuildTabardVendor, TalentMaster, SpecializationMaster, MailInfo, SpiritHealer, AreaSpiritHealer, Binder, Auctioneer, StableMaster, BattleMaster, Transmogrifier, LFGDungeon, VoidStorageBanker, BlackMarketAuctioneer, AdventureMap, WorldMap, GarrArchitect, GarrTradeskill, GarrMission, ShipmentCrafter, GarrRecruitment, GarrTalent, Trophy, PlayerChoice, ArtifactForge, ObliterumForge, ScrappingMachine, ContributionCollector, AzeriteRespec, IslandQueue, ItemInteraction, ChromieTime, CovenantPreview, AnimaDiversion, LegendaryCrafting, WeeklyRewards, Soulbind, CovenantSanctum, NewPlayerGuide, ItemUpgrade, AdventureJournal, Renown, AzeriteForge, PerksProgramVendor, ProfessionsCraftingOrder, Professions, ProfessionsCustomerOrder, TraitSystem, BarbersChoice, JailersTowerBuffs, MajorFactionRenown, PersonalTabardVendor, ForgeMaster, CharacterBanker, AccountBanker, ProfessionRespec, PlaceholderType71, PlaceholderType72, PlaceholderType73, PlaceholderType74, PlaceholderType75, PlaceholderType76, PlaceholderType77, }; Default: None
         }
 
         public struct keystonereceptacle

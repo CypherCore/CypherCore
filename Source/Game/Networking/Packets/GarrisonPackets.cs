@@ -51,7 +51,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(FactionIndex);
+            _worldPacket.WriteInt8(FactionIndex);
             _worldPacket.WriteInt32(Garrisons.Count);
             _worldPacket.WriteInt32(FollowerSoftCaps.Count);
 
@@ -62,7 +62,7 @@ namespace Game.Networking.Packets
                 garrison.Write(_worldPacket);
         }
 
-        public uint FactionIndex;
+        public sbyte FactionIndex;
         public List<GarrisonInfo> Garrisons = new();
         public List<FollowerSoftCapInfo> FollowerSoftCaps = new();
     }

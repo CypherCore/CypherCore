@@ -516,7 +516,7 @@ namespace Game.Garrisons
         public void SendInfo()
         {
             GetGarrisonInfoResult garrisonInfo = new();
-            garrisonInfo.FactionIndex = GetFaction();
+            garrisonInfo.FactionIndex = (sbyte)GetFaction();
 
             GarrisonInfo garrison = new();
             garrison.GarrTypeID = GetGarrisonType();

@@ -2355,7 +2355,7 @@ namespace Game.Entities
                     Player player = user.ToPlayer();
 
                     EnableBarberShop enableBarberShop = new();
-                    enableBarberShop.CustomizationScope = (byte)info.BarberChair.CustomizationScope;
+                    enableBarberShop.CustomizationFeatureMask = (byte)info.BarberChair.CustomizationFeatureMask;
                     player.SendPacket(enableBarberShop);
 
                     // fallback, will always work

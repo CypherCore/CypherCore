@@ -254,13 +254,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(OriginalHonor);
             _worldPacket.WriteInt32(Honor);
             _worldPacket.WritePackedGuid(Target);
-            _worldPacket.WriteUInt32(Rank);
+            _worldPacket.WriteInt8(Rank);
         }
 
         public int OriginalHonor;
         public int Honor;
         public ObjectGuid Target;
-        public uint Rank;
+        public sbyte Rank;
     }
 
     class BreakTarget : ServerPacket

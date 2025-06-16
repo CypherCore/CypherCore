@@ -143,7 +143,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteInt32((int)Result);
         }
 
         public StableResult Result;

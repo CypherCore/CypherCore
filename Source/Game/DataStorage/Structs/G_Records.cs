@@ -161,7 +161,7 @@ namespace Game.DataStorage
         public uint AllySlottingBroadcastTextID;
         public byte ChrClassID;
         public int Flags;
-        public byte Gender;
+        public sbyte Gender;
         public int AutoCombatantID;
         public int CovenantID;
     }
@@ -332,6 +332,7 @@ namespace Game.DataStorage
         public int TraitTreeID;
         public int ProfessionID;
         public int Unknown_1002_14;
+        public int SkillLineID;
     }
 
     public sealed class GuildColorBackgroundRecord

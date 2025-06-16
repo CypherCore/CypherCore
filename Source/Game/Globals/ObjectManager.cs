@@ -567,7 +567,7 @@ namespace Game
                     gMenuItem.GossipNpcOptionID = result.Read<int>(10);
 
                 gMenuItem.BoxCoded = result.Read<bool>(11);
-                gMenuItem.BoxMoney = result.Read<uint>(12);
+                gMenuItem.BoxMoney = result.Read<ulong>(12);
                 gMenuItem.BoxText = result.Read<string>(13);
                 gMenuItem.BoxBroadcastTextId = result.Read<uint>(14);
                 if (!result.IsNull(15))

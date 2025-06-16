@@ -144,7 +144,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Mapid);
             _worldPacket.WriteUInt32(ShutdownTimer);
             _worldPacket.WriteUInt32(StartTimer);
-            _worldPacket.WriteBit(ArenaFaction != 0);
+            _worldPacket.WriteInt8(ArenaFaction);
             _worldPacket.WriteBit(LeftEarly);
             _worldPacket.WriteBit(Brawl);
             _worldPacket.FlushBits();
@@ -152,7 +152,7 @@ namespace Game.Networking.Packets
 
         public BattlefieldStatusHeader Hdr = new();
         public uint ShutdownTimer;
-        public byte ArenaFaction;
+        public sbyte ArenaFaction;
         public bool LeftEarly;
         public bool Brawl;
         public uint StartTimer;
@@ -704,13 +704,14 @@ namespace Game.Networking.Packets
             {
                 data.WritePackedGuid(PlayerGUID);
                 data.WriteUInt32(Kills);
+                data.WriteInt32(Faction);
                 data.WriteUInt32(DamageDone);
                 data.WriteUInt32(HealingDone);
                 data.WriteInt32(Stats.Count);
                 data.WriteInt32(PrimaryTalentTree);
                 data.WriteInt8(Sex);
-                data.WriteUInt32((uint)PlayerRace);
-                data.WriteInt32(PlayerClass);
+                data.WriteInt8(PlayerRace);
+                data.WriteInt8(PlayerClass);
                 data.WriteInt32(CreatureID);
                 data.WriteInt32(HonorLevel);
                 data.WriteInt32(Role);
@@ -718,7 +719,6 @@ namespace Game.Networking.Packets
                 foreach (var pvpStat in Stats)
                     pvpStat.Write(data);
 
-                data.WriteBit(Faction != 0);
                 data.WriteBit(IsInWorld);
                 data.WriteBit(Honor.HasValue);
                 data.WriteBit(PreMatchRating.HasValue);
@@ -749,7 +749,7 @@ namespace Game.Networking.Packets
 
             public ObjectGuid PlayerGUID;
             public uint Kills;
-            public byte Faction;
+            public int Faction;
             public bool IsInWorld;
             public HonorData? Honor;
             public uint DamageDone;
@@ -762,8 +762,8 @@ namespace Game.Networking.Packets
             public List<PVPMatchPlayerPVPStat> Stats = new();
             public int PrimaryTalentTree;
             public sbyte Sex;
-            public Race PlayerRace;
-            public int PlayerClass;
+            public sbyte PlayerRace;
+            public sbyte PlayerClass;
             public int CreatureID;
             public int HonorLevel;
             public int Role;

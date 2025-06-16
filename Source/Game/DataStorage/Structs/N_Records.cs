@@ -7,8 +7,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
-        public byte RaceID;
-        public byte Sex;
+        public sbyte RaceID;
+        public sbyte Sex;
     }
 
     public sealed class NamesProfanityRecord

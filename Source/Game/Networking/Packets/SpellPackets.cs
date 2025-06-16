@@ -1620,6 +1620,7 @@ namespace Game.Networking.Packets
             data.WriteUInt16(CastLevel);
             data.WriteUInt8(Applications);
             data.WriteInt32(ContentTuningID);
+            data.WriteVector3(DstLocation);
             data.WriteBit(CastUnit.HasValue);
             data.WriteBit(Duration.HasValue);
             data.WriteBit(Remaining.HasValue);
@@ -1665,13 +1666,14 @@ namespace Game.Networking.Packets
         float? TimeMod;
         public List<float> Points = new();
         public List<float> EstimatedPoints = new();
+        public Vector3 DstLocation;
     }
 
     public struct AuraInfo
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8(Slot);
+            data.WriteUInt16(Slot);
             data.WriteBit(AuraData != null);
             data.FlushBits();
 
@@ -1679,7 +1681,7 @@ namespace Game.Networking.Packets
                 AuraData.Write(data);
         }
 
-        public byte Slot;
+        public ushort Slot;
         public AuraDataInfo AuraData;
     }
 

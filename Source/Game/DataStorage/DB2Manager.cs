@@ -2416,7 +2416,7 @@ namespace Game.DataStorage
         MultiMap<uint, int> _creatureLabels = new();
         MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
         MultiMap<uint, Vector2> _curvePoints = new();
-        Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
+        Dictionary<Tuple<uint, sbyte, sbyte, sbyte>, EmotesTextSoundRecord> _emoteTextSounds = new();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
         MultiMap<uint, ContentTuningXExpectedRecord> _expectedStatModsByContentTuning = new();
         MultiMap<uint, uint> _factionTeams = new();
@@ -2438,7 +2438,7 @@ namespace Game.DataStorage
         Dictionary<uint, MountRecord> _mountsBySpellId = new();
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();
         MultiMap<uint, MountXDisplayRecord> _mountDisplays = new();
-        Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new();
+        Dictionary<sbyte, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
         Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
         Dictionary<uint, PathDb2> _paths = new();

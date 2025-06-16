@@ -152,8 +152,8 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32((uint)Result);
-            _worldPacket.WriteUInt32((uint)Command);
+            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteUInt8((byte)Command);
 
             _worldPacket.WriteBits(Name.GetByteCount(), 8);
             _worldPacket.WriteString(Name);

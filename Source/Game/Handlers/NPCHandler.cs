@@ -354,9 +354,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetPetSlot)]
         void HandleSetPetSlot(SetPetSlot setPetSlot)
         {
-            if (!CheckStableMaster(setPetSlot.StableMaster) || setPetSlot.DestSlot >= (byte)PetSaveMode.LastStableSlot)
+            if (!CheckStableMaster(setPetSlot.StableMaster))
             {
-                SendPetStableResult(StableResult.InternalError);
+                SendPetStableResult(StableResult.NotStableMaster);
+                return;
+            }
+
+            if (setPetSlot.DestSlot >= (byte)PetSaveMode.LastStableSlot)
+            {
+                SendPetStableResult(StableResult.InvalidSlot);
                 return;
             }
 

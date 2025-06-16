@@ -33,7 +33,7 @@ namespace Game.Entities
         FEntityLocalMatrix = 113,
         FEntityWorldMatrix = 114,
         CActor = 115, //  INDIRECT,
-        FVendor_C = 117, //  UPDATEABLE,
+        FVendor_C = 117, //  UPDATEABLE, INDIRECT,
         FMirroredObject_C = 119,
         End = 255,
     }
@@ -84,7 +84,7 @@ namespace Game.Entities
                 Array.Sort(arr);
                 ++count;
                 return (whereIndex, true);
-            };
+            }
 
             if (!insertSorted(ref Ids, ref Count, fragment).Item2)
                 return;
@@ -103,7 +103,8 @@ namespace Game.Entities
                     if (IsIndirectFragment(UpdateableIds[i]))
                     {
                         ContentsChangedMask |= UpdateableMasks[i]; // set the first bit to true to activate fragment
-                        UpdateableMasks[i] |= (byte)(1 << maskIndex++);
+                        ++maskIndex;
+                        UpdateableMasks[i] <<= 1;
                     }
                 }
             }
@@ -125,7 +126,7 @@ namespace Game.Entities
                     return (where, true);
                 }
                 return (where, false);
-            };
+            }
 
             if (!removeSorted(ref Ids, ref Count, fragment).Item2)
                 return;
@@ -142,7 +143,10 @@ namespace Game.Entities
                     {
                         UpdateableMasks[i] = (byte)(1 << maskIndex++);
                         if (IsIndirectFragment(UpdateableIds[i]))
-                            UpdateableMasks[i] |= (byte)(1 << maskIndex++);
+                        {
+                            ++maskIndex;
+                            UpdateableMasks[i] <<= 1;
+                        }
                     }
                 }
             }
@@ -157,7 +161,7 @@ namespace Game.Entities
 
         public static bool IsIndirectFragment(EntityFragment frag)
         {
-            return frag == EntityFragment.CGObject || frag == EntityFragment.CActor;
+            return frag == EntityFragment.CGObject || frag == EntityFragment.CActor || frag == EntityFragment.FVendor_C;
         }
 
         public EntityFragment[] GetIds() { return Ids[..Count]; }

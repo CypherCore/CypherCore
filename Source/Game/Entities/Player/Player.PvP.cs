@@ -162,7 +162,7 @@ namespace Game.Entities
             data.Honor = honor;
             data.OriginalHonor = honor;
             data.Target = victim_guid;
-            data.Rank = victim_rank;
+            data.Rank = (sbyte)victim_rank;
 
             SendPacket(data);
 

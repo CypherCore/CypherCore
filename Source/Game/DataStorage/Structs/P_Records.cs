@@ -22,7 +22,7 @@ namespace Game.DataStorage
         public byte Green;
         public byte Blue;
         public byte Alpha;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class PathNodeRecord
@@ -85,7 +85,7 @@ namespace Game.DataStorage
         public ushort WorldStateExpressionID;
         public int WeatherID;
         public byte PartyStatus;
-        public byte LifetimeMaxPVPRank;
+        public sbyte LifetimeMaxPVPRank;
         public uint AchievementLogic;
         public sbyte Gender;
         public sbyte NativeGender;
@@ -115,8 +115,8 @@ namespace Game.DataStorage
         public byte MinGuildLevel;
         public sbyte MaxExpansionTier;
         public sbyte MinExpansionTier;
-        public byte MinPVPRank;
-        public byte MaxPVPRank;
+        public sbyte MinPVPRank;
+        public sbyte MaxPVPRank;
         public uint ContentTuningID;
         public int CovenantID;
         public uint TraitNodeEntryLogic;

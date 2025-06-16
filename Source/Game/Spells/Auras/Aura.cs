@@ -51,7 +51,7 @@ namespace Game.Spells
         Unit _target;
         Aura _base;
         AuraRemoveMode _removeMode;                  // Store info for know remove aura reason
-        byte _slot;                                   // Aura slot on unit
+        ushort _slot;                                   // Aura slot on unit
         AuraFlags _flags;                                  // Aura info flag
         uint _effectsToApply;                         // Used only at spell hit to determine which effect should be applied
         bool _needClientUpdate;
@@ -70,7 +70,7 @@ namespace Game.Spells
             Cypher.Assert(GetTarget() != null && GetBase() != null);
 
             // Try find slot for aura
-            byte slot = 0;
+            ushort slot = 0;
             // Lookup for auras already applied from spell
             foreach (AuraApplication visibleAura in GetTarget().GetVisibleAuras())
             {
@@ -314,7 +314,7 @@ namespace Game.Spells
         public Unit GetTarget() { return _target; }
         public Aura GetBase() { return _base; }
 
-        public byte GetSlot() { return _slot; }
+        public ushort GetSlot() { return _slot; }
         public AuraFlags GetFlags() { return _flags; }
         public uint GetEffectMask() { return _effectMask; }
         public bool HasEffect(uint effect)

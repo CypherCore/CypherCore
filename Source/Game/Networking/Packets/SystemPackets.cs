@@ -42,9 +42,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt16(NameLookupTelemetryInterval);
             _worldPacket.WriteUInt32((uint)NotFoundCacheTimeSeconds.TotalSeconds);
 
+            _worldPacket.WriteUInt32(RealmPvpTypeOverride);
+
             _worldPacket.WriteInt32(AddonChatThrottle.MaxTries);
             _worldPacket.WriteInt32(AddonChatThrottle.TriesRestoredPerSecond);
             _worldPacket.WriteInt32(AddonChatThrottle.UsedTriesPerMessage);
+
+            _worldPacket.WriteFloat(AddonPerformanceMsgWarning);
+            _worldPacket.WriteFloat(AddonPerformanceMsgError);
+            _worldPacket.WriteFloat(AddonPerformanceMsgOverall);
 
             foreach (GameRuleValuePair gameRuleValue in GameRules)
                 gameRuleValue.Write(_worldPacket);
@@ -108,6 +114,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(false); // unused 11.0.7
             _worldPacket.WriteBit(LobbyMatchmakerQueueFromMainlineEnabled);
             _worldPacket.WriteBit(CanSendLobbyMatchmakerPartyCustomizations);
+            _worldPacket.WriteBit(AddonProfilerEnabled);
 
             _worldPacket.FlushBits();
 
@@ -216,6 +223,7 @@ namespace Game.Networking.Packets
         public bool IsAccountCurrencyTransferEnabled;
         public bool LobbyMatchmakerQueueFromMainlineEnabled;
         public bool CanSendLobbyMatchmakerPartyCustomizations;
+        public bool AddonProfilerEnabled;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -225,6 +233,10 @@ namespace Game.Networking.Packets
         public int RemainingTimerunningSeasonSeconds;
         public string Unknown1027;                          // related to movement lua functions used by keybinds
         public AddonChatThrottleParams AddonChatThrottle;
+        public uint RealmPvpTypeOverride;       ///< Use Cfg_Configs value = 0, ForceEnabled = 1, ForceDisabled = 2
+        public float AddonPerformanceMsgWarning;
+        public float AddonPerformanceMsgError;
+        public float AddonPerformanceMsgOverall;
 
         public struct SessionAlertConfig
         {

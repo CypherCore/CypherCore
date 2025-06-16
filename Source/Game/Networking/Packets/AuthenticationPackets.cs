@@ -371,6 +371,7 @@ namespace Game.Networking.Packets
     class EnterEncryptedMode : ServerPacket
     {
         byte[] EncryptionKey;
+        int RegionGroup;
         bool Enabled;
         static byte[] expandedPrivateKey;
 
@@ -404,6 +405,7 @@ namespace Game.Networking.Packets
             toSign.Finish(EnableEncryptionSeed, 16);
 
             _worldPacket.WriteBytes(Ed25519.Sign(toSign.Digest, expandedPrivateKey, 0, EnableEncryptionContext));
+            _worldPacket.WriteInt32(RegionGroup);
             _worldPacket.WriteBit(Enabled);
             _worldPacket.FlushBits();
         }
@@ -416,7 +418,7 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(WaitCount);
             data.WriteUInt32(WaitTime);
-            data.WriteUInt32(AllowedFactionGroupForCharacterCreate);
+            data.WriteUInt8(AllowedFactionGroupForCharacterCreate);
             data.WriteBit(HasFCM);
             data.WriteBit(CanCreateOnlyIfExisting);
             data.FlushBits();
@@ -424,7 +426,7 @@ namespace Game.Networking.Packets
 
         public uint WaitCount; // position of the account in the login queue
         public uint WaitTime; // Wait time in login queue in minutes, if sent queued and this value is 0 client displays "unknown time"
-        public uint AllowedFactionGroupForCharacterCreate;
+        public byte AllowedFactionGroupForCharacterCreate;
         public bool HasFCM; // true if the account has a forced character migration pending. @todo implement
         public bool CanCreateOnlyIfExisting; ///< Can create characters on realm only if player has other existing characters there
     }

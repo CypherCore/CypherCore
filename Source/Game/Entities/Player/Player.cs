@@ -853,7 +853,7 @@ namespace Game.Entities
                     Pet oldPet = GetPet();
                     if (oldPet != null && !oldPet.IsAlive())
                     {
-                        sess.SendPetStableResult(StableResult.InternalError);
+                        sess.SendPetStableResult(StableResult.NoPet);
                         return;
                     }
 
@@ -881,7 +881,7 @@ namespace Game.Entities
                     Pet oldPet = GetPet();
                     if (oldPet != null && !oldPet.IsAlive())
                     {
-                        sess.SendPetStableResult(StableResult.InternalError);
+                        sess.SendPetStableResult(StableResult.NoPet);
                         return;
                     }
 
@@ -2813,7 +2813,7 @@ namespace Game.Entities
                 }
             }
 
-            long cost = item.BoxMoney;
+            long cost = (long)item.BoxMoney;
             if (!HasEnoughMoney(cost))
             {
                 SendBuyError(BuyResult.NotEnoughtMoney, null, 0);
@@ -2968,7 +2968,7 @@ namespace Game.Entities
                         PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
                         PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
                         PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker,
-                        PlayerInteractionType.AccountBanker
+                        PlayerInteractionType.AccountBanker, PlayerInteractionType.ProfessionRespec
                     };
 
                     PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
@@ -5938,8 +5938,8 @@ namespace Game.Entities
 
             PlayerLevelInfo info = ObjectMgr.GetPlayerLevelInfo(GetRace(), GetClass(), GetLevel());
 
-            int exp_max_lvl = (int)ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
-            int conf_max_lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            uint exp_max_lvl = ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
+            uint conf_max_lvl = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
             if (exp_max_lvl == SharedConst.DefaultMaxLevel || exp_max_lvl >= conf_max_lvl)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
@@ -8023,7 +8023,7 @@ namespace Game.Entities
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, false, 0, "", null, null, sender, action);
         }
-        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, uint popupMoney, bool coded)
+        public void AddGossipItem(GossipOptionNpc optionNpc, string text, uint sender, uint action, string popupText, ulong popupMoney, bool coded)
         {
             PlayerTalkClass.GetGossipMenu().AddMenuItem(0, -1, optionNpc, text, 0, GossipOptionFlags.None, null, 0, 0, coded, popupMoney, popupText, null, null, sender, action);
         }

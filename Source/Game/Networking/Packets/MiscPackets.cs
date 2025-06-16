@@ -793,13 +793,13 @@ namespace Game.Networking.Packets
 
     public class EnableBarberShop : ServerPacket
     {
-        public byte CustomizationScope;
+        public uint CustomizationFeatureMask;
 
         public EnableBarberShop() : base(ServerOpcodes.EnableBarberShop) { }
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(CustomizationScope);
+            _worldPacket.WriteUInt32(CustomizationFeatureMask);
         }
     }
 

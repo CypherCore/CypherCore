@@ -211,6 +211,7 @@ namespace Game.DataStorage
         public short ReqMapID;
         public int PlayerConditionID;
         public int FlightCapabilityID;
+        public int DriveCapabilityID;
 
         public bool HasFlag(MountCapabilityFlags mountCapabilityFlags) { return (Flags & (int)mountCapabilityFlags) != 0; }
     }

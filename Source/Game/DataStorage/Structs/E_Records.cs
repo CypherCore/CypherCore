@@ -27,9 +27,9 @@ namespace Game.DataStorage
     public sealed class EmotesTextSoundRecord
     {
         public uint Id;
-        public byte RaceId;
-        public byte ClassId;
-        public byte SexId;
+        public sbyte RaceId;
+        public sbyte ClassId;
+        public sbyte SexId;
         public uint SoundId;
         public uint EmotesTextId;
     }

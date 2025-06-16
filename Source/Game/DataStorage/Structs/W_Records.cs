@@ -28,7 +28,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint QuestFeedbackEffectID;
-        public byte WhenToDisplay;
+        public int WhenToDisplay;
         public byte TargetType;
         public int TargetAsset;
         public uint PlayerConditionID;
@@ -48,7 +48,7 @@ namespace Game.DataStorage
         public int HitRectLeft;
         public int HitRectRight;
         public uint PlayerConditionID;
-        public uint Flags;
+        public int Flags;
         public uint[] AreaID = new uint[SharedConst.MaxWorldMapOverlayArea];
     }
 

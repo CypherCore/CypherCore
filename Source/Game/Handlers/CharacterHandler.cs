@@ -115,7 +115,7 @@ namespace Game
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
-                raceUnlock.RaceID = requirement.Key;
+                raceUnlock.RaceID = (sbyte)requirement.Key;
                 raceUnlock.HasUnlockedLicense = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
                 raceUnlock.HasUnlockedAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
                     /* || HasAccountAchievement(requirement.second.AchievementId)*/);

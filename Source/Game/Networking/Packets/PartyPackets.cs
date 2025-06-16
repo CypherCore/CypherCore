@@ -195,9 +195,14 @@ namespace Game.Networking.Packets
 
     class GroupUninvite : ServerPacket
     {
+        public byte Reason;
+
         public GroupUninvite() : base(ServerOpcodes.GroupUninvite) { }
 
-        public override void Write() { }
+        public override void Write()
+        {
+            _worldPacket.WriteUInt8(Reason);
+        }
     }
 
     class RequestPartyMemberStats : ClientPacket
@@ -365,7 +370,7 @@ namespace Game.Networking.Packets
             }
 
             MemberStats.ChromieTime.ConditionalFlags = player.m_playerData.CtrOptions.GetValue().ConditionalFlags;
-            MemberStats.ChromieTime.FactionGroup = (int)player.m_playerData.CtrOptions.GetValue().FactionGroup;
+            MemberStats.ChromieTime.FactionGroup = (sbyte)player.m_playerData.CtrOptions.GetValue().FactionGroup;
             MemberStats.ChromieTime.ChromieTimeExpansionMask = player.m_playerData.CtrOptions.GetValue().ChromieTimeExpansionMask;
         }
 
@@ -1167,13 +1172,13 @@ namespace Game.Networking.Packets
     public struct CTROptions
     {
         public uint ConditionalFlags;
-        public int FactionGroup;
+        public sbyte FactionGroup;
         public uint ChromieTimeExpansionMask;
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ConditionalFlags);
-            data.WriteInt32(FactionGroup);
+            data.WriteInt8(FactionGroup);
             data.WriteUInt32(ChromieTimeExpansionMask);
         }
     }

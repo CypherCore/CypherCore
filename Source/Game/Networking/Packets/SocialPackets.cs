@@ -67,7 +67,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Status);
             _worldPacket.WriteUInt32(AreaID);
             _worldPacket.WriteUInt32(Level);
-            _worldPacket.WriteUInt32((uint)ClassID);
+            _worldPacket.WriteInt8((sbyte)ClassID);
             _worldPacket.WriteBits(Notes.GetByteCount(), 10);
             _worldPacket.FlushBits();
             _worldPacket.WriteString(Notes);
@@ -200,7 +200,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Status);
             data.WriteUInt32(AreaID);
             data.WriteUInt32(Level);
-            data.WriteUInt32((uint)ClassID);
+            data.WriteInt8((sbyte)ClassID);
             data.WriteBits(Notes.GetByteCount(), 10);
             data.FlushBits();
             data.WriteString(Notes);

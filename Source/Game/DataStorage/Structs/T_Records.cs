@@ -20,7 +20,7 @@ namespace Game.DataStorage
         public byte TierID;
         public byte Flags;
         public byte ColumnIndex;
-        public byte ClassID;
+        public sbyte ClassID;
         public ushort SpecID;
         public uint SpellID;
         public uint OverridesSpellID;

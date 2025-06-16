@@ -2945,7 +2945,7 @@ namespace Game.Entities
                     int scalingLevelMin = m_unitData.ScalingLevelMin;
                     int scalingLevelMax = m_unitData.ScalingLevelMax;
                     int scalingLevelDelta = m_unitData.ScalingLevelDelta;
-                    int scalingFactionGroup = m_unitData.ScalingFactionGroup;
+                    byte scalingFactionGroup = m_unitData.ScalingFactionGroup;
                     uint targetLevel = unitTarget.m_unitData.EffectiveLevel;
                     if (targetLevel == 0)
                         targetLevel = unitTarget.GetLevel();
@@ -3804,7 +3804,12 @@ namespace Game.Entities
             m_unitData.WriteCreate(data, flags, this, target);
 
             if (m_vendorData != null)
+            {
+                if (EntityFragmentsHolder.IsIndirectFragment(EntityFragment.FVendor_C))
+                    data.WriteUInt8(1);  // IndirectFragmentActive: FVendor_C
+
                 m_vendorData.WriteCreate(data, flags, this, target);
+            }
         }
 
         public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
@@ -3869,9 +3874,7 @@ namespace Game.Entities
 
         public override void ClearUpdateMask(bool remove)
         {
-            if (m_vendorData != null)
-                m_values.ClearChangesMask(m_vendorData);
-
+            m_values.ClearChangesMask(m_vendorData);
             base.ClearUpdateMask(remove);
         }
 

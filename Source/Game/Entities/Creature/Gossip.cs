@@ -17,7 +17,7 @@ namespace Game.Misc
     public class GossipMenu
     {
         public uint AddMenuItem(int gossipOptionId, int orderIndex, GossipOptionNpc optionNpc, string optionText, uint language,
-            GossipOptionFlags flags, int? gossipNpcOptionId, uint actionMenuId, uint actionPoiId, bool boxCoded, uint boxMoney,
+            GossipOptionFlags flags, int? gossipNpcOptionId, uint actionMenuId, uint actionPoiId, bool boxCoded, ulong boxMoney,
             string boxText, int? spellId, int? overrideIconId, uint sender, uint action)
         {
             Cypher.Assert(_menuItems.Count <= SharedConst.MaxGossipMenuItems);
@@ -261,7 +261,7 @@ namespace Game.Misc
                 opt.GossipOptionID = item.GossipOptionID;
                 opt.OptionNPC = item.OptionNpc;
                 opt.OptionFlags = (byte)(item.BoxCoded ? 1 : 0);     // makes pop up box password
-                opt.OptionCost = (int)item.BoxMoney;     // money required to open menu, 2.0.3
+                opt.OptionCost = item.BoxMoney;     // money required to open menu, 2.0.3
                 opt.OptionLanguage = item.Language;
                 opt.Flags = item.Flags;
                 opt.OrderIndex = (int)item.OrderIndex;
@@ -757,7 +757,7 @@ namespace Game.Misc
         public GossipOptionFlags Flags;
         public int? GossipNpcOptionID;
         public bool BoxCoded;
-        public uint BoxMoney;
+        public ulong BoxMoney;
         public string BoxText;
         public int? SpellID;
         public int? OverrideIconID;
@@ -801,7 +801,7 @@ namespace Game.Misc
         public uint ActionPoiID;
         public int? GossipNpcOptionID;
         public bool BoxCoded;
-        public uint BoxMoney;
+        public ulong BoxMoney;
         public string BoxText;
         public uint BoxBroadcastTextId;
         public int? SpellID;

@@ -53,6 +53,7 @@ namespace Game.DataStorage
         public int LoreFileDataID;
         public int Flags;
         public ushort AreaID;
+        public ushort CovenantID;
     }
 
     public sealed class JournalTierRecord

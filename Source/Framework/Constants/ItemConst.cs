@@ -467,6 +467,7 @@ namespace Framework.Constants
         TransmogSetFavorite = 4,
         RuneforgeLegendaryAbility = 5,
         TransmogIllusion = 6,
+        WarbandScene = 7,
     }
 
     public enum ItemContext : byte

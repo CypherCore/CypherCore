@@ -34,7 +34,7 @@ namespace Game.Networking.Packets
             MinLevel = _worldPacket.ReadUInt8();
             MaxLevel = _worldPacket.ReadUInt8();
             Unused1007_1 = _worldPacket.ReadUInt8();
-            Unused1007_2= _worldPacket.ReadUInt8();
+            Unused1007_2 = _worldPacket.ReadUInt8();
             Filters = (AuctionHouseFilterMask)_worldPacket.ReadUInt32();
             uint knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
@@ -133,8 +133,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-             Auctioneer = _worldPacket.ReadPackedGuid();
-             Offset = _worldPacket.ReadUInt32();
+            Auctioneer = _worldPacket.ReadPackedGuid();
+            Offset = _worldPacket.ReadUInt32();
             if (_worldPacket.HasBit())
                 TaintedBy = new();
 
@@ -270,7 +270,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionPlaceBid : ClientPacket
-    {   
+    {
         public ObjectGuid Auctioneer;
         public ulong BidAmount;
         public uint AuctionID;
@@ -341,7 +341,7 @@ namespace Game.Networking.Packets
             }
         }
     }
-    
+
     class AuctionSellCommodity : ClientPacket
     {
         public ObjectGuid Auctioneer;
@@ -402,7 +402,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionSetFavoriteItem : ClientPacket
-    {    
+    {
         public AuctionFavoriteInfo Item;
         public bool IsNotFavorite = true;
 
@@ -439,7 +439,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionClosedNotification : ServerPacket
-    { 
+    {
         public AuctionOwnerNotification Info;
         public float ProceedsMailDelay;
         public bool Sold = true;
@@ -456,7 +456,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionCommandResult : ServerPacket
-    {   
+    {
         public uint AuctionID; ///< the id of the auction that triggered this notification
         public int Command; ///< the type of action that triggered this notification. Possible values are @ref AuctionAction
         public int ErrorCode; ///< the error code that was generated when trying to perform the action. Possible values are @ref AuctionError
@@ -515,6 +515,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Auctioneer;
         public uint PurchaseDeliveryDelay;
         public uint CancelDeliveryDelay;
+        public uint AuctionHouseID;
         public bool OpenForBusiness = true;
 
         public AuctionHelloResponse() : base(ServerOpcodes.AuctionHelloResponse) { }
@@ -524,13 +525,14 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Auctioneer);
             _worldPacket.WriteUInt32(PurchaseDeliveryDelay);
             _worldPacket.WriteUInt32(CancelDeliveryDelay);
+            _worldPacket.WriteUInt32(AuctionHouseID);
             _worldPacket.WriteBit(OpenForBusiness);
             _worldPacket.FlushBits();
         }
     }
 
     public class AuctionListBiddedItemsResult : ServerPacket
-    {   
+    {
         public List<AuctionItem> Items = new();
         public uint DesiredDelay;
         public bool HasMoreResults;
@@ -550,7 +552,7 @@ namespace Game.Networking.Packets
     }
 
     public class AuctionListBucketsResult : ServerPacket
-    {  
+    {
         public List<BucketInfo> Buckets = new();
         public uint DesiredDelay;
         public int Unknown830_0;
@@ -576,7 +578,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionFavoriteList : ServerPacket
-    {    
+    {
         public uint DesiredDelay;
         public List<AuctionFavoriteInfo> Items = new();
 
@@ -623,7 +625,7 @@ namespace Game.Networking.Packets
     }
 
     public class AuctionListOwnedItemsResult : ServerPacket
-    {   
+    {
         public List<AuctionItem> Items = new();
         public List<AuctionItem> SoldItems = new();
         public uint DesiredDelay;
@@ -648,7 +650,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionOutbidNotification : ServerPacket
-    {    
+    {
         public AuctionBidderNotification Info;
         public ulong BidAmount;
         public ulong MinIncrement;
@@ -664,7 +666,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionOwnerBidNotification : ServerPacket
-    {    
+    {
         public AuctionOwnerNotification Info;
         public ObjectGuid Bidder;
         public ulong MinIncrement;
@@ -680,7 +682,7 @@ namespace Game.Networking.Packets
     }
 
     public class AuctionReplicateResponse : ServerPacket
-    { 
+    {
         public uint ChangeNumberCursor;
         public uint ChangeNumberGlobal;
         public uint DesiredDelay;
@@ -705,7 +707,7 @@ namespace Game.Networking.Packets
     }
 
     class AuctionWonNotification : ServerPacket
-    {  
+    {
         public AuctionBidderNotification Info;
 
         public AuctionWonNotification() : base(ServerOpcodes.AuctionWonNotification) { }
@@ -791,7 +793,7 @@ namespace Game.Networking.Packets
             ItemClass = data.ReadInt32();
             uint subClassFilterCount = data.ReadBits<uint>(5);
 
-            for (var i =  0; i < subClassFilterCount; ++i)
+            for (var i = 0; i < subClassFilterCount; ++i)
                 SubClassFilters[i] = new AuctionListFilterSubClass(data);
         }
     }
@@ -944,6 +946,7 @@ namespace Game.Networking.Packets
         public ObjectGuid ItemGuid;
         public ObjectGuid OwnerAccountID;
         public uint EndTime;
+        public uint Unused1110;
         public ObjectGuid? Bidder;
         public ulong? BidAmount;
         public List<ItemGemData> Gems = new();
@@ -981,6 +984,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Owner);
             data.WriteInt32(DurationLeft);
             data.WriteUInt8(DeleteReason);
+            data.WriteUInt32(Unused1110);
 
             foreach (ItemEnchantData enchant in Enchantments)
                 enchant.Write(data);
@@ -1026,12 +1030,14 @@ namespace Game.Networking.Packets
 
     struct AuctionBidderNotification
     {
+        public uint AuctionHouseID;
         public uint AuctionID;
         public ObjectGuid Bidder;
         public ItemInstance Item;
 
-        public void Initialize(AuctionPosting auction, Item item)
+        public void Initialize(uint auctionHouseId, AuctionPosting auction, Item item)
         {
+            AuctionHouseID = auctionHouseId;
             AuctionID = auction.Id;
             Item = new ItemInstance(item);
             Bidder = auction.Bidder;
@@ -1039,6 +1045,7 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
+            data.WriteUInt32(AuctionHouseID);
             data.WriteUInt32(AuctionID);
             data.WritePackedGuid(Bidder);
             Item.Write(data);

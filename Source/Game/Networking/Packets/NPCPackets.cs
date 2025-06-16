@@ -340,7 +340,7 @@ namespace Game.Networking.Packets
         public int GossipOptionID;
         public GossipOptionNpc OptionNPC;
         public byte OptionFlags;
-        public int OptionCost;
+        public ulong OptionCost;
         public uint OptionLanguage;
         public GossipOptionFlags Flags;
         public int OrderIndex;
@@ -357,7 +357,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(GossipOptionID);
             data.WriteUInt8((byte)OptionNPC);
             data.WriteInt8((sbyte)OptionFlags);
-            data.WriteInt32(OptionCost);
+            data.WriteUInt64(OptionCost);
             data.WriteUInt32(OptionLanguage);
             data.WriteInt32((int)Flags);
             data.WriteInt32(OrderIndex);
