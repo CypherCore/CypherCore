@@ -354,6 +354,8 @@ namespace Game.Spells
             {
                 if (!forcedCooldown.HasValue)
                 {
+                    TimeSpan baseCooldown = cooldown;
+
                     // Now we have cooldown data (if found any), time to apply mods
                     Player modOwner = _owner.GetSpellModOwner();
                     if (modOwner != null)
@@ -382,6 +384,35 @@ namespace Game.Spells
                     {
                         cooldown = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
                         categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
+                    }
+
+                    {
+                        float calcRecoveryRate(AuraEffect modRecoveryRate)
+                        {
+                            float rate = 100.0f / (Math.Max(modRecoveryRate.GetAmount(), -99.0f) + 100.0f);
+                            if (baseCooldown <= TimeSpan.FromHours(1)
+                                && !spellInfo.HasAttribute(SpellAttr6.IgnoreForModTimeRate)
+                                && !modRecoveryRate.GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.IgnoreDuringCooldownTimeRateCalculation))
+                                rate *= _owner.m_unitData.ModTimeRate;
+
+                            return rate;
+                        }
+
+
+                        float recoveryRate = 1.0f;
+                        foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModRecoveryRate))
+                            if (modRecoveryRate.IsAffectingSpell(spellInfo))
+                                recoveryRate *= calcRecoveryRate(modRecoveryRate);
+
+                        foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModRecoveryRateBySpellLabel))
+                            if (spellInfo.HasLabel((uint)modRecoveryRate.GetMiscValue()) || (modRecoveryRate.GetMiscValueB() != 0 && spellInfo.HasLabel((uint)modRecoveryRate.GetMiscValueB())))
+                                recoveryRate *= calcRecoveryRate(modRecoveryRate);
+
+                        if (recoveryRate > 0.0f)
+                        {
+                            cooldown = TimeSpan.FromMilliseconds((long)(cooldown.TotalMilliseconds * recoveryRate));
+                            categoryCooldown = TimeSpan.FromMilliseconds((long)(categoryCooldown.TotalMilliseconds * recoveryRate));
+                        }
                     }
 
                     int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
@@ -535,7 +566,7 @@ namespace Game.Spells
                 modifyCooldown.IsPet = _owner != playerOwner;
                 modifyCooldown.SpellID = cooldownEntry.SpellId;
                 modifyCooldown.DeltaTime = (int)cooldownMod.TotalMilliseconds;
-                modifyCooldown.WithoutCategoryCooldown = withoutCategoryCooldown;
+                modifyCooldown.SkipCategory = withoutCategoryCooldown;
                 playerOwner.SendPacket(modifyCooldown);
             }
 
@@ -543,6 +574,40 @@ namespace Game.Spells
             {
                 _categoryCooldowns.Remove(cooldownEntry.CategoryId);
                 _spellCooldowns.Remove(cooldownEntry.SpellId);
+            }
+        }
+
+        public void UpdateCooldownRecoveryRate(Func<CooldownEntry, bool> predicate, float modChange, bool apply)
+        {
+            foreach (var cooldownEntry in _spellCooldowns.Values)
+            {
+                if (predicate(cooldownEntry))
+                    UpdateCooldownRecoveryRate(cooldownEntry, modChange, apply);
+            }
+        }
+
+        public void UpdateCooldownRecoveryRate(CooldownEntry cooldownEntry, float modChange, bool apply)
+        {
+            if (modChange <= 0.0f)
+                return;
+
+            if (!apply)
+                modChange = 1.0f / modChange;
+
+            DateTime now = GameTime.GetDateAndTime();
+
+            cooldownEntry.CooldownEnd = now + TimeSpan.FromMilliseconds((cooldownEntry.CooldownEnd - now).TotalMilliseconds * modChange);
+
+            if (cooldownEntry.CategoryId != 0)
+                cooldownEntry.CategoryEnd = now + TimeSpan.FromMilliseconds((cooldownEntry.CategoryEnd - now).TotalMilliseconds * modChange);
+
+            Player playerOwner = GetPlayerOwner();
+            if (playerOwner != null)
+            {
+                UpdateCooldown updateCooldown = new();
+                updateCooldown.SpellID = cooldownEntry.SpellId;
+                updateCooldown.ModChange = modChange;
+                playerOwner.SendPacket(updateCooldown);
             }
         }
 

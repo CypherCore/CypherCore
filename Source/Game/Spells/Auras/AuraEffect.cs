@@ -5813,6 +5813,35 @@ namespace Game.Spells
                 target.RemoveSpellCategoryCooldownMod(GetMiscValue(), GetAmount());
         }
 
+        [AuraEffectHandler(AuraType.ModRecoveryRate)]
+        void HandleModRecoveryRate(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
+                return;
+
+            float rate = 100.0f / (Math.Max(GetAmount(), -99.0f) + 100.0f);
+
+            aurApp.GetTarget().GetSpellHistory().UpdateCooldownRecoveryRate(cooldown =>
+            {
+                return IsAffectingSpell(Global.SpellMgr.GetSpellInfo(cooldown.SpellId, Difficulty.None));
+            }, rate, apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModRecoveryRateBySpellLabel)]
+        void HandleModRecoveryRateBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
+                return;
+
+            float rate = 100.0f / (Math.Max(GetAmount(), -99.0f) + 100.0f);
+
+            aurApp.GetTarget().GetSpellHistory().UpdateCooldownRecoveryRate(cooldown =>
+            {
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cooldown.SpellId, Difficulty.None);
+                return spellInfo.HasLabel((uint)GetMiscValue()) || (GetMiscValueB() != 0 && spellInfo.HasLabel((uint)GetMiscValueB()));
+            }, rate, apply);
+        }
+
         [AuraEffectHandler(AuraType.ShowConfirmationPrompt)]
         [AuraEffectHandler(AuraType.ShowConfirmationPromptWithDifficulty)]
         void HandleShowConfirmationPrompt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
