@@ -2734,7 +2734,7 @@ namespace Game.Entities
             if (player == null)
                 return null;
 
-            SpawnMetadata data = Global.ObjectMgr.GetSpawnMetadata(SpawnObjectType.GameObject, GetSpawnId());
+            GameObjectData data = GetGameObjectData();
             if (data != null)
             {
                 if (data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)

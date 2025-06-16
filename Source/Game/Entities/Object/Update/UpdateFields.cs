@@ -1279,6 +1279,8 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
+            var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+
             data.WriteUInt32(GetViewerDependentDisplayId(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentNpcFlags(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentNpcFlags2(this, owner, receiver));
@@ -1286,12 +1288,11 @@ namespace Game.Entities
             data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
             data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
-            var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
-            data.WriteInt32(stateWorldEffects.Count);
+            data.WriteInt32(stateWorldEffectIDs.Count);
             data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
             data.WriteInt32(SpellOverrideNameID);
-            for (int i = 0; i < stateWorldEffects.Count; ++i)
-                data.WriteUInt32(stateWorldEffects[i]);
+            for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
+                data.WriteUInt32(stateWorldEffectIDs[i]);
 
             data.WritePackedGuid(Charm);
             data.WritePackedGuid(Summon);
@@ -1512,6 +1513,8 @@ namespace Game.Entities
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
+            List<uint> stateWorldEffectIDs = new();
+
             if (changesMask[0])
             {
                 if (changesMask[1])
@@ -1520,11 +1523,11 @@ namespace Game.Entities
                 }
                 if (changesMask[2])
                 {
-                    var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
-                    data.WriteBits(stateWorldEffects.Count, 32);
-                    for (int i = 0; i < stateWorldEffects.Count; ++i)
+                    stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+                    data.WriteBits(stateWorldEffectIDs.Count, 32);
+                    for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
                     {
-                        data.WriteUInt32(stateWorldEffects[i]);
+                        data.WriteUInt32(stateWorldEffectIDs[i]);
                     }
                 }
             }
@@ -2366,6 +2369,7 @@ namespace Game.Entities
 
             return displayId;
         }
+
         uint GetViewerDependentNpcFlags(UnitData unitData, Unit unit, Player receiver)
         {
             uint npcFlag = unitData.NpcFlags;
@@ -2390,6 +2394,7 @@ namespace Game.Entities
 
             return npcFlag;
         }
+
         uint GetViewerDependentNpcFlags2(UnitData unitData, Unit unit, Player receiver)
         {
             uint npcFlag = unitData.NpcFlags2;
@@ -2402,6 +2407,7 @@ namespace Game.Entities
 
             return npcFlag;
         }
+
         uint GetViewerDependentFactionTemplate(UnitData unitData, Unit unit, Player receiver)
         {
             uint factionTemplate = unitData.FactionTemplate;
@@ -2416,6 +2422,7 @@ namespace Game.Entities
 
             return factionTemplate;
         }
+
         uint GetViewerDependentFlags(UnitData unitData, Unit unit, Player receiver)
         {
             uint flags = unitData.Flags;
@@ -2425,6 +2432,7 @@ namespace Game.Entities
 
             return flags;
         }
+
         uint GetViewerDependentFlags2(UnitData unitData, Unit unit, Player receiver)
         {
             uint flags = unitData.Flags2;
@@ -2434,6 +2442,7 @@ namespace Game.Entities
 
             return flags;
         }
+
         uint GetViewerDependentFlags3(UnitData unitData, Unit unit, Player receiver)
         {
             uint flags = unitData.Flags3;
@@ -2442,11 +2451,13 @@ namespace Game.Entities
 
             return flags;
         }
+
         uint GetViewerDependentAuraState(UnitData unitData, Unit unit, Player receiver)
         {
             // Check per caster aura states to not enable using a spell in client if specified aura is not by target
             return unit.BuildAuraStateUpdateForTarget(receiver);
         }
+
         byte GetViewerDependentPvpFlags(UnitData unitData, Unit unit, Player receiver)
         {
             byte pvpFlags = unitData.PvpFlags;
@@ -2461,6 +2472,7 @@ namespace Game.Entities
 
             return pvpFlags;
         }
+
         int GetViewerDependentInteractSpellId(UnitData unitData, Unit unit, Player receiver)
         {
             int interactSpellId = unitData.InteractSpellID;
@@ -2483,6 +2495,7 @@ namespace Game.Entities
             }
             return interactSpellId;
         }
+
         List<uint> GetViewerDependentStateWorldEffectIDs(UnitData unitData, Unit unit, Player receiver)
         {
             List<uint> stateWorldEffects = unitData.StateWorldEffectIDs;
@@ -2497,7 +2510,6 @@ namespace Game.Entities
             return stateWorldEffects;
         }
 
-
         uint GetViewerDependentStateSpellVisualID(UnitData unitData, Unit unit, Player receiver)
         {
             uint stateSpellVisual = unitData.StateSpellVisualID;
@@ -2511,7 +2523,6 @@ namespace Game.Entities
 
             return stateSpellVisual;
         }
-
 
         uint GetViewerDependentStateAnimID(UnitData unitData, Unit unit, Player receiver)
         {
@@ -7566,17 +7577,18 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
         {
+            var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+
             data.WriteUInt32(DisplayID);
             data.WriteUInt32(SpellVisualID);
             data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
-            var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
-            data.WriteInt32(stateWorldEffects.Count);
+            data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, owner, receiver));
+            data.WriteInt32(stateWorldEffectIDs.Count);
             data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
-            for (int i = 0; i < stateWorldEffects.Count; ++i)
+            for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
             {
-                data.WriteUInt32(stateWorldEffects[i]);
+                data.WriteUInt32(stateWorldEffectIDs[i]);
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
@@ -7618,15 +7630,17 @@ namespace Game.Entities
         {
             data.WriteBits(changesMask.GetBlock(0), 25);
 
+            List<uint> stateWorldEffectIDs;
+
             if (changesMask[0])
             {
                 if (changesMask[1])
                 {
-                    var stateWorldEffects = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
-                    data.WriteBits(stateWorldEffects.Count, 32);
-                    for (int i = 0; i < stateWorldEffects.Count; ++i)
+                    stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+                    data.WriteBits(stateWorldEffectIDs.Count, 32);
+                    for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
                     {
-                        data.WriteUInt32(stateWorldEffects[i]);
+                        data.WriteUInt32(stateWorldEffectIDs[i]);
                     }
                 }
             }
@@ -7685,11 +7699,11 @@ namespace Game.Entities
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimID(this, owner, receiver));
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, owner, receiver));
                 }
                 if (changesMask[9])
                 {
@@ -7827,7 +7841,7 @@ namespace Game.Entities
             return stateSpellVisual;
         }
 
-        uint GetViewerDependentStateAnimID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentSpawnTrackingStateAnimID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
             uint stateAnimId = Global.DB2Mgr.GetEmptyAnimStateID();
 
@@ -7838,7 +7852,7 @@ namespace Game.Entities
             return stateAnimId;
         }
 
-        uint GetViewerDependentStateAnimKitID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentSpawnTrackingStateAnimKitID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
             uint stateAnimKitId = gameObjectData.SpawnTrackingStateAnimKitID;
 
