@@ -88,6 +88,8 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
                     return GetConversation(p, guid);
                 break;
             case HighGuid.Corpse:
+                if (typemask.HasAnyFlag(TypeMask.Corpse))
+                    return GetCorpse(p, guid);
                 break;
         }
 
@@ -123,7 +125,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     {
         return u.GetMap().GetSceneObject(guid);
     }
-    
+
     public static Conversation GetConversation(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetConversation(guid);
