@@ -766,7 +766,7 @@ namespace Game.Entities
         public uint GetTransportPeriod() { return m_gameObjectData.Level; }
         public void SetPeriod(uint period) { SetLevel(period); }
         public uint GetTimer() { return _pathProgress; }
-        public bool IsStopRequested() { return _requestStopTimestamp.HasValue; }
+        public uint? GetNextStopTimestamp() { return _requestStopTimestamp; }
         public bool IsStopped()
         {
             return HasDynamicFlag(GameObjectDynamicLowFlags.Stopped);

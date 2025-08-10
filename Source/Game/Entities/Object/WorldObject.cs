@@ -649,9 +649,11 @@ namespace Game.Entities
                 data.FlushBits();
                 if (transport != null)
                 {
-                    data.WriteUInt32(transport.GetTransportPeriod());
-                    data.WriteUInt32(transport.GetTimer());
-                    data.WriteBit(transport.IsStopRequested());
+                    uint period = transport.GetTransportPeriod();
+
+                    data.WriteUInt32((uint)((((long)transport.GetTimer() - (long)GameTime.GetGameTimeMS()) % period) + period) % period);  // TimeOffset
+                    data.WriteUInt32(transport.GetNextStopTimestamp().GetValueOrDefault(0));
+                    data.WriteBit(transport.GetNextStopTimestamp().HasValue);
                     data.WriteBit(transport.IsStopped());
                     data.WriteBit(false);
                     data.FlushBits();
