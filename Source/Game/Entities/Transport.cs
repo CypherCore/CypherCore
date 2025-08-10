@@ -241,7 +241,7 @@ namespace Game.Entities
 
             if (eventToTriggerIndex != -1)
             {
-                while (eventToTriggerIndex < _transportInfo.Events.Count && _transportInfo.Events[eventToTriggerIndex].Timestamp < timer)
+                while (eventToTriggerIndex < _transportInfo.Events.Count && _transportInfo.Events[eventToTriggerIndex].Timestamp <= timer)
                 {
                     TransportPathLeg leg = _transportInfo.GetLegForTime(_transportInfo.Events[eventToTriggerIndex].Timestamp);
                     if (leg != null)
