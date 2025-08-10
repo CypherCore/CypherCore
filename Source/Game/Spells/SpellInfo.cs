@@ -13,6 +13,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Framework.Collections;
+using System.Numerics;
 
 namespace Game.Spells
 {
@@ -645,36 +646,41 @@ namespace Game.Spells
             return true;
         }
 
-        bool IsAffectedBySpellMods()
+        public bool IsAffectedBySpellMods()
         {
             return !HasAttribute(SpellAttr3.IgnoreCasterModifiers);
         }
 
-        public bool IsAffectedBySpellMod(SpellModifier mod)
+        public int IsAffectedBySpellMod(SpellModifier mod)
         {
-            if (!IsAffectedBySpellMods())
-                return false;
-
             SpellInfo affectSpell = Global.SpellMgr.GetSpellInfo(mod.spellId, Difficulty);
             if (affectSpell == null)
-                return false;
+                return 0;
 
             switch (mod.type)
             {
                 case SpellModType.Flat:
                 case SpellModType.Pct:
+                {
                     // TEMP: dont use IsAffected - !familyName and !familyFlags are not valid options for spell mods
                     // TODO: investigate if the !familyName and !familyFlags conditions are even valid for all other (nonmod) uses of SpellInfo::IsAffected
-                    return affectSpell.SpellFamilyName == SpellFamilyName && (mod as SpellModifierByClassMask).mask & SpellFamilyFlags;
+                    if (affectSpell.SpellFamilyName != SpellFamilyName)
+                        return 0;
+
+                    // spell modifiers should apply as many times as number of matched SpellFamilyFlags bits (verified with spell 1218116 with modifier 384451 in patch 11.1.0 and client tooltip code since at least 3.3.5)
+                    // unknown if this is a bug or strange design choice...
+                    var matched = (mod as SpellModifierByClassMask).mask & SpellFamilyFlags;
+                    return BitOperations.PopCount(matched[0]) + BitOperations.PopCount(matched[1]) + BitOperations.PopCount(matched[2]) + BitOperations.PopCount(matched[3]);
+                }
                 case SpellModType.LabelFlat:
-                    return HasLabel((uint)(mod as SpellFlatModifierByLabel).value.LabelID);
+                    return HasLabel((uint)(mod as SpellFlatModifierByLabel).value.LabelID) ? 1 : 0;
                 case SpellModType.LabelPct:
-                    return HasLabel((uint)(mod as SpellPctModifierByLabel).value.LabelID);
+                    return HasLabel((uint)(mod as SpellPctModifierByLabel).value.LabelID) ? 1 : 0;
                 default:
                     break;
             }
 
-            return false;
+            return 0;
         }
 
         public bool IsUpdatingTemporaryAuraValuesBySpellMod()

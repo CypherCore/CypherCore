@@ -3041,6 +3041,9 @@ namespace Game.Entities
             flat = 0;
             pct = 1.0f;
 
+            if (!spellInfo.IsAffectedBySpellMods())
+                return;
+
             // Drop charges for triggering spells instead of triggered ones
             if (m_spellModTakingSpell != null)
                 spell = m_spellModTakingSpell;
@@ -3053,7 +3056,7 @@ namespace Game.Entities
                     SpellModifier modInstantSpell = null;
                     foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Pct])
                     {
-                        if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                        if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                             continue;
 
                         if (baseValue.CompareTo(10000) < 0 && mod.value <= -100)
@@ -3067,7 +3070,7 @@ namespace Game.Entities
                     {
                         foreach (SpellPctModifierByLabel mod in m_spellMods[(int)op][(int)SpellModType.LabelPct])
                         {
-                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                            if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                                 continue;
 
                             if (baseValue.CompareTo(10000) < 0 && mod.value.ModifierValue <= -1.0f)
@@ -3092,7 +3095,7 @@ namespace Game.Entities
                     SpellModifier modCritical = null;
                     foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Flat])
                     {
-                        if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                        if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                             continue;
 
                         if (mod.value >= 100)
@@ -3106,7 +3109,7 @@ namespace Game.Entities
                     {
                         foreach (SpellFlatModifierByLabel mod in m_spellMods[(int)op][(int)SpellModType.LabelFlat])
                         {
-                            if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                            if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                                 continue;
 
                             if (mod.value.ModifierValue >= 100)
@@ -3131,33 +3134,36 @@ namespace Game.Entities
 
             foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Flat])
             {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                int applyCount = IsAffectedBySpellmod(spellInfo, mod, spell);
+                if (applyCount == 0)
                     continue;
 
                 int value = mod.value;
                 if (value == 0)
                     continue;
 
-                flat += value;
+                flat += value * applyCount;
                 ApplyModToSpell(mod, spell);
             }
 
             foreach (SpellFlatModifierByLabel mod in m_spellMods[(int)op][(int)SpellModType.LabelFlat])
             {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                int applyCount = IsAffectedBySpellmod(spellInfo, mod, spell);
+                if (applyCount == 0)
                     continue;
 
                 int value = mod.value.ModifierValue;
                 if (value == 0)
                     continue;
 
-                flat += value;
+                flat += value * applyCount;
                 ApplyModToSpell(mod, spell);
             }
 
             foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Pct])
             {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                int applyCount = IsAffectedBySpellmod(spellInfo, mod, spell);
+                if (applyCount == 0)
                     continue;
 
                 // skip percent mods for null basevalue (most important for spell mods with charges)
@@ -3175,13 +3181,14 @@ namespace Game.Entities
                         continue;
                 }
 
-                pct *= 1.0f + MathFunctions.CalculatePct(1.0f, value);
+                pct *= MathF.Pow(1.0f + MathFunctions.CalculatePct(1.0f, value), applyCount);
                 ApplyModToSpell(mod, spell);
             }
 
             foreach (SpellPctModifierByLabel mod in m_spellMods[(int)op][(int)SpellModType.LabelPct])
             {
-                if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+                int applyCount = IsAffectedBySpellmod(spellInfo, mod, spell);
+                if (applyCount == 0)
                     continue;
 
                 // skip percent mods for null basevalue (most important for spell mods with charges)
@@ -3199,50 +3206,50 @@ namespace Game.Entities
                         continue;
                 }
 
-                pct *= value;
+                pct *= MathF.Pow(value, applyCount);
                 ApplyModToSpell(mod, spell);
             }
         }
 
-        bool IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
+        int IsAffectedBySpellmod(SpellInfo spellInfo, SpellModifier mod, Spell spell)
         {
             if (mod == null || spellInfo == null)
-                return false;
+                return 0;
 
             // First time this aura applies a mod to us and is out of charges
             if (spell != null && mod.ownerAura.IsUsingCharges() && mod.ownerAura.GetCharges() == 0 && !spell.m_appliedMods.Contains(mod.ownerAura))
-                return false;
+                return 0;
 
             switch (mod.op)
             {
                 case SpellModOp.Duration: // +duration to infinite duration spells making them limited
                     if (spellInfo.GetDuration() == -1)
-                        return false;
+                        return 0;
                     break;
                 case SpellModOp.CritChance: // mod crit to spells that can't crit
                     if (!spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
-                        return false;
+                        return 0;
                     break;
                 case SpellModOp.PointsIndex0: // check if spell has any effect at that index
                 case SpellModOp.Points:
                     if (spellInfo.GetEffects().Count <= 0)
-                        return false;
+                        return 0;
                     break;
                 case SpellModOp.PointsIndex1: // check if spell has any effect at that index
                     if (spellInfo.GetEffects().Count <= 1)
-                        return false;
+                        return 0;
                     break;
                 case SpellModOp.PointsIndex2: // check if spell has any effect at that index
                     if (spellInfo.GetEffects().Count <= 2)
-                        return false;
+                        return 0;
                     break;
                 case SpellModOp.PointsIndex3: // check if spell has any effect at that index
                     if (spellInfo.GetEffects().Count <= 3)
-                        return false;
+                        return 0;
                     break;
                 case SpellModOp.PointsIndex4: // check if spell has any effect at that index
                     if (spellInfo.GetEffects().Count <= 4)
-                        return false;
+                        return 0;
                     break;
                 default:
                     break;
