@@ -851,9 +851,6 @@ namespace Game.Spells
             {
                 // Pandemic doesn't reset periodic timer
                 resetPeriodicTimer = false;
-
-                int pandemicDuration = MathFunctions.CalculatePct(m_maxDuration, 30.0f);
-                m_maxDuration = Math.Max(GetDuration(), Math.Min(pandemicDuration, GetDuration()) + m_maxDuration);
             }
 
             RefreshDuration();
@@ -3100,7 +3097,6 @@ namespace Game.Spells
         public void SetBaseAmount(int[] bp) { BaseAmount = bp; }
         public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
         public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
-        public void SetIsRefresh(bool isRefresh) { IsRefresh = isRefresh; }
         public void SetStackAmount(int stackAmount) { StackAmount = stackAmount > 0 ? stackAmount : 1; }
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }
         public void SetAuraEffectMask(uint effMask) { _auraEffectMask = effMask; }

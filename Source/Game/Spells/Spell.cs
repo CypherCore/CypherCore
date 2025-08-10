@@ -2392,6 +2392,12 @@ namespace Game.Spells
                                         if (hitInfo.AuraDuration == 0)
                                             hitInfo.AuraDuration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
                                     }
+
+                                    if (createInfo.IsRefresh && m_spellInfo.HasAttribute(SpellAttr13.PeriodicRefreshExtendsDuration))
+                                    {
+                                        int newDuration = hitInfo.AuraDuration + hitInfo.HitAura.GetDuration();
+                                        hitInfo.AuraDuration = Math.Min(newDuration, MathFunctions.CalculatePct(hitInfo.AuraDuration, 130));
+                                    }
                                 }
                             }
                             else
