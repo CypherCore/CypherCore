@@ -5368,6 +5368,8 @@ namespace Game.Spells
             uint absorb = damageInfo.GetAbsorb();
             uint resist = damageInfo.GetResist();
 
+            Unit.DealDamageMods(caster, target, ref damage, ref absorb);
+
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
             SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastId());
             log.damage = damage;
