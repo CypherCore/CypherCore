@@ -1640,19 +1640,13 @@ namespace Game.Entities
             if (chrSpec == null)
                 return;
 
-            foreach (uint masterySpellId in chrSpec.MasterySpellID)
+            foreach (var (_, aura) in GetOwnedAuras())
             {
-                Aura aura = GetAura(masterySpellId);
-                if (aura != null)
+                if (aura.GetCasterGUID() == GetGUID() && aura.GetSpellInfo().HasAttribute(SpellAttr8.MasteryAffectsPoints))
                 {
-                    foreach (var spellEffectInfo in aura.GetSpellInfo().GetEffects())
-                    {
-                        float mult = spellEffectInfo.BonusCoefficient;
-                        if (MathFunctions.fuzzyEq(mult, 0.0f))
-                            continue;
-
-                        aura.GetEffect(spellEffectInfo.EffectIndex).ChangeAmount((int)(value * mult));
-                    }
+                    foreach (var auraEff in aura.GetAuraEffects())
+                        if (MathFunctions.fuzzyEq(auraEff.GetSpellEffectInfo().BonusCoefficient, 0.0f))
+                            auraEff.RecalculateAmount(this);
                 }
             }
         }

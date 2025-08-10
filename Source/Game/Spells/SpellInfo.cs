@@ -4123,6 +4123,7 @@ namespace Game.Spells
                     value += level * basePointsPerLevel;
                 }
             }
+
             // random damage
             if (casterUnit != null)
             {
@@ -4133,10 +4134,18 @@ namespace Game.Spells
                     if (comboPoints != 0)
                         value += comboDamage * comboPoints;
                 }
-
-                if (caster != null)
-                    value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
             }
+
+            if (_spellInfo.HasAttribute(SpellAttr8.MasteryAffectsPoints))
+            {
+                Player playerCaster = caster?.ToPlayer();
+                if (playerCaster != null)
+                    value += playerCaster.m_activePlayerData.Mastery * BonusCoefficient;
+            }
+
+            if (caster != null)
+                value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
+
 
             return (int)Math.Round(value);
         }

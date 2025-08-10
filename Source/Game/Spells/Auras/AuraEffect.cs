@@ -58,13 +58,10 @@ namespace Game.Spells
 
         public int CalculateAmount(Unit caster)
         {
-            // default amount calculation
-            int amount = 0;
+            Unit unitOwner = GetBase().GetOwner().ToUnit();
 
-            if (!m_spellInfo.HasAttribute(SpellAttr8.MasteryAffectsPoints) || MathFunctions.fuzzyEq(GetSpellEffectInfo().BonusCoefficient, 0.0f))
-                amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, GetBase().GetOwner().ToUnit(), GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
-            else if (caster != null && caster.IsTypeId(TypeId.Player))
-                amount = (int)(caster.ToPlayer().m_activePlayerData.Mastery * GetSpellEffectInfo().BonusCoefficient);
+            // default amount calculation
+            int amount = GetSpellEffectInfo().CalcValue(caster, m_baseAmount, unitOwner, GetBase().GetCastItemId(), GetBase().GetCastItemLevel());
 
             // custom amount calculations go here
             switch (GetAuraType())
@@ -79,7 +76,7 @@ namespace Game.Spells
                     m_canBeRecalculated = false;
                     if (m_spellInfo.ProcFlags == null)
                         break;
-                    amount = (int)(GetBase().GetUnitOwner().CountPctFromMaxHealth(10));
+                    amount = (int)unitOwner.CountPctFromMaxHealth(10);
                     break;
                 case AuraType.SchoolAbsorb:
                 case AuraType.ManaShield:
@@ -91,7 +88,7 @@ namespace Game.Spells
                     if (mountEntry != null)
                         mountType = mountEntry.MountTypeID;
 
-                    var mountCapability = GetBase().GetUnitOwner().GetMountCapability(mountType);
+                    var mountCapability = unitOwner.GetMountCapability(mountType);
                     if (mountCapability != null)
                         amount = (int)mountCapability.Id;
                     break;
@@ -106,7 +103,7 @@ namespace Game.Spells
 
             if (GetSpellInfo().HasAttribute(SpellAttr10.RollingPeriodic))
             {
-                var periodicAuras = GetBase().GetUnitOwner().GetAuraEffectsByType(GetAuraType());
+                var periodicAuras = unitOwner.GetAuraEffectsByType(GetAuraType());
                 uint totalTicks = GetTotalTicks();
                 if (totalTicks != 0)
                 {
