@@ -3111,7 +3111,7 @@ namespace Game.AI
                     break;
                 case SmartEvents.HealthPct:
                 {
-                    if (_me == null || !_me.IsEngaged() || _me.GetMaxHealth() == 0)
+                    if (_me == null || _me.IsInEvadeMode() || _me.GetMaxHealth() == 0)
                         return;
                     uint perc = (uint)_me.GetHealthPct();
                     if (perc > e.Event.minMaxRepeat.max || perc < e.Event.minMaxRepeat.min)
@@ -3523,7 +3523,7 @@ namespace Game.AI
                 }
                 case SmartEvents.FriendlyHealthPCT:
                 {
-                    if (_me == null || !_me.IsEngaged())
+                    if (_me == null || _me.IsInEvadeMode())
                         return;
 
                     Unit unitTarget = null;
