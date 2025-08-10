@@ -80,7 +80,7 @@ namespace Game.Entities
 
         uint GetViewerDependentDynamicFlags(ObjectFieldData objectData, WorldObject obj, Player receiver)
         {
-            uint unitDynFlags = objectData.DynamicFlags;
+            uint dynamicFlags = objectData.DynamicFlags;
 
             Unit unit = obj.ToUnit();
             if (unit != null)
@@ -88,61 +88,65 @@ namespace Game.Entities
                 Creature creature = obj.ToCreature();
                 if (creature != null)
                 {
-                    if ((unitDynFlags & (uint)UnitDynFlags.Tapped) != 0 && !creature.IsTappedBy(receiver))
-                        unitDynFlags &= ~(uint)UnitDynFlags.Tapped;
+                    if ((dynamicFlags & (uint)UnitDynFlags.Tapped) != 0 && !creature.IsTappedBy(receiver))
+                        dynamicFlags &= ~(uint)UnitDynFlags.Tapped;
 
-                    if ((unitDynFlags & (uint)UnitDynFlags.Lootable) != 0 && !receiver.IsAllowedToLoot(creature))
-                        unitDynFlags &= ~(uint)UnitDynFlags.Lootable;
+                    if ((dynamicFlags & (uint)UnitDynFlags.Lootable) != 0 && !receiver.IsAllowedToLoot(creature))
+                        dynamicFlags &= ~(uint)UnitDynFlags.Lootable;
 
-                    if ((unitDynFlags & (uint)UnitDynFlags.CanSkin) != 0 && creature.IsSkinnedBy(receiver))
-                        unitDynFlags &= ~(uint)UnitDynFlags.CanSkin;
+                    if ((dynamicFlags & (uint)UnitDynFlags.CanSkin) != 0 && creature.IsSkinnedBy(receiver))
+                        dynamicFlags &= ~(uint)UnitDynFlags.CanSkin;
                 }
 
                 // unit UNIT_DYNFLAG_TRACK_UNIT should only be sent to caster of SPELL_AURA_MOD_STALKED auras
-                if (unitDynFlags.HasAnyFlag((uint)UnitDynFlags.TrackUnit))
+                if (dynamicFlags.HasAnyFlag((uint)UnitDynFlags.TrackUnit))
                     if (!unit.HasAuraTypeWithCaster(AuraType.ModStalked, receiver.GetGUID()))
-                        unitDynFlags &= ~(uint)UnitDynFlags.TrackUnit;
+                        dynamicFlags &= ~(uint)UnitDynFlags.TrackUnit;
             }
             else
             {
                 GameObject gameObject = obj.ToGameObject();
                 if (gameObject != null)
                 {
-                    GameObjectDynamicLowFlags dynFlags = GameObjectDynamicLowFlags.StateTransitionAnimDone;
+                    uint dynFlags = (uint)GameObjectDynamicLowFlags.StateTransitionAnimDone;
                     switch (gameObject.GetGoType())
                     {
                         case GameObjectTypes.Button:
                         case GameObjectTypes.Goober:
                             if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
                                 if (gameObject.GetGoStateFor(receiver.GetGUID()) != GameObjectState.Active)
-                                    dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Highlight;
+                                    dynFlags |= (uint)(GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Highlight);
                             break;
                         case GameObjectTypes.QuestGiver:
                             if (gameObject.CanActivateForPlayer(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Activate;
+                                dynFlags |= (uint)GameObjectDynamicLowFlags.Activate;
                             break;
                         case GameObjectTypes.Chest:
                             if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                                dynFlags |= (uint)(GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight);
                             else if (receiver.IsGameMaster())
-                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle;
+                                dynFlags |= (uint)(GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle);
                             break;
                         case GameObjectTypes.Generic:
                         case GameObjectTypes.SpellFocus:
                             if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Sparkle;
+                                dynFlags |= (uint)GameObjectDynamicLowFlags.Sparkle;
+                            break;
+                        case GameObjectTypes.Transport:
+                        case GameObjectTypes.MapObjTransport:
+                            dynFlags |= dynamicFlags;   // preserve all dynamicflgs
                             break;
                         case GameObjectTypes.CapturePoint:
                             if (!gameObject.CanInteractWithCapturePoint(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.NoInterract;
+                                dynFlags |= (uint)GameObjectDynamicLowFlags.NoInterract;
                             else
-                                dynFlags &= ~GameObjectDynamicLowFlags.NoInterract;
+                                dynFlags &= ~(uint)GameObjectDynamicLowFlags.NoInterract;
                             break;
                         case GameObjectTypes.GatheringNode:
                             if (gameObject.HasConditionalInteraction() && gameObject.CanActivateForPlayer(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
+                                dynFlags |= (uint)(GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight);
                             if (gameObject.GetGoStateFor(receiver.GetGUID()) == GameObjectState.Active)
-                                dynFlags |= GameObjectDynamicLowFlags.Depleted;
+                                dynFlags |= (uint)GameObjectDynamicLowFlags.Depleted;
                             break;
                         default:
                             break;
@@ -156,22 +160,22 @@ namespace Game.Entities
                         // (Ignore GAMEOBJECT_TYPE_SPELLCASTER as interaction is handled by GO_DYNFLAG_LO_NO_INTERACT)
                         if (gameObject.GetGoType() != GameObjectTypes.GatheringNode && gameObject.GetGoType() != GameObjectTypes.FlagStand && gameObject.GetGoType() != GameObjectTypes.SpellCaster)
                             if (gameObject.HasConditionalInteraction() && !gameObject.HasFlag(GameObjectFlags.InteractCond))
-                                dynFlags |= GameObjectDynamicLowFlags.InteractCond;
+                                dynFlags |= (uint)GameObjectDynamicLowFlags.InteractCond;
 
                         if (!gameObject.MeetsInteractCondition(receiver))
-                            dynFlags |= GameObjectDynamicLowFlags.NoInterract;
+                            dynFlags |= (uint)GameObjectDynamicLowFlags.NoInterract;
 
                         var data = Global.ObjectMgr.GetSpawnMetadata(SpawnObjectType.GameObject, gameObject.GetSpawnId());
                         if (data != null && data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
                             if (receiver.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId) != SpawnTrackingState.Active)
-                                dynFlags &= ~GameObjectDynamicLowFlags.Activate;
+                                dynFlags &= ~(uint)GameObjectDynamicLowFlags.Activate;
                     }
 
-                    unitDynFlags = (uint)dynFlags;
+                    dynamicFlags = dynFlags;
                 }
             }
 
-            return unitDynFlags;
+            return dynamicFlags;
         }
     }
 
