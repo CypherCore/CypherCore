@@ -2224,7 +2224,7 @@ namespace Game.Spells
                 return SpellMissInfo.Evade;
 
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-            if (m_spellInfo.HasHitDelay() && unit.IsImmunedToSpell(m_spellInfo, m_caster))
+            if (hitInfo.TimeDelay != 0 && unit.IsImmunedToSpell(m_spellInfo, m_caster))
                 return SpellMissInfo.Immune;
 
             CallScriptBeforeHitHandlers(hitInfo.MissCondition);
@@ -2244,7 +2244,7 @@ namespace Game.Spells
             if (m_caster != unit)
             {
                 // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
-                if (m_spellInfo.HasHitDelay() && unit.HasUnitFlag(UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
+                if (hitInfo.TimeDelay != 0 && unit.HasUnitFlag(UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
                     return SpellMissInfo.Evade;
 
                 if (m_caster.IsValidAttackTarget(unit, m_spellInfo))
@@ -2252,7 +2252,7 @@ namespace Game.Spells
                 else if (m_caster.IsFriendlyTo(unit))
                 {
                     // for delayed spells ignore negative spells (after duel end) for friendly targets
-                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !IsPositive() && !m_caster.IsValidAssistTarget(unit, m_spellInfo))
+                    if (hitInfo.TimeDelay != 0 && unit.IsPlayer() && !IsPositive() && !m_caster.IsValidAssistTarget(unit, m_spellInfo))
                         return SpellMissInfo.Evade;
 
                     // assisting case, healing and resurrection
@@ -3046,7 +3046,7 @@ namespace Game.Spells
                     creatureCaster.ReleaseSpellFocus(this);
 
             // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-            if (m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled())
+            if (m_delayMoment != 0 && !m_spellInfo.IsChanneled())
             {
                 // Remove used for cast item if need (it can be already NULL after TakeReagents call
                 // in case delayed spell remove item at cast delay start
@@ -7582,9 +7582,12 @@ namespace Game.Spells
 
         bool IsNeedSendToClient()
         {
-            return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
-                (m_spellInfo.HasAttribute(SpellAttr8.AuraPointsOnClient)) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered()) ||
-                m_spellInfo.HasAttribute(SpellAttr7.AlwaysCastLog);
+            return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0
+                || m_spellInfo.IsChanneled()
+                || m_spellInfo.HasAttribute(SpellAttr8.AuraPointsOnClient)
+                || m_spellInfo.HasHitDelay() || m_delayMoment != 0
+                || (m_triggeredByAuraSpell == null && !IsTriggered())
+                || m_spellInfo.HasAttribute(SpellAttr7.AlwaysCastLog);
         }
 
         public Unit GetUnitCasterForEffectHandlers()
