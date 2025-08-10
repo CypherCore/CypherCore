@@ -171,8 +171,8 @@ namespace Framework.Constants
         WithdrawMoney = 5,
         RepairMoney = 6,
         MoveItem2 = 7,
-        Unk1 = 8,
-        BuySlot = 9,
+        WithdrawToBuyTab = 8,
+        BuyTab = 9,
         CashFlowDeposit = 10
     }
 

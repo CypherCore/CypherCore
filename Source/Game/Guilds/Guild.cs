@@ -505,6 +505,9 @@ namespace Game.Guilds
             if (member == null)
                 return;
 
+            if (GetLeaderGUID() != player.GetGUID())
+                return;
+
             if (_GetPurchasedTabsSize() >= GuildConst.MaxBankTabs)
                 return;
 
@@ -514,18 +517,19 @@ namespace Game.Guilds
             if (tabId >= GuildConst.MaxBankTabs)
                 return;
 
-            // Do not get money for bank tabs that the GM bought, we had to buy them already.
-            // This is just a speedup check, GetGuildBankTabPrice will return 0.
-            if (tabId < GuildConst.MaxBankTabs - 2) // 7th tab is actually the 6th
-            {
-                long tabCost = (long)(GetGuildBankTabPrice(tabId) * MoneyConstants.Gold);
-                if (!player.HasEnoughMoney(tabCost))                   // Should not happen, this is checked by client
-                    return;
+            SQLTransaction trans = new SQLTransaction();
 
-                player.ModifyMoney(-tabCost);
-            }
+            // Remove money from bank
+            ulong tabCost = GetGuildBankTabPrice(tabId) * MoneyConstants.Gold;
+            if (tabCost != 0 && !_ModifyBankMoney(trans, tabCost, false))                   // Should not happen, this is checked by client
+                return;
 
-            _CreateNewBankTab();
+            // Log guild bank event
+            _LogBankEvent(trans, GuildBankEventLogTypes.BuyTab, tabId, player.GetGUID().GetCounter(), (uint)tabCost);
+
+            _CreateNewBankTab(trans);
+
+            DB.Characters.CommitTransaction(trans);
 
             BroadcastPacket(new GuildEventTabAdded());
 
@@ -1813,12 +1817,10 @@ namespace Game.Guilds
         }
 
         // Private methods
-        void _CreateNewBankTab()
+        void _CreateNewBankTab(SQLTransaction trans)
         {
             byte tabId = _GetPurchasedTabsSize();                      // Next free id
             m_bankTabs.Add(new BankTab(m_id, tabId));
-
-            SQLTransaction trans = new();
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_TAB);
             stmt.AddValue(0, m_id);
@@ -1833,8 +1835,6 @@ namespace Game.Guilds
             ++tabId;
             foreach (var rank in m_ranks)
                 rank.CreateMissingTabsIfNeeded(tabId, trans, false);
-
-            DB.Characters.CommitTransaction(trans);
         }
 
         void _CreateDefaultGuildRanks(SQLTransaction trans, Locale loc = Locale.enUS)
