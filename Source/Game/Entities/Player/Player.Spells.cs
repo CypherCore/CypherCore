@@ -1660,10 +1660,10 @@ namespace Game.Entities
 
                 switch (ability.AcquireMethod)
                 {
-                    case AbilityLearnType.OnSkillValue:
-                    case AbilityLearnType.OnSkillLearn:
+                    case SkillLineAbilityAcquireMethod.AutomaticSkillRank:
+                    case SkillLineAbilityAcquireMethod.AutomaticCharLevel:
                         break;
-                    case AbilityLearnType.RewardedFromQuest:
+                    case SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel:
                         if (!ability.HasFlag(SkillLineAbilityFlags.CanFallbackToLearnedOnSkillLearn) ||
                             !spellInfo.MeetsFutureSpellPlayerCondition(this))
                             continue;
@@ -1687,7 +1687,7 @@ namespace Game.Entities
                     continue;
 
                 // need unlearn spell
-                if (skillValue < ability.MinSkillLineRank && ability.AcquireMethod == AbilityLearnType.OnSkillValue)
+                if (skillValue < ability.MinSkillLineRank && ability.AcquireMethod == SkillLineAbilityAcquireMethod.AutomaticSkillRank)
                     RemoveSpell(ability.Spell);
                 // need learn
                 else if (!IsInWorld)
@@ -2847,7 +2847,7 @@ namespace Game.Entities
                         continue;
 
                     // Runeforging special case
-                    if ((_spell_idx.AcquireMethod == AbilityLearnType.OnSkillLearn && !HasSkill((SkillType)_spell_idx.SkillLine))
+                    if ((_spell_idx.AcquireMethod == SkillLineAbilityAcquireMethod.AutomaticCharLevel && !HasSkill((SkillType)_spell_idx.SkillLine))
                         || ((_spell_idx.SkillLine == (int)SkillType.Runeforging) && _spell_idx.TrivialSkillLineRankHigh == 0))
                     {
                         SkillRaceClassInfoRecord rcInfo = Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass());

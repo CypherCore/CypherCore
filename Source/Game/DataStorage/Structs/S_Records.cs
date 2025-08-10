@@ -107,7 +107,7 @@ namespace Game.DataStorage
         public short MinSkillLineRank;
         public int ClassMask;
         public uint SupercedesSpell;
-        public AbilityLearnType AcquireMethod;
+        public SkillLineAbilityAcquireMethod AcquireMethod;
         public ushort TrivialSkillLineRankHigh;
         public ushort TrivialSkillLineRankLow;
         public int Flags;

@@ -125,7 +125,7 @@ namespace Game.Entities
                 var skills = Global.SpellMgr.GetSkillLineAbilityMapBounds(learned_0);
                 foreach (var skillLine in skills)
                 {
-                    if (skillLine.AcquireMethod == AbilityLearnType.RewardedFromQuest)
+                    if (skillLine.AcquireMethod == SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel)
                     {
                         found = true;
                         break;

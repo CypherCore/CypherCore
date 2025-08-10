@@ -1860,7 +1860,7 @@ namespace Game.Entities
 
                     foreach (var skillLine in skillLineAbilities)
                     {
-                        if (skillLine.AcquireMethod != AbilityLearnType.OnSkillLearn)
+                        if (skillLine.AcquireMethod != SkillLineAbilityAcquireMethod.AutomaticCharLevel)
                             continue;
 
                         SpellInfo spell = GetSpellInfo(skillLine.Spell, Difficulty.None);
@@ -4650,6 +4650,24 @@ namespace Game.Entities
                 spellInfo._LoadSqrtTargetLimit(5, 0, null, 1, null, null);
             });
 
+            // Ice Nova
+            ApplySpellFix([157997], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(8, 0, null, 2, null, null);
+            });
+
+            // Raze
+            ApplySpellFix([400254], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, null, 2, null, null);
+            });
+
+            // Explosive Shot
+            ApplySpellFix([212680], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, 212431, 1, null, null);
+            });
+
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
@@ -4677,7 +4695,7 @@ namespace Game.Entities
                         if (skillLine.SkillLine != cFamily.SkillLine[0] && skillLine.SkillLine != cFamily.SkillLine[1])
                             continue;
 
-                        if (skillLine.AcquireMethod != AbilityLearnType.OnSkillLearn)
+                        if (skillLine.AcquireMethod != SkillLineAbilityAcquireMethod.AutomaticCharLevel)
                             continue;
 
                         Global.SpellMgr.PetFamilySpellsStorage.Add(cFamily.Id, spellInfo.Id);

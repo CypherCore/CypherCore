@@ -47,11 +47,13 @@ namespace Framework.Constants
         RacialForThePurposeOfTemporaryRaceChange = 0x8000,
     }
 
-    public enum AbilityLearnType : int
+    public enum SkillLineAbilityAcquireMethod : int
     {
-        OnSkillValue = 1, // Spell state will update depending on skill value
-        OnSkillLearn = 2, // Spell will be learned/removed together with entire skill
-        RewardedFromQuest = 4 // Learned as quest reward, also re-learned if missing
+        Learned = 0,
+        AutomaticSkillRank = 1, // Spell state will update depending on skill value
+        AutomaticCharLevel = 2, // Spell will be learned/removed together with entire skill
+        NeverLearned = 3,
+        LearnedOrAutomaticCharLevel = 4,
     }
 
     [Flags]
