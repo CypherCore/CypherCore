@@ -783,6 +783,9 @@ namespace Game
 
             SendPacket(new ResumeComms(ConnectionType.Instance));
 
+            // client will respond to SMSG_RESUME_COMMS with CMSG_QUEUED_MESSAGES_END
+            RegisterTimeSync(SPECIAL_RESUME_COMMS_TIME_SYNC_COUNTER);
+
             AddQueryHolderCallback(DB.Characters.DelayQueryHolder(holder)).AfterComplete(holder => HandlePlayerLogin((LoginQueryHolder)holder));
         }
 
@@ -797,6 +800,12 @@ namespace Game
                 KickPlayer("WorldSession::HandlePlayerLogin Player::LoadFromDB failed");
                 m_playerLoading.Clear();
                 return;
+            }
+
+            if (!_timeSyncClockDeltaQueue.IsEmpty)
+            {
+                pCurrChar.SetPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
+                pCurrChar.SetTransportServerTime((int)_timeSyncClockDelta);
             }
 
             pCurrChar.SetVirtualPlayerRealm(Global.WorldMgr.GetVirtualRealmAddress());

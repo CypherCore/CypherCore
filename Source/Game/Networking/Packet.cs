@@ -29,6 +29,11 @@ namespace Game.Networking
             Log.outDebug(LogFilter.Network, "Received ClientOpcode: {0} From: {1}", GetOpcode(), session != null ? session.GetPlayerInfo() : "Unknown IP");
         }
 
+        public WorldPacket GetWorldPacket()
+        {
+            return _worldPacket;
+        }
+
         protected WorldPacket _worldPacket;
     }
 

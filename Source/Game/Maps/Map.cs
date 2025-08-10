@@ -1767,6 +1767,9 @@ namespace Game.Maps
             UpdateObject packet;
             data.BuildPacket(out packet);
             player.SendPacket(packet);
+
+            // client will respond to SMSG_UPDATE_OBJECT that contains ThisIsYou = true with CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE
+            player.GetSession().RegisterTimeSync(WorldSession.SPECIAL_INIT_ACTIVE_MOVER_TIME_SYNC_COUNTER);
         }
 
         void SendInitTransports(Player player)

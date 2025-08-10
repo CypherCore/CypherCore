@@ -2195,9 +2195,6 @@ namespace Game.Entities
                     }
 
                     SendPacket(transferPending);
-
-                    RemovePlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime);
-                    SetTransportServerTime(0);
                 }
 
                 // remove from old map now

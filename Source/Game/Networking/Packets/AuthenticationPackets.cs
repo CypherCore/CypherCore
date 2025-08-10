@@ -411,6 +411,18 @@ namespace Game.Networking.Packets
         }
     }
 
+    class QueuedMessagesEnd : ClientPacket
+    {
+        public uint Timestamp;
+
+        public QueuedMessagesEnd(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Timestamp = _worldPacket.ReadUInt32();
+        }
+    }
+
     //Structs
     public struct AuthWaitInfo
     {

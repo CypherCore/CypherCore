@@ -25,6 +25,9 @@ namespace Game
 {
     public partial class WorldSession : IDisposable
     {
+        public static uint SPECIAL_INIT_ACTIVE_MOVER_TIME_SYNC_COUNTER = 0xFFFFFFFF;
+        public static uint SPECIAL_RESUME_COMMS_TIME_SYNC_COUNTER      = 0xFFFFFFFE;
+
         public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, uint build, Framework.ClientBuild.ClientBuildVariantId clientBuildVariant, Locale locale, uint recruiter, bool isARecruiter)
         {
             m_muteTime = mute_time;
@@ -888,11 +891,16 @@ namespace Game
             timeSyncRequest.SequenceIndex = _timeSyncNextCounter;
             SendPacket(timeSyncRequest);
 
-            _pendingTimeSyncRequests[_timeSyncNextCounter] = Time.GetMSTime();
+            RegisterTimeSync(_timeSyncNextCounter);
 
             // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
             _timeSyncTimer = _timeSyncNextCounter == 0 ? 5000 : 10000u;
             _timeSyncNextCounter++;
+        }
+
+        public void RegisterTimeSync(uint counter)
+        {
+            _pendingTimeSyncRequests[counter] = Time.GetMSTime();
         }
 
         uint AdjustClientMovementTime(uint time)
@@ -998,7 +1006,7 @@ namespace Game
         CircularBuffer<Tuple<long, uint>> _timeSyncClockDeltaQueue = new(6); // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
         long _timeSyncClockDelta;
 
-        Dictionary<uint, uint> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
+        Dictionary<uint, long> _pendingTimeSyncRequests = new(); // key: counter. value: server time when packet with that counter was sent.
         uint _timeSyncNextCounter;
         uint _timeSyncTimer;
 
