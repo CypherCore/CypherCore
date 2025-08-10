@@ -571,6 +571,7 @@ namespace Game.Entities
                     createInfo.SetCasterGUID(casterGuid);
                     createInfo.SetBaseAmount(info.BaseAmounts);
                     createInfo.SetCastItem(itemGuid, castItemId, castItemLevel);
+                    createInfo.SetStackAmount(stackCount);
 
                     Aura aura = Aura.TryCreate(createInfo);
                     if (aura != null)
@@ -581,7 +582,7 @@ namespace Game.Entities
                             continue;
                         }
 
-                        aura.SetLoadedState(maxDuration, remainTime, remainCharges, stackCount, recalculateMask, info.Amounts);
+                        aura.SetLoadedState(maxDuration, remainTime, remainCharges, recalculateMask, info.Amounts);
                         aura.ApplyForTargets();
                         Log.outInfo(LogFilter.Player, "Added aura spellid {0}, effectmask {1}", spellInfo.Id, key.EffectMask);
                     }

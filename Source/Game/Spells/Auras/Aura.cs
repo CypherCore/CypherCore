@@ -353,7 +353,7 @@ namespace Game.Spells
             m_updateTargetMapInterval = 0;
             m_casterLevel = createInfo.Caster != null ? createInfo.Caster.GetLevel() : m_spellInfo.SpellLevel;
             m_procCharges = 0;
-            m_stackAmount = 1;
+            m_stackAmount = (byte)createInfo.StackAmount;
             m_isRemoved = false;
             m_isSingleTarget = false;
             m_isUsingCharges = false;
@@ -1133,13 +1133,12 @@ namespace Game.Spells
             return key;
         }
 
-        public void SetLoadedState(int maxduration, int duration, int charges, byte stackamount, uint recalculateMask, int[] amount)
+        public void SetLoadedState(int maxduration, int duration, int charges, uint recalculateMask, int[] amount)
         {
             m_maxDuration = maxduration;
             m_duration = duration;
             m_procCharges = (byte)charges;
             m_isUsingCharges = m_procCharges != 0;
-            m_stackAmount = stackamount;
             Unit caster = GetCaster();
             foreach (AuraEffect effect in GetAuraEffects())
             {
@@ -3070,6 +3069,7 @@ namespace Game.Spells
         public uint CastItemId = 0;
         public int CastItemLevel = -1;
         public bool IsRefresh;
+        public int StackAmount = 1;
         public bool ResetPeriodicTimer = true;
 
         internal ObjectGuid _castId;
@@ -3100,6 +3100,8 @@ namespace Game.Spells
         public void SetBaseAmount(int[] bp) { BaseAmount = bp; }
         public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
         public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
+        public void SetIsRefresh(bool isRefresh) { IsRefresh = isRefresh; }
+        public void SetStackAmount(int stackAmount) { StackAmount = stackAmount > 0 ? stackAmount : 1; }
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }
         public void SetAuraEffectMask(uint effMask) { _auraEffectMask = effMask; }
 

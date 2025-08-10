@@ -2354,20 +2354,12 @@ namespace Game.Spells
                         createInfo.SetCastItem(m_castItemGUID, m_castItemEntry, m_castItemLevel);
                         createInfo.SetPeriodicReset(resetPeriodicTimer);
                         createInfo.SetOwnerEffectMask(aura_effmask);
+                        createInfo.SetStackAmount(m_spellValue.AuraStackAmount);
 
                         Aura aura = Aura.TryRefreshStackOrCreate(createInfo, false);
                         if (aura != null)
                         {
                             hitInfo.HitAura = aura.ToUnitAura();
-
-                            // Set aura stack amount to desired value
-                            if (m_spellValue.AuraStackAmount > 1)
-                            {
-                                if (!createInfo.IsRefresh)
-                                    hitInfo.HitAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
-                                else
-                                    hitInfo.HitAura.ModStackAmount(m_spellValue.AuraStackAmount);
-                            }
 
                             hitInfo.HitAura.SetDiminishGroup(hitInfo.DRGroup);
 

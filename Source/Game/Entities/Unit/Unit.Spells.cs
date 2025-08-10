@@ -3245,6 +3245,7 @@ namespace Game.Entities
                             AuraCreateInfo createInfo = new(aura.GetCastId(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
                             createInfo.SetCasterGUID(aura.GetCasterGUID());
                             createInfo.SetBaseAmount(baseDamage);
+                            createInfo.SetStackAmount(stolenCharges);
 
                             Aura newAura = Aura.TryRefreshStackOrCreate(createInfo);
                             if (newAura != null)
@@ -3258,7 +3259,7 @@ namespace Game.Entities
                                     caster.GetSingleCastAuras().Add(aura);
                                 }
                                 // FIXME: using aura.GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
-                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? stolenCharges : aura.GetCharges(), (byte)stolenCharges, recalculateMask, damage);
+                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? stolenCharges : aura.GetCharges(), recalculateMask, damage);
                                 newAura.ApplyForTargets();
                             }
                         }
@@ -4262,7 +4263,7 @@ namespace Game.Entities
                     }
 
                     // try to increase stack amount
-                    foundAura.ModStackAmount(1, AuraRemoveMode.Default, createInfo.ResetPeriodicTimer);
+                    foundAura.ModStackAmount(createInfo.StackAmount, AuraRemoveMode.Default, createInfo.ResetPeriodicTimer);
                     return foundAura;
                 }
             }
