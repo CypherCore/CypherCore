@@ -7827,47 +7827,44 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public void SetSpellValue(SpellValueMod mod, int value)
+        public void SetSpellValue(CastSpellExtraArgsInit.SpellValueOverride value)
         {
-            if (mod < SpellValueMod.IntEnd)
+            if (value.Type >= (int)SpellValueMod.BasePoint0 && value.Type < (int)SpellValueMod.BasePointEnd)
             {
-                m_spellValue.EffectBasePoints[(int)mod] = value;
-                m_spellValue.CustomBasePointsMask |= 1u << (int)mod;
+                m_spellValue.EffectBasePoints[value.Type - (int)SpellValueMod.BasePoint0] = value.IntValue;
+                m_spellValue.CustomBasePointsMask |= 1u << (value.Type - (int)SpellValueMod.BasePoint0);
                 return;
             }
 
-            switch (mod)
+            switch ((SpellValueMod)value.Type)
             {
                 case SpellValueMod.MaxTargets:
-                    m_spellValue.MaxAffectedTargets = (uint)value;
+                    m_spellValue.MaxAffectedTargets = (uint)value.IntValue;
                     break;
                 case SpellValueMod.AuraStack:
-                    m_spellValue.AuraStackAmount = value;
+                    m_spellValue.AuraStackAmount = value.IntValue;
                     break;
                 case SpellValueMod.Duration:
-                    m_spellValue.Duration = value;
+                    m_spellValue.Duration = value.IntValue;
                     break;
                 case SpellValueMod.ParentSpellTargetCount:
-                    m_spellValue.ParentSpellTargetCount = value;
+                    m_spellValue.ParentSpellTargetCount = value.IntValue;
                     break;
                 case SpellValueMod.ParentSpellTargetIndex:
-                    m_spellValue.ParentSpellTargetIndex = value;
+                    m_spellValue.ParentSpellTargetIndex = value.IntValue;
                     break;
             }
-        }
 
-        public void SetSpellValue(SpellValueModFloat mod, float value)
-        {
-            switch (mod)
-            {
+            switch ((SpellValueModFloat)value.Type)
+            { 
                 case SpellValueModFloat.RadiusMod:
-                    m_spellValue.RadiusMod = value;
+                    m_spellValue.RadiusMod = value.FloatValue;
                     break;
                 case SpellValueModFloat.CritChance:
-                    m_spellValue.CriticalChance = value;
+                    m_spellValue.CriticalChance = value.FloatValue;
                     break;
                 case SpellValueModFloat.DurationPct:
-                    m_spellValue.DurationMul = value / 100.0f;
+                    m_spellValue.DurationMul = value.FloatValue / 100.0f;
                     break;
                 default:
                     break;

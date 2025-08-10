@@ -136,7 +136,7 @@ namespace Scripts.Spells.Monk
                 calmingCoalescence.GetBase().Remove();
             }
 
-            GetSpell().SetSpellValue(SpellValueMod.BasePoint0, absorb);
+            GetSpell().SetSpellValue(new((int)SpellValueMod.BasePoint0, absorb));
         }
 
         public override void Register()

@@ -2558,13 +2558,8 @@ namespace Game.Entities
             }
 
             Spell spell = new(this, info, args.TriggerFlags, args.OriginalCaster, args.OriginalCastId);
-            foreach (var spellOverride in args.SpellValueOverrides)
-            {
-                if (spellOverride.Type < (int)SpellValueMod.IntEnd)
-                    spell.SetSpellValue((SpellValueMod)spellOverride.Type, spellOverride.IntValue);
-                else
-                    spell.SetSpellValue((SpellValueModFloat)spellOverride.Type, spellOverride.FloatValue);
-            }
+            foreach (var value in args.SpellValueOverrides)
+                spell.SetSpellValue(value);
 
             spell.m_CastItem = args.CastItem;
             if (args.OriginalCastItemLevel.HasValue)
