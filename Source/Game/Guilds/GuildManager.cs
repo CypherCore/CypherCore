@@ -442,13 +442,13 @@ namespace Game
 
                 if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
                 {
-                    Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing item entry {0}", reward.ItemID);
+                    Log.outError(LogFilter.Sql, "Guild rewards constains not existing item entry {0}", reward.ItemID);
                     continue;
                 }
 
                 if (reward.MinGuildRep >= (int)ReputationRank.Max)
                 {
-                    Log.outError(LogFilter.ServerLoading, "Guild rewards contains wrong reputation standing {0}, max is {1}", reward.MinGuildRep, (int)ReputationRank.Max - 1);
+                    Log.outError(LogFilter.Sql, "Guild rewards contains wrong reputation standing {0}, max is {1}", reward.MinGuildRep, (int)ReputationRank.Max - 1);
                     continue;
                 }
 
@@ -462,7 +462,7 @@ namespace Game
                         uint requiredAchievementId = reqAchievementResult.Read<uint>(0);
                         if (!CliDB.AchievementStorage.ContainsKey(requiredAchievementId))
                         {
-                            Log.outError(LogFilter.ServerLoading, "Guild rewards constains not existing achievement entry {0}", requiredAchievementId);
+                            Log.outError(LogFilter.Sql, "Guild rewards constains not existing achievement entry {0}", requiredAchievementId);
                             continue;
                         }
 

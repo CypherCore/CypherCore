@@ -804,7 +804,7 @@ namespace Game
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellItem.Auctioneer, NPCFlags.Auctioneer, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleAuctionSellItem - Unit (%s) not found or you can't interact with him.", sellItem.Auctioneer.ToString());
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Unit ({sellItem.Auctioneer}) not found or you can't interact with him.");
                 return;
             }
 
@@ -812,7 +812,7 @@ namespace Game
             AuctionHouseRecord auctionHouseEntry = Global.AuctionHouseMgr.GetAuctionHouseEntry(creature.GetFaction(), ref houseId);
             if (auctionHouseEntry == null)
             {
-                Log.outError(LogFilter.Network, "WORLD: HandleAuctionSellItem - Unit (%s) has wrong faction.", sellItem.Auctioneer.ToString());
+                Log.outError(LogFilter.Network, $"WORLD: HandleAuctionSellItem - Unit ({sellItem.Auctioneer}) has wrong faction.");
                 return;
             }
 
@@ -880,7 +880,7 @@ namespace Game
 
             auction.Items.Add(item);
 
-            Log.outInfo(LogFilter.Network, $"CMSG_AuctionAction.SellItem: {_player.GetGUID()} {_player.GetName()} is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
+            Log.outInfo(LogFilter.Network, $"CMSG_AUCTION_SELL_ITEM: {_player.GetGUID()} {_player.GetName()} is selling item {item.GetGUID()} {item.GetTemplate().GetName()} " +
                 $"to auctioneer {creature.GetGUID()} with count {item.GetCount()} with initial bid {sellItem.MinBid} with buyout {sellItem.BuyoutPrice} and with time {auctionTime.TotalSeconds} " +
                 $"(in sec) in auctionhouse {auctionHouse.GetAuctionHouseId()}");
 
