@@ -3013,10 +3013,6 @@ namespace Game.Entities
             if (oldData == data)
                 return;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
-            if (quest != null)
-                Global.ScriptMgr.OnQuestObjectiveChange(this, quest, objective, oldData, data);
-
             // Add to save
             m_QuestStatusSave[objective.QuestID] = QuestSaveType.Default;
 
@@ -3027,6 +3023,10 @@ namespace Game.Entities
                 SetQuestSlotObjectiveFlag(status.Slot, objective.StorageIndex);
             else
                 RemoveQuestSlotObjectiveFlag(status.Slot, objective.StorageIndex);
+
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
+            if (quest != null)
+                Global.ScriptMgr.OnQuestObjectiveChange(this, quest, objective, oldData, data);
         }
 
         public bool IsQuestObjectiveCompletable(ushort slot, Quest quest, QuestObjective objective)
