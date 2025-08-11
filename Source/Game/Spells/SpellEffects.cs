@@ -414,7 +414,7 @@ namespace Game.Spells
         [SpellEffectHandler(SpellEffectName.ForceCast2)]
         void EffectForceCast()
         {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
                 return;
 
             if (unitTarget == null)
