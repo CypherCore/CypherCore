@@ -448,7 +448,6 @@ namespace Game.Spells
                     {
                         CastSpellExtraArgs args1 = new(TriggerCastFlags.FullMask);
                         args1.SetOriginalCaster(m_originalCasterGUID);
-                        args1.SetTriggeringSpell(this);
                         args1.AddSpellMod(SpellValueMod.BasePoint0, damage);
                         unitTarget.CastSpell(unitTarget, spellInfo.Id, args1);
                         return;
@@ -460,13 +459,11 @@ namespace Game.Spells
             {
                 case 72298: // Malleable Goo Summon
                     unitTarget.CastSpell(unitTarget, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                        .SetOriginalCaster(m_originalCasterGUID)
-                        .SetTriggeringSpell(this));
+                        .SetOriginalCaster(m_originalCasterGUID));
                     return;
             }
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
-            args.SetTriggeringSpell(this);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
                 for (int i = 0; i < spellInfo.GetEffects().Count; ++i)
