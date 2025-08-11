@@ -1655,10 +1655,10 @@ namespace Game.Entities
 
             mSkillLineAbilityMap.Clear();
 
-            foreach (var skill in CliDB.SkillLineAbilityStorage.Values)
-                mSkillLineAbilityMap.Add(skill.Spell, skill);
+            foreach (var (_, skillLineAbility) in CliDB.SkillLineAbilityStorage)
+                mSkillLineAbilityMap.Add(skillLineAbility.Spell, skillLineAbility);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} SkillLineAbility MultiMap Data in {1} ms", mSkillLineAbilityMap.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mSkillLineAbilityMap.Count} SkillLineAbility MultiMap Data in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadSpellPetAuras()
@@ -4515,15 +4515,19 @@ namespace Game.Entities
                     spellInfo.MaxAffectedTargets = 1;
             }
 
-            SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(121);
-            if (properties != null)
+            DB2HotfixGenerator<SummonPropertiesRecord> summonProperties = new(CliDB.SummonPropertiesStorage);
+            summonProperties.ApplyHotfix(121, properties =>
+            {
                 properties.Title = SummonTitle.Totem;
-            properties = CliDB.SummonPropertiesStorage.LookupByKey(647); // 52893
-            if (properties != null)
+            });
+            summonProperties.ApplyHotfix(647, properties => // 52893
+            {
                 properties.Title = SummonTitle.Totem;
-            properties = CliDB.SummonPropertiesStorage.LookupByKey(628);
-            if (properties != null) // Hungry Plaguehound
+            });
+            summonProperties.ApplyHotfix(628, properties => // Hungry Plaguehound
+            {
                 properties.Control = SummonCategory.Pet;
+            });
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo corrections in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }

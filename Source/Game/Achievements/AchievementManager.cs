@@ -1156,10 +1156,14 @@ namespace Game.Achievements
                 ++count;
             }
 
+            DB2HotfixGenerator<AchievementRecord> hotfixes = new(CliDB.AchievementStorage);
+
             // Once Bitten, Twice Shy (10 player) - Icecrown Citadel
-            AchievementRecord achievement1 = CliDB.AchievementStorage.LookupByKey(4539);
-            if (achievement1 != null)
-                achievement1.InstanceID = 631;    // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
+            // Correct map requirement (currently has Ulduar); 6.0.3 note - it STILL has ulduar requirement
+            hotfixes.ApplyHotfix(4539, achievement =>
+            {
+                achievement.InstanceID = 631;
+            });
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} achievement references in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }

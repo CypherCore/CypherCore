@@ -801,6 +801,7 @@ namespace Game.DataStorage
                 push.Records.Add(hotfixRecord);
                 push.AvailableLocalesMask |= hotfixRecord.AvailableLocalesMask;
 
+                _maxHotfixId = Math.Max(_maxHotfixId, id);
                 deletedRecords[(tableHash, recordId)] = status == HotfixRecord.Status.RecordRemoved;
 
                 ++count;
@@ -958,6 +959,20 @@ namespace Game.DataStorage
         public uint GetEmptyAnimStateID()
         {
             return AnimationDataStorage.GetNumRows();
+        }
+
+        public void InsertNewHotfix(uint tableHash, uint recordId)
+        {
+            HotfixRecord hotfixRecord = new();
+            hotfixRecord.TableHash = tableHash;
+            hotfixRecord.RecordID = (int)recordId;
+            hotfixRecord.ID.PushID = (int)++_maxHotfixId;
+            hotfixRecord.ID.UniqueID = RandomHelper.Rand32();
+            hotfixRecord.AvailableLocalesMask = 0xDFF;
+
+            HotfixPush push = _hotfixData[hotfixRecord.ID.PushID];
+            push.Records.Add(hotfixRecord);
+            push.AvailableLocalesMask |= hotfixRecord.AvailableLocalesMask;
         }
 
         public List<uint> GetAreasForGroup(uint areaGroupId)
@@ -2479,6 +2494,8 @@ namespace Game.DataStorage
         public static byte[] HordeTaxiNodesMask;
         public static byte[] AllianceTaxiNodesMask;
         public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
+
+        int _maxHotfixId;
     }
 
     class UiMapBounds

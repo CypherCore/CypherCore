@@ -1120,6 +1120,21 @@ namespace Game
                     }
                     break;
                 }
+                case ConditionSourceType.SkillLineAbility:
+                {
+                    var skillLineAbility = CliDB.SkillLineAbilityStorage.LookupByKey(cond.SourceEntry);
+                    if (skillLineAbility == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond} SourceEntry in `condition` table, does not exist in SkillLineAbility.db2, ignoring.");
+                        return false;
+                    }
+                    if (skillLineAbility.AcquireMethod != SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond} in SkillLineAbility.db2 does not have AcquireMethod = {SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel} (LearnedOrAutomaticCharLevel), ignoring.");
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.GossipMenu:
                 case ConditionSourceType.GossipMenuOption:
                 case ConditionSourceType.SmartEvent:
@@ -2712,8 +2727,8 @@ namespace Game
                 }
                 case WorldStateExpressionValueType.WorldState:
                 {
-                    uint worldStateId = buffer.ReadUInt32();
-                    value = Global.WorldStateMgr.GetValue((int)worldStateId, map);
+                    int worldStateId = buffer.ReadInt32();
+                    value = Global.WorldStateMgr.GetValue(worldStateId, map);
                     break;
                 }
                 case WorldStateExpressionValueType.Function:

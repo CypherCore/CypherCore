@@ -1664,8 +1664,10 @@ namespace Game.Entities
                     case SkillLineAbilityAcquireMethod.AutomaticCharLevel:
                         break;
                     case SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel:
-                        if (!ability.HasFlag(SkillLineAbilityFlags.CanFallbackToLearnedOnSkillLearn) ||
-                            !spellInfo.MeetsFutureSpellPlayerCondition(this))
+                        // Treat as AutomaticCharLevel when conditions are met, otherwise treat it as Learned (trainer or quest)
+                        if (spellInfo.ShowFutureSpellPlayerConditionID != 0 && !ConditionManager.IsPlayerMeetingCondition(this, spellInfo.ShowFutureSpellPlayerConditionID))
+                            continue;
+                        if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.SkillLineAbility, ability.Id, this))
                             continue;
                         break;
                     default:

@@ -105,6 +105,7 @@ namespace Framework.Constants
         ObjectIdVisibility = 32,
         SpawnGroup = 33,
         PlayerCondition = 34,
+        SkillLineAbility = 35,
 
         MaxDbAllowed,
         ReferenceCondition = MaxDbAllowed,
