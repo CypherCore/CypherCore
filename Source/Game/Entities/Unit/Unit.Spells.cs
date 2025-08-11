@@ -981,7 +981,7 @@ namespace Game.Entities
                 }
 
                 return null;
-            };
+            }
 
             SpellInfo newInfo = findMatchingAuraEffectIn(AuraType.OverrideActionbarSpells, ref triggerFlag);
             if (newInfo != null)
@@ -1113,12 +1113,9 @@ namespace Game.Entities
         public Spell FindCurrentSpellBySpellId(uint spell_id)
         {
             foreach (var spell in m_currentSpells.Values)
-            {
-                if (spell == null)
-                    continue;
-                if (spell.m_spellInfo.Id == spell_id)
+                if (spell != null && spell.m_spellInfo.Id == spell_id)
                     return spell;
-            }
+
             return null;
         }
 
@@ -1936,7 +1933,7 @@ namespace Game.Entities
 
             // generic spells are cast when they are not finished and not delayed
             var currentSpell = GetCurrentSpell(CurrentSpellTypes.Generic);
-            if (currentSpell != null && (currentSpell.GetState() != SpellState.Finished) && (withDelayed || currentSpell.GetState() != SpellState.Delayed))
+            if (currentSpell != null && (currentSpell.GetState() != SpellState.Finished) && (withDelayed || currentSpell.GetState() != SpellState.Launched))
             {
                 if (!skipInstant || currentSpell.GetCastTime() != 0)
                 {
@@ -2630,8 +2627,8 @@ namespace Game.Entities
             Log.outDebug(LogFilter.Unit, "Interrupt spell for unit {0}", GetEntry());
             Spell spell = m_currentSpells.LookupByKey(spellType);
             if (spell != null
-                && (withDelayed || spell.GetState() != SpellState.Delayed)
-                && (withInstant || spell.GetCastTime() > 0 || spell.GetState() == SpellState.Casting))
+                && (withDelayed || spell.GetState() != SpellState.Launched)
+                && (withInstant || spell.GetCastTime() > 0 || spell.GetState() == SpellState.Channeling))
             {
                 // for example, do not let self-stun aura interrupt itself
                 if (!spell.IsInterruptable())
@@ -2667,7 +2664,7 @@ namespace Game.Entities
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (spell != null)
             {
-                if (spell.GetState() == SpellState.Casting)
+                if (spell.GetState() == SpellState.Channeling)
                 {
                     m_interruptMask |= spell.m_spellInfo.ChannelInterruptFlags;
                     m_interruptMask2 |= spell.m_spellInfo.ChannelInterruptFlags2;
@@ -3117,7 +3114,7 @@ namespace Game.Entities
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (spell != null)
             {
-                if (spell.GetState() == SpellState.Casting
+                if (spell.GetState() == SpellState.Channeling
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
                     && (source == null || spell.GetSpellInfo().Id != source.Id)
                     && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), true, source))
@@ -3150,7 +3147,7 @@ namespace Game.Entities
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (spell != null)
             {
-                if (spell.GetState() == SpellState.Casting
+                if (spell.GetState() == SpellState.Channeling
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
                     && (source == null || spell.GetSpellInfo().Id != source.Id)
                     && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), true, source))

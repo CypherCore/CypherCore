@@ -431,12 +431,12 @@ namespace Framework.Constants
 
     public enum SpellState
     {
-        None = 0,
+        Null = 0,
         Preparing = 1,
-        Casting = 2,
-        Finished = 3,
-        Idle = 4,
-        Delayed = 5
+        Launched = 2,
+        Channeling = 3,
+        Finished = 4,
+        Idle = 5
     }
 
     public enum SpellSchools

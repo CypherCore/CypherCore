@@ -1750,13 +1750,13 @@ namespace Game.Entities
                 RemoveOwnedAura(pair);
             }
 
-            // currently casted spells can be dependent from item
+            // currently cast spells can be dependent from item
             for (CurrentSpellTypes i = 0; i < CurrentSpellTypes.Max; ++i)
             {
                 Spell spell = GetCurrentSpell(i);
                 if (spell != null)
-                    if (spell.GetState() != SpellState.Delayed && !HasItemFitToSpellRequirements(spell.m_spellInfo, pItem))
-                        InterruptSpell(i);
+                    if (!HasItemFitToSpellRequirements(spell.m_spellInfo, pItem))
+                        InterruptSpell(i, false);
             }
         }
 

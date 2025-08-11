@@ -1917,7 +1917,7 @@ namespace Game.Spells
                 target.SetSilencedSchoolMask((SpellSchoolMask)GetMiscValue());
 
                 // call functions which may have additional effects after changing state of unit
-                // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
+                // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_NO_ACTIONS
                 for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
                 {
                     Spell spell = target.GetCurrentSpell(i);

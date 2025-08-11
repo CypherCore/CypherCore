@@ -2748,13 +2748,12 @@ namespace Game.Spells
             {
                 case SpellState.Preparing:
                     CancelGlobalCooldown();
-                    goto case SpellState.Delayed;
-                case SpellState.Delayed:
+                    goto case SpellState.Launched;
+                case SpellState.Launched:
                     SendInterrupted(0);
                     SendCastResult(SpellCastResult.Interrupted);
                     break;
-
-                case SpellState.Casting:
+                case SpellState.Channeling:
                     foreach (var ihit in m_UniqueTargetInfo)
                     {
                         if (ihit.MissCondition == SpellMissInfo.None)
@@ -2771,7 +2770,6 @@ namespace Game.Spells
 
                     m_appliedMods.Clear();
                     break;
-
                 default:
                     break;
             }
@@ -3054,7 +3052,7 @@ namespace Game.Spells
 
                 // Okay, maps created, now prepare flags
                 m_immediateHandled = false;
-                m_spellState = SpellState.Delayed;
+                m_spellState = SpellState.Launched;
                 SetDelayStart(0);
 
                 unitCaster = m_caster.ToUnit();
@@ -3222,7 +3220,7 @@ namespace Game.Spells
 
                 if (duration != 0)
                 {
-                    m_spellState = SpellState.Casting;
+                    m_spellState = SpellState.Channeling;
                     // GameObjects shouldn't cast channeled spells
                     m_caster.ToUnit()?.AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
                 }
@@ -3254,7 +3252,7 @@ namespace Game.Spells
             // Remove used for cast item if need (it can be already NULL after TakeReagents call
             TakeCastItem();
 
-            if (m_spellState != SpellState.Casting)
+            if (m_spellState != SpellState.Channeling)
                 Finish();                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
         }
 
@@ -3472,7 +3470,7 @@ namespace Game.Spells
                         Cast(m_casttime == 0);
                     break;
                 }
-                case SpellState.Casting:
+                case SpellState.Channeling:
                 {
                     if (m_timer != 0)
                     {
@@ -7287,7 +7285,7 @@ namespace Game.Spells
             if (unitCaster == null)
                 return;
 
-            if (m_spellState != SpellState.Casting)
+            if (m_spellState != SpellState.Channeling)
                 return;
 
             if (IsDelayableNoMore())                                    // Spells may only be delayed twice
@@ -8415,7 +8413,7 @@ namespace Game.Spells
                         if (m_casttime > 0 && m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
                             return SpellCastResult.Moving;
                     }
-                    else if (GetState() == SpellState.Casting && !m_spellInfo.IsMoveAllowedChannel())
+                    else if (GetState() == SpellState.Channeling && !m_spellInfo.IsMoveAllowedChannel())
                         return SpellCastResult.Moving;
                 }
             }
@@ -8909,7 +8907,7 @@ namespace Game.Spells
             if (unit.IsAlive() != IsAlive && !spell.m_spellInfo.HasAttribute(SpellAttr9.ForceCorpseTarget))
                 return;
 
-            if (!spell.m_spellInfo.HasAttribute(SpellAttr8.IgnoreSanctuary) && spell.GetState() == SpellState.Delayed && !spell.IsPositive() && (GameTime.GetGameTimeMS() - TimeDelay) <= unit.LastSanctuaryTime)
+            if (!spell.m_spellInfo.HasAttribute(SpellAttr8.IgnoreSanctuary) && spell.GetState() == SpellState.Launched && !spell.IsPositive() && (GameTime.GetGameTimeMS() - TimeDelay) <= unit.LastSanctuaryTime)
                 return;                                             // No missinfo in that case
 
             if (_spellHitTarget != null)
@@ -9652,7 +9650,7 @@ namespace Game.Spells
                     // event will be re-added automatically at the end of routine)
                     break;
                 }
-                case SpellState.Delayed:
+                case SpellState.Launched:
                 {
                     // first, check, if we have just started
                     if (m_Spell.GetDelayStart() != 0)
