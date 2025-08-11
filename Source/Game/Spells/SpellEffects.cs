@@ -3894,6 +3894,8 @@ namespace Game.Spells
                 dispel_list.RemoveAt(0);
             }
 
+            CallScriptSuccessfulDispel(effectInfo.EffectIndex);
+
             m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Dispel;
         }
 
