@@ -46,6 +46,8 @@ namespace Framework.Constants
         GuildName = 0x1000,
         Description = 0x2000,
         Name = 0x4000,
+        ChinaHarmfulMinors = 0x8000,
+        Disruption = 0x10000,
     }
 
     public enum GMTicketSystemStatus

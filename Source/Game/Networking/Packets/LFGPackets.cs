@@ -265,7 +265,7 @@ namespace Game.Networking.Packets
         {
             Ticket.Write(_worldPacket);
 
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteInt32(Result);
             _worldPacket.WriteUInt8(ResultDetail);
             _worldPacket.WriteInt32(BlackList.Count);
             _worldPacket.WriteInt32(BlackListNames.Count);
@@ -282,7 +282,7 @@ namespace Game.Networking.Packets
         }
 
         public RideTicket Ticket = new();
-        public byte Result;
+        public int Result;
         public byte ResultDetail;
         public List<LFGBlackListPkt> BlackList = new();
         public List<string> BlackListNames = new();

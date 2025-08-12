@@ -20,11 +20,16 @@ namespace Game.DataStorage
         public byte TierID;
         public byte Flags;
         public byte ColumnIndex;
+        public ushort TabID;
         public sbyte ClassID;
         public ushort SpecID;
         public uint SpellID;
         public uint OverridesSpellID;
-        public byte[] CategoryMask = new byte[2];
+        public uint RequiredSpellID;
+        public int[] CategoryMask = new int[2];
+        public uint[] SpellRank = new uint[2];
+        public uint[] PrereqTalent = new uint[2];
+        public byte[] PrereqRank = new byte[2];
     }
 
     public sealed class TaxiNodesRecord
@@ -98,7 +103,7 @@ namespace Game.DataStorage
         public string SourceText;
         public uint Id;
         public uint ItemID;
-        public byte Flags;
+        public int Flags;
         public sbyte SourceTypeEnum;
     }
 

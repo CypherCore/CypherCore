@@ -399,6 +399,7 @@ namespace Game.Networking.Packets
         public uint QuestFlags;
         public uint QuestFlagsEx;
         public uint QuestFlagsEx2;
+        public uint QuestFlagsEx3;
 
         public void Write(WorldPacket data)
         {
@@ -409,6 +410,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(QuestFlags);
             data.WriteUInt32(QuestFlagsEx);
             data.WriteUInt32(QuestFlagsEx2);
+            data.WriteUInt32(QuestFlagsEx3);
 
             data.WriteBit(Repeatable);
             data.WriteBit(ResetByScheduler);

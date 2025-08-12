@@ -63,6 +63,10 @@ namespace Framework.Constants
         Spell = 5,
         Unlock = 6,
         Companion = 7,
+        QuestlineUnlock = 8,
+        QuestlineReward = 9,
+        QuestlineUnlockPart = 10,
+
         Max
     }
 

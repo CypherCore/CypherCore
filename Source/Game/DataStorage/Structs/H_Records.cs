@@ -13,7 +13,7 @@ namespace Game.DataStorage
         public int LegacyUpgradedItemID;
         public uint StaticUpgradedItemID;
         public sbyte SourceTypeEnum;
-        public byte Flags;
+        public int Flags;
         public int LegacyItemID;
         public int[] UpgradeItemID = new int[6];
         public ushort[] UpgradeItemBonusListID = new ushort[6];

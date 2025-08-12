@@ -129,7 +129,7 @@ namespace Game.DataStorage
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
         public uint Id;
-        public byte PrimaryStatPriority;
+        public sbyte PrimaryStatPriority;
         public PowerType DisplayPower;
         public byte RangedAttackPowerPerAgility;
         public byte AttackPowerPerAgility;
@@ -532,7 +532,7 @@ namespace Game.DataStorage
         public uint FootstepCameraEffectID;
         public uint DeathThudCameraEffectID;
         public uint SoundID;
-        public uint SizeClass;
+        public sbyte SizeClass;
         public float CollisionWidth;
         public float CollisionHeight;
         public float WorldEffectScale;

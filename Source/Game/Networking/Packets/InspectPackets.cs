@@ -288,7 +288,7 @@ namespace Game.Networking.Packets
         public int Tier;
         public int WeeklyBestTier;
         public int SeasonBestRating;
-        public int SeasonBestTierEnum;
+        public byte SeasonBestTierEnum;
         public int RoundsSeasonPlayed;
         public int RoundsSeasonWon;
         public int RoundsWeeklyPlayed;
@@ -311,7 +311,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Tier);
             data.WriteInt32(WeeklyBestTier);
             data.WriteInt32(SeasonBestRating);
-            data.WriteInt32(SeasonBestTierEnum);
+            data.WriteUInt8(SeasonBestTierEnum);
             data.WriteInt32(RoundsSeasonPlayed);
             data.WriteInt32(RoundsSeasonWon);
             data.WriteInt32(RoundsWeeklyPlayed);

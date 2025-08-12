@@ -2965,7 +2965,9 @@ namespace Game.Entities
                         PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
                         PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
                         PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker,
-                        PlayerInteractionType.AccountBanker, PlayerInteractionType.ProfessionRespec
+                        PlayerInteractionType.AccountBanker, PlayerInteractionType.ProfessionRespec,PlayerInteractionType.PlaceholderType72,
+                        PlayerInteractionType.PlaceholderType75, PlayerInteractionType.PlaceholderType76, PlayerInteractionType.GuildRename,
+                        PlayerInteractionType.PlaceholderType77, PlayerInteractionType.ItemUpgrade
                     };
 
                     PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
@@ -4962,7 +4964,7 @@ namespace Game.Entities
             if (playerChoiceLocale != null)
                 ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
 
-            displayPlayerChoice.CloseChoiceFrame = false;
+            displayPlayerChoice.InfiniteRange = false;
             displayPlayerChoice.HideWarboardHeader = playerChoice.HideWarboardHeader;
             displayPlayerChoice.KeepOpenAfterChoice = playerChoice.KeepOpenAfterChoice;
 
@@ -5066,7 +5068,6 @@ namespace Game.Entities
                     var mawPower = new Networking.Packets.PlayerChoiceResponseMawPower();
                     mawPower.TypeArtFileID = playerChoiceResponse.MawPower.Value.TypeArtFileID;
                     mawPower.Rarity = playerChoiceResponse.MawPower.Value.Rarity;
-                    mawPower.RarityColor = playerChoiceResponse.MawPower.Value.RarityColor;
                     mawPower.SpellID = playerChoiceResponse.MawPower.Value.SpellID;
                     mawPower.MaxStacks = playerChoiceResponse.MawPower.Value.MaxStacks;
 

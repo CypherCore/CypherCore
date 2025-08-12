@@ -158,7 +158,7 @@ namespace Game.DataStorage
         public string ClassName;
         public sbyte ClassID;
         public float PriceModifier;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class ItemContextPickerEntryRecord
@@ -225,7 +225,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort RequiredArenaRating;
         public byte ArenaBracket;                                             // arena slot restrictions (min slot value)
-        public byte Flags;
+        public int Flags;
         public byte MinFactionID;
         public int MinReputation;
         public byte RequiredAchievement;                                      // required personal arena rating

@@ -1103,6 +1103,7 @@ namespace Framework.Constants
         DontDisplayIfZero = 0x20, // NYI
         ScaleMaxQuantityBySeasonWeeks = 0x40, // NYI
         ScaleMaxQuantityByWeeksSinceStart = 0x80, // NYI
+        ForceMaxQuantityOnConversion = 0x100, // NYI
     }
 
     [Flags]
@@ -1269,7 +1270,7 @@ namespace Framework.Constants
     public enum ContentTuningFlag
     {
         DisabledForItem = 0x04,
-        Horde = 0x8,
+        Horde = 0x08,
         Alliance = 0x10
     }
 
@@ -2034,6 +2035,14 @@ namespace Framework.Constants
         CharacterBanker = 67,
         AccountBanker = 68,
         ProfessionRespec = 69,
+        PlaceholderType71 = 70,
+        PlaceholderType72 = 71,
+        PlaceholderType73 = 72,
+        PlaceholderType74 = 73,
+        PlaceholderType75 = 74,
+        PlaceholderType76 = 75,
+        GuildRename = 76,
+        PlaceholderType77 = 77,
     }
 
     [Flags]
@@ -2885,6 +2894,14 @@ namespace Framework.Constants
         ContentTuningPvpItemLevelHealthScaling = 13,
         ContentTuningPvpLevelDamageScaling = 14,
         ContentTuningPvpItemLevelDamageScaling = 15,
+
+        ArmorItemLevelDiminishing = 18,
+
+        ChallengeModeHealth = 21,
+        ChallengeModeDamage = 22,
+        MythicPlusEndOfRunGearSequenceLevel = 23,
+
+        SpellAreaEffectWarningRadius = 26,  // ground spell effect warning circle radius (based on spell radius)
     }
 
     public enum BattlePetSpeciesFlags : int

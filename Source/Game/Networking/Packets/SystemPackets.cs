@@ -102,7 +102,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(GroupFinderEnabled);
             _worldPacket.WriteBit(IsPremadeGroupEnabled);
-            _worldPacket.WriteBit(UseActivePlayerDataQuestCompleted);
             _worldPacket.WriteBit(false); // unused 10.2.7
             _worldPacket.WriteBit(GuildEventsEditsEnabled);
             _worldPacket.WriteBit(GuildTradeSkillsEnabled);
@@ -110,8 +109,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(BNSendWhisperUseV2Services);
             _worldPacket.WriteBit(BNSendGameDataUseV2Services);
             _worldPacket.WriteBit(IsAccountCurrencyTransferEnabled);
-
             _worldPacket.WriteBit(false); // unused 11.0.7
+
             _worldPacket.WriteBit(LobbyMatchmakerQueueFromMainlineEnabled);
             _worldPacket.WriteBit(CanSendLobbyMatchmakerPartyCustomizations);
             _worldPacket.WriteBit(AddonProfilerEnabled);
@@ -215,7 +214,6 @@ namespace Game.Networking.Packets
         public bool SellAllJunkEnabled;
         public bool GroupFinderEnabled = true;  // classic only
         public bool IsPremadeGroupEnabled = true;  // classic only
-        public bool UseActivePlayerDataQuestCompleted = false; ///< Uses ActivePlayerData::QuestCompleted (legacy) to store completed quest bits instead of ActivePlayerData::BitVectors[9]
         public bool GuildEventsEditsEnabled = true;
         public bool GuildTradeSkillsEnabled = true;
         public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService

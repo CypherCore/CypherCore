@@ -492,7 +492,9 @@ namespace Game
             {
                 MirrorImageComponentedData mirrorImageComponentedData = new();
                 mirrorImageComponentedData.UnitGUID = guid;
-                mirrorImageComponentedData.DisplayID = (int)creator.GetDisplayId();
+                var chrModel = Global.DB2Mgr.GetChrModel(creator.GetRace(), creator.GetGender());
+                if (chrModel != null)
+                    mirrorImageComponentedData.ChrModelID = (int)chrModel.Id;
                 mirrorImageComponentedData.RaceID = (byte)creator.GetRace();
                 mirrorImageComponentedData.Gender = (byte)creator.GetGender();
                 mirrorImageComponentedData.ClassID = (byte)creator.GetClass();

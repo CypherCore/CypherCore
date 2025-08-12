@@ -89,12 +89,12 @@ namespace Game.DataStorage
         public float CameraEnteringZoom;
         public float CameraSeatZoomMin;
         public float CameraSeatZoomMax;
-        public short EnterAnimKitID;
-        public short RideAnimKitID;
-        public short ExitAnimKitID;
-        public short VehicleEnterAnimKitID;
-        public short VehicleRideAnimKitID;
-        public short VehicleExitAnimKitID;
+        public int EnterAnimKitID;
+        public int RideAnimKitID;
+        public int ExitAnimKitID;
+        public int VehicleEnterAnimKitID;
+        public int VehicleRideAnimKitID;
+        public int VehicleExitAnimKitID;
         public short CameraModeID;
 
         public bool HasFlag(VehicleSeatFlags flag) { return (Flags & (int)flag) != 0; }

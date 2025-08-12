@@ -65,6 +65,7 @@ namespace Game.DataStorage
         public int Flags;
         public int SpellIconFileID;
         public int Faction;
+        public int Unknown1115;
     }
 
     public sealed class DurabilityCostsRecord

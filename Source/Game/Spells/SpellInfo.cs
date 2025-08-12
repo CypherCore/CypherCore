@@ -121,7 +121,7 @@ namespace Game.Spells
             if (_castreq != null)
             {
                 RequiresSpellFocus = _castreq.RequiresSpellFocus;
-                FacingCasterFlags = _castreq.FacingCasterFlags;
+                FacingCasterFlags = (uint)_castreq.FacingCasterFlags;
                 RequiredAreasID = _castreq.RequiredAreasID;
             }
 

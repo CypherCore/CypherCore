@@ -156,6 +156,8 @@ namespace Framework.Constants
         AlreadyUsingLfgList = 0x3f, // You Can'T Do That While Using Premade Groups.
         NotLeader = 0x45, // You Are Not The Party Leader.
         Dead = 0x49,
+        FarmLimit = 0x4D, // You or someone in your party has entered too many instances recently. Please wait awhile and try again.
+        NoCrossFactionParties = 0x4E, // Cross-faction groups can't queue for this instance
 
         PartyNotMeetReqs = 6,      // One Or More Party Members Do Not Meet The Requirements For The Chosen Dungeons (Fixme)
     }

@@ -465,6 +465,9 @@ namespace Framework.Constants
         PlayerDataElementCharacterEqual = 390, /*NYI*/ // Player {PlayerDataElementCharacter} is greater than {#Amount}
         PlayerDataElementAccountEqual = 391, /*NYI*/ // Player {PlayerDataElementAccount} is greater than {#Amount}
         PlayerHasCompletedQuestOrIsReadyToTurnIn = 392, // Player has previously completed quest "{QuestV2}" or is ready to turn it in
+        PlayerTitle = 393, // Player is currently using "{ChrTitles}" title
+
+        PlayerIsInGuild = 404, // Player is in a guild
     }
 
     public enum CriteriaFailEvent : byte

@@ -788,6 +788,9 @@ namespace Framework.Constants
         Bandage = 7,
         ConsumableOther = 8,
         VantusRune = 9,
+        UtilityCurio = 10,
+        CombatCurio = 11,
+
         Max
     }
 

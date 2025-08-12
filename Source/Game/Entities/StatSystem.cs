@@ -1999,10 +1999,10 @@ namespace Game.Entities
 
         Stats GetPrimaryStat()
         {
-            byte primaryStatPriority;
+            sbyte primaryStatPriority;
             var specialization = GetPrimarySpecializationEntry();
             if (specialization != null)
-                primaryStatPriority = (byte)specialization.PrimaryStatPriority;
+                primaryStatPriority = specialization.PrimaryStatPriority;
             else
                 primaryStatPriority = CliDB.ChrClassesStorage.LookupByKey(GetClass()).PrimaryStatPriority;
 

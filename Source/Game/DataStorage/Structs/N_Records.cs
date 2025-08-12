@@ -37,5 +37,6 @@ namespace Game.DataStorage
         public uint NumTalents;
         public uint NumTalentsDeathKnight;
         public uint NumTalentsDemonHunter;
+        public float Unknown1115;
     }
 }

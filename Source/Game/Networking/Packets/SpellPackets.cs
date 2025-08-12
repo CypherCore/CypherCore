@@ -1063,14 +1063,15 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(UnitGUID);
-            _worldPacket.WriteInt32(DisplayID);
-            _worldPacket.WriteInt32(SpellVisualKitID);
+            _worldPacket.WriteInt32(ChrModelID);
             _worldPacket.WriteUInt8(RaceID);
             _worldPacket.WriteUInt8(Gender);
             _worldPacket.WriteUInt8(ClassID);
             _worldPacket.WriteInt32(Customizations.Count);
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteInt32(ItemDisplayID.Count);
+            _worldPacket.WriteInt32(SpellVisualKitID);
+            _worldPacket.WriteInt32(Unused_1115);
 
             foreach (ChrCustomizationChoice customization in Customizations)
             {
@@ -1083,8 +1084,9 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid UnitGUID;
-        public int DisplayID;
+        public int ChrModelID;
         public int SpellVisualKitID;
+        public int Unused_1115;
         public byte RaceID;
         public byte Gender;
         public byte ClassID;
@@ -2036,6 +2038,7 @@ namespace Game.Networking.Packets
 
             data.WriteUInt32((uint)CastFlags);
             data.WriteUInt32((uint)CastFlagsEx);
+            data.WriteUInt32(CastFlagsEx2);
             data.WriteUInt32(CastTime);
 
             MissileTrajectory.Write(data);
@@ -2087,6 +2090,7 @@ namespace Game.Networking.Packets
         public SpellCastVisual Visual;
         public SpellCastFlags CastFlags;
         public SpellCastFlagsEx CastFlagsEx;
+        public uint CastFlagsEx2;
         public uint CastTime;
         public List<ObjectGuid> HitTargets = new();
         public List<ObjectGuid> MissTargets = new();

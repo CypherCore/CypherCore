@@ -287,6 +287,7 @@ namespace Game.Misc
                     gossipText.QuestFlags = (uint)quest.Flags;
                     gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
                     gossipText.QuestFlagsEx2 = (uint)quest.FlagsEx2;
+                    gossipText.QuestFlagsEx3 = quest.FlagsEx3;
                     gossipText.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
                     gossipText.ResetByScheduler = quest.IsResetByScheduler();
                     gossipText.Important = quest.IsImportant();
@@ -383,6 +384,7 @@ namespace Game.Misc
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
                     text.QuestFlagsEx2 = (uint)quest.FlagsEx2;
+                    text.QuestFlagsEx3 = quest.FlagsEx3;
                     text.Repeatable = quest.IsTurnIn() && quest.IsRepeatable() && !quest.IsDailyOrWeekly() && !quest.IsMonthly();
                     text.ResetByScheduler = quest.IsResetByScheduler();
                     text.Important = quest.IsImportant();
@@ -464,6 +466,7 @@ namespace Game.Misc
             packet.QuestFlags[0] = (uint)(quest.Flags & (WorldConfig.GetBoolValue(WorldCfg.QuestIgnoreAutoAccept) ? ~QuestFlags.AutoAccept : ~QuestFlags.None));
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.QuestFlags[2] = (uint)quest.FlagsEx2;
+            packet.QuestFlags[3] = quest.FlagsEx3;
             packet.SuggestedPartyMembers = quest.SuggestedPlayers;
 
             // Is there a better way? what about game objects?
@@ -576,6 +579,7 @@ namespace Game.Misc
             offer.QuestFlags[0] = (uint)quest.Flags;
             offer.QuestFlags[1] = (uint)quest.FlagsEx;
             offer.QuestFlags[2] = (uint)quest.FlagsEx2;
+            offer.QuestFlags[3] = quest.FlagsEx3;
 
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.PortraitGiver = quest.QuestGiverPortrait;
@@ -646,6 +650,7 @@ namespace Game.Misc
             packet.QuestFlags[0] = (uint)quest.Flags;
             packet.QuestFlags[1] = (uint)quest.FlagsEx;
             packet.QuestFlags[2] = (uint)quest.FlagsEx2;
+            packet.QuestFlags[3] = quest.FlagsEx3;
             packet.SuggestPartyMembers = quest.SuggestedPlayers;
             packet.QuestInfoID = (int)quest.QuestInfoID;
 

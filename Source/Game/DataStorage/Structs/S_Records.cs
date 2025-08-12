@@ -231,7 +231,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public byte FacingCasterFlags;
+        public int FacingCasterFlags;
         public ushort MinFactionID;
         public int MinReputation;
         public ushort RequiredAreasID;

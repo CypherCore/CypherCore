@@ -3754,6 +3754,14 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
+                case ModifierTreeType.PlayerTitle: // 393
+                    if (referencePlayer.m_playerData.PlayerTitle != reqValue)
+                        return false;
+                    break;
+                case ModifierTreeType.PlayerIsInGuild: // 404
+                    if (referencePlayer.GetGuildId() == 0)
+                        return false;
+                    break;
                 default:
                     return false;
             }

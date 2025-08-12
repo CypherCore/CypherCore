@@ -3794,7 +3794,7 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteBits(Type, 1);
+            data.WriteUInt32(Type);
             if (Type == 1)
             {
                 data.WriteFloat(FloatValue);
@@ -3803,11 +3803,10 @@ namespace Game.Entities
             {
                 data.WriteInt64(Int64Value);
             }
-            data.FlushBits();
         }
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
         {
-            data.WriteBits(Type, 1);
+            data.WriteUInt32(Type);
             if (Type == 1)
             {
                 data.WriteFloat(FloatValue);
@@ -3816,7 +3815,6 @@ namespace Game.Entities
             {
                 data.WriteInt64(Int64Value);
             }
-            data.FlushBits();
         }
     }
 
@@ -5637,10 +5635,9 @@ namespace Game.Entities
 
     public class ActivePlayerData : HasChangesMask
     {
-        public static int QuestCompletedBitsSize;
         public static int QuestCompletedBitsPerBlock;
 
-        static int changeMaskLength = 1517;
+        static int changeMaskLength = 516;
 
         public UpdateField<bool> BackpackAutoSortDisabled = new(0, 1);
         public UpdateField<bool> BackpackSellJunkDisabled = new(0, 2);
@@ -5652,6 +5649,8 @@ namespace Game.Entities
         public UpdateFieldArray<DynamicUpdateField<uint>> ResearchSiteProgress = new(1, 43, 44);
         public UpdateFieldArray<DynamicUpdateField<Research>> Research = new(1, 45, 46);
         public DynamicUpdateField<ulong> KnownTitles = new(0, 7);
+        public DynamicUpdateField<PlayerDataElement> CharacterDataElements = new(0, 8);
+        public DynamicUpdateField<PlayerDataElement> AccountDataElements = new(0, 9);
         public DynamicUpdateField<uint> DailyQuestsCompleted = new(0, 11);
         public DynamicUpdateField<int> AvailableQuestLineXQuestIDs = new(0, 12);
         public DynamicUpdateField<uint> Heirlooms = new(0, 13);
@@ -5677,8 +5676,6 @@ namespace Game.Entities
         public DynamicUpdateField<CategoryCooldownMod> CategoryCooldownMods = new(32, 37);
         public DynamicUpdateField<WeeklySpellUse> WeeklySpellUses = new(32, 38);
         public DynamicUpdateField<CollectableSourceTrackedData> TrackedCollectableSources = new(32, 39);
-        public DynamicUpdateField<PlayerDataElement> CharacterDataElements = new(0, 8);
-        public DynamicUpdateField<PlayerDataElement> AccountDataElements = new(0, 9);
         public DynamicUpdateField<PVPInfo> PvpInfo = new(0, 10);
         public DynamicUpdateField<CharacterRestriction> CharacterRestrictions = new(0, 23);
         public DynamicUpdateField<TraitConfig> TraitConfigs = new(32, 33);
@@ -5733,7 +5730,7 @@ namespace Game.Entities
         public UpdateField<byte> MultiActionBars = new(70, 94);
         public UpdateField<byte> LifetimeMaxRank = new(70, 95);
         public UpdateField<byte> NumRespecs = new(70, 96);
-        public UpdateField<byte> PvpMedals = new(70, 97);
+        public UpdateField<uint> PvpMedals = new(70, 97);
         public UpdateField<ushort> TodayHonorableKills = new(70, 98);
         public UpdateField<ushort> YesterdayHonorableKills = new(70, 99);
         public UpdateField<uint> LifetimeHonorableKills = new(70, 100);
@@ -5795,12 +5792,10 @@ namespace Game.Entities
         public UpdateFieldArray<uint> ProfessionSkillLine = new(2, 481, 482);
         public UpdateFieldArray<uint> BagSlotFlags = new(5, 484, 485);
         public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 490, 491);
-        public UpdateFieldArray<ulong> QuestCompleted = new(1000, 498, 499);
-        public UpdateFieldArray<float> ItemUpgradeHighWatermark = new(17, 1499, 1500);
+        public UpdateFieldArray<float> ItemUpgradeHighWatermark = new(17, 498, 499);
 
         public ActivePlayerData() : base((int)EntityFragment.CGObject, TypeId.ActivePlayer, changeMaskLength)
         {
-            QuestCompletedBitsSize = QuestCompleted.GetSize();
             QuestCompletedBitsPerBlock = sizeof(ulong) * 8;
         }
 
@@ -5878,7 +5873,7 @@ namespace Game.Entities
             data.WriteUInt8(MultiActionBars);
             data.WriteUInt8(LifetimeMaxRank);
             data.WriteUInt8(NumRespecs);
-            data.WriteUInt8(PvpMedals);
+            data.WriteUInt32(PvpMedals);
             for (int i = 0; i < 12; ++i)
             {
                 data.WriteUInt32(BuybackPrice[i]);
@@ -5924,10 +5919,6 @@ namespace Game.Entities
             for (int i = 0; i < 7; ++i)
             {
                 data.WriteUInt32(BankBagSlotFlags[i]);
-            }
-            for (int i = 0; i < 1000; ++i)
-            {
-                data.WriteUInt64(QuestCompleted[i]);
             }
             data.WriteUInt32(Honor);
             data.WriteUInt32(HonorNextLevel);
@@ -6000,6 +5991,14 @@ namespace Game.Entities
             for (int i = 0; i < KnownTitles.Size(); ++i)
             {
                 data.WriteUInt64(KnownTitles[i]);
+            }
+            for (int i = 0; i < CharacterDataElements.Size(); ++i)
+            {
+                CharacterDataElements[i].WriteCreate(data, owner, receiver);
+            }
+            for (int i = 0; i < AccountDataElements.Size(); ++i)
+            {
+                AccountDataElements[i].WriteCreate(data, owner, receiver);
             }
             for (int i = 0; i < DailyQuestsCompleted.Size(); ++i)
             {
@@ -6122,14 +6121,6 @@ namespace Game.Entities
             FrozenPerksVendorItem.GetValue().Write(data);
             Field_1410.GetValue().WriteCreate(data, owner, receiver);
             DungeonScore.GetValue().Write(data);
-            for (int i = 0; i < CharacterDataElements.Size(); ++i)
-            {
-                CharacterDataElements[i].WriteCreate(data, owner, receiver);
-            }
-            for (int i = 0; i < AccountDataElements.Size(); ++i)
-            {
-                AccountDataElements[i].WriteCreate(data, owner, receiver);
-            }
             for (int i = 0; i < PvpInfo.Size(); ++i)
             {
                 PvpInfo[i].WriteCreate(data, owner, receiver);
@@ -6172,10 +6163,8 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
         {
-            for (uint i = 0; i < 1; ++i)
-                data.WriteUInt32(changesMask.GetBlocksMask(i));
-            data.WriteBits(changesMask.GetBlocksMask(1), 16);
-            for (uint i = 0; i < 48; ++i)
+            data.WriteBits(changesMask.GetBlocksMask(0), 17);
+            for (uint i = 0; i < 17; ++i)
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
@@ -6537,6 +6526,26 @@ namespace Game.Entities
                         }
                     }
                 }
+                if (changesMask[8])
+                {
+                    for (int i = 0; i < CharacterDataElements.Size(); ++i)
+                    {
+                        if (CharacterDataElements.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            CharacterDataElements[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
+                if (changesMask[9])
+                {
+                    for (int i = 0; i < AccountDataElements.Size(); ++i)
+                    {
+                        if (AccountDataElements.HasChanged(i) || ignoreNestedChangesMask)
+                        {
+                            AccountDataElements[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        }
+                    }
+                }
                 if (changesMask[11])
                 {
                     for (int i = 0; i < DailyQuestsCompleted.Size(); ++i)
@@ -6800,26 +6809,6 @@ namespace Game.Entities
             }
             if (changesMask[0])
             {
-                if (changesMask[8])
-                {
-                    for (int i = 0; i < CharacterDataElements.Size(); ++i)
-                    {
-                        if (CharacterDataElements.HasChanged(i) || ignoreNestedChangesMask)
-                        {
-                            CharacterDataElements[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
-                        }
-                    }
-                }
-                if (changesMask[9])
-                {
-                    for (int i = 0; i < AccountDataElements.Size(); ++i)
-                    {
-                        if (AccountDataElements.HasChanged(i) || ignoreNestedChangesMask)
-                        {
-                            AccountDataElements[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
-                        }
-                    }
-                }
                 if (changesMask[10])
                 {
                     for (int i = 0; i < PvpInfo.Size(); ++i)
@@ -7074,7 +7063,7 @@ namespace Game.Entities
                 }
                 if (changesMask[97])
                 {
-                    data.WriteUInt8(PvpMedals);
+                    data.WriteUInt32(PvpMedals);
                 }
                 if (changesMask[98])
                 {
@@ -7418,19 +7407,9 @@ namespace Game.Entities
             }
             if (changesMask[498])
             {
-                for (int i = 0; i < 1000; ++i)
-                {
-                    if (changesMask[499 + i])
-                    {
-                        data.WriteUInt64(QuestCompleted[i]);
-                    }
-                }
-            }
-            if (changesMask[1499])
-            {
                 for (int i = 0; i < 17; ++i)
                 {
-                    if (changesMask[1500 + i])
+                    if (changesMask[499 + i])
                     {
                         data.WriteFloat(ItemUpgradeHighWatermark[i]);
                     }
@@ -7451,6 +7430,8 @@ namespace Game.Entities
             ClearChangesMask(ResearchSiteProgress);
             ClearChangesMask(Research);
             ClearChangesMask(KnownTitles);
+            ClearChangesMask(CharacterDataElements);
+            ClearChangesMask(AccountDataElements);
             ClearChangesMask(DailyQuestsCompleted);
             ClearChangesMask(AvailableQuestLineXQuestIDs);
             ClearChangesMask(Heirlooms);
@@ -7476,8 +7457,6 @@ namespace Game.Entities
             ClearChangesMask(CategoryCooldownMods);
             ClearChangesMask(WeeklySpellUses);
             ClearChangesMask(TrackedCollectableSources);
-            ClearChangesMask(CharacterDataElements);
-            ClearChangesMask(AccountDataElements);
             ClearChangesMask(PvpInfo);
             ClearChangesMask(CharacterRestrictions);
             ClearChangesMask(TraitConfigs);
@@ -7594,7 +7573,6 @@ namespace Game.Entities
             ClearChangesMask(ProfessionSkillLine);
             ClearChangesMask(BagSlotFlags);
             ClearChangesMask(BankBagSlotFlags);
-            ClearChangesMask(QuestCompleted);
             ClearChangesMask(ItemUpgradeHighWatermark);
             _changesMask.ResetAll();
         }

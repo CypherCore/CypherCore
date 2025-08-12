@@ -199,7 +199,7 @@ namespace Game.Networking.Packets
             {
                 data.WritePackedGuid(Guid);
                 data.WriteUInt32(VirtualRealmAddress);
-                data.WriteUInt8(ListPosition);
+                data.WriteUInt16(ListPosition);
                 data.WriteUInt8(RaceId);
                 data.WriteUInt8(SexId);
                 data.WriteUInt8((byte)ClassId);
@@ -256,7 +256,7 @@ namespace Game.Networking.Packets
             public uint VirtualRealmAddress;
             public ulong GuildClubMemberID; // same as bgs.protocol.club.v1.MemberId.unique_id, guessed basing on SMSG_QUERY_PLAYER_NAME_RESPONSE (that one is known)
             public string Name;
-            public byte ListPosition; // Order of the characters in list
+            public ushort ListPosition; // Order of the characters in list
             public byte RaceId;
             public Class ClassId;
             public byte SexId;

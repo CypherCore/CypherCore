@@ -2421,13 +2421,6 @@ namespace Game.Entities
 
             int fieldOffset = (int)((questBit - 1) / ActivePlayerData.QuestCompletedBitsPerBlock);
             ulong flag = 1ul << (((int)questBit - 1) % ActivePlayerData.QuestCompletedBitsPerBlock);
-            if (fieldOffset < ActivePlayerData.QuestCompletedBitsSize)
-            {
-                if (completed)
-                    SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, fieldOffset), flag);
-                else
-                    RemoveUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.QuestCompleted, fieldOffset), flag);
-            }
 
             BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
             BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.CharacterQuestCompletedIndex);
