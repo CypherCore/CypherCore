@@ -106,8 +106,11 @@ namespace Game.Networking.Packets
                 PlayerFlags playerFlags = (PlayerFlags)fields.Read<uint>(12);
                 AtLoginFlags atLoginFlags = (AtLoginFlags)fields.Read<ushort>(13);
 
-                if (playerFlags.HasFlag(PlayerFlags.Resting))
+                if (playerFlags.HasAnyFlag(PlayerFlags.Resting))
                     Flags |= CharacterFlags.Resting;
+
+                if (atLoginFlags.HasAnyFlag(AtLoginFlags.ResetTalents))
+                    Flags |= CharacterFlags.ResetTalentsOnLogin;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Resurrect))
                     playerFlags &= ~PlayerFlags.Ghost;
@@ -125,11 +128,26 @@ namespace Game.Networking.Packets
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
-                    Flags2 = CharacterCustomizeFlags.Customize;
+                    Flags2 = CharacterFlags2.Customize;
                 else if (atLoginFlags.HasAnyFlag(AtLoginFlags.ChangeFaction))
-                    Flags2 = CharacterCustomizeFlags.Faction;
+                    Flags2 = CharacterFlags2.FactionChange;
                 else if (atLoginFlags.HasAnyFlag(AtLoginFlags.ChangeRace))
-                    Flags2 = CharacterCustomizeFlags.Race;
+                    Flags2 = CharacterFlags2.RaceChange;
+
+                if (playerFlags.HasAnyFlag(PlayerFlags.NoXPGain))
+                    Flags2 |= CharacterFlags2.NoXpGain;
+
+                if (playerFlags.HasAnyFlag(PlayerFlags.LowLevelRaidEnabled))
+                    Flags2 |= CharacterFlags2.LowLevelRaidEnabled;
+
+                if (playerFlags.HasAnyFlag(PlayerFlags.AutoDeclineGuild))
+                    Flags2 |= CharacterFlags2.AutoDeclineGuild;
+
+                if (playerFlags.HasAnyFlag(PlayerFlags.HidAccountAchievements))
+                    Flags3 |= CharacterFlags3.HideAccountAchievements;
+
+                if (playerFlags.HasAnyFlag(PlayerFlags.WarModeDesired))
+                    Flags3 |= CharacterFlags3.WarModeDesired;
 
                 FirstLogin = atLoginFlags.HasAnyFlag(AtLoginFlags.FirstLogin);
 
@@ -196,8 +214,8 @@ namespace Game.Networking.Packets
                 data.WritePackedGuid(GuildGuid);
                 data.WriteUInt32((uint)Flags);
                 data.WriteUInt32((uint)Flags2);
-                data.WriteUInt32(Flags3);
-                data.WriteUInt32(Flags4);
+                data.WriteUInt32((uint)Flags3);
+                data.WriteUInt32((uint)Flags4);
                 data.WriteUInt8(CantLoginReason);
 
                 data.WriteUInt32(PetCreatureDisplayId);
@@ -249,9 +267,9 @@ namespace Game.Networking.Packets
             public Vector3 PreloadPos;
             public ObjectGuid GuildGuid;
             public CharacterFlags Flags; // Character flag @see enum CharacterFlags
-            public CharacterCustomizeFlags Flags2; // Character customization flags @see enum CharacterCustomizeFlags
-            public uint Flags3; // Character flags 3 @todo research
-            public uint Flags4; ///< Character flags 4 @todo research
+            public CharacterFlags2 Flags2; // Character flag2 @see enum CharacterFlags2
+            public CharacterFlags3 Flags3; // Character flag3 @see enum CharacterFlags3
+            public CharacterFlags4 Flags4; // Character flag4 @see enum CharacterFlags4
             public bool FirstLogin;
             public byte CantLoginReason;
             public long LastActiveTime;

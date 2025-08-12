@@ -89,18 +89,18 @@ namespace Game
 
                             charInfo.Customizations.Clear();
 
-                            if (!charInfo.Flags2.HasAnyFlag(CharacterCustomizeFlags.Customize | CharacterCustomizeFlags.Faction | CharacterCustomizeFlags.Race))
+                            if (!charInfo.Flags2.HasAnyFlag(CharacterFlags2.Customize | CharacterFlags2.FactionChange | CharacterFlags2.RaceChange))
                             {
                                 PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                                 stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
                                 stmt.AddValue(1, charInfo.Guid.GetCounter());
                                 DB.Characters.Execute(stmt);
-                                charInfo.Flags2 = CharacterCustomizeFlags.Customize;
+                                charInfo.Flags2 = CharacterFlags2.Customize;
                             }
                         }
 
                         // Do not allow locked characters to login
-                        if (!charInfo.Flags.HasAnyFlag(CharacterFlags.CharacterLockedForTransfer | CharacterFlags.LockedByBilling))
+                        if (!charInfo.Flags.HasAnyFlag(CharacterFlags.LockedForTransfer | CharacterFlags.LockedByBilling))
                             _legitCharacters.Add(charInfo.Guid);
                     }
 
