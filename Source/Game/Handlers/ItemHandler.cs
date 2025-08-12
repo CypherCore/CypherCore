@@ -818,24 +818,34 @@ namespace Game
                 if (gemProperties[i] == null)
                     continue;
 
+                SocketColor acceptableGemTypeMask = ItemConst.SocketColorToGemTypeMask[(int)itemTarget.GetSocketColor(i)];
                 // tried to put gem in socket where no socket exists (take care about prismatic sockets)
-                if (itemTarget.GetSocketColor(i) == 0)
+                switch (itemTarget.GetSocketColor(i))
                 {
-                    // no prismatic socket
-                    if (itemTarget.GetEnchantmentId(EnchantmentSlot.Prismatic) == 0)
-                        return;
+                    case 0:
+                    {
+                        // no prismatic socket
+                        if (itemTarget.GetEnchantmentId(EnchantmentSlot.Prismatic) == 0)
+                            return;
 
-                    if (i != firstPrismatic)
+                        if (i != firstPrismatic)
                         return;
+                        acceptableGemTypeMask = SocketColor.Red | SocketColor.Yellow | SocketColor.Blue;
+                        break;
+                    }
+                    case 2:
+                    case 3:
+                    case 4:
+                        // red, blue and yellow sockets accept any red/blue/yellow gem
+                        acceptableGemTypeMask = SocketColor.Red | SocketColor.Yellow | SocketColor.Blue;
+                        break;
+                    default:
+                        break;
                 }
 
                 // Gem must match socket color
-                if (ItemConst.SocketColorToGemTypeMask[(int)itemTarget.GetSocketColor(i)] != gemProperties[i].Type)
-                {
-                    // unless its red, blue, yellow or prismatic
-                    if (!ItemConst.SocketColorToGemTypeMask[(int)itemTarget.GetSocketColor(i)].HasAnyFlag(SocketColor.Prismatic) || !gemProperties[i].Type.HasAnyFlag(SocketColor.Prismatic))
-                        return;
-                }
+                if ((acceptableGemTypeMask & gemProperties[i].Type) == 0)
+                    return;
             }
 
             // check unique-equipped conditions

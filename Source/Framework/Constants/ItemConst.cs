@@ -47,7 +47,7 @@ namespace Framework.Constants
             SocketColor.Blue,
             SocketColor.Hydraulic,
             SocketColor.Cogwheel,
-            SocketColor.Prismatic,
+            SocketColor.Red | SocketColor.Yellow | SocketColor.Blue,
             SocketColor.RelicIron,
             SocketColor.RelicBlood,
             SocketColor.RelicShadow,
@@ -62,10 +62,14 @@ namespace Framework.Constants
             SocketColor.PunchcardRed,
             SocketColor.PunchcardYellow,
             SocketColor.PunchcardBlue,
-            SocketColor.Domination,
+            SocketColor.DominationBlood | SocketColor.DominationFrost | SocketColor.DominationUnholy,
             SocketColor.Cypher,
             SocketColor.Tinker,
-            SocketColor.Primordial
+            SocketColor.Primordial,
+            SocketColor.Fragrance,
+            SocketColor.SingingThunder,
+            SocketColor.SingingSea,
+            SocketColor.SingingWind
         };
 
         public static ItemModifier[] AppearanceModifierSlotBySpec =
@@ -206,31 +210,36 @@ namespace Framework.Constants
 
     public enum SocketColor
     {
-        Meta = 0x00001,
-        Red = 0x00002,
-        Yellow = 0x00004,
-        Blue = 0x00008,
-        Hydraulic = 0x00010, // Not Used
-        Cogwheel = 0x00020,
-        Prismatic = 0x0000e,
-        RelicIron = 0x00040,
-        RelicBlood = 0x00080,
-        RelicShadow = 0x00100,
-        RelicFel = 0x00200,
-        RelicArcane = 0x00400,
-        RelicFrost = 0x00800,
-        RelicFire = 0x01000,
-        RelicWater = 0x02000,
-        RelicLife = 0x04000,
-        RelicWind = 0x08000,
-        RelicHoly = 0x10000,
-        PunchcardRed = 0x20000,
-        PunchcardYellow = 0x40000,
-        PunchcardBlue = 0x80000,
-        Domination = 0x100000,
-        Cypher = 0x200000,
-        Tinker = 0x400000,
-        Primordial = 0x800000,
+        Meta = 0X01,
+        Red = 0X02,
+        Yellow = 0X04,
+        Blue = 0X08,
+        Hydraulic = 0X10,
+        Cogwheel = 0X20,
+        RelicIron = 0X40,
+        RelicBlood = 0X80,
+        RelicShadow = 0X100,
+        RelicFel = 0X200,
+        RelicArcane = 0X400,
+        RelicFrost = 0X800,
+        RelicFire = 0X1000,
+        RelicWater = 0X2000,
+        RelicLife = 0X4000,
+        RelicWind = 0X8000,
+        RelicHoly = 0X10000,
+        PunchcardRed = 0X20000,
+        PunchcardYellow = 0X40000,
+        PunchcardBlue = 0X80000,
+        DominationBlood = 0X100000,
+        DominationFrost = 0X200000,
+        DominationUnholy = 0X400000,
+        Cypher = 0X800000,
+        Tinker = 0x01000000,
+        Primordial = 0x02000000,
+        Fragrance = 0x04000000,
+        SingingThunder = 0x08000000,
+        SingingSea = 0x10000000,
+        SingingWind = 0x20000000,
 
         Standard = (Red | Yellow | Blue)
     }
@@ -1082,10 +1091,10 @@ namespace Framework.Constants
         Unk8 = 0x2000, // ?
         Unk9 = 0x4000, // ?
         Unk10 = 0x8000, // ?
-        Unk11 = 0x00010000, // ?
-        Unk12 = 0x00020000, // ?
-        Unk13 = 0x00040000, // ?
-        Child = 0x00080000,
+        Unk11 = 0X0010000, // ?
+        Unk12 = 0X0020000, // ?
+        Unk13 = 0X0040000, // ?
+        Child = 0X0080000,
         Unk15 = 0x00100000, // ?
         NewItem = 0x00200000, // Item glows in inventory
         AzeriteEmpoweredItemViewed = 0x00400000, // Won't play azerite powers animation when viewing it

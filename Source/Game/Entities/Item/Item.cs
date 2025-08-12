@@ -2675,7 +2675,7 @@ namespace Game.Entities
             Cypher.Assert(index < ItemConst.MaxStats);
             return _bonusData.ItemStatType[index];
         }
-        public SocketColor GetSocketColor(uint index)
+        public uint GetSocketColor(uint index)
         {
             Cypher.Assert(index < ItemConst.MaxGemSockets);
             return _bonusData.socketColor[index];
@@ -2881,7 +2881,7 @@ namespace Game.Entities
 
             for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
-                socketColor[i] = proto.GetSocketColor(i);
+                socketColor[i] = (uint)proto.GetSocketColor(i);
                 GemItemLevelBonus[i] = 0;
                 GemRelicType[i] = -1;
                 GemRelicRankBonus[i] = 0;
@@ -2980,7 +2980,7 @@ namespace Game.Entities
                     {
                         if (socketColor[i] == 0)
                         {
-                            socketColor[i] = (SocketColor)values[1];
+                            socketColor[i] = (uint)values[1];
                             --socketCount;
                         }
                     }
@@ -3061,7 +3061,7 @@ namespace Game.Entities
         public int[] ItemStatType = new int[ItemConst.MaxStats];
         public int[] StatPercentEditor = new int[ItemConst.MaxStats];
         public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
-        public SocketColor[] socketColor = new SocketColor[ItemConst.MaxGemSockets];
+        public uint[] socketColor = new uint[ItemConst.MaxGemSockets];
         public ItemBondingType Bonding;
         public uint AppearanceModID;
         public float RepairCostMultiplier;
