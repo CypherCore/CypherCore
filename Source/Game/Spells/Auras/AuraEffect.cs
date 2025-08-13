@@ -1904,6 +1904,19 @@ namespace Game.Spells
                 target.UpdateDamagePhysical(attType);
         }
 
+        static void InterruptSpellsWithPreventionTypeOnAuraApply(Unit target, SpellPreventionType preventionType)
+        {
+            // Stop cast only spells vs PreventionType
+            for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
+            {
+                Spell spell = target.GetCurrentSpell(i);
+                if (spell != null)
+                    if ((spell.m_spellInfo.PreventionType & preventionType) != 0)
+                        // Stop spells on prepare or casting state
+                        target.InterruptSpell(i, false);
+            }
+        }
+
         [AuraEffectHandler(AuraType.ModSilence)]
         void HandleAuraModSilence(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -1917,15 +1930,7 @@ namespace Game.Spells
                 target.SetSilencedSchoolMask((SpellSchoolMask)GetMiscValue());
 
                 // call functions which may have additional effects after changing state of unit
-                // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_NO_ACTIONS
-                for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
-                {
-                    Spell spell = target.GetCurrentSpell(i);
-                    if (spell != null)
-                        if (spell.m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
-                            // Stop spells on prepare or casting state
-                            target.InterruptSpell(i, false);
-                }
+                InterruptSpellsWithPreventionTypeOnAuraApply(target, SpellPreventionType.Silence);
             }
             else
             {
@@ -1949,7 +1954,12 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
+            { 
                 target.SetUnitFlag(UnitFlags.Pacified);
+
+                // call functions which may have additional effects after changing state of unit
+                InterruptSpellsWithPreventionTypeOnAuraApply(target, SpellPreventionType.Pacify);
+            }
             else
             {
                 // do not remove unit flag if there are more than this auraEffect of that kind on unit on unit
@@ -1999,15 +2009,7 @@ namespace Game.Spells
                 target.SetUnitFlag2(UnitFlags2.NoActions);
 
                 // call functions which may have additional effects after changing state of unit
-                // Stop cast only spells vs PreventionType & SPELL_PREVENTION_TYPE_SILENCE
-                for (var i = CurrentSpellTypes.Melee; i < CurrentSpellTypes.Max; ++i)
-                {
-                    Spell spell = target.GetCurrentSpell(i);
-                    if (spell != null)
-                        if (spell.m_spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.NoActions))
-                            // Stop spells on prepare or casting state
-                            target.InterruptSpell(i, false);
-                }
+                InterruptSpellsWithPreventionTypeOnAuraApply(target, SpellPreventionType.NoActions);
             }
             else
             {
