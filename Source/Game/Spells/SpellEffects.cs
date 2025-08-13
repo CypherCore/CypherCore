@@ -411,7 +411,6 @@ namespace Game.Spells
 
         [SpellEffectHandler(SpellEffectName.ForceCast)]
         [SpellEffectHandler(SpellEffectName.ForceCastWithValue)]
-        [SpellEffectHandler(SpellEffectName.ForceCast2)]
         void EffectForceCast()
         {
             if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
@@ -463,13 +462,56 @@ namespace Game.Spells
                     return;
             }
 
-            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.IgnoreReagentCost));
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask & ~(TriggerCastFlags.IgnorePowerCost | TriggerCastFlags.CastDirectly | TriggerCastFlags.IgnoreReagentCost));
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
                 for (int i = 0; i < spellInfo.GetEffects().Count; ++i)
                     args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
             unitTarget.CastSpell(m_caster, spellInfo.Id, args);
+        }
+
+        [SpellEffectHandler(SpellEffectName.ForceCast2)]
+        void EffectForceCast2()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.LaunchTarget)
+                return;
+
+            if (unitTarget == null)
+                return;
+
+            uint triggered_spell_id = effectInfo.TriggerSpell;
+            if (triggered_spell_id == 0)
+            {
+                Log.outWarn(LogFilter.Spells, $"Spell::EffectForceCast2: Spell {m_spellInfo.Id} [EffectIndex: {effectInfo.EffectIndex}] does not have triggered spell.");
+                return;
+            }
+
+            // normal case
+            if (!Global.SpellMgr.HasSpellInfo(triggered_spell_id, GetCastDifficulty()))
+            {
+                Log.outError(LogFilter.Spells, $"Spell::EffectForceCast2 of spell {m_spellInfo.Id}: triggering unknown spell id {triggered_spell_id}.");
+                return;
+            }
+
+            // Start the cast during next update tick
+            // This is neccessary to preserve proper SMSG_SPELL_START and SMSG_SPELL_GO packet sequence
+            // (if packet sequence is not preserved then client cast bar in UI bugs and doesn't stop when the spell is interrupted)
+            // Triggered spells from effects handled during launch phase (such as SPELL_EFFECT_TRIGGER_SPELL)
+            // normally have their SMSG_SPELL_GO sent before parent spell SMSG_SPELL_GO
+            // SPELL_EFFECT_FORCE_CAST_2 requires these packets to be sent after parent spell
+            // but also needs to be handled during launch phase as well
+            var target = new CastSpellTargetArg(m_caster);
+            var caster = unitTarget;
+            unitTarget.m_Events.AddEventAtOffset(() =>
+            {
+                if (target.Targets == null)
+                    return;
+
+                target.Targets.Update(caster);
+
+                caster.CastSpell(target, triggered_spell_id);
+            }, TimeSpan.Zero);
         }
 
         [SpellEffectHandler(SpellEffectName.TriggerSpell2)]

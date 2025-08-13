@@ -3027,6 +3027,8 @@ namespace Game.Spells
             if (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
                 SendSpellCooldown();
 
+            m_spellState = SpellState.Launched;
+
             if (m_spellInfo.LaunchDelay == 0)
             {
                 HandleLaunchPhase();
@@ -3052,7 +3054,6 @@ namespace Game.Spells
 
                 // Okay, maps created, now prepare flags
                 m_immediateHandled = false;
-                m_spellState = SpellState.Launched;
                 SetDelayStart(0);
 
                 unitCaster = m_caster.ToUnit();
