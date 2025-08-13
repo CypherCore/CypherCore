@@ -1768,19 +1768,16 @@ namespace Game.Spells
             }
 
             // check if we have charges to proc with
-            if (IsUsingCharges())
-            {
-                if (GetCharges() == 0)
-                    return 0;
+            if (IsUsingCharges() && GetCharges() == 0)
+                return 0;
 
-                if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqSpellmod))
-                {
-                    Spell eventSpell = eventInfo.GetProcSpell();
-                    if (eventSpell != null)
-                        if (!eventSpell.m_appliedMods.Contains(this))
-                            return 0;
-                }
+            if (procEntry.AttributesMask.HasAnyFlag(ProcAttributes.ReqSpellmod) && (IsUsingCharges() || (procEntry.AttributesMask & ProcAttributes.UseStacksForCharges) != 0))
+            {
+                Spell eventSpell = eventInfo.GetProcSpell();
+                if (eventSpell != null && !eventSpell.m_appliedMods.Contains(this))
+                    return 0;
             }
+
 
             // check proc cooldown
             if (IsProcOnCooldown(now))
