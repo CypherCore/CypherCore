@@ -1948,8 +1948,8 @@ namespace Game.Entities
                     }
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_FAVORITE);
-                    stmt.AddValue(0, id);
-                    stmt.AddValue(1, GetGUID().GetCounter());
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, id);
                     trans.Append(stmt);
 
                     if (spell.Favorite)
