@@ -92,6 +92,11 @@ namespace Game.DataStorage
         public float Health;
     }
 
+    public sealed class GtItemLevelByLevelRecord
+    {
+        public float ItemLevel;
+    }
+
     public sealed class GtItemSocketCostPerLevelRecord
     {
         public float SocketCost;

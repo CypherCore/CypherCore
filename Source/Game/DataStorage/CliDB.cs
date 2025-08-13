@@ -436,8 +436,9 @@ namespace Game.DataStorage
             BattlePetXPGameTable = ReadGameTable<GtBattlePetXPRecord>("BattlePetXP.txt");
             CombatRatingsGameTable = ReadGameTable<GtCombatRatingsRecord>("CombatRatings.txt");
             CombatRatingsMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("CombatRatingsMultByILvl.txt");
-            ItemSocketCostPerLevelGameTable = ReadGameTable<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
             HpPerStaGameTable = ReadGameTable<GtHpPerStaRecord>("HpPerSta.txt");
+            ItemLevelByLevelTable = ReadGameTable<GtItemLevelByLevelRecord>("ItemLevelByLevel.txt");
+            ItemSocketCostPerLevelGameTable = ReadGameTable<GtItemSocketCostPerLevelRecord>("ItemSocketCostPerLevel.txt");
             NpcManaCostScalerGameTable = ReadGameTable<GtNpcManaCostScalerRecord>("NPCManaCostScaler.txt");
             SpellScalingGameTable = ReadGameTable<GtSpellScalingRecord>("SpellScaling.txt");
             StaminaMultByILvlGameTable = ReadGameTable<GtGenericMultByILvlRecord>("StaminaMultByILvl.txt");
@@ -807,6 +808,7 @@ namespace Game.DataStorage
         public static GameTable<GtCombatRatingsRecord> CombatRatingsGameTable;
         public static GameTable<GtGenericMultByILvlRecord> CombatRatingsMultByILvlGameTable;
         public static GameTable<GtHpPerStaRecord> HpPerStaGameTable;
+        public static GameTable<GtItemLevelByLevelRecord> ItemLevelByLevelTable;
         public static GameTable<GtItemSocketCostPerLevelRecord> ItemSocketCostPerLevelGameTable;
         public static GameTable<GtNpcManaCostScalerRecord> NpcManaCostScalerGameTable;
         public static GameTable<GtSpellScalingRecord> SpellScalingGameTable;

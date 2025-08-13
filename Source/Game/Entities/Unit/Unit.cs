@@ -3888,15 +3888,32 @@ namespace Game.Entities
             if (MathFunctions.fuzzyLe(armor, 0.0f))
                 return damage;
 
-            Class attackerClass = Class.Warrior;
+            Class attackerClass = Class.None;
+            float? attackerItemLevel = null;
             if (attacker != null)
             {
                 attackerLevel = attacker.GetLevelForTarget(victim);
-                attackerClass = attacker.GetClass();
+                Player ownerPlayer = attacker.GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (ownerPlayer != null)
+                    attackerItemLevel = ownerPlayer.m_playerData.AvgItemLevel[(int)AvgItemLevelCategory.EquippedBase];
+                else
+                    attackerClass = attacker.GetClass();
             }
 
             // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
             float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass, 0);
+            if (attackerItemLevel.HasValue)
+            {
+                uint maxLevelForExpansion = Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)WorldConfig.GetUIntValue(WorldCfg.Expansion));
+                if (attackerLevel == maxLevelForExpansion)
+                {
+                    float itemLevelDelta = attackerItemLevel.Value - CliDB.ItemLevelByLevelTable.GetRow(maxLevelForExpansion).ItemLevel;
+                    uint curveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.ArmorItemLevelDiminishing);
+                    if (curveId != 0)
+                        armorConstant *= Global.DB2Mgr.GetCurveValueAt(curveId, itemLevelDelta);
+                }
+            }
+
             if ((armor + armorConstant) == 0)
                 return damage;
 
