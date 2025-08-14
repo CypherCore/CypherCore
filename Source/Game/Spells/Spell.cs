@@ -338,15 +338,15 @@ namespace Game.Spells
                 {
                     float speed = m_targets.GetSpeedXY();
                     if (speed > 0.0f)
-                        return (ulong)(Math.Floor((m_targets.GetDist2d() / speed + launchDelay) * 1000.0f));
+                        return (ulong)(Math.Floor((Math.Max(m_targets.GetDist2d() / speed, m_spellInfo.MinDuration) + launchDelay) * 1000.0f));
                 }
                 else if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
-                    return (ulong)(Math.Floor((m_spellInfo.Speed + launchDelay) * 1000.0f));
+                    return (ulong)(Math.Floor((Math.Max(m_spellInfo.Speed, m_spellInfo.MinDuration) + launchDelay) * 1000.0f));
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // We should not subtract caster size from dist calculation (fixes execution time desync with animation on client, eg. Malleable Goo cast by PP)
                     float dist = m_caster.GetExactDist(m_targets.GetDstPos());
-                    return (ulong)(Math.Floor((dist / m_spellInfo.Speed + launchDelay) * 1000.0f));
+                    return (ulong)(Math.Floor((Math.Max(dist / m_spellInfo.Speed, m_spellInfo.MinDuration) + launchDelay) * 1000.0f));
                 }
 
                 return (ulong)Math.Floor(launchDelay * 1000.0f);
@@ -2001,13 +2001,13 @@ namespace Game.Spells
                 }
 
                 if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
-                    hitDelay += m_spellInfo.Speed;
+                    hitDelay += Math.Max(m_spellInfo.Speed, m_spellInfo.MinDuration);
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // calculate spell incoming interval
                     /// @todo this is a hack
                     float dist = Math.Max(missileSource.GetDistance(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ()), 5.0f);
-                    hitDelay += dist / m_spellInfo.Speed;
+                    hitDelay += Math.Max(dist / m_spellInfo.Speed, m_spellInfo.MinDuration);
                 }
 
                 targetInfo.TimeDelay += (ulong)Math.Floor(hitDelay * 1000.0f);
@@ -2070,12 +2070,12 @@ namespace Game.Spells
             {
                 float hitDelay = m_spellInfo.LaunchDelay;
                 if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
-                    hitDelay += m_spellInfo.Speed;
+                    hitDelay += Math.Max(m_spellInfo.Speed, m_spellInfo.MinDuration);
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // calculate spell incoming interval
                     float dist = Math.Max(m_caster.GetDistance(go.GetPositionX(), go.GetPositionY(), go.GetPositionZ()), 5.0f);
-                    hitDelay += dist / m_spellInfo.Speed;
+                    hitDelay += Math.Max(dist / m_spellInfo.Speed, m_spellInfo.MinDuration);
                 }
 
                 target.TimeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
@@ -2150,12 +2150,12 @@ namespace Game.Spells
             {
                 float hitDelay = m_spellInfo.LaunchDelay;
                 if (m_spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
-                    hitDelay += m_spellInfo.Speed;
+                    hitDelay += Math.Max(m_spellInfo.Speed, m_spellInfo.MinDuration);
                 else if (m_spellInfo.Speed > 0.0f)
                 {
                     // calculate spell incoming interval
                     float dist = Math.Max(m_caster.GetDistance(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ()), 5.0f);
-                    hitDelay += dist / m_spellInfo.Speed;
+                    hitDelay += Math.Max(dist / m_spellInfo.Speed, m_spellInfo.MinDuration);
                 }
 
                 target.TimeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);

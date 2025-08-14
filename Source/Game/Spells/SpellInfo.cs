@@ -63,6 +63,7 @@ namespace Game.Spells
                 RangeEntry = CliDB.SpellRangeStorage.LookupByKey(_misc.RangeIndex);
                 Speed = _misc.Speed;
                 LaunchDelay = _misc.LaunchDelay;
+                MinDuration = _misc.MinDuration;
                 SchoolMask = (SpellSchoolMask)_misc.SchoolMask;
                 IconFileDataId = _misc.SpellIconFileDataID;
                 ActiveIconFileDataId = _misc.ActiveIconFileDataID;
@@ -3937,6 +3938,7 @@ namespace Game.Spells
         public SpellRangeRecord RangeEntry { get; set; }
         public float Speed { get; set; }
         public float LaunchDelay { get; set; }
+        public float MinDuration { get; set; }
         public uint StackAmount { get; set; }
         public uint[] Totem = new uint[SpellConst.MaxTotems];
         public uint[] TotemCategory = new uint[SpellConst.MaxTotems];

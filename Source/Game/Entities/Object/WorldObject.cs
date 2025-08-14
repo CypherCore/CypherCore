@@ -2943,9 +2943,9 @@ namespace Game.Entities
                             // Set up missile speed based delay
                             float hitDelay = spellInfo.LaunchDelay;
                             if (spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
-                                hitDelay += spellInfo.Speed;
+                                hitDelay += Math.Max(spellInfo.Speed, spellInfo.MinDuration);
                             else if (spellInfo.Speed > 0.0f)
-                                hitDelay += Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed;
+                                hitDelay += Math.Max(Math.Max(victim.GetDistance(this), 5.0f) / spellInfo.Speed, spellInfo.MinDuration);
 
                             uint delay = (uint)Math.Floor(hitDelay * 1000.0f);
                             // Schedule charge drop

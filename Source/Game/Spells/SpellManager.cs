@@ -2493,7 +2493,7 @@ namespace Game.Entities
                     var existingSpellBounds = _GetSpellInfo(spellId);
                     if (existingSpellBounds == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} effext index {effect.EffectIndex} references a regular spell loaded from file. Adding serverside effects to existing spells is not allowed.");
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} effect index {effect.EffectIndex} references a regular spell loaded from file. Adding serverside effects to existing spells is not allowed.");
                         continue;
                     }
 
