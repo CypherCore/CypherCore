@@ -373,6 +373,23 @@ namespace Game
             return true;
         }
 
+        public static void AddInstanceConnection(WorldSession session, WorldSocket socket, ConnectToKey key)
+        {
+            if (socket == null || !socket.IsOpen())
+                return;
+
+            if (session == null || session.GetConnectToInstanceKey() != key.Raw)
+            {
+                socket.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
+                socket.CloseSocket();
+                return;
+            }
+
+            socket.SetWorldSession(session);
+            session.m_Socket[(int)ConnectionType.Instance] = socket;
+            session.HandleContinuePlayerLogin();
+        }
+
         public void QueuePacket(WorldPacket packet)
         {
             _recvQueue.Enqueue(packet);
@@ -410,8 +427,6 @@ namespace Game
 
             m_Socket[(int)conIdx].SendPacket(packet);
         }
-
-        public void AddInstanceConnection(WorldSocket sock) { m_Socket[(int)ConnectionType.Instance] = sock; }
 
         public void KickPlayer(string reason)
         {

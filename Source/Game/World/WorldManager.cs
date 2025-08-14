@@ -187,7 +187,7 @@ namespace Game
 
         public void AddInstanceSocket(WorldSocket sock, ulong connectToKey)
         {
-            _linkSocketQueue.Enqueue(Tuple.Create(sock, connectToKey));
+            _linkSocketQueue.Enqueue((sock, connectToKey));
         }
 
         void AddSession_(WorldSession s)
@@ -259,27 +259,6 @@ namespace Game
 
                 Log.outInfo(LogFilter.Server, $"Server Population ({popu}).");
             }
-        }
-
-        void ProcessLinkInstanceSocket(Tuple<WorldSocket, ulong> linkInfo)
-        {
-            if (!linkInfo.Item1.IsOpen())
-                return;
-
-            ConnectToKey key = new();
-            key.Raw = linkInfo.Item2;
-
-            WorldSession session = FindSession(key.AccountId);
-            if (session == null || session.GetConnectToInstanceKey() != linkInfo.Item2)
-            {
-                linkInfo.Item1.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
-                linkInfo.Item1.CloseSocket();
-                return;
-            }
-
-            linkInfo.Item1.SetWorldSession(session);
-            session.AddInstanceConnection(linkInfo.Item1);
-            session.HandleContinuePlayerLogin();
         }
 
         bool HasRecentlyDisconnected(WorldSession session)
@@ -1980,14 +1959,16 @@ namespace Game
 
         public void UpdateSessions(uint diff)
         {
-            Tuple<WorldSocket, ulong> linkInfo;
-            while (_linkSocketQueue.TryDequeue(out linkInfo))
-                ProcessLinkInstanceSocket(linkInfo);
-
             // Add new sessions
             WorldSession sess;
             while (addSessQueue.TryDequeue(out sess))
                 AddSession_(sess);
+
+            while (_linkSocketQueue.TryDequeue(out (WorldSocket, ulong) linkInfo))
+            {
+                ConnectToKey key = new() { Raw = linkInfo.Item2 };
+                WorldSession.AddInstanceConnection(FindSession(key.AccountId), linkInfo.Item1, key);
+            }
 
             // Then send an update signal to remaining ones
             foreach (var pair in m_sessions)
@@ -2629,7 +2610,7 @@ namespace Game
         List<WorldSession> m_QueuedPlayer = new();
         ConcurrentQueue<WorldSession> addSessQueue = new();
 
-        ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new();
+        ConcurrentQueue<(WorldSocket, ulong)> _linkSocketQueue = new();
 
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
 
