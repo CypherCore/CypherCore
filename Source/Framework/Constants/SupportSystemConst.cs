@@ -48,6 +48,8 @@ namespace Framework.Constants
         Name = 0x4000,
         ChinaHarmfulMinors = 0x8000,
         Disruption = 0x10000,
+        TerroristAndViolentExtremistContent = 0x20000,
+        ChildSexualExploitationAndAbuse = 0x40000,
     }
 
     public enum GMTicketSystemStatus
