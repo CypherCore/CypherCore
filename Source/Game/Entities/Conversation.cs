@@ -132,7 +132,7 @@ namespace Game.Entities
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.ConversationLine, line.Id, creator))
                     continue;
 
-                var  convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
+                var convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
 
                 ConversationLine lineField = new();
                 lineField.ConversationLineID = line.Id;
@@ -142,12 +142,16 @@ namespace Game.Entities
                 lineField.Flags = line.Flags;
                 lineField.ChatType = line.ChatType;
 
+                if (!_lineStartTimes.ContainsKey(line.Id))
+                    _lineStartTimes[(int)line.Id] = new TimeSpan[(int)Locale.Total];
+
+                var startTimes = _lineStartTimes[(int)line.Id];
                 for (Locale locale = Locale.enUS; locale < Locale.Total; locale = locale + 1)
                 {
                     if (locale == Locale.None)
                         continue;
 
-                    _lineStartTimes[(locale, line.Id)] = _lastLineEndTimes[(int)locale];
+                    startTimes[(int)locale] = _lastLineEndTimes[(int)locale];
                     if (locale == Locale.enUS)
                         lineField.StartTime = (uint)_lastLineEndTimes[(int)locale].TotalMilliseconds;
 
@@ -224,7 +228,10 @@ namespace Game.Entities
 
         public TimeSpan GetLineStartTime(Locale locale, int lineId)
         {
-            return _lineStartTimes.LookupByKey((locale, lineId));
+            if (_lineStartTimes.TryGetValue(lineId, out var timeSpans))
+                return timeSpans[(int)locale];
+
+            return default;
         }
 
         public TimeSpan GetLastLineEndTime(Locale locale)
@@ -377,7 +384,7 @@ namespace Game.Entities
         TimeSpan _duration;
         uint _textureKitId;
 
-        Dictionary<(Locale locale, uint lineId), TimeSpan> _lineStartTimes = new();
+        Dictionary<int, TimeSpan[]> _lineStartTimes = new();
         TimeSpan[] _lastLineEndTimes = new TimeSpan[(int)Locale.Total];
 
         ConversationAI _ai;

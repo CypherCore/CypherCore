@@ -3346,31 +3346,7 @@ namespace Game.Entities
                 }
             }
 
-            UpdateItemSetAuras(true);
-        }
-
-        void UpdateItemSetAuras(bool formChange = false)
-        {
-            // item set bonuses not dependent from item broken state
-            for (int setindex = 0; setindex < ItemSetEff.Count; ++setindex)
-            {
-                ItemSetEffect eff = ItemSetEff[setindex];
-                if (eff == null)
-                    continue;
-
-                foreach (ItemSetSpellRecord itemSetSpell in eff.SetBonuses)
-                {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
-
-                    if (itemSetSpell.ChrSpecID != 0 && (ChrSpecialization)itemSetSpell.ChrSpecID != GetPrimarySpecialization())
-                        ApplyEquipSpell(spellInfo, null, false, false);  // item set aura is not for current spec
-                    else
-                    {
-                        ApplyEquipSpell(spellInfo, null, false, formChange); // remove spells that not fit to form - removal is skipped if shapeshift condition is satisfied
-                        ApplyEquipSpell(spellInfo, null, true, formChange);  // add spells that fit form but not active
-                    }
-                }
-            }
+            Item.UpdateItemSetAuras(this, true);
         }
 
         public int GetSpellPenetrationItemMod() { return m_spellPenetrationItemMod; }

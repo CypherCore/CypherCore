@@ -47,25 +47,7 @@ namespace Game.Entities
                     {
                         var addionalData = additionalData.LookupByKey(item.GetGUID().GetCounter());
                         if (addionalData != null)
-                        {
-                            if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
-                                item.LoadArtifactData(this, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId, addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
-
-                            if (addionalData.AzeriteItem != null)
-                            {
-                                AzeriteItem azeriteItem = item.ToAzeriteItem();
-                                if (azeriteItem != null)
-                                    azeriteItem.LoadAzeriteItemData(this, addionalData.AzeriteItem);
-                            }
-
-                            if (addionalData.AzeriteEmpoweredItem != null)
-                            {
-                                AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                                if (azeriteEmpoweredItem != null)
-                                    azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(this, addionalData.AzeriteEmpoweredItem);
-                            }
-                        }
-
+                            item.LoadAdditionalDataFromDB(this, addionalData);
 
                         ulong dbId = result.Read<ulong>(52);
                         ObjectGuid bagGuid = dbId != 0 ? ObjectGuid.Create(HighGuid.Item, dbId) : ObjectGuid.Empty;
@@ -1432,25 +1414,7 @@ namespace Game.Entities
             }
 
             if (addionalData != null)
-            {
-                if (item.GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
-                    item.LoadArtifactData(player, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId,
-                        addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
-
-                if (addionalData.AzeriteItem != null)
-                {
-                    AzeriteItem azeriteItem = item.ToAzeriteItem();
-                    if (azeriteItem != null)
-                        azeriteItem.LoadAzeriteItemData(player, addionalData.AzeriteItem);
-                }
-
-                if (addionalData.AzeriteEmpoweredItem != null)
-                {
-                    AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                    if (azeriteEmpoweredItem != null)
-                        azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(player, addionalData.AzeriteEmpoweredItem);
-                }
-            }
+                item.LoadAdditionalDataFromDB(player, addionalData);
 
             if (mail != null)
                 mail.AddItem(itemGuid, itemEntry);

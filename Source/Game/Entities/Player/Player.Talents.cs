@@ -232,7 +232,7 @@ namespace Game.Entities
             LearnSpecializationSpells();
 
             SendTalentsInfoData();
-            UpdateItemSetAuras(false);
+            Item.UpdateItemSetAuras(this, false);
         }
 
         bool HasTalent(uint talentId, byte group)
@@ -422,7 +422,7 @@ namespace Game.Entities
                 SetPower(PowerType.Mana, 0); // Mana must be 0 even if it isn't the active power type.
 
             SetPower(pw, 0);
-            UpdateItemSetAuras(false);
+            Item.UpdateItemSetAuras(this, false);
 
             // update visible transmog
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)

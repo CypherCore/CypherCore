@@ -585,6 +585,27 @@ namespace Game.Entities
             return true;
         }
 
+        public void LoadAdditionalDataFromDB(Player owner, ItemAdditionalLoadInfo addionalData)
+        {
+            if (GetTemplate().GetArtifactID() != 0 && addionalData.Artifact != null)
+                LoadArtifactData(owner, addionalData.Artifact.Xp, addionalData.Artifact.ArtifactAppearanceId,
+                    addionalData.Artifact.ArtifactTierId, addionalData.Artifact.ArtifactPowers);
+
+            if (addionalData.AzeriteItem != null)
+            {
+                AzeriteItem azeriteItem = ToAzeriteItem();
+                if (azeriteItem != null)
+                    azeriteItem.LoadAzeriteItemData(owner, addionalData.AzeriteItem);
+            }
+
+            if (addionalData.AzeriteEmpoweredItem != null)
+            {
+                AzeriteEmpoweredItem azeriteEmpoweredItem = ToAzeriteEmpoweredItem();
+                if (azeriteEmpoweredItem != null)
+                    azeriteEmpoweredItem.LoadAzeriteEmpoweredItemData(owner, addionalData.AzeriteEmpoweredItem);
+            }
+        }
+
         public void LoadArtifactData(Player owner, ulong xp, uint artifactAppearanceId, uint artifactTier, List<ArtifactPowerData> powers)
         {
             for (byte i = 0; i <= artifactTier; ++i)
@@ -2156,10 +2177,15 @@ namespace Game.Entities
             return true;
         }
 
+        int GetArtifactPowerIndex(uint artifactPowerId)
+        {
+            return m_itemData.ArtifactPowers.FindIndexIf(artifactPower => artifactPower.ArtifactPowerId == artifactPowerId);
+        }
+
         public ArtifactPower GetArtifactPower(uint artifactPowerId)
         {
-            var index = m_artifactPowerIdToIndex.LookupByKey(artifactPowerId);
-            if (index != 0)
+            int index = GetArtifactPowerIndex(artifactPowerId);
+            if (index >= 0)
                 return m_itemData.ArtifactPowers[index];
 
             return null;
@@ -2167,9 +2193,6 @@ namespace Game.Entities
 
         void AddArtifactPower(ArtifactPowerData artifactPower)
         {
-            int index = m_artifactPowerIdToIndex.Count;
-            m_artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
-
             ArtifactPower powerField = new();
             powerField.ArtifactPowerId = (ushort)artifactPower.ArtifactPowerId;
             powerField.PurchasedRank = artifactPower.PurchasedRank;
@@ -2180,10 +2203,10 @@ namespace Game.Entities
 
         public void SetArtifactPower(ushort artifactPowerId, byte purchasedRank, byte currentRankWithBonus)
         {
-            var foundIndex = m_artifactPowerIdToIndex.LookupByKey(artifactPowerId);
-            if (foundIndex != 0)
+            int index = GetArtifactPowerIndex(artifactPowerId);
+            if (index >= 0)
             {
-                ArtifactPower artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, foundIndex);
+                ArtifactPower artifactPower = m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ArtifactPowers, index);
                 SetUpdateFieldValue(ref artifactPower.PurchasedRank, purchasedRank);
                 SetUpdateFieldValue(ref artifactPower.CurrentRankWithBonus, currentRankWithBonus);
             }
@@ -2191,12 +2214,16 @@ namespace Game.Entities
 
         public void InitArtifactPowers(byte artifactId, byte artifactTier)
         {
+            List<uint> knownPowers = new();
+            foreach (var power in m_itemData.ArtifactPowers)
+                knownPowers.Add(power.ArtifactPowerId);
+
             foreach (ArtifactPowerRecord artifactPower in Global.DB2Mgr.GetArtifactPowers(artifactId))
             {
                 if (artifactPower.Tier != artifactTier)
                     continue;
 
-                if (m_artifactPowerIdToIndex.ContainsKey(artifactPower.Id))
+                if (knownPowers.Contains(artifactPower.Id))
                     continue;
 
                 ArtifactPowerData powerData = new();
@@ -2277,8 +2304,8 @@ namespace Game.Entities
                         break;
                         case ItemEnchantmentType.ArtifactPowerBonusRankByID:
                         {
-                            ushort artifactPowerIndex = m_artifactPowerIdToIndex.LookupByKey(enchant.EffectArg[i]);
-                            if (artifactPowerIndex != 0)
+                            int artifactPowerIndex = GetArtifactPowerIndex(enchant.EffectArg[i]);
+                            if (artifactPowerIndex >= 0)
                             {
                                 byte newRank = m_itemData.ArtifactPowers[artifactPowerIndex].CurrentRankWithBonus;
                                 if (apply)
@@ -2579,6 +2606,29 @@ namespace Game.Entities
             }
         }
 
+        public static void UpdateItemSetAuras(Player player, bool formChange)
+        {
+            // item set bonuses not dependent from item broken state
+            foreach (var eff in player.ItemSetEff)
+            {
+                if (eff == null)
+                    continue;
+
+                foreach (var itemSetSpell in eff.SetBonuses)
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
+
+                    if (itemSetSpell.ChrSpecID != 0 && (ChrSpecialization)itemSetSpell.ChrSpecID != player.GetPrimarySpecialization())
+                        player.ApplyEquipSpell(spellInfo, null, false, false);  // item set aura is not for current spec
+                    else
+                    {
+                        player.ApplyEquipSpell(spellInfo, null, false, formChange); // remove spells that not fit to form - removal is skipped if shapeshift condition is satisfied
+                        player.ApplyEquipSpell(spellInfo, null, true, formChange);  // add spells that fit form but not active
+                    }
+                }
+            }
+        }
+
         public BonusData GetBonus() { return _bonusData; }
 
         public override ObjectGuid GetOwnerGUID() { return m_itemData.Owner; }
@@ -2808,7 +2858,6 @@ namespace Game.Entities
         List<ObjectGuid> allowedGUIDs = new();
         uint m_randomBonusListId;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
         ObjectGuid m_childItem;
-        Dictionary<uint, ushort> m_artifactPowerIdToIndex = new();
         Array<uint> m_gemScalingLevels = new(ItemConst.MaxGemSockets);
         #endregion
 
@@ -3102,7 +3151,7 @@ namespace Game.Entities
         public byte CurrentRankWithBonus;
     }
 
-    class ArtifactData
+    public class ArtifactData
     {
         public ulong Xp;
         public uint ArtifactAppearanceId;
@@ -3115,7 +3164,7 @@ namespace Game.Entities
         public int[] SelectedAzeritePowers = new int[SharedConst.MaxAzeriteEmpoweredTier];
     }
 
-    class ItemAdditionalLoadInfo
+    public class ItemAdditionalLoadInfo
     {
         public ArtifactData Artifact;
         public AzeriteData AzeriteItem;
