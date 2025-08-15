@@ -11363,8 +11363,8 @@ namespace Game
 
             _vehicleTemplateStore.Clear();
 
-            //                                         0           1
-            SQLResult result = DB.World.Query("SELECT creatureId, despawnDelayMs FROM vehicle_template");
+            //                                         0           1               2
+            SQLResult result = DB.World.Query("SELECT creatureId, despawnDelayMs, Pitch FROM vehicle_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vehicle template. DB table `vehicle_template` is empty.");
@@ -11375,14 +11375,38 @@ namespace Game
             {
                 uint creatureId = result.Read<uint>(0);
 
-                if (GetCreatureTemplate(creatureId) == null)
+                CreatureTemplate creatureInfo = GetCreatureTemplate(creatureId);
+                if (creatureInfo == null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Vehicle {creatureId} does not exist.");
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Creature (Entry: {creatureId}) does not exist.");
+                    continue;
+                }
+
+                if (creatureInfo.VehicleId == 0)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Creature (Entry: {creatureId}) is not a vehicle.");
                     continue;
                 }
 
                 VehicleTemplate vehicleTemplate = new();
                 vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(result.Read<int>(1));
+
+                if (!result.IsNull(2))
+                {
+                    var vehicle = CliDB.VehicleStorage.LookupByKey(creatureInfo.VehicleId);
+                    if (vehicle == null)
+                        continue;
+
+                    float pitch = result.Read<float>(2);
+                    if (pitch < vehicle.PitchMin || pitch > vehicle.PitchMax)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Creature (Entry: {creatureId}) has invalid Pitch ({pitch}).`. Ignoring");
+                        continue;
+                    }
+
+                    vehicleTemplate.Pitch = pitch;
+                }
+
                 _vehicleTemplateStore[creatureId] = vehicleTemplate;
 
             } while (result.NextRow());

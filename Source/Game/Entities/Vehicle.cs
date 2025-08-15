@@ -459,6 +459,8 @@ namespace Game.Entities
                 _me.AddUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
             if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedpitching))
                 _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+
+            _me.m_movementInfo.Pitch = GetPitch();
         }
 
         public VehicleSeatRecord GetSeatForPassenger(Unit passenger)
@@ -567,6 +569,15 @@ namespace Game.Entities
                 return vehicleTemplate.DespawnDelay;
 
             return TimeSpan.FromMilliseconds(1);
+        }
+
+        float GetPitch()
+        {
+            VehicleTemplate vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
+            if (vehicleTemplate != null && vehicleTemplate.Pitch.HasValue)
+                return vehicleTemplate.Pitch.Value;
+
+            return Math.Clamp(0.0f, _vehicleInfo.PitchMin, _vehicleInfo.PitchMax);
         }
 
         public string GetDebugInfo()
@@ -820,6 +831,7 @@ namespace Game.Entities
     public class VehicleTemplate
     {
         public TimeSpan DespawnDelay;
+        public float? Pitch;
     }
 
     public class VehicleSeatAddon
