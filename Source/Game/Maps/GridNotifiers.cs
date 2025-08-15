@@ -32,11 +32,11 @@ namespace Game.Maps
 
             if (!c.HasUnitState(UnitState.Sightless))
             {
-                if (c.IsAIEnabled() && c.CanSeeOrDetect(u, false, true))
+                if (c.IsAIEnabled() && c.CanSeeOrDetect(u, new CanSeeOrDetectExtraArgs() { DistanceCheck = true }))
                     c.GetAI().MoveInLineOfSight_Safe(u);
                 else
                 {
-                    if (u.IsTypeId(TypeId.Player) && u.HasStealthAura() && c.IsAIEnabled() && c.CanSeeOrDetect(u, false, true, true))
+                    if (u.IsTypeId(TypeId.Player) && u.HasStealthAura() && c.IsAIEnabled() && c.CanSeeOrDetect(u, new CanSeeOrDetectExtraArgs() { DistanceCheck = true, AlertCheck = true }))
                         c.GetAI().TriggerAlert(u);
                 }
             }

@@ -3959,11 +3959,11 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool CanNeverSee(WorldObject obj)
+        public override bool CanNeverSee(WorldObject obj, bool ignorePhaseShift = false)
         {
             // the intent is to delay sending visible objects until client is ready for them
             // some gameobjects dont function correctly if they are sent before TransportServerTime is correctly set (after CMSG_MOVE_INIT_ACTIVE_MOVER_COMPLETE)
-            return !HasPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime) || base.CanNeverSee(obj);
+            return !HasPlayerLocalFlag(PlayerLocalFlags.OverrideTransportServerTime) || base.CanNeverSee(obj, ignorePhaseShift);
         }
 
         public override bool CanAlwaysSee(WorldObject obj)
@@ -6229,7 +6229,7 @@ namespace Game.Entities
         {
             if (HaveAtClient(target))
             {
-                if (!CanSeeOrDetect(target, false, true))
+                if (!CanSeeOrDetect(target, new CanSeeOrDetectExtraArgs() { DistanceCheck = true }))
                 {
                     BeforeVisibilityDestroy(target, this);
 
@@ -6243,7 +6243,7 @@ namespace Game.Entities
             }
             else
             {
-                if (CanSeeOrDetect(target, false, true))
+                if (CanSeeOrDetect(target, new CanSeeOrDetectExtraArgs() { DistanceCheck = true }))
                 {
                     target.SendUpdateToPlayer(this);
                     m_clientGUIDs.Add(target.GetGUID());
@@ -6259,7 +6259,7 @@ namespace Game.Entities
         {
             if (HaveAtClient(target))
             {
-                if (!CanSeeOrDetect(target, false, true))
+                if (!CanSeeOrDetect(target, new CanSeeOrDetectExtraArgs() { DistanceCheck = true }))
                 {
                     BeforeVisibilityDestroy(target, this);
 
@@ -6273,7 +6273,7 @@ namespace Game.Entities
             }
             else
             {
-                if (CanSeeOrDetect(target, false, true))
+                if (CanSeeOrDetect(target, new CanSeeOrDetectExtraArgs() { DistanceCheck = true }))
                 {
                     target.BuildCreateUpdateBlockForPlayer(data, this);
                     m_clientGUIDs.Add(target.GetGUID());

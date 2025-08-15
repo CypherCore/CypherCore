@@ -2035,7 +2035,7 @@ namespace Framework.Constants
         OnlyTargetOwnSummons = 0x10000, // Only Target Own Summons
         HasteAffectsDuration = 0x20000, // Haste Affects Duration
         IgnoreSpellcastOverrideCost = 0x40000, // Ttile Ignore Spellcast Override Cost
-        AllowTargetsHiddenBySpawnTracking = 0x80000, /*Nyi - No Spawn Tracking Implementation*/ // Allow Targets Hidden By Spawn Tracking
+        AllowTargetsHiddenBySpawnTracking = 0x80000, // Allow Targets Hidden By Spawn Tracking
         RequiresEquippedInvTypes = 0x100000, // Requires Equipped Inv Types
         NoSummonDestFromClientTargetingPathingRequirement = 0x200000, /*Nyi - Vald Path To A Spell Dest Is Not Required Currently If The Dest Comes From Client*/ // No 'Summon + Dest From Client' Targeting Pathing Requirement
         MeleeHasteAffectsPeriodic = 0x400000, // Melee Haste Affects Periodic
@@ -2320,7 +2320,8 @@ namespace Framework.Constants
         SchoolmaskNormalWithMagic = 0x200000,
         DeprecatedLiquidAura = 0x400000,
         IsTalent = 0x800000,
-        AuraCannotBeSaved = 0x1000000
+        AuraCannotBeSaved = 0x1000000,
+        CanTargetAnyPrivateObject = 0x2000000,
     }
     #endregion
 

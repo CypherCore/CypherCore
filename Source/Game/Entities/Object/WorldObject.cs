@@ -1271,18 +1271,18 @@ namespace Game.Entities
 
         public SmoothPhasing GetSmoothPhasing() { return _smoothPhasing; }
 
-        public bool CanSeeOrDetect(WorldObject obj, bool implicitDetect = false, bool distanceCheck = false, bool checkAlert = false)
+        public bool CanSeeOrDetect(WorldObject obj, CanSeeOrDetectExtraArgs args = default)
         {
             if (this == obj)
                 return true;
 
-            if (obj.IsNeverVisibleFor(this, implicitDetect) || CanNeverSee(obj))
+            if (obj.IsNeverVisibleFor(this, args.ImplicitDetection) || CanNeverSee(obj, args.IgnorePhaseShift))
                 return false;
 
             if (obj.IsAlwaysVisibleFor(this) || CanAlwaysSee(obj))
                 return true;
 
-            if (!obj.CheckPrivateObjectOwnerVisibility(this))
+            if (!args.IncludeAnyPrivateObject && !obj.CheckPrivateObjectOwnerVisibility(this))
                 return false;
 
             SmoothPhasing smoothPhasing = obj.GetSmoothPhasing();
@@ -1292,17 +1292,21 @@ namespace Game.Entities
             if (!obj.IsPrivateObject() && !Global.ConditionMgr.IsObjectMeetingVisibilityByObjectIdConditions(obj, this))
                 return false;
 
-            // Spawn tracking
             Player player = ToPlayer();
-            if (player != null)
+
+            // Spawn tracking
+            if (!args.IncludeHiddenBySpawnTracking)
             {
-                SpawnTrackingStateData spawnTrackingStateData = obj.GetSpawnTrackingStateDataForPlayer(player);
-                if (spawnTrackingStateData != null && !spawnTrackingStateData.Visible)
-                    return false;
+                if (player != null)
+                {
+                    SpawnTrackingStateData spawnTrackingStateData = obj.GetSpawnTrackingStateDataForPlayer(player);
+                    if (spawnTrackingStateData != null && !spawnTrackingStateData.Visible)
+                        return false;
+                }
             }
 
             bool corpseVisibility = false;
-            if (distanceCheck)
+            if (args.DistanceCheck)
             {
                 bool corpseCheck = false;
                 Player thisPlayer = ToPlayer();
@@ -1376,15 +1380,15 @@ namespace Game.Entities
             if (obj.IsInvisibleDueToDespawn(this))
                 return false;
 
-            if (!CanDetect(obj, implicitDetect, checkAlert))
+            if (!CanDetect(obj, args.ImplicitDetection, args.AlertCheck))
                 return false;
 
             return true;
         }
 
-        public virtual bool CanNeverSee(WorldObject obj)
+        public virtual bool CanNeverSee(WorldObject obj, bool ignorePhaseShift = false)
         {
-            return GetMap() != obj.GetMap() || !InSamePhase(obj);
+            return GetMap() != obj.GetMap() || (!ignorePhaseShift && !InSamePhase(obj));
         }
 
         public virtual bool CanAlwaysSee(WorldObject obj) { return false; }
@@ -2679,11 +2683,16 @@ namespace Game.Entities
             if (unit != null)
             {
                 // can't attack invisible
-                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift))
+                CanSeeOrDetectExtraArgs canSeeOrDetectExtraArgs = new();
+                if (bySpell != null)
                 {
-                    if (!unit.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
-                        return false;
+                    canSeeOrDetectExtraArgs.ImplicitDetection = bySpell.IsAffectingArea();
+                    canSeeOrDetectExtraArgs.IgnorePhaseShift = bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift);
+                    canSeeOrDetectExtraArgs.IncludeHiddenBySpawnTracking = bySpell.HasAttribute(SpellAttr8.AllowTargetsHiddenBySpawnTracking);
+                    canSeeOrDetectExtraArgs.IncludeAnyPrivateObject = bySpell.HasAttribute(SpellCustomAttributes.CanTargetAnyPrivateObject);
                 }
+                if (!unit.CanSeeOrDetect(target, canSeeOrDetectExtraArgs))
+                    return false;
             }
 
             // can't attack dead
@@ -2845,7 +2854,15 @@ namespace Game.Entities
             }
 
             // can't assist invisible
-            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
+            CanSeeOrDetectExtraArgs canSeeOrDetectExtraArgs = new();
+            if (bySpell != null)
+            {
+                canSeeOrDetectExtraArgs.ImplicitDetection = bySpell.IsAffectingArea();
+                canSeeOrDetectExtraArgs.IgnorePhaseShift = bySpell.HasAttribute(SpellAttr6.IgnorePhaseShift);
+                canSeeOrDetectExtraArgs.IncludeHiddenBySpawnTracking = bySpell.HasAttribute(SpellAttr8.AllowTargetsHiddenBySpawnTracking);
+                canSeeOrDetectExtraArgs.IncludeAnyPrivateObject = bySpell.HasAttribute(SpellCustomAttributes.CanTargetAnyPrivateObject);
+            }
+            if (!CanSeeOrDetect(target, canSeeOrDetectExtraArgs))
                 return false;
 
             // can't assist dead
@@ -4331,5 +4348,16 @@ namespace Game.Entities
         {
             return _changesMask[(int)index];
         }
+    }
+
+    public struct CanSeeOrDetectExtraArgs
+    {
+        public bool ImplicitDetection;
+        public bool IgnorePhaseShift;
+        public bool IncludeHiddenBySpawnTracking;
+        public bool IncludeAnyPrivateObject;
+
+        public bool DistanceCheck;
+        public bool AlertCheck;
     }
 }

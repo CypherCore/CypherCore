@@ -995,8 +995,15 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr1.ExcludeCaster) && caster == target)
                 return SpellCastResult.BadTargets;
 
-            // check visibility - ignore invisibility/stealth for implicit (area) targets
-            if (!HasAttribute(SpellAttr6.IgnorePhaseShift) && !caster.CanSeeOrDetect(target, Implicit))
+            // check visibility - Ignore invisibility/stealth for implicit (area) targets
+            CanSeeOrDetectExtraArgs canSeeOrDetectExtraArgs = new CanSeeOrDetectExtraArgs
+            {
+                ImplicitDetection = Implicit,
+                IgnorePhaseShift = HasAttribute(SpellAttr6.IgnorePhaseShift),
+                IncludeHiddenBySpawnTracking = HasAttribute(SpellAttr8.AllowTargetsHiddenBySpawnTracking),
+                IncludeAnyPrivateObject = HasAttribute(SpellCustomAttributes.CanTargetAnyPrivateObject)
+            };
+            if (!caster.CanSeeOrDetect(target, canSeeOrDetectExtraArgs))
                 return SpellCastResult.BadTargets;
 
             Unit unitTarget = target.ToUnit();

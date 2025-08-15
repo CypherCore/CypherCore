@@ -38,7 +38,12 @@ namespace Game.AI
             Unit victim = !_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, _victimGuid) : null;
 
             // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
-            if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) || me.IsFriendlyTo(victim) || !me.CanSeeOrDetect(victim))
+            CanSeeOrDetectExtraArgs canSeeOrDetectExtraArgs = new CanSeeOrDetectExtraArgs() {
+                IgnorePhaseShift = spellInfo.HasAttribute(SpellAttr6.IgnorePhaseShift),
+                IncludeHiddenBySpawnTracking = spellInfo.HasAttribute(SpellAttr8.AllowTargetsHiddenBySpawnTracking),
+                IncludeAnyPrivateObject = spellInfo.HasAttribute(SpellCustomAttributes.CanTargetAnyPrivateObject)
+            };            
+            if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) || me.IsFriendlyTo(victim) || !me.CanSeeOrDetect(victim, canSeeOrDetectExtraArgs))
             {
                 float extraSearchRadius = max_range > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                 var u_check = new NearestAttackableUnitInObjectRangeCheck(me, me.GetCharmerOrOwnerOrSelf(), max_range);
