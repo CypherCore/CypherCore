@@ -866,10 +866,15 @@ namespace Game.Entities
             }
         }
 
-        public void RemoveAllAreaTriggers()
+        public void RemoveAllAreaTriggers(AreaTriggerRemoveReason reason = AreaTriggerRemoveReason.Default)
         {
-            while (!m_areaTrigger.Empty())
-                m_areaTrigger.Last()?.Remove();
+            foreach (AreaTrigger at in m_areaTrigger)
+            {
+                if (reason == AreaTriggerRemoveReason.UnitDespawn && at.GetTemplate().ActionSetFlags.HasFlag(AreaTriggerActionSetFlag.DontDespawnWithCreator))
+                    continue;
+
+                at.Remove();
+            }
         }
 
         public NPCFlags GetNpcFlags() { return (NPCFlags)m_unitData.NpcFlags.GetValue(); }

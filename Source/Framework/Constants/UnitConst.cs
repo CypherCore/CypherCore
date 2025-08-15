@@ -607,13 +607,19 @@ namespace Framework.Constants
 
     public enum UnitDynFlags
     {
-        None                    = 0x00,
-        HideModel               = 0x02,     // Object model is not shown with this flag
-        Lootable                = 0x04,
-        TrackUnit               = 0x08,
-        Tapped                  = 0x10,     // Lua_UnitIsTapped
-        SpecialInfo             = 0x20,
-        CanSkin                 = 0x40,     // previously UNIT_DYNFLAG_DEAD
-        ReferAFriend            = 0x80
+        None = 0x00,
+        HideModel = 0x02,     // Object model is not shown with this flag
+        Lootable = 0x04,
+        TrackUnit = 0x08,
+        Tapped = 0x10,     // Lua_UnitIsTapped
+        SpecialInfo = 0x20,
+        CanSkin = 0x40,     // previously UNIT_DYNFLAG_DEAD
+        ReferAFriend = 0x80
+    }
+
+    public enum AreaTriggerRemoveReason
+    {
+        Default,
+        UnitDespawn
     }
 }
