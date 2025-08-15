@@ -3213,7 +3213,7 @@ namespace Game.Spells
                     else
                         duration = m_spellValue.Duration.Value;
 
-                    m_channeledDuration = duration;
+                    m_channelDuration = duration;
                     SendChannelStart((uint)duration);
                 }
                 else if (duration == -1)
@@ -3503,7 +3503,7 @@ namespace Game.Spells
                     {
                         int completedStages = new Func<int>(() =>
                         {
-                            TimeSpan passed = TimeSpan.FromMilliseconds(m_channeledDuration - m_timer);
+                            TimeSpan passed = TimeSpan.FromMilliseconds(m_channelDuration - m_timer);
                             for (int i = 0; i < m_empower.StageDurations.Count; ++i)
                             {
                                 passed -= m_empower.StageDurations[i];
@@ -7294,7 +7294,7 @@ namespace Game.Spells
 
             //check pushback reduce
             // should be affected by modifiers, not take the dbc duration.
-            int duration = ((m_channeledDuration > 0) ? m_channeledDuration : m_spellInfo.GetDuration());
+            int duration = ((m_channelDuration > 0) ? m_channelDuration : m_spellInfo.GetDuration());
 
             int delaytime = MathFunctions.CalculatePct(duration, 25); // channeling delay is normally 25% of its time per hit
             int delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
@@ -7575,7 +7575,7 @@ namespace Game.Spells
             if (!m_empower.IsReleasedByClient && m_timer != 0)
                 return false;
 
-            TimeSpan passedTime = TimeSpan.FromMilliseconds(m_channeledDuration - m_timer);
+            TimeSpan passedTime = TimeSpan.FromMilliseconds(m_channelDuration - m_timer);
             return passedTime >= m_empower.MinHoldTime;
         }
 
@@ -7858,7 +7858,7 @@ namespace Game.Spells
             }
 
             switch ((SpellValueModFloat)value.Type)
-            { 
+            {
                 case SpellValueModFloat.RadiusMod:
                     m_spellValue.RadiusMod = value.FloatValue;
                     break;
@@ -8460,6 +8460,8 @@ namespace Game.Spells
 
         public int GetRemainingCastTime() { return m_timer; }
 
+        public int GetChannelDuration() { return m_channelDuration; }
+
         bool IsAutoRepeat()
         {
             return m_autoRepeat;
@@ -8577,7 +8579,7 @@ namespace Game.Spells
 
         List<SpellPowerCost> m_powerCost = new();
         int m_casttime;                                   // Calculated spell cast time initialized only in Spell.prepare
-        int m_channeledDuration;                          // Calculated channeled spell duration in order to calculate correct pushback.
+        int m_channelDuration;                          // Calculated channeled spell duration in order to calculate correct pushback.
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
         byte m_runesState;
