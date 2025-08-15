@@ -3136,6 +3136,23 @@ namespace Game.Entities
             return true;
         }
 
+        bool IsQuestObjectiveCompletable(uint questId, uint objectiveId)
+        {
+            Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+            if (quest == null)
+                return false;
+
+            ushort slot = FindQuestSlot(questId);
+            if (slot >= SharedConst.MaxQuestLogSize)
+                return false;
+
+            QuestObjective obj = Global.ObjectMgr.GetQuestObjective(objectiveId);
+            if (obj == null)
+                return false;
+
+            return IsQuestObjectiveCompletable(slot, quest, obj);
+        }
+
         bool IsQuestObjectiveComplete(uint questId, uint objectiveId)
         {
             Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -3438,7 +3455,7 @@ namespace Game.Entities
                 {
                     if (IsQuestRewarded(questObjective.QuestID) || IsQuestObjectiveComplete(questObjective.QuestID, questObjective.Id))
                         return SpawnTrackingState.Complete;
-                    else if (GetQuestStatus(questObjective.QuestID) != QuestStatus.None)
+                    else if (GetQuestStatus(questObjective.QuestID) != QuestStatus.None && IsQuestObjectiveCompletable(questObjective.QuestID, questObjective.Id))
                     {
                         var itr = m_QuestStatus.LookupByKey(questObjective.QuestID);
                         if (itr != null && itr.Slot < SharedConst.MaxQuestLogSize)
