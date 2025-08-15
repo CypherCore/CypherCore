@@ -346,7 +346,7 @@ namespace Game.Spells
             m_castItemGuid = createInfo.CastItemGUID;
             m_castItemId = createInfo.CastItemId;
             m_castItemLevel = createInfo.CastItemLevel;
-            m_spellVisual = new SpellCastVisual(createInfo.Caster != null ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId(), 0);
+            m_spellVisual = createInfo.CalcSpellVisual();
             m_applyTime = GameTime.GetGameTime();
             m_owner = createInfo._owner;
             m_timeCla = 0;
@@ -3071,6 +3071,7 @@ namespace Game.Spells
         internal Difficulty _castDifficulty;
         internal uint _auraEffectMask;
         internal WorldObject _owner;
+        internal SpellCastVisual? _spellVisual;
 
         internal uint _targetEffectMask;
 
@@ -3089,6 +3090,15 @@ namespace Game.Spells
             Cypher.Assert(auraEffMask <= SpellConst.MaxEffectMask);
         }
 
+        public SpellCastVisual CalcSpellVisual()
+        {
+            return _spellVisual.GetValueOrDefault(new SpellCastVisual()
+            {
+                SpellXSpellVisualID = Caster != null ? Caster.GetCastSpellXSpellVisualId(_spellInfo) : _spellInfo.GetSpellXSpellVisualId(),
+                ScriptVisualID = 0
+            });
+        }
+
         public void SetCasterGUID(ObjectGuid guid) { CasterGUID = guid; }
         public void SetCaster(Unit caster) { Caster = caster; }
         public void SetBaseAmount(int[] bp) { BaseAmount = bp; }
@@ -3097,6 +3107,7 @@ namespace Game.Spells
         public void SetStackAmount(int stackAmount) { StackAmount = stackAmount > 0 ? stackAmount : 1; }
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }
         public void SetAuraEffectMask(uint effMask) { _auraEffectMask = effMask; }
+        public void SetSpellVisual(SpellCastVisual spellVisual) { _spellVisual = spellVisual; }
 
         public SpellInfo GetSpellInfo() { return _spellInfo; }
         public uint GetAuraEffectMask() { return _auraEffectMask; }

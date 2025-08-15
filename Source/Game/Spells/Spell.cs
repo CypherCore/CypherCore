@@ -2355,6 +2355,7 @@ namespace Game.Spells
                         createInfo.SetPeriodicReset(resetPeriodicTimer);
                         createInfo.SetOwnerEffectMask(aura_effmask);
                         createInfo.SetStackAmount(m_spellValue.AuraStackAmount);
+                        createInfo.SetSpellVisual(m_SpellVisual);
 
                         Aura aura = Aura.TryRefreshStackOrCreate(createInfo, false);
                         if (aura != null)
