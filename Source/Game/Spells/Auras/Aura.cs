@@ -426,6 +426,12 @@ namespace Game.Spells
             _DeleteRemovedApplications();
         }
 
+        public void SetSpellVisual(SpellCastVisual spellVisual)
+        {
+            m_spellVisual = spellVisual;
+            SetNeedClientUpdateForTargets();
+        }
+
         public Unit GetCaster()
         {
             if (m_owner.GetGUID() == m_casterGuid)

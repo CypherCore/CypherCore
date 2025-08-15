@@ -1216,6 +1216,22 @@ namespace Game.Networking.Packets
         public MovementInfo Status;
     }
 
+    class UpdateAuraVisual : ClientPacket
+    {
+        public uint SpellID;
+        public SpellCastVisual Visual;
+        public ObjectGuid TargetGUID;
+
+        public UpdateAuraVisual(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellID = _worldPacket.ReadUInt32();
+            Visual.Read(_worldPacket);
+            TargetGUID = _worldPacket.ReadPackedGuid();
+        }
+    }
+
     public class SpellDelayed : ServerPacket
     {
         public SpellDelayed() : base(ServerOpcodes.SpellDelayed, ConnectionType.Instance) { }

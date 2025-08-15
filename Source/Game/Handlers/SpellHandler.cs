@@ -603,6 +603,26 @@ namespace Game
             }
         }
 
+        [WorldPacketHandler(ClientOpcodes.UpdateSpellVisual, Processing = PacketProcessing.Inplace)]
+        void HandleUpdateAuraVisual(UpdateAuraVisual updateAuraVisual)
+        {
+            Unit target = Global.ObjAccessor.GetUnit(_player, updateAuraVisual.TargetGUID);
+            if (target == null)
+                return;
+
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(updateAuraVisual.SpellID, _player.GetMap().GetDifficultyID());
+            if (spellInfo == null)
+                return;
+
+            uint spellXspellVisualId = _player.GetCastSpellXSpellVisualId(spellInfo);
+            foreach (var (_, auraApp) in target.GetAppliedAuras().Where(p => p.Key == spellInfo.Id))
+                if (auraApp.GetBase().GetCasterGUID() == _player.GetGUID())
+                    auraApp.GetBase().SetSpellVisual(new SpellCastVisual() { SpellXSpellVisualID = spellXspellVisualId });
+
+            if (_player.GetChannelSpellId() == spellInfo.Id)
+                _player.SetChannelVisual(new SpellCastVisualField() { SpellXSpellVisualID = spellXspellVisualId });
+        }
+
         [WorldPacketHandler(ClientOpcodes.KeyboundOverride, Processing = PacketProcessing.ThreadSafe)]
         void HandleKeyboundOverride(KeyboundOverride keyboundOverride)
         {
