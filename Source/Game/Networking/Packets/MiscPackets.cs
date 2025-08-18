@@ -1358,15 +1358,16 @@ namespace Game.Networking.Packets
     class DisplayToast : ServerPacket
     {
         public ulong Quantity;
+        public uint QuestID;
         public DisplayToastMethod DisplayToastMethod;
         public bool Mailed;
         public DisplayToastType Type = DisplayToastType.Money;
-        public uint QuestID;
         public bool IsSecondaryResult;
         public ItemInstance Item;
-        public bool BonusRoll;
         public int LootSpec;
         public Gender Gender = Gender.None;
+        public bool BonusRoll;
+        public bool ForceToast;    // Ignores ITEM_FLAG3_DO_NOT_TOAST
         public uint CurrencyID;
 
         public DisplayToast() : base(ServerOpcodes.DisplayToast, ConnectionType.Instance) { }
@@ -1385,6 +1386,7 @@ namespace Game.Networking.Packets
             {
                 case DisplayToastType.NewItem:
                     _worldPacket.WriteBit(BonusRoll);
+                    _worldPacket.WriteBit(ForceToast);
                     Item.Write(_worldPacket);
                     _worldPacket.WriteInt32(LootSpec);
                     _worldPacket.WriteInt8((sbyte)Gender);
