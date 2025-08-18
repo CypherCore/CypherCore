@@ -1811,6 +1811,10 @@ namespace Game.Entities
                         if (trapEntry != 0)
                             TriggeringLinkedGameObject(trapEntry, player);
 
+                        // Cast spell before sending loot
+                        if (spellCaster != null && info.Chest.spell != 0)
+                            spellCaster.CastSpell(null, info.Chest.spell, spellArgs);
+
                         AddUniqueUse(player);
                     }
 
