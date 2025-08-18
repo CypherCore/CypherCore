@@ -926,7 +926,7 @@ namespace Game.Scripting
         }
 
         // returns current spell hit target aura
-        public Aura GetHitAura(bool dynObjAura = false)
+        public Aura GetHitAura(bool dynObjAura = false, bool withRemoved = false)
         {
             if (!IsInTargetHook())
             {
@@ -938,7 +938,7 @@ namespace Game.Scripting
             if (dynObjAura)
                 aura = m_spell.dynObjAura;
 
-            if (aura == null || aura.IsRemoved())
+            if (aura == null || (aura.IsRemoved() && !withRemoved))
                 return null;
 
             return aura;
