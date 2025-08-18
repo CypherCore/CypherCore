@@ -4963,7 +4963,11 @@ namespace Game.Entities
             displayPlayerChoice.SoundKitID = playerChoice.SoundKitId;
             displayPlayerChoice.CloseUISoundKitID = playerChoice.CloseSoundKitId;
             if (playerChoice.Duration > TimeSpan.Zero)
-                displayPlayerChoice.ExpireTime = (GameTime.GetSystemTime() + playerChoice.Duration).ToFileTime();
+            {
+                DateTime expireTime = GameTime.GetSystemTime() + playerChoice.Duration;
+                PlayerTalkClass.GetInteractionData().GetPlayerChoice().SetExpireTime(expireTime);
+                displayPlayerChoice.ExpireTime = Time.DateTimeToUnixTime(expireTime);
+            }
 
             displayPlayerChoice.Question = playerChoice.Question;
             if (playerChoiceLocale != null)
