@@ -5523,8 +5523,11 @@ namespace Game.Spells
                                 if (activeGlyphId == glyphId)
                                     return SpellCastResult.UniqueGlyph;
 
-                                if (CliDB.GlyphPropertiesStorage.LookupByKey(activeGlyphId).GlyphExclusiveCategoryID == glyphProperties.GlyphExclusiveCategoryID)
+                                if (glyphProperties.GlyphExclusiveCategoryID != 0 && CliDB.GlyphPropertiesStorage.LookupByKey(activeGlyphId).GlyphExclusiveCategoryID == glyphProperties.GlyphExclusiveCategoryID)
+                                {
+                                    param1 = glyphProperties.GlyphExclusiveCategoryID;
                                     return SpellCastResult.GlyphExclusiveCategory;
+                                }
                             }
                         }
                         break;
