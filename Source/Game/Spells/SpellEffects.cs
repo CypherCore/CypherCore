@@ -2440,8 +2440,12 @@ namespace Game.Spells
             // multiple weapon dmg effect workaround
             // execute only the last weapon damage
             // and handle all effects at once
+            uint effectMask = m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).EffectMask;
             for (var j = effectInfo.EffectIndex + 1; j < m_spellInfo.GetEffects().Count; ++j)
             {
+                if ((effectMask & (1 << (int)j)) == 0)
+                    continue;
+
                 switch (m_spellInfo.GetEffect(j).Effect)
                 {
                     case SpellEffectName.WeaponDamage:
@@ -2474,6 +2478,9 @@ namespace Game.Spells
             float weaponDamagePercentMod = 1.0f;
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
+                if ((effectMask & (1 << (int)spellEffectInfo.EffectIndex)) == 0)
+                    continue;
+
                 switch (spellEffectInfo.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
@@ -2525,6 +2532,9 @@ namespace Game.Spells
             // Sequence is important
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
+                if ((effectMask & (1 << (int)spellEffectInfo.EffectIndex)) == 0)
+                    continue;
+
                 // We assume that a spell have at most one fixed_bonus
                 // and at most one weaponDamagePercentMod
                 switch (spellEffectInfo.Effect)
