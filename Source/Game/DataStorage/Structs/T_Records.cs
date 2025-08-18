@@ -18,7 +18,7 @@ namespace Game.DataStorage
         public uint Id;
         public string Description;
         public byte TierID;
-        public byte Flags;
+        public int Flags;
         public byte ColumnIndex;
         public ushort TabID;
         public sbyte ClassID;

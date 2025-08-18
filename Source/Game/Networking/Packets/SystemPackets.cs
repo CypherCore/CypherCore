@@ -114,34 +114,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LobbyMatchmakerQueueFromMainlineEnabled);
             _worldPacket.WriteBit(CanSendLobbyMatchmakerPartyCustomizations);
             _worldPacket.WriteBit(AddonProfilerEnabled);
+            _worldPacket.WriteBit(false); // unused 11.1.7
+            _worldPacket.WriteBit(false); // unused 11.1.7
 
             _worldPacket.FlushBits();
 
-            {
-                _worldPacket.WriteBit(QuickJoinConfig.ToastsDisabled);
-                _worldPacket.WriteFloat(QuickJoinConfig.ToastDuration);
-                _worldPacket.WriteFloat(QuickJoinConfig.DelayDuration);
-                _worldPacket.WriteFloat(QuickJoinConfig.QueueMultiplier);
-                _worldPacket.WriteFloat(QuickJoinConfig.PlayerMultiplier);
-                _worldPacket.WriteFloat(QuickJoinConfig.PlayerFriendValue);
-                _worldPacket.WriteFloat(QuickJoinConfig.PlayerGuildValue);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleInitialThreshold);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleDecayTime);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePrioritySpike);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleMinThreshold);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePvPPriorityNormal);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePvPPriorityLow);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottlePvPHonorThreshold);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListPriorityDefault);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListPriorityAbove);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListPriorityBelow);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListIlvlScalingAbove);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleLfgListIlvlScalingBelow);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleRfPriorityAbove);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleRfIlvlScalingAbove);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleDfMaxItemLevel);
-                _worldPacket.WriteFloat(QuickJoinConfig.ThrottleDfBestPriority);
-            }
+            QuickJoinConfig.Write(_worldPacket);
 
             if (SessionAlert.HasValue)
             {
@@ -268,6 +246,34 @@ namespace Game.Networking.Packets
             public float ThrottleRfIlvlScalingAbove;
             public float ThrottleDfMaxItemLevel;
             public float ThrottleDfBestPriority;
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteFloat(ToastDuration);
+                data.WriteFloat(DelayDuration);
+                data.WriteFloat(QueueMultiplier);
+                data.WriteFloat(PlayerMultiplier);
+                data.WriteFloat(PlayerFriendValue);
+                data.WriteFloat(PlayerGuildValue);
+                data.WriteFloat(ThrottleInitialThreshold);
+                data.WriteFloat(ThrottleDecayTime);
+                data.WriteFloat(ThrottlePrioritySpike);
+                data.WriteFloat(ThrottleMinThreshold);
+                data.WriteFloat(ThrottlePvPPriorityNormal);
+                data.WriteFloat(ThrottlePvPPriorityLow);
+                data.WriteFloat(ThrottlePvPHonorThreshold);
+                data.WriteFloat(ThrottleLfgListPriorityDefault);
+                data.WriteFloat(ThrottleLfgListPriorityAbove);
+                data.WriteFloat(ThrottleLfgListPriorityBelow);
+                data.WriteFloat(ThrottleLfgListIlvlScalingAbove);
+                data.WriteFloat(ThrottleLfgListIlvlScalingBelow);
+                data.WriteFloat(ThrottleRfPriorityAbove);
+                data.WriteFloat(ThrottleRfIlvlScalingAbove);
+                data.WriteFloat(ThrottleDfMaxItemLevel);
+                data.WriteFloat(ThrottleDfBestPriority);
+                data.WriteBit(ToastsDisabled);
+                data.FlushBits();
+            }
         }
 
         public struct SquelchInfo
@@ -339,6 +345,10 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(BNSendGameDataUseV2Services);
             _worldPacket.WriteBit(CharacterSelectListModeRealmless);
+            _worldPacket.WriteBit(WowTokenLimitedMode);
+            _worldPacket.WriteBit(false); // unused 11.1.7
+            _worldPacket.WriteBit(false); // unused 11.1.7
+            _worldPacket.WriteBit(PandarenLevelBoostAllowed);
 
             _worldPacket.FlushBits();
 
@@ -411,6 +421,8 @@ namespace Game.Networking.Packets
         public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
         public bool BNSendGameDataUseV2Services = true; ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
         public bool CharacterSelectListModeRealmless;
+        public bool WowTokenLimitedMode; // classic only
+        public bool PandarenLevelBoostAllowed; // classic only
         public EuropaTicketConfig? EuropaTicketSystemStatus;
         public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint CommercePricePollTimeSeconds;     // NYI

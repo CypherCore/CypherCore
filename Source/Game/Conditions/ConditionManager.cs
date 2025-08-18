@@ -2145,7 +2145,29 @@ namespace Game
                 for (var i = 0; i < condition.ItemID.Length; ++i)
                 {
                     if (condition.ItemID[i] != 0)
-                        results[i] = player.GetItemCount(condition.ItemID[i], condition.ItemFlags != 0) >= condition.ItemCount[i];
+                    {
+                        ItemSearchLocation where = ItemSearchLocation.Equipment;
+                        if ((condition.ItemFlags & 1) != 0)    // include banks
+                            where |= ItemSearchLocation.Bank | ItemSearchLocation.ReagentBank | ItemSearchLocation.AccountBank;
+                        if ((condition.ItemFlags & 2) == 0)    // ignore inventory
+                            where |= ItemSearchLocation.Inventory;
+
+                        uint foundCount = 0;
+                        results[i] = !player.ForEachItem(where, item =>
+                        {
+                            if (item.GetEntry() == condition.ItemID[i])
+                            {
+                                foundCount += item.GetCount();
+                                if (foundCount >= condition.ItemCount[i])
+                                    return false;
+                            }
+
+                            return true;
+                        });
+
+                        if (!results[i] && condition.ItemCount[i] == 1 && Global.DB2Mgr.IsToyItem(condition.ItemID[i]))
+                            results[i] = player.GetSession().GetCollectionMgr().HasToy(condition.ItemID[i]);
+                    }
                 }
 
                 if (!PlayerConditionLogic(condition.ItemLogic, results))

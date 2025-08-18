@@ -4384,6 +4384,13 @@ namespace Game.Entities
                 });
             });
 
+            // Flame Spout
+            ApplySpellFix([ 114685 ], spellInfo =>
+            {
+                spellInfo.AttributesEx |= SpellAttr1.NoThreat;
+                spellInfo.AttributesEx8 |= SpellAttr8.CanAttackImmunePC;
+            });
+
             // END OF THE WANDERING ISLE SPELLS
             //
 
@@ -4682,6 +4689,18 @@ namespace Game.Entities
             ApplySpellFix([388615], spellInfo =>
             {
                 spellInfo._LoadSqrtTargetLimit(5, 0, null, 4, null, null);
+            });
+
+            // Keg Smash
+            ApplySpellFix([ 121253 ], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, null, 6, null, null);
+            });
+
+            // Odyn's Fury
+            ApplySpellFix([ 385060, 385061, 385062 ], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, 385059, 5, null, null);
             });
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");

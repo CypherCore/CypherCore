@@ -43,7 +43,7 @@ namespace Game.DataStorage
         public ushort IntroSound;
         public ushort UwIntroSound;
         public ushort AreaTableID;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class WorldEffectRecord

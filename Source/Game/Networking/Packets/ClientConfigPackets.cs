@@ -103,6 +103,22 @@ namespace Game.Networking.Packets
         public ByteBuffer CompressedData;
     }
 
+    class UpdateAccountDataComplete : ServerPacket
+    {
+        public ObjectGuid Player;
+        public int DataType; // @see enum AccountDataType
+        public int Result;
+
+        public UpdateAccountDataComplete() : base(ServerOpcodes.UpdateAccountDataComplete, ConnectionType.Realm) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Player);
+            _worldPacket.WriteInt32(DataType);
+            _worldPacket.WriteInt32(Result);
+        }
+    }
+
     class SetAdvancedCombatLogging : ClientPacket
     {
         public SetAdvancedCombatLogging(WorldPacket packet) : base(packet) { }

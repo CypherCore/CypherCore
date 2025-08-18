@@ -370,8 +370,8 @@ namespace Game.Networking.Packets
 
     class EnterEncryptedMode : ServerPacket
     {
-        byte[] EncryptionKey;
         int RegionGroup;
+        byte[] EncryptionKey;
         bool Enabled;
         static byte[] expandedPrivateKey;
 
@@ -404,8 +404,8 @@ namespace Game.Networking.Packets
             toSign.Process(BitConverter.GetBytes(Enabled), 1);
             toSign.Finish(EnableEncryptionSeed, 16);
 
-            _worldPacket.WriteBytes(Ed25519.Sign(toSign.Digest, expandedPrivateKey, 0, EnableEncryptionContext));
             _worldPacket.WriteInt32(RegionGroup);
+            _worldPacket.WriteBytes(Ed25519.Sign(toSign.Digest, expandedPrivateKey, 0, EnableEncryptionContext));
             _worldPacket.WriteBit(Enabled);
             _worldPacket.FlushBits();
         }

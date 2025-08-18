@@ -80,7 +80,7 @@ namespace Game.DataStorage
         public uint CurrentCompletedQuestLogic;
         public uint SpellLogic;
         public uint ItemLogic;
-        public byte ItemFlags;
+        public int ItemFlags;
         public uint AuraSpellLogic;
         public ushort WorldStateExpressionID;
         public int WeatherID;

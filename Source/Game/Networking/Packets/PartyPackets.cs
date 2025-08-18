@@ -609,22 +609,22 @@ namespace Game.Networking.Packets
 
     class SetPartyAssignment : ClientPacket
     {
+        public int Assignment;
+        public byte? PartyIndex;
+        public ObjectGuid Target;
+        public bool Set;
+
         public SetPartyAssignment(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             bool hasPartyIndex = _worldPacket.HasBit();
             Set = _worldPacket.HasBit();
-            Assignment = _worldPacket.ReadUInt8();
+            Assignment = _worldPacket.ReadInt32();
             Target = _worldPacket.ReadPackedGuid();
             if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
         }
-
-        public byte Assignment;
-        public byte? PartyIndex;
-        public ObjectGuid Target;
-        public bool Set;
     }
 
     class DoReadyCheck : ClientPacket
@@ -1290,8 +1290,8 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt8(MyFlags);
             data.WriteUInt32(Slot);
+            data.WriteUInt8(MyFlags);
             data.WriteUInt32(MyRandomSlot);
             data.WriteUInt8(MyPartialClear);
             data.WriteFloat(MyGearDiff);
@@ -1303,15 +1303,15 @@ namespace Game.Networking.Packets
             data.FlushBits();
         }
 
-        public byte MyFlags;
         public uint Slot;
-        public byte BootCount;
+        public byte MyFlags;
         public uint MyRandomSlot;
-        public bool Aborted;
         public byte MyPartialClear;
         public float MyGearDiff;
         public byte MyStrangerCount;
         public byte MyKickVoteCount;
+        public byte BootCount;
+        public bool Aborted;
         public bool MyFirstReward;
     }
 

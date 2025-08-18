@@ -48,9 +48,17 @@ namespace Game
             if (packet.DataType >= AccountDataTypes.Max)
                 return;
 
+            UpdateAccountDataComplete updateAccountDataComplete = new();
+
             if (packet.Size == 0)
             {
                 SetAccountData(packet.DataType, 0, "");
+
+                updateAccountDataComplete.Player = packet.PlayerGuid;
+                updateAccountDataComplete.DataType = (int)packet.DataType;
+                updateAccountDataComplete.Result = 0;
+                SendPacket(updateAccountDataComplete);
+
                 return;
             }
 
@@ -62,6 +70,11 @@ namespace Game
 
             byte[] data = ZLib.Decompress(packet.CompressedData.GetData(), packet.Size);
             SetAccountData(packet.DataType, packet.Time, Encoding.Default.GetString(data));
+
+            updateAccountDataComplete.Player = packet.PlayerGuid;
+            updateAccountDataComplete.DataType = (int)packet.DataType;
+            updateAccountDataComplete.Result = 0;
+            SendPacket(updateAccountDataComplete);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetSelection)]

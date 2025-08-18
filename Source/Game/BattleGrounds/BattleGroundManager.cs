@@ -461,13 +461,13 @@ namespace Game.BattleGrounds
             switch ((BattlegroundQueueIdType)bgQueueTypeId.BgType)
             {
                 case BattlegroundQueueIdType.Battleground:
-                    if (battlemasterList.InstanceType != (int)MapTypes.Battleground)
+                    if (battlemasterList.GetPvpType() != BattlemasterType.Battleground)
                         return false;
                     if (bgQueueTypeId.TeamSize != 0)
                         return false;
                     break;
                 case BattlegroundQueueIdType.Arena:
-                    if (battlemasterList.InstanceType != (int)MapTypes.Arena)
+                    if (battlemasterList.GetPvpType() != BattlemasterType.Arena)
                         return false;
                     if (!bgQueueTypeId.Rated)
                         return false;
@@ -479,7 +479,7 @@ namespace Game.BattleGrounds
                         return false;
                     break;
                 case BattlegroundQueueIdType.ArenaSkirmish:
-                    if (battlemasterList.InstanceType != (int)MapTypes.Arena)
+                    if (battlemasterList.GetPvpType() != BattlemasterType.Arena)
                         return false;
                     if (!bgQueueTypeId.Rated)
                         return false;
@@ -785,7 +785,7 @@ namespace Game.BattleGrounds
         public BattlemasterListRecord BattlemasterEntry;
         public List<int> MapIDs = new();
 
-        public bool IsArena() { return BattlemasterEntry.InstanceType == (uint)MapTypes.Arena; }
+        public bool IsArena() { return BattlemasterEntry.GetPvpType() == BattlemasterType.Arena; }
 
         public ushort GetMinPlayersPerTeam()
         {

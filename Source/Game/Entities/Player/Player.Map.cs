@@ -546,7 +546,7 @@ namespace Game.Entities
         {
             RaidDifficultySet raidDifficultySet = new();
             raidDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID()) : forcedDifficulty;
-            raidDifficultySet.Legacy = legacy;
+            raidDifficultySet.Legacy = legacy ? 1 : 0;
             SendPacket(raidDifficultySet);
         }
 

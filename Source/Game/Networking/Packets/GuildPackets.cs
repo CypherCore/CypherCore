@@ -843,12 +843,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBit(InGuildParty);
-            _worldPacket.FlushBits();
-
             _worldPacket.WriteInt32(NumMembers);
             _worldPacket.WriteInt32(NumRequired);
             _worldPacket.WriteFloat(GuildXPEarnedMult);
+            _worldPacket.WriteBit(InGuildParty);
+            _worldPacket.FlushBits();
         }
 
         public float GuildXPEarnedMult = 0.0f;

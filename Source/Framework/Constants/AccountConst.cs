@@ -704,7 +704,7 @@ namespace Framework.Constants
         CommandPetLevel = 838,
         CommandServerShutdownForce = 839,
         CommandServerRestartForce = 840,
-        CommandNearGraveyard = 841,
+        // 841 previously used, do not reuse
         CommandReloadCharacterTemplate = 842,
         CommandReloadQuestGreeting = 843,
         CommandScene = 844,

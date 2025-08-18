@@ -393,10 +393,11 @@ namespace Game.Entities
 
                 if (HasDriveStatus)
                 {
-                    data.WriteBit(unit.m_movementInfo.driveStatus.Value.accelerating);
-                    data.WriteBit(unit.m_movementInfo.driveStatus.Value.drifting);
                     data.WriteFloat(unit.m_movementInfo.driveStatus.Value.speed);
                     data.WriteFloat(unit.m_movementInfo.driveStatus.Value.movementAngle);
+                    data.WriteBit(unit.m_movementInfo.driveStatus.Value.accelerating);
+                    data.WriteBit(unit.m_movementInfo.driveStatus.Value.drifting);
+                    data.FlushBits();
                 }
 
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.Walk));

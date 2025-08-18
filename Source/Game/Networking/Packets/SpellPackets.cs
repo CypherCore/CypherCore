@@ -1464,7 +1464,8 @@ namespace Game.Networking.Packets
             var contentTuning = CliDB.ContentTuningStorage.LookupByKey(creatureDifficulty.ContentTuningID);
             if (contentTuning != null)
             {
-                ScalingHealthItemLevelCurveID = (uint)contentTuning.HealthItemLevelCurveID;
+                ScalingHealthItemLevelCurveID = contentTuning.HealthItemLevelCurveID;
+                ScalingHealthPrimaryStatCurveID = contentTuning.HealthPrimaryStatCurveID;
                 TargetContentTuningID = contentTuning.Id;
             }
             TargetLevel = (byte)target.GetLevel();
@@ -1484,7 +1485,8 @@ namespace Game.Networking.Packets
             var contentTuning = CliDB.ContentTuningStorage.LookupByKey(creatureDifficulty.ContentTuningID);
             if (contentTuning != null)
             {
-                ScalingHealthItemLevelCurveID = (uint)contentTuning.HealthItemLevelCurveID;
+                ScalingHealthItemLevelCurveID = contentTuning.HealthItemLevelCurveID;
+                ScalingHealthPrimaryStatCurveID = contentTuning.HealthPrimaryStatCurveID;
                 TargetContentTuningID = contentTuning.Id;
             }
             TargetLevel = (byte)target.GetLevel();
@@ -1549,14 +1551,17 @@ namespace Game.Networking.Packets
             data.WriteFloat(PlayerItemLevel);
             data.WriteFloat(TargetItemLevel);
             data.WriteInt16(PlayerLevelDelta);
-            data.WriteUInt32(ScalingHealthItemLevelCurveID);
+            data.WriteInt32(ScalingHealthItemLevelCurveID);
+            data.WriteInt32(Unused1117);
+            data.WriteInt32(ScalingHealthPrimaryStatCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
             data.WriteInt8(TargetScalingLevelDelta);
             data.WriteUInt32((uint)Flags);
             data.WriteUInt32(PlayerContentTuningID);
             data.WriteUInt32(TargetContentTuningID);
-            data.WriteInt32(Unused927);
+            data.WriteInt32(TargetHealingContentTuningID);
+            data.WriteFloat(PlayerPrimaryStatToExpectedRatio);
             data.WriteBits(TuningType, 4);
             data.FlushBits();
         }
@@ -1565,22 +1570,28 @@ namespace Game.Networking.Packets
         public short PlayerLevelDelta;
         public float PlayerItemLevel;
         public float TargetItemLevel;
-        public uint ScalingHealthItemLevelCurveID;
+        public int ScalingHealthItemLevelCurveID = 0;
+        public int Unused1117 = 0;
+        public int ScalingHealthPrimaryStatCurveID = 0;
         public byte TargetLevel;
         public byte Expansion;
         public sbyte TargetScalingLevelDelta;
         public ContentTuningFlags Flags = ContentTuningFlags.NoLevelScaling | ContentTuningFlags.NoItemLevelScaling;
         public uint PlayerContentTuningID;
         public uint TargetContentTuningID;
-        public int Unused927;
+        public int TargetHealingContentTuningID = 0; // direct heal only, not periodic
+        public float PlayerPrimaryStatToExpectedRatio = 1.0f;
 
         public enum ContentTuningType
         {
             CreatureToPlayerDamage = 1,
             PlayerToCreatureDamage = 2,
-            CreatureToCreatureDamage = 4,
-            PlayerToSandboxScaling = 7, // NYI
-            PlayerToPlayerExpectedStat = 8
+            CreatureToPlayerHealing = 3,
+            PlayerToCreatureHealing = 4,
+            CreatureToCreatureDamage = 5,
+            CreatureToCreatureHealing = 6,
+            PlayerToPlayerDamage = 7, // Nyi
+            PlayerToPlayerHealing = 8,
         }
 
         public enum ContentTuningFlags

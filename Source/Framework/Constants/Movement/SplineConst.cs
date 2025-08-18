@@ -31,7 +31,7 @@ namespace Framework.Constants
         Catmullrom = 0x00000800,           // Used Catmullrom interpolation mode
         Cyclic = 0x00001000,           // Movement by cycled spline
         EnterCycle = 0x00002000,           // Everytimes appears with cyclic flag in monster move packet, erases first spline vertex after first cycle done
-        Frozen = 0x00004000,           // Will never arrive
+        Turning = 0x00004000,           // Turns in place
         TransportEnter = 0x00008000,
         TransportExit = 0x00010000,
         Unknown_0x20000 = 0x00020000,           // NOT VERIFIED
@@ -53,7 +53,7 @@ namespace Framework.Constants
         // flags that shouldn't be appended into SMSG_MONSTER_MOVE\SMSG_MONSTER_MOVE_TRANSPORT packet, should be more probably
         MaskNoMonsterMove = Done,
         // Unused, not suported flags
-        MaskUnused = NoSpline | Frozen | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
+        MaskUnused = NoSpline | Unknown_0x100 | Unknown_0x20000 | Unknown_0x40000
             | Unknown_0x800000 | FadeObject | UnlimitedSpeed | Unknown_0x40000000 | Unknown_0x80000000
     }
 }

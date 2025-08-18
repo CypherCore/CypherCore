@@ -1106,6 +1106,12 @@ namespace Framework.Constants
         ForceMaxQuantityOnConversion = 0x100, // NYI
     }
 
+    public enum BattlemasterType
+    {
+        Battleground = 0,
+        Arena = 1,
+    }
+
     [Flags]
     public enum BattlemasterListFlags : int
     {

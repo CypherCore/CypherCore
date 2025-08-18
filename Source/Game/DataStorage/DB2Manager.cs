@@ -1944,7 +1944,7 @@ namespace Game.DataStorage
             if (v2 == null)
                 return 0;
 
-            return v2.UniqueBitFlag;
+            return (uint)v2.UniqueBitFlag;
         }
 
         public List<uint> GetPhasesForGroup(uint group)

@@ -414,16 +414,16 @@ namespace Game.Networking.Packets
 
     public class SetRaidDifficulty : ClientPacket
     {
+        public int DifficultyID;
+        public int Legacy;
+
         public SetRaidDifficulty(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
+            Legacy = _worldPacket.ReadInt32();
             DifficultyID = _worldPacket.ReadInt32();
-            Legacy = _worldPacket.ReadUInt8();
         }
-
-        public int DifficultyID;
-        public byte Legacy;
     }
 
     public class DungeonDifficultySet : ServerPacket
@@ -440,16 +440,16 @@ namespace Game.Networking.Packets
 
     public class RaidDifficultySet : ServerPacket
     {
+        public int DifficultyID;
+        public int Legacy;
+
         public RaidDifficultySet() : base(ServerOpcodes.RaidDifficultySet) { }
 
         public override void Write()
         {
+            _worldPacket.WriteInt32(Legacy);
             _worldPacket.WriteInt32(DifficultyID);
-            _worldPacket.WriteUInt8((byte)(Legacy ? 1 : 0));
         }
-
-        public int DifficultyID;
-        public bool Legacy;
     }
 
     public class CorpseReclaimDelay : ServerPacket

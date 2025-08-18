@@ -387,6 +387,8 @@ namespace Game.DataStorage
         public int ExpansionID;
         public int HealthItemLevelCurveID;
         public int DamageItemLevelCurveID;
+        public int HealthPrimaryStatCurveID;
+        public int DamagePrimaryStatCurveID;
         public int MinLevel;
         public int MaxLevel;
         public int MinLevelType;

@@ -80,7 +80,7 @@ namespace Game.DataStorage
         public string GameType;
         public string ShortDescription;
         public string LongDescription;
-        public sbyte InstanceType;
+        public int PvpType;
         public byte MinLevel;
         public byte MaxLevel;
         public sbyte RatedPlayers;
@@ -93,6 +93,7 @@ namespace Game.DataStorage
         public int IconFileDataID;
         public int RequiredPlayerConditionID;
 
+        public BattlemasterType GetPvpType() { return (BattlemasterType)PvpType; }
         public bool HasFlag(BattlemasterListFlags battlemasterListFlags) { return (Flags & (int)battlemasterListFlags) != 0; }
     }
 

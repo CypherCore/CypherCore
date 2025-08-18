@@ -176,6 +176,9 @@ namespace Game.Movement
                 loc.W = unit.GetOrientation();
             }
 
+            if (move_spline.IsTurning())
+                SetFacing(loc.W);
+
             args.flags.Flags = MoveSplineFlagEnum.Done;
             unit.m_movementInfo.RemoveMovementFlag(MovementFlag.Forward);
             move_spline.onTransport = transport;
@@ -186,6 +189,9 @@ namespace Game.Movement
             packet.Pos = new Vector3(loc.X, loc.Y, loc.Z);
             packet.SplineData.StopSplineStyle = 2;
             packet.SplineData.Id = move_spline.GetId();
+            packet.SplineData.StopUseFaceDirection = args.facing.type == MonsterMoveType.FacingAngle;
+            packet.SplineData.Move.Face = args.facing.type;
+            packet.SplineData.Move.FaceDirection = args.facing.angle;
 
             if (transport)
             {
@@ -322,6 +328,17 @@ namespace Game.Movement
         public void SetSpellEffectExtraData(SpellEffectExtraData spellEffectExtraData)
         {
             args.spellEffectExtra = spellEffectExtraData;
+        }
+
+        public void SetTurning(float startFacing, float totalTurnRads, float radsPerSec)
+        {
+            args.flags.SetUnsetFlag(MoveSplineFlagEnum.Turning, true);
+
+            TurnData turn = new();
+            turn.StartFacing = startFacing;
+            turn.TotalTurnRads = totalTurnRads;
+            turn.RadsPerSec = radsPerSec;
+            args.turnData = turn;
         }
 
         public List<Vector3> Path() { return args.path; }
