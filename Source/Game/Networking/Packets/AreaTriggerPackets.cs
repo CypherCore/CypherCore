@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Movement;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -95,20 +96,26 @@ namespace Game.Networking.Packets
     //Structs
     class AreaTriggerSplineInfo
     {
-        public void Write(WorldPacket data)
+        public static void WriteAreaTriggerSpline(WorldPacket data, uint timeToTarget, uint elapsedTimeForMovement, Spline<float> areaTriggerSpline)
         {
-            data.WriteUInt32(TimeToTarget);
-            data.WriteUInt32(ElapsedTimeForMovement);
+            data.WriteUInt32(timeToTarget);
+            data.WriteUInt32(elapsedTimeForMovement);
 
-            data.WriteBits(Points.Length, 16);
+            var points = areaTriggerSpline.GetPoints();
+            data.WriteBits(points.Length, 16);
             data.FlushBits();
 
-            foreach (Vector3 point in Points)
+            foreach (Vector3 point in points)
                 data.WriteVector3(point);
+        }
+
+        public void Write(WorldPacket data)
+        {
+            WriteAreaTriggerSpline(data, TimeToTarget, ElapsedTimeForMovement, Points);
         }
 
         public uint TimeToTarget;
         public uint ElapsedTimeForMovement;
-        public Vector3[] Points = new Vector3[0];
+        public Spline<float> Points;
     }
 }

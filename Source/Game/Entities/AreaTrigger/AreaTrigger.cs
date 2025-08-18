@@ -1086,7 +1086,7 @@ namespace Game.Entities
                 reshape.AreaTriggerSpline = new();
                 reshape.AreaTriggerSpline.ElapsedTimeForMovement = GetElapsedTimeForMovement();
                 reshape.AreaTriggerSpline.TimeToTarget = timeToTarget;
-                reshape.AreaTriggerSpline.Points = _spline.GetPoints();
+                reshape.AreaTriggerSpline.Points = _spline;
                 SendMessageToSet(reshape, true);
             }
 

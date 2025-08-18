@@ -342,13 +342,6 @@ namespace Game.Networking.Packets
             }
         }
 
-        public static void WriteCreateObjectAreaTriggerSpline(Spline<float> spline, WorldPacket data)
-        {
-            data.WriteBits(spline.GetPoints().Length, 16);
-            foreach (var point in spline.GetPoints())
-                data.WriteVector3(point);
-        }
-
         public static void WriteMovementForceWithDirection(MovementForce movementForce, WorldPacket data, Position objectPosition = null)
         {
             data.WritePackedGuid(movementForce.ID);

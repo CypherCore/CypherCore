@@ -577,8 +577,6 @@ namespace Game.Entities
                 bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
                 bool hasFacingCurveID = createProperties != null && createProperties.FacingCurveId != 0;
                 bool hasMoveCurveID = createProperties != null && createProperties.MoveCurveId != 0;
-                bool hasAreaTriggerSpline = areaTrigger.HasSplines();
-                bool hasOrbit = areaTrigger.HasOrbit();
                 bool hasMovementScript = false;
                 bool hasPositionalSoundKitID = false;
 
@@ -595,19 +593,14 @@ namespace Game.Entities
                 data.WriteBit(hasFacingCurveID);
                 data.WriteBit(hasMoveCurveID);
                 data.WriteBit(hasPositionalSoundKitID);
-                data.WriteBit(hasAreaTriggerSpline);
-                data.WriteBit(hasOrbit);
+                data.WriteBit(areaTrigger.HasSplines());
+                data.WriteBit(areaTrigger.HasOrbit());
                 data.WriteBit(hasMovementScript);
 
                 data.FlushBits();
 
-                if (hasAreaTriggerSpline)
-                {
-                    data.WriteUInt32(areaTrigger.GetTimeToTarget());
-                    data.WriteUInt32(areaTrigger.GetElapsedTimeForMovement());
-
-                    MovementExtensions.WriteCreateObjectAreaTriggerSpline(areaTrigger.GetSpline(), data);
-                }
+                if (areaTrigger.HasSplines())
+                    AreaTriggerSplineInfo.WriteAreaTriggerSpline(data, areaTrigger.GetTimeToTarget(), areaTrigger.GetElapsedTimeForMovement(), areaTrigger.GetSpline());
 
                 if (hasTargetRollPitchYaw)
                     data.WriteVector3(areaTrigger.GetTargetRollPitchYaw());
@@ -630,7 +623,7 @@ namespace Game.Entities
                 //if (hasMovementScript)
                 //    *data << *areaTrigger.GetMovementScript(); // AreaTriggerMovementScriptInfo
 
-                if (hasOrbit)
+                if (areaTrigger.HasOrbit())
                     areaTrigger.GetOrbit().Write(data);
             }
 
