@@ -335,8 +335,21 @@ namespace Game.Entities
         
         public bool IsRangedWeapon()
         {
-            return IsWeapon() && (GetSubClass() == (uint)ItemSubClassWeapon.Bow ||
-                   GetSubClass() == (uint)ItemSubClassWeapon.Gun || GetSubClass() == (uint)ItemSubClassWeapon.Crossbow);
+            if (!IsWeapon())
+                return false;
+
+            switch ((ItemSubClassWeapon)GetSubClass())
+            {
+                case ItemSubClassWeapon.Bow:
+                case ItemSubClassWeapon.Gun:
+                case ItemSubClassWeapon.Crossbow:
+                case ItemSubClassWeapon.Wand:
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
         }
 
         public uint MaxDurability;

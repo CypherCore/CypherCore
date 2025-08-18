@@ -2718,7 +2718,6 @@ namespace Game.Entities
         public bool IsPotion() { return GetTemplate().IsPotion(); }
         public bool IsVellum() { return GetTemplate().IsVellum(); }
         public bool IsConjuredConsumable() { return GetTemplate().IsConjuredConsumable(); }
-        public bool IsRangedWeapon() { return GetTemplate().IsRangedWeapon(); }
         public ItemQuality GetQuality() { return _bonusData.Quality; }
         public int GetItemStatType(uint index)
         {
