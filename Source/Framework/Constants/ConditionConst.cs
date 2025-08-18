@@ -106,6 +106,7 @@ namespace Framework.Constants
         SpawnGroup = 33,
         PlayerCondition = 34,
         SkillLineAbility = 35,
+        PlayerChoiceResponse = 36,
 
         MaxDbAllowed,
         ReferenceCondition = MaxDbAllowed,

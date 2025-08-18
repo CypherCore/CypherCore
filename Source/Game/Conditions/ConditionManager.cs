@@ -290,6 +290,17 @@ namespace Game
             return true;
         }
 
+        public bool IsObjectMeetingPlayerChoiceResponseConditions(uint playerChoiceId, int playerChoiceResponseId, Player player)
+        {
+            var list = ConditionStorage[ConditionSourceType.PlayerChoiceResponse].LookupByKey(new ConditionId(playerChoiceId, playerChoiceResponseId, 0));
+            if (list != null)
+            {
+                Log.outDebug(LogFilter.Condition, $"GetConditionsForNpcVendor: found conditions for creature entry {playerChoiceId} item {playerChoiceResponseId}");
+                return IsObjectMeetToConditions(player, list);
+            }
+            return true;
+        }
+
         public bool IsSpellUsedInSpellClickConditions(uint spellId)
         {
             return spellsUsedInSpellClickConditions.Contains(spellId);
@@ -1131,6 +1142,21 @@ namespace Game
                     if (skillLineAbility.AcquireMethod != SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel)
                     {
                         Log.outError(LogFilter.Sql, $"{cond} in SkillLineAbility.db2 does not have AcquireMethod = {SkillLineAbilityAcquireMethod.LearnedOrAutomaticCharLevel} (LearnedOrAutomaticCharLevel), ignoring.");
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionSourceType.PlayerChoiceResponse:
+                {
+                    PlayerChoice playerChoice = Global.ObjectMgr.GetPlayerChoice((int)cond.SourceGroup);
+                    if (playerChoice == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond} SourceGroup in `condition` table, does not exist in `playerchoice`, ignoring.");
+                        return false;
+                    }
+                    if (playerChoice.GetResponse(cond.SourceEntry) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond} SourceEntry in `condition` table, does not exist in `playerchoice_response`, ignoring.");
                         return false;
                     }
                     break;

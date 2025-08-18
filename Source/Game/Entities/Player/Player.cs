@@ -4972,8 +4972,10 @@ namespace Game.Entities
             for (var i = 0; i < playerChoice.Responses.Count; ++i)
             {
                 PlayerChoiceResponse playerChoiceResponseTemplate = playerChoice.Responses[i];
-                var playerChoiceResponse = new Networking.Packets.PlayerChoiceResponse();
+                if (!Global.ConditionMgr.IsObjectMeetingPlayerChoiceResponseConditions((uint)choiceId, playerChoiceResponseTemplate.ResponseId, this))
+                    continue;
 
+                var playerChoiceResponse = new Networking.Packets.PlayerChoiceResponse();
                 playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
                 playerChoiceResponse.ResponseIdentifier = playerChoiceResponseTemplate.ResponseIdentifier;
                 playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
