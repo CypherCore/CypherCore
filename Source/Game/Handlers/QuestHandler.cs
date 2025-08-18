@@ -10,6 +10,7 @@ using Game.Networking.Packets;
 using Game.DataStorage;
 using System.Collections.Generic;
 using System;
+using Game.Misc;
 
 namespace Game
 {
@@ -738,9 +739,29 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChoiceResponse)]
         void HandlePlayerChoiceResponse(ChoiceResponse choiceResponse)
         {
-            if (_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId != choiceResponse.ChoiceID)
+            PlayerChoiceData playerChoiceData = _player.PlayerTalkClass.GetInteractionData().GetPlayerChoice();
+            if (playerChoiceData == null)
             {
-                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to respond to invalid player choice {choiceResponse.ChoiceID} (allowed {_player.PlayerTalkClass.GetInteractionData().PlayerChoiceId}) (possible packet-hacking detected)");
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to respond to invalid player choice {choiceResponse.ChoiceID} (none allowed)");
+                return;
+            }
+
+            if (playerChoiceData.GetChoiceId() != choiceResponse.ChoiceID)
+            {
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to respond to invalid player choice {choiceResponse.ChoiceID} ({playerChoiceData.GetChoiceId()} allowed)");
+                return;
+            }
+
+            if (playerChoiceData.GetExpireTime().HasValue && playerChoiceData.GetExpireTime() < GameTime.GetSystemTime())
+            {
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to respond to expired player choice {choiceResponse.ChoiceID})");
+                return;
+            }
+
+            uint? responseId = playerChoiceData.FindIdByClientIdentifier((ushort)choiceResponse.ResponseIdentifier);
+            if (!responseId.HasValue)
+            {
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response identifier {choiceResponse.ResponseIdentifier}");
                 return;
             }
 
@@ -748,52 +769,21 @@ namespace Game
             if (playerChoice == null)
                 return;
 
-            PlayerChoiceResponse playerChoiceResponse = playerChoice.GetResponseByIdentifier(choiceResponse.ResponseIdentifier);
+            PlayerChoiceResponse playerChoiceResponse = playerChoice.GetResponse((ushort)responseId);
             if (playerChoiceResponse == null)
             {
-                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {choiceResponse.ResponseIdentifier} (possible packet-hacking detected)");
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select invalid player choice response {responseId}");
                 return;
             }
 
-            Global.ScriptMgr.OnPlayerChoiceResponse(GetPlayer(), (uint)choiceResponse.ChoiceID, (uint)choiceResponse.ResponseIdentifier);
-
-            if (playerChoiceResponse.Reward != null)
+            if (playerChoiceResponse.Flags.HasFlag(PlayerChoiceResponseFlags.DisabledButton | PlayerChoiceResponseFlags.DisabledOption | PlayerChoiceResponseFlags.HideButtonShowText))
             {
-                var reward = playerChoiceResponse.Reward;
-                if (reward.TitleId != 0)
-                    _player.SetTitle(CliDB.CharTitlesStorage.LookupByKey(reward.TitleId), false);
-
-                if (reward.PackageId != 0)
-                    _player.RewardQuestPackage((uint)reward.PackageId, ItemContext.None);
-
-                if (reward.SkillLineId != 0 && _player.HasSkill((SkillType)reward.SkillLineId))
-                    _player.UpdateSkillPro((uint)reward.SkillLineId, 1000, reward.SkillPointCount);
-
-                if (reward.HonorPointCount != 0)
-                    _player.AddHonorXP(reward.HonorPointCount);
-
-                if (reward.Money != 0)
-                    _player.ModifyMoney((long)reward.Money, false);
-
-                if (reward.Xp != 0)
-                    _player.GiveXP(reward.Xp, null, 0.0f);
-
-                foreach (PlayerChoiceResponseRewardItem item in reward.Items)
-                {
-                    List<ItemPosCount> dest = new();
-                    if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
-                    {
-                        Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);
-                        _player.SendNewItem(newItem, (uint)item.Quantity, true, false);
-                    }
-                }
-
-                foreach (PlayerChoiceResponseRewardEntry currency in reward.Currency)
-                    _player.ModifyCurrency(currency.Id, currency.Quantity);
-
-                foreach (PlayerChoiceResponseRewardEntry faction in reward.Faction)
-                    _player.GetReputationMgr().ModifyReputation(CliDB.FactionStorage.LookupByKey(faction.Id), faction.Quantity);
+                Log.outError(LogFilter.Player, $"Error in CMSG_CHOICE_RESPONSE: {GetPlayerInfo()} tried to select disabled player choice response {responseId}");
+                return;
             }
+
+            Global.ScriptMgr.OnPlayerChoiceResponse(Global.ObjAccessor.GetWorldObject(_player, _player.PlayerTalkClass.GetInteractionData().SourceGuid), _player,
+                playerChoice, playerChoiceResponse, (ushort)choiceResponse.ResponseIdentifier);
         }
 
         [WorldPacketHandler(ClientOpcodes.UiMapQuestLinesRequest)]

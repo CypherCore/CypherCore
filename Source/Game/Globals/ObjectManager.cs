@@ -10152,7 +10152,10 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
             _playerChoices.Clear();
 
-            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, HideWarboardHeader, KeepOpenAfterChoice FROM playerchoice");
+            //                                               0         1               2           3                4         5         6
+            SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, " +
+                //7              8                   9                    10                 11                          12            13
+                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, ForceDontShowChoicesAsList, MaxResponses, ScriptName FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -10174,18 +10177,26 @@ namespace Game
                 choice.UiTextureKitId = choiceResult.Read<int>(1);
                 choice.SoundKitId = choiceResult.Read<uint>(2);
                 choice.CloseSoundKitId = choiceResult.Read<uint>(3);
-                choice.Duration = choiceResult.Read<long>(4);
+                choice.Duration = TimeSpan.FromSeconds(choiceResult.Read<long>(4));
                 choice.Question = choiceResult.Read<string>(5);
                 choice.PendingChoiceText = choiceResult.Read<string>(6);
-                choice.HideWarboardHeader = choiceResult.Read<bool>(7);
-                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(8);
+                choice.InfiniteRange = choiceResult.Read<bool>(7);
+                choice.HideWarboardHeader = choiceResult.Read<bool>(8);
+                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(9);
+                choice.ShowChoicesAsList = choiceResult.Read<bool>(10);
+                choice.ForceDontShowChoicesAsList = choiceResult.Read<bool>(11);
+
+                if (!choiceResult.IsNull(12))
+                    choice.MaxResponses = choiceResult.Read<uint>(12);
+
+                choice.ScriptId = GetScriptId(choiceResult.Read<string>(13));
 
                 _playerChoices[choice.ChoiceId] = choice;
 
             } while (choiceResult.NextRow());
 
-            //                                            0         1           2                   3                4      5
-            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, ResponseIdentifier, ChoiceArtFileId, Flags, WidgetSetID, " +
+            //                                            0         1           2     3                4      5
+            SQLResult responses = DB.World.Query("SELECT ChoiceId, ResponseId, NULL, ChoiceArtFileId, Flags, WidgetSetID, " +
                 //6                        7           8        9               10      11      12         13              14           15            16
                 "UiTextureAtlasElementID, SoundKitID, GroupID, UiTextureKitID, Answer, Header, SubHeader, ButtonTooltip, Description, Confirmation, RewardQuestID " +
                 "FROM playerchoice_response ORDER BY `Index` ASC");
@@ -10206,9 +10217,8 @@ namespace Game
                     PlayerChoiceResponse response = new();
 
                     response.ResponseId = responseId;
-                    response.ResponseIdentifier = responses.Read<ushort>(2);
                     response.ChoiceArtFileId = responses.Read<int>(3);
-                    response.Flags = responses.Read<int>(4);
+                    response.Flags = (PlayerChoiceResponseFlags)responses.Read<int>(4);
                     response.WidgetSetID = responses.Read<uint>(5);
                     response.UiTextureAtlasElementID = responses.Read<uint>(6);
                     response.SoundKitID = responses.Read<uint>(7);
@@ -12663,104 +12673,6 @@ namespace Game
         public StringArray ButtonTooltip = new((int)Locale.Total);
         public StringArray Description = new((int)Locale.Total);
         public StringArray Confirmation = new((int)Locale.Total);
-    }
-
-    public class PlayerChoiceResponseRewardItem
-    {
-        public PlayerChoiceResponseRewardItem() { }
-        public PlayerChoiceResponseRewardItem(uint id, List<uint> bonusListIDs, int quantity)
-        {
-            Id = id;
-            BonusListIDs = bonusListIDs;
-            Quantity = quantity;
-        }
-
-        public uint Id;
-        public List<uint> BonusListIDs = new();
-        public int Quantity;
-    }
-
-    public class PlayerChoiceResponseRewardEntry
-    {
-        public PlayerChoiceResponseRewardEntry(uint id, int quantity)
-        {
-            Id = id;
-            Quantity = quantity;
-        }
-
-        public uint Id;
-        public int Quantity;
-    }
-
-    public class PlayerChoiceResponseReward
-    {
-        public int TitleId;
-        public int PackageId;
-        public int SkillLineId;
-        public uint SkillPointCount;
-        public uint ArenaPointCount;
-        public uint HonorPointCount;
-        public ulong Money;
-        public uint Xp;
-
-        public List<PlayerChoiceResponseRewardItem> Items = new();
-        public List<PlayerChoiceResponseRewardEntry> Currency = new();
-        public List<PlayerChoiceResponseRewardEntry> Faction = new();
-        public List<PlayerChoiceResponseRewardItem> ItemChoices = new();
-    }
-
-    public struct PlayerChoiceResponseMawPower
-    {
-        public int TypeArtFileID;
-        public int? Rarity;
-        public int SpellID;
-        public int MaxStacks;
-    }
-
-    public class PlayerChoiceResponse
-    {
-        public int ResponseId;
-        public ushort ResponseIdentifier;
-        public int ChoiceArtFileId;
-        public int Flags;
-        public uint WidgetSetID;
-        public uint UiTextureAtlasElementID;
-        public uint SoundKitID;
-        public byte GroupID;
-        public int UiTextureKitID;
-        public string Answer;
-        public string Header;
-        public string SubHeader;
-        public string ButtonTooltip;
-        public string Description;
-        public string Confirmation;
-        public PlayerChoiceResponseReward Reward;
-        public uint? RewardQuestID;
-        public PlayerChoiceResponseMawPower? MawPower;
-    }
-
-    public class PlayerChoice
-    {
-        public int ChoiceId;
-        public int UiTextureKitId;
-        public uint SoundKitId;
-        public uint CloseSoundKitId;
-        public long Duration;
-        public string Question;
-        public string PendingChoiceText;
-        public List<PlayerChoiceResponse> Responses = new();
-        public bool HideWarboardHeader;
-        public bool KeepOpenAfterChoice;
-
-        public PlayerChoiceResponse GetResponse(int responseId)
-        {
-            return Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseId == responseId);
-        }
-
-        public PlayerChoiceResponse GetResponseByIdentifier(int responseIdentifier)
-        {
-            return Responses.Find(playerChoiceResponse => playerChoiceResponse.ResponseIdentifier == responseIdentifier);
-        }
     }
 
     public class ClassAvailability

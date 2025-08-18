@@ -8,6 +8,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -205,16 +206,31 @@ namespace Game.Misc
 
     public class InteractionData
     {
+        public ObjectGuid SourceGuid;
+        public bool IsLaunchedByQuest;
+
+        ushort _playerChoiceResponseIdentifierGenerator = 0; // not reset between interactions
+        uint trainerId;
+        PlayerChoiceData playerChoiceData;
+
         public void Reset()
         {
             SourceGuid.Clear();
-            TrainerId = 0;
+            IsLaunchedByQuest = false;
+            trainerId = 0;
         }
 
-        public ObjectGuid SourceGuid;
-        public uint TrainerId;
-        public uint PlayerChoiceId;
-        public bool IsLaunchedByQuest;
+        public uint? GetTrainerId() { return trainerId; }
+        public void SetTrainerId(uint _trainerId) { trainerId = _trainerId; }
+
+        public PlayerChoiceData GetPlayerChoice() { return playerChoiceData; }
+        public void SetPlayerChoice(uint choiceId) { playerChoiceData = new PlayerChoiceData(choiceId); }
+
+        public ushort AddPlayerChoiceResponse(uint responseId)
+        {
+            playerChoiceData.AddResponse(responseId, ++_playerChoiceResponseIdentifierGenerator);
+            return _playerChoiceResponseIdentifierGenerator;
+        }
     }
 
     public class PlayerMenu
@@ -834,5 +850,41 @@ namespace Game.Misc
         public uint MenuId;
         public uint TextId;
         public ConditionsReference Conditions;
+    }
+
+    public class PlayerChoiceData
+    {
+        uint _choiceId;
+        List<Response> _responses = new();
+        DateTime? _expireTime;
+
+        public PlayerChoiceData(uint choiceId)
+        {
+            _choiceId = choiceId;
+        }
+
+        public uint? FindIdByClientIdentifier(ushort clientIdentifier)
+        {
+            var itr = _responses.Find(p => p.ClientIdentifier == clientIdentifier);
+            return itr != null ? itr.Id : null;
+        }
+
+        public void AddResponse(uint id, ushort clientIdentifier)
+        {
+            _responses.Add(new Response(id, clientIdentifier));
+        }
+
+        public uint GetChoiceId() { return _choiceId; }
+        public void SetChoiceId(uint choiceId) { _choiceId = choiceId; }
+
+        public DateTime? GetExpireTime() { return _expireTime; }
+        public void SetExpireTime(DateTime expireTime) { _expireTime = expireTime; }
+
+
+        public class Response(uint id, ushort clientIdentifier)
+        {
+            public uint Id = id;
+            public ushort ClientIdentifier = clientIdentifier;
+        }
     }
 }

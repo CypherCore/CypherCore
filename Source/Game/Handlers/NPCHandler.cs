@@ -91,7 +91,7 @@ namespace Game
 
             _player.PlayerTalkClass.GetInteractionData().Reset();
             _player.PlayerTalkClass.GetInteractionData().SourceGuid = npc.GetGUID();
-            _player.PlayerTalkClass.GetInteractionData().TrainerId = trainerId;
+            _player.PlayerTalkClass.GetInteractionData().SetTrainerId(trainerId);
             trainer.SendSpells(npc, _player, GetSessionDbLocaleIndex());
         }
 
@@ -112,7 +112,7 @@ namespace Game
             if (_player.PlayerTalkClass.GetInteractionData().SourceGuid != packet.TrainerGUID)
                 return;
 
-            if (_player.PlayerTalkClass.GetInteractionData().TrainerId != packet.TrainerID)
+            if (_player.PlayerTalkClass.GetInteractionData().GetTrainerId() != packet.TrainerID)
                 return;
 
             // check present spell in trainer spell list

@@ -703,9 +703,6 @@ namespace Game.Scripting
 
         // Called when a player completes a movie
         public virtual void OnMovieComplete(Player player, uint movieId) { }
-
-        // Called when a player choose a response from a PlayerChoice
-        public virtual void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId) { }
     }
 
     public class AccountScript : ScriptObject
@@ -891,5 +888,17 @@ namespace Game.Scripting
 
         // Called when a game event is triggered
         public virtual void OnTrigger(WorldObject obj, WorldObject invoker, uint eventId) { }
+    }
+
+    public class PlayerChoiceScript : ScriptObject
+    {
+        public PlayerChoiceScript(string name) : base(name)
+        {
+            Global.ScriptMgr.AddScript(this);
+        }
+
+        public override bool IsDatabaseBound() { return true; }
+
+        public virtual void OnResponse(WorldObject obj, Player player, PlayerChoice choice, PlayerChoiceResponse response, ushort clientIdentifier) { }
     }
 }

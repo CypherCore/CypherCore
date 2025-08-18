@@ -915,9 +915,12 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnMovieComplete(player, movieId));
         }
-        public void OnPlayerChoiceResponse(Player player, uint choiceId, uint responseId)
+        public void OnPlayerChoiceResponse(WorldObject obj, Player player, PlayerChoice choice, PlayerChoiceResponse response, ushort clientIdentifier)
         {
-            ForEach<PlayerScript>(p => p.OnPlayerChoiceResponse(player, choiceId, responseId));
+            Cypher.Assert(choice != null);
+            Cypher.Assert(response != null);
+
+            ForEach<PlayerChoiceScript>(p => p.OnResponse(obj, player, choice, response, clientIdentifier));
         }
 
         // Account

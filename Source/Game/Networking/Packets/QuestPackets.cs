@@ -912,14 +912,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SoundKitID);
             _worldPacket.WriteUInt32(CloseUISoundKitID);
             _worldPacket.WriteUInt8(NumRerolls);
-            _worldPacket.WriteInt64(Duration);
+            _worldPacket.WriteInt64(ExpireTime);
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
             _worldPacket.WriteBits(PendingChoiceText.GetByteCount(), 8);
             _worldPacket.WriteBit(InfiniteRange);
             _worldPacket.WriteBit(HideWarboardHeader);
             _worldPacket.WriteBit(KeepOpenAfterChoice);
-            _worldPacket.WriteBit(Unknown_1115_1);
-            _worldPacket.WriteBit(Unknown_1115_2);
+            _worldPacket.WriteBit(ShowChoicesAsList);
+            _worldPacket.WriteBit(ForceDontShowChoicesAsList);
             _worldPacket.FlushBits();
 
             foreach (PlayerChoiceResponse response in Responses)
@@ -935,15 +935,15 @@ namespace Game.Networking.Packets
         public uint SoundKitID;
         public uint CloseUISoundKitID;
         public byte NumRerolls;
-        public long Duration;
+        public long ExpireTime;
         public string Question;
         public string PendingChoiceText;
         public List<PlayerChoiceResponse> Responses = new();
         public bool InfiniteRange;
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
-        public bool Unknown_1115_1;
-        public bool Unknown_1115_2;
+        public bool ShowChoicesAsList;
+        public bool ForceDontShowChoicesAsList;
     }
 
     class ChoiceResponse : ClientPacket
@@ -1502,7 +1502,7 @@ namespace Game.Networking.Packets
         public int Unused901_1;
         public int TypeArtFileID;
         public int? Rarity;
-        public int Unused901_2;
+        public int BorderUiTextureAtlasMemberID;
         public int SpellID;
         public int MaxStacks;
 
@@ -1510,7 +1510,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Unused901_1);
             data.WriteInt32(TypeArtFileID);
-            data.WriteInt32(Unused901_2);
+            data.WriteInt32(BorderUiTextureAtlasMemberID);
             data.WriteInt32(SpellID);
             data.WriteInt32(MaxStacks);
             data.WriteBit(Rarity.HasValue);

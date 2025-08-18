@@ -4954,22 +4954,28 @@ namespace Game.Entities
 
             PlayerTalkClass.GetInteractionData().Reset();
             PlayerTalkClass.GetInteractionData().SourceGuid = sender;
-            PlayerTalkClass.GetInteractionData().PlayerChoiceId = (uint)choiceId;
+            PlayerTalkClass.GetInteractionData().SetPlayerChoice((uint)choiceId);
 
             DisplayPlayerChoice displayPlayerChoice = new();
             displayPlayerChoice.SenderGUID = sender;
             displayPlayerChoice.ChoiceID = choiceId;
             displayPlayerChoice.UiTextureKitID = playerChoice.UiTextureKitId;
             displayPlayerChoice.SoundKitID = playerChoice.SoundKitId;
+            displayPlayerChoice.CloseUISoundKitID = playerChoice.CloseSoundKitId;
+            if (playerChoice.Duration > TimeSpan.Zero)
+                displayPlayerChoice.ExpireTime = (GameTime.GetSystemTime() + playerChoice.Duration).ToFileTime();
+
             displayPlayerChoice.Question = playerChoice.Question;
             if (playerChoiceLocale != null)
                 ObjectManager.GetLocaleString(playerChoiceLocale.Question, locale, ref displayPlayerChoice.Question);
 
-            displayPlayerChoice.InfiniteRange = false;
+            displayPlayerChoice.InfiniteRange = playerChoice.InfiniteRange;
             displayPlayerChoice.HideWarboardHeader = playerChoice.HideWarboardHeader;
             displayPlayerChoice.KeepOpenAfterChoice = playerChoice.KeepOpenAfterChoice;
+            displayPlayerChoice.ShowChoicesAsList = playerChoice.ShowChoicesAsList;
+            displayPlayerChoice.ForceDontShowChoicesAsList = playerChoice.ForceDontShowChoicesAsList;
 
-            for (var i = 0; i < playerChoice.Responses.Count; ++i)
+            for (var i = 0; i < playerChoice.Responses.Count && (playerChoice.MaxResponses == 0 || displayPlayerChoice.Responses.Count < playerChoice.MaxResponses); ++i)
             {
                 PlayerChoiceResponse playerChoiceResponseTemplate = playerChoice.Responses[i];
                 if (!Global.ConditionMgr.IsObjectMeetingPlayerChoiceResponseConditions((uint)choiceId, playerChoiceResponseTemplate.ResponseId, this))
@@ -4977,9 +4983,9 @@ namespace Game.Entities
 
                 var playerChoiceResponse = new Networking.Packets.PlayerChoiceResponse();
                 playerChoiceResponse.ResponseID = playerChoiceResponseTemplate.ResponseId;
-                playerChoiceResponse.ResponseIdentifier = playerChoiceResponseTemplate.ResponseIdentifier;
+                playerChoiceResponse.ResponseIdentifier = PlayerTalkClass.GetInteractionData().AddPlayerChoiceResponse((uint)playerChoiceResponseTemplate.ResponseId);
                 playerChoiceResponse.ChoiceArtFileID = playerChoiceResponseTemplate.ChoiceArtFileId;
-                playerChoiceResponse.Flags = playerChoiceResponseTemplate.Flags;
+                playerChoiceResponse.Flags = (int)playerChoiceResponseTemplate.Flags;
                 playerChoiceResponse.WidgetSetID = playerChoiceResponseTemplate.WidgetSetID;
                 playerChoiceResponse.UiTextureAtlasElementID = playerChoiceResponseTemplate.UiTextureAtlasElementID;
                 playerChoiceResponse.SoundKitID = playerChoiceResponseTemplate.SoundKitID;
@@ -5017,51 +5023,32 @@ namespace Game.Entities
                     reward.Money = playerChoiceResponseTemplate.Reward.Money;
                     reward.Xp = playerChoiceResponseTemplate.Reward.Xp;
 
-                    foreach (var item in playerChoiceResponseTemplate.Reward.Items)
+                    void fillRewardItems<T>(List<T> src, List<Networking.Packets.PlayerChoiceResponseRewardEntry>  dest)
                     {
-                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
-                        rewardEntry.Item.ItemID = item.Id;
-                        rewardEntry.Quantity = item.Quantity;
-                        if (!item.BonusListIDs.Empty())
+                        for (var j = 0; j < src.Count; ++j)
                         {
-                            rewardEntry.Item.ItemBonus = new();
-                            rewardEntry.Item.ItemBonus.BonusListIDs = item.BonusListIDs;
+                            dynamic rewardEntryTemplate = src[j];
+                            Networking.Packets.PlayerChoiceResponseRewardEntry rewardEntry = new();
+                            rewardEntry.Item.ItemID = rewardEntryTemplate.Id;
+                            rewardEntry.Quantity = rewardEntryTemplate.Quantity;
+                            if (rewardEntryTemplate is PlayerChoiceResponseRewardItem)
+                            {
+                                if (!rewardEntryTemplate.BonusListIDs.empty())
+                                {
+                                    ItemBonuses itemBonuses = new();
+                                    itemBonuses.BonusListIDs = rewardEntryTemplate.BonusListIDs;
+                                    rewardEntry.Item.ItemBonus = itemBonuses;
+                                }
+                            }
+
+                            dest.Add(rewardEntry);
                         }
-                        reward.Items.Add(rewardEntry);
                     }
 
-                    foreach (var currency in playerChoiceResponseTemplate.Reward.Currency)
-                    {
-                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
-                        rewardEntry.Item.ItemID = currency.Id;
-                        rewardEntry.Quantity = currency.Quantity;
-                        reward.Items.Add(rewardEntry);
-                    }
-
-                    foreach (var faction in playerChoiceResponseTemplate.Reward.Faction)
-                    {
-                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
-                        rewardEntry.Item.ItemID = faction.Id;
-                        rewardEntry.Quantity = faction.Quantity;
-                        reward.Items.Add(rewardEntry);
-                    }
-
-                    foreach (PlayerChoiceResponseRewardItem item in playerChoiceResponseTemplate.Reward.ItemChoices)
-                    {
-                        var rewardEntry = new Networking.Packets.PlayerChoiceResponseRewardEntry();
-                        rewardEntry.Item.ItemID = item.Id;
-                        rewardEntry.Quantity = item.Quantity;
-                        if (!item.BonusListIDs.Empty())
-                        {
-                            rewardEntry.Item.ItemBonus = new();
-                            rewardEntry.Item.ItemBonus.BonusListIDs = item.BonusListIDs;
-                        }
-
-                        reward.ItemChoices.Add(rewardEntry);
-                    }
-
-                    playerChoiceResponse.Reward = reward;
-                    displayPlayerChoice.Responses[i] = playerChoiceResponse;
+                    fillRewardItems(playerChoiceResponseTemplate.Reward.Items, playerChoiceResponse.Reward.Items);
+                    fillRewardItems(playerChoiceResponseTemplate.Reward.Currency, playerChoiceResponse.Reward.Currencies);
+                    fillRewardItems(playerChoiceResponseTemplate.Reward.Faction, playerChoiceResponse.Reward.Factions);
+                    fillRewardItems(playerChoiceResponseTemplate.Reward.ItemChoices, playerChoiceResponse.Reward.ItemChoices);
                 }
 
                 playerChoiceResponse.RewardQuestID = playerChoiceResponseTemplate.RewardQuestID;
