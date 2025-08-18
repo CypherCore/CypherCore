@@ -35,15 +35,12 @@ namespace Game.Misc
                         orderIndex = (int)(itr.OrderIndex + 1);
                 }
 
-                if (!_menuItems.Empty())
+                foreach (var (_, _menuItem) in _menuItems)
                 {
-                    foreach (var pair in _menuItems)
-                    {
-                        if (pair.Value.OrderIndex > orderIndex)
-                            break;
+                    if (_menuItem.OrderIndex > orderIndex)
+                        break;
 
-                        orderIndex = (int)pair.Value.OrderIndex + 1;
-                    }
+                    orderIndex = (int)_menuItem.OrderIndex + 1;
                 }
             }
 
@@ -250,7 +247,7 @@ namespace Game.Misc
                 packet.FriendshipFactionID = addon.FriendshipFactionID;
                 packet.LfgDungeonsID = addon.LfgDungeonsID;
             }
-            
+
             NpcText text = Global.ObjectMgr.GetNpcText(titleTextId);
             if (text != null)
                 packet.BroadcastTextID = (int)text.Data.SelectRandomElementByWeight(data => data.Probability).BroadcastTextID;
@@ -418,13 +415,13 @@ namespace Game.Misc
         {
             QuestGiverQuestDetails packet = new();
 
-             packet.QuestTitle = quest.LogTitle;
-             packet.LogDescription = quest.LogDescription;
-             packet.DescriptionText = quest.QuestDescription;
-             packet.PortraitGiverText = quest.PortraitGiverText;
-             packet.PortraitGiverName = quest.PortraitGiverName;
-             packet.PortraitTurnInText = quest.PortraitTurnInText;
-             packet.PortraitTurnInName = quest.PortraitTurnInName;
+            packet.QuestTitle = quest.LogTitle;
+            packet.LogDescription = quest.LogDescription;
+            packet.DescriptionText = quest.QuestDescription;
+            packet.PortraitGiverText = quest.PortraitGiverText;
+            packet.PortraitGiverName = quest.PortraitGiverName;
+            packet.PortraitTurnInText = quest.PortraitTurnInText;
+            packet.PortraitTurnInName = quest.PortraitTurnInName;
 
             Locale locale = _session.GetSessionDbLocaleIndex();
 
@@ -714,13 +711,9 @@ namespace Game.Misc
             _questMenuItems.Add(questMenuItem);
         }
 
-        bool HasItem(uint questId)
+        public bool HasItem(uint questId)
         {
-            foreach (var item in _questMenuItems)
-                if (item.QuestId == questId)
-                    return true;
-
-            return false;
+            return _questMenuItems.Any(p => p.QuestId == questId);
         }
 
         public void ClearMenu()
@@ -833,7 +826,7 @@ namespace Game.Misc
 
     public class PointOfInterestLocale
     {
-        public StringArray Name = new((int)Locale.Total); 
+        public StringArray Name = new((int)Locale.Total);
     }
 
     public class GossipMenus
