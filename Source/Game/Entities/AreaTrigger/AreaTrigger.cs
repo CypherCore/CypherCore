@@ -136,14 +136,12 @@ namespace Game.Entities
                 spellForVisuals = Global.SpellMgr.GetSpellInfo(GetCreateProperties().SpellForVisuals.Value, Difficulty.None);
 
                 if (spellForVisuals != null)
-                    spellVisual.SpellXSpellVisualID = spellForVisuals.GetSpellXSpellVisualId();
+                    spellVisual.SpellXSpellVisualID = caster != null ? caster.GetCastSpellXSpellVisualId(spellForVisuals) : spellForVisuals.GetSpellXSpellVisualId();
             }
             if (spellForVisuals != null)
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.SpellForVisuals), spellForVisuals.Id);
 
-            SpellCastVisualField spellCastVisual = areaTriggerData.ModifyValue(m_areaTriggerData.SpellVisual);
-            SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, spellVisual.SpellXSpellVisualID);
-            SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, spellVisual.ScriptVisualID);
+            SetSpellVisual(spellVisual);
 
             if (!IsStaticSpawn())
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
@@ -402,6 +400,13 @@ namespace Game.Entities
             ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveX));
             ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveY));
             ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveZ));
+        }
+
+        public void SetSpellVisual(SpellCastVisual visual)
+        {
+            SpellCastVisualField spellCastVisual = m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.SpellVisual);
+            SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, visual.SpellXSpellVisualID);
+            SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, visual.ScriptVisualID);
         }
 
         public void SetDuration(int newDuration)
@@ -1449,7 +1454,7 @@ namespace Game.Entities
 
         public AreaTriggerOrbitInfo GetOrbit() { return _orbitInfo; }
 
-        AreaTriggerFieldData m_areaTriggerData;
+        public AreaTriggerFieldData m_areaTriggerData;
 
         ulong _spawnId;
 

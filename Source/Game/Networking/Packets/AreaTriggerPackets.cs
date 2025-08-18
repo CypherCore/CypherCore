@@ -93,6 +93,23 @@ namespace Game.Networking.Packets
         }
     }
 
+    class UpdateAreaTriggerVisual : ClientPacket
+    {
+        public int SpellID;
+        public SpellCastVisual Visual;
+        public ObjectGuid TargetGUID;
+
+        public UpdateAreaTriggerVisual(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            SpellID = _worldPacket.ReadInt32();
+            Visual.Read(_worldPacket);
+            TargetGUID = _worldPacket.ReadPackedGuid();
+        }
+    }
+
+
     //Structs
     class AreaTriggerSplineInfo
     {

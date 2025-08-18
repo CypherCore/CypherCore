@@ -623,6 +623,23 @@ namespace Game
                 _player.SetChannelVisual(new SpellCastVisualField() { SpellXSpellVisualID = spellXspellVisualId });
         }
 
+        [WorldPacketHandler(ClientOpcodes.UpdateAreaTriggerVisual, Processing = PacketProcessing.Inplace)]
+        void HandleUpdateAreaTriggerVisual(UpdateAreaTriggerVisual updateAreaTriggerVisual)
+        {
+            AreaTrigger target = ObjectAccessor.GetAreaTrigger(_player, updateAreaTriggerVisual.TargetGUID);
+            if (target == null)
+                return;
+
+            if (target.GetCasterGuid() != _player.GetGUID())
+                return;
+
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(target.m_areaTriggerData.SpellForVisuals, _player.GetMap().GetDifficultyID());
+            if (spellInfo == null)
+                return;
+
+            target.SetSpellVisual(new SpellCastVisual(_player.GetCastSpellXSpellVisualId(spellInfo), 0));
+        }
+
         [WorldPacketHandler(ClientOpcodes.KeyboundOverride, Processing = PacketProcessing.ThreadSafe)]
         void HandleKeyboundOverride(KeyboundOverride keyboundOverride)
         {

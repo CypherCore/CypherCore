@@ -116,7 +116,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetDynamicObject(guid);
     }
 
-    static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
+    public static AreaTrigger GetAreaTrigger(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetAreaTrigger(guid);
     }
