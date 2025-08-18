@@ -1846,6 +1846,9 @@ namespace Game.Spells
 
             CallScriptSuccessfulDispel(effectInfo.EffectIndex);
 
+            Unit.ProcSkillsAndAuras(GetUnitCasterForEffectHandlers(), unitTarget, new ProcFlagsInit(ProcFlags.None, ProcFlags2.SuccessfulDispel), new ProcFlagsInit(ProcFlags.None),
+                ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, null, null);
+
             m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Dispel;
         }
 
@@ -3934,6 +3937,9 @@ namespace Game.Spells
             }
 
             CallScriptSuccessfulDispel(effectInfo.EffectIndex);
+
+            Unit.ProcSkillsAndAuras(GetUnitCasterForEffectHandlers(), unitTarget, new ProcFlagsInit(ProcFlags.None, ProcFlags2.SuccessfulDispel), new ProcFlagsInit(ProcFlags.None),
+                ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, null, null);
 
             m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Dispel;
         }
