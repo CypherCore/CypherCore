@@ -773,7 +773,7 @@ namespace Game.Chat
             }
 
             [Command("formation", RBACPermissions.CommandNpcAddFormation)]
-            static bool HandleNpcAddFormationCommand(CommandHandler handler, ulong leaderGUID)
+            static bool HandleNpcAddFormationCommand(CommandHandler handler, ulong leaderGUID, bool? linkedAggro, bool? formationMovement)
             {
                 Creature creature = handler.GetSelectedCreature();
                 if (creature == null || creature.GetSpawnId() == 0)
@@ -793,18 +793,23 @@ namespace Game.Chat
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
-                float followAngle = (creature.GetAbsoluteAngle(chr) - chr.GetOrientation()) * 180.0f / MathF.PI;
-                float followDist = MathF.Sqrt(MathF.Pow(chr.GetPositionX() - creature.GetPositionX(), 2f) + MathF.Pow(chr.GetPositionY() - creature.GetPositionY(), 2f));
-                uint groupAI = 0;
-                FormationMgr.AddFormationMember(lowguid, followAngle, followDist, leaderGUID, groupAI);
+                float followAngle = creature.GetRelativeAngle(chr) * 180.0f / MathF.PI;
+                float followDist = chr.GetExactDist2d(creature);
+                GroupAIFlags groupAI = 0;
+                if (linkedAggro == true)
+                    groupAI |= GroupAIFlags.MembersAssistMember;
+                if (formationMovement == true)
+                    groupAI |= GroupAIFlags.IdleInFormation;
+
+                FormationMgr.AddFormationMember(lowguid, followAngle, followDist, leaderGUID, (uint)groupAI);
                 creature.SearchFormation();
 
                 PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.INS_CREATURE_FORMATION);
                 stmt.AddValue(0, leaderGUID);
                 stmt.AddValue(1, lowguid);
-                stmt.AddValue(2, followAngle);
-                stmt.AddValue(3, followDist);
-                stmt.AddValue(4, groupAI);
+                stmt.AddValue(2, followDist);
+                stmt.AddValue(3, followAngle);
+                stmt.AddValue(4, (uint)groupAI);
 
                 DB.World.Execute(stmt);
 
