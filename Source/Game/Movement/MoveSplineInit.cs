@@ -126,7 +126,7 @@ namespace Game.Movement
                     return 50.0f;
 
                 return Math.Max(28.0f, unit.GetSpeed(UnitMoveType.Run) * 4.0f);
-            };
+            }
 
             args.velocity = Math.Min(args.velocity, speedLimit());
 
@@ -218,20 +218,8 @@ namespace Game.Movement
 
         public void SetFacing(float angle)
         {
-            if (args.TransformForTransport)
-            {
-                Unit vehicle = unit.GetVehicleBase();
-                if (vehicle != null)
-                    angle -= vehicle.GetOrientation();
-                else
-                {
-                    ITransport transport = unit.GetTransport();
-                    if (transport != null)
-                        angle -= transport.GetTransportOrientation();
-                }
-            }
-
-            args.facing.angle = MathFunctions.wrap(angle, 0.0f, MathFunctions.TwoPi);
+            TransportPathTransform transform =  new(unit, args.TransformForTransport);
+            args.facing.angle = Position.NormalizeOrientation(transform.Calc(angle));
             args.facing.type = MonsterMoveType.FacingAngle;
         }
 
@@ -288,12 +276,12 @@ namespace Game.Movement
 
         public void SetUnlimitedSpeed() { args.flags.SetUnsetFlag(MoveSplineFlagEnum.UnlimitedSpeed, true); }
 
-        public void MovebyPath(Vector3[] controls, int path_offset = 0)
+        public void MovebyPath(Vector3[] path, int pointId = 0)
         {
-            args.path_Idx_offset = path_offset;
+            args.path_Idx_offset = pointId;
             TransportPathTransform transform = new(unit, args.TransformForTransport);
-            for (var i = 0; i < controls.Length; i++)
-                args.path.Add(transform.Calc(controls[i]));
+            for (var i = 0; i < path.Length; i++)
+                args.path.Add(transform.Calc(path[i]));
 
         }
 
@@ -302,17 +290,17 @@ namespace Game.Movement
             MoveTo(new Vector3(x, y, z), generatePath, forceDest);
         }
 
-        public void SetParabolic(float amplitude, float time_shift)
+        public void SetParabolic(float amplitude, float start_time)
         {
-            args.effect_start_time_percent = time_shift;
+            args.effect_start_time_percent = start_time;
             args.parabolic_amplitude = amplitude;
             args.vertical_acceleration = 0.0f;
             args.flags.EnableParabolic();
         }
 
-        public void SetParabolicVerticalAcceleration(float vertical_acceleration, float time_shift)
+        public void SetParabolicVerticalAcceleration(float vertical_acceleration, float start_time)
         {
-            args.effect_start_time_percent = time_shift;
+            args.effect_start_time_percent = start_time;
             args.parabolic_amplitude = 0.0f;
             args.vertical_acceleration = vertical_acceleration;
             args.flags.EnableParabolic();
@@ -345,30 +333,28 @@ namespace Game.Movement
     // Transforms coordinates from global to transport offsets
     public class TransportPathTransform
     {
+        ITransport _transport;
+
         public TransportPathTransform(Unit owner, bool transformForTransport)
         {
-            _owner = owner;
-            _transformForTransport = transformForTransport;
+            _transport = transformForTransport ? owner.GetDirectTransport() : null;
         }
 
         public Vector3 Calc(Vector3 input)
         {
-            float x = input.X;
-            float y = input.Y;
-            float z = input.Z;
-            if (_transformForTransport)
-            {
-                ITransport transport = _owner.GetDirectTransport();
-                if (transport != null)
-                {
-                    float unused = 0.0f; // need reference
-                    transport.CalculatePassengerOffset(ref x, ref y, ref z, ref unused);
-                }
-            }
-            return new Vector3(x, y, z);
+            float o = 0;
+            if (_transport != null)
+                _transport.CalculatePassengerOffset(ref input.X, ref input.Y, ref input.Z, ref o);
+
+            return input;
         }
 
-        Unit _owner;
-        bool _transformForTransport;
+        public float Calc(float input)
+        {
+            if (_transport != null)
+                input -= _transport.GetTransportOrientation();
+
+            return input;
+        }
     }
 }

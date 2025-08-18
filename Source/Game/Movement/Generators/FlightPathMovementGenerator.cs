@@ -63,7 +63,7 @@ namespace Game.Movement
             MoveSplineInit init = new(owner);
             // Providing a starting vertex since the taxi paths do not provide such
             init.Path().Add(new Vector3(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()));
-            for (int i = (int)currentNodeId; i != (uint)end; ++i)
+            for (int i = (int)currentNodeId; i != end; ++i)
             {
                 Vector3 vertice = new(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
                 init.Path().Add(vertice);
