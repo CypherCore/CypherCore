@@ -276,7 +276,7 @@ namespace Game
             if (path == null)
                 return null;
 
-            return GetNode(path.Id, nodeId);
+            return GetNode(path, nodeId);
         }
 
         public WaypointPath GetPathByVisualGUID(ObjectGuid guid)
