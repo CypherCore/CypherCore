@@ -4591,7 +4591,7 @@ namespace Game.Entities
             else
                 m_deathExpireTime = now + PlayerConst.DeathExpireStep;
         }
-        
+
         public int CalculateCorpseReclaimDelay(bool load = false)
         {
             Corpse corpse = GetCorpse();
@@ -4629,7 +4629,7 @@ namespace Game.Entities
 
             return (int)(delay * Time.InMilliseconds);
         }
-        
+
         public void SendCorpseReclaimDelay(int delay)
         {
             CorpseReclaimDelay packet = new();
@@ -4875,7 +4875,8 @@ namespace Game.Entities
                         foundPet = true;
                     }
                 }
-            };
+            }
+            ;
 
             FindAndRemovePet(m_petStable.ActivePets);
             FindAndRemovePet(m_petStable.StabledPets);
@@ -5562,7 +5563,8 @@ namespace Game.Entities
                 if (creature.HasNpcFlag2(npcFlags2))
                     return true;
                 return false;
-            };
+            }
+            ;
 
             if (!hasNpcFlags())
                 return null;
@@ -6609,12 +6611,27 @@ namespace Game.Entities
 
         public void UpdateTavernRestingState()
         {
-            var atEntry = CliDB.AreaTriggerStorage.LookupByKey(_restMgr.GetInnTriggerId());
+            InnAreaTrigger innTrigger = _restMgr.GetInnTrigger();
+            if (innTrigger == null)
+            {
+                if (_restMgr.HasRestFlag(RestFlag.Tavern))
+                    _restMgr.RemoveRestFlag(RestFlag.Tavern);
 
-            if (_restMgr.HasRestFlag(RestFlag.Tavern) && (atEntry == null || !IsInAreaTrigger(atEntry)))
-                _restMgr.RemoveRestFlag(RestFlag.Tavern);
-            else if (!_restMgr.HasRestFlag(RestFlag.Tavern) && IsInAreaTrigger(atEntry))
-                _restMgr.SetRestFlag(RestFlag.Tavern);
+                return;
+            }
+
+            if (innTrigger.IsDBC)
+            {
+                var atEntry = CliDB.AreaTriggerStorage.LookupByKey(innTrigger.AreaTriggerEntryId);
+
+                if (_restMgr.HasRestFlag(RestFlag.Tavern) && (atEntry == null || !IsInAreaTrigger(atEntry)))
+                {
+                    _restMgr.RemoveRestFlag(RestFlag.Tavern);
+                    _restMgr.SetInnTrigger(null);
+                }
+                else if (!_restMgr.HasRestFlag(RestFlag.Tavern) && IsInAreaTrigger(atEntry))
+                    _restMgr.SetRestFlag(RestFlag.Tavern);
+            }
         }
 
         public void SendSysMessage(CypherStrings str, params object[] args)

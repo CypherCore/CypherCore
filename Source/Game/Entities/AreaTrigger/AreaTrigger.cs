@@ -856,6 +856,9 @@ namespace Game.Entities
 
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.NumUnitsInside), _insideUnits.Count);
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.NumPlayersInside), _insideUnits.Count(guid => guid.IsPlayer()));
+
+            if (IsStaticSpawn())
+                SetActive(!_insideUnits.Empty());
         }
 
         public AreaTriggerTemplate GetTemplate()
@@ -1017,6 +1020,16 @@ namespace Game.Entities
                                     }
                                 }
                                 break;
+                            case AreaTriggerActionTypes.Tavern:
+                            {
+                                Player player = caster.ToPlayer();
+                                if (player != null)
+                                {
+                                    player.GetRestMgr().SetInnTrigger(new InnAreaTrigger(false));
+                                    player.GetRestMgr().SetRestFlag(RestFlag.Tavern);
+                                }
+                                break;
+                            }
                             default:
                                 break;
                         }
@@ -1031,8 +1044,21 @@ namespace Game.Entities
             {
                 foreach (AreaTriggerAction action in GetTemplate().Actions)
                 {
-                    if (action.ActionType == AreaTriggerActionTypes.Cast || action.ActionType == AreaTriggerActionTypes.AddAura)
-                        unit.RemoveAurasDueToSpell(action.Param, GetCasterGuid());
+                    switch (action.ActionType)
+                    {
+                        case AreaTriggerActionTypes.Cast:
+                            goto case AreaTriggerActionTypes.AddAura;
+                        case AreaTriggerActionTypes.AddAura:
+                            unit.RemoveAurasDueToSpell(action.Param, GetCasterGuid());
+                            break;
+                        case AreaTriggerActionTypes.Tavern:
+                            Player player = unit.ToPlayer();
+                            if (player != null)
+                                player.GetRestMgr().SetInnTrigger(null);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

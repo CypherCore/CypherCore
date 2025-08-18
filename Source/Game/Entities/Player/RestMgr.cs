@@ -6,7 +6,7 @@ namespace Game.Entities
     {
         Player _player;
         long _restTime;
-        uint _innAreaTriggerId;
+        InnAreaTrigger _innAreaTrigger;
         float[] _restBonus = new float[(int)RestTypes.Max];
         RestFlag _restFlagMask;
 
@@ -111,7 +111,7 @@ namespace Game.Entities
 
             uint rested_loss = rested_bonus;
             if (restType == RestTypes.XP)
-               MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
+                MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
             SetRestBonus(restType, GetRestBonus(restType) - rested_loss);
 
@@ -157,7 +157,19 @@ namespace Game.Entities
 
         public float GetRestBonus(RestTypes restType) { return _restBonus[(int)restType]; }
         public bool HasRestFlag(RestFlag restFlag) { return (_restFlagMask & restFlag) != 0; }
-        public uint GetInnTriggerId() { return _innAreaTriggerId; }
-        public void SetInnTriggerID(uint id) { _innAreaTriggerId = id; }
+        public InnAreaTrigger GetInnTrigger() { return _innAreaTrigger; }
+        public void SetInnTrigger(InnAreaTrigger trigger) { _innAreaTrigger = trigger; }
+    }
+
+    public class InnAreaTrigger
+    {
+        public bool IsDBC = true;
+        public uint AreaTriggerEntryId;
+
+        public InnAreaTrigger(bool isDBC, uint areaTriggerEntryId = 0)
+        {
+            IsDBC = isDBC;
+            AreaTriggerEntryId = areaTriggerEntryId;
+        }
     }
 }

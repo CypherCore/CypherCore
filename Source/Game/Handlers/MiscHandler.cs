@@ -245,9 +245,14 @@ namespace Game
             {
                 // set resting flag we are in the inn
                 if (packet.Entered)
-                    player.GetRestMgr().SetInnTriggerID(atEntry.Id);
+                {
+                    player.GetRestMgr().SetInnTrigger(new InnAreaTrigger(true, atEntry.Id));
+                }
                 else
+                {
                     player.GetRestMgr().RemoveRestFlag(RestFlag.Tavern);
+                    player.GetRestMgr().SetInnTrigger(null);
+                }
 
                 if (Global.WorldMgr.IsFFAPvPRealm())
                 {
