@@ -371,10 +371,7 @@ namespace Game.Entities
         public override ObjectGuid GetOwnerGUID() { return GetCreatorGUID(); }
         public override uint GetFaction() { return 0; }
 
-        public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
-        public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }
-        public override float GetStationaryZ() { return _stationaryPosition.GetPositionZ(); }
-        public override float GetStationaryO() { return _stationaryPosition.GetOrientation(); }
+        public override Position GetStationaryPosition() { return _stationaryPosition; }
         void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
 
         ConversationData m_conversationData;

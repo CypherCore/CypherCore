@@ -3879,13 +3879,10 @@ namespace Game.Entities
         public override uint GetFaction() { return m_gameObjectData.FactionTemplate; }
         public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
 
-        public override float GetStationaryX() { return StationaryPosition.GetPositionX(); }
-        public override float GetStationaryY() { return StationaryPosition.GetPositionY(); }
-        public override float GetStationaryZ() { return StationaryPosition.GetPositionZ(); }
-        public override float GetStationaryO() { return StationaryPosition.GetOrientation(); }
-        public Position GetStationaryPosition() { return StationaryPosition; }
+        public override Position GetStationaryPosition() { return StationaryPosition; }
 
         public void RelocateStationaryPosition(float x, float y, float z, float o) { StationaryPosition.Relocate(x, y, z, o); }
+        public void RelocateStationaryPosition(Position pos) { StationaryPosition.Relocate(pos); }
 
         //! Object distance/size - overridden from Object._IsWithinDist. Needs to take in account proper GO size.
         public override bool _IsWithinDist(WorldObject obj, float dist2compare, bool is3D, bool incOwnRadius, bool incTargetRadius)

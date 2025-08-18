@@ -456,10 +456,7 @@ namespace Game.Entities
             if (flags.Stationary)
             {
                 WorldObject self = this;
-                data.WriteFloat(self.GetStationaryX());
-                data.WriteFloat(self.GetStationaryY());
-                data.WriteFloat(self.GetStationaryZ());
-                data.WriteFloat(self.GetStationaryO());
+                data.WriteXYZO(self.GetStationaryPosition());
             }
 
             if (flags.CombatVictim)
@@ -3256,10 +3253,7 @@ namespace Game.Entities
         }
         public void SetTransport(ITransport t) { m_transport = t; }
 
-        public virtual float GetStationaryX() { return GetPositionX(); }
-        public virtual float GetStationaryY() { return GetPositionY(); }
-        public virtual float GetStationaryZ() { return GetPositionZ(); }
-        public virtual float GetStationaryO() { return GetOrientation(); }
+        public virtual Position GetStationaryPosition() { return this; }
 
         public virtual float GetCollisionHeight() { return 0.0f; }
         public float GetMidsectionHeight() { return GetCollisionHeight() / 2.0f; }

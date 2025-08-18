@@ -1093,7 +1093,7 @@ namespace Game.Entities
             _movementTime = 0;
 
             _spline = new Spline<float>();
-            _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear, GetStationaryO());
+            _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear, _stationaryPosition.GetOrientation());
             _spline.InitLengths();
 
             float speed = overrideSpeed.GetValueOrDefault(GetCreateProperties().Speed);
@@ -1432,10 +1432,7 @@ namespace Game.Entities
             }
         }
 
-        public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
-        public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }
-        public override float GetStationaryZ() { return _stationaryPosition.GetPositionZ(); }
-        public override float GetStationaryO() { return _stationaryPosition.GetOrientation(); }
+        public override Position GetStationaryPosition() { return _stationaryPosition; }
         void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
 
         public bool IsRemoved() { return _isRemoved; }
