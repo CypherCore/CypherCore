@@ -222,7 +222,7 @@ namespace Game.Movement
 
         static bool PositionOkay(Unit owner, Unit target, float range, ChaseAngle? angle = null)
         {
-            if (owner.GetExactDistSq(target) > (owner.GetCombatReach() + target.GetCombatReach() + range) * (owner.GetCombatReach() + target.GetCombatReach() + range))
+            if (!owner.IsInDist(target, owner.GetCombatReach() + target.GetCombatReach() + range))
                 return false;
 
             return !angle.HasValue || angle.Value.IsAngleOkay(target.GetRelativeAngle(owner));

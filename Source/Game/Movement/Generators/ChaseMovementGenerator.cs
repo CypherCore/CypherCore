@@ -251,10 +251,9 @@ namespace Game.Movement
 
         static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)
         {
-            float distSq = owner.GetExactDistSq(target);
-            if (minDistance.HasValue && distSq < minDistance.Value * minDistance.Value)
+            if (minDistance .HasValue && owner.IsInDist(target, minDistance.Value))
                 return false;
-            if (maxDistance.HasValue && distSq > maxDistance.Value * maxDistance.Value)
+            if (maxDistance.HasValue && !owner.IsInDist(target, maxDistance.Value))
                 return false;
             if (angle.HasValue && !angle.Value.IsAngleOkay(target.GetRelativeAngle(owner)))
                 return false;
