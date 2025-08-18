@@ -159,7 +159,8 @@ namespace Game
                     sourceType == ConditionSourceType.AreaTrigger ||
                     sourceType == ConditionSourceType.TrainerSpell ||
                     sourceType == ConditionSourceType.ObjectIdVisibility ||
-                    sourceType == ConditionSourceType.ReferenceCondition;
+                    sourceType == ConditionSourceType.ReferenceCondition ||
+                    sourceType == ConditionSourceType.PlayerChoiceResponse;
         }
 
         public bool CanHaveSourceIdSet(ConditionSourceType sourceType)
