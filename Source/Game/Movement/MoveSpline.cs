@@ -162,7 +162,7 @@ namespace Game.Movement
                 if (!splineflags.HasFlag(MoveSplineFlagEnum.OrientationFixed | MoveSplineFlagEnum.Falling | MoveSplineFlagEnum.JumpOrientationFixed))
                 {
                     Vector3 hermite;
-                    spline.Evaluate_Derivative(point_Idx, u, out hermite);
+                    spline.Evaluate_Derivative(point_index, u, out hermite);
                     if (hermite.X != 0f || hermite.Y != 0f)
                         orientation = MathF.Atan2(hermite.Y, hermite.X);
                 }
