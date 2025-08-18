@@ -342,7 +342,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public static void WriteCreateObjectAreaTriggerSpline(Spline<int> spline, WorldPacket data)
+        public static void WriteCreateObjectAreaTriggerSpline(Spline<float> spline, WorldPacket data)
         {
             data.WriteBits(spline.GetPoints().Length, 16);
             foreach (var point in spline.GetPoints())

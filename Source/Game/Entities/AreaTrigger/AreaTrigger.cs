@@ -322,7 +322,7 @@ namespace Game.Entities
                     {
                         float orientation = Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
                         if (GetCreateProperties() == null || !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
-                            orientation += GetStationaryO();
+                            orientation += _stationaryPosition.GetOrientation();
 
                         SetOrientation(orientation);
                     }
@@ -1061,7 +1061,7 @@ namespace Game.Entities
 
             _movementTime = 0;
 
-            _spline = new Spline<int>();
+            _spline = new Spline<float>();
             _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear, GetStationaryO());
             _spline.InitLengths();
 
@@ -1255,7 +1255,7 @@ namespace Game.Entities
             Vector3 currentPosition;
             _spline.Evaluate_Percent(lastPositionIndex, percentFromLastPoint, out currentPosition);
 
-            float orientation = GetStationaryO();
+            float orientation = _stationaryPosition.GetOrientation();
             if (createProperties != null && createProperties.FacingCurveId != 0)
                 orientation += Global.DB2Mgr.GetCurveValueAt(createProperties.FacingCurveId, GetProgress());
 
@@ -1290,7 +1290,7 @@ namespace Game.Entities
             {
                 orientation = Global.DB2Mgr.GetCurveValueAt(GetCreateProperties().FacingCurveId, GetProgress());
                 if (GetCreateProperties() == null || !GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
-                    orientation += GetStationaryO();
+                    orientation += _stationaryPosition.GetOrientation();
             }
 
             GetMap().AreaTriggerRelocation(this, x, y, z, orientation);
@@ -1444,7 +1444,7 @@ namespace Game.Entities
         public Vector3 GetTargetRollPitchYaw() { return _targetRollPitchYaw; }
 
         public bool HasSplines() { return !_spline.Empty(); }
-        public Spline<int> GetSpline() { return _spline; }
+        public Spline<float> GetSpline() { return _spline; }
         public uint GetElapsedTimeForMovement() { return GetTimeSinceCreated(); } // @todo: research the right value, in sniffs both timers are nearly identical
 
         public AreaTriggerOrbitInfo GetOrbit() { return _orbitInfo; }
@@ -1468,7 +1468,7 @@ namespace Game.Entities
         Position _rollPitchYaw;
         Position _targetRollPitchYaw;
         List<Position> _polygonVertices;
-        Spline<int> _spline;
+        Spline<float> _spline;
 
         bool _reachedDestination;
         int _lastSplineIndex;
