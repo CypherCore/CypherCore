@@ -920,13 +920,20 @@ namespace Game.Maps
     {
         WorldObject i_searcher;
         float i_dist;
-        IDoWork<Player> _do;
+        Action<Player> _do;
 
         public PlayerDistWorker(WorldObject searcher, float _dist, IDoWork<Player> @do)
         {
             i_searcher = searcher;
             i_dist = _dist;
-            _do = @do;
+            _do = @do.Invoke;
+        }
+
+        public PlayerDistWorker(WorldObject searcher, float _dist, Action<Player> destroyer)
+        {
+            i_searcher = searcher;
+            i_dist = _dist;
+            _do = destroyer;
         }
 
         public override void Visit(IList<Player> objs)
@@ -2602,31 +2609,6 @@ namespace Game.Maps
             _customizer.Update(go);
             return true;
         }
-    }
-
-    public class AnyPlayerInObjectRangeCheck : ICheck<Player>
-    {
-        public AnyPlayerInObjectRangeCheck(WorldObject obj, float range, bool reqAlive = true)
-        {
-            _obj = obj;
-            _range = range;
-            _reqAlive = reqAlive;
-        }
-
-        public bool Invoke(Player pl)
-        {
-            if (_reqAlive && !pl.IsAlive())
-                return false;
-
-            if (!_obj.IsWithinDist(pl, _range))
-                return false;
-
-            return true;
-        }
-
-        WorldObject _obj;
-        float _range;
-        bool _reqAlive;
     }
 
     class AnyPlayerInPositionRangeCheck : ICheck<Player>

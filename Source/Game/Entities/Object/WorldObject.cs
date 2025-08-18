@@ -3025,7 +3025,7 @@ namespace Game.Entities
         public List<Player> GetPlayerListInGrid(float maxSearchRange, bool alive = true)
         {
             List<Player> playerList = new();
-            var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange, alive);
+            var checker = new AnyUnitInObjectRangeCheck(this, maxSearchRange, alive);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
             Cell.VisitWorldObjects(this, searcher, maxSearchRange);
@@ -3116,26 +3116,24 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            List<Player> targets = new();
-            var check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange(), false);
-            var searcher = new PlayerListSearcher(this, targets, check);
-
-            Cell.VisitWorldObjects(this, searcher, GetVisibilityRange());
-            foreach (Player player in targets)
+            void destroyer(Player player)
             {
                 if (player == this)
-                    continue;
+                    return;
 
                 if (!player.HaveAtClient(this))
-                    continue;
+                    return;
 
                 Unit unit = ToUnit();
                 if (unit != null && unit.GetCharmerGUID() == player.GetGUID())// @todo this is for puppet
-                    continue;
+                    return;
 
                 DestroyForPlayer(player);
                 player.m_clientGUIDs.Remove(GetGUID());
             }
+
+            PlayerDistWorker worker = new(this, GetVisibilityRange(), destroyer);
+            Cell.VisitWorldObjects(this, worker, GetVisibilityRange());
         }
 
         public virtual void UpdateObjectVisibility(bool force = true)

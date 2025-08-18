@@ -638,7 +638,7 @@ namespace Game.Entities
                             else
                             {
                                 // Environmental trap: Any player
-                                var check = new AnyPlayerInObjectRangeCheck(this, radius);
+                                var check = new AnyUnitInObjectRangeCheck(this, radius);
                                 var searcher = new PlayerSearcher(this, check);
                                 Cell.VisitWorldObjects(this, searcher, radius);
                                 target = searcher.GetTarget();

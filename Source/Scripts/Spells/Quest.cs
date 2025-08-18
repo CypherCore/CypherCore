@@ -648,16 +648,16 @@ namespace Scripts.Spells.Azerite
         {
             Unit caster = GetCaster();
             // Check for player that is in 65 y range
-            List<Player> playerList = new();
-            AnyPlayerInObjectRangeCheck checker = new(caster, 65.0f);
-            PlayerListSearcher searcher = new(caster, playerList, checker);
-            Cell.VisitWorldObjects(caster, searcher, 65.0f);
-
+            List<Player> playerList = caster.GetPlayerListInGrid(65.0f);
             foreach (var player in playerList)
+            {
                 // Check if found player target is on fly mount or using flying form
                 if (player.HasAuraType(AuraType.Fly) || player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
+                {
                     // Summom Fel Cannon (bunny version) at found player
                     caster.SummonCreature(NpcFelCannon2, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
+                }
+            }
         }
 
         public override void Register()
