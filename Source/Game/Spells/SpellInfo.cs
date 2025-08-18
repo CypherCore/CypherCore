@@ -4107,7 +4107,38 @@ namespace Game.Spells
 
             Unit casterUnit = null;
             if (caster != null)
+            {
                 casterUnit = caster.ToUnit();
+                Player playerCaster = caster.ToPlayer();
+                if (playerCaster != null)
+                {
+                    PlayerSpellTrait trait = playerCaster.GetTraitInfoForSpell(_spellInfo.Id);
+                    if (trait != null)
+                    {
+                        var traitDefinitionEffectPoints = TraitMgr.GetTraitDefinitionEffectPointModifiers(trait.DefinitionId);
+                        if (traitDefinitionEffectPoints != null)
+                        {
+                            var pointsOverride = traitDefinitionEffectPoints.Find(p => p.EffectIndex == EffectIndex);
+                            if (pointsOverride != null)
+                            {
+                                float traitBasePoints = Global.DB2Mgr.GetCurveValueAt((uint)pointsOverride.CurveID, trait.Rank);
+                                switch (pointsOverride.GetOperationType())
+                                {
+                                    case TraitPointsOperationType.Set:
+                                        value = traitBasePoints;
+                                        break;
+                                    case TraitPointsOperationType.Multiply:
+                                        value *= traitBasePoints;
+                                        break;
+                                    case TraitPointsOperationType.None:
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             if (Scaling.Variance != 0)
             {

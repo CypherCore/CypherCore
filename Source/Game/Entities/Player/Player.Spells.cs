@@ -2141,7 +2141,7 @@ namespace Game.Entities
             SendPacket(new SendUnlearnSpells());
         }
 
-        public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false, int? traitDefinitionId = null)
+        public void LearnSpell(uint spellId, bool dependent, uint fromSkill = 0, bool suppressMessaging = false, PlayerSpellTrait trait = null)
         {
             PlayerSpell spell = m_spells.LookupByKey(spellId);
 
@@ -2149,7 +2149,7 @@ namespace Game.Entities
             bool active = !disabled || spell.Active;
             bool favorite = spell != null ? spell.Favorite : false;
 
-            bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill, favorite, traitDefinitionId);
+            bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill, favorite, trait);
 
             // prevent duplicated entires in spell book, also not send if not in world (loading)
             if (learning && IsInWorld)
@@ -2158,7 +2158,8 @@ namespace Game.Entities
                 LearnedSpellInfo learnedSpellInfo = new();
                 learnedSpellInfo.SpellID = spellId;
                 learnedSpellInfo.Favorite = favorite;
-                learnedSpellInfo.TraitDefinitionID = traitDefinitionId;
+                if (trait != null)
+                    learnedSpellInfo.TraitDefinitionID = trait.DefinitionId;
                 learnedSpells.SuppressMessaging = suppressMessaging;
                 learnedSpells.ClientLearnedSpellData.Add(learnedSpellInfo);
                 SendPacket(learnedSpells);
@@ -2216,7 +2217,7 @@ namespace Game.Entities
 
             bool cur_active = pSpell.Active;
             bool cur_dependent = pSpell.Dependent;
-            int? traitDefinitionId = pSpell.TraitDefinitionId;
+            PlayerSpellTrait trait = pSpell.Trait;
 
             if (disabled)
             {
@@ -2380,9 +2381,9 @@ namespace Game.Entities
                 }
             }
 
-            if (traitDefinitionId.HasValue)
+            if (trait != null)
             {
-                var traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitDefinitionId.Value);
+                var traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(trait.DefinitionId);
                 if (traitDefinition != null)
                     RemoveOverrideSpell(traitDefinition.OverridesSpellID, spellId);
             }
@@ -2480,7 +2481,7 @@ namespace Game.Entities
             return null;
         }
 
-        bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0, bool favorite = false, int? traitDefinitionId = null)
+        bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0, bool favorite = false, PlayerSpellTrait? trait = null)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
@@ -2559,16 +2560,16 @@ namespace Game.Entities
                     dependent_set = true;
                 }
 
-                if (spell.TraitDefinitionId != traitDefinitionId)
+                if (spell.Trait != trait)
                 {
-                    if (spell.TraitDefinitionId.HasValue)
+                    if (spell.Trait != null)
                     {
-                        TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(spell.TraitDefinitionId.Value);
+                        TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(spell.Trait.DefinitionId);
                         if (traitDefinition != null)
-                            RemoveOverrideSpell((uint)traitDefinition.OverridesSpellID, spellId);
+                            RemoveOverrideSpell(traitDefinition.OverridesSpellID, spellId);
                     }
 
-                    spell.TraitDefinitionId = traitDefinitionId;
+                    spell.Trait = trait;
                 }
 
                 spell.Favorite = favorite;
@@ -2655,8 +2656,7 @@ namespace Game.Entities
                 newspell.Dependent = dependent;
                 newspell.Disabled = disabled;
                 newspell.Favorite = favorite;
-                if (traitDefinitionId.HasValue)
-                    newspell.TraitDefinitionId = traitDefinitionId.Value;
+                newspell.Trait = trait;
 
                 // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
                 if (newspell.Active && !newspell.Disabled && spellInfo.IsRanked())
@@ -2725,51 +2725,14 @@ namespace Game.Entities
 
             if (castSpell)
             {
-                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-
-                if (traitDefinitionId.HasValue)
-                {
-                    TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
-                    if (traitConfig != null)
-                    {
-                        int traitEntryIndex = traitConfig.Entries.FindIndexIf(traitEntry =>
-                        {
-                            return CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.TraitDefinitionID == traitDefinitionId;
-                        });
-
-                        int rank = 0;
-                        if (traitEntryIndex >= 0)
-                            rank = traitConfig.Entries[traitEntryIndex].Rank + traitConfig.Entries[traitEntryIndex].GrantedRanks;
-
-                        if (rank > 0)
-                        {
-                            var traitDefinitionEffectPoints = TraitMgr.GetTraitDefinitionEffectPointModifiers(traitDefinitionId.Value);
-                            if (traitDefinitionEffectPoints != null)
-                            {
-                                foreach (TraitDefinitionEffectPointsRecord traitDefinitionEffectPoint in traitDefinitionEffectPoints)
-                                {
-                                    if (traitDefinitionEffectPoint.EffectIndex >= spellInfo.GetEffects().Count)
-                                        continue;
-
-                                    float basePoints = Global.DB2Mgr.GetCurveValueAt((uint)traitDefinitionEffectPoint.CurveID, rank);
-                                    if (traitDefinitionEffectPoint.GetOperationType() == TraitPointsOperationType.Multiply)
-                                        basePoints *= spellInfo.GetEffect((uint)traitDefinitionEffectPoint.EffectIndex).CalcBaseValue(this, null, 0, -1);
-
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + traitDefinitionEffectPoint.EffectIndex, (int)basePoints);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                CastSpell(this, spellId, args);
+                CastSpell(this, spellId, true);
                 if (spellInfo.HasEffect(SpellEffectName.SkillStep))
                     return false;
             }
 
-            if (traitDefinitionId.HasValue)
+            if (trait != null)
             {
-                TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(traitDefinitionId.Value);
+                TraitDefinitionRecord traitDefinition = CliDB.TraitDefinitionStorage.LookupByKey(trait.DefinitionId);
                 if (traitDefinition != null && traitDefinition.OverridesSpellID != 0)
                     AddOverrideSpell(traitDefinition.OverridesSpellID, spellId);
             }
@@ -4043,6 +4006,6 @@ namespace Game.Entities
         public bool Dependent;
         public bool Disabled;
         public bool Favorite;
-        public int? TraitDefinitionId;
+        public PlayerSpellTrait Trait;
     }
 }

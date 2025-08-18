@@ -1014,9 +1014,8 @@ namespace Game.Entities
             List<TraitEntryPacket> costEntries = new();
 
             // apply new traits
-            for (var i = 0; i < newConfig.Entries.Count; ++i)
+            foreach (TraitEntryPacket newEntry in newConfig.Entries)
             {
-                TraitEntryPacket newEntry = newConfig.Entries[i];
                 int oldEntryIndex = editedConfig.Entries.FindIndexIf(ufEntry => ufEntry.TraitNodeID == newEntry.TraitNodeID && ufEntry.TraitNodeEntryID == newEntry.TraitNodeEntryID);
                 if (oldEntryIndex < 0)
                 {
@@ -1033,7 +1032,10 @@ namespace Game.Entities
                     AddDynamicUpdateFieldValue(newTraitConfig.ModifyValue(newTraitConfig.Entries), newUfEntry);
 
                     if (applyTraits)
+                    {
+                        ApplyTraitEntry(newEntry.TraitNodeEntryID, 0, 0, false);
                         ApplyTraitEntry(newUfEntry.TraitNodeEntryID, newUfEntry.Rank, 0, true);
+                    }
                 }
                 else if (newEntry.Rank != editedConfig.Entries[oldEntryIndex].Rank || newEntry.GrantedRanks != editedConfig.Entries[oldEntryIndex].GrantedRanks)
                 {
@@ -1080,9 +1082,8 @@ namespace Game.Entities
                 }
             }
 
-            for (int i = 0; i < newConfig.SubTrees.Count; ++i)
+            foreach (TraitSubTreeCachePacket newSubTree in newConfig.SubTrees)
             {
-                var newSubTree = newConfig.SubTrees[i];
                 int oldSubTreeIndex = editedConfig.SubTrees.FindIndexIf(ufSubTree => ufSubTree.TraitSubTreeID == newSubTree.TraitSubTreeID);
 
                 List<TraitEntry> subTreeEntries = new();
@@ -1094,6 +1095,7 @@ namespace Game.Entities
                     newUfEntry.Rank = newSubTree.Entries[j].Rank;
                     newUfEntry.GrantedRanks = newSubTree.Entries[j].GrantedRanks;
                 }
+
                 if (oldSubTreeIndex < 0)
                 {
                     TraitSubTreeCache newUfSubTree = new();
@@ -1182,11 +1184,22 @@ namespace Game.Entities
 
             if (traitDefinition.SpellID != 0)
             {
+                Cypher.Assert(traitNodeEntry.TraitDefinitionID <= 0xFFFFFF && rank + grantedRanks <= 0xFF);
+
                 if (apply)
-                    LearnSpell(traitDefinition.SpellID, true, 0, false, traitNodeEntry.TraitDefinitionID);
+                    LearnSpell(traitDefinition.SpellID, true, 0, false, new PlayerSpellTrait(traitNodeEntry.TraitDefinitionID, rank + grantedRanks));
                 else
                     RemoveSpell(traitDefinition.SpellID);
             }
+        }
+
+        public PlayerSpellTrait GetTraitInfoForSpell(uint spellId)
+        {
+            PlayerSpell spell = m_spells.LookupByKey(spellId);
+            if (spell != null)
+                return spell.Trait;
+
+            return null;
         }
 
         public void SetTraitConfigUseStarterBuild(int traitConfigId, bool useStarterBuild)

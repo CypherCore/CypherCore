@@ -8068,4 +8068,28 @@ namespace Game.Entities
         public uint? InstanceId;
         public uint? LfgDungeonsId;
     }
+
+    public class PlayerSpellTrait
+    {
+        public int DefinitionId;
+        public int Rank;
+
+        public PlayerSpellTrait(int definitionId, int rank)
+        {
+            DefinitionId = definitionId;
+            Rank = rank;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PlayerSpellTrait trait &&
+                   DefinitionId == trait.DefinitionId &&
+                   Rank == trait.Rank;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(DefinitionId, Rank);
+        }
+    }
 }
