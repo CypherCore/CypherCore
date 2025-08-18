@@ -4672,6 +4672,18 @@ namespace Game.Entities
                 spellInfo._LoadSqrtTargetLimit(5, 0, 212431, 1, null, null);
             });
 
+            // Revival
+            ApplySpellFix([115310], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, null, 4, null, null);
+            });
+
+            // Restoral
+            ApplySpellFix([388615], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(5, 0, null, 4, null, null);
+            });
+
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
