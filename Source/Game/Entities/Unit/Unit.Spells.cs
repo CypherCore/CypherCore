@@ -8,8 +8,10 @@ using Game.BattleGrounds;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace Game.Entities
@@ -3197,24 +3199,17 @@ namespace Game.Entities
                 {
                     int[] damage = new int[SpellConst.MaxEffects];
                     int[] baseDamage = new int[SpellConst.MaxEffects];
-                    uint effMask = 0;
-                    uint recalculateMask = 0;
+                    BitSet effMask = new BitSet(SpellConst.MaxEffects);
+                    BitSet recalculateMask = new BitSet(SpellConst.MaxEffects);
                     Unit caster = aura.GetCaster();
-                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    foreach (AuraEffect aurEff in aura.GetAuraEffects())
                     {
-                        if (aura.GetEffect(i) != null)
-                        {
-                            baseDamage[i] = aura.GetEffect(i).GetBaseAmount();
-                            damage[i] = aura.GetEffect(i).GetAmount();
-                            effMask |= 1u << i;
-                            if (aura.GetEffect(i).CanBeRecalculated())
-                                recalculateMask |= 1u << i;
-                        }
-                        else
-                        {
-                            baseDamage[i] = 0;
-                            damage[i] = 0;
-                        }
+                        int i = (int)aurEff.GetEffIndex();
+                        baseDamage[i] = aurEff.GetBaseAmount();
+                        damage[i] = aurEff.GetAmount();
+                        effMask[i] = true;
+                        if (aurEff.CanBeRecalculated())
+                            recalculateMask[i] = true;
                     }
 
                     bool stealCharge = aura.GetSpellInfo().HasAttribute(SpellAttr7.DispelRemovesCharges);
@@ -3239,7 +3234,7 @@ namespace Game.Entities
                             if (aura.IsSingleTarget())
                                 aura.UnregisterSingleTarget();
 
-                            AuraCreateInfo createInfo = new(aura.GetCastId(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
+                            AuraCreateInfo createInfo = new(aura.GetCastId(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask.ToUInt(), stealer);
                             createInfo.SetCasterGUID(aura.GetCasterGUID());
                             createInfo.SetBaseAmount(baseDamage);
                             createInfo.SetStackAmount(stolenCharges);
@@ -3256,7 +3251,7 @@ namespace Game.Entities
                                     caster.GetSingleCastAuras().Add(aura);
                                 }
                                 // FIXME: using aura.GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
-                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? stolenCharges : aura.GetCharges(), recalculateMask, damage);
+                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? stolenCharges : aura.GetCharges(), recalculateMask.ToUInt(), damage);
                                 newAura.ApplyForTargets();
                             }
                         }
@@ -3478,10 +3473,10 @@ namespace Game.Entities
             if (aurApp.HasRemoveMode())
             {
                 // remove remaining effects of an aura
-                for (byte effectIndex = 0; effectIndex < SpellConst.MaxEffects; ++effectIndex)
+                foreach (AuraEffect aurEff in aurApp.GetBase().GetAuraEffects())
                 {
-                    if (aurApp.HasEffect(effectIndex))
-                        aurApp._HandleEffect(effectIndex, false);
+                    if (aurApp.HasEffect(aurEff.GetEffIndex()))
+                        aurApp._HandleEffect(aurEff.GetEffIndex(), false);
                 }
                 return;
             }
@@ -3903,11 +3898,9 @@ namespace Game.Entities
             aura._UnapplyForTarget(this, caster, aurApp);
 
             // remove effects of the spell - needs to be done after removing aura from lists
-            for (byte c = 0; c < SpellConst.MaxEffects; ++c)
-            {
-                if (aurApp.HasEffect(c))
-                    aurApp._HandleEffect(c, false);
-            }
+            foreach (AuraEffect aurEff in aura.GetAuraEffects())
+                if (aurApp.HasEffect(aurEff.GetEffIndex()))
+                    aurApp._HandleEffect(aurEff.GetEffIndex(), false);
 
             // all effect mustn't be applied
             Cypher.Assert(aurApp.GetEffectMask() == 0);
@@ -4152,10 +4145,14 @@ namespace Game.Entities
             aura.HandleAuraSpecificMods(aurApp, caster, true, false);
 
             // apply effects of the aura
-            for (byte i = 0; i < SpellConst.MaxEffects; i++)
+            foreach (AuraEffect aurEff in aura.GetAuraEffects())
             {
-                if (Convert.ToBoolean(effMask & 1 << i) && !(aurApp.HasRemoveMode()))
-                    aurApp._HandleEffect(i, true);
+                if ((effMask & 1 << (int)aurEff.GetEffIndex()) != 0)
+                {
+                    aurApp._HandleEffect(aurEff.GetEffIndex(), true);
+                    if (aurApp.GetRemoveMode() != 0)
+                        break;
+                }
             }
 
             Player player = ToPlayer();
@@ -4336,7 +4333,10 @@ namespace Game.Entities
                     if (diff == 0)
                     {
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                            diff += (long)((auraEffectMask & (1 << i)) >> i) - (long)((existingAurEff.GetBase().GetEffectMask() & (1 << i)) >> i);
+                        {
+                            // treat the aura with more effects as stronger
+                            diff = BitOperations.PopCount(auraEffectMask) - BitOperations.PopCount(existingAurEff.GetBase().GetEffectMask());
+                        }
                     }
 
                     if (diff > 0)
