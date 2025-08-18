@@ -293,6 +293,7 @@ namespace Game
 
             player.ResetMap();
             player.SetMap(newMap);
+            player.UpdatePositionData();
 
             ResumeToken resumeToken = new();
             resumeToken.SequenceIndex = player.m_movementCounter;
