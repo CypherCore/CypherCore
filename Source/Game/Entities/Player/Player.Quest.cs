@@ -2483,10 +2483,25 @@ namespace Game.Entities
 
             List<QuestObjective> updatedObjectives = new();
             Func<QuestObjective, bool> objectiveFilter = null;
-            if (boundItemFlagRequirement.HasValue)
-                objectiveFilter = boundItemFlagRequirement.Value ? QuestBoundItemFunc : NotQuestBoundItemFunc;
-
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(entry);
+            if (boundItemFlagRequirement.HasValue)
+            {
+                bool ignoresQuestBoundItemFlag = itemTemplate.Effects.Any(itemEffect =>
+                {
+                    return itemEffect.TriggerType != ItemSpelltriggerType.OnLooted && itemEffect.TriggerType != ItemSpelltriggerType.OnLootedForced;
+                });
+
+                if (boundItemFlagRequirement.HasValue)
+                {
+                    if (ignoresQuestBoundItemFlag)
+                        return;
+
+                    objectiveFilter = QuestBoundItemFunc;
+                }
+                else if (!ignoresQuestBoundItemFlag)
+                    objectiveFilter = NotQuestBoundItemFunc;
+            }
+
             UpdateQuestObjectiveProgress(QuestObjectiveType.Item, (int)itemTemplate.GetId(), count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
             if (itemTemplate.QuestLogItemId != 0 && (updatedObjectives.Count != 1 || !updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem)))
                 UpdateQuestObjectiveProgress(QuestObjectiveType.Item, itemTemplate.QuestLogItemId, count, ObjectGuid.Empty, updatedObjectives, objectiveFilter);
@@ -2498,7 +2513,7 @@ namespace Game.Entities
                 if (quest != null && quest.SourceItemId == entry)
                     return;
 
-                hadBoundItemObjective = updatedObjectives.Count == 1 && updatedObjectives[0].Flags2.HasFlag(QuestObjectiveFlags2.QuestBoundItem);
+                hadBoundItemObjective = true;
 
                 SendQuestUpdateAddItem(itemTemplate, updatedObjectives[0], (ushort)count);
             }
