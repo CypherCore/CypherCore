@@ -188,8 +188,10 @@ namespace Game.Achievements
                 case CriteriaType.HighestHealReceived:
                 case CriteriaType.AnyArtifactPowerRankPurchased:
                 case CriteriaType.AzeriteLevelReached:
-                case CriteriaType.ReachRenownLevel:
                     SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
+                    break;
+                case CriteriaType.ReachRenownLevel:
+                    SetCriteriaProgress(criteria, miscValue2, referencePlayer, ProgressType.Highest);
                     break;
                 case CriteriaType.ReachLevel:
                     SetCriteriaProgress(criteria, referencePlayer.GetLevel(), referencePlayer);
