@@ -2908,7 +2908,6 @@ namespace Game.Entities
             {
                 data.WriteBits(Name[i].GetByteCount(), 10);
             }
-            data.FlushBits();
             for (int i = 0; i < 5; ++i)
             {
                 data.WriteString(Name[i]);
@@ -2926,7 +2925,6 @@ namespace Game.Entities
             if (changesMask.GetBlock(0) != 0)
                 data.WriteBits(changesMask.GetBlock(0), 32);
 
-            data.FlushBits();
             if (changesMask[0])
             {
                 for (int i = 0; i < 5; ++i)
@@ -5541,7 +5539,6 @@ namespace Game.Entities
 
             data.WriteBits(changesMask.GetBlock(0), 4);
 
-            data.FlushBits();
             if (changesMask[0])
             {
                 data.WriteBits(Name.Size(), 7);
@@ -5554,6 +5551,7 @@ namespace Game.Entities
             {
                 data.WriteBits(Description.Size(), 14);
             }
+            data.FlushBits();
             if (changesMask[3])
             {
                 data.WriteInt32(DepositFlags);
