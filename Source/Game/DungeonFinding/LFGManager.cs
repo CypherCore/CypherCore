@@ -1339,9 +1339,9 @@ namespace Game.DungeonFinding
         /// Check if dungeon can be rewarded, if any.
         /// </summary>
         /// <param name="gguid">Group guid</param>
-        /// <param name="dungeonEncounterIds">DungeonEncounter that was just completed</param>
+        /// <param name="dungeonEncounters">DungeonEncounter that was just completed</param>
         /// <param name="currMap">Map of the instance where encounter was completed</param>
-        public void OnDungeonEncounterDone(ObjectGuid gguid, uint[] dungeonEncounterIds, Map currMap)
+        public void OnDungeonEncounterDone(ObjectGuid gguid, uint[] dungeonEncounters, Map currMap)
         {
             if (GetState(gguid) == LfgState.FinishedDungeon) // Shouldn't happen. Do not reward multiple times
             {
@@ -1352,7 +1352,7 @@ namespace Game.DungeonFinding
             uint gDungeonId = GetDungeon(gguid);
             LFGDungeonData dungeonDone = GetLFGDungeon(gDungeonId);
             // LFGDungeons can point to a DungeonEncounter from any difficulty so we need this kind of lenient check
-            if (dungeonDone.finalDungeonEncounterId == 0 || !dungeonEncounterIds.Contains(dungeonDone.finalDungeonEncounterId))
+            if (dungeonDone.finalDungeonEncounterId == 0 || !dungeonEncounters.Contains(dungeonDone.finalDungeonEncounterId))
                 return;
 
             FinishDungeon(gguid, gDungeonId, currMap);

@@ -138,8 +138,9 @@ namespace Game.Maps
         void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
         {
             if (bossId < bosses.Count)
-                for (int i = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
-                    bosses[bossId].DungeonEncounters[i] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
+                for (int i = 0, j = 0; i < dungeonEncounterIds.Length && i < MapConst.MaxDungeonEncountersPerBoss; ++i)
+                    if (dungeonEncounterIds[i] != 0)
+                        bosses[bossId].DungeonEncounters[j++] = CliDB.DungeonEncounterStorage.LookupByKey(dungeonEncounterIds[i]);
         }
 
         public virtual void UpdateDoorState(GameObject door)
@@ -724,10 +725,9 @@ namespace Game.Maps
 
         public bool IsEncounterCompleted(uint dungeonEncounterId)
         {
-            for (uint i = 0; i < bosses.Count; ++i)
-                for (var j = 0; j < bosses[i].DungeonEncounters.Length; ++j)
-                    if (bosses[i].DungeonEncounters[j] != null && bosses[i].DungeonEncounters[j].Id == dungeonEncounterId)
-                        return bosses[i].state == EncounterState.Done;
+            foreach (var (_, boss) in bosses)
+                if (boss.DungeonEncounters.Any(p => p.Id == dungeonEncounterId))
+                    return boss.state == EncounterState.Done;
 
             return false;
         }
