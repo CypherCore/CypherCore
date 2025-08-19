@@ -1126,7 +1126,9 @@ namespace Game.Entities
             PhasingHandler.InitDbPhaseShift(GetPhaseShift(), data.PhaseUseFlags, data.PhaseId, data.PhaseGroup);
             PhasingHandler.InitDbVisibleMapId(GetPhaseShift(), data.terrainSwapMap);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.StateWorldEffectsQuestObjectiveID), data != null ? data.spawnTrackingQuestObjectiveId : 0);
+            // Set StateWorldEffectsQuestObjectiveID if there is only one linked objective for this gameobject
+            if (data != null && data.spawnTrackingQuestObjectives.Count == 1)
+                SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.StateWorldEffectsQuestObjectiveID), data.spawnTrackingQuestObjectives.First());
 
             if (data.spawntimesecs >= 0)
             {
@@ -2741,9 +2743,9 @@ namespace Game.Entities
             GameObjectData data = GetGameObjectData();
             if (data != null)
             {
-                if (data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
+                if (data.spawnTrackingData != null && !data.spawnTrackingQuestObjectives.Empty())
                 {
-                    SpawnTrackingState state = player.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId);
+                    SpawnTrackingState state = player.GetSpawnTrackingStateByObjectives(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectives);
                     return data.spawnTrackingStates[(int)state];
                 }
             }

@@ -338,7 +338,9 @@ namespace Game.Entities
 
             ReplaceAllDynamicFlags(UnitDynFlags.None);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateWorldEffectsQuestObjectiveID), data != null ? data.spawnTrackingQuestObjectiveId : 0);
+            // Set StateWorldEffectsQuestObjectiveID if there is only one linked objective for this creature
+            if (data != null && data.spawnTrackingQuestObjectives.Count == 1)
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateWorldEffectsQuestObjectiveID), data.spawnTrackingQuestObjectives.First());
 
             SetCanDualWield(cInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
@@ -3033,9 +3035,9 @@ namespace Game.Entities
             CreatureData data = GetCreatureData();
             if (data != null)
             {
-                if (data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
+                if (data.spawnTrackingData != null && !data.spawnTrackingQuestObjectives.Empty())
                 {
-                    SpawnTrackingState state = player.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId);
+                    SpawnTrackingState state = player.GetSpawnTrackingStateByObjectives(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectives);
                     return data.spawnTrackingStates[(int)state];
                 }
             }

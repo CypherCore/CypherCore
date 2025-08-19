@@ -60,7 +60,7 @@ namespace Game.Maps
         public bool dbData = true;
         public SpawnGroupTemplateData spawnGroupData;
         public SpawnTrackingTemplateData spawnTrackingData;
-        public uint spawnTrackingQuestObjectiveId;
+        public List<uint> spawnTrackingQuestObjectives = new();
         public SpawnTrackingStateData[] spawnTrackingStates = new SpawnTrackingStateData[(int)SpawnTrackingState.Max];
 
         public static bool TypeInMask(SpawnObjectType type, SpawnObjectTypeMask mask) { return ((1 << (int)type) & (int)mask) != 0; }

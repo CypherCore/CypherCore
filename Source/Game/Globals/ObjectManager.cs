@@ -9264,8 +9264,8 @@ namespace Game
             // need for reload case
             _spawnTrackingMapStorage.Clear();
 
-            //                                               0                1          2        3
-            SQLResult result = DB.World.Query("SELECT SpawnTrackingId, SpawnType, SpawnId, QuestObjectiveId FROM spawn_tracking");
+            //                                         0                1          2        3
+            SQLResult result = DB.World.Query("SELECT SpawnTrackingId, SpawnType, SpawnId, QuestObjectiveIds FROM spawn_tracking");
 
             if (result.IsEmpty())
             {
@@ -9280,7 +9280,6 @@ namespace Game
                 uint spawnTrackingId = result.Read<uint>(0);
                 SpawnObjectType spawnType = (SpawnObjectType)result.Read<byte>(1);
                 ulong spawnId = result.Read<ulong>(2);
-                uint objectiveId = result.Read<uint>(3);
 
                 if (!SpawnData.TypeIsValid(spawnType))
                 {
@@ -9312,12 +9311,6 @@ namespace Game
                     continue;
                 }
 
-                if (!IsQuestObjectiveForSpawnTracking(spawnTrackingId, objectiveId))
-                {
-                    Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} assigned to spawn ({spawnType},{spawnId}), but spawn tracking is not linked to quest objective {objectiveId}. Skipped.");
-                    continue;
-                }
-
                 if (spawnTrackingTemplateData.MapId != data.MapId)
                 {
                     Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} (map {spawnTrackingTemplateData.MapId}) assigned to spawn ({spawnType},{spawnId}), but spawn has map {data.MapId} - spawn NOT added to spawn tracking!");
@@ -9332,8 +9325,33 @@ namespace Game
                     continue;
                 }
 
+                List<uint> objectiveList = new();
+                string objectivesStr = result.Read<string>(3);
+                if (!objectivesStr.IsEmpty())
+                {
+                    foreach (var objectiveStr in objectivesStr.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        if (!uint.TryParse(objectiveStr, out uint objectiveId))
+                            continue;
+
+                        if (!IsQuestObjectiveForSpawnTracking(spawnTrackingId, objectiveId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} assigned to spawn ({spawnType},{spawnId}), but spawn tracking is not linked to quest objective {objectiveId}. Skipped.");
+                            continue;
+                        }
+
+                        objectiveList.Add(objectiveId);
+                    }
+
+                    if (objectiveList.Empty())
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `spawn_tracking` has spawn tracking {spawnTrackingId} assigned to spawn ({spawnType},{spawnId}), but spawn tracking is not linked to any quest objective - spawn NOT added to spawn tracking!");
+                        continue;
+                    }
+                }
+
                 data.spawnTrackingData = spawnTrackingTemplateData;
-                data.spawnTrackingQuestObjectiveId = objectiveId;
+                data.spawnTrackingQuestObjectives = objectiveList;
                 _spawnTrackingMapStorage.Add(spawnTrackingId, data);
 
                 ++count;
@@ -9435,7 +9453,7 @@ namespace Game
 
                         if (!CliDB.WorldEffectStorage.HasRecord(worldEffectId))
                         {
-                            Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` references invalid StateAnimKitId {worldEffectId} for spawn ({spawnType},{spawnId}). Skipped.");
+                            Log.outError(LogFilter.Sql, $"Table `spawn_tracking_state` references invalid WorldEffectId {worldEffectId} for spawn ({spawnType},{spawnId}). Skipped.");
                             continue;
                         }
 

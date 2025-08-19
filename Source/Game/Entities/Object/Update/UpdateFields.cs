@@ -9,6 +9,7 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -166,8 +167,8 @@ namespace Game.Entities
                             dynFlags |= (uint)GameObjectDynamicLowFlags.NoInterract;
 
                         var data = Global.ObjectMgr.GetSpawnMetadata(SpawnObjectType.GameObject, gameObject.GetSpawnId());
-                        if (data != null && data.spawnTrackingQuestObjectiveId != 0 && data.spawnTrackingData != null)
-                            if (receiver.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectiveId) != SpawnTrackingState.Active)
+                        if (data.spawnTrackingData != null && !data.spawnTrackingQuestObjectives.Empty())
+                            if (receiver.GetSpawnTrackingStateByObjectives(data.spawnTrackingData.SpawnTrackingId, data.spawnTrackingQuestObjectives) != SpawnTrackingState.Active)
                                 dynFlags &= ~(uint)GameObjectDynamicLowFlags.Activate;
                     }
 
@@ -1295,7 +1296,7 @@ namespace Game.Entities
 
             var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
             data.WriteInt32(stateWorldEffectIDs.Count);
-            data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
+            data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
             data.WriteInt32(SpellOverrideNameID);
             for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
                 data.WriteUInt32(stateWorldEffectIDs[i]);
@@ -1623,7 +1624,7 @@ namespace Game.Entities
                 }
                 if (changesMask[12])
                 {
-                    data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
+                    data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
                 }
                 if (changesMask[13])
                 {
@@ -2573,6 +2574,36 @@ namespace Game.Entities
             }
 
             return stateAnimKitId;
+        }
+
+        uint GetViewerDependentStateWorldEffectsQuestObjectiveID(UnitData unitData, Unit unit, Player receiver)
+        {
+            uint stateWorldEffectsQuestObjectiveId = unitData.StateWorldEffectsQuestObjectiveID;
+
+            if (stateWorldEffectsQuestObjectiveId == 0 && unit.IsCreature())
+            {
+                CreatureData data = unit.ToCreature().GetCreatureData();
+                if (data != null)
+                {
+                    if (data.spawnTrackingQuestObjectives.Any())
+                    {
+                        // If there is no valid objective for player, fill UF with first objective (if any)
+                        stateWorldEffectsQuestObjectiveId = data.spawnTrackingQuestObjectives.First();
+                        int i = 0;
+                        while (++i <= data.spawnTrackingQuestObjectives.Count)
+                        {
+                            var id = data.spawnTrackingQuestObjectives[i];
+                            if (receiver.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, id) != SpawnTrackingState.Active)
+                                continue;
+
+                            stateWorldEffectsQuestObjectiveId = id;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return stateWorldEffectsQuestObjectiveId;
         }
     }
 
@@ -7640,7 +7671,7 @@ namespace Game.Entities
             data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, owner, receiver));
             var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
             data.WriteInt32(stateWorldEffectIDs.Count);
-            data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
+            data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
             for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
             {
                 data.WriteUInt32(stateWorldEffectIDs[i]);
@@ -7762,7 +7793,7 @@ namespace Game.Entities
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(StateWorldEffectsQuestObjectiveID);
+                    data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
                 }
                 if (changesMask[10])
                 {
@@ -7918,6 +7949,36 @@ namespace Game.Entities
             return stateAnimKitId;
         }
 
+        uint GetViewerDependentStateWorldEffectsQuestObjectiveID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        {
+            uint stateWorldEffectsQuestObjectiveId = gameObjectData.StateWorldEffectsQuestObjectiveID;
+
+            if (stateWorldEffectsQuestObjectiveId == 0)
+            {
+                GameObjectData data = gameObject.GetGameObjectData();
+                if (data != null)
+                {
+                    if (data.spawnTrackingQuestObjectives.Any())
+                    {
+                        // If there is no valid objective for player, fill UF with first objective (if any)
+                        stateWorldEffectsQuestObjectiveId = data.spawnTrackingQuestObjectives.First();
+                        int i = 0;
+                        while (++i <= data.spawnTrackingQuestObjectives.Count)
+                        {
+                            var id = data.spawnTrackingQuestObjectives[i];
+                            if (receiver.GetSpawnTrackingStateByObjective(data.spawnTrackingData.SpawnTrackingId, id) != SpawnTrackingState.Active)
+                                continue;
+
+                            stateWorldEffectsQuestObjectiveId = id;
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+            return stateWorldEffectsQuestObjectiveId;
+        }
     }
 
     public class DynamicObjectData : HasChangesMask

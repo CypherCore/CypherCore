@@ -854,7 +854,7 @@ namespace Game
                 responseInfo.ObjectID = requestInfo.ObjectID;
 
                 var spawnTrackingTemplateData = Global.ObjectMgr.GetSpawnTrackingData(requestInfo.SpawnTrackingID);
-                QuestObjective activeQuestObjective = _player.GetActiveQuestObjectiveForForSpawnTracking(requestInfo.SpawnTrackingID);
+                QuestObjective activeQuestObjective = _player.GetActiveQuestObjectiveForSpawnTracking(requestInfo.SpawnTrackingID);
 
                 // Send phase info if map is the same or spawn tracking related quests are taken or completed
                 if (spawnTrackingTemplateData != null && (_player.GetMapId() == spawnTrackingTemplateData.MapId || activeQuestObjective != null))
@@ -881,7 +881,7 @@ namespace Game
 
                             if (activeQuestObjective != null)
                             {
-                                SpawnTrackingState state = _player.GetSpawnTrackingStateByObjective(requestInfo.SpawnTrackingID, activeQuestObjective.Id);
+                                SpawnTrackingState state = _player.GetSpawnTrackingStateByObjectives(requestInfo.SpawnTrackingID, data.spawnTrackingQuestObjectives);
                                 responseInfo.Visible = data.spawnTrackingStates[(int)state].Visible;
                                 break;
                             }
