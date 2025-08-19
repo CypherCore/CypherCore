@@ -187,7 +187,13 @@ namespace Game.Chat
                     case 'c':
                     case 'C':
                         // skip color
-                        i += 9;
+                        if (i + 2 >= source.Length)
+                            break;
+
+                        if (source[i + 2] == 'n')
+                            i = source.IndexOf(':', i); // numeric color id
+                        else
+                            i += 9;
                         break;
                     case 'r':
                         ++i;
@@ -232,7 +238,12 @@ namespace Game.Chat
 
         static char upper_backslash(char c)
         {
-            return c == '/' ? '\\' : char.ToUpper(c);
+            if (c == '/')
+                return '\\';
+            if (c >= 'a' && c <= 'z')
+                return (char)('A' + (char)(c - 'a'));
+            else
+                return c;
         }
 
         static uint[] s_hashtable =
