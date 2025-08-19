@@ -1352,7 +1352,7 @@ namespace Game.DungeonFinding
             uint gDungeonId = GetDungeon(gguid);
             LFGDungeonData dungeonDone = GetLFGDungeon(gDungeonId);
             // LFGDungeons can point to a DungeonEncounter from any difficulty so we need this kind of lenient check
-            if (!dungeonEncounterIds.Contains(dungeonDone.finalDungeonEncounterId))
+            if (dungeonDone.finalDungeonEncounterId == 0 || !dungeonEncounterIds.Contains(dungeonDone.finalDungeonEncounterId))
                 return;
 
             FinishDungeon(gguid, gDungeonId, currMap);
