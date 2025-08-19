@@ -27,8 +27,11 @@ namespace Game
 
             var oldMSTime = Time.GetMSTime();
 
-            //                                          0       1         2      3
-            SQLResult result = DB.World.Query("SELECT  PathId, MoveType, Flags, Velocity FROM waypoint_path");
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH);
+            stmt.AddValue(0, 0);
+            stmt.AddValue(1, 1);
+
+            SQLResult result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint paths. DB table `waypoint_path` is empty!");
@@ -39,7 +42,7 @@ namespace Game
 
             do
             {
-                LoadPathFromDB(result.GetFields());
+                LoadPathFromDB(result);
                 ++count;
             } while (result.NextRow());
 
@@ -50,8 +53,11 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0       1          2          3          4            5      6
-            SQLResult result = DB.World.Query("SELECT PathId, NodeId, PositionX, PositionY, PositionZ, Orientation, Delay FROM waypoint_path_node ORDER BY PathId, NodeId");
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE);
+            stmt.AddValue(0, 0);
+            stmt.AddValue(1, 1);
+
+            SQLResult result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 waypoint path nodes. DB table `waypoint_path_node` is empty!");
@@ -62,7 +68,7 @@ namespace Game
 
             do
             {
-                LoadPathNodesFromDB(result.GetFields());
+                LoadPathNodesFromDB(result);
                 ++count;
             }
             while (result.NextRow());
@@ -70,12 +76,12 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} waypoint path nodes in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        void LoadPathFromDB(SQLFields fields)
+        void LoadPathFromDB(SQLResult result)
         {
-            uint pathId = fields.Read<uint>(0);
+            uint pathId = result.Read<uint>(0);
 
             WaypointPath path = new();
-            path.MoveType = (WaypointMoveType)fields.Read<byte>(1);
+            path.MoveType = (WaypointMoveType)result.Read<byte>(1);
 
             if (path.MoveType >= WaypointMoveType.Max)
             {
@@ -84,11 +90,11 @@ namespace Game
             }
 
             path.Id = pathId;
-            path.Flags = (WaypointPathFlags)fields.Read<byte>(2);
+            path.Flags = (WaypointPathFlags)result.Read<byte>(2);
 
-            if (!fields.IsNull(3))
+            if (!result.IsNull(3))
             {
-                float velocity = fields.Read<float>(3);
+                float velocity = result.Read<float>(3);
                 if (velocity > 0.0f)
                     path.Velocity = velocity;
                 else
@@ -100,9 +106,9 @@ namespace Game
             _pathStorage.Add(pathId, path);
         }
 
-        void LoadPathNodesFromDB(SQLFields fields)
+        void LoadPathNodesFromDB(SQLResult result)
         {
-            uint pathId = fields.Read<uint>(0);
+            uint pathId = result.Read<uint>(0);
 
             if (!_pathStorage.ContainsKey(pathId))
             {
@@ -110,22 +116,22 @@ namespace Game
                 return;
             }
 
-            float x = fields.Read<float>(2);
-            float y = fields.Read<float>(3);
-            float z = fields.Read<float>(4);
+            float x = result.Read<float>(2);
+            float y = result.Read<float>(3);
+            float z = result.Read<float>(4);
             float? o = null;
-            if (!fields.IsNull(5))
-                o = fields.Read<float>(5);
+            if (!result.IsNull(5))
+                o = result.Read<float>(5);
 
             TimeSpan delay = default;
-            uint delayMs = fields.Read<uint>(6);
+            uint delayMs = result.Read<uint>(6);
             if (delayMs != 0)
                 delay = TimeSpan.FromMilliseconds(delayMs);
 
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new(fields.Read<uint>(1), x, y, z, o, delay);
+            WaypointNode waypoint = new(result.Read<uint>(1), x, y, z, o, delay);
             _pathStorage[pathId].Nodes.Add(waypoint);
         }
 
@@ -146,8 +152,10 @@ namespace Game
         public void ReloadPath(uint pathId)
         {
             // waypoint_path
-            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_BY_PATHID);
+            PreparedStatement stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH);
             stmt.AddValue(0, pathId);
+            stmt.AddValue(1, 0);
+
             SQLResult result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
@@ -157,12 +165,13 @@ namespace Game
 
             do
             {
-                LoadPathFromDB(result.GetFields());
+                LoadPathFromDB(result);
             } while (result.NextRow());
 
             // waypoint_path_data
-            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE_BY_PATHID);
+            stmt = WorldDatabase.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_PATH_NODE);
             stmt.AddValue(0, pathId);
+            stmt.AddValue(1, 0);
 
             result = DB.World.Query(stmt);
             if (result.IsEmpty())
@@ -173,7 +182,7 @@ namespace Game
 
             do
             {
-                LoadPathNodesFromDB(result.GetFields());
+                LoadPathNodesFromDB(result);
             } while (result.NextRow());
 
             WaypointPath path = _pathStorage.LookupByKey(pathId);
