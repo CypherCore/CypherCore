@@ -2767,16 +2767,17 @@ namespace Game.Entities
             if (source == null)
                 return;
 
+            // If there is only one quest available (and no gossip options), send quest info
             if (source.IsTypeId(TypeId.Unit) || source.IsTypeId(TypeId.GameObject))
             {
-                if (PlayerTalkClass.GetGossipMenu().IsEmpty() && !PlayerTalkClass.GetQuestMenu().IsEmpty())
+                if (PlayerTalkClass.GetGossipMenu().IsEmpty() && PlayerTalkClass.GetQuestMenu().GetMenuItemCount() == 1)
                 {
                     SendPreparedQuest(source);
                     return;
                 }
             }
 
-            // in case non empty gossip menu (that not included quests list size) show it
+            // In case non empty gossip menu or quest menu count > 1, show it
             // (quest entries from quest menu will be included in list)
 
             uint textId = GetGossipTextId(source);

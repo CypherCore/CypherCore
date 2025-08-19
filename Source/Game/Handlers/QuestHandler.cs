@@ -56,8 +56,8 @@ namespace Game
             if (creature.GetAI().OnGossipHello(_player))
                 return;
 
-            GetPlayer().PrepareGossipMenu(creature, _player.GetGossipMenuForSource(creature), true);
-            GetPlayer().SendPreparedGossip(creature);
+            _player.PrepareQuestMenu(creature.GetGUID());
+            _player.SendPreparedQuest(creature);
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverAcceptQuest, Processing = PacketProcessing.Inplace)]
