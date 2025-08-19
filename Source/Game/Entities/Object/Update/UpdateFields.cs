@@ -4831,7 +4831,7 @@ namespace Game.Entities
         public UpdateField<int> Field_0 = new(0, 2);
         public UpdateField<ulong> OrderID = new(0, 3);
         public UpdateField<int> SkillLineAbilityID = new(0, 4);
-        public UpdateField<byte> OrderState = new(0, 5);
+        public UpdateField<int> OrderState = new(0, 5);
         public UpdateField<byte> OrderType = new(6, 7);
         public UpdateField<byte> MinQuality = new(6, 8);
         public UpdateField<long> ExpirationTime = new(6, 9);
@@ -4856,7 +4856,7 @@ namespace Game.Entities
             data.WriteInt32(Field_0);
             data.WriteUInt64(OrderID);
             data.WriteInt32(SkillLineAbilityID);
-            data.WriteUInt8(OrderState);
+            data.WriteInt32(OrderState);
             data.WriteUInt8(OrderType);
             data.WriteUInt8(MinQuality);
             data.WriteInt64(ExpirationTime);
@@ -4944,7 +4944,7 @@ namespace Game.Entities
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt8(OrderState);
+                    data.WriteInt32(OrderState);
                 }
             }
             if (changesMask[6])
@@ -6854,6 +6854,10 @@ namespace Game.Entities
                         }
                     }
                 }
+            }
+            data.FlushBits();
+            if (changesMask[32])
+            {
                 if (changesMask[41])
                 {
                     if (!ignoreNestedChangesMask)
@@ -6862,6 +6866,7 @@ namespace Game.Entities
                         WriteCompleteDynamicFieldUpdateMask(AccountBankTabSettings.Size(), data, 3);
                 }
             }
+            data.FlushBits();
             if (changesMask[0])
             {
                 if (changesMask[10])
