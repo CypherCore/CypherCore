@@ -5899,9 +5899,7 @@ namespace Game.Spells
                 if (bitIndex < 0 || bitIndex >= sizeof(uint) * 8)
                     return false;
 
-                FlagArray128 reqFlag = new();
-                reqFlag[bitIndex / 32] = 1u << (bitIndex % 32);
-                return (spellOnCooldown.SpellFamilyFlags & reqFlag);
+                return (spellOnCooldown.SpellFamilyFlags[bitIndex / 32] & 1u << (bitIndex % 32)) != 0;
             }, TimeSpan.FromMilliseconds(damage));
         }
 
@@ -6002,6 +6000,58 @@ namespace Game.Spells
                 return;
 
             target.GetSession().GetCollectionMgr().AddWarbandScene((uint)effectInfo.MiscValue);
+        }
+
+        [SpellEffectHandler(SpellEffectName.SetPlayerDataElementAccount)]
+        void EffectSetPlayerDataElementAccount()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            target.SetDataElementAccount((uint)effectInfo.MiscValue, (long)damage);
+        }
+
+        [SpellEffectHandler(SpellEffectName.SetPlayerDataElementCharacter)]
+        void EffectSetPlayerDataElementCharacter()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            target.SetDataElementCharacter((uint)effectInfo.MiscValue, (long)damage);
+        }
+
+        [SpellEffectHandler(SpellEffectName.SetPlayerDataFlagAccount)]
+        void EffectSetPlayerDataFlagAccount()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            target.SetDataFlagAccount((uint)effectInfo.MiscValue, damage != 0);
+        }
+
+        [SpellEffectHandler(SpellEffectName.SetPlayerDataFlagCharacter)]
+        void EffectSetPlayerDataFlagCharacter()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            target.SetDataFlagCharacter((uint)effectInfo.MiscValue, damage != 0);
         }
     }
 

@@ -3804,6 +3804,7 @@ namespace Game.Entities
                 data.WriteInt64(Int64Value);
             }
         }
+
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
         {
             data.WriteUInt32(Type);

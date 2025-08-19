@@ -1969,6 +1969,12 @@ namespace Framework.Constants
         GearDiff = 8
     }
 
+    public enum PlayerDataElementType
+    {
+        Int64 = 0,
+        Float = 1
+    }
+
     public enum PlayerInteractionType
     {
         None = 0,

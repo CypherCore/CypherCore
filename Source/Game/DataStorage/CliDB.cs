@@ -264,6 +264,10 @@ namespace Game.DataStorage
             PhaseStorage = ReadDB2<PhaseRecord>("Phase.db2", HotfixStatements.SEL_PHASE);
             PhaseXPhaseGroupStorage = ReadDB2<PhaseXPhaseGroupRecord>("PhaseXPhaseGroup.db2", HotfixStatements.SEL_PHASE_X_PHASE_GROUP);
             PlayerConditionStorage = ReadDB2<PlayerConditionRecord>("PlayerCondition.db2", HotfixStatements.SEL_PLAYER_CONDITION, HotfixStatements.SEL_PLAYER_CONDITION_LOCALE);
+            PlayerDataElementAccountStorage = ReadDB2<PlayerDataElementAccountRecord>("PlayerDataElementAccount.db2", HotfixStatements.SEL_PLAYER_DATA_ELEMENT_ACCOUNT);
+            PlayerDataElementCharacterStorage = ReadDB2<PlayerDataElementCharacterRecord>("PlayerDataElementCharacter.db2", HotfixStatements.SEL_PLAYER_DATA_ELEMENT_CHARACTER);
+            PlayerDataFlagAccountStorage = ReadDB2<PlayerDataFlagAccountRecord>("PlayerDataFlagAccount.db2", HotfixStatements.SEL_PLAYER_DATA_FLAG_ACCOUNT);
+            PlayerDataFlagCharacterStorage = ReadDB2<PlayerDataFlagCharacterRecord>("PlayerDataFlagCharacter.db2", HotfixStatements.SEL_PLAYER_DATA_FLAG_CHARACTER);
             PowerDisplayStorage = ReadDB2<PowerDisplayRecord>("PowerDisplay.db2", HotfixStatements.SEL_POWER_DISPLAY);
             PowerTypeStorage = ReadDB2<PowerTypeRecord>("PowerType.db2", HotfixStatements.SEL_POWER_TYPE);
             PrestigeLevelInfoStorage = ReadDB2<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
@@ -396,7 +400,7 @@ namespace Game.DataStorage
             WMOAreaTableStorage = ReadDB2<WMOAreaTableRecord>("WMOAreaTable.db2", HotfixStatements.SEL_WMO_AREA_TABLE, HotfixStatements.SEL_WMO_AREA_TABLE_LOCALE);
             WorldEffectStorage = ReadDB2<WorldEffectRecord>("WorldEffect.db2", HotfixStatements.SEL_WORLD_EFFECT);
             WorldMapOverlayStorage = ReadDB2<WorldMapOverlayRecord>("WorldMapOverlay.db2", HotfixStatements.SEL_WORLD_MAP_OVERLAY);
-            WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);           
+            WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
             // Check loaded DB2 files proper version
             if (!AreaTableStorage.ContainsKey(16108) ||               // last area added in 11.0.7 (58162)
@@ -664,6 +668,10 @@ namespace Game.DataStorage
         public static DB6Storage<PhaseRecord> PhaseStorage;
         public static DB6Storage<PhaseXPhaseGroupRecord> PhaseXPhaseGroupStorage;
         public static DB6Storage<PlayerConditionRecord> PlayerConditionStorage;
+        public static DB6Storage<PlayerDataElementAccountRecord> PlayerDataElementAccountStorage;
+        public static DB6Storage<PlayerDataElementCharacterRecord> PlayerDataElementCharacterStorage;
+        public static DB6Storage<PlayerDataFlagAccountRecord> PlayerDataFlagAccountStorage;
+        public static DB6Storage<PlayerDataFlagCharacterRecord> PlayerDataFlagCharacterStorage;
         public static DB6Storage<PowerDisplayRecord> PowerDisplayStorage;
         public static DB6Storage<PowerTypeRecord> PowerTypeStorage;
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;

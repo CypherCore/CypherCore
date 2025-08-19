@@ -22,6 +22,7 @@ namespace Framework.Constants
 
         public const int ExploredZonesSize = 240;
         public const int ExploredZonesBits = sizeof(ulong) * 8;
+        public const int DataFlagValueBits = sizeof(ulong) * 8;
 
         public const ulong MaxMoneyAmount = 99999999999UL;
         public const int MaxActionButtons = 180;

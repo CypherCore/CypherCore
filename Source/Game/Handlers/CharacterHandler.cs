@@ -2958,6 +2958,14 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_TRAIT_CONFIGS);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.TraitConfigs, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_DATA_ELEMENTS_CHARACTER);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.DataElements, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_DATA_FLAGS_CHARACTER);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.DataFlags, stmt);
         }
 
         public ObjectGuid GetGuid() { return m_guid; }
@@ -3064,6 +3072,8 @@ namespace Game
         GarrisonFollowerAbilities,
         TraitEntries,
         TraitConfigs,
+        DataElements,
+        DataFlags,
         Max
     }
 

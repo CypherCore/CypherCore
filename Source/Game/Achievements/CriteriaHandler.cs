@@ -3713,6 +3713,14 @@ namespace Game.Achievements
                     if (referencePlayer.GetPositionZ() >= reqValue)
                         return false;
                     break;
+                case ModifierTreeType.PlayerDataFlagAccountIsSet: // 378
+                    if (!referencePlayer.HasDataFlagAccount(reqValue))
+                        return false;
+                    break;
+                case ModifierTreeType.PlayerDataFlagCharacterIsSet: // 379
+                    if (!referencePlayer.HasDataFlagCharacter(reqValue))
+                        return false;
+                    break;
                 case ModifierTreeType.PlayerIsOnMapWithExpansion: // 380
                 {
                     var mapEntry = referencePlayer.GetMap().GetEntry();
@@ -3746,6 +3754,16 @@ namespace Game.Achievements
                     if (targetCreature.GetCreatureClassification() != (CreatureClassifications)reqValue)
                         return false;
                     break;
+                }
+                case ModifierTreeType.PlayerDataElementCharacterBetween: // 390
+                {
+                    var value = referencePlayer.GetDataElementCharacter(reqValue);
+                    return value >= secondaryAsset && value <= tertiaryAsset;
+                }
+                case ModifierTreeType.PlayerDataElementAccountBetween: // 391
+                {
+                    var value = referencePlayer.GetDataElementAccount(reqValue);
+                    return value >= secondaryAsset && value <= tertiaryAsset;             
                 }
                 case ModifierTreeType.PlayerHasCompletedQuestOrIsReadyToTurnIn: // 392
                 {

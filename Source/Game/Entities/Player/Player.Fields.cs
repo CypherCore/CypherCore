@@ -253,6 +253,9 @@ namespace Game.Entities
 
         PlayerCommandStates _activeCheats;
 
+        List<uint> _playerDataElementsNeedSave = new();
+        List<uint> _playerDataFlagsNeedSave = new();
+
         class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
         {
             Player Owner;

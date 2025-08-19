@@ -2620,7 +2620,7 @@ namespace Framework.Constants
         CraftItem = 288, // Miscvalue[0] = Craftingdataid
         ModifyAuraStacks = 289, // Miscvalue[0] = 0 Means Add, = 1 Means Set
         ModifyCooldown = 290,
-        ModifyCooldowns = 291, // Miscvalue[0] = Spellfamily, Miscvalue[1] = Maybe Bit Index For Family Flags? Off By 1 For The Only Spell Using This Effect
+        ModifyCooldowns = 291, // Miscvalue[0] = Spellfamily, Miscvalue[1] = bit index for family flags
         ModifyCooldownsByCategory = 292, // Miscvalue[0] = Category
         ModifyCharges = 293, // Miscvalue[0] = Charge Category
         CraftLoot = 294, // Miscvalue[0] = Craftingdataid
@@ -2664,10 +2664,10 @@ namespace Framework.Constants
         Unk332 = 332,
         Unk333 = 333,
         Unk334 = 334,
-        Unk335 = 335,
-        Unk336 = 336,
-        Unk337 = 337,
-        Unk338 = 338,
+        SetPlayerDataElementAccount = 335, // MiscValue[0] = PlayerDataElementAccount
+        SetPlayerDataElementCharacter = 336, // MiscValue[0] = PlayerDataElementCharacter
+        SetPlayerDataFlagAccount = 337, // MiscValue[0] = PlayerDataFlagAccount
+        SetPlayerDataFlagCharacter = 338, // MiscValue[0] = PlayerDataFlagCharacter
         UiAction = 339,
         Unk340 = 340,
         LearnWarbanScene = 341,

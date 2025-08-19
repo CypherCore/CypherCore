@@ -5027,7 +5027,7 @@ namespace Game.Entities
                     reward.Money = playerChoiceResponseTemplate.Reward.Money;
                     reward.Xp = playerChoiceResponseTemplate.Reward.Xp;
 
-                    void fillRewardItems<T>(List<T> src, List<Networking.Packets.PlayerChoiceResponseRewardEntry>  dest)
+                    void fillRewardItems<T>(List<T> src, List<Networking.Packets.PlayerChoiceResponseRewardEntry> dest)
                     {
                         for (var j = 0; j < src.Count; ++j)
                         {
@@ -5075,6 +5075,176 @@ namespace Game.Entities
         public bool MeetPlayerCondition(uint conditionId)
         {
             return ConditionManager.IsPlayerMeetingCondition(this, conditionId);
+        }
+
+        public dynamic GetDataElementAccount(uint dataElementId)
+        {
+            var entry = CliDB.PlayerDataElementAccountStorage.LookupByKey(dataElementId);
+            if (entry == null)
+                return 0L;
+
+            switch (entry.GetElementType())
+            {
+                case PlayerDataElementType.Int64:
+                    if (entry.StorageIndex < m_activePlayerData.AccountDataElements.Size())
+                        return m_activePlayerData.AccountDataElements[entry.StorageIndex].Int64Value;
+                    return 0L;
+                case PlayerDataElementType.Float:
+                    if (entry.StorageIndex < m_activePlayerData.AccountDataElements.Size())
+                        return (0, m_activePlayerData.AccountDataElements[entry.StorageIndex].FloatValue);
+                    return 0.0f;
+                default:
+                    break;
+            }
+
+            return 0L;
+        }
+
+        public void SetDataElementAccount(uint dataElementId, dynamic value)
+        {
+            var entry = CliDB.PlayerDataElementAccountStorage.LookupByKey(dataElementId);
+            if (entry == null)
+                return;
+
+            PlayerDataElement elementSetter = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AccountDataElements, entry.StorageIndex);
+            SetUpdateFieldValue(ref elementSetter.Type, (uint)entry.Type);
+
+            switch (entry.GetElementType())
+            {
+                case PlayerDataElementType.Int64:
+                {
+                    long int64Value = value;
+                    SetUpdateFieldValue(ref elementSetter.Int64Value, int64Value);
+                    GetSession().SetPlayerDataElementAccount(dataElementId, int64Value);
+                    break;
+                }
+                case PlayerDataElementType.Float:
+                {
+                    float floatValue = value;
+                    SetUpdateFieldValue(ref elementSetter.FloatValue, floatValue);
+                    GetSession().SetPlayerDataElementAccount(dataElementId, floatValue);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+
+        public dynamic GetDataElementCharacter(uint dataElementId)
+        {
+            var entry = CliDB.PlayerDataElementCharacterStorage.LookupByKey(dataElementId);
+            if (entry == null)
+                return 0L;
+
+            switch (entry.GetElementType())
+            {
+                case PlayerDataElementType.Int64:
+                    if (entry.StorageIndex < m_activePlayerData.CharacterDataElements.Size())
+                        return m_activePlayerData.CharacterDataElements[entry.StorageIndex].Int64Value;
+                    return 0L;
+                case PlayerDataElementType.Float:
+                    if (entry.StorageIndex < m_activePlayerData.CharacterDataElements.Size())
+                        return m_activePlayerData.CharacterDataElements[entry.StorageIndex].FloatValue;
+                    return 0.0f;
+                default:
+                    break;
+            }
+
+            return 0L;
+        }
+
+        public void SetDataElementCharacter(uint dataElementId, dynamic value)
+        {
+            var entry = CliDB.PlayerDataElementCharacterStorage.LookupByKey(dataElementId);
+            if (entry == null)
+                return;
+
+            PlayerDataElement elementSetter = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterDataElements, entry.StorageIndex);
+            SetUpdateFieldValue(ref elementSetter.Type, (uint)entry.Type);
+
+            switch (entry.GetElementType())
+            {
+                case PlayerDataElementType.Int64:
+                    SetUpdateFieldValue(ref elementSetter.Int64Value, value);
+                    break;
+                case PlayerDataElementType.Float:
+                    SetUpdateFieldValue(ref elementSetter.FloatValue, value);
+                    break;
+                default:
+                    break;
+            }
+
+            _playerDataElementsNeedSave.Add(dataElementId);
+        }
+
+        public bool HasDataFlagAccount(uint dataFlagId)
+        {
+            var entry = CliDB.PlayerDataFlagAccountStorage.LookupByKey(dataFlagId);
+            if (entry == null)
+                return false;
+
+            int fieldOffset = entry.StorageIndex / PlayerConst.DataFlagValueBits;
+            ulong flag = 1UL << (entry.StorageIndex % PlayerConst.DataFlagValueBits);
+
+            if (fieldOffset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.AccountDataIndex].Values.Size())
+                return false;
+
+            return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.AccountDataIndex].Values[fieldOffset] & flag) != 0;
+        }
+
+        public void SetDataFlagAccount(uint dataFlagId, bool on)
+        {
+            var entry = CliDB.PlayerDataFlagAccountStorage.LookupByKey(dataFlagId);
+            if (entry == null)
+                return;
+
+            int fieldOffset = entry.StorageIndex / PlayerConst.DataFlagValueBits;
+            ulong flag = 1UL << (entry.StorageIndex % PlayerConst.DataFlagValueBits);
+
+            BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+            BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.AccountDataIndex);
+
+            if (on)
+                SetUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, fieldOffset), flag);
+            else
+                RemoveUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, fieldOffset), flag);
+
+            GetSession().SetPlayerDataFlagAccount(dataFlagId, on);
+        }
+
+        public bool HasDataFlagCharacter(uint dataFlagId)
+        {
+            var entry = CliDB.PlayerDataFlagCharacterStorage.LookupByKey(dataFlagId);
+            if (entry == null)
+                return false;
+
+            int fieldOffset = entry.StorageIndex / PlayerConst.DataFlagValueBits;
+            ulong flag = 1UL << (entry.StorageIndex % PlayerConst.DataFlagValueBits);
+
+            if (fieldOffset >= m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.CharacterDataIndex].Values.Size())
+                return false;
+
+            return (m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.CharacterDataIndex].Values[fieldOffset] & flag) != 0;
+        }
+
+        public void SetDataFlagCharacter(uint dataFlagId, bool on)
+        {
+            var entry = CliDB.PlayerDataFlagCharacterStorage.LookupByKey(dataFlagId);
+            if (entry == null)
+                return;
+
+            int fieldOffset = entry.StorageIndex / PlayerConst.DataFlagValueBits;
+            ulong flag = 1UL << (entry.StorageIndex % PlayerConst.DataFlagValueBits);
+
+            BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+            BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.CharacterDataIndex);
+
+            if (on)
+                SetUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, fieldOffset), flag);
+            else
+                RemoveUpdateFieldFlagValue(bitVector.ModifyValue(bitVector.Values, fieldOffset), flag);
+
+            _playerDataFlagsNeedSave.Add((uint)fieldOffset);
         }
 
         bool IsInFriendlyArea()

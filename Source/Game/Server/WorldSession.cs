@@ -9,6 +9,7 @@ using Game.Accounts;
 using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.Chat;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Guilds;
 using Game.Maps;
@@ -18,6 +19,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -26,7 +28,7 @@ namespace Game
     public partial class WorldSession : IDisposable
     {
         public static uint SPECIAL_INIT_ACTIVE_MOVER_TIME_SYNC_COUNTER = 0xFFFFFFFF;
-        public static uint SPECIAL_RESUME_COMMS_TIME_SYNC_COUNTER      = 0xFFFFFFFE;
+        public static uint SPECIAL_RESUME_COMMS_TIME_SYNC_COUNTER = 0xFFFFFFFE;
 
         public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, uint build, Framework.ClientBuild.ClientBuildVariantId clientBuildVariant, Locale locale, uint recruiter, bool isARecruiter)
         {
@@ -496,6 +498,163 @@ namespace Game
             tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
+        void LoadPlayerDataAccount(SQLResult elementsResult, SQLResult flagsResult)
+        {
+            if (!elementsResult.IsEmpty())
+            {
+                do
+                {
+                    var entry = CliDB.PlayerDataElementAccountStorage.LookupByKey(elementsResult.Read<uint>(0));
+                    if (entry == null)
+                        continue;
+
+                    PlayerDataAccount.Element element = new();
+                    element.Id = entry.Id;
+                    element.NeedSave = false;
+
+                    switch (entry.GetElementType())
+                    {
+                        case PlayerDataElementType.Int64:
+                            element.Int64Value = elementsResult.Read<long>(2);
+                            break;
+                        case PlayerDataElementType.Float:
+                            element.FloatValue = elementsResult.Read<float>(1);
+                            break;
+                        default:
+                            break;
+                    }
+
+                    _playerDataAccount.Elements.Add(element);
+                } while (elementsResult.NextRow());
+            }
+
+            if (!flagsResult.IsEmpty())
+            {
+                do
+                {
+                    _playerDataAccount.Flags.EnsureWritableListIndex(flagsResult.Read<uint>(0), new PlayerDataAccount.Flag() { Value = flagsResult.Read<ulong>(1), NeedSave = false });
+                } while (flagsResult.NextRow());
+            }
+        }
+
+        public void SavePlayerDataAccount(SQLTransaction transaction)
+        {
+            PreparedStatement stmt;
+            for (int i = 0; i < _playerDataAccount.Elements.Count; i++)
+            {
+                PlayerDataAccount.Element element = _playerDataAccount.Elements[i];
+                if (!element.NeedSave)
+                    continue;
+
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_PLAYER_DATA_ELEMENTS_ACCOUNT);
+                stmt.AddValue(0, GetBattlenetAccountId());
+                stmt.AddValue(1, element.Id);
+                transaction.Append(stmt);
+
+                element.NeedSave = false;
+
+                var entry = CliDB.PlayerDataElementAccountStorage.LookupByKey(element.Id);
+                if (entry == null)
+                    continue;
+
+                switch (entry.GetElementType())
+                {
+                    case PlayerDataElementType.Int64:
+                        if (element.Int64Value == 0)
+                            continue;
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_PLAYER_DATA_ELEMENTS_ACCOUNT);
+                        stmt.AddValue(0, GetBattlenetAccountId());
+                        stmt.AddValue(1, element.Id);
+                        stmt.AddNull(2);
+                        stmt.AddValue(3, element.Int64Value);
+                        transaction.Append(stmt);
+                        break;
+                    case PlayerDataElementType.Float:
+                        if (element.FloatValue == 0)
+                            continue;
+                        stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_PLAYER_DATA_ELEMENTS_ACCOUNT);
+                        stmt.AddValue(0, GetBattlenetAccountId());
+                        stmt.AddValue(1, element.Id);
+                        stmt.AddValue(2, element.FloatValue);
+                        stmt.AddNull(3);
+                        transaction.Append(stmt);
+                        break;
+                }
+            }
+
+            for (var i = 0; i < _playerDataAccount.Flags.Count; ++i)
+            {
+                var flag = _playerDataAccount.Flags[i];
+                if (!flag.NeedSave)
+                    continue;
+
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_BNET_PLAYER_DATA_FLAGS_ACCOUNT);
+                stmt.AddValue(0, GetBattlenetAccountId());
+                stmt.AddValue(1, i);
+                transaction.Append(stmt);
+
+                flag.NeedSave = false;
+
+                if (flag.Value == 0)
+                    continue;
+
+                stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_PLAYER_DATA_FLAGS_ACCOUNT);
+                stmt.AddValue(0, GetBattlenetAccountId());
+                stmt.AddValue(1, i);
+                stmt.AddValue(2, flag.Value);
+                transaction.Append(stmt);
+            }
+        }
+
+        public void SetPlayerDataElementAccount(uint dataElementId, float value)
+        {
+            var element = _playerDataAccount.Elements.Find(p => p.Id == dataElementId);
+            if (element == null)
+            {
+                element = new();
+                element.Id = dataElementId;
+                _playerDataAccount.Elements.Add(element);
+            }
+
+            element.NeedSave = true;
+            element.FloatValue = value;
+        }
+
+        public void SetPlayerDataElementAccount(uint dataElementId, long value)
+        {
+            var element = _playerDataAccount.Elements.Find(p => p.Id == dataElementId);
+            if (element == null)
+            {
+                element = new();
+                element.Id = dataElementId;
+                _playerDataAccount.Elements.Add(element);
+            }
+
+            element.NeedSave = true;
+            element.Int64Value = value;
+        }
+
+        public void SetPlayerDataFlagAccount(uint dataFlagId, bool on)
+        {
+            var entry = CliDB.PlayerDataFlagAccountStorage.LookupByKey(dataFlagId);
+            if (entry == null)
+                return;
+
+            int fieldOffset = entry.StorageIndex / PlayerConst.DataFlagValueBits;
+            ulong flagValue = 1UL << (entry.StorageIndex % PlayerConst.DataFlagValueBits);
+
+            _playerDataAccount.Flags.EnsureWritableListIndex((uint)fieldOffset, new PlayerDataAccount.Flag());
+            var flag = _playerDataAccount.Flags[fieldOffset];
+            if (on)
+                flag.Value |= flagValue;
+            else
+                flag.Value &= ~flagValue;
+
+            flag.NeedSave = true;
+        }
+
+        public PlayerDataAccount GetPlayerDataAccount() { return _playerDataAccount; }
+
         public void SendConnectToInstance(ConnectToSerial serial)
         {
             System.Net.IPAddress instanceAddress = null;
@@ -824,6 +983,7 @@ namespace Game
             _collectionMgr.LoadAccountItemAppearances(holder.GetResult(AccountInfoQueryLoad.ItemAppearances), holder.GetResult(AccountInfoQueryLoad.ItemFavoriteAppearances));
             _collectionMgr.LoadAccountTransmogIllusions(holder.GetResult(AccountInfoQueryLoad.TransmogIllusions));
             _collectionMgr.LoadAccountWarbandScenes(holder.GetResult(AccountInfoQueryLoad.WarbandScenes));
+            LoadPlayerDataAccount(holder.GetResult(AccountInfoQueryLoad.PlayerDataElementsAccount), holder.GetResult(AccountInfoQueryLoad.PlayerDataFlagsAccount));
 
             if (!m_inQueue)
                 SendAuthResponse(BattlenetRpcErrorCode.Ok, false);
@@ -1007,6 +1167,7 @@ namespace Game
         Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new();
         uint _battlenetRequestToken;
 
+        PlayerDataAccount _playerDataAccount = new();
         List<string> _registeredAddonPrefixes = new();
         bool _filterAddonMessages;
         uint recruiterId;
@@ -1217,6 +1378,28 @@ namespace Game
         GlobalAccountDataIndexPerRealm,
         TutorialsIndexPerRealm,
         TransmogIllusions,
-        WarbandScenes
+        WarbandScenes,
+        PlayerDataElementsAccount,
+        PlayerDataFlagsAccount,
+    }
+
+    public class PlayerDataAccount
+    {
+        public List<Element> Elements = new();
+        public List<Flag> Flags = new();
+
+        public class Element
+        {
+            public uint Id;
+            public bool NeedSave;
+            public float FloatValue;
+            public long Int64Value;
+        }
+
+        public class Flag
+        {
+            public ulong Value;
+            public bool NeedSave;
+        }
     }
 }

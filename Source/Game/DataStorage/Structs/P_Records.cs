@@ -149,6 +149,38 @@ namespace Game.DataStorage
         public ushort[] TraitNodeEntryMaxRank = new ushort[4];
     }
 
+    public sealed class PlayerDataElementAccountRecord
+    {
+        public uint Id;
+        public int StorageIndex;
+        public int Type;
+
+        public PlayerDataElementType GetElementType() { return (PlayerDataElementType)Type; }
+    }
+
+    public sealed class PlayerDataElementCharacterRecord
+    {
+        public uint Id;
+        public int StorageIndex;
+        public int Type;
+
+        public PlayerDataElementType GetElementType() { return (PlayerDataElementType)Type; }
+    }
+
+    public sealed class PlayerDataFlagAccountRecord
+    {
+        public uint Id;
+        public int StorageIndex;
+        public int Unknown1107;
+    }
+
+    public sealed class PlayerDataFlagCharacterRecord
+    {
+        public uint Id;
+        public int StorageIndex;
+        public int Unknown1107;
+    }
+
     public sealed class PowerDisplayRecord
     {
         public uint Id;

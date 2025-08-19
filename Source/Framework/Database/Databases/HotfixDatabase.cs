@@ -1052,6 +1052,22 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_PLAYER_CONDITION_LOCALE, "SELECT ID, FailureDescription_lang FROM player_condition_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
 
+            // PlayerDataElementAccount.db2
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_ELEMENT_ACCOUNT, "SELECT ID, StorageIndex, Type FROM player_data_element_account" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
+            // PlayerDataElementCharacter.db2
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_ELEMENT_CHARACTER, "SELECT ID, StorageIndex, Type FROM player_data_element_character" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
+            // PlayerDataFlagAccount.db2
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_FLAG_ACCOUNT, "SELECT ID, StorageIndex, Unknown1107 FROM player_data_flag_account" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
+            // PlayerDataFlagCharacter.db2
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_FLAG_CHARACTER, "SELECT ID, StorageIndex, Unknown1107 FROM player_data_flag_character" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // PowerDisplay.db2
             PrepareStatement(HotfixStatements.SEL_POWER_DISPLAY, "SELECT ID, GlobalStringBaseTag, ActualType, Red, Green, Blue FROM power_display" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
@@ -2156,6 +2172,14 @@ namespace Framework.Database
 
         SEL_PLAYER_CONDITION,
         SEL_PLAYER_CONDITION_LOCALE,
+
+        SEL_PLAYER_DATA_ELEMENT_ACCOUNT,
+
+        SEL_PLAYER_DATA_ELEMENT_CHARACTER,
+
+        SEL_PLAYER_DATA_FLAG_ACCOUNT,
+
+        SEL_PLAYER_DATA_FLAG_CHARACTER,
 
         SEL_POWER_DISPLAY,
 

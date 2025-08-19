@@ -575,6 +575,7 @@ namespace Game.Entities
             // TODO: finish dragonriding - this forces old flight mode
             AddAura(404468, this);
         }
+
         bool _LoadHomeBind(SQLResult result)
         {
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
@@ -650,6 +651,80 @@ namespace Game.Entities
 
             return true;
         }
+
+        void _LoadPlayerData(SQLResult elementsResult, SQLResult flagsResult)
+        {
+            if (!elementsResult.IsEmpty())
+            {
+                do
+                {
+                    var entry = CliDB.PlayerDataElementCharacterStorage.LookupByKey(elementsResult.Read<uint>(0));
+                    if (entry == null)
+                        continue;
+
+                    PlayerDataElement dataElement = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterDataElements, entry.StorageIndex);
+
+                    SetUpdateFieldValue(ref dataElement.Type, (uint)entry.Type);
+
+                    switch (entry.GetElementType())
+                    {
+                        case PlayerDataElementType.Int64:
+                            SetUpdateFieldValue(ref dataElement.Int64Value, elementsResult.Read<long>(1));
+                            break;
+                        case PlayerDataElementType.Float:
+                            SetUpdateFieldValue(ref dataElement.FloatValue, elementsResult.Read<float>(2));
+                            break;
+                        default:
+                            break;
+                    }
+                } while (elementsResult.NextRow());
+            }
+
+            if (!flagsResult.IsEmpty())
+            {
+                BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+                BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.CharacterDataIndex);
+
+                do
+                {
+                    SetUpdateFieldValue(bitVector.ModifyValue(bitVector.Values, flagsResult.Read<int>(0)), flagsResult.Read<ulong>(1));
+                } while (flagsResult.NextRow());
+            }
+
+            PlayerDataAccount accountData = GetSession().GetPlayerDataAccount();
+            foreach (var element in accountData.Elements)
+            {
+                var entry = CliDB.PlayerDataElementAccountStorage.LookupByKey(element.Id);
+                if (entry == null)
+                    continue;
+
+                PlayerDataElement dataElement = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.AccountDataElements, entry.StorageIndex);
+
+                SetUpdateFieldValue(ref dataElement.Type, (uint)entry.Type);
+
+                switch (entry.GetElementType())
+                {
+                    case PlayerDataElementType.Int64:
+                        SetUpdateFieldValue(ref dataElement.Int64Value, element.Int64Value);
+                        break;
+                    case PlayerDataElementType.Float:
+                        SetUpdateFieldValue(ref dataElement.FloatValue, element.FloatValue);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!accountData.Flags.Empty())
+            {
+                BitVectors bitVectors = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.BitVectors);
+                BitVector bitVector = bitVectors.ModifyValue(bitVectors.Values, (int)PlayerDataFlag.AccountDataIndex);
+
+                for (var i = 0; i < accountData.Flags.Count; ++i)
+                    SetUpdateFieldValue(bitVector.ModifyValue(bitVector.Values, i), accountData.Flags[i].Value);
+            }
+        }
+
         void _LoadCurrency(SQLResult result)
         {
             if (result.IsEmpty())
@@ -2194,7 +2269,7 @@ namespace Game.Entities
                         }
 
                         // Save spawn trackings
-                        stmt = CharacterDatabase.GetPreparedStatement( CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING_BY_QUEST);
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_SPAWN_TRACKING_BY_QUEST);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, save.Key);
                         trans.Append(stmt);
@@ -2586,6 +2661,7 @@ namespace Game.Entities
                 }
             }
         }
+
         void _SaveStats(SQLTransaction trans)
         {
             // check if stat saving is enabled and if char level is high enough
@@ -2625,6 +2701,71 @@ namespace Game.Entities
 
             trans.Append(stmt);
         }
+
+        void _SavePlayerData(SQLTransaction trans)
+        {
+            ulong guid = GetGUID().GetCounter();
+            PreparedStatement stmt;
+            foreach (uint playerDataElementCharacterId in _playerDataElementsNeedSave)
+            {
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_DATA_ELEMENTS_CHARACTER);
+                stmt.AddValue(0, guid);
+                stmt.AddValue(1, playerDataElementCharacterId);
+                trans.Append(stmt);
+
+                var entry = CliDB.PlayerDataElementCharacterStorage.LookupByKey(playerDataElementCharacterId);
+                if (entry == null)
+                    continue;
+
+                PlayerDataElement element = m_activePlayerData.CharacterDataElements[entry.StorageIndex];
+                switch (entry.GetElementType())
+                {
+                    case PlayerDataElementType.Int64:
+                        if (element.Int64Value == 0)
+                            continue;
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PLAYER_DATA_ELEMENTS_CHARACTER);
+                        stmt.AddValue(0, guid);
+                        stmt.AddValue(1, playerDataElementCharacterId);
+                        stmt.AddNull(2);
+                        stmt.AddValue(3, element.Int64Value);
+                        trans.Append(stmt);
+                        break;
+                    case PlayerDataElementType.Float:
+                        if (element.FloatValue == 0)
+                            continue;
+                        stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PLAYER_DATA_ELEMENTS_CHARACTER);
+                        stmt.AddValue(0, guid);
+                        stmt.AddValue(1, playerDataElementCharacterId);
+                        stmt.AddValue(2, element.FloatValue);
+                        stmt.AddNull(3);
+                        trans.Append(stmt);
+                        break;
+                }
+
+            }
+
+            foreach (int storageIndex in _playerDataFlagsNeedSave)
+            {
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_DATA_FLAGS_CHARACTER);
+                stmt.AddValue(0, guid);
+                stmt.AddValue(1, storageIndex);
+                trans.Append(stmt);
+
+                ulong value = m_activePlayerData.BitVectors.GetValue().Values[(int)PlayerDataFlag.CharacterDataIndex].Values[storageIndex];
+                if (value == 0)
+                    continue;
+
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_PLAYER_DATA_FLAGS_CHARACTER);
+                stmt.AddValue(0, guid);
+                stmt.AddValue(1, storageIndex);
+                stmt.AddValue(2, value);
+                trans.Append(stmt);
+            }
+
+            _playerDataElementsNeedSave.Clear();
+            _playerDataFlagsNeedSave.Clear();
+        }
+
         public void SaveInventoryAndGoldToDB(SQLTransaction trans)
         {
             _SaveInventory(trans);
@@ -2635,6 +2776,7 @@ namespace Game.Entities
             stmt.AddValue(1, GetGUID().GetCounter());
             trans.Append(stmt);
         }
+
         void _SaveEquipmentSets(SQLTransaction trans)
         {
             foreach (var pair in _equipmentSets)
@@ -3628,6 +3770,8 @@ namespace Game.Entities
 
             _LoadCUFProfiles(holder.GetResult(PlayerLoginQueryLoad.CufProfiles));
 
+            _LoadPlayerData(holder.GetResult(PlayerLoginQueryLoad.DataElements), holder.GetResult(PlayerLoginQueryLoad.DataFlags));
+
             var garrison = new Garrison(this);
             if (garrison.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Garrison),
                 holder.GetResult(PlayerLoginQueryLoad.GarrisonBlueprints),
@@ -4062,6 +4206,7 @@ namespace Game.Entities
             _SaveInstanceTimeRestrictions(characterTransaction);
             _SaveCurrency(characterTransaction);
             _SaveCUFProfiles(characterTransaction);
+            _SavePlayerData(characterTransaction);
             if (_garrison != null)
                 _garrison.SaveToDB(characterTransaction);
 
@@ -4078,6 +4223,7 @@ namespace Game.Entities
             GetSession().GetCollectionMgr().SaveAccountItemAppearances(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountTransmogIllusions(loginTransaction);
             GetSession().GetCollectionMgr().SaveAccountWarbandScenes(loginTransaction);
+            GetSession().SavePlayerDataAccount(loginTransaction);
 
             var currentRealmId = Global.RealmMgr.GetCurrentRealmId();
 

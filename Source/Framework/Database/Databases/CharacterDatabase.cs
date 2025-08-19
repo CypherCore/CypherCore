@@ -767,6 +767,13 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE, "UPDATE character_instance_lock SET expiryTime = ?, extended = 0 WHERE guid = ? AND mapId = ? AND lockId = ?");
             PrepareStatement(CharStatements.DEL_INSTANCE, "DELETE FROM instance WHERE instanceId = ?");
             PrepareStatement(CharStatements.INS_INSTANCE, "INSERT INTO instance (instanceId, data, completedEncountersMask, entranceWorldSafeLocId) VALUES (?, ?, ?, ?)");
+
+            PrepareStatement(CharStatements.SEL_PLAYER_DATA_ELEMENTS_CHARACTER, "SELECT playerDataElementCharacterId, floatValue, int64Value FROM character_player_data_element WHERE characterGuid = ?");
+            PrepareStatement(CharStatements.DEL_PLAYER_DATA_ELEMENTS_CHARACTER, "DELETE FROM character_player_data_element WHERE characterGuid = ? AND playerDataElementCharacterId = ?");
+            PrepareStatement(CharStatements.INS_PLAYER_DATA_ELEMENTS_CHARACTER, "INSERT INTO character_player_data_element (characterGuid, playerDataElementCharacterId, floatValue, int64Value) VALUES (?, ?, ?, ?)");
+            PrepareStatement(CharStatements.SEL_PLAYER_DATA_FLAGS_CHARACTER, "SELECT storageIndex, mask FROM character_player_data_flag WHERE characterGuid = ?");
+            PrepareStatement(CharStatements.DEL_PLAYER_DATA_FLAGS_CHARACTER, "DELETE FROM character_player_data_flag WHERE characterGuid = ? AND storageIndex = ?");
+            PrepareStatement(CharStatements.INS_PLAYER_DATA_FLAGS_CHARACTER, "INSERT INTO character_player_data_flag (characterGuid, storageIndex, mask) VALUES (?, ?, ?)");
         }
     }
 
@@ -1394,6 +1401,13 @@ namespace Framework.Database
         UPD_CHARACTER_INSTANCE_LOCK_FORCE_EXPIRE,
         DEL_INSTANCE,
         INS_INSTANCE,
+
+        SEL_PLAYER_DATA_ELEMENTS_CHARACTER,
+        DEL_PLAYER_DATA_ELEMENTS_CHARACTER,
+        INS_PLAYER_DATA_ELEMENTS_CHARACTER,
+        SEL_PLAYER_DATA_FLAGS_CHARACTER,
+        DEL_PLAYER_DATA_FLAGS_CHARACTER,
+        INS_PLAYER_DATA_FLAGS_CHARACTER,
 
         MAX_CHARACTERDATABASE_STATEMENTS
     }
