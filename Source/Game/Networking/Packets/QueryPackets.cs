@@ -582,7 +582,7 @@ namespace Game.Networking.Packets
     {
         public uint QuestID;
         public uint TreasurePickerID;
-        public TreasurePickerPick Pick;
+        public TreasurePickerPick Treasure;
 
         public TreasurePickerResponse() : base(ServerOpcodes.TreasurePickerResponse, ConnectionType.Instance) { }
 
@@ -590,7 +590,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(QuestID);
             _worldPacket.WriteUInt32(TreasurePickerID);
-            Pick.Write(_worldPacket);
+            Treasure.Write(_worldPacket);
         }
     }
 
@@ -834,52 +834,58 @@ namespace Game.Networking.Packets
         }
     }
 
+    enum TreasurePickerBonusContext
+    {
+        None = 0,
+        WarMode = 1
+    }
+
     class TreasurePickerBonus
     {
-        public List<TreasurePickItem> Items = new();
-        public List<TreasurePickCurrency> Currencies = new();
-        public ulong Money;
-        public bool Context;
+        public List<TreasurePickItem> ItemPicks = new();
+        public List<TreasurePickCurrency> CurrencyPicks = new();
+        public ulong Gold;
+        public TreasurePickerBonusContext Context;
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Items.Count);
-            data.WriteInt32(Currencies.Count);
-            data.WriteUInt64(Money);
-            data.WriteBit(Context);
+            data.WriteInt32(ItemPicks.Count);
+            data.WriteInt32(CurrencyPicks.Count);
+            data.WriteUInt64(Gold);
+            data.WriteBits(Context, 1);
             data.FlushBits();
 
-            foreach (TreasurePickItem treasurePickerItem in Items)
+            foreach (TreasurePickItem treasurePickerItem in ItemPicks)
                 treasurePickerItem.Write(data);
 
-            foreach (TreasurePickCurrency treasurePickCurrency in Currencies)
+            foreach (TreasurePickCurrency treasurePickCurrency in CurrencyPicks)
                 treasurePickCurrency.Write(data);
         }
     }
 
     class TreasurePickerPick
     {
-        public List<TreasurePickItem> Items = new();
-        public List<TreasurePickCurrency> Currencies = new();
+        public List<TreasurePickItem> ItemPicks = new();
+        public List<TreasurePickCurrency> CurrencyPicks = new();
         public List<TreasurePickerBonus> Bonuses = new();
-        public ulong Money;
+        public ulong Gold;
         public int Flags;
         public bool IsChoice;
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Items.Count);
-            data.WriteInt32(Currencies.Count);
-            data.WriteUInt64(Money);
+            data.WriteInt32(ItemPicks.Count);
+            data.WriteInt32(CurrencyPicks.Count);
+            data.WriteUInt64(Gold);
             data.WriteInt32(Bonuses.Count);
             data.WriteInt32(Flags);
             data.WriteBit(IsChoice);
             data.FlushBits();
 
-            foreach (TreasurePickItem treasurePickItem in Items)
+            foreach (TreasurePickItem treasurePickItem in ItemPicks)
                 treasurePickItem.Write(data);
 
-            foreach (TreasurePickCurrency treasurePickCurrency in Currencies)
+            foreach (TreasurePickCurrency treasurePickCurrency in CurrencyPicks)
                 treasurePickCurrency.Write(data);
 
             foreach (TreasurePickerBonus treasurePickerBonus in Bonuses)
