@@ -1454,30 +1454,27 @@ namespace Game.AI
                 }
                 case SmartActions.CreateTimedEvent:
                 {
-                    SmartEvent ne = new();
-                    ne.type = SmartEvents.Update;
-                    ne.event_chance = e.Action.timeEvent.chance;
-                    if (ne.event_chance == 0)
-                        ne.event_chance = 100;
-
-                    ne.minMaxRepeat.min = e.Action.timeEvent.min;
-                    ne.minMaxRepeat.max = e.Action.timeEvent.max;
-                    ne.minMaxRepeat.repeatMin = e.Action.timeEvent.repeatMin;
-                    ne.minMaxRepeat.repeatMax = e.Action.timeEvent.repeatMax;
-
-                    ne.event_flags = 0;
-                    if (ne.minMaxRepeat.repeatMin == 0 && ne.minMaxRepeat.repeatMax == 0)
-                        ne.event_flags |= SmartEventFlags.NotRepeatable;
-
-                    SmartAction ac = new();
-                    ac.type = SmartActions.TriggerTimedEvent;
-                    ac.timeEvent.id = e.Action.timeEvent.id;
-
                     SmartScriptHolder ev = new();
-                    ev.Event = ne;
                     ev.EventId = e.Action.timeEvent.id;
+                    ev.Event.type = SmartEvents.Update;
+                    ev.Event.event_chance = e.Action.timeEvent.chance;
+                    if (ev.Event.event_chance == 0)
+                        ev.Event.event_chance = 100;
+
+                    ev.Event.minMaxRepeat.min = e.Action.timeEvent.min;
+                    ev.Event.minMaxRepeat.max = e.Action.timeEvent.max;
+                    ev.Event.minMaxRepeat.repeatMin = e.Action.timeEvent.repeatMin;
+                    ev.Event.minMaxRepeat.repeatMax = e.Action.timeEvent.repeatMax;
+
+                    ev.Event.event_flags = 0;
+                    if (ev.Event.minMaxRepeat.repeatMin == 0 && ev.Event.minMaxRepeat.repeatMax == 0)
+                        ev.Event.event_flags |= SmartEventFlags.NotRepeatable;
+
+                    ev.Action.type = SmartActions.TriggerTimedEvent;
+                    ev.Action.timeEvent.id = e.Action.timeEvent.id;
+
                     ev.Target = e.Target;
-                    ev.Action = ac;
+
                     InitTimer(ev);
                     _storedEvents.Add(ev);
                     break;
@@ -2126,31 +2123,28 @@ namespace Game.AI
                     else
                     {
                         // Delayed spawn (use values from parameter to schedule event to call us back
-                        SmartEvent ne = new();
-                        ne.type = SmartEvents.Update;
-                        ne.event_chance = 100;
-
-                        ne.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
-                        ne.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
-                        ne.minMaxRepeat.repeatMin = 0;
-                        ne.minMaxRepeat.repeatMax = 0;
-
-                        ne.event_flags = 0;
-                        ne.event_flags |= SmartEventFlags.NotRepeatable;
-
-                        SmartAction ac = new();
-                        ac.type = SmartActions.SpawnSpawngroup;
-                        ac.groupSpawn.groupId = e.Action.groupSpawn.groupId;
-                        ac.groupSpawn.minDelay = 0;
-                        ac.groupSpawn.maxDelay = 0;
-                        ac.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
-                        ac.timeEvent.id = e.Action.timeEvent.id;
-
                         SmartScriptHolder ev = new();
-                        ev.Event = ne;
                         ev.EventId = e.EventId;
+                        ev.Event.type = SmartEvents.Update;
+                        ev.Event.event_chance = 100;
+
+                        ev.Event.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
+                        ev.Event.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
+                        ev.Event.minMaxRepeat.repeatMin = 0;
+                        ev.Event.minMaxRepeat.repeatMax = 0;
+
+                        ev.Event.event_flags = 0;
+                        ev.Event.event_flags |= SmartEventFlags.NotRepeatable;
+
+                        ev.Action.type = SmartActions.SpawnSpawngroup;
+                        ev.Action.groupSpawn.groupId = e.Action.groupSpawn.groupId;
+                        ev.Action.groupSpawn.minDelay = 0;
+                        ev.Action.groupSpawn.maxDelay = 0;
+                        ev.Action.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
+                        ev.Action.timeEvent.id = e.Action.timeEvent.id;
+
                         ev.Target = e.Target;
-                        ev.Action = ac;
+
                         InitTimer(ev);
                         _storedEvents.Add(ev);
                     }
@@ -2168,31 +2162,28 @@ namespace Game.AI
                     else
                     {
                         // Delayed spawn (use values from parameter to schedule event to call us back
-                        SmartEvent ne = new();
-                        ne.type = SmartEvents.Update;
-                        ne.event_chance = 100;
-
-                        ne.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
-                        ne.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
-                        ne.minMaxRepeat.repeatMin = 0;
-                        ne.minMaxRepeat.repeatMax = 0;
-
-                        ne.event_flags = 0;
-                        ne.event_flags |= SmartEventFlags.NotRepeatable;
-
-                        SmartAction ac = new();
-                        ac.type = SmartActions.DespawnSpawngroup;
-                        ac.groupSpawn.groupId = e.Action.groupSpawn.groupId;
-                        ac.groupSpawn.minDelay = 0;
-                        ac.groupSpawn.maxDelay = 0;
-                        ac.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
-                        ac.timeEvent.id = e.Action.timeEvent.id;
-
                         SmartScriptHolder ev = new();
-                        ev.Event = ne;
                         ev.EventId = e.EventId;
+                        ev.Event.type = SmartEvents.Update;
+                        ev.Event.event_chance = 100;
+
+                        ev.Event.minMaxRepeat.min = e.Action.groupSpawn.minDelay;
+                        ev.Event.minMaxRepeat.max = e.Action.groupSpawn.maxDelay;
+                        ev.Event.minMaxRepeat.repeatMin = 0;
+                        ev.Event.minMaxRepeat.repeatMax = 0;
+
+                        ev.Event.event_flags = 0;
+                        ev.Event.event_flags |= SmartEventFlags.NotRepeatable;
+
+                        ev.Action.type = SmartActions.DespawnSpawngroup;
+                        ev.Action.groupSpawn.groupId = e.Action.groupSpawn.groupId;
+                        ev.Action.groupSpawn.minDelay = 0;
+                        ev.Action.groupSpawn.maxDelay = 0;
+                        ev.Action.groupSpawn.spawnflags = e.Action.groupSpawn.spawnflags;
+                        ev.Action.timeEvent.id = e.Action.timeEvent.id;
+
                         ev.Target = e.Target;
-                        ev.Action = ac;
+
                         InitTimer(ev);
                         _storedEvents.Add(ev);
                     }
@@ -3794,9 +3785,7 @@ namespace Game.AI
         {
             if (!_installEvents.Empty())
             {
-                foreach (var holder in _installEvents)
-                    _events.Add(holder);//must be before UpdateTimers
-
+                _events.AddRange(_installEvents);
                 _installEvents.Clear();
             }
         }
