@@ -336,13 +336,8 @@ namespace Game.AI
                                 {
                                     if (player.CanTakeQuest(quest, true))
                                     {
-                                        WorldSession session = player.GetSession();
-                                        if (session != null)
-                                        {
-                                            PlayerMenu menu = new(session);
-                                            menu.SendQuestGiverQuestDetails(quest, _me.GetGUID(), true, false);
-                                            Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction:: SMART_ACTION_OFFER_QUEST: Player {0} - offering quest {1}", player.GetGUID().ToString(), e.Action.questOffer.questId);
-                                        }
+                                        player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, _me.GetGUID(), true, false);
+                                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript::ProcessAction:: SMART_ACTION_OFFER_QUEST: Player {player.GetGUID()} - offering quest {e.Action.questOffer.questId}");
                                     }
                                 }
                                 else
