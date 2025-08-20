@@ -915,15 +915,18 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (IsAlive())
+            if (GetVehicle() == null)
             {
-                if (IsGravityDisabled() || IsHovering())
-                    SetPlayHoverAnim(true);
-                else
-                    SetPlayHoverAnim(false);
+                if (IsAlive())
+                {
+                    if (IsGravityDisabled() || IsHovering())
+                        SetPlayHoverAnim(true);
+                    else
+                        SetPlayHoverAnim(false);
+                }
+                else if (IsPlayer()) // To update player who dies while flying/hovering
+                    SetPlayHoverAnim(false, false);
             }
-            else if (IsPlayer()) // To update player who dies while flying/hovering
-                SetPlayHoverAnim(false, false);
 
             if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
             {
