@@ -532,7 +532,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Winner);
+            _worldPacket.WriteInt32(Winner);
             _worldPacket.WriteInt64(Duration);
             _worldPacket.WriteBit(LogData != null);
             _worldPacket.WriteBits(SoloShuffleStatus, 2);
@@ -542,7 +542,7 @@ namespace Game.Networking.Packets
                 LogData.Write(_worldPacket);
         }
 
-        public byte Winner;
+        public int Winner;
         public long Duration;
         public PVPMatchStatistics LogData;
         public uint SoloShuffleStatus;
