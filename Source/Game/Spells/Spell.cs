@@ -5674,13 +5674,16 @@ namespace Game.Spells
 
                         Pet pet = playerCaster.GetPet();
                         if (pet != null && pet.IsAlive())
+                        {
                             return SpellCastResult.AlreadyHaveSummon;
-
-                        PetStable petStable = playerCaster.GetPetStable();
-                        var deadPetInfo = petStable.ActivePets.FirstOrDefault(petInfo => petInfo?.Health == 0);
-
-                        if (deadPetInfo == null)
-                            return SpellCastResult.BadTargets;
+                        }
+                        else
+                        {
+                            PetStable petStable = playerCaster.GetPetStable();
+                            var deadPetInfo = petStable.ActivePets.FirstOrDefault(petInfo => petInfo?.Health == 0);
+                            if (deadPetInfo == null)
+                                return SpellCastResult.BadTargets;
+                        }
 
                         break;
                     }
