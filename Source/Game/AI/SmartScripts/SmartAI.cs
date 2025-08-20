@@ -215,7 +215,7 @@ namespace Game.AI
             List<WorldObject> targets = GetScript().GetStoredTargetList(SharedConst.SmartEscortTargets, me);
             if (targets != null && EscortQuestID != 0)
             {
-                if (targets.Count == 1 && GetScript().IsPlayer(targets.First()))
+                if (targets.Count == 1 && targets.First().IsPlayer())
                 {
                     Player player = targets.First().ToPlayer();
                     if (!fail && player.IsAtGroupRewardDistance(me) && player.GetCorpse() == null)
@@ -242,11 +242,11 @@ namespace Game.AI
                 }
                 else
                 {
-                    foreach (var obj in targets)
+                    foreach (var target in targets)
                     {
-                        if (GetScript().IsPlayer(obj))
+                        Player player = target.ToPlayer();
+                        if (player != null)
                         {
-                            Player player = obj.ToPlayer();
                             if (!fail && player.IsAtGroupRewardDistance(me) && player.GetCorpse() == null)
                                 player.AreaExploredOrEventHappens(EscortQuestID);
                             else if (fail)
@@ -324,7 +324,7 @@ namespace Game.AI
             if (targets != null)
             {
                 float checkDist = me.GetInstanceScript() != null ? SMART_ESCORT_MAX_PLAYER_DIST * 2 : SMART_ESCORT_MAX_PLAYER_DIST;
-                if (targets.Count == 1 && GetScript().IsPlayer(targets.First()))
+                if (targets.Count == 1 && targets.First().IsPlayer())
                 {
                     Player player = targets.First().ToPlayer();
                     if (me.GetDistance(player) <= checkDist)
@@ -343,14 +343,9 @@ namespace Game.AI
                 }
                 else
                 {
-                    foreach (var obj in targets)
-                    {
-                        if (GetScript().IsPlayer(obj))
-                        {
-                            if (me.GetDistance(obj.ToPlayer()) <= checkDist)
-                                return true;
-                        }
-                    }
+                    foreach (var target in targets)
+                        if (target.IsPlayer() && me.GetDistance(target) <= checkDist)
+                            return true;
                 }
 
                 // no valid target found
