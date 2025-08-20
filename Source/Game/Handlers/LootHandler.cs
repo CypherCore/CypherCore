@@ -222,6 +222,8 @@ namespace Game
             {
                 CreatureListSearcher searcher = new(_player, corpses, check);
                 Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
+                if (corpses.Count > 49)
+                    corpses.Resize(49); // lootTarget is 50th, not in corpses vector
             }
 
             if (!corpses.Empty())

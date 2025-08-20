@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public Array<LootRequest> Loot = new(1000);
+        public Array<LootRequest> Loot = new(100);
         public ObjectGuid Target;
     }
     
