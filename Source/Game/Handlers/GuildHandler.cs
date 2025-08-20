@@ -265,6 +265,8 @@ namespace Game
                 return;
             }
 
+            GetPlayer().PlayerTalkClass.GetInteractionData().StartInteraction(packet.Banker, PlayerInteractionType.GuildBanker);
+
             guild.SendBankList(this, 0, packet.FullUpdate);
         }
 

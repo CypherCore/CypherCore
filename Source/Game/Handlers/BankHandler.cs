@@ -307,8 +307,8 @@ namespace Game
 
         public void SendShowBank(ObjectGuid guid, PlayerInteractionType interactionType)
         {
-            _player.PlayerTalkClass.GetInteractionData().Reset();
-            _player.PlayerTalkClass.GetInteractionData().SourceGuid = guid;
+            _player.PlayerTalkClass.GetInteractionData().StartInteraction(guid, interactionType);
+
             NPCInteractionOpenResult npcInteraction = new();
             npcInteraction.Npc = guid;
             npcInteraction.InteractionType = interactionType;

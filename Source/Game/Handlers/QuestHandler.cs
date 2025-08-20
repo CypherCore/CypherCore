@@ -77,118 +77,100 @@ namespace Game
 
             // no or incorrect quest giver
             if (obj == null)
-            {
-                CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                 return;
-            }
 
             Player playerQuestObject = obj.ToPlayer();
             if (playerQuestObject != null)
             {
                 if ((_player.GetPlayerSharingQuest().IsEmpty() && _player.GetPlayerSharingQuest() != packet.QuestGiverGUID) || !playerQuestObject.CanShareQuest(packet.QuestID))
-                {
-                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
-                }
+
                 if (!_player.IsInSameRaidWith(playerQuestObject))
-                {
-                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
-                }
             }
             else
             {
                 if (!obj.HasQuest(packet.QuestID))
-                {
-                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                     return;
-                }
             }
 
             // some kind of WPE protection
             if (!_player.CanInteractWithQuestGiver(obj))
-            {
-                CLOSE_GOSSIP_CLEAR_SHARING_INFO();
                 return;
-            }
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
-            if (quest != null)
+            if (quest == null)
+                return;
+
+            // prevent cheating
+            if (!GetPlayer().CanTakeQuest(quest, true))
+                return;
+
+            if (!_player.GetPlayerSharingQuest().IsEmpty())
             {
-                // prevent cheating
-                if (!GetPlayer().CanTakeQuest(quest, true))
+                Player player = Global.ObjAccessor.FindPlayer(_player.GetPlayerSharingQuest());
+                if (player != null)
                 {
-                    CLOSE_GOSSIP_CLEAR_SHARING_INFO();
-                    return;
-                }
-
-                if (!_player.GetPlayerSharingQuest().IsEmpty())
-                {
-                    Player player = Global.ObjAccessor.FindPlayer(_player.GetPlayerSharingQuest());
-                    if (player != null)
-                    {
-                        player.SendPushToPartyResponse(_player, QuestPushReason.Accepted);
-                        _player.ClearQuestSharingInfo();
-                    }
-                }
-
-                if (_player.CanAddQuest(quest, true))
-                {
-                    _player.AddQuestAndCheckCompletion(quest, obj);
-
-                    if (quest.IsPushedToPartyOnAccept())
-                    {
-                        var group = _player.GetGroup();
-                        if (group != null)
-                        {
-                            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-                            {
-                                Player player = refe.GetSource();
-
-                                if (player == null || player == _player || !player.IsInMap(_player))     // not self and in same map
-                                    continue;
-
-                                if (player.CanTakeQuest(quest, true))
-                                {
-                                    player.SetQuestSharingInfo(_player.GetGUID(), quest.Id);
-
-                                    //need confirmation that any gossip window will close
-                                    player.PlayerTalkClass.SendCloseGossip();
-
-                                    _player.SendQuestConfirmAccept(quest, player);
-                                }
-                            }
-                        }
-                    }
-
-                    if (quest.HasFlag(QuestFlags.LaunchGossipAccept) && !quest.HasFlagEx(QuestFlagsEx.SuppressGossipAccept))
-                    {
-                        void launchGossip(WorldObject worldObject)
-                        {
-                            _player.PlayerTalkClass.ClearMenus();
-                            _player.PrepareGossipMenu(worldObject, _player.GetGossipMenuForSource(worldObject), true);
-                            _player.SendPreparedGossip(worldObject);
-                            _player.PlayerTalkClass.GetInteractionData().IsLaunchedByQuest = true;
-                        }
-
-                        Creature creature = obj.ToCreature();
-                        if (creature != null)
-                            launchGossip(creature);
-                        else
-                        {
-                            GameObject go = obj.ToGameObject();
-                            if (go != null)
-                                launchGossip(go);
-                        }
-                    }
-                    else
-                        _player.PlayerTalkClass.SendCloseGossip();
-
-                    return;
+                    player.SendPushToPartyResponse(_player, QuestPushReason.Accepted);
+                    _player.ClearQuestSharingInfo();
                 }
             }
 
-            CLOSE_GOSSIP_CLEAR_SHARING_INFO();
+            if (!_player.CanAddQuest(quest, true))
+                return;
+
+            _player.AddQuestAndCheckCompletion(quest, obj);
+
+            if (quest.IsPushedToPartyOnAccept())
+            {
+                var group = _player.GetGroup();
+                if (group != null)
+                {
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                    {
+                        Player player = refe.GetSource();
+
+                        if (player == null || player == _player || !player.IsInMap(_player))     // not self and in same map
+                            continue;
+
+                        if (player.CanTakeQuest(quest, true))
+                        {
+                            player.SetQuestSharingInfo(_player.GetGUID(), quest.Id);
+
+                            //need confirmation that any gossip window will close
+                            player.PlayerTalkClass.SendCloseGossip();
+
+                            _player.SendQuestConfirmAccept(quest, player);
+                        }
+                    }
+                }
+            }
+
+            if (quest.HasFlag(QuestFlags.LaunchGossipAccept) && !quest.HasFlagEx(QuestFlagsEx.SuppressGossipAccept))
+            {
+                void launchGossip(WorldObject worldObject)
+                {
+                    _player.PlayerTalkClass.ClearMenus();
+                    _player.PrepareGossipMenu(worldObject, _player.GetGossipMenuForSource(worldObject), true);
+                    _player.SendPreparedGossip(worldObject);
+                    _player.PlayerTalkClass.GetInteractionData().IsLaunchedByQuest = true;
+                }
+
+                Creature creature = obj.ToCreature();
+                if (creature != null)
+                    launchGossip(creature);
+                else
+                {
+                    GameObject go = obj.ToGameObject();
+                    if (go != null)
+                        launchGossip(go);
+                }
+            }
+            // do not close gossip if quest accept script started a new interaction
+            else if (!_player.PlayerTalkClass.GetInteractionData().IsInteractingWith(obj.GetGUID(), PlayerInteractionType.QuestGiver))
+                _player.PlayerTalkClass.GetInteractionData().IsLaunchedByQuest = true;
+            else
+                _player.PlayerTalkClass.SendCloseGossip();
         }
 
         [WorldPacketHandler(ClientOpcodes.QuestGiverQueryQuest, Processing = PacketProcessing.Inplace)]

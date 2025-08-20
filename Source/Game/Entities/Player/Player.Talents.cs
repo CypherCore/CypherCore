@@ -688,6 +688,18 @@ namespace Game.Entities
 
         public void SendRespecWipeConfirm(ObjectGuid guid, uint cost, SpecResetType respecType)
         {
+            switch (respecType)
+            {
+                case SpecResetType.Talents:
+                    PlayerTalkClass.GetInteractionData().StartInteraction(guid, PlayerInteractionType.TalentMaster);
+                    break;
+                case SpecResetType.Specialization:
+                    PlayerTalkClass.GetInteractionData().StartInteraction(guid, PlayerInteractionType.SpecializationMaster);
+                    break;
+                default:
+                    break;
+            }
+
             RespecWipeConfirm respecWipeConfirm = new();
             respecWipeConfirm.RespecMaster = guid;
             respecWipeConfirm.Cost = cost;

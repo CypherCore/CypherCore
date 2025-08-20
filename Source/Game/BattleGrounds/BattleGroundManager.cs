@@ -398,6 +398,8 @@ namespace Game.BattleGrounds
             if (bgTemplate == null)
                 return;
 
+            player.PlayerTalkClass.GetInteractionData().StartInteraction(guid, PlayerInteractionType.BattleMaster);
+
             BattlefieldList battlefieldList = new();
             battlefieldList.BattlemasterGuid = guid;
             battlefieldList.BattlemasterListID = (int)bgTypeId;

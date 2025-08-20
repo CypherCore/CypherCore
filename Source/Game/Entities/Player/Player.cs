@@ -2787,6 +2787,7 @@ namespace Game.Entities
 
             PlayerTalkClass.SendGossipMenu(textId, source.GetGUID());
         }
+
         public void OnGossipSelect(WorldObject source, int gossipOptionId, uint menuId)
         {
             GossipMenu gossipMenu = PlayerTalkClass.GetGossipMenu();
@@ -2882,7 +2883,10 @@ namespace Game.Entities
                 case GossipOptionNpc.GuildBanker:
                     Guild guild = GetGuild();
                     if (guild != null)
+                    {
+                        PlayerTalkClass.GetInteractionData().StartInteraction(source.GetGUID(), PlayerInteractionType.GuildBanker);
                         guild.SendBankList(GetSession(), 0, true);
+                    }
                     else
                         Guild.SendCommandResult(GetSession(), GuildCommandType.ViewTab, GuildCommandError.PlayerNotInGuild);
                     break;
@@ -2931,6 +2935,36 @@ namespace Game.Entities
 
             if (!handled)
             {
+                 PlayerInteractionType[] GossipOptionNpcToInteractionType =
+                 [
+                     PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
+                     PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
+                     PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
+                     PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
+                     PlayerInteractionType.StableMaster, PlayerInteractionType.None, PlayerInteractionType.GuildBanker,
+                     PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.None,
+                     PlayerInteractionType.MailInfo, PlayerInteractionType.None, PlayerInteractionType.LFGDungeon,
+                     PlayerInteractionType.ArtifactForge, PlayerInteractionType.None, PlayerInteractionType.SpecializationMaster,
+                     PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.GarrArchitect,
+                     PlayerInteractionType.GarrMission, PlayerInteractionType.ShipmentCrafter, PlayerInteractionType.GarrTradeskill,
+                     PlayerInteractionType.GarrRecruitment, PlayerInteractionType.AdventureMap, PlayerInteractionType.GarrTalent,
+                     PlayerInteractionType.ContributionCollector, PlayerInteractionType.Transmogrifier, PlayerInteractionType.AzeriteRespec,
+                     PlayerInteractionType.IslandQueue, PlayerInteractionType.ItemInteraction, PlayerInteractionType.WorldMap,
+                     PlayerInteractionType.Soulbind, PlayerInteractionType.ChromieTime, PlayerInteractionType.CovenantPreview,
+                     PlayerInteractionType.LegendaryCrafting, PlayerInteractionType.NewPlayerGuide, PlayerInteractionType.LegendaryCrafting,
+                     PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
+                     PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
+                     PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
+                     PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker,
+                     PlayerInteractionType.AccountBanker, PlayerInteractionType.ProfessionRespec, PlayerInteractionType.PlaceholderType72,
+                     PlayerInteractionType.PlaceholderType75, PlayerInteractionType.PlaceholderType76, PlayerInteractionType.GuildRename,
+                     PlayerInteractionType.PlaceholderType77, PlayerInteractionType.ItemUpgrade
+                 ];
+
+                PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
+                if (interactionType != PlayerInteractionType.None)
+                    PlayerTalkClass.GetInteractionData().StartInteraction(source.GetGUID(), interactionType);
+
                 if (item.GossipNpcOptionID.HasValue)
                 {
                     GossipMenuAddon addon = ObjectMgr.GetGossipMenuAddon(menuId);
@@ -2945,33 +2979,6 @@ namespace Game.Entities
                 }
                 else
                 {
-                    PlayerInteractionType[] GossipOptionNpcToInteractionType =
-                    {
-                        PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
-                        PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
-                        PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
-                        PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
-                        PlayerInteractionType.StableMaster, PlayerInteractionType.None, PlayerInteractionType.GuildBanker,
-                        PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.None,
-                        PlayerInteractionType.MailInfo, PlayerInteractionType.None, PlayerInteractionType.LFGDungeon,
-                        PlayerInteractionType.ArtifactForge, PlayerInteractionType.None, PlayerInteractionType.SpecializationMaster,
-                        PlayerInteractionType.None, PlayerInteractionType.None, PlayerInteractionType.GarrArchitect,
-                        PlayerInteractionType.GarrMission, PlayerInteractionType.ShipmentCrafter, PlayerInteractionType.GarrTradeskill,
-                        PlayerInteractionType.GarrRecruitment, PlayerInteractionType.AdventureMap, PlayerInteractionType.GarrTalent,
-                        PlayerInteractionType.ContributionCollector, PlayerInteractionType.Transmogrifier, PlayerInteractionType.AzeriteRespec,
-                        PlayerInteractionType.IslandQueue, PlayerInteractionType.ItemInteraction, PlayerInteractionType.WorldMap,
-                        PlayerInteractionType.Soulbind, PlayerInteractionType.ChromieTime, PlayerInteractionType.CovenantPreview,
-                        PlayerInteractionType.LegendaryCrafting, PlayerInteractionType.NewPlayerGuide, PlayerInteractionType.LegendaryCrafting,
-                        PlayerInteractionType.Renown, PlayerInteractionType.BlackMarketAuctioneer, PlayerInteractionType.PerksProgramVendor,
-                        PlayerInteractionType.ProfessionsCraftingOrder, PlayerInteractionType.Professions, PlayerInteractionType.ProfessionsCustomerOrder,
-                        PlayerInteractionType.TraitSystem, PlayerInteractionType.BarbersChoice, PlayerInteractionType.MajorFactionRenown,
-                        PlayerInteractionType.PersonalTabardVendor, PlayerInteractionType.ForgeMaster, PlayerInteractionType.CharacterBanker,
-                        PlayerInteractionType.AccountBanker, PlayerInteractionType.ProfessionRespec,PlayerInteractionType.PlaceholderType72,
-                        PlayerInteractionType.PlaceholderType75, PlayerInteractionType.PlaceholderType76, PlayerInteractionType.GuildRename,
-                        PlayerInteractionType.PlaceholderType77, PlayerInteractionType.ItemUpgrade
-                    };
-
-                    PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
                     if (interactionType != PlayerInteractionType.None)
                     {
                         NPCInteractionOpenResult npcInteraction = new();
@@ -4953,9 +4960,8 @@ namespace Game.Entities
             Locale locale = GetSession().GetSessionDbLocaleIndex();
             PlayerChoiceLocale playerChoiceLocale = locale != Locale.enUS ? ObjectMgr.GetPlayerChoiceLocale(choiceId) : null;
 
-            PlayerTalkClass.GetInteractionData().Reset();
-            PlayerTalkClass.GetInteractionData().SourceGuid = sender;
-            PlayerTalkClass.GetInteractionData().SetPlayerChoice((uint)choiceId);
+            PlayerTalkClass.GetInteractionData().StartInteraction(sender, PlayerInteractionType.PlayerChoice);
+            PlayerTalkClass.GetInteractionData().GetPlayerChoice().SetChoiceId((uint)choiceId);
 
             DisplayPlayerChoice displayPlayerChoice = new();
             displayPlayerChoice.SenderGUID = sender;

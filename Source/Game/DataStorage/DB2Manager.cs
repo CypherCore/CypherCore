@@ -275,7 +275,6 @@ namespace Game.DataStorage
                 _curvePoints.AddRange(curveId, curvePoints.Select(p => p.Pos));
             }
 
-
             foreach (EmotesTextSoundRecord emoteTextSound in EmotesTextSoundStorage.Values)
                 _emoteTextSounds[Tuple.Create(emoteTextSound.EmotesTextId, emoteTextSound.RaceId, emoteTextSound.SexId, emoteTextSound.ClassId)] = emoteTextSound;
 

@@ -562,8 +562,7 @@ namespace Game
                     response.Mails.Add(new MailListEntry(m, player));
             }
 
-            player.PlayerTalkClass.GetInteractionData().Reset();
-            player.PlayerTalkClass.GetInteractionData().SourceGuid = getList.Mailbox;
+            player.PlayerTalkClass.GetInteractionData().StartInteraction(getList.Mailbox, PlayerInteractionType.MailInfo);
             SendPacket(response);
 
             // recalculate m_nextMailDelivereTime and unReadMails

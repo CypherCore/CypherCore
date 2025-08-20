@@ -207,24 +207,45 @@ namespace Game.Misc
     public class InteractionData
     {
         public ObjectGuid SourceGuid;
+        public PlayerInteractionType InteractionType;
         public bool IsLaunchedByQuest;
 
         ushort _playerChoiceResponseIdentifierGenerator = 0; // not reset between interactions
-        uint trainerId;
+        TrainerData trainerData;
         PlayerChoiceData playerChoiceData;
+
+        public void StartInteraction(ObjectGuid target, PlayerInteractionType type)
+        {
+            SourceGuid = target;
+            InteractionType = type;
+            IsLaunchedByQuest = false;
+            switch (type)
+            {
+                case PlayerInteractionType.Trainer:
+                    trainerData = new();
+                    break;
+                case PlayerInteractionType.PlayerChoice:
+                    playerChoiceData = new();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public bool IsInteractingWith(ObjectGuid target, PlayerInteractionType type) { return SourceGuid == target && InteractionType == type; }
 
         public void Reset()
         {
             SourceGuid.Clear();
+            InteractionType = PlayerInteractionType.None;
             IsLaunchedByQuest = false;
-            trainerId = 0;
+            trainerData = null;
+            playerChoiceData = null;
         }
 
-        public uint? GetTrainerId() { return trainerId; }
-        public void SetTrainerId(uint _trainerId) { trainerId = _trainerId; }
+        public TrainerData GetTrainer() { return trainerData; }
 
         public PlayerChoiceData GetPlayerChoice() { return playerChoiceData; }
-        public void SetPlayerChoice(uint choiceId) { playerChoiceData = new PlayerChoiceData(choiceId); }
 
         public ushort AddPlayerChoiceResponse(uint responseId)
         {
@@ -250,8 +271,7 @@ namespace Game.Misc
 
         public void SendGossipMenu(uint titleTextId, ObjectGuid objectGUID)
         {
-            _interactionData.Reset();
-            _interactionData.SourceGuid = objectGUID;
+            _interactionData.StartInteraction(objectGUID, PlayerInteractionType.Gossip);
 
             GossipMessagePkt packet = new();
             packet.GossipGUID = objectGUID;
@@ -362,6 +382,9 @@ namespace Game.Misc
         public void SendQuestGiverQuestListMessage(WorldObject questgiver)
         {
             ObjectGuid guid = questgiver.GetGUID();
+
+            GetInteractionData().StartInteraction(guid, PlayerInteractionType.QuestGiver);
+
             Locale localeConstant = _session.GetSessionDbLocaleIndex();
 
             QuestGiverQuestListMessage questList = new();
@@ -429,6 +452,8 @@ namespace Game.Misc
 
         public void SendQuestGiverQuestDetails(Quest quest, ObjectGuid npcGUID, bool autoLaunched, bool displayPopup)
         {
+            GetInteractionData().StartInteraction(npcGUID, PlayerInteractionType.QuestGiver);
+
             QuestGiverQuestDetails packet = new();
 
             packet.QuestTitle = quest.LogTitle;
@@ -532,6 +557,8 @@ namespace Game.Misc
 
         public void SendQuestGiverOfferReward(Quest quest, ObjectGuid npcGUID, bool autoLaunched)
         {
+            GetInteractionData().StartInteraction(npcGUID, PlayerInteractionType.QuestGiver);
+
             QuestGiverOfferRewardMessage packet = new();
 
             packet.QuestTitle = quest.LogTitle;
@@ -615,6 +642,8 @@ namespace Game.Misc
                 SendQuestGiverOfferReward(quest, npcGUID, true);
                 return;
             }
+
+            GetInteractionData().StartInteraction(npcGUID, PlayerInteractionType.QuestGiver);
 
             QuestGiverRequestItems packet = new();
 
@@ -852,16 +881,16 @@ namespace Game.Misc
         public ConditionsReference Conditions;
     }
 
+    public class TrainerData
+    {
+        public uint Id;
+    }
+
     public class PlayerChoiceData
     {
         uint _choiceId;
         List<Response> _responses = new();
         DateTime? _expireTime;
-
-        public PlayerChoiceData(uint choiceId)
-        {
-            _choiceId = choiceId;
-        }
 
         public uint? FindIdByClientIdentifier(ushort clientIdentifier)
         {

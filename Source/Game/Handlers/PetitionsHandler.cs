@@ -425,8 +425,7 @@ namespace Game
                 return;
             }
 
-            WorldPacket data = new(ServerOpcodes.PetitionShowList);
-            data.WritePackedGuid(guid);                                           // npc guid
+            GetPlayer().PlayerTalkClass.GetInteractionData().StartInteraction(guid, PlayerInteractionType.PetitionVendor);
 
             ServerPetitionShowList packet = new();
             packet.Unit = guid;

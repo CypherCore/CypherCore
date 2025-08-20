@@ -89,9 +89,8 @@ namespace Game
                 return;
             }
 
-            _player.PlayerTalkClass.GetInteractionData().Reset();
-            _player.PlayerTalkClass.GetInteractionData().SourceGuid = npc.GetGUID();
-            _player.PlayerTalkClass.GetInteractionData().SetTrainerId(trainerId);
+            _player.PlayerTalkClass.GetInteractionData().StartInteraction(npc.GetGUID(), PlayerInteractionType.Trainer);
+            _player.PlayerTalkClass.GetInteractionData().GetTrainer().Id = trainerId;
             trainer.SendSpells(npc, _player, GetSessionDbLocaleIndex());
         }
 
@@ -109,10 +108,10 @@ namespace Game
             if (_player.HasUnitState(UnitState.Died))
                 _player.RemoveAurasByType(AuraType.FeignDeath);
 
-            if (_player.PlayerTalkClass.GetInteractionData().SourceGuid != packet.TrainerGUID)
+            if (!_player.PlayerTalkClass.GetInteractionData().IsInteractingWith(packet.TrainerGUID, PlayerInteractionType.Trainer))
                 return;
 
-            if (_player.PlayerTalkClass.GetInteractionData().GetTrainerId() != packet.TrainerID)
+            if (_player.PlayerTalkClass.GetInteractionData().GetTrainer().Id != packet.TrainerID)
                 return;
 
             // check present spell in trainer spell list
@@ -177,7 +176,7 @@ namespace Game
                 return;
 
             // Prevent cheating on C# scripted menus
-            if (GetPlayer().PlayerTalkClass.GetInteractionData().SourceGuid != packet.GossipUnit)
+            if (!_player.PlayerTalkClass.GetInteractionData().IsInteractingWith(packet.GossipUnit, PlayerInteractionType.Gossip))
                 return;
 
             Creature unit = null;
@@ -423,6 +422,8 @@ namespace Game
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+
+            GetPlayer().PlayerTalkClass.GetInteractionData().StartInteraction(vendorGuid, PlayerInteractionType.Vendor);
 
             // Stop the npc if moving
             uint pause = vendor.GetMovementTemplate().GetInteractionPauseTimer();

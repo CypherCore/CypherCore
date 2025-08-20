@@ -993,6 +993,8 @@ namespace Game
             if (ahEntry == null)
                 return;
 
+            GetPlayer().PlayerTalkClass.GetInteractionData().StartInteraction(guid, PlayerInteractionType.Auctioneer);
+
             AuctionHelloResponse auctionHelloResponse = new();
             auctionHelloResponse.Auctioneer = guid;
             auctionHelloResponse.AuctionHouseID = ahEntry.Id;
