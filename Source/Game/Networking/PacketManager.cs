@@ -87,16 +87,17 @@ namespace Game.Networking
         {
             switch (opcode)
             {
-                case ServerOpcodes.QuestGiverStatus: // ClientQuest
-                case ServerOpcodes.DuelRequested: // Client
-                case ServerOpcodes.DuelInBounds: // Client
                 case ServerOpcodes.QueryTimeResponse: // Client
-                case ServerOpcodes.DuelWinner: // Client
-                case ServerOpcodes.DuelComplete: // Client
-                case ServerOpcodes.DuelOutOfBounds: // Client
-                case ServerOpcodes.AttackStop: // Client
-                case ServerOpcodes.AttackStart: // Client
                 case ServerOpcodes.MountResult: // Client
+                case ServerOpcodes.AttackStart: // ClientCombat
+                case ServerOpcodes.AttackStop: // ClientCombat
+                case ServerOpcodes.DuelRequested: // ClientCombat
+                case ServerOpcodes.DuelArranged: // ClientCombat
+                case ServerOpcodes.DuelOutOfBounds: // ClientCombat
+                case ServerOpcodes.DuelInBounds: // ClientCombat
+                case ServerOpcodes.DuelComplete: // ClientCombat
+                case ServerOpcodes.DuelWinner: // ClientCombat
+                case ServerOpcodes.QuestGiverStatus: // ClientQuest
                     return true;
                 default:
                     return false;
