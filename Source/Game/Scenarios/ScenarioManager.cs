@@ -14,7 +14,7 @@ namespace Game.Scenarios
     {
         ScenarioManager() { }
 
-        public InstanceScenario CreateInstanceScenario(InstanceMap map, int team)
+        public InstanceScenario CreateInstanceScenarioForTeam(InstanceMap map, int team)
         {
             var dbData = _scenarioDBData.LookupByKey(Tuple.Create(map.GetId(), (byte)map.GetDifficultyID()));
             // No scenario registered for this map and difficulty in the database
@@ -34,11 +34,15 @@ namespace Game.Scenarios
                     break;
             }
 
+            return CreateInstanceScenario(map, scenarioID);
+        }
+
+        InstanceScenario CreateInstanceScenario(InstanceMap map, uint scenarioID)
+        {
             var scenarioData = _scenarioData.LookupByKey(scenarioID);
             if (scenarioData == null)
             {
-                Log.outError(LogFilter.Scenario, "Table `scenarios` contained data linking scenario (Id: {0}) to map (Id: {1}), difficulty (Id: {2}) but no scenario data was found related to that scenario Id.", 
-                    scenarioID, map.GetId(), map.GetDifficultyID());
+                Log.outError(LogFilter.Scenario, $"No scenario data was found related to scenario(Id: {scenarioID}) for map(Id: {map.GetId()}), difficulty(Id: {map.GetDifficultyID()}).");
                 return null;
             }
 

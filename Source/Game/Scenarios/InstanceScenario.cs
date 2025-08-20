@@ -14,16 +14,9 @@ namespace Game.Scenarios
 {
     public class InstanceScenario : Scenario
     {
-        public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(map, scenarioData)
-        {
-            LoadInstanceData();
+        public InstanceScenario(InstanceMap map, ScenarioData scenarioData) : base(map, scenarioData) { }
 
-            var players = map.GetPlayers();
-            foreach (var player in players)
-                SendScenarioState(player);
-        }
-
-        void LoadInstanceData()
+        public void LoadInstanceData()
         {
             InstanceScript instanceScript = _map.ToInstanceMap().GetInstanceScript();
             if (instanceScript == null)

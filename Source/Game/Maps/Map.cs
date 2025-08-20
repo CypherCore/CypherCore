@@ -5197,6 +5197,20 @@ namespace Game.Maps
             }
         }
 
+        public void SetInstanceScenario(InstanceScenario scenario)
+        {
+            i_scenario.Reset(); // sends exit packets to all players
+
+            if (scenario != null)
+            {
+                i_scenario = scenario;
+
+                scenario.LoadInstanceData();
+
+                DoOnPlayers(scenario.OnPlayerEnter);
+            }
+        }
+
         public void UpdateInstanceLock(UpdateAdditionalSaveDataEvent updateSaveDataEvent)
         {
             if (i_instanceLock != null)
@@ -5301,8 +5315,6 @@ namespace Game.Maps
         }
 
         public InstanceScenario GetInstanceScenario() { return i_scenario; }
-
-        public void SetInstanceScenario(InstanceScenario scenario) { i_scenario = scenario; }
 
         public InstanceLock GetInstanceLock() { return i_instanceLock; }
 

@@ -82,7 +82,7 @@ namespace Game.Entities
                 map.TrySetOwningGroup(group);
 
             map.CreateInstanceData();
-            map.SetInstanceScenario(Global.ScenarioMgr.CreateInstanceScenario(map, team));
+            map.SetInstanceScenario(Global.ScenarioMgr.CreateInstanceScenarioForTeam(map, team));
             map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
