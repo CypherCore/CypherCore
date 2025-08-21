@@ -11391,8 +11391,8 @@ namespace Game
 
             _vehicleTemplateStore.Clear();
 
-            //                                         0           1               2
-            SQLResult result = DB.World.Query("SELECT creatureId, despawnDelayMs, Pitch FROM vehicle_template");
+            //                                         0           1               2      3
+            SQLResult result = DB.World.Query("SELECT creatureId, despawnDelayMs, Pitch, CustomFlags FROM vehicle_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 vehicle template. DB table `vehicle_template` is empty.");
@@ -11418,6 +11418,7 @@ namespace Game
 
                 VehicleTemplate vehicleTemplate = new();
                 vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(result.Read<int>(1));
+                vehicleTemplate.CustomFlags = (VehicleCustomFlags)result.Read<int>(3);
 
                 if (!result.IsNull(2))
                 {

@@ -389,7 +389,11 @@ namespace Game.Entities
 
             // only for flyable vehicles
             if (unit.IsFlying())
-                _me.CastSpell(unit, SharedConst.VehicleSpellParachute, true);
+            {
+                VehicleTemplate vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
+                if (vehicleTemplate == null || !vehicleTemplate.CustomFlags.HasFlag(VehicleCustomFlags.DontForceParachuteOnExit))
+                    _me.CastSpell(unit, SharedConst.VehicleSpellParachute, true);
+            }
 
             if (_me.IsTypeId(TypeId.Unit) && _me.ToCreature().IsAIEnabled())
                 _me.ToCreature().GetAI().PassengerBoarded(unit, seat.Key, false);
@@ -828,10 +832,17 @@ namespace Game.Entities
         public uint? RideSpellID;
     }
 
+    public enum VehicleCustomFlags
+    {
+        None = 0x0,
+        DontForceParachuteOnExit = 0x1
+    }
+
     public class VehicleTemplate
     {
         public TimeSpan DespawnDelay;
         public float? Pitch;
+        public VehicleCustomFlags CustomFlags;
     }
 
     public class VehicleSeatAddon
