@@ -865,10 +865,6 @@ namespace Game.Entities
                 }
                 while (result.NextRow());
             }
-
-            // clear quest log tail
-            for (ushort i = slot; i < SharedConst.MaxQuestLogSize; ++i)
-                SetQuestSlot(i, 0);
         }
         void _LoadQuestStatusObjectives(SQLResult result)
         {

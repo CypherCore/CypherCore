@@ -176,9 +176,8 @@ namespace Game.Entities
                 if (quest == null || !quest.IsDaily() || !quest.HasFlagEx(QuestFlagsEx.RemoveOnPeriodicReset))
                     continue;
 
-                SetQuestSlot(slot, 0);
-                AbandonQuest(questId);
                 RemoveActiveQuest(questId);
+                AbandonQuest(questId);
                 DespawnPersonalSummonsForQuest(questId);
 
                 if (quest.LimitTime != 0)
@@ -215,9 +214,8 @@ namespace Game.Entities
                 if (quest == null || !quest.IsWeekly() || !quest.HasFlagEx(QuestFlagsEx.RemoveOnWeeklyReset))
                     continue;
 
-                SetQuestSlot(slot, 0);
-                AbandonQuest(questId);
                 RemoveActiveQuest(questId);
+                AbandonQuest(questId);
                 DespawnPersonalSummonsForQuest(questId);
 
                 if (quest.LimitTime != 0)
@@ -967,6 +965,30 @@ namespace Game.Entities
             uint questId = quest.Id;
             QuestStatus oldStatus = GetQuestStatus(questId);
 
+            if (quest.IsDaily() || quest.IsDFQuest())
+            {
+                SetDailyQuestStatus(questId);
+                if (quest.IsDaily())
+                {
+                    StartCriteria(CriteriaStartEvent.CompleteDailyQuest, 0);
+                    UpdateCriteria(CriteriaType.CompleteDailyQuest, questId);
+                    UpdateCriteria(CriteriaType.CompleteAnyDailyQuestPerDay, questId);
+                }
+            }
+            else if (quest.IsWeekly())
+                SetWeeklyQuestStatus(questId);
+            else if (quest.IsMonthly())
+                SetMonthlyQuestStatus(questId);
+            else if (quest.IsSeasonal())
+                SetSeasonalQuestStatus(questId);
+
+            RemoveTimedQuest(questId);
+            RemoveActiveQuest(questId, false);
+            if (quest.CanIncreaseRewardedQuestCounters())
+                SetRewardedQuest(questId);
+
+            SetQuestCompletedBit(questId, true);
+
             foreach (QuestObjective obj in quest.Objectives)
             {
                 switch (obj.Type)
@@ -998,8 +1020,6 @@ namespace Game.Entities
                     }
                 }
             }
-
-            RemoveTimedQuest(questId);
 
             if (quest.GetRewItemsCount() > 0)
             {
@@ -1081,10 +1101,6 @@ namespace Game.Entities
             if (skill != 0)
                 UpdateSkillPro(skill, 1000, quest.RewardSkillPoints);
 
-            ushort log_slot = FindQuestSlot(questId);
-            if (log_slot < SharedConst.MaxQuestLogSize)
-                SetQuestSlot(log_slot, 0);
-
             uint XP = GetQuestXPReward(quest);
 
             int moneyRew = 0;
@@ -1132,27 +1148,6 @@ namespace Game.Entities
                 DB.Characters.CommitTransaction(trans);
             }
 
-            if (quest.IsDaily() || quest.IsDFQuest())
-            {
-                SetDailyQuestStatus(questId);
-                if (quest.IsDaily())
-                {
-                    StartCriteria(CriteriaStartEvent.CompleteDailyQuest, 0);
-                    UpdateCriteria(CriteriaType.CompleteDailyQuest, questId);
-                    UpdateCriteria(CriteriaType.CompleteAnyDailyQuestPerDay, questId);
-                }
-            }
-            else if (quest.IsWeekly())
-                SetWeeklyQuestStatus(questId);
-            else if (quest.IsMonthly())
-                SetMonthlyQuestStatus(questId);
-            else if (quest.IsSeasonal())
-                SetSeasonalQuestStatus(questId);
-
-            RemoveActiveQuest(questId, false);
-            if (quest.CanIncreaseRewardedQuestCounters())
-                SetRewardedQuest(questId);
-
             SendQuestReward(quest, questGiver?.ToCreature(), XP, !announce);
 
             RewardReputation(quest);
@@ -1192,8 +1187,6 @@ namespace Game.Entities
 
             // make full db save
             SaveToDB(false);
-
-            SetQuestCompletedBit(questId, true);
 
             if (quest.HasFlag(QuestFlags.Pvp))
             {
@@ -1906,6 +1899,8 @@ namespace Game.Entities
             var questStatus = m_QuestStatus.LookupByKey(questId);
             if (questStatus != null)
             {
+                SetQuestSlot(questStatus.Slot, 0);
+
                 foreach (var objective in m_questObjectiveStatus.KeyValueList)
                 {
                     if (objective.Value.QuestStatusPair.Status == questStatus)
@@ -2173,11 +2168,13 @@ namespace Game.Entities
                 if (quest == null)
                     return;
 
-                ushort questSlot = FindQuestSlot(questId);
-                QuestStatus oldStatus = GetQuestStatus(questSlot);
+                QuestStatus oldStatus = GetQuestStatus(questId);
 
-                if (questSlot != SharedConst.MaxQuestLogSize)
+                if (oldStatus != QuestStatus.None && oldStatus != QuestStatus.Rewarded)
                 {
+                    RemoveActiveQuest(questId);
+                    TakeQuestSourceItem(questId, true); // remove quest src item from player
+                    AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements.
                     if (quest.LimitTime != 0)
                         RemoveTimedQuest(questId);
 
@@ -2186,11 +2183,6 @@ namespace Game.Entities
                         pvpInfo.IsHostile = pvpInfo.IsInHostileArea || HasPvPForcingQuest();
                         UpdatePvPState();
                     }
-
-                    SetQuestSlot(questSlot, 0);
-                    TakeQuestSourceItem(questId, true); // remove quest src item from player
-                    AbandonQuest(questId); // remove all quest items player received before abandoning quest. Note, this does not remove normal drop items that happen to be quest requirements.
-                    RemoveActiveQuest(questId);
                 }
 
                 SetRewardedQuest(questId);

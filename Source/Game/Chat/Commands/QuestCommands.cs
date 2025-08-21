@@ -86,26 +86,21 @@ namespace Game.Chat
 
             if (oldStatus != QuestStatus.None)
             {
+                player.RemoveActiveQuest(quest.Id, false);
+
                 // remove all quest entries for 'entry' from quest log
-                for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+                if (oldStatus != QuestStatus.Rewarded)
                 {
-                    uint logQuest = player.GetQuestSlotQuestId(slot);
-                    if (logQuest == quest.Id)
+                    // we ignore unequippable quest items in this case, its' still be equipped
+                    player.TakeQuestSourceItem(quest.Id, false);
+
+                    if (quest.HasFlag(QuestFlags.Pvp))
                     {
-                        player.SetQuestSlot(slot, 0);
-
-                        // we ignore unequippable quest items in this case, its' still be equipped
-                        player.TakeQuestSourceItem(logQuest, false);
-
-                        if (quest.HasFlag(QuestFlags.Pvp))
-                        {
-                            player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
-                            player.UpdatePvPState();
-                        }
+                        player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
+                        player.UpdatePvPState();
                     }
                 }
 
-                player.RemoveActiveQuest(quest.Id, false);
                 player.RemoveRewardedQuest(quest.Id);
                 player.DespawnPersonalSummonsForQuest(quest.Id);
 

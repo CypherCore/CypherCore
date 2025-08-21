@@ -3785,26 +3785,21 @@ namespace Game.Spells
             if (oldStatus == QuestStatus.None)
                 return;
 
+            player.RemoveActiveQuest(quest_id, false);
+
             // remove all quest entries for 'entry' from quest log
-            for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+            if (oldStatus != QuestStatus.Rewarded)
             {
-                uint logQuest = player.GetQuestSlotQuestId(slot);
-                if (logQuest == quest_id)
+                // we ignore unequippable quest items in this case, it's still be equipped
+                player.TakeQuestSourceItem(quest_id, false);
+
+                if (quest.HasFlag(QuestFlags.Pvp))
                 {
-                    player.SetQuestSlot(slot, 0);
-
-                    // we ignore unequippable quest items in this case, it's still be equipped
-                    player.TakeQuestSourceItem(logQuest, false);
-
-                    if (quest.HasFlag(QuestFlags.Pvp))
-                    {
-                        player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
-                        player.UpdatePvPState();
-                    }
+                    player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
+                    player.UpdatePvPState();
                 }
             }
 
-            player.RemoveActiveQuest(quest_id, false);
             player.RemoveRewardedQuest(quest_id);
             player.DespawnPersonalSummonsForQuest(quest_id);
 
