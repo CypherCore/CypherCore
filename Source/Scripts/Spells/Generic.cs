@@ -2887,12 +2887,9 @@ namespace Scripts.Spells.Generic
             return ValidateSpellInfo(RunningWildMountIds.AlteredForm);
         }
 
-        public override bool Load()
+        public override void OnPrecast()
         {
-            // Definitely not a good thing, but currently the only way to do something at cast start
-            // Should be replaced as soon as possible with a new hook: BeforeCastStart
             GetCaster().CastSpell(GetCaster(), RunningWildMountIds.AlteredForm, TriggerCastFlags.FullMask);
-            return false;
         }
 
         public override void Register()
