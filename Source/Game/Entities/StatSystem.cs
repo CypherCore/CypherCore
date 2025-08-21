@@ -177,7 +177,7 @@ namespace Game.Entities
             }
         }
 
-        int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
+        public int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
 
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
