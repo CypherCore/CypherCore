@@ -5575,19 +5575,22 @@ namespace Game.Spells
                 return;
             }
 
-            // don't regen when permanent aura target has full power
-            if (GetBase().IsPermanent() && target.GetPower(powerType) == target.GetMaxPower(powerType))
-                return;
+            // don't regen when permanent aura and limit is already reached
+            if (GetBase().IsPermanent())
+            {
+                if ((target.GetPower(powerType) == target.GetMaxPower(powerType) && GetAmount() > 0)
+                    || (target.GetPower(powerType) == 0 && GetAmount() < 0))
+                    return;
+            }
 
-            // ignore negative values (can be result apply spellmods to aura damage
-            int amount = Math.Max(GetAmount(), 0) * target.GetMaxPower(powerType) / 100;
+            int amount = GetAmount() * target.GetMaxPower(powerType) / 100;
 
             SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
 
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
-                target.GetThreatManager().ForwardThreatForAssistingMe(caster, gain * 0.5f, GetSpellInfo(), true);
+                target.GetThreatManager().ForwardThreatForAssistingMe(caster, Math.Abs(gain * 0.5f), GetSpellInfo(), true);
 
             target.SendPeriodicAuraLog(pInfo);
         }
