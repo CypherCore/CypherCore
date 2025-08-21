@@ -640,7 +640,7 @@ namespace Game.Chat
         }
 
         [Command("moveflags", RBACPermissions.CommandDebug)]
-        static bool HandleDebugMoveflagsCommand(CommandHandler handler, uint? moveFlags, uint? moveFlagsExtra)
+        static bool HandleDebugMoveflagsCommand(CommandHandler handler, uint? moveFlags, uint? moveFlagsExtra, uint? moveFlagsExtra2)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -653,12 +653,13 @@ namespace Game.Chat
             }
             else
             {
-                // @fixme: port master's HandleDebugMoveflagsCommand; flags need different handling
-
                 target.SetUnitMovementFlags((MovementFlag)moveFlags);
 
                 if (moveFlagsExtra.HasValue)
                     target.SetUnitMovementFlags2((MovementFlag2)moveFlagsExtra);
+
+                if (moveFlagsExtra2.HasValue)
+                    target.SetExtraUnitMovementFlags2((MovementFlags3)moveFlagsExtra2.Value);
 
                 if (!target.IsTypeId(TypeId.Player))
                     target.DestroyForNearbyPlayers();  // Force new SMSG_UPDATE_OBJECT:CreateObject
@@ -741,8 +742,8 @@ namespace Game.Chat
                 var orderedCreatures = creatureIds.OrderBy(p => p.Value).Where(p => p.Value > 5);
 
                 handler.SendSysMessage("Top Creatures count:");
-                foreach (var p in orderedCreatures)
-                    handler.SendSysMessage($"Entry: {p.Key} Count: {p.Value}");
+                foreach (var (creatureId, count) in orderedCreatures)
+                    handler.SendSysMessage($"Entry: {creatureId} Count: {count}");
             }
 
             if (mapId.HasValue)
