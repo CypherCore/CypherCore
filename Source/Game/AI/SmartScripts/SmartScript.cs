@@ -2664,6 +2664,50 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.EnterVehicle:
+                {
+                    if (_me == null)
+                        break;
+
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit unitTarget = target.ToUnit();
+                        if (unitTarget != null)
+                        {
+                            _me.EnterVehicle(unitTarget, (sbyte)e.Action.enterVehicle.seatId);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case SmartActions.BoardPassenger:
+                {
+                    if (_me == null)
+                        break;
+
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit unitTarget = target.ToUnit();
+                        if (unitTarget != null)
+                        {
+                            unitTarget.EnterVehicle(_me, (sbyte)e.Action.enterVehicle.seatId);
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case SmartActions.ExitVehicle:
+                {
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit unitTarget = target.ToUnit();
+                        if (unitTarget != null)
+                        {
+                            unitTarget.ExitVehicle();
+                        }
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;

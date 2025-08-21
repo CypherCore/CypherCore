@@ -391,6 +391,10 @@ namespace Framework.Constants
         DoAction = 151,
         CompleteQuest = 152, // QuestId. Regular quests with objectives can't be completed with this action (only quests with QUEST_FLAGS_COMPLETION_EVENT, QUEST_FLAGS_COMPLETION_AREA_TRIGGER or QUEST_FLAGS_TRACKING_EVENT)
         CreditQuestObjectiveTalkTo = 153,
+        EnterVehicle = 155,    // seat id
+        BoardPassenger = 156,    // seat id
+        ExitVehicle = 157,
+
         End
     }
 

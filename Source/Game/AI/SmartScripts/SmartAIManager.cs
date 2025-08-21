@@ -821,6 +821,9 @@ namespace Game.AI
                 SmartActions.DoAction => Marshal.SizeOf(typeof(SmartAction.DoAction)),
                 SmartActions.CompleteQuest => Marshal.SizeOf(typeof(SmartAction.Quest)),
                 SmartActions.CreditQuestObjectiveTalkTo => 0,
+                SmartActions.EnterVehicle => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
+                SmartActions.BoardPassenger => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
+                SmartActions.ExitVehicle => 0,
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
@@ -2178,6 +2181,7 @@ namespace Game.AI
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.AddToStoredTargetList:
                 case SmartActions.DoAction:
+                case SmartActions.ExitVehicle:
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
                 {
@@ -2216,6 +2220,16 @@ namespace Game.AI
                     if (e.GetScriptType() != SmartScriptType.Creature)
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-valid SourceType (only valid for SourceType {SmartScriptType.Creature}), skipped.");
+                        return false;
+                    }
+                    break;
+                }
+                case SmartActions.EnterVehicle:
+                case SmartActions.BoardPassenger:
+                {
+                    if (e.Action.enterVehicle.seatId >= SharedConst.MaxVehicleSeats)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses incorrect seat id (out of range 0 - {SharedConst.MaxVehicleSeats - 1}), skipped.");
                         return false;
                     }
                     break;
@@ -3263,6 +3277,9 @@ namespace Game.AI
         public DoAction doAction;
 
         [FieldOffset(4)]
+        public EnterVehicle enterVehicle;
+
+        [FieldOffset(4)]
         public Raw raw;
 
         [FieldOffset(32)]
@@ -3815,6 +3832,10 @@ namespace Game.AI
         public struct DoAction
         {
             public uint actionId;
+        }
+        public struct EnterVehicle
+        {
+            public uint seatId;
         }
         public struct Raw
         {
