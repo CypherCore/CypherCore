@@ -2935,9 +2935,9 @@ namespace Game.Entities
 
             if (!handled)
             {
-                 PlayerInteractionType[] GossipOptionNpcToInteractionType =
-                 [
-                     PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
+                PlayerInteractionType[] GossipOptionNpcToInteractionType =
+                [
+                    PlayerInteractionType.None, PlayerInteractionType.Vendor, PlayerInteractionType.TaxiNode,
                      PlayerInteractionType.Trainer, PlayerInteractionType.SpiritHealer, PlayerInteractionType.Binder,
                      PlayerInteractionType.Banker, PlayerInteractionType.PetitionVendor, PlayerInteractionType.GuildTabardVendor,
                      PlayerInteractionType.BattleMaster, PlayerInteractionType.Auctioneer, PlayerInteractionType.TalentMaster,
@@ -2959,7 +2959,7 @@ namespace Game.Entities
                      PlayerInteractionType.AccountBanker, PlayerInteractionType.ProfessionRespec, PlayerInteractionType.PlaceholderType72,
                      PlayerInteractionType.PlaceholderType75, PlayerInteractionType.PlaceholderType76, PlayerInteractionType.GuildRename,
                      PlayerInteractionType.PlaceholderType77, PlayerInteractionType.ItemUpgrade
-                 ];
+                ];
 
                 PlayerInteractionType interactionType = GossipOptionNpcToInteractionType[(int)gossipOptionNpc];
                 if (interactionType != PlayerInteractionType.None)
@@ -8091,21 +8091,8 @@ namespace Game.Entities
         {
             if (target == this)
             {
-                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
-
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].BuildCreateUpdateBlockForPlayer(data, target);
-                }
+                foreach (Item item in m_items)
+                    item?.BuildCreateUpdateBlockForPlayer(data, target);
             }
 
             base.BuildCreateUpdateBlockForPlayer(data, target);
