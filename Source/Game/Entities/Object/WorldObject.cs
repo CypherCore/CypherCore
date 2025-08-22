@@ -3114,24 +3114,9 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            void destroyer(Player player)
-            {
-                if (player == this)
-                    return;
-
-                if (!player.HaveAtClient(this))
-                    return;
-
-                Unit unit = ToUnit();
-                if (unit != null && unit.GetCharmerGUID() == player.GetGUID())// @todo this is for puppet
-                    return;
-
-                DestroyForPlayer(player);
-                player.m_clientGUIDs.Remove(GetGUID());
-            }
-
-            PlayerDistWorker worker = new(this, GetVisibilityRange(), destroyer);
-            Cell.VisitWorldObjects(this, worker, GetVisibilityRange());
+            WorldObjectClientDestroyWork destroyer = new() { obj = this };
+            WorldObjectVisibleChangeVisitor visitor = new(destroyer);
+            Cell.VisitWorldObjects(this, visitor, GetVisibilityRange());
         }
 
         public virtual void UpdateObjectVisibility(bool force = true)
@@ -3151,7 +3136,8 @@ namespace Game.Entities
         public virtual void BuildUpdate(Dictionary<Player, UpdateData> data)
         {
             var notifier = new WorldObjectChangeAccumulator(this, data);
-            Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
+            WorldObjectVisibleChangeVisitor visitor = new(notifier);
+            Cell.VisitWorldObjects(this, visitor, GetVisibilityRange());
 
             ClearUpdateMask(false);
         }
@@ -4345,5 +4331,76 @@ namespace Game.Entities
 
         public bool DistanceCheck;
         public bool AlertCheck;
+    }
+
+    class WorldObjectVisibleChangeVisitor : Notifier
+    {
+        IDoWork<Player> work;
+
+        public WorldObjectVisibleChangeVisitor(IDoWork<Player> _work)
+        {
+            work = _work;
+        }
+
+        public override void Visit(IList<Player> objs)
+        {
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Player player = objs[i];
+
+                work.Invoke(player);
+
+                foreach (Player viewer in player.GetSharedVisionList())
+                    work.Invoke(viewer);
+            }
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                Creature creature = objs[i];
+                foreach (Player viewer in creature.GetSharedVisionList())
+                    work.Invoke(viewer);
+            }
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                DynamicObject dynamicObject = objs[i];
+                ObjectGuid guid = dynamicObject.GetCasterGUID();
+
+                if (guid.IsPlayer())
+                {
+                    //GetCaster() will be nullptr if DynObj is in removelist
+                    Player caster = Global.ObjAccessor.GetPlayer(dynamicObject, guid);
+                    if (caster != null && caster.m_activePlayerData.FarsightObject == dynamicObject.GetGUID())
+                        work.Invoke(caster);
+                }
+            }
+        }
+    }
+
+    struct WorldObjectClientDestroyWork : IDoWork<Player>
+    {
+        public WorldObject obj;
+
+        public void Invoke(Player player)
+        {
+            if (player == obj)
+                return;
+
+            if (!player.HaveAtClient(obj))
+                return;
+
+            Unit unit = obj.ToUnit();
+            if (unit != null && unit.GetCharmerGUID() == player.GetGUID()) /// @todo this is for puppet
+                return;
+
+            obj.DestroyForPlayer(player);
+            player.m_clientGUIDs.Remove(obj.GetGUID());
+        }
     }
 }
