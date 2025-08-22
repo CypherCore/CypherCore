@@ -870,12 +870,6 @@ namespace Game.Entities
 
         public uint GetQuestXPReward(Quest quest)
         {
-            bool rewarded = IsQuestRewarded(quest.Id) && !quest.IsDFQuest();
-
-            // Not give XP in case already completed once repeatable quest
-            if (rewarded)
-                return 0;
-
             uint XP = (uint)(quest.XPValue(this) * WorldConfig.GetFloatValue(WorldCfg.RateXpQuest));
 
             // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
