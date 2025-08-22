@@ -847,73 +847,24 @@ namespace Game.Maps
         }
     }
 
-    public class WorldObjectChangeAccumulator : Notifier
+    public class WorldObjectChangeAccumulator : IDoWork<Player>
     {
+        Dictionary<Player, UpdateData> updateData;
+        WorldObject worldObject;
+        HashSet<ObjectGuid> plr_list = new();
+
         public WorldObjectChangeAccumulator(WorldObject obj, Dictionary<Player, UpdateData> d)
         {
             updateData = d;
             worldObject = obj;
         }
 
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                BuildPacket(player);
-
-                if (!player.GetSharedVisionList().Empty())
-                {
-                    foreach (var visionPlayer in player.GetSharedVisionList())
-                        BuildPacket(visionPlayer);
-                }
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.GetSharedVisionList().Empty())
-                {
-                    foreach (var visionPlayer in creature.GetSharedVisionList())
-                        BuildPacket(visionPlayer);
-                }
-            }
-        }
-
-        public override void Visit(IList<DynamicObject> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                DynamicObject dynamicObject = objs[i];
-
-                ObjectGuid guid = dynamicObject.GetCasterGUID();
-                if (guid.IsPlayer())
-                {
-                    //Caster may be NULL if DynObj is in removelist
-                    Player caster = Global.ObjAccessor.FindPlayer(guid);
-                    if (caster != null)
-                        if (caster.m_activePlayerData.FarsightObject == dynamicObject.GetGUID())
-                            BuildPacket(caster);
-                }
-            }
-        }
-
-        void BuildPacket(Player player)
+        public void Invoke(Player player)
         {
             // Only send update once to a player
-            if (!plr_list.Contains(player.GetGUID()) && player.HaveAtClient(worldObject))
-            {
+            if (player.HaveAtClient(worldObject) && plr_list.Add(player.GetGUID()))
                 worldObject.BuildFieldsUpdate(player, updateData);
-                plr_list.Add(player.GetGUID());
-            }
         }
-
-        Dictionary<Player, UpdateData> updateData;
-        WorldObject worldObject;
-        List<ObjectGuid> plr_list = new();
     }
 
     public class PlayerDistWorker : Notifier

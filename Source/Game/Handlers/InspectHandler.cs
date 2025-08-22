@@ -43,11 +43,11 @@ namespace Game
                 for (int i = 0; i < pvpTalents.Length; ++i)
                     inspectResult.PvpTalents[i] = (ushort)pvpTalents[i];
 
-                inspectResult.TalentTraits.Level = (int)player.GetLevel();
-                inspectResult.TalentTraits.ChrSpecializationID = (int)player.GetPrimarySpecialization();
+                inspectResult.TraitsInfo.PlayerLevel = (int)player.GetLevel();
+                inspectResult.TraitsInfo.SpecID = (int)player.GetPrimarySpecialization();
                 TraitConfig traitConfig = player.GetTraitConfig((int)(uint)player.m_activePlayerData.ActiveCombatTraitConfigID);
                 if (traitConfig != null)
-                    inspectResult.TalentTraits.Config = new TraitConfigPacket(traitConfig);
+                    inspectResult.TraitsInfo.ActiveCombatTraits = new TraitConfigPacket(traitConfig);
             }
 
             Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
