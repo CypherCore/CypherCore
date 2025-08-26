@@ -3253,7 +3253,10 @@ namespace Game.Entities
 
             ApplySpellFix(new[] {
                 42818, // Headless Horseman - Wisp Flight Port
-                42821  // Headless Horseman - Wisp Flight Missile
+                42821, // Headless Horseman - Wisp Flight Missile
+                17678, // Despawn Spectral Combatants
+                720,   // Entangle
+                731    // Entangle
             }, spellInfo =>
             {
                 spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(6); // 100 yards
@@ -4713,7 +4716,7 @@ namespace Game.Entities
             });
 
             // Flamestrike
-            ApplySpellFix([ 2120 ], spellInfo =>            
+            ApplySpellFix([2120], spellInfo =>
             {
                 spellInfo._LoadSqrtTargetLimit(8, 0, null, 2, null, null);
             });

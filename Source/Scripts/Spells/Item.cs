@@ -80,33 +80,6 @@ namespace Scripts.Spells.Azerite
         }
     }
 
-    [Script] // 38554 - Absorb Eye of Grillok (31463: Zezzak's Shard)
-    class spell_item_absorb_eye_of_grillok : AuraScript
-    {
-        const uint SpellEyeOfGrillok = 38495;
-
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellEyeOfGrillok);
-        }
-
-        void PeriodicTick(AuraEffect aurEff)
-        {
-            PreventDefaultAction();
-
-            if (GetCaster() == null || GetTarget().GetTypeId() != TypeId.Unit)
-                return;
-
-            GetCaster().CastSpell(GetCaster(), SpellEyeOfGrillok, aurEff);
-            GetTarget().ToCreature().DespawnOrUnsummon();
-        }
-
-        public override void Register()
-        {
-            OnEffectPeriodic.Add(new(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
-        }
-    }
-
     [Script] // 37877 - Blessing of Faith
     class spell_item_blessing_of_faith : SpellScript
     {
@@ -2437,34 +2410,6 @@ namespace Scripts.Spells.Azerite
     }
 
     [Script]
-    class spell_item_purify_helboar_meat : SpellScript
-    {
-        const uint SpellSummonPurifiedHelboarMeat = 29277;
-        const uint SpellSummonToxicHelboarMeat = 29278;
-
-        public override bool Load()
-        {
-            return GetCaster().IsPlayer();
-        }
-
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellSummonPurifiedHelboarMeat, SpellSummonToxicHelboarMeat);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            caster.CastSpell(caster, RandomHelper.randChance(50) ? SpellSummonPurifiedHelboarMeat : SpellSummonToxicHelboarMeat, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
     class spell_item_nigh_invulnerability : SpellScript
     {
         const uint SpellNighInvulnerability = 30456;
@@ -2509,43 +2454,6 @@ namespace Scripts.Spells.Azerite
         {
             if (GetCastItem() != null && GetHitUnit() != null)
                 GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(80) ? SpellPoultryizerSuccess : SpellPoultryizerBackfire, GetCastItem());
-        }
-
-        public override void Register()
-        {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
-        }
-    }
-
-    [Script]
-    class spell_item_socrethars_stone : SpellScript
-    {
-        const uint SpellSocretharToSeat = 35743;
-        const uint SpellSocretharFromSeat = 35744;
-
-        public override bool Load()
-        {
-            return (GetCaster().GetAreaId() == 3900 || GetCaster().GetAreaId() == 3742);
-        }
-        public override bool Validate(SpellInfo spell)
-        {
-            return ValidateSpellInfo(SpellSocretharToSeat, SpellSocretharFromSeat);
-        }
-
-        void HandleDummy(uint effIndex)
-        {
-            Unit caster = GetCaster();
-            switch (caster.GetAreaId())
-            {
-                case 3900:
-                    caster.CastSpell(caster, SpellSocretharToSeat, true);
-                    break;
-                case 3742:
-                    caster.CastSpell(caster, SpellSocretharFromSeat, true);
-                    break;
-                default:
-                    return;
-            }
         }
 
         public override void Register()
