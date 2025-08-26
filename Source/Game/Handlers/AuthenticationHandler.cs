@@ -26,7 +26,7 @@ namespace Game
 
                 // Send current home realm. Also there is no need to send it later in realm queries.
                 var currentRealm = Global.RealmMgr.GetCurrentRealm();
-                if(currentRealm != null)
+                if (currentRealm != null)
                 {
                     response.SuccessInfo.VirtualRealmAddress = currentRealm.Id.GetAddress();
                     response.SuccessInfo.VirtualRealms.Add(new VirtualRealmInfo(currentRealm.Id.GetAddress(), true, false, currentRealm.Name, currentRealm.NormalizedName));
@@ -103,6 +103,19 @@ namespace Game
             europaTicketConfig.BugsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportBugsEnabled);
             europaTicketConfig.ComplaintsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportComplaintsEnabled);
             europaTicketConfig.SuggestionsEnabled = WorldConfig.GetBoolValue(WorldCfg.SupportSuggestionsEnabled);
+
+            foreach (var (gameRule, value) in Global.WorldMgr.GetGameRules())
+            {
+                GameRuleValuePair rule = new();
+                rule.Rule = (int)gameRule;
+
+                if (value is float)
+                    rule.ValueF = (float)value;
+                else
+                    rule.Value = Convert.ToInt32(value);
+
+                features.GameRules.Add(rule);
+            }
 
             features.EuropaTicketSystemStatus = europaTicketConfig;
 

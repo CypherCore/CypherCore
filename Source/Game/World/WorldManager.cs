@@ -1179,6 +1179,11 @@ namespace Game
             SetPlayerAmountLimit((uint)ConfigMgr.GetDefaultValue("PlayerLimit", 100));
             SetMotd(ConfigMgr.GetDefaultValue("Motd", "Welcome to a Cypher Core Server."));
 
+            _gameRules =
+            [
+                new() { Item1 = GameRule.TransmogEnabled, Item2 = true }
+            ];
+
             if (reload)
             {
                 Global.SupportMgr.SetSupportSystemStatus(WorldConfig.GetBoolValue(WorldCfg.SupportEnabled));
@@ -2556,6 +2561,11 @@ namespace Game
 
         public WorldUpdateTime GetWorldUpdateTime() { return _worldUpdateTime; }
 
+        public List<(GameRule, object)> GetGameRules()
+        {
+            return _gameRules;
+        }
+
         #region Fields
         uint m_ShutdownTimer;
         ShutdownMask m_ShutdownMask;
@@ -2628,6 +2638,8 @@ namespace Game
         bool _guidAlert;
         uint _warnDiff;
         long _warnShutdownTime;
+
+        List<(GameRule, object)> _gameRules = new();
         #endregion
     }
 

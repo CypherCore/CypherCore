@@ -193,7 +193,7 @@ namespace Game.Entities
                     fieldFlags |= AreaTriggerFieldFlags.AlwaysExterior;
                 return fieldFlags;
             }
-            ;
+
             ReplaceAllAreaTriggerFlags(fieldFlags());
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.MovementStartTime), GameTime.GetGameTimeMS());
@@ -235,7 +235,7 @@ namespace Game.Entities
                 InitSplineOffsets(GetCreateProperties().SplinePoints);
             }
             else
-                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)AreaTriggerPathType.None);
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (byte)AreaTriggerPathType.None);
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Facing), _stationaryPosition.GetOrientation());
 

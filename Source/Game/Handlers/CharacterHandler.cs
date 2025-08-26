@@ -1167,6 +1167,19 @@ namespace Game
 
             features.SpeakForMeAllowed = false;
 
+            foreach (var (gameRule, value) in Global.WorldMgr.GetGameRules())
+            {
+                GameRuleValuePair rule = new();
+                rule.Rule = (int)gameRule;
+
+                if (value is float)
+                    rule.ValueF = (float)value;
+                else
+                    rule.Value = Convert.ToInt32(value);
+
+                features.GameRules.Add(rule);
+            }
+
             SendPacket(features);
         }
 
