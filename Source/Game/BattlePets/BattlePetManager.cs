@@ -391,17 +391,16 @@ namespace Game.BattlePets
             if (!battlePetSpecies.HasFlag(BattlePetSpeciesFlags.WellKnown)) // Not learnable
                 return;
 
+            ObjectGuid guid = ObjectGuid.Create(HighGuid.BattlePet, Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Generate());
+
             BattlePet pet = new();
-            pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Generate());
+            pet.PacketInfo.Guid = guid;
             pet.PacketInfo.Species = species;
             pet.PacketInfo.CreatureID = battlePetSpecies.CreatureID;
             pet.PacketInfo.DisplayID = display;
             pet.PacketInfo.Level = level;
-            pet.PacketInfo.Exp = 0;
-            pet.PacketInfo.Flags = 0;
             pet.PacketInfo.Breed = breed;
             pet.PacketInfo.Quality = (byte)quality;
-            pet.PacketInfo.Name = "";
             pet.CalculateStats();
             pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
 
@@ -417,7 +416,7 @@ namespace Game.BattlePets
 
             pet.SaveInfo = BattlePetSaveInfo.New;
 
-            _pets[pet.PacketInfo.Guid.GetCounter()] = pet;
+            _pets[guid.GetCounter()] = pet;
 
             List<BattlePet> updates = [pet];
             SendUpdates(updates, true);
