@@ -39,6 +39,11 @@ namespace Game.Chat
 
             // Everything looks OK, create new pet
             Pet pet = player.CreateTamedPetFrom(creatureTarget);
+            if (pet == null)
+            {
+                handler.SendSysMessage("CreateTamedPetFrom returned null.");
+                return false;
+            }
 
             // "kill" original creature
             creatureTarget.DespawnOrUnsummon();
