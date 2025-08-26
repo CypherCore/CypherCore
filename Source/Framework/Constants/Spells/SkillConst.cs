@@ -369,7 +369,26 @@ namespace Framework.Constants
         DragonIslesSkinning = 2834,
         Crafting = 2846,
         TuskarrFishingGear = 2847,
-        PetLesserDragonkin = 2850
+        PetLesserDragonkin = 2850,
+        LangFurbolg = 2855,
+        ShipmentPrototype = 2870,
+        KhazAlgarAlchemy = 2871,
+        KhazAlgarBlacksmithing = 2872,
+        KhazAlgarCoocking = 2873,
+        KhazAlgarEnchanting = 2874,
+        KhazAlgarEngineering = 2875,
+        KhazAlgarFishing = 2876,
+        KhazAlgarHerbalism = 2877,
+        KhazAlgarInscription = 2878,
+        KhazAlgarJewelcrafting = 2879,
+        KhazAlgarLeatherworking = 2880,
+        KhazAlgarMining = 2881,
+        KhazAlgarSkinning = 2882,
+        KhazAlgarTailoring = 2883,
+        LangEarthen = 2884,
+        SupplyShipments = 2886,
+        RacialEarthen = 2895,
+        AllWarbands = 2902
     }
 
     public enum SkillState

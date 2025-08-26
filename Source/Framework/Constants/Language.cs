@@ -48,6 +48,10 @@ namespace Framework.Constants
         Bassalim = 296,
         EmbeddedLanguages = 297,
         Unknowable = 298,
+        Furbolg = 303,
+        Earthen = 304,
+        Nerubian = 307,
+        TonguesOfSanctuary = 308,
     }
 
     public enum CypherStrings

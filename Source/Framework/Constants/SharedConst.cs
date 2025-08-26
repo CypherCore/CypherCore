@@ -374,6 +374,16 @@ namespace Framework.Constants
             LockType.DragonIslesSkinning25 => SkillType.DragonIslesSkinning,
             LockType.DragonIslesTailoring25 => SkillType.DragonIslesTailoring,
             LockType.DragonIslesMining or LockType.DragonIslesMining25 => SkillType.DragonIslesMining,
+            LockType.KhazAlgarMining or LockType.KhazAlgarMining25 => SkillType.KhazAlgarMining,
+            LockType.KhazAlgarHerbalism or LockType.KhazAlgarHerbalism25 => SkillType.KhazAlgarHerbalism,
+            LockType.KhazAlgarAlchemy25 => SkillType.KhazAlgarAlchemy,
+            LockType.KhazAlgarBlacksmithing25 => SkillType.KhazAlgarBlacksmithing,
+            LockType.KhazAlgarEnchanting25 => SkillType.KhazAlgarEnchanting,
+            LockType.KhazAlgarEngineering25 => SkillType.KhazAlgarEngineering,
+            LockType.KhazAlgarInscription25 => SkillType.KhazAlgarInscription,
+            LockType.KhazAlgarJewelcrafting25 => SkillType.KhazAlgarJewelcrafting,
+            LockType.KhazAlgarLeatherworking25 => SkillType.KhazAlgarLeatherworking,
+            LockType.KhazAlgarSkinning25 => SkillType.KhazAlgarSkinning,
             _ => SkillType.None
         };
 

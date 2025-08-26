@@ -667,7 +667,8 @@ namespace Framework.Constants
         Camel = 298,
         Courser = 299,
         Mammoth = 300,
-        Incubus = 302
+        Incubus = 302,
+        LesserDragonkin = 303
     }
 
     public enum InhabitType
