@@ -876,7 +876,7 @@ namespace Game
             {
                 if (z > -500)
                 {
-                    Log.outError(LogFilter.Server, "ZoneId not found for map {0} coords ({1}, {2}, {3})", MapId, x, y, z);
+                    Log.outError(LogFilter.Server, $"ZoneId not found for map {MapId} coords ({x}, {y}, {z}), object name: {(conditionObject != null ? conditionObject.GetName() : "")} {conditionObject?.GetGUID()}");
                     return GetDefaultGraveyard(team);
                 }
             }
