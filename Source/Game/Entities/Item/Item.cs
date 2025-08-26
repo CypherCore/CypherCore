@@ -1513,34 +1513,7 @@ namespace Game.Entities
             if (proto.HasFlag(ItemFlags2.NoAlterItemVisual))
                 return false;
 
-            if (!HasStats())
-                return false;
-
             return true;
-        }
-
-        bool HasStats()
-        {
-            ItemTemplate proto = GetTemplate();
-            Player owner = GetOwner();
-            for (byte i = 0; i < ItemConst.MaxStats; ++i)
-            {
-                if ((owner != null ? GetItemStatValue(i, owner) : proto.GetStatPercentEditor(i)) != 0)
-                    return true;
-            }
-
-            return false;
-        }
-
-        static bool HasStats(ItemInstance itemInstance, BonusData bonus)
-        {
-            for (byte i = 0; i < ItemConst.MaxStats; ++i)
-            {
-                if (bonus.StatPercentEditor[i] != 0)
-                    return true;
-            }
-
-            return false;
         }
 
         static ItemTransmogrificationWeaponCategory GetTransmogrificationWeaponCategory(ItemTemplate proto)
@@ -1563,11 +1536,10 @@ namespace Game.Entities
                     case ItemSubClassWeapon.Mace:
                     case ItemSubClassWeapon.Sword:
                     case ItemSubClassWeapon.Warglaives:
+                    case ItemSubClassWeapon.Fist:
                         return ItemTransmogrificationWeaponCategory.AxeMaceSword1H;
                     case ItemSubClassWeapon.Dagger:
                         return ItemTransmogrificationWeaponCategory.Dagger;
-                    case ItemSubClassWeapon.Fist:
-                        return ItemTransmogrificationWeaponCategory.Fist;
                     default:
                         break;
                 }

@@ -1495,7 +1495,6 @@ namespace Framework.Constants
         // One-handed
         AxeMaceSword1H,
         Dagger,
-        Fist,
 
         Invalid
     }
