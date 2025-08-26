@@ -143,9 +143,6 @@ namespace Game.Entities
 
             _cinematicMgr.Dispose();
 
-            for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
-                _voidStorageItems[i] = null;
-
             ClearResurrectRequestData();
 
             WorldMgr.DecreasePlayerCount();
@@ -599,21 +596,8 @@ namespace Game.Entities
 
             if (target == this)
             {
-                for (byte i = EquipmentSlot.Start; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
-
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    if (m_items[i] == null)
-                        continue;
-
-                    m_items[i].DestroyForPlayer(target);
-                }
+                foreach (Item item in m_items)
+                    item?.DestroyForPlayer(target);
             }
         }
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
@@ -7697,6 +7681,7 @@ namespace Game.Entities
         }
 
         void SetActiveCombatTraitConfigID(int traitConfigId) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ActiveCombatTraitConfigID), (uint)traitConfigId); }
+        void SetCurrentCombatTraitConfigSubTreeID(int traitSubTreeId) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentCombatTraitConfigSubTreeID), traitSubTreeId); }
 
         void InitPrimaryProfessions()
         {

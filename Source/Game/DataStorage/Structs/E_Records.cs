@@ -47,6 +47,7 @@ namespace Game.DataStorage
         public float PlayerSecondaryStat;
         public float ArmorConstant;
         public float CreatureSpellDamage;
+        public int ContentSetID;
         public uint Lvl;
     }
 

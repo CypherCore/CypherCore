@@ -2458,7 +2458,7 @@ namespace Game.Entities
             {
                 SetAnimTier setAnimTier = new();
                 setAnimTier.Unit = GetGUID();
-                setAnimTier.Tier = (int)animTier;
+                setAnimTier.Tier = (byte)animTier;
                 SendMessageToSet(setAnimTier, true);
             }
         }
@@ -2484,6 +2484,13 @@ namespace Game.Entities
             int index = m_unitData.ChannelObjects.FindIndex(guid);
             if (index >= 0)
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), index);
+        }
+
+        public void SetChannelSpellData(uint startTimeMs, uint durationMs)
+        {
+            UnitChannel channelData = m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelData);
+            SetUpdateFieldValue(ref channelData.StartTimeMs, startTimeMs);
+            SetUpdateFieldValue(ref channelData.Duration, durationMs);
         }
 
         public sbyte GetSpellEmpowerStage() { return m_unitData.SpellEmpowerStage; }

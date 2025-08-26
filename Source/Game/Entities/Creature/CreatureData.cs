@@ -166,6 +166,7 @@ namespace Game.Entities
 
             stats.Flags[0] = (uint)creatureDifficulty.TypeFlags;
             stats.Flags[1] = creatureDifficulty.TypeFlags2;
+            stats.Flags[2] = creatureDifficulty.TypeFlags3;
 
             stats.CreatureType = (sbyte)CreatureType;
             stats.CreatureFamily = (int)Family;
@@ -436,6 +437,7 @@ namespace Game.Entities
         public int CreatureDifficultyID;
         public CreatureTypeFlags TypeFlags;
         public uint TypeFlags2;
+        public uint TypeFlags3;
         public uint LootID;
         public uint PickPocketLootID;
         public uint SkinLootID;

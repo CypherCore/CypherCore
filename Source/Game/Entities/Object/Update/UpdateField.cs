@@ -15,6 +15,12 @@ namespace Game.Entities
         T GetValue();
     }
 
+    public interface IHasChangesMask
+    {
+        void ClearChangesMask();
+        UpdateMask GetUpdateMask();
+    }
+
     public class UpdateFieldString : IUpdateField<string>
     {
         public string _value;
@@ -347,15 +353,39 @@ namespace Game.Entities
         }
     }
 
-    public interface IHasChangesMask
+    public class VariantUpdateField(int blockBit, int bit, params Type[] types)
     {
-        void ClearChangesMask();
-        UpdateMask GetUpdateMask();
+        public object _value;
+        Type[] _types = types;
+
+        public int BlockBit = blockBit;
+        public int Bit = bit;
+
+        public bool Is<T>() { return _types.Contains(typeof(T)); }
+
+        public T Get<T>() where T : class, new()
+        {
+            if (Is<T>())
+                return _value as T;
+
+            return null;
+        }
+
+        public void Visit(Action<dynamic> visitor)
+        {
+            visitor(_value);
+        }
+
+        public void ConstructValue<T>() where T : class, new()
+        {
+            _value = new T();
+        }
     }
 
     public abstract class HasChangesMask : IHasChangesMask
     {
-        public int _changeMask;
+        public static int ChangeMaskLength;
+
         public UpdateMask _changesMask;
         public int _blockBit;
         public int Bit;
@@ -364,12 +394,13 @@ namespace Game.Entities
         {
             _blockBit = blockBit;
             Bit = (int)bit;
+            ChangeMaskLength = changeMask;
             _changesMask = new UpdateMask(changeMask);
-            _changeMask = changeMask;
         }
 
         public HasChangesMask(int changeMask)
         {
+            ChangeMaskLength = changeMask;
             _changesMask = new UpdateMask(changeMask);
         }
 
@@ -431,6 +462,19 @@ namespace Game.Entities
 
                 updateField.ClearChangesMask();
             }
+        }
+
+        public void ClearChangesMask(VariantUpdateField field)
+        {
+            if (typeof(IHasChangesMask).IsAssignableFrom(field._value.GetType()))
+                ((IHasChangesMask)field._value).ClearChangesMask();
+        }
+
+        public dynamic ModifyValueOld(dynamic value, int bit, int blockBit)
+        {
+            _changesMask.Set(blockBit);
+            _changesMask.Set(bit);
+            return value;
         }
 
         public UpdateField<U> ModifyValue<U>(UpdateField<U> updateField) where U : new()
@@ -504,6 +548,18 @@ namespace Game.Entities
             return new DynamicUpdateFieldSetter<U>(updateField[index], dynamicIndex);
         }
 
+        public V ModifyValue<V>(VariantUpdateField field) where V : class, new()
+        {
+            if (!field.Is<V>())
+                field.ConstructValue<V>();
+
+            if (field.BlockBit >= 0)
+                _changesMask.Set(field.BlockBit);
+
+            _changesMask.Set(Bit);
+            return field.Get<V>();
+        }
+
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
         {
             _changesMask.Set(updateField.BlockBit);
@@ -560,7 +616,7 @@ namespace Game.Entities
 
         public UpdateMask GetStaticUpdateMask()
         {
-            return new UpdateMask(_changeMask);
+            return new UpdateMask(ChangeMaskLength);
         }
     }
 

@@ -1144,7 +1144,6 @@ namespace Game
             features.CfgRealmRecID = 0;
             features.CommercePricePollTimeSeconds = 300;
             features.VoiceEnabled = false;
-            features.BrowserEnabled = false; // Has to be false, otherwise client will crash if "Customer Support" is opened
 
             EuropaTicketConfig europaTicketSystemStatus = new();
             europaTicketSystemStatus.ThrottleState.MaxTries = 10;
@@ -1163,7 +1162,6 @@ namespace Game
             features.EuropaTicketSystemStatus = europaTicketSystemStatus;
 
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);
-            features.BpayStoreEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemBpayStoreEnabled);
             features.WarModeEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemWarModeEnabled);
             features.IsChatMuted = !CanSpeak();
 
@@ -2796,10 +2794,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AzeriteEmpowered, stmt);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_VOID_STORAGE);
-            stmt.AddValue(0, lowGuid);
-            SetQuery(PlayerLoginQueryLoad.VoidStorage, stmt);
-
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Mails, stmt);
@@ -2966,6 +2960,10 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_DATA_FLAGS_CHARACTER);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.DataFlags, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_BANK_TAB_SETTINGS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.BankTabSettings, stmt);
         }
 
         public ObjectGuid GetGuid() { return m_guid; }
@@ -3060,7 +3058,6 @@ namespace Game
         InstanceLockTimes,
         SeasonalQuestStatus,
         MonthlyQuestStatus,
-        VoidStorage,
         Currency,
         CufProfiles,
         CorpseLocation,
@@ -3074,6 +3071,7 @@ namespace Game
         TraitConfigs,
         DataElements,
         DataFlags,
+        BankTabSettings,
         Max
     }
 

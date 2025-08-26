@@ -782,6 +782,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(LeaderFactionGroup);
             _worldPacket.WriteInt32((int)PingRestriction);
             _worldPacket.WriteInt32(PlayerList.Count);
+            _worldPacket.WriteBit(ChallengeMode.HasValue);
             _worldPacket.WriteBit(LfgInfos.HasValue);
             _worldPacket.WriteBit(LootSettings.HasValue);
             _worldPacket.WriteBit(DifficultySettings.HasValue);
@@ -795,6 +796,9 @@ namespace Game.Networking.Packets
 
             if (DifficultySettings.HasValue)
                 DifficultySettings.Value.Write(_worldPacket);
+
+            if (ChallengeMode.HasValue)
+                ChallengeMode.Value.Write(_worldPacket);
 
             if (LfgInfos.HasValue)
                 LfgInfos.Value.Write(_worldPacket);
@@ -815,6 +819,7 @@ namespace Game.Networking.Packets
 
         public List<PartyPlayerInfo> PlayerList = new();
 
+        public ChallengeModeData? ChallengeMode;
         public PartyLFGInfo? LfgInfos;
         public PartyLootSettings? LootSettings;
         public PartyDifficultySettings? DifficultySettings;
@@ -1253,8 +1258,50 @@ namespace Game.Networking.Packets
         public DungeonScoreSummary DungeonScore = new();
     }
 
+    public struct LeaverInfo
+    {
+        public ObjectGuid BnetAccountGUID;
+        public float LeaveScore;
+        public uint SeasonID;
+        public uint TotalLeaves;
+        public uint TotalSuccesses;
+        public int ConsecutiveSuccesses;
+        public long LastPenaltyTime;
+        public long LeaverExpirationTime;
+        public int Unknown_1120;
+        public bool LeaverStatus;
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(BnetAccountGUID);
+            data.WriteFloat(LeaveScore);
+            data.WriteUInt32(SeasonID);
+            data.WriteUInt32(TotalLeaves);
+            data.WriteUInt32(TotalSuccesses);
+            data.WriteInt32(ConsecutiveSuccesses);
+            data.WriteInt64(LastPenaltyTime);
+            data.WriteInt64(LeaverExpirationTime);
+            data.WriteInt32(Unknown_1120);
+            data.WriteBits(LeaverStatus, 1);
+            data.FlushBits();
+        }
+    }
+
     struct PartyPlayerInfo
     {
+        public ObjectGuid GUID;
+        public string Name;
+        public string VoiceStateID;   // same as bgs.protocol.club.v1.MemberVoiceState.id
+        public LeaverInfo Leaver;
+        public byte Class;
+        public byte Subgroup;
+        public byte Flags;
+        public byte RolesAssigned;
+        public byte FactionGroup;
+        public bool FromSocialQueue;
+        public bool VoiceChatSilenced;
+        public bool Connected;
+
         public void Write(WorldPacket data)
         {
             data.WriteBits(Name.GetByteCount(), 6);
@@ -1262,6 +1309,7 @@ namespace Game.Networking.Packets
             data.WriteBit(Connected);
             data.WriteBit(VoiceChatSilenced);
             data.WriteBit(FromSocialQueue);
+            Leaver.Write(data);
             data.WritePackedGuid(GUID);
             data.WriteUInt8(Subgroup);
             data.WriteUInt8(Flags);
@@ -1272,22 +1320,21 @@ namespace Game.Networking.Packets
             if (!VoiceStateID.IsEmpty())
                 data.WriteString(VoiceStateID);
         }
-
-        public ObjectGuid GUID;
-        public string Name;
-        public string VoiceStateID;   // same as bgs.protocol.club.v1.MemberVoiceState.id
-        public byte Class;
-        public byte Subgroup;
-        public byte Flags;
-        public byte RolesAssigned;
-        public byte FactionGroup;
-        public bool FromSocialQueue;
-        public bool VoiceChatSilenced;
-        public bool Connected;
     }
 
     struct PartyLFGInfo
     {
+        public uint Slot;
+        public byte MyFlags;
+        public uint MyRandomSlot;
+        public byte MyPartialClear;
+        public float MyGearDiff;
+        public byte MyStrangerCount;
+        public byte MyKickVoteCount;
+        public byte BootCount;
+        public bool Aborted;
+        public bool MyFirstReward;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Slot);
@@ -1302,44 +1349,60 @@ namespace Game.Networking.Packets
             data.WriteBit(MyFirstReward);
             data.FlushBits();
         }
-
-        public uint Slot;
-        public byte MyFlags;
-        public uint MyRandomSlot;
-        public byte MyPartialClear;
-        public float MyGearDiff;
-        public byte MyStrangerCount;
-        public byte MyKickVoteCount;
-        public byte BootCount;
-        public bool Aborted;
-        public bool MyFirstReward;
     }
 
     struct PartyLootSettings
     {
+        public byte Method;
+        public ObjectGuid LootMaster;
+        public byte Threshold;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt8(Method);
             data.WritePackedGuid(LootMaster);
             data.WriteUInt8(Threshold);
         }
-
-        public byte Method;
-        public ObjectGuid LootMaster;
-        public byte Threshold;
     }
 
     struct PartyDifficultySettings
     {
+        public uint DungeonDifficultyID;
+        public uint RaidDifficultyID;
+        public uint LegacyRaidDifficultyID;
+
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(DungeonDifficultyID);
             data.WriteUInt32(RaidDifficultyID);
             data.WriteUInt32(LegacyRaidDifficultyID);
         }
+    }
 
-        public uint DungeonDifficultyID;
-        public uint RaidDifficultyID;
-        public uint LegacyRaidDifficultyID;
+    struct ChallengeModeData
+    {
+        public int Unknown_1120_1;
+        public int Unknown_1120_2;
+        public ulong Unknown_1120_3;
+        public long Unknown_1120_4;
+        public ObjectGuid KeystoneOwnerGUID;
+        public ObjectGuid LeaverGUID;
+        public bool IsActive;
+        public bool HasRestrictions;
+        public bool CanVoteAbandon;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(Unknown_1120_1);
+            data.WriteInt32(Unknown_1120_2);
+            data.WriteUInt64(Unknown_1120_3);
+            data.WriteInt64(Unknown_1120_4);
+            data.WritePackedGuid(KeystoneOwnerGUID);
+            data.WritePackedGuid(LeaverGUID);
+            data.WriteBit(IsActive);
+            data.WriteBit(HasRestrictions);
+            data.WriteBit(CanVoteAbandon);
+            data.FlushBits();
+        }
     }
 }

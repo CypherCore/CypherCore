@@ -50,6 +50,8 @@ namespace Game.Networking.Packets
             for (int i = 0; i < PvpTalents.Count; ++i)
                 _worldPacket.WriteUInt16(PvpTalents[i]);
 
+            TalentInfo.Write(_worldPacket);
+
             _worldPacket.WriteBit(GuildData.HasValue);
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
             _worldPacket.FlushBits();
@@ -79,6 +81,7 @@ namespace Game.Networking.Packets
         public ushort TodayHK;
         public ushort YesterdayHK;
         public byte LifetimeMaxRank;
+        public ClassicTalentInfoUpdate TalentInfo;
         public TraitInspectInfo TraitsInfo = new();
     }
 

@@ -29,6 +29,7 @@ namespace Game.DataStorage
         public uint Raidorigin;                                              // Date of first raid reset, all other resets are calculated as this date plus interval
         public byte RegionGroupMask;
         public uint ChallengeOrigin;
+        public int TimeEventRegionGroupID;
     }
 
     public sealed class ChallengeModeItemBonusOverrideRecord
@@ -56,7 +57,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public LocalizedString Name1;
         public ushort MaskID;
-        public sbyte Flags;
+        public int Flags;
     }
 
     public sealed class CharacterLoadoutRecord
@@ -115,6 +116,7 @@ namespace Game.DataStorage
         public uint IconFileDataID;
         public uint LowResScreenFileDataID;
         public int Flags;
+        public int StartingLevel;
         public uint SpellTextureBlobFileDataID;
         public uint ArmorTypeMask;
         public int CharStartKitUnknown901;
@@ -129,6 +131,7 @@ namespace Game.DataStorage
         public ushort CinematicSequenceID;
         public ushort DefaultSpec;
         public uint Id;
+        public byte HasStrengthBonus;
         public sbyte PrimaryStatPriority;
         public PowerType DisplayPower;
         public byte RangedAttackPowerPerAgility;
@@ -139,6 +142,8 @@ namespace Game.DataStorage
         public byte ClassColorG;
         public byte ClassColorB;
         public byte RolesMask;
+        public byte DamageBonusStat;
+        public byte HasRelicSlot;
     }
 
     public sealed class ChrClassesXPowerTypesRecord
@@ -506,6 +511,7 @@ namespace Game.DataStorage
         public sbyte MaxScaleLevel;
         public ushort PetFoodMask;
         public sbyte PetTalentType;
+        public int CategoryEnumID;
         public int IconFileID;
         public short[] SkillLine = new short[2];
     }

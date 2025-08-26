@@ -767,7 +767,7 @@ namespace Game.Networking.Packets
         public int CreatureDifficultyID;
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
-        public uint[] Flags = new uint[2];
+        public uint[] Flags = new uint[3];
         public uint[] ProxyCreatureID = new uint[SharedConst.MaxCreatureKillCredit];
         public StringArray Name = new(SharedConst.MaxCreatureNames);
         public StringArray NameAlt = new(SharedConst.MaxCreatureNames);

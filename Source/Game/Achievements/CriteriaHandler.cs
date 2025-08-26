@@ -379,6 +379,19 @@ namespace Game.Achievements
                 case CriteriaType.GuildAttainedLevel:
                     SetCriteriaProgress(criteria, miscValue1, referencePlayer);
                     break;
+                case CriteriaType.BankTabPurchased:
+                    switch ((BankType)criteria.Entry.Asset)
+                    {
+                        case BankType.Character:
+                            SetCriteriaProgress(criteria, referencePlayer.GetCharacterBankTabCount(), referencePlayer);
+                            break;
+                        case BankType.Account:
+                            SetCriteriaProgress(criteria, referencePlayer.GetAccountBankTabCount(), referencePlayer);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
                 // FIXME: not triggered in code as result, need to implement
                 case CriteriaType.RunInstance:
                 case CriteriaType.EarnTeamArenaRating:
@@ -825,6 +838,7 @@ namespace Game.Achievements
                 case CriteriaType.SellItemsToVendors:
                 case CriteriaType.GainLevels:
                 case CriteriaType.ReachRenownLevel:
+                case CriteriaType.BankTabPurchased:
                 case CriteriaType.LearnTaxiNode:
                     return progress.Counter >= requiredAmount;
                 case CriteriaType.EarnAchievement:
@@ -1244,6 +1258,10 @@ namespace Game.Achievements
                     break;
                 case CriteriaType.ReachMaxLevel:
                     if (!referencePlayer.IsMaxLevel())
+                        return false;
+                    break;
+                case CriteriaType.BankTabPurchased:
+                    if (miscValue1 != 0 /*allow any at login*/ && miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
                 case CriteriaType.LearnTaxiNode:
@@ -4180,7 +4198,7 @@ namespace Game.Achievements
             //CriteriaType.MythicPlusRatingAttained, /*NYI*/
             //CriteriaType.MythicPlusDisplaySeasonEnded, /*NYI*/
             //CriteriaType.CompleteTrackingQuest, /*NYI*/
-            //CriteriaType.WarbandBankTabPurchased, /*NYI*/
+            CriteriaType.BankTabPurchased,
             CriteriaType.LearnTaxiNode,
             CriteriaType.EarnAchievementPoints,
             CriteriaType.BattlePetAchievementPointsEarned,

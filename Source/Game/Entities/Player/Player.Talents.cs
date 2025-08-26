@@ -365,9 +365,20 @@ namespace Game.Entities
                     && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None;
             });
             if (specTraitConfigIndex >= 0)
-                SetActiveCombatTraitConfigID(m_activePlayerData.TraitConfigs[specTraitConfigIndex].ID);
+            {
+                TraitConfig activeTraitConfig = m_activePlayerData.TraitConfigs[specTraitConfigIndex];
+                SetActiveCombatTraitConfigID(activeTraitConfig.ID);
+                int activeSubTree = activeTraitConfig.SubTrees.FindIndexIf(subTree => subTree.Active != 0);
+                if (activeSubTree >= 0)
+                    SetCurrentCombatTraitConfigSubTreeID(activeTraitConfig.SubTrees[activeSubTree].TraitSubTreeID);
+                else
+                    SetCurrentCombatTraitConfigSubTreeID(0);
+            }
             else
+            {
                 SetActiveCombatTraitConfigID(0);
+                SetCurrentCombatTraitConfigSubTreeID(0);
+            }
 
             foreach (var talentInfo in CliDB.TalentStorage.Values)
             {
@@ -1134,6 +1145,17 @@ namespace Game.Entities
                         foreach (var subTreeEntry in newSubTree.Entries)
                             ApplyTraitEntry(subTreeEntry.TraitNodeEntryID, subTreeEntry.Rank, subTreeEntry.GrantedRanks, newSubTree.Active);
                 }
+            }
+
+            if (applyTraits)
+            {
+                int activeSubTree = editedConfig.SubTrees.FindIndexIf(subTree => subTree.Active != 0);
+                if (activeSubTree >= 0)
+                    SetCurrentCombatTraitConfigSubTreeID(editedConfig.SubTrees[activeSubTree].TraitSubTreeID);
+                else
+                    SetCurrentCombatTraitConfigSubTreeID(0);
+
+                Item.UpdateItemSetAuras(this, false);
             }
 
             m_traitConfigStates[editedConfigId] = PlayerSpellState.Changed;

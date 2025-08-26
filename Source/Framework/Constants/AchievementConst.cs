@@ -774,10 +774,10 @@ namespace Framework.Constants
 
         CompleteQuestsCountOnAccount = 257, /*NYI*/
 
-        WarbandBankTabPurchased = 260, /*NYI*/
+        BankTabPurchased = 260, // Bank Tab Purchased in {#BankType}
         ReachRenownLevel = 261,
         LearnTaxiNode = 262,
-        Count = 264
+        Count = 270
     }
 
     public enum CriteriaDataType

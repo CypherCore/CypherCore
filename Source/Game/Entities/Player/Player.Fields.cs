@@ -41,7 +41,6 @@ namespace Game.Entities
         List<ObjectGuid> m_itemSoulboundTradeable = new();
         List<ObjectGuid> m_refundableItems = new();
         public List<Item> ItemUpdateQueue = new();
-        VoidStorageItem[] _voidStorageItems = new VoidStorageItem[SharedConst.VoidStorageMaxSlot];
         Item[] m_items = new Item[(int)PlayerSlots.Count];
         uint m_WeaponProficiency;
         uint m_ArmorProficiency;
@@ -488,32 +487,6 @@ namespace Game.Entities
         public Item item;
         public EnchantmentSlot slot;
         public uint leftduration;
-    }
-
-    public class VoidStorageItem
-    {
-        public VoidStorageItem(ulong id, uint entry, ObjectGuid creator, uint randomBonusListId, uint fixedScalingLevel, uint artifactKnowledgeLevel, ItemContext context, List<uint> bonuses)
-        {
-            ItemId = id;
-            ItemEntry = entry;
-            CreatorGuid = creator;
-            RandomBonusListId = randomBonusListId;
-            FixedScalingLevel = fixedScalingLevel;
-            ArtifactKnowledgeLevel = artifactKnowledgeLevel;
-            Context = context;
-
-            foreach (var value in bonuses)
-                BonusListIDs.Add(value);
-        }
-
-        public ulong ItemId;
-        public uint ItemEntry;
-        public ObjectGuid CreatorGuid;
-        public uint RandomBonusListId;
-        public uint FixedScalingLevel;
-        public uint ArtifactKnowledgeLevel;
-        public ItemContext Context;
-        public List<uint> BonusListIDs = new();
     }
 
     public class EquipmentSetInfo

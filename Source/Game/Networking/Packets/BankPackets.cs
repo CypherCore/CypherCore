@@ -40,62 +40,30 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class BuyBankSlot : ClientPacket
+    public class BuyBankTab : ClientPacket
     {
-        public BuyBankSlot(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Banker;
+        public BankType BankType;
+
+        public BuyBankTab(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            Guid = _worldPacket.ReadPackedGuid();
+            Banker = _worldPacket.ReadPackedGuid();
+            BankType = (BankType)_worldPacket.ReadInt8();
         }
-
-        public ObjectGuid Guid;
     }
 
-    class AutoBankReagent : ClientPacket
+    class AutoDepositCharacterBank : ClientPacket
     {
-        public AutoBankReagent(WorldPacket packet) : base(packet) { }
+        public ObjectGuid Banker;
 
-        public override void Read()
-        {
-            Inv = new(_worldPacket);
-            PackSlot = _worldPacket.ReadUInt8();
-            Slot = _worldPacket.ReadUInt8();
-        }
-
-        public InvUpdate Inv;
-        public byte Slot;
-        public byte PackSlot;
-    }
-
-    class AutoStoreBankReagent : ClientPacket
-    {
-        public AutoStoreBankReagent(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Inv = new(_worldPacket);
-            Slot = _worldPacket.ReadUInt8();
-            PackSlot = _worldPacket.ReadUInt8();
-        }
-
-        public InvUpdate Inv;
-        public byte Slot;
-        public byte PackSlot;
-    }
-
-    // CMSG_BUY_REAGENT_BANK
-    // CMSG_REAGENT_BANK_DEPOSIT
-    class ReagentBank : ClientPacket
-    {
-        public ReagentBank(WorldPacket packet) : base(packet) { }
+        public AutoDepositCharacterBank(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
         }
-
-        public ObjectGuid Banker;
     }
 
     class BankerActivate : ClientPacket
@@ -109,6 +77,45 @@ namespace Game.Networking.Packets
         {
             Banker = _worldPacket.ReadPackedGuid();
             InteractionType = (PlayerInteractionType)_worldPacket.ReadInt32();
+        }
+    }
+
+    class UpdateBankTabSettings : ClientPacket
+    {
+        public ObjectGuid Banker;
+        public BankType BankType;
+        public byte Tab;
+        public BankTabSettings Settings;
+
+        public UpdateBankTabSettings(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankType = (BankType)_worldPacket.ReadInt8();
+            Tab = _worldPacket.ReadUInt8();
+            Settings.Read(_worldPacket);
+        }
+    }
+
+    public struct BankTabSettings
+    {
+        public string Name;
+        public string Icon;
+        public string Description;
+        public BagSlotFlags DepositFlags;
+
+        public void Read(WorldPacket data)
+        {
+            data.ResetBitPos();
+            var nameLength = data.ReadBits<uint>(7);
+            var iconLength = data.ReadBits<uint>(9);
+            var descriptionLength = data.ReadBits<uint>(14);
+            DepositFlags = (BagSlotFlags)data.ReadInt32();
+
+            Name = data.ReadString(nameLength);
+            Icon = data.ReadString(iconLength);
+            Description = data.ReadString(descriptionLength);
         }
     }
 }

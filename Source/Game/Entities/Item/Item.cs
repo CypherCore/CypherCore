@@ -2551,9 +2551,15 @@ namespace Game.Entities
                 }
 
                 eff.SetBonuses.Add(itemSetSpell);
+
                 // spell cast only if fit form requirement, in other case will cast at form change
-                if (itemSetSpell.ChrSpecID == 0 || (ChrSpecialization)itemSetSpell.ChrSpecID == player.GetPrimarySpecialization())
-                    player.ApplyEquipSpell(spellInfo, null, true);
+                if (itemSetSpell.ChrSpecID != 0 && (ChrSpecialization)itemSetSpell.ChrSpecID != player.GetPrimarySpecialization())
+                    continue;
+
+                if (itemSetSpell.TraitSubTreeID != 0 && itemSetSpell.TraitSubTreeID != player.m_playerData.CurrentCombatTraitConfigSubTreeID)
+                    continue;
+
+                player.ApplyEquipSpell(spellInfo, null, true);
             }
         }
 
@@ -2592,11 +2598,10 @@ namespace Game.Entities
                 if (itemSetSpell.Threshold <= eff.EquippedItems.Count)
                     continue;
 
-                if (!eff.SetBonuses.Contains(itemSetSpell))
+                if (!eff.SetBonuses.Remove(itemSetSpell))
                     continue;
 
                 player.ApplyEquipSpell(Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None), null, false);
-                eff.SetBonuses.Remove(itemSetSpell);
             }
 
             if (eff.EquippedItems.Empty())                                    //all items of a set were removed
@@ -2618,7 +2623,8 @@ namespace Game.Entities
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(itemSetSpell.SpellID, Difficulty.None);
 
-                    if (itemSetSpell.ChrSpecID != 0 && (ChrSpecialization)itemSetSpell.ChrSpecID != player.GetPrimarySpecialization())
+                    if ((itemSetSpell.ChrSpecID != 0 && itemSetSpell.ChrSpecID != (ushort)player.GetPrimarySpecialization())
+                        || (itemSetSpell.TraitSubTreeID != 0 && itemSetSpell.TraitSubTreeID != player.m_playerData.CurrentCombatTraitConfigSubTreeID))
                         player.ApplyEquipSpell(spellInfo, null, false, false);  // item set aura is not for current spec
                     else
                     {

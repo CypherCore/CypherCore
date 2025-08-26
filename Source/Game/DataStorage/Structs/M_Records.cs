@@ -87,6 +87,7 @@ namespace Game.DataStorage
                 case 1643:
                 case 2222:
                 case 2444:
+                case 2601:
                     return true;
                 default:
                     return false;
@@ -114,10 +115,12 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public uint Id;
         public ushort MapID;
-        public byte Flags;
+        public int Flags;
         public uint ExpansionLevel;
         public int RequiredWorldStateID; // maybe?
         public short[] CriteriaCount = new short[3];
+        public int[] FirstRewardQuestID = new int[6];
+        public int[] RewardQuestID = new int[6];
     }
 
     public sealed class MapDifficultyRecord

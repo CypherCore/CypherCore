@@ -520,7 +520,7 @@ namespace Game.Guilds
             SQLTransaction trans = new SQLTransaction();
 
             // Remove money from bank
-            ulong tabCost = GetGuildBankTabPrice(tabId) * MoneyConstants.Gold;
+            ulong tabCost = GetGuildBankTabPrice(tabId);
             if (tabCost != 0 && !_ModifyBankMoney(trans, tabCost, false))                   // Should not happen, this is checked by client
                 return;
 
@@ -2538,17 +2538,11 @@ namespace Game.Guilds
 
         ulong GetGuildBankTabPrice(byte tabId)
         {
-            // these prices are in gold units, not copper
-            switch (tabId)
-            {
-                case 0: return 100;
-                case 1: return 250;
-                case 2: return 500;
-                case 3: return 1000;
-                case 4: return 2500;
-                case 5: return 5000;
-                default: return 0;
-            }
+            var bankTab = CliDB.BankTabStorage.FirstOrDefault(bankTab => bankTab.Value.BankType == (int)BankType.Guild && bankTab.Value.OrderIndex == tabId).Value;
+            if (bankTab != null)
+                return bankTab.Cost;
+
+            return 0;
         }
 
         public static void SendCommandResult(WorldSession session, GuildCommandType type, GuildCommandError errCode, string param = "")

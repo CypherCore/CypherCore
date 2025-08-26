@@ -68,6 +68,8 @@ namespace Framework.Constants
         ClientModel = 60,
         CraftingTable = 61,
         PerksProgramChest = 62,
+        FuturePatch = 63,
+        AssistAction = 64,
 
         Max
     }

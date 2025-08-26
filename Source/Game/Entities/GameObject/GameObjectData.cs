@@ -225,6 +225,12 @@ namespace Game.Entities
         public craftingTable CraftingTable;
 
         [FieldOffset(80)]
+        public futurePatchGameObject FuturePatchGameObject;
+
+        [FieldOffset(80)]
+        public assistAction AssistAction;
+
+        [FieldOffset(80)]
         public raw Raw;
 
         [FieldOffset(224)]
@@ -539,6 +545,10 @@ namespace Game.Entities
                     return QuestGiver.gossipID;
                 case GameObjectTypes.Goober:
                     return Goober.gossipID;
+                case GameObjectTypes.SpellFocus:
+                    return SpellFocus.gossipID;
+                case GameObjectTypes.AssistAction:
+                    return AssistAction.gossipID;
                 default:
                     return 0;
             }
@@ -641,6 +651,8 @@ namespace Game.Entities
                     return Trap.cooldown;
                 case GameObjectTypes.Goober:
                     return Goober.cooldown;
+                case GameObjectTypes.AssistAction:
+                    return AssistAction.cooldown;
                 default:
                     return 0;
             }
@@ -1483,7 +1495,7 @@ namespace Game.Entities
             public uint radius;                                  // 4 radius, int, Min value: 0, Max value: 50, Default value: 10
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ItemInteractionID;                       // 6 Item Interaction ID, References: UiItemInteraction, NoValue = 0
-            public uint PlayerInteractionType;                   // 7 Player Interaction Type, enum { None, TradePartner, Item, Gossip, QuestGiver, Merchant, TaxiNode, Trainer, Banker, AlliedRaceDetailsGiver, GuildBanker, Registrar, Vendor, PetitionVendor, GuildTabardVendor, TalentMaster, SpecializationMaster, MailInfo, SpiritHealer, AreaSpiritHealer, Binder, Auctioneer, StableMaster, BattleMaster, Transmogrifier, LFGDungeon, VoidStorageBanker, BlackMarketAuctioneer, AdventureMap, WorldMap, GarrArchitect, GarrTradeskill, GarrMission, ShipmentCrafter, GarrRecruitment, GarrTalent, Trophy, PlayerChoice, ArtifactForge, ObliterumForge, ScrappingMachine, ContributionCollector, AzeriteRespec, IslandQueue, ItemInteraction, ChromieTime, CovenantPreview, AnimaDiversion, LegendaryCrafting, WeeklyRewards, Soulbind, CovenantSanctum, NewPlayerGuide, ItemUpgrade, AdventureJournal, Renown, AzeriteForge, PerksProgramVendor, ProfessionsCraftingOrder, Professions, ProfessionsCustomerOrder, TraitSystem, BarbersChoice, JailersTowerBuffs, MajorFactionRenown, PersonalTabardVendor, ForgeMaster, CharacterBanker, AccountBanker, ProfessionRespec, PlaceholderType71, PlaceholderType72, PlaceholderType73, PlaceholderType74, PlaceholderType75, PlaceholderType76, PlaceholderType77, }; Default: None
+            public uint PlayerInteractionType;                   // 7 Player Interaction Type, enum { None, TradePartner, Item, Gossip, QuestGiver, Merchant, TaxiNode, Trainer, Banker, AlliedRaceDetailsGiver, GuildBanker, Registrar, Vendor, PetitionVendor, GuildTabardVendor, TalentMaster, SpecializationMaster, MailInfo, SpiritHealer, AreaSpiritHealer, Binder, Auctioneer, StableMaster, BattleMaster, Transmogrifier, LFGDungeon, VoidStorageBanker, BlackMarketAuctioneer, AdventureMap, WorldMap, GarrArchitect, GarrTradeskill, GarrMission, ShipmentCrafter, GarrRecruitment, GarrTalent, Trophy, PlayerChoice, ArtifactForge, ObliterumForge, ScrappingMachine, ContributionCollector, AzeriteRespec, IslandQueue, ItemInteraction, ChromieTime, CovenantPreview, AnimaDiversion, LegendaryCrafting, WeeklyRewards, Soulbind, CovenantSanctum, NewPlayerGuide, ItemUpgrade, AdventureJournal, Renown, AzeriteForge, PerksProgramVendor, ProfessionsCraftingOrder, Professions, ProfessionsCustomerOrder, TraitSystem, BarbersChoice, JailersTowerBuffs, MajorFactionRenown, PersonalTabardVendor, ForgeMaster, CharacterBanker, AccountBanker, ProfessionRespec, PlaceholderType71, PlaceholderType72, PlaceholderType73, PlaceholderType74, PlaceholderType75, PlaceholderType76, GuildRename, PlaceholderType76, }; Default: None
         }
 
         public struct keystonereceptacle
@@ -1613,6 +1625,19 @@ namespace Game.Entities
         {
             public uint Script;                                  // 0 Script, References: SpellScript, NoValue = 0
             public uint autoClose;                               // 1 autoClose (ms), int, Min value: 0, Max value: 2147483647, Default value: 3000
+        }
+
+        public struct futurePatchGameObject
+        {
+        }
+
+        public struct assistAction
+        {
+            public uint AssistActionType;                        // 0 Assist Action Type, enum { None, Lounging Player, Grave Marker, Placed VO, Player Guardian, Player Slayer, Captured Buff, }; Default: None
+            public uint cooldown;                                // 1 cooldown, int, Min value: 0, Max value: 2147483647, Default value: 3000
+            public uint gossipID;                                // 2 gossipID, References: Gossip, NoValue = 0
+            public uint spell;                                   // 3 spell, References: Spell, NoValue = 0
+            public uint playerCast;                              // 4 playerCast, enum { false, true, }; Default: false
         }
         #endregion
     }

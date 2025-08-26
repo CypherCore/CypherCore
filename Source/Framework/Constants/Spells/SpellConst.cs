@@ -2671,6 +2671,10 @@ namespace Framework.Constants
         UiAction = 339,
         Unk340 = 340,
         LearnWarbanScene = 341,
+        Unk342 = 342,
+        Unk343 = 343,
+        Unk344 = 344, // some kind of teleport
+        AssistAction = 345, // MiscValue[0] = AssistActionType, MiscValue[1] = ID, depends on type
 
         TotalSpellEffects
     }

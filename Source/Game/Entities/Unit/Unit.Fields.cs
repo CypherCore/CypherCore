@@ -458,6 +458,8 @@ namespace Game.Entities
         public ObjectGuid castId;
         public SpellInfo Spell;
         public SpellCastVisual SpellVisual;
+        public uint StartTimeMs;
+        public uint Duration;
         public uint damage;
         public uint originalDamage;
         public SpellSchoolMask schoolMask;

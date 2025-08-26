@@ -5,10 +5,18 @@ using Framework.Constants;
 
 namespace Game.DataStorage
 {
-    public sealed class BankBagSlotPricesRecord
+    public sealed class BankTabRecord
     {
         public uint Id;
-        public uint Cost;
+        public ulong Cost;
+        public byte BankType;
+        public sbyte OrderIndex;
+        public int PlayerConditionID;
+        public int PurchasePromptTitle;
+        public int PurchasePromptBody;
+        public int PurchasePromptConfirmation;
+        public int TabCleanupConfirmation;
+        public int TabNameEditBoxHeader;
     }
 
     public sealed class BannedAddonsRecord
@@ -16,7 +24,7 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public string Version;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class BarberShopStyleRecord
@@ -63,7 +71,7 @@ namespace Game.DataStorage
         public int CovenantID;
 
         public bool HasFlag(BattlePetSpeciesFlags battlePetSpeciesFlags) { return (Flags & (int)battlePetSpeciesFlags) != 0; }
-}
+    }
 
     public sealed class BattlePetSpeciesStateRecord
     {

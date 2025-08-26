@@ -2722,11 +2722,11 @@ namespace Game
 
             //                                         0      1             2                     3                     4                5
             SQLResult result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID, HealthScalingExpansion, " +
-                //6               7             8              9               10                    11         12
-                "HealthModifier, ManaModifier, ArmorModifier, DamageModifier, CreatureDifficultyID, TypeFlags, TypeFlags2, " +
-                //13      14                15          16       17
+                //   6               7             8              9               10                    11         12          13
+                "HealthModifier, ManaModifier, ArmorModifier, DamageModifier, CreatureDifficultyID, TypeFlags, TypeFlags2, TypeFlags3, " +
+                //   14      15                16          17       18
                 "LootID, PickPocketLootID, SkinLootID, GoldMin, GoldMax," +
-                //18            19            20            21            22            23            24            25
+                //   19            20            21            22            23            24            25            26
                 "StaticFlags1, StaticFlags2, StaticFlags3, StaticFlags4, StaticFlags5, StaticFlags6, StaticFlags7, StaticFlags8 " +
                 "FROM creature_template_difficulty ORDER BY Entry");
             if (result.IsEmpty())
@@ -2760,12 +2760,13 @@ namespace Game
                 creatureDifficulty.CreatureDifficultyID = result.Read<int>(10);
                 creatureDifficulty.TypeFlags = (CreatureTypeFlags)result.Read<uint>(11);
                 creatureDifficulty.TypeFlags2 = result.Read<uint>(12);
-                creatureDifficulty.LootID = result.Read<uint>(13);
-                creatureDifficulty.PickPocketLootID = result.Read<uint>(14);
-                creatureDifficulty.SkinLootID = result.Read<uint>(15);
-                creatureDifficulty.GoldMin = result.Read<uint>(16);
-                creatureDifficulty.GoldMax = result.Read<uint>(17);
-                creatureDifficulty.StaticFlags = new(result.Read<uint>(18), result.Read<uint>(19), result.Read<uint>(20), result.Read<uint>(21), result.Read<uint>(22), result.Read<uint>(23), result.Read<uint>(24), result.Read<uint>(25));
+                creatureDifficulty.TypeFlags3 = result.Read<uint>(13);
+                creatureDifficulty.LootID = result.Read<uint>(14);
+                creatureDifficulty.PickPocketLootID = result.Read<uint>(15);
+                creatureDifficulty.SkinLootID = result.Read<uint>(16);
+                creatureDifficulty.GoldMin = result.Read<uint>(17);
+                creatureDifficulty.GoldMax = result.Read<uint>(18);
+                creatureDifficulty.StaticFlags = new(result.Read<uint>(19), result.Read<uint>(20), result.Read<uint>(21), result.Read<uint>(22), result.Read<uint>(23), result.Read<uint>(24), result.Read<uint>(25), result.Read<uint>(26));
 
                 // TODO: Check if this still applies
                 creatureDifficulty.DamageModifier *= Creature.GetDamageMod(template.Classification);
@@ -10997,10 +10998,6 @@ namespace Game
             if (!result.IsEmpty())
                 Global.GuildMgr.SetNextGuildId(result.Read<uint>(0) + 1);
 
-            result = DB.Characters.Query("SELECT MAX(itemId) from character_void_storage");
-            if (!result.IsEmpty())
-                _voidItemId = result.Read<ulong>(0) + 1;
-
             result = DB.World.Query("SELECT MAX(guid) FROM creature");
             if (!result.IsEmpty())
                 _creatureSpawnId = result.Read<ulong>(0) + 1;
@@ -11035,15 +11032,6 @@ namespace Game
                 Global.WorldMgr.StopNow();
             }
             return _mailId++;
-        }
-        public ulong GenerateVoidStorageItemId()
-        {
-            if (_voidItemId >= 0xFFFFFFFFFFFFFFFE)
-            {
-                Log.outError(LogFilter.Misc, "_voidItemId overflow!! Can't continue, shutting down server. ");
-                Global.WorldMgr.StopNow(ShutdownExitCode.Error);
-            }
-            return _voidItemId++;
         }
         public ulong GenerateCreatureSpawnId()
         {
@@ -11789,7 +11777,6 @@ namespace Game
         uint _hiPetNumber;
         ulong _creatureSpawnId;
         ulong _gameObjectSpawnId;
-        ulong _voidItemId;
         uint[] _playerXPperLevel;
         Dictionary<uint, uint> _baseXPTable = new();
         #endregion

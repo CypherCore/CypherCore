@@ -73,7 +73,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_BATTLEGROUND_RANDOM, "INSERT INTO character_battleground_random (guid) VALUES (?)");
 
             PrepareStatement(CharStatements.SEL_CHARACTER, "SELECT c.guid, account, name, race, class, gender, level, xp, money, inventorySlots, inventoryBagFlags, bagSlotFlags1, bagSlotFlags2, bagSlotFlags3, bagSlotFlags4, bagSlotFlags5, " +
-                "bankSlots, bankBagFlags, bankBagSlotFlags1, bankBagSlotFlags2, bankBagSlotFlags3, bankBagSlotFlags4, bankBagSlotFlags5, bankBagSlotFlags6, bankBagSlotFlags7, restState, playerFlags, playerFlagsEx, " +
+                "bankSlots, bankTabs, bankBagFlags, restState, playerFlags, playerFlagsEx, " +
                 "position_x, position_y, position_z, map, orientation, taximask, createTime, createMode, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, " +
                 "resettalents_time, primarySpecialization, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, summonedPetNumber, at_login, zone, online, death_expire_time, taxi_path, dungeonDifficulty, " +
                 "totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, " +
@@ -451,14 +451,14 @@ namespace Framework.Database
 
             // Player saving
             PrepareStatement(CharStatements.INS_CHARACTER, "INSERT INTO characters (guid, account, name, race, class, gender, level, xp, money, inventorySlots, inventoryBagFlags, bagSlotFlags1, bagSlotFlags2, bagSlotFlags3, bagSlotFlags4, bagSlotFlags5, " +
-                "bankSlots, bankBagFlags, bankBagSlotFlags1, bankBagSlotFlags2, bankBagSlotFlags3, bankBagSlotFlags4, bankBagSlotFlags5, bankBagSlotFlags6, bankBagSlotFlags7, restState, playerFlags, playerFlagsEx, " +
+                "bankSlots, bankTabs, bankBagFlags, restState, playerFlags, playerFlagsEx, " +
                 "map, instance_id, dungeonDifficulty, raidDifficulty, legacyRaidDifficulty, position_x, position_y, position_z, orientation, trans_x, trans_y, trans_z, trans_o, transguid, " +
                 "taximask, createTime, createMode, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, primarySpecialization, " +
                 "extra_flags, summonedPetNumber, at_login, death_expire_time, taxi_path, totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, power1, power2, power3, " +
                 "power4, power5, power6, power7, power8, power9, power10, latency, activeTalentGroup, lootSpecId, exploredZones, equipmentCache, knownTitles, actionBars, lastLoginBuild) VALUES " +
-                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             PrepareStatement(CharStatements.UPD_CHARACTER, "UPDATE characters SET name=?,race=?,class=?,gender=?,level=?,xp=?,money=?,inventorySlots=?,inventoryBagFlags=?,bagSlotFlags1=?,bagSlotFlags2=?,bagSlotFlags3=?,bagSlotFlags4=?,bagSlotFlags5=?," +
-                "bankSlots=?,bankBagFlags=?,bankBagSlotFlags1=?,bankBagSlotFlags2=?,bankBagSlotFlags3=?,bankBagSlotFlags4=?,bankBagSlotFlags5=?,bankBagSlotFlags6=?,bankBagSlotFlags7=?,restState=?,playerFlags=?,playerFlagsEx=?," +
+                "bankSlots=?,bankTabs=?,bankBagFlags=?,restState=?,playerFlags=?,playerFlagsEx=?," +
                 "map=?,instance_id=?,dungeonDifficulty=?,raidDifficulty=?,legacyRaidDifficulty=?,position_x=?,position_y=?,position_z=?,orientation=?,trans_x=?,trans_y=?,trans_z=?,trans_o=?,transguid=?,taximask=?,cinematic=?,totaltime=?,leveltime=?,rest_bonus=?," +
                 "logout_time=?,is_logout_resting=?,resettalents_cost=?,resettalents_time=?,numRespecs=?,primarySpecialization=?,extra_flags=?,summonedPetNumber=?,at_login=?,zone=?,death_expire_time=?,taxi_path=?," +
                 "totalKills=?,todayKills=?,yesterdayKills=?,chosenTitle=?," +
@@ -654,12 +654,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS, "DELETE FROM character_trait_config WHERE guid = ? AND traitConfigId = ?");
             PrepareStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS_BY_CHAR, "DELETE FROM character_trait_config WHERE guid = ?");
 
-            // Void Storage
-            PrepareStatement(CharStatements.SEL_CHAR_VOID_STORAGE, "SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?");
-            PrepareStatement(CharStatements.REP_CHAR_VOID_STORAGE_ITEM, "REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_CHAR_GUID, "DELETE FROM character_void_storage WHERE playerGuid = ?");
-            PrepareStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT, "DELETE FROM character_void_storage WHERE slot = ? AND playerGuid = ?");
-
             // CompactUnitFrame profiles
             PrepareStatement(CharStatements.SEL_CHAR_CUF_PROFILES, "SELECT id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, topPoint, bottomPoint, leftPoint, topOffset, bottomOffset, leftOffset FROM character_cuf_profiles WHERE guid = ?");
             PrepareStatement(CharStatements.REP_CHAR_CUF_PROFILES, "REPLACE INTO character_cuf_profiles (guid, id, name, frameHeight, frameWidth, sortBy, healthText, boolOptions, topPoint, bottomPoint, leftPoint, topOffset, bottomOffset, leftOffset) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -769,11 +763,17 @@ namespace Framework.Database
             PrepareStatement(CharStatements.INS_INSTANCE, "INSERT INTO instance (instanceId, data, completedEncountersMask, entranceWorldSafeLocId) VALUES (?, ?, ?, ?)");
 
             PrepareStatement(CharStatements.SEL_PLAYER_DATA_ELEMENTS_CHARACTER, "SELECT playerDataElementCharacterId, floatValue, int64Value FROM character_player_data_element WHERE characterGuid = ?");
+            PrepareStatement(CharStatements.DEL_PLAYER_DATA_ELEMENTS_CHARACTER_BY_GUID, "DELETE FROM character_player_data_element WHERE characterGuid = ?");
             PrepareStatement(CharStatements.DEL_PLAYER_DATA_ELEMENTS_CHARACTER, "DELETE FROM character_player_data_element WHERE characterGuid = ? AND playerDataElementCharacterId = ?");
             PrepareStatement(CharStatements.INS_PLAYER_DATA_ELEMENTS_CHARACTER, "INSERT INTO character_player_data_element (characterGuid, playerDataElementCharacterId, floatValue, int64Value) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.SEL_PLAYER_DATA_FLAGS_CHARACTER, "SELECT storageIndex, mask FROM character_player_data_flag WHERE characterGuid = ?");
+            PrepareStatement(CharStatements.DEL_PLAYER_DATA_FLAGS_CHARACTER_BY_GUID, "DELETE FROM character_player_data_flag WHERE characterGuid = ?");
             PrepareStatement(CharStatements.DEL_PLAYER_DATA_FLAGS_CHARACTER, "DELETE FROM character_player_data_flag WHERE characterGuid = ? AND storageIndex = ?");
             PrepareStatement(CharStatements.INS_PLAYER_DATA_FLAGS_CHARACTER, "INSERT INTO character_player_data_flag (characterGuid, storageIndex, mask) VALUES (?, ?, ?)");
+
+            PrepareStatement(CharStatements.SEL_CHARACTER_BANK_TAB_SETTINGS, "SELECT tabId, name, icon, description, depositFlags FROM character_bank_tab_settings WHERE characterGuid = ?");
+            PrepareStatement(CharStatements.DEL_CHARACTER_BANK_TAB_SETTINGS, "DELETE FROM character_bank_tab_settings WHERE characterGuid = ?");
+            PrepareStatement(CharStatements.INS_CHARACTER_BANK_TAB_SETTINGS, "INSERT INTO character_bank_tab_settings (characterGuid, tabId, name, icon, description, depositFlags) VALUES (?, ?, ?, ?, ?, ?)");
         }
     }
 
@@ -1301,11 +1301,6 @@ namespace Framework.Database
         DEL_CHAR_TRAIT_CONFIGS,
         DEL_CHAR_TRAIT_CONFIGS_BY_CHAR,
 
-        SEL_CHAR_VOID_STORAGE,
-        REP_CHAR_VOID_STORAGE_ITEM,
-        DEL_CHAR_VOID_STORAGE_ITEM_BY_CHAR_GUID,
-        DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT,
-
         SEL_CHAR_CUF_PROFILES,
         REP_CHAR_CUF_PROFILES,
         DEL_CHAR_CUF_PROFILES_BY_ID,
@@ -1403,11 +1398,17 @@ namespace Framework.Database
         INS_INSTANCE,
 
         SEL_PLAYER_DATA_ELEMENTS_CHARACTER,
+        DEL_PLAYER_DATA_ELEMENTS_CHARACTER_BY_GUID,
         DEL_PLAYER_DATA_ELEMENTS_CHARACTER,
         INS_PLAYER_DATA_ELEMENTS_CHARACTER,
         SEL_PLAYER_DATA_FLAGS_CHARACTER,
+        DEL_PLAYER_DATA_FLAGS_CHARACTER_BY_GUID,
         DEL_PLAYER_DATA_FLAGS_CHARACTER,
         INS_PLAYER_DATA_FLAGS_CHARACTER,
+
+        SEL_CHARACTER_BANK_TAB_SETTINGS,
+        DEL_CHARACTER_BANK_TAB_SETTINGS,
+        INS_CHARACTER_BANK_TAB_SETTINGS,
 
         MAX_CHARACTERDATABASE_STATEMENTS
     }

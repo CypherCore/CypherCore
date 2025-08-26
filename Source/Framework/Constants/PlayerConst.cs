@@ -532,7 +532,10 @@ namespace Framework.Constants
         AccountSecured = 0x1000, // Script_IsAccountSecured
         OverrideTransportServerTime = 0x8000,
         MentorRestricted = 0x20000,
-        WeeklyRewardAvailable = 0x40000
+        HasAccountBankLock = 0x40000,
+        CharacterBankDisabled = 0x80000,
+        CharacterBankConversionFailed = 0x100000,
+        AccountBankDisabled = 0x200000,
     }
 
     public enum PlayerFieldByte2Flags
@@ -592,14 +595,14 @@ namespace Framework.Constants
         // first slot for item stored (in any way in player items data)
         Start = 0,
         // last+1 slot for item stored (in any way in player items data)
-        End = 232,
+        End = 105,
         Count = (End - Start)
     }
 
-    enum AccountBankBagSlots
+    public enum AccountBankBagSlots
     {
-        Start = 227,
-        End = 232
+        Start = 100,
+        End = 105
     }
 
     public enum PlayerTitle : ulong

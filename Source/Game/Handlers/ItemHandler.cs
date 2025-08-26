@@ -1097,14 +1097,6 @@ namespace Game
             SendPacket(new BagCleanupFinished());
         }
 
-        [WorldPacketHandler(ClientOpcodes.SortReagentBankBags, Processing = PacketProcessing.Inplace)]
-        void HandleSortReagentBankBags(SortReagentBankBags sortReagentBankBags)
-        {
-            // TODO: Implement sorting
-            // Placeholder to prevent completely locking out bags clientside
-            SendPacket(new BagCleanupFinished());
-        }
-
         [WorldPacketHandler(ClientOpcodes.RemoveNewItem, Processing = PacketProcessing.Inplace)]
         void HandleRemoveNewItem(RemoveNewItem removeNewItem)
         {
@@ -1132,18 +1124,6 @@ namespace Game
                 _player.SetBagSlotFlag(changeBagSlotFlag.BagIndex, changeBagSlotFlag.FlagToChange);
             else
                 _player.RemoveBagSlotFlag(changeBagSlotFlag.BagIndex, changeBagSlotFlag.FlagToChange);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.ChangeBankBagSlotFlag, Processing = PacketProcessing.Inplace)]
-        void HandleChangeBankBagSlotFlag(ChangeBankBagSlotFlag changeBankBagSlotFlag)
-        {
-            if (changeBankBagSlotFlag.BagIndex >= _player.m_activePlayerData.BankBagSlotFlags.GetSize())
-                return;
-
-            if (changeBankBagSlotFlag.On)
-                _player.SetBankBagSlotFlag(changeBankBagSlotFlag.BagIndex, changeBankBagSlotFlag.FlagToChange);
-            else
-                _player.RemoveBankBagSlotFlag(changeBankBagSlotFlag.BagIndex, changeBankBagSlotFlag.FlagToChange);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetBackpackAutosortDisabled, Processing = PacketProcessing.Inplace)]

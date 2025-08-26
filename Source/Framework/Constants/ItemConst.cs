@@ -144,20 +144,14 @@ namespace Framework.Constants
         public const byte ItemStart = 35;
         public const byte ItemEnd = 63;
 
-        public const byte BankItemStart = 63;
-        public const byte BankItemEnd = 91;
+        public const byte BankBagStart = 63;
+        public const byte BankBagEnd = 69;
 
-        public const byte BankBagStart = 91;
-        public const byte BankBagEnd = 98;
+        public const byte BuyBackStart = 69;
+        public const byte BuyBackEnd = 81;
 
-        public const byte BuyBackStart = 98;
-        public const byte BuyBackEnd = 110;
-
-        public const byte ReagentStart = 110;
-        public const byte ReagentEnd = 208;
-
-        public const byte ChildEquipmentStart = 208;
-        public const byte ChildEquipmentEnd = 211;
+        public const byte ChildEquipmentStart = 81;
+        public const byte ChildEquipmentEnd = 84;
 
         public const byte Bag0 = 255;
         public const byte DefaultSize = 16;
@@ -165,22 +159,22 @@ namespace Framework.Constants
 
     enum EquipableSpellSlots
     {
-        OffensiveSlot1 = 211,
-        OffensiveSlot2 = 212,
-        OffensiveSlot3 = 213,
-        OffensiveSlot4 = 214,
-        UtilitySlot1 = 215,
-        UtilitySlot2 = 216,
-        UtilitySlot3 = 217,
-        UtilitySlot4 = 218,
-        DefensiveSlot1 = 219,
-        DefensiveSlot2 = 220,
-        DefensiveSlot3 = 221,
-        DefensiveSlot4 = 222,
-        WeaponSlot1 = 223,
-        WeaponSlot2 = 224,
-        WeaponSlot3 = 225,
-        WeaponSlot4 = 226,
+        OffensiveSlot1 = 84,
+        OffensiveSlot2 = 85,
+        OffensiveSlot3 = 86,
+        OffensiveSlot4 = 87,
+        UtilitySlot1 = 88,
+        UtilitySlot2 = 89,
+        UtilitySlot3 = 90,
+        UtilitySlot4 = 91,
+        DefensiveSlot1 = 92,
+        DefensiveSlot2 = 93,
+        DefensiveSlot3 = 94,
+        DefensiveSlot4 = 95,
+        WeaponSlot1 = 96,
+        WeaponSlot2 = 97,
+        WeaponSlot3 = 98,
+        WeaponSlot4 = 99,
     }
 
     public struct EquipmentSlot
@@ -761,7 +755,7 @@ namespace Framework.Constants
         BnetAccountUntilEquipped = 9,
     }
 
-    public enum ItemClass : sbyte
+    public enum ItemClass : int
     {
         None = -1,
         Consumable = 0,
@@ -1399,6 +1393,8 @@ namespace Framework.Constants
         BankNotAccessible = 128,// This Character Does Not Have Access To This Bank.
         CantTradeAccountItem = 129,// You Can't Trade An Item From The Warband Bank.
         AccountMoneyLocked = 130,// You cannot withdraw or deposit gold from the warband bank currently; please try again later.
+        CharacterBankNotAccessible = 131,// This character does not have access to this bank.
+        CharacterBankNotConverted = 132,// Your character's bank has not been converted. Please try again later.
     }
 
     public enum BankType
@@ -1531,6 +1527,9 @@ namespace Framework.Constants
         PriorityJunk = 0x10,
         PriorityQuestItems = 0x20,
         ExcludeJunkSell = 0x40,
+        PriorityReagents = 0x80,
+        ExpansionCurrent = 0x100,
+        ExpansionLegacy = 0x200,
     }
 
     public enum LootStoreItemType

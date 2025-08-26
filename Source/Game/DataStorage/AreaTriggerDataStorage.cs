@@ -226,8 +226,8 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger create properties. DB table `areatrigger_create_properties` is empty.");
             }
 
-            //                                                       0                               1         2           3             4                5             6        7                 8
-            SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit`");
+            //                                                        0                              1         2                     3             4                5             6        7                 8
+            SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, IsCustom, ExtraTimeForBlending, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit`");
             if (!circularMovementInfos.IsEmpty())
             {
                 do
@@ -243,7 +243,7 @@ namespace Game.DataStorage
 
                     AreaTriggerOrbitInfo orbitInfo = new();
 
-                    orbitInfo.StartDelay = circularMovementInfos.Read<uint>(2);
+                    orbitInfo.ExtraTimeForBlending = circularMovementInfos.Read<int>(2);
 
                     float ValidateAndSetFloat(float value)
                     {

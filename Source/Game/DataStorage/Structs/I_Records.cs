@@ -349,6 +349,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort ChrSpecID;
         public uint SpellID;
+        public ushort TraitSubTreeID;
         public byte Threshold;
         public uint ItemSetID;
     }

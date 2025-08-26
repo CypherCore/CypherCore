@@ -164,8 +164,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_AZERITE_UNLOCK_MAPPING, "SELECT ID, ItemLevel, ItemBonusListHead, ItemBonusListShoulders, ItemBonusListChest, " +
                 "AzeriteUnlockMappingSetID FROM azerite_unlock_mapping WHERE (`VerifiedBuild` > 0) = ?");
 
-            // BankBagSlotPrices.db2
-            PrepareStatement(HotfixStatements.SEL_BANK_BAG_SLOT_PRICES, "SELECT ID, Cost FROM bank_bag_slot_prices WHERE (`VerifiedBuild` > 0) = ?");
+            // BankTab.db2
+            PrepareStatement(HotfixStatements.SEL_BANK_TAB, "SELECT ID, Cost, BankType, OrderIndex, PlayerConditionID, PurchasePromptTitle, PurchasePromptBody, " +
+                "PurchasePromptConfirmation, TabCleanupConfirmation, TabNameEditBoxHeader FROM bank_tab WHERE (`VerifiedBuild` > 0) = ?");
 
             // BannedAddons.db2
             PrepareStatement(HotfixStatements.SEL_BANNED_ADDONS, "SELECT ID, Name, Version, Flags FROM banned_addons WHERE (`VerifiedBuild` > 0) = ?");
@@ -222,8 +223,8 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES_LOCALE, "SELECT ID, Name_lang FROM cfg_categories_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // CfgRegions.db2
-            PrepareStatement(HotfixStatements.SEL_CFG_REGIONS, "SELECT ID, Tag, RegionID, Raidorigin, RegionGroupMask, ChallengeOrigin FROM cfg_regions" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_CFG_REGIONS, "SELECT ID, Tag, RegionID, Raidorigin, RegionGroupMask, ChallengeOrigin, TimeEventRegionGroupID" +
+                " FROM cfg_regions WHERE (`VerifiedBuild` > 0) = ?");
 
             // ChallengeModeItemBonusOverride.db2
             PrepareStatement(HotfixStatements.SEL_CHALLENGE_MODE_ITEM_BONUS_OVERRIDE, "SELECT ID, ItemBonusTreeGroupID, DstItemBonusTreeID, Value, " +
@@ -259,12 +260,12 @@ namespace Framework.Database
             // ChrClasses.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CLASSES, "SELECT Name, Filename, NameMale, NameFemale, PetNameToken, Description, RoleInfoString, DisabledString, " +
                 "HyphenatedNameMale, HyphenatedNameFemale, CreateScreenFileDataID, SelectScreenFileDataID, IconFileDataID, LowResScreenFileDataID, Flags, " +
-                "SpellTextureBlobFileDataID, ArmorTypeMask, CharStartKitUnknown901, MaleCharacterCreationVisualFallback, " +
+                "StartingLevel, SpellTextureBlobFileDataID, ArmorTypeMask, CharStartKitUnknown901, MaleCharacterCreationVisualFallback, " +
                 "MaleCharacterCreationIdleVisualFallback, FemaleCharacterCreationVisualFallback, FemaleCharacterCreationIdleVisualFallback, " +
                 "CharacterCreationIdleGroundVisualFallback, CharacterCreationGroundVisualFallback, AlteredFormCharacterCreationIdleVisualFallback, " +
-                "CharacterCreationAnimLoopWaitTimeMsFallback, CinematicSequenceID, DefaultSpec, ID, PrimaryStatPriority, DisplayPower, " +
-                "RangedAttackPowerPerAgility, AttackPowerPerAgility, AttackPowerPerStrength, SpellClassSet, ClassColorR, ClassColorG, ClassColorB, RolesMask" +
-                " FROM chr_classes WHERE (`VerifiedBuild` > 0) = ?");
+                "CharacterCreationAnimLoopWaitTimeMsFallback, CinematicSequenceID, DefaultSpec, ID, HasStrengthBonus, PrimaryStatPriority, DisplayPower, " +
+                "RangedAttackPowerPerAgility, AttackPowerPerAgility, AttackPowerPerStrength, SpellClassSet, ClassColorR, ClassColorG, ClassColorB, RolesMask, " +
+                "DamageBonusStat, HasRelicSlot FROM chr_classes WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CHR_CLASSES_LOCALE, "SELECT ID, Name_lang, NameMale_lang, NameFemale_lang, Description_lang, RoleInfoString_lang, " +
                 "DisabledString_lang, HyphenatedNameMale_lang, HyphenatedNameFemale_lang FROM chr_classes_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
@@ -391,7 +392,7 @@ namespace Framework.Database
 
             // CreatureFamily.db2
             PrepareStatement(HotfixStatements.SEL_CREATURE_FAMILY, "SELECT ID, Name, MinScale, MinScaleLevel, MaxScale, MaxScaleLevel, PetFoodMask, PetTalentType, " +
-                "IconFileID, SkillLine1, SkillLine2 FROM creature_family WHERE (`VerifiedBuild` > 0) = ?");
+                "CategoryEnumID, IconFileID, SkillLine1, SkillLine2 FROM creature_family WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_CREATURE_FAMILY_LOCALE, "SELECT ID, Name_lang FROM creature_family_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // CreatureLabel.db2
@@ -482,7 +483,7 @@ namespace Framework.Database
 
             // ExpectedStat.db2
             PrepareStatement(HotfixStatements.SEL_EXPECTED_STAT, "SELECT ID, ExpansionID, CreatureHealth, PlayerHealth, CreatureAutoAttackDps, CreatureArmor, " +
-                "PlayerMana, PlayerPrimaryStat, PlayerSecondaryStat, ArmorConstant, CreatureSpellDamage, Lvl FROM expected_stat" +
+                "PlayerMana, PlayerPrimaryStat, PlayerSecondaryStat, ArmorConstant, CreatureSpellDamage, ContentSetID, Lvl FROM expected_stat" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ExpectedStatMod.db2
@@ -818,7 +819,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_SET_LOCALE, "SELECT ID, Name_lang FROM item_set_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // ItemSetSpell.db2
-            PrepareStatement(HotfixStatements.SEL_ITEM_SET_SPELL, "SELECT ID, ChrSpecID, SpellID, Threshold, ItemSetID FROM item_set_spell" +
+            PrepareStatement(HotfixStatements.SEL_ITEM_SET_SPELL, "SELECT ID, ChrSpecID, SpellID, TraitSubTreeID, Threshold, ItemSetID FROM item_set_spell" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemSparse.db2
@@ -937,7 +938,9 @@ namespace Framework.Database
 
             // MapChallengeMode.db2
             PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, ExpansionLevel, RequiredWorldStateID, CriteriaCount1, " +
-                "CriteriaCount2, CriteriaCount3 FROM map_challenge_mode WHERE (`VerifiedBuild` > 0) = ?");
+                "CriteriaCount2, CriteriaCount3, FirstRewardQuestID1, FirstRewardQuestID2, FirstRewardQuestID3, FirstRewardQuestID4, FirstRewardQuestID5, " +
+                "FirstRewardQuestID6, RewardQuestID1, RewardQuestID2, RewardQuestID3, RewardQuestID4, RewardQuestID5, RewardQuestID6 FROM map_challenge_mode" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE_LOCALE, "SELECT ID, Name_lang FROM map_challenge_mode_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
 
@@ -1407,8 +1410,9 @@ namespace Framework.Database
                 " FROM spell_visual_effect_name WHERE (`VerifiedBuild` > 0) = ?");
 
             // SpellVisualKit.db2
-            PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL_KIT, "SELECT ID, ClutterLevel, FallbackSpellVisualKitId, DelayMin, DelayMax, Flags1, Flags2" +
-                " FROM spell_visual_kit WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL_KIT, "SELECT ID, ClutterLevel, FallbackSpellVisualKitId, DelayMin, DelayMax, " +
+                "MinimumSpellVisualDensityFilterType, MinimumSpellVisualDensityFilterParam, ReducedSpellVisualDensityFilterType, " +
+                "ReducedSpellVisualDensityFilterParam, Flags1, Flags2 FROM spell_visual_kit WHERE (`VerifiedBuild` > 0) = ?");
 
             // SpellVisualMissile.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL_MISSILE, "SELECT CastOffset1, CastOffset2, CastOffset3, ImpactOffset1, ImpactOffset2, ImpactOffset3, ID, " +
@@ -1648,11 +1652,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_VIGNETTE_LOCALE, "SELECT ID, Name_lang FROM vignette_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // WarbandScene.db2
-            PrepareStatement(HotfixStatements.SEL_WARBAND_SCENE, "SELECT Name, Description, Source, PositionX, PositionY, PositionZ, LookAtX, LookAtY, LookAtZ, ID, " +
-                "MapID, Fov, TimeOfDay, Flags, SoundAmbienceID, Quality, TextureKit, DefaultScenePriority, SourceType FROM warband_scene" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
-            PrepareStatement(HotfixStatements.SEL_WARBAND_SCENE_LOCALE, "SELECT ID, Name_lang, Description_lang, Source_lang FROM warband_scene_locale" +
-                " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+            PrepareStatement(HotfixStatements.SEL_WARBAND_SCENE, "SELECT Name, Description, PositionX, PositionY, PositionZ, LookAtX, LookAtY, LookAtZ, ID, MapID, Fov, " +
+                "TimeOfDay, Flags, SoundAmbienceID, Quality, TextureKit, DefaultScenePriority FROM warband_scene WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_WARBAND_SCENE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM warband_scene_locale WHERE (`VerifiedBuild` > 0) = ?" +
+                " AND locale = ?");
 
             // WmoAreaTable.db2
             PrepareStatement(HotfixStatements.SEL_WMO_AREA_TABLE, "SELECT AreaName, ID, WmoID, NameSetID, WmoGroupID, SoundProviderPref, SoundProviderPrefUnderwater, " +
@@ -1759,7 +1762,7 @@ namespace Framework.Database
 
         SEL_AZERITE_UNLOCK_MAPPING,
 
-        SEL_BANK_BAG_SLOT_PRICES,
+        SEL_BANK_TAB,
 
         SEL_BANNED_ADDONS,
 

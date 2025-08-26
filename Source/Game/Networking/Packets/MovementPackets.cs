@@ -333,9 +333,9 @@ namespace Game.Networking.Packets
                 if (moveSpline.anim_tier != null)
                 {
                     data.WriteUInt32(moveSpline.anim_tier.TierTransitionId);
+                    data.WriteUInt8(moveSpline.anim_tier.AnimTier);
                     data.WriteInt32(moveSpline.effect_start_time);
                     data.WriteUInt32(0);
-                    data.WriteUInt8(moveSpline.anim_tier.AnimTier);
                 }
 
                 //if (HasUnknown901)
@@ -1473,9 +1473,9 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(TierTransitionID);
+            data.WriteUInt8(AnimTier);
             data.WriteUInt32(StartTime);
             data.WriteUInt32(EndTime);
-            data.WriteUInt8(AnimTier);
         }
     }
 

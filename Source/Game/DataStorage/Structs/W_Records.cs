@@ -10,7 +10,6 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public LocalizedString Description;
-        public LocalizedString Source;
         public Vector3 Position;
         public Vector3 LookAt;
         public uint Id;
@@ -22,7 +21,6 @@ namespace Game.DataStorage
         public sbyte Quality;
         public int TextureKit;
         public int DefaultScenePriority;
-        public sbyte SourceType;
 
         public WarbandSceneFlags GetFlags() { return (WarbandSceneFlags)Flags; }
     }

@@ -258,8 +258,8 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public int Flags;
-        public byte UsesPerWeek;
-        public byte MaxCharges;
+        public int UsesPerWeek;
+        public int MaxCharges;
         public int ChargeRecoveryTime;
         public int TypeMask;
 
@@ -346,7 +346,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public sbyte EquippedItemClass;
+        public int EquippedItemClass;
         public int EquippedItemInvTypes;
         public int EquippedItemSubclass;
     }
@@ -658,6 +658,10 @@ namespace Game.DataStorage
         public int FallbackSpellVisualKitId;
         public ushort DelayMin;
         public ushort DelayMax;
+        public int MinimumSpellVisualDensityFilterType;
+        public int MinimumSpellVisualDensityFilterParam;
+        public int ReducedSpellVisualDensityFilterType;
+        public int ReducedSpellVisualDensityFilterParam;
         public int[] Flags = new int[2];
     }
 

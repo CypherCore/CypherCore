@@ -657,13 +657,6 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    class SortReagentBankBags : ClientPacket
-    {
-        public SortReagentBankBags(WorldPacket packet) : base(packet) { }
-
-        public override void Read() { }
-    }
-
     class BagCleanupFinished : ServerPacket
     {
         public BagCleanupFinished() : base(ServerOpcodes.BagCleanupFinished, ConnectionType.Instance) { }
@@ -1003,24 +996,6 @@ namespace Game.Networking.Packets
                 ItemBonus.Context = lootItem.context;
                 if (lootItem.randomBonusListId != 0)
                     ItemBonus.BonusListIDs.Add(lootItem.randomBonusListId);
-            }
-        }
-
-        public ItemInstance(VoidStorageItem voidItem)
-        {
-            ItemID = voidItem.ItemEntry;
-
-            if (voidItem.FixedScalingLevel != 0)
-                Modifications.Values.Add(new ItemMod(voidItem.FixedScalingLevel, ItemModifier.TimewalkerLevel));
-
-            if (voidItem.ArtifactKnowledgeLevel != 0)
-                Modifications.Values.Add(new ItemMod(voidItem.ArtifactKnowledgeLevel, ItemModifier.ArtifactKnowledgeLevel));
-
-            if (!voidItem.BonusListIDs.Empty())
-            {
-                ItemBonus = new();
-                ItemBonus.Context = voidItem.Context;
-                ItemBonus.BonusListIDs = voidItem.BonusListIDs;
             }
         }
 

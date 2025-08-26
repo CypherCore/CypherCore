@@ -725,6 +725,25 @@ namespace Game.Entities
             }
         }
 
+        void _LoadCharacterBankTabSettings(SQLResult result)
+        {
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    if (result.Read<byte>(0) >= (InventorySlots.BankBagEnd - InventorySlots.BankBagStart))
+                        continue;
+
+                    SetCharacterBankTabSettings(result.Read<byte>(0), result.Read<string>(1), result.Read<string>(2),
+                        result.Read<string>(3), (BagSlotFlags)result.Read<uint>(4));
+
+                } while (result.NextRow());
+            }
+
+            while (m_activePlayerData.CharacterBankTabSettings.Size() < m_activePlayerData.NumCharacterBankTabs)
+                AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterBankTabSettings), new BankTabSettings());
+        }
+
         void _LoadCurrency(SQLResult result)
         {
             if (result.IsEmpty())
@@ -1272,7 +1291,13 @@ namespace Game.Entities
             });
 
             if (activeConfig >= 0)
-                SetActiveCombatTraitConfigID(m_activePlayerData.TraitConfigs[activeConfig].ID);
+            {
+                TraitConfig activeTraitConfig = m_activePlayerData.TraitConfigs[activeConfig];
+                SetActiveCombatTraitConfigID(activeTraitConfig.ID);
+                int activeSubTree = activeTraitConfig.SubTrees.FindIndexIf(subTree => subTree.Active != 0);
+                if (activeSubTree >= 0)
+                    SetCurrentCombatTraitConfigSubTreeID(activeTraitConfig.SubTrees[activeSubTree].TraitSubTreeID);
+            }
 
             foreach (TraitConfig traitConfig in m_activePlayerData.TraitConfigs)
             {
@@ -1339,55 +1364,6 @@ namespace Game.Entities
             }
 
             RemoveAtLoginFlag(AtLoginFlags.Resurrect);
-        }
-        void _LoadVoidStorage(SQLResult result)
-        {
-            if (result.IsEmpty())
-                return;
-
-            do
-            {
-                // SELECT itemId, itemEntry, slot, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs FROM character_void_storage WHERE playerGuid = ?
-                ulong itemId = result.Read<ulong>(0);
-                uint itemEntry = result.Read<uint>(1);
-                byte slot = result.Read<byte>(2);
-                ObjectGuid creatorGuid = result.Read<ulong>(3) != 0 ? ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3)) : ObjectGuid.Empty;
-                uint randomBonusListId = result.Read<uint>(4);
-                uint fixedScalingLevel = result.Read<uint>(5);
-                uint artifactKnowledgeLevel = result.Read<uint>(6);
-                ItemContext context = (ItemContext)result.Read<byte>(7);
-                List<uint> bonusListIDs = new();
-                var bonusListIdTokens = new StringArray(result.Read<string>(8), ' ');
-                for (var i = 0; i < bonusListIdTokens.Length; ++i)
-                {
-                    if (uint.TryParse(bonusListIdTokens[i], out uint id))
-                        bonusListIDs.Add(id);
-                }
-
-                if (itemId == 0)
-                {
-                    Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an item with an invalid id (item id: item id: {2}, entry: {3}).", GetGUID().ToString(), GetName(), itemId, itemEntry);
-                    continue;
-                }
-
-                if (Global.ObjectMgr.GetItemTemplate(itemEntry) == null)
-                {
-                    Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an item with an invalid entry (item id: item id: {2}, entry: {3}).", GetGUID().ToString(), GetName(), itemId, itemEntry);
-                    continue;
-                }
-
-                if (slot >= SharedConst.VoidStorageMaxSlot)
-                {
-                    Log.outError(LogFilter.Player, "Player:_LoadVoidStorage - Player (GUID: {0}, name: {1}) has an item with an invalid slot (item id: item id: {2}, entry: {3}, slot: {4}).", GetGUID().ToString(), GetName(), itemId, itemEntry, slot);
-                    continue;
-                }
-
-                _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
-
-                BonusData bonus = new(new ItemInstance(_voidStorageItems[slot]));
-                GetSession().GetCollectionMgr().AddItemAppearance(itemEntry, bonus.AppearanceModID);
-            }
-            while (result.NextRow());
         }
 
         public void _LoadMail(SQLResult mailsResult, SQLResult mailItemsResult, SQLResult artifactResult, SQLResult azeriteItemResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult)
@@ -2762,6 +2738,26 @@ namespace Game.Entities
             _playerDataFlagsNeedSave.Clear();
         }
 
+        void _SaveCharacterBankTabSettings(SQLTransaction trans)
+        {
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_BANK_TAB_SETTINGS);
+            stmt.AddValue(0, GetGUID().GetCounter());
+            trans.Append(stmt);
+
+            for (int i = 0; i < m_activePlayerData.CharacterBankTabSettings.Size(); ++i)
+            {
+                BankTabSettings tabSetting = m_activePlayerData.CharacterBankTabSettings[i];
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_BANK_TAB_SETTINGS);
+                stmt.AddValue(0, GetGUID().GetCounter());
+                stmt.AddValue(1, i);
+                stmt.AddValue(2, tabSetting.Name);
+                stmt.AddValue(3, tabSetting.Icon);
+                stmt.AddValue(4, tabSetting.Description);
+                stmt.AddValue(5, tabSetting.DepositFlags);
+                trans.Append(stmt);
+            }
+        }
+
         public void SaveInventoryAndGoldToDB(SQLTransaction trans)
         {
             _SaveInventory(trans);
@@ -2867,42 +2863,7 @@ namespace Game.Entities
                 }
             }
         }
-        void _SaveVoidStorage(SQLTransaction trans)
-        {
-            PreparedStatement stmt;
-            for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
-            {
-                if (_voidStorageItems[i] == null) // unused item
-                {
-                    // DELETE FROM void_storage WHERE slot = ? AND playerGuid = ?
-                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_SLOT);
-                    stmt.AddValue(0, i);
-                    stmt.AddValue(1, GetGUID().GetCounter());
-                }
 
-                else
-                {
-                    // REPLACE INTO character_void_storage (itemId, playerGuid, itemEntry, slot, creatorGuid, randomPropertyType, randomProperty, upgradeId, fixedScalingLevel, artifactKnowledgeLevel, bonusListIDs) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.REP_CHAR_VOID_STORAGE_ITEM);
-                    stmt.AddValue(0, _voidStorageItems[i].ItemId);
-                    stmt.AddValue(1, GetGUID().GetCounter());
-                    stmt.AddValue(2, _voidStorageItems[i].ItemEntry);
-                    stmt.AddValue(3, i);
-                    stmt.AddValue(4, _voidStorageItems[i].CreatorGuid.GetCounter());
-                    stmt.AddValue(5, (byte)_voidStorageItems[i].RandomBonusListId);
-                    stmt.AddValue(6, _voidStorageItems[i].FixedScalingLevel);
-                    stmt.AddValue(7, _voidStorageItems[i].ArtifactKnowledgeLevel);
-                    stmt.AddValue(8, (byte)_voidStorageItems[i].Context);
-
-                    StringBuilder bonusListIDs = new();
-                    foreach (uint bonusListID in _voidStorageItems[i].BonusListIDs)
-                        bonusListIDs.AppendFormat("{0} ", bonusListID);
-                    stmt.AddValue(9, bonusListIDs.ToString());
-                }
-
-                trans.Append(stmt);
-            }
-        }
         void _SaveCUFProfiles(SQLTransaction trans)
         {
             PreparedStatement stmt;
@@ -3006,10 +2967,8 @@ namespace Game.Entities
                 bagSlotFlags[i] = (BagSlotFlags)result.Read<uint>(fieldIndex++);
 
             byte bankSlots = result.Read<byte>(fieldIndex++);
-            BagSlotFlags[] bankBagSlotFlags = new BagSlotFlags[7];
+            byte bankTabs = result.Read<byte>(fieldIndex++);
             BagSlotFlags bankBagFlags = (BagSlotFlags)result.Read<uint>(fieldIndex++);
-            for (var i = 0; i < bankBagSlotFlags.Length; ++i)
-                bankBagSlotFlags[i] = (BagSlotFlags)result.Read<uint>(fieldIndex++);
 
             PlayerRestState restState = (PlayerRestState)result.Read<byte>(fieldIndex++);
             PlayerFlags playerFlags = (PlayerFlags)result.Read<uint>(fieldIndex++);
@@ -3179,9 +3138,8 @@ namespace Game.Entities
                 ReplaceAllBagSlotFlags(bagIndex, bagSlotFlags[bagIndex]);
 
             SetBankBagSlotCount(bankSlots);
+            SetCharacterBankTabCount(bankTabs);
             SetBankAutoSortDisabled(bankBagFlags.HasFlag(BagSlotFlags.DisableAutoSort));
-            for (int bagIndex = 0; bagIndex < bankBagSlotFlags.Length; ++bagIndex)
-                ReplaceAllBankBagSlotFlags(bagIndex, bankBagSlotFlags[bagIndex]);
 
             SetNativeGender(gender);
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), drunk);
@@ -3608,11 +3566,10 @@ namespace Game.Entities
             // must be before inventory (some items required reputation check)
             reputationMgr.LoadFromDB(holder.GetResult(PlayerLoginQueryLoad.Reputation));
 
+            _LoadCharacterBankTabSettings(holder.GetResult(PlayerLoginQueryLoad.BankTabSettings));
+
             _LoadInventory(holder.GetResult(PlayerLoginQueryLoad.Inventory), holder.GetResult(PlayerLoginQueryLoad.Artifacts), holder.GetResult(PlayerLoginQueryLoad.Azerite),
                         holder.GetResult(PlayerLoginQueryLoad.AzeriteMilestonePowers), holder.GetResult(PlayerLoginQueryLoad.AzeriteUnlockedEssences), holder.GetResult(PlayerLoginQueryLoad.AzeriteEmpowered), time_diff);
-
-            if (IsVoidStorageUnlocked())
-                _LoadVoidStorage(holder.GetResult(PlayerLoginQueryLoad.VoidStorage));
 
             // update items with duration and realtime
             UpdateItemDuration(time_diff, true);
@@ -3884,13 +3841,12 @@ namespace Game.Entities
                 foreach (uint bagSlotFlag in m_activePlayerData.BagSlotFlags)
                     stmt.AddValue(index++, bagSlotFlag);
                 stmt.AddValue(index++, GetBankBagSlotCount());
+                stmt.AddValue(index++, GetCharacterBankTabCount());
 
                 inventoryFlags = BagSlotFlags.None;
                 if (m_activePlayerData.BankAutoSortDisabled)
                     inventoryFlags |= BagSlotFlags.DisableAutoSort;
                 stmt.AddValue(index++, (uint)inventoryFlags);
-                foreach (uint bankBagSlotFlag in m_activePlayerData.BankBagSlotFlags)
-                    stmt.AddValue(index++, bankBagSlotFlag);
 
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
                 stmt.AddValue(index++, m_playerData.PlayerFlags);
@@ -4019,13 +3975,12 @@ namespace Game.Entities
                 foreach (uint bagSlotFlag in m_activePlayerData.BagSlotFlags)
                     stmt.AddValue(index++, bagSlotFlag);
                 stmt.AddValue(index++, GetBankBagSlotCount());
+                stmt.AddValue(index++, GetCharacterBankTabCount());
 
                 inventoryFlags = BagSlotFlags.None;
                 if (m_activePlayerData.BankAutoSortDisabled)
                     inventoryFlags |= BagSlotFlags.DisableAutoSort;
                 stmt.AddValue(index++, (uint)inventoryFlags);
-                foreach (uint bankBagSlotFlag in m_activePlayerData.BankBagSlotFlags)
-                    stmt.AddValue(index++, bankBagSlotFlag);
 
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
                 stmt.AddValue(index++, m_playerData.PlayerFlags);
@@ -4179,7 +4134,6 @@ namespace Game.Entities
             _SaveCustomizations(characterTransaction);
             _SaveBGData(characterTransaction);
             _SaveInventory(characterTransaction);
-            _SaveVoidStorage(characterTransaction);
             _SaveQuestStatus(characterTransaction);
             _SaveDailyQuestStatus(characterTransaction);
             _SaveWeeklyQuestStatus(characterTransaction);
@@ -4203,6 +4157,7 @@ namespace Game.Entities
             _SaveCurrency(characterTransaction);
             _SaveCUFProfiles(characterTransaction);
             _SavePlayerData(characterTransaction);
+            _SaveCharacterBankTabSettings(characterTransaction);
             if (_garrison != null)
                 _garrison.SaveToDB(characterTransaction);
 
@@ -4717,10 +4672,6 @@ namespace Game.Entities
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
-                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_CHAR_GUID);
-                    stmt.AddValue(0, guid);
-                    trans.Append(stmt);
-
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
@@ -4752,6 +4703,18 @@ namespace Game.Entities
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_TRAIT_CONFIGS_BY_CHAR);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_DATA_ELEMENTS_CHARACTER_BY_GUID);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_DATA_FLAGS_CHARACTER_BY_GUID);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_BANK_TAB_SETTINGS);
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 

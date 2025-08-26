@@ -651,6 +651,9 @@ namespace Framework.Constants
         Unk641 = 641,
         Unk642 = 642,
         ModRangedAttackSpeedFlat = 643,
+        Unk644 = 644,
+        Unk645 = 645,
+
         Total
     }
 

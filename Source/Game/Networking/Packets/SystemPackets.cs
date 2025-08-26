@@ -29,7 +29,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(KioskSessionDurationMinutes);
             _worldPacket.WriteInt64(RedeemForBalanceAmount);
 
-            _worldPacket.WriteUInt32(BpayStorePurchaseTimeout);
             _worldPacket.WriteUInt32(ClubsPresenceDelay);
             _worldPacket.WriteUInt32(ClubPresenceUnsubscribeDelay);
 
@@ -57,60 +56,58 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(VoiceEnabled);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
-            _worldPacket.WriteBit(BpayStoreEnabled);
             _worldPacket.WriteBit(BpayStoreAvailable);
             _worldPacket.WriteBit(BpayStoreDisabledByParentalControls);
             _worldPacket.WriteBit(ItemRestorationButtonEnabled);
-            _worldPacket.WriteBit(BrowserEnabled);
-
             _worldPacket.WriteBit(SessionAlert.HasValue);
             _worldPacket.WriteBit(RAFSystem.Enabled);
             _worldPacket.WriteBit(RAFSystem.RecruitingEnabled);
+
             _worldPacket.WriteBit(CharUndeleteEnabled);
             _worldPacket.WriteBit(RestrictedAccount);
             _worldPacket.WriteBit(CommerceServerEnabled);
             _worldPacket.WriteBit(TutorialEnabled);
-
             _worldPacket.WriteBit(VeteranTokenRedeemWillKick);
             _worldPacket.WriteBit(WorldTokenRedeemWillKick);
             _worldPacket.WriteBit(KioskModeEnabled);
             _worldPacket.WriteBit(CompetitiveModeEnabled);
+
             _worldPacket.WriteBit(RedeemForBalanceAvailable);
             _worldPacket.WriteBit(WarModeEnabled);
             _worldPacket.WriteBit(CommunitiesEnabled);
             _worldPacket.WriteBit(BnetGroupsEnabled);
-
             _worldPacket.WriteBit(CharacterCommunitiesEnabled);
             _worldPacket.WriteBit(ClubPresenceAllowSubscribeAll);
             _worldPacket.WriteBit(VoiceChatParentalDisabled);
             _worldPacket.WriteBit(VoiceChatParentalMuted);
+
             _worldPacket.WriteBit(QuestSessionEnabled);
             _worldPacket.WriteBit(IsChatMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.WriteBit(CommunityFinderEnabled);
             _worldPacket.WriteBit(BrowserCrashReporterEnabled);
             _worldPacket.WriteBit(SpeakForMeAllowed);
-
             _worldPacket.WriteBit(DoesAccountNeedAADCPrompt);
             _worldPacket.WriteBit(IsAccountOptedInToAADC);
+
             _worldPacket.WriteBit(LfgRequireAuthenticatorEnabled);
             _worldPacket.WriteBit(ScriptsDisallowedForBeta);
             _worldPacket.WriteBit(TimerunningEnabled);
             _worldPacket.WriteBit(WarGamesEnabled);
             _worldPacket.WriteBit(IsPlayerContentTrackingEnabled);
             _worldPacket.WriteBit(SellAllJunkEnabled);
-
             _worldPacket.WriteBit(GroupFinderEnabled);
             _worldPacket.WriteBit(IsPremadeGroupEnabled);
+
             _worldPacket.WriteBit(false); // unused 10.2.7
             _worldPacket.WriteBit(GuildEventsEditsEnabled);
             _worldPacket.WriteBit(GuildTradeSkillsEnabled);
-            _worldPacket.WriteBits(Unknown1027.GetByteCount(), 7);
+            _worldPacket.WriteBits(Unknown1027.GetByteCount(), 10);
             _worldPacket.WriteBit(BNSendWhisperUseV2Services);
             _worldPacket.WriteBit(BNSendGameDataUseV2Services);
             _worldPacket.WriteBit(IsAccountCurrencyTransferEnabled);
-            _worldPacket.WriteBit(false); // unused 11.0.7
 
+            _worldPacket.WriteBit(false); // unused 11.0.7
             _worldPacket.WriteBit(LobbyMatchmakerQueueFromMainlineEnabled);
             _worldPacket.WriteBit(CanSendLobbyMatchmakerPartyCustomizations);
             _worldPacket.WriteBit(AddonProfilerEnabled);
@@ -139,9 +136,7 @@ namespace Game.Networking.Packets
         }
 
         public bool VoiceEnabled;
-        public bool BrowserEnabled;
         public bool BpayStoreAvailable;
-        public bool BpayStoreEnabled;
         public SessionAlertConfig? SessionAlert;
         public EuropaTicketConfig? EuropaTicketSystemStatus;
         public uint CfgRealmID;
@@ -149,7 +144,6 @@ namespace Game.Networking.Packets
         public int CfgRealmRecID;
         public uint CommercePricePollTimeSeconds;
         public long RedeemForBalanceAmount;
-        public uint BpayStorePurchaseTimeout;
         public uint ClubsPresenceDelay;
         public uint ClubPresenceUnsubscribeDelay; // Timer for updating club presence when communities ui frame is hidden
         public uint KioskSessionDurationMinutes;
@@ -308,7 +302,6 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBit(BpayStoreEnabled);
             _worldPacket.WriteBit(BpayStoreAvailable);
             _worldPacket.WriteBit(BpayStoreDisabledByParentalControls);
             _worldPacket.WriteBit(CharUndeleteEnabled);
@@ -316,8 +309,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(VeteranTokenRedeemWillKick);
             _worldPacket.WriteBit(WorldTokenRedeemWillKick);
             _worldPacket.WriteBit(ExpansionPreorderInStore);
-
             _worldPacket.WriteBit(KioskModeEnabled);
+
             _worldPacket.WriteBit(CompetitiveModeEnabled);
             _worldPacket.WriteBit(BoostEnabled);
             _worldPacket.WriteBit(TrialBoostEnabled);
@@ -325,8 +318,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(PaidCharacterTransfersBetweenBnetAccountsEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterListEnabled);
             _worldPacket.WriteBit(LiveRegionCharacterCopyEnabled);
-
             _worldPacket.WriteBit(LiveRegionAccountCopyEnabled);
+
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(BrowserCrashReporterEnabled);
             _worldPacket.WriteBit(IsEmployeeAccount);
@@ -334,16 +327,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(NameReservationOnly);
             _worldPacket.WriteBit(LaunchDurationETA.HasValue);
             _worldPacket.WriteBit(TimerunningEnabled);
-
             _worldPacket.WriteBit(ScriptsDisallowedForBeta);
+
             _worldPacket.WriteBit(PlayerIdentityOptionsEnabled);
             _worldPacket.WriteBit(AccountExportEnabled);
             _worldPacket.WriteBit(AccountLockedPostExport);
             _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
 
             _worldPacket.WriteBit(BNSendWhisperUseV2Services);
-
             _worldPacket.WriteBit(BNSendGameDataUseV2Services);
+
             _worldPacket.WriteBit(CharacterSelectListModeRealmless);
             _worldPacket.WriteBit(WowTokenLimitedMode);
             _worldPacket.WriteBit(false); // unused 11.1.7
@@ -360,7 +353,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt64(RedeemForBalanceAmount);
             _worldPacket.WriteInt32(MaxCharactersOnThisRealm);
             _worldPacket.WriteInt32(LiveRegionCharacterCopySourceRegions.Count);
-            _worldPacket.WriteUInt32(BpayStorePurchaseTimeout);
             _worldPacket.WriteInt32(ActiveBoostType);
             _worldPacket.WriteInt32(TrialBoostType);
             _worldPacket.WriteInt32(MinimumExpansionLevel);
@@ -395,7 +387,6 @@ namespace Game.Networking.Packets
         public bool BpayStoreAvailable; // NYI
         public bool BpayStoreDisabledByParentalControls; // NYI
         public bool CharUndeleteEnabled;
-        public bool BpayStoreEnabled; // NYI
         public bool CommerceServerEnabled; // NYI
         public bool VeteranTokenRedeemWillKick; // NYI
         public bool WorldTokenRedeemWillKick; // NYI
@@ -428,7 +419,6 @@ namespace Game.Networking.Packets
         public uint CommercePricePollTimeSeconds;     // NYI
         public long RedeemForBalanceAmount;     // NYI 
         public int MaxCharactersOnThisRealm;
-        public uint BpayStorePurchaseTimeout;     // NYI
         public int ActiveBoostType;     // NYI
         public int TrialBoostType;     // NYI
         public int MinimumExpansionLevel;

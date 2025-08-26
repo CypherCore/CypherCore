@@ -4898,6 +4898,10 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 339 SPELL_EFFECT_UI_ACTION
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 340 SPELL_EFFECT_340
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 341 SPELL_EFFECT_LEARN_WARBAND_SCENE
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 342 SPELL_EFFECT_342
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 343 SPELL_EFFECT_343
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 344 SPELL_EFFECT_344
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 345 SPELL_EFFECT_ASSIST_ACTION
         };
 
         #region Fields

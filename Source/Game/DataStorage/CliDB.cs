@@ -83,7 +83,7 @@ namespace Game.DataStorage
             AzeriteTierUnlockStorage = ReadDB2<AzeriteTierUnlockRecord>("AzeriteTierUnlock.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK);
             AzeriteTierUnlockSetStorage = ReadDB2<AzeriteTierUnlockSetRecord>("AzeriteTierUnlockSet.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK_SET);
             AzeriteUnlockMappingStorage = ReadDB2<AzeriteUnlockMappingRecord>("AzeriteUnlockMapping.db2", HotfixStatements.SEL_AZERITE_UNLOCK_MAPPING);
-            BankBagSlotPricesStorage = ReadDB2<BankBagSlotPricesRecord>("BankBagSlotPrices.db2", HotfixStatements.SEL_BANK_BAG_SLOT_PRICES);
+            BankTabStorage = ReadDB2<BankTabRecord>("BankTab.db2", HotfixStatements.SEL_BANK_TAB);
             BannedAddOnsStorage = ReadDB2<BannedAddonsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
             BarberShopStyleStorage = ReadDB2<BarberShopStyleRecord>("BarberShopStyle.db2", HotfixStatements.SEL_BARBER_SHOP_STYLE, HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE);
             BattlePetBreedQualityStorage = ReadDB2<BattlePetBreedQualityRecord>("BattlePetBreedQuality.db2", HotfixStatements.SEL_BATTLE_PET_BREED_QUALITY);
@@ -403,14 +403,16 @@ namespace Game.DataStorage
             WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(16108) ||               // last area added in 11.0.7 (58162)
-                !CharTitlesStorage.ContainsKey(876) ||                // last char title added in 11.0.7 (58162)
+            if (!AreaTableStorage.ContainsKey(16579) ||               // last area added in 11.2.0 (62213)
+                !CharTitlesStorage.ContainsKey(937) ||                // last char title added in 11.2.0 (62213)
                 !FlightCapabilityStorage.ContainsKey(1) ||            // default flight capability (required)
-                !GemPropertiesStorage.ContainsKey(4266) ||            // last gem property added in 11.0.7 (58162)
-                !ItemStorage.ContainsKey(235551) ||                   // last item added in 11.0.7 (58162)
-                !ItemExtendedCostStorage.ContainsKey(9918) ||         // last item extended cost added in 11.0.7 (58162)
-                !MapStorage.ContainsKey(2829) ||                      // last map added in 11.0.7 (58162)
-                !SpellNameStorage.ContainsKey(1218101))               // last spell added in 11.0.7 (58162)
+                !GemPropertiesStorage.ContainsKey(4287) ||            // last gem property added in 11.2.0 (62213)
+                !ItemStorage.ContainsKey(252009) ||                   // last item added in 11.2.0 (62213)
+                !ItemSparseStorage.ContainsKey(208392) ||
+                !ItemSparseStorage.ContainsKey(242709) ||
+                !ItemExtendedCostStorage.ContainsKey(10637) ||        // last item extended cost added in 11.2.0 (62213)
+                !MapStorage.ContainsKey(2951) ||                      // last map added in 11.2.0 (62213)
+                !SpellNameStorage.ContainsKey(1254022))               // last spell added in 11.2.0 (62213)
             {
                 Log.outFatal(LogFilter.ServerLoading, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
                 Environment.Exit(1);
@@ -487,7 +489,7 @@ namespace Game.DataStorage
         public static DB6Storage<AzeriteTierUnlockRecord> AzeriteTierUnlockStorage;
         public static DB6Storage<AzeriteTierUnlockSetRecord> AzeriteTierUnlockSetStorage;
         public static DB6Storage<AzeriteUnlockMappingRecord> AzeriteUnlockMappingStorage;
-        public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
+        public static DB6Storage<BankTabRecord> BankTabStorage;
         public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
         public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage;

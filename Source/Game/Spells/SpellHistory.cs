@@ -992,9 +992,9 @@ namespace Game.Spells
             if (chargeCategoryEntry == null)
                 return 0;
 
-            uint charges = chargeCategoryEntry.MaxCharges;
-            charges += (uint)_owner.GetTotalAuraModifierByMiscValue(AuraType.ModMaxCharges, (int)chargeCategoryId);
-            return (int)charges;
+            int charges = chargeCategoryEntry.MaxCharges;
+            charges += _owner.GetTotalAuraModifierByMiscValue(AuraType.ModMaxCharges, (int)chargeCategoryId);
+            return charges;
         }
 
         public int GetChargeRecoveryTime(uint chargeCategoryId)

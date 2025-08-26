@@ -48,37 +48,6 @@ namespace Game.Networking.Packets
         public override void Write() { }
     }
 
-    class AreaTriggerRePath : ServerPacket
-    {
-        public AreaTriggerRePath() : base(ServerOpcodes.AreaTriggerRePath) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(TriggerGUID);
-            _worldPacket.WritePackedGuid(Unused_1100);
-
-            _worldPacket.WriteBit(AreaTriggerSpline != null);
-            _worldPacket.WriteBit(AreaTriggerOrbit != null);
-            _worldPacket.WriteBit(AreaTriggerMovementScript.HasValue);
-            _worldPacket.FlushBits();
-
-            if (AreaTriggerSpline != null)
-                AreaTriggerSpline.Write(_worldPacket);
-
-            if (AreaTriggerMovementScript.HasValue)
-                AreaTriggerMovementScript.Value.Write(_worldPacket);
-
-            if (AreaTriggerOrbit != null)
-                AreaTriggerOrbit.Write(_worldPacket);
-        }
-
-        public AreaTriggerSplineInfo AreaTriggerSpline;
-        public AreaTriggerOrbitInfo AreaTriggerOrbit;
-        public AreaTriggerMovementScriptInfo? AreaTriggerMovementScript;
-        public ObjectGuid TriggerGUID;
-        public ObjectGuid Unused_1100;
-    }
-
     class AreaTriggerPlaySpellVisual : ServerPacket
     {
         public ObjectGuid AreaTriggerGUID;
@@ -107,32 +76,5 @@ namespace Game.Networking.Packets
             Visual.Read(_worldPacket);
             TargetGUID = _worldPacket.ReadPackedGuid();
         }
-    }
-
-
-    //Structs
-    class AreaTriggerSplineInfo
-    {
-        public static void WriteAreaTriggerSpline(WorldPacket data, uint timeToTarget, uint elapsedTimeForMovement, Spline<float> areaTriggerSpline)
-        {
-            data.WriteUInt32(timeToTarget);
-            data.WriteUInt32(elapsedTimeForMovement);
-
-            var points = areaTriggerSpline.GetPoints();
-            data.WriteBits(points.Length, 16);
-            data.FlushBits();
-
-            foreach (Vector3 point in points)
-                data.WriteVector3(point);
-        }
-
-        public void Write(WorldPacket data)
-        {
-            WriteAreaTriggerSpline(data, TimeToTarget, ElapsedTimeForMovement, Points);
-        }
-
-        public uint TimeToTarget;
-        public uint ElapsedTimeForMovement;
-        public Spline<float> Points;
     }
 }

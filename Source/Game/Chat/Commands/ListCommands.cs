@@ -126,8 +126,6 @@ namespace Game.Chat.Commands
                         itemPos = "[equipped]";
                     else if (Player.IsInventoryPos((byte)itemBag, itemSlot))
                         itemPos = "[in inventory]";
-                    else if (Player.IsReagentBankPos((byte)itemBag, itemSlot))
-                        itemPos = "[in reagent bank]";
                     else if (Player.IsBankPos((byte)itemBag, itemSlot))
                         itemPos = "[in bank]";
                     else

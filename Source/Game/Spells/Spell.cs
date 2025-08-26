@@ -4471,6 +4471,7 @@ namespace Game.Spells
                 unitCaster.ClearChannelObjects();
                 unitCaster.SetChannelSpellId(0);
                 unitCaster.SetChannelVisual(new SpellCastVisualField());
+                unitCaster.SetChannelSpellData(0, 0);
                 unitCaster.SetSpellEmpowerStage(-1);
             }
 
@@ -4550,6 +4551,7 @@ namespace Game.Spells
 
             unitCaster.SetChannelSpellId(m_spellInfo.Id);
             unitCaster.SetChannelVisual(m_SpellVisual);
+            unitCaster.SetChannelSpellData(GameTime.GetGameTimeMS(), duration);
 
             void setImmunitiesAndHealPrediction(ref SpellChannelStartInterruptImmunities? interruptImmunities, ref SpellTargetedHealPrediction? healPrediction)
             {

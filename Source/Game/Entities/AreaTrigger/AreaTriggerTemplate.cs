@@ -104,18 +104,6 @@ namespace Game.Entities
         public AreaTriggerScaleCurvePointsTemplate CurveTemplate;
     }
 
-    public struct AreaTriggerMovementScriptInfo
-    {
-        public uint SpellScriptID;
-        public Vector3 Center;
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(SpellScriptID);
-            data.WriteVector3(Center);
-        }
-    }
-
     public struct AreaTriggerId
     {
         public uint Id;
@@ -204,35 +192,11 @@ namespace Game.Entities
 
     public class AreaTriggerOrbitInfo
     {
-        public void Write(WorldPacket data)
-        {
-            data.WriteBit(PathTarget.HasValue);
-            data.WriteBit(Center.HasValue);
-            data.WriteBit(CounterClockwise);
-            data.WriteBit(CanLoop);
-
-            data.WriteUInt32(TimeToTarget);
-            data.WriteInt32(ElapsedTimeForMovement);
-            data.WriteUInt32(StartDelay);
-            data.WriteFloat(Radius);
-            data.WriteFloat(BlendFromRadius);
-            data.WriteFloat(InitialAngle);
-            data.WriteFloat(ZOffset);
-
-            if (PathTarget.HasValue)
-                data.WritePackedGuid(PathTarget.Value);
-
-            if (Center.HasValue)
-                data.WriteVector3(Center.Value);
-        }
-
         public ObjectGuid? PathTarget;
         public Vector3? Center;
         public bool CounterClockwise;
         public bool CanLoop;
-        public uint TimeToTarget;
-        public int ElapsedTimeForMovement;
-        public uint StartDelay;
+        public int ExtraTimeForBlending;
         public float Radius;
         public float BlendFromRadius;
         public float InitialAngle;

@@ -299,6 +299,7 @@ namespace Game.Entities
             data.WriteBit(flags.NoBirthAnim);
             data.WriteBit(flags.EnablePortals);
             data.WriteBit(flags.PlayHoverAnim);
+            data.WriteBit(flags.ThisIsYou);
             data.WriteBit(flags.MovementUpdate);
             data.WriteBit(flags.MovementTransport);
             data.WriteBit(flags.Stationary);
@@ -307,10 +308,8 @@ namespace Game.Entities
             data.WriteBit(flags.Vehicle);
             data.WriteBit(flags.AnimKit);
             data.WriteBit(flags.Rotation);
-            data.WriteBit(flags.AreaTrigger);
             data.WriteBit(flags.GameObject);
             data.WriteBit(flags.SmoothPhasing);
-            data.WriteBit(flags.ThisIsYou);
             data.WriteBit(flags.SceneObject);
             data.WriteBit(flags.ActivePlayer);
             data.WriteBit(flags.Conversation);
@@ -461,7 +460,10 @@ namespace Game.Entities
             }
 
             if (flags.CombatVictim)
-                data.WritePackedGuid(ToUnit().GetVictim().GetGUID());                      // CombatVictim
+            {
+                Unit unit = ToUnit();
+                data.WritePackedGuid(unit.GetVictim().GetGUID());                          // CombatVictim
+            }
 
             if (flags.ServerTime)
                 data.WriteUInt32(GameTime.GetGameTimeMS());
@@ -481,7 +483,10 @@ namespace Game.Entities
             }
 
             if (flags.Rotation)
-                data.WriteInt64(ToGameObject().GetPackedLocalRotation());                 // Rotation
+            {
+                GameObject gameObject = ToGameObject();
+                data.WriteInt64(gameObject.GetPackedLocalRotation());                 // Rotation
+            }
 
             if (PauseTimes != null && !PauseTimes.Empty())
                 foreach (var stopFrame in PauseTimes)
@@ -491,138 +496,6 @@ namespace Game.Entities
             {
                 WorldObject self = this;
                 MovementExtensions.WriteTransportInfo(data, self.m_movementInfo.transport);
-            }
-
-            if (flags.AreaTrigger)
-            {
-                AreaTrigger areaTrigger = ToAreaTrigger();
-                AreaTriggerCreateProperties createProperties = areaTrigger.GetCreateProperties();
-                AreaTriggerShapeInfo shape = areaTrigger.GetShape();
-
-                data.WriteUInt32(areaTrigger.GetTimeSinceCreated());
-
-                data.WriteVector3(areaTrigger.GetRollPitchYaw());
-
-                switch (shape.TriggerType)
-                {
-                    case AreaTriggerShapeType.Sphere:
-                        data.WriteInt8(0);
-                        data.WriteFloat(shape.SphereDatas.Radius);
-                        data.WriteFloat(shape.SphereDatas.RadiusTarget);
-                        break;
-                    case AreaTriggerShapeType.Box:
-                        data.WriteInt8(1);
-                        data.WriteFloat(shape.BoxDatas.Extents[0]);
-                        data.WriteFloat(shape.BoxDatas.Extents[1]);
-                        data.WriteFloat(shape.BoxDatas.Extents[2]);
-                        data.WriteFloat(shape.BoxDatas.ExtentsTarget[0]);
-                        data.WriteFloat(shape.BoxDatas.ExtentsTarget[1]);
-                        data.WriteFloat(shape.BoxDatas.ExtentsTarget[2]);
-                        break;
-                    case AreaTriggerShapeType.Polygon:
-                        data.WriteInt8(3);
-                        data.WriteInt32(shape.PolygonVertices.Count);
-                        data.WriteInt32(shape.PolygonVerticesTarget.Count);
-                        data.WriteFloat(shape.PolygonDatas.Height);
-                        data.WriteFloat(shape.PolygonDatas.HeightTarget);
-
-                        foreach (var vertice in shape.PolygonVertices)
-                            data.WriteVector2(vertice);
-
-                        foreach (var vertice in shape.PolygonVerticesTarget)
-                            data.WriteVector2(vertice);
-                        break;
-                    case AreaTriggerShapeType.Cylinder:
-                        data.WriteInt8(4);
-                        data.WriteFloat(shape.CylinderDatas.Radius);
-                        data.WriteFloat(shape.CylinderDatas.RadiusTarget);
-                        data.WriteFloat(shape.CylinderDatas.Height);
-                        data.WriteFloat(shape.CylinderDatas.HeightTarget);
-                        data.WriteFloat(shape.CylinderDatas.LocationZOffset);
-                        data.WriteFloat(shape.CylinderDatas.LocationZOffsetTarget);
-                        break;
-                    case AreaTriggerShapeType.Disk:
-                        data.WriteInt8(7);
-                        data.WriteFloat(shape.DiskDatas.InnerRadius);
-                        data.WriteFloat(shape.DiskDatas.InnerRadiusTarget);
-                        data.WriteFloat(shape.DiskDatas.OuterRadius);
-                        data.WriteFloat(shape.DiskDatas.OuterRadiusTarget);
-                        data.WriteFloat(shape.DiskDatas.Height);
-                        data.WriteFloat(shape.DiskDatas.HeightTarget);
-                        data.WriteFloat(shape.DiskDatas.LocationZOffset);
-                        data.WriteFloat(shape.DiskDatas.LocationZOffsetTarget);
-                        break;
-                    case AreaTriggerShapeType.BoundedPlane:
-                        data.WriteInt8(8);
-                        data.WriteFloat(shape.BoundedPlaneDatas.Extents[0]);
-                        data.WriteFloat(shape.BoundedPlaneDatas.Extents[1]);
-                        data.WriteFloat(shape.BoundedPlaneDatas.ExtentsTarget[0]);
-                        data.WriteFloat(shape.BoundedPlaneDatas.ExtentsTarget[1]);
-                        break;
-                    default:
-                        break;
-                }
-
-                bool hasAbsoluteOrientation = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation);
-                bool hasDynamicShape = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasDynamicShape);
-                bool hasAttached = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached);
-                bool hasFaceMovementDir = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir);
-                bool hasFollowsTerrain = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain);
-                bool hasAlwaysExterior = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.AlwaysExterior);
-                bool hasUnknown1025 = false;
-                bool hasTargetRollPitchYaw = createProperties != null && createProperties.Flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasTargetRollPitchYaw);
-                bool hasScaleCurveID = createProperties != null && createProperties.ScaleCurveId != 0;
-                bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
-                bool hasFacingCurveID = createProperties != null && createProperties.FacingCurveId != 0;
-                bool hasMoveCurveID = createProperties != null && createProperties.MoveCurveId != 0;
-                bool hasMovementScript = false;
-                bool hasPositionalSoundKitID = false;
-
-                data.WriteBit(hasAbsoluteOrientation);
-                data.WriteBit(hasDynamicShape);
-                data.WriteBit(hasAttached);
-                data.WriteBit(hasFaceMovementDir);
-                data.WriteBit(hasFollowsTerrain);
-                data.WriteBit(hasAlwaysExterior);
-                data.WriteBit(hasUnknown1025);
-                data.WriteBit(hasTargetRollPitchYaw);
-                data.WriteBit(hasScaleCurveID);
-                data.WriteBit(hasMorphCurveID);
-                data.WriteBit(hasFacingCurveID);
-                data.WriteBit(hasMoveCurveID);
-                data.WriteBit(hasPositionalSoundKitID);
-                data.WriteBit(areaTrigger.HasSplines());
-                data.WriteBit(areaTrigger.HasOrbit());
-                data.WriteBit(hasMovementScript);
-
-                data.FlushBits();
-
-                if (areaTrigger.HasSplines())
-                    AreaTriggerSplineInfo.WriteAreaTriggerSpline(data, areaTrigger.GetTimeToTarget(), areaTrigger.GetElapsedTimeForMovement(), areaTrigger.GetSpline());
-
-                if (hasTargetRollPitchYaw)
-                    data.WriteVector3(areaTrigger.GetTargetRollPitchYaw());
-
-                if (hasScaleCurveID)
-                    data.WriteUInt32(createProperties.ScaleCurveId);
-
-                if (hasMorphCurveID)
-                    data.WriteUInt32(createProperties.MorphCurveId);
-
-                if (hasFacingCurveID)
-                    data.WriteUInt32(createProperties.FacingCurveId);
-
-                if (hasMoveCurveID)
-                    data.WriteUInt32(createProperties.MoveCurveId);
-
-                if (hasPositionalSoundKitID)
-                    data.WriteUInt32(0);
-
-                //if (hasMovementScript)
-                //    *data << *areaTrigger.GetMovementScript(); // AreaTriggerMovementScriptInfo
-
-                if (areaTrigger.HasOrbit())
-                    areaTrigger.GetOrbit().Write(data);
             }
 
             if (flags.GameObject)
@@ -785,7 +658,7 @@ namespace Game.Entities
                 Player player = ToPlayer();
 
                 bool HasSceneInstanceIDs = !player.GetSceneMgr().GetSceneTemplateByInstanceMap().Empty();
-                bool HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
+                bool HasRuneState = player.GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
 
                 data.WriteBit(HasSceneInstanceIDs);
                 data.WriteBit(HasRuneState);
@@ -794,8 +667,8 @@ namespace Game.Entities
                 if (HasSceneInstanceIDs)
                 {
                     data.WriteInt32(player.GetSceneMgr().GetSceneTemplateByInstanceMap().Count);
-                    foreach (var pair in player.GetSceneMgr().GetSceneTemplateByInstanceMap())
-                        data.WriteUInt32(pair.Key);
+                    foreach (var (sceneInstanceId, _) in player.GetSceneMgr().GetSceneTemplateByInstanceMap())
+                        data.WriteUInt32(sceneInstanceId);
                 }
 
                 if (HasRuneState)
@@ -4157,7 +4030,6 @@ namespace Game.Entities
         public bool Vehicle;
         public bool AnimKit;
         public bool Rotation;
-        public bool AreaTrigger;
         public bool GameObject;
         public bool SmoothPhasing;
         public bool ThisIsYou;
@@ -4178,7 +4050,6 @@ namespace Game.Entities
             Vehicle = false;
             AnimKit = false;
             Rotation = false;
-            AreaTrigger = false;
             GameObject = false;
             SmoothPhasing = false;
             ThisIsYou = false;

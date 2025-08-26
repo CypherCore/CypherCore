@@ -121,6 +121,7 @@ namespace Game.Networking.Packets
         public int TraitNodeEntryID;
         public int Rank;
         public int GrantedRanks;
+        public int BonusRanks;
 
         public TraitEntryPacket() { }
         public TraitEntryPacket(TraitEntry ufEntry)
@@ -137,6 +138,7 @@ namespace Game.Networking.Packets
             TraitNodeEntryID = data.ReadInt32();
             Rank = data.ReadInt32();
             GrantedRanks = data.ReadInt32();
+            BonusRanks = data.ReadInt32();
         }
 
         public void Write(WorldPacket data)
@@ -145,6 +147,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(TraitNodeEntryID);
             data.WriteInt32(Rank);
             data.WriteInt32(GrantedRanks);
+            data.WriteInt32(BonusRanks);
         }
     }
 

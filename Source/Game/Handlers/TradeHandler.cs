@@ -301,7 +301,16 @@ namespace Game
                         SendTradeStatus(info);
                         return;
                     }
+
+                    if (Player.IsAccountBankPos(item.GetSlot(), item.GetBagSlot()))
+                    {
+                        info.Status = TradeStatus.Failed;
+                        info.BagResult = InventoryResult.CantTradeAccountItem;
+                        SendTradeStatus(info);
+                        return;
+                    }
                 }
+
                 item = his_trade.GetItem((TradeSlots)i);
                 if (item != null)
                 {
@@ -311,6 +320,14 @@ namespace Game
                         SendTradeStatus(info);
                         return;
                     }
+                }
+
+                if (Player.IsAccountBankPos(item.GetSlot(), item.GetBagSlot()))
+                {
+                    info.Status = TradeStatus.Failed;
+                    info.BagResult = InventoryResult.CantTradeAccountItem;
+                    SendTradeStatus(info);
+                    return;
                 }
             }
 

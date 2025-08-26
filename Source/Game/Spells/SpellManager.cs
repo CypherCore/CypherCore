@@ -3716,6 +3716,15 @@ namespace Game.Entities
                 });
             });
 
+            // Summon Faol in Tirisfal
+            ApplySpellFix([202112], spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
+                });
+            });
+
             //
             // VIOLET HOLD SPELLS
             //
@@ -4385,7 +4394,7 @@ namespace Game.Entities
             });
 
             // Flame Spout
-            ApplySpellFix([ 114685 ], spellInfo =>
+            ApplySpellFix([114685], spellInfo =>
             {
                 spellInfo.AttributesEx |= SpellAttr1.NoThreat;
                 spellInfo.AttributesEx8 |= SpellAttr8.CanAttackImmunePC;
@@ -4692,15 +4701,21 @@ namespace Game.Entities
             });
 
             // Keg Smash
-            ApplySpellFix([ 121253 ], spellInfo =>
+            ApplySpellFix([121253], spellInfo =>
             {
                 spellInfo._LoadSqrtTargetLimit(5, 0, null, 6, null, null);
             });
 
             // Odyn's Fury
-            ApplySpellFix([ 385060, 385061, 385062 ], spellInfo =>
+            ApplySpellFix([385060, 385061, 385062], spellInfo =>
             {
                 spellInfo._LoadSqrtTargetLimit(5, 0, 385059, 5, null, null);
+            });
+
+            // Flamestrike
+            ApplySpellFix([ 2120 ], spellInfo =>            
+            {
+                spellInfo._LoadSqrtTargetLimit(8, 0, null, 2, null, null);
             });
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
