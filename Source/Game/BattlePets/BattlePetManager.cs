@@ -142,7 +142,7 @@ namespace Game.BattlePets
         {
             return _battlePetSpeciesBySpell.LookupByKey(spellId);
         }
-        
+
         public static ushort RollPetBreed(uint species)
         {
             var list = _availableBreedsPerSpecies.LookupByKey(species);
@@ -175,7 +175,7 @@ namespace Game.BattlePets
 
             return 0;
         }
-        
+
         public void LoadFromDB(SQLResult petsResult, SQLResult slotsResult)
         {
             if (!petsResult.IsEmpty())
@@ -419,8 +419,7 @@ namespace Game.BattlePets
 
             _pets[pet.PacketInfo.Guid.GetCounter()] = pet;
 
-            List<BattlePet> updates = new();
-            updates.Add(pet);
+            List<BattlePet> updates = [pet];
             SendUpdates(updates, true);
 
             player.UpdateCriteria(CriteriaType.UniquePetsOwned);
@@ -476,7 +475,7 @@ namespace Game.BattlePets
                 if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
                     summonedBattlePet.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
         }
-        
+
         bool IsPetInSlot(ObjectGuid guid)
         {
             foreach (BattlePetSlot slot in _slots)
@@ -510,7 +509,7 @@ namespace Game.BattlePets
             int maxPetsPerSpecies = battlePetSpecies.HasFlag(BattlePetSpeciesFlags.LegacyAccountUnique) ? 1 : SharedConst.DefaultMaxBattlePetsPerSpecies;
             return GetPetCount(battlePetSpecies, ownerGuid) >= maxPetsPerSpecies;
         }
-        
+
         public uint GetPetUniqueSpeciesCount()
         {
             HashSet<uint> speciesIds = new();
@@ -519,7 +518,7 @@ namespace Game.BattlePets
 
             return (uint)speciesIds.Count;
         }
-        
+
         public void UnlockSlot(BattlePetSlots slot)
         {
             if (slot >= BattlePetSlots.Count)
@@ -631,8 +630,7 @@ namespace Game.BattlePets
             if (pet.SaveInfo != BattlePetSaveInfo.New)
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
 
-            List<BattlePet> updates = new();
-            updates.Add(pet);
+            List<BattlePet> updates = [pet];
             SendUpdates(updates, false);
 
             // UF::PlayerData::CurrentBattlePetBreedQuality isn't updated (Intended)
@@ -653,8 +651,8 @@ namespace Game.BattlePets
 
             var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (battlePetSpecies != null)
-        if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
-                return;
+                if (battlePetSpecies.HasFlag(BattlePetSpeciesFlags.CantBattle))
+                    return;
 
             ushort level = pet.PacketInfo.Level;
             if (level >= SharedConst.MaxBattlePetLevel)
@@ -695,8 +693,7 @@ namespace Game.BattlePets
             if (pet.SaveInfo != BattlePetSaveInfo.New)
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
 
-            List<BattlePet> updates = new();
-            updates.Add(pet);
+            List<BattlePet> updates = [pet];
             SendUpdates(updates, false);
         }
 
@@ -735,8 +732,7 @@ namespace Game.BattlePets
             if (pet.SaveInfo != BattlePetSaveInfo.New)
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
 
-            List<BattlePet> updates = new List<BattlePet>();
-            updates.Add(pet);
+            List<BattlePet> updates = [pet];
             SendUpdates(updates, false);
         }
 
@@ -746,17 +742,18 @@ namespace Game.BattlePets
             // regain 50 % of the damage that was taken during combat
             List<BattlePet> updates = new();
 
-            foreach (var pet in _pets.Values)
+            foreach (var (_, pet) in _pets)
             {
-                if (pet.PacketInfo.Health != pet.PacketInfo.MaxHealth)
-                {
-                    pet.PacketInfo.Health += MathFunctions.CalculatePct(pet.PacketInfo.MaxHealth, pct);
-                    // don't allow Health to be greater than MaxHealth
-                    pet.PacketInfo.Health = Math.Min(pet.PacketInfo.Health, pet.PacketInfo.MaxHealth);
-                    if (pet.SaveInfo != BattlePetSaveInfo.New)
-                        pet.SaveInfo = BattlePetSaveInfo.Changed;
-                    updates.Add(pet);
-                }
+                if (pet.PacketInfo.Health == pet.PacketInfo.MaxHealth)
+                    continue;
+
+                pet.PacketInfo.Health += MathFunctions.CalculatePct(pet.PacketInfo.MaxHealth, pct);
+                // don't allow Health to be greater than MaxHealth
+                pet.PacketInfo.Health = Math.Min(pet.PacketInfo.Health, pet.PacketInfo.MaxHealth);
+                if (pet.SaveInfo != BattlePetSaveInfo.New)
+                    pet.SaveInfo = BattlePetSaveInfo.Changed;
+
+                updates.Add(pet);
             }
 
             SendUpdates(updates, false);
@@ -867,7 +864,7 @@ namespace Game.BattlePets
         {
             return Global.WorldMgr.IsBattlePetJournalLockAcquired(_owner.GetBattlenetAccountGUID());
         }
-        
+
         public BattlePetSlot GetSlot(BattlePetSlots slot) { return slot < BattlePetSlots.Count ? _slots[(byte)slot] : null; }
         WorldSession GetOwner() { return _owner; }
 
