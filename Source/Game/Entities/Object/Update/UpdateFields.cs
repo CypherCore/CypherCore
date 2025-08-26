@@ -4303,14 +4303,14 @@ namespace Game.Entities
 
     public class CompletedProject() : HasChangesMask(4)
     {
-        public UpdateField<uint> ProjectID = new(0, 1);
-        public UpdateField<long> FirstCompleted = new(0, 2);
+        public UpdateField<long> FirstCompleted = new(0, 1);
+        public UpdateField<uint> ProjectID = new(0, 2);
         public UpdateField<uint> CompletionCount = new(0, 3);
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt32(ProjectID);
             data.WriteInt64(FirstCompleted);
+            data.WriteUInt32(ProjectID);
             data.WriteUInt32(CompletionCount);
         }
 
@@ -4327,11 +4327,11 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(ProjectID);
+                    data.WriteInt64(FirstCompleted);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteInt64(FirstCompleted);
+                    data.WriteUInt32(ProjectID);
                 }
                 if (changesMask[3])
                 {
@@ -9349,7 +9349,7 @@ namespace Game.Entities
             {
                 ShapeData.Get<AreaTriggerBox>().WriteCreate(data, owner, receiver);
             }
-            if (ShapeType == 3)
+            if (ShapeType == 2 || ShapeType == 3 || ShapeType == 5 || ShapeType == 6)
             {
                 ShapeData.Get<AreaTriggerPolygon>().WriteCreate(data, owner, receiver);
             }
@@ -9532,7 +9532,7 @@ namespace Game.Entities
                     {
                         ShapeData.Get<AreaTriggerBox>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
-                    if (ShapeType == 3)
+                    if (ShapeType == 2 || ShapeType == 3 || ShapeType == 5 || ShapeType == 6)
                     {
                         ShapeData.Get<AreaTriggerPolygon>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }

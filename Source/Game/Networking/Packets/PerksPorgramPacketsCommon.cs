@@ -21,6 +21,7 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
+            data.WriteInt64(AvailableUntil);
             data.WriteInt32(VendorItemID);
             data.WriteInt32(MountID);
             data.WriteInt32(BattlePetSpeciesID);
@@ -30,7 +31,6 @@ namespace Game.Networking.Packets
             data.WriteInt32(ToyID);
             data.WriteInt32(Price);
             data.WriteInt32(OriginalPrice);
-            data.WriteInt64(AvailableUntil);
             data.WriteInt32(WarbandSceneID);
             data.WriteBit(Disabled);
             data.WriteBit(DoesNotExpire);

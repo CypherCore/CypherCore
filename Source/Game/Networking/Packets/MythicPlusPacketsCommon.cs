@@ -84,6 +84,7 @@ namespace Game.Networking.Packets
         public int Season;
         public List<MythicPlusMember> Members = new();
         public float RunScore;
+        public int Unknown_1120;
         public int[] KeystoneAffixIDs = new int[4];
 
         public void Write(WorldPacket data)
@@ -99,6 +100,7 @@ namespace Game.Networking.Packets
 
             data.WriteInt32(Members.Count);
             data.WriteFloat(RunScore);
+            data.WriteInt32(Unknown_1120);
             foreach (var member in Members)
                 member.Write(data);
 
