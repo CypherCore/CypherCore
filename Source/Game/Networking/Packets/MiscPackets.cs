@@ -620,12 +620,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Unit);
-            _worldPacket.WriteBits(Tier, 3);
-            _worldPacket.FlushBits();
+            _worldPacket.WriteUInt8(Tier);
         }
 
         public ObjectGuid Unit;
-        public int Tier;
+        public byte Tier;
     }
 
     public class StartMirrorTimer : ServerPacket
