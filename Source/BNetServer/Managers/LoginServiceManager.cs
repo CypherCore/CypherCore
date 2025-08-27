@@ -23,7 +23,7 @@ namespace BNetServer
 
         public void Initialize()
         {
-            certificate = new X509Certificate2(ConfigMgr.GetDefaultValue("CertificatesFile", "./BNetServer.pfx"));
+            certificate = X509CertificateLoader.LoadPkcs12FromFile(ConfigMgr.GetDefaultValue("CertificatesFile", "./BNetServer.pfx"), null);
 
             Assembly currentAsm = Assembly.GetExecutingAssembly();
             foreach (var type in currentAsm.GetTypes())

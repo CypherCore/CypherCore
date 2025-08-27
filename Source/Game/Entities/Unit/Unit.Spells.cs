@@ -3204,6 +3204,9 @@ namespace Game.Entities
                     Unit caster = aura.GetCaster();
                     foreach (AuraEffect aurEff in aura.GetAuraEffects())
                     {
+                        if (aurEff == null)
+                            continue;
+
                         int i = (int)aurEff.GetEffIndex();
                         baseDamage[i] = aurEff.GetBaseAmount();
                         damage[i] = aurEff.GetAmount();
@@ -3475,7 +3478,7 @@ namespace Game.Entities
                 // remove remaining effects of an aura
                 foreach (AuraEffect aurEff in aurApp.GetBase().GetAuraEffects())
                 {
-                    if (aurApp.HasEffect(aurEff.GetEffIndex()))
+                    if (aurEff != null && aurApp.HasEffect(aurEff.GetEffIndex()))
                         aurApp._HandleEffect(aurEff.GetEffIndex(), false);
                 }
                 return;
@@ -3899,7 +3902,7 @@ namespace Game.Entities
 
             // remove effects of the spell - needs to be done after removing aura from lists
             foreach (AuraEffect aurEff in aura.GetAuraEffects())
-                if (aurApp.HasEffect(aurEff.GetEffIndex()))
+                if (aurEff != null && aurApp.HasEffect(aurEff.GetEffIndex()))
                     aurApp._HandleEffect(aurEff.GetEffIndex(), false);
 
             // all effect mustn't be applied
@@ -4147,7 +4150,7 @@ namespace Game.Entities
             // apply effects of the aura
             foreach (AuraEffect aurEff in aura.GetAuraEffects())
             {
-                if ((effMask & 1 << (int)aurEff.GetEffIndex()) != 0)
+                if (aurEff != null && (effMask & 1 << (int)aurEff.GetEffIndex()) != 0)
                 {
                     aurApp._HandleEffect(aurEff.GetEffIndex(), true);
                     if (aurApp.GetRemoveMode() != 0)

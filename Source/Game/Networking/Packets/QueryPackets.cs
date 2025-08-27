@@ -84,7 +84,7 @@ namespace Game.Networking.Packets
                         _worldPacket.WriteCString(Stats.NameAlt[i]);
                 }
 
-                for (var i = 0; i < 2; ++i)
+                for (var i = 0; i < Stats.Flags.Length; ++i)
                     _worldPacket.WriteUInt32(Stats.Flags[i]);
 
                 _worldPacket.WriteInt8(Stats.CreatureType);

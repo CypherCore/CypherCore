@@ -1645,7 +1645,7 @@ namespace Game.Entities
                 if (aura.GetCasterGUID() == GetGUID() && aura.GetSpellInfo().HasAttribute(SpellAttr8.MasteryAffectsPoints))
                 {
                     foreach (var auraEff in aura.GetAuraEffects())
-                        if (MathFunctions.fuzzyEq(auraEff.GetSpellEffectInfo().BonusCoefficient, 0.0f))
+                        if (auraEff != null && MathFunctions.fuzzyEq(auraEff.GetSpellEffectInfo().BonusCoefficient, 0.0f))
                             auraEff.RecalculateAmount(this);
                 }
             }

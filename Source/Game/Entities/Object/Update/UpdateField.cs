@@ -384,7 +384,7 @@ namespace Game.Entities
 
     public abstract class HasChangesMask : IHasChangesMask
     {
-        public static int ChangeMaskLength;
+        public int ChangeMaskLength;
 
         public UpdateMask _changesMask;
         public int _blockBit;

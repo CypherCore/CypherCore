@@ -24,12 +24,11 @@ namespace Game.Entities
             if (input != null)
             {
                 int block = 0;
-                for (; block < input.Length; ++block)
+                for (; block < _blockCount; ++block)
                     if ((_blocks[block] = input[block]) != 0)
                         _blocksMask[GetBlockIndex(block)] |= (uint)GetBlockFlag(block);
-
-                for (; block < _blockCount; ++block)
-                    _blocks[block] = 0;
+                    else
+                        _blocksMask[GetBlockIndex(block)] &= ~(uint)GetBlockFlag(block);
             }
         }
 
@@ -100,7 +99,7 @@ namespace Game.Entities
 
             for (int i = 0; i < _blockCount; ++i)
             {
-                if (!Convert.ToBoolean(_blocks[i] &= right._blocks[i]))
+                if ((_blocks[i] &= right._blocks[i]) == 0)
                     _blocksMask[GetBlockIndex(i)] &= ~(uint)GetBlockFlag(i);
             }
         }

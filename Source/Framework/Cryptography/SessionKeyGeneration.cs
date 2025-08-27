@@ -29,7 +29,7 @@ namespace Framework.Cryptography
         {
             for (uint i = 0; i < sz; ++i)
             {
-                if (taken == 32)
+                if (taken == 64)
                     FillUp();
 
                 buf[i] = o0[taken];
@@ -40,9 +40,9 @@ namespace Framework.Cryptography
         void FillUp()
         {
             sh.Initialize();
-            sh.TransformBlock(o1, 0, 32, o1, 0);
-            sh.TransformBlock(o0, 0, 32, o0, 0);
-            sh.TransformFinalBlock(o2, 0, 32);
+            sh.TransformBlock(o1, 0, 64, o1, 0);
+            sh.TransformBlock(o0, 0, 64, o0, 0);
+            sh.TransformFinalBlock(o2, 0, 64);
             o0 = sh.Hash;
 
             taken = 0;
@@ -50,9 +50,9 @@ namespace Framework.Cryptography
 
         SHA512 sh;        
         uint taken;
-        byte[] o0 = new byte[32];
-        byte[] o1 = new byte[32];
-        byte[] o2 = new byte[32];
+        byte[] o0 = new byte[64];
+        byte[] o1 = new byte[64];
+        byte[] o2 = new byte[64];
     }
 
     public class SessionKeyGenerator

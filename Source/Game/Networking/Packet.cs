@@ -222,7 +222,7 @@ namespace Game.Networking
         public bool IsValidOpcode()
         {
             int opcodeArrayIndex = GetOpcodeArrayIndex(opcode);
-            return opcodeArrayIndex >= 0 && opcodeArrayIndex < 1699;
+            return opcodeArrayIndex >= 0 && opcodeArrayIndex < 1735;
         }
 
         int GetOpcodeArrayIndex(uint opcode)
@@ -230,33 +230,33 @@ namespace Game.Networking
             int idInGroup = (int)(opcode & 0xFFFF);
             switch (opcode >> 16)
             {
-                case 0x2A: return idInGroup < 26 ? idInGroup + 0 : -1;
-                case 0x2C: return idInGroup < 47 ? idInGroup + 26 : -1;
-                case 0x2D: return idInGroup < 3 ? idInGroup + 73 : -1;
-                case 0x2E: return idInGroup < 33 ? idInGroup + 76 : -1;
-                case 0x30: return idInGroup < 739 ? idInGroup + 109 : -1;
-                case 0x31: return idInGroup < 298 ? idInGroup + 848 : -1;
-                case 0x32: return idInGroup < 12 ? idInGroup + 1146 : -1;
-                case 0x33: return idInGroup < 130 ? idInGroup + 1158 : -1;
-                case 0x35: return idInGroup < 396 ? idInGroup + 1288 : -1;
-                case 0x36: return idInGroup < 15 ? idInGroup + 1684 : -1;
-                case 0x37: return idInGroup < 831 ? idInGroup + 0 : -1;
-                case 0x38: return idInGroup < 10 ? idInGroup + 831 : -1;
-                case 0x3B: return idInGroup < 18 ? idInGroup + 841 : -1;
-                case 0x3C: return idInGroup < 33 ? idInGroup + 859 : -1;
-                case 0x3D: return idInGroup < 49 ? idInGroup + 892 : -1;
-                case 0x3E: return idInGroup < 11 ? idInGroup + 941 : -1;
-                case 0x3F: return idInGroup < 12 ? idInGroup + 952 : -1;
-                case 0x41: return idInGroup < 82 ? idInGroup + 964 : -1;
-                case 0x43: return idInGroup < 67 ? idInGroup + 1046 : -1;
-                case 0x45: return idInGroup < 32 ? idInGroup + 1113 : -1;
-                case 0x47: return idInGroup < 1 ? idInGroup + 1145 : -1;
-                case 0x48: return idInGroup < 118 ? idInGroup + 1146 : -1;
-                case 0x4A: return idInGroup < 46 ? idInGroup + 1264 : -1;
-                case 0x4B: return idInGroup < 41 ? idInGroup + 1310 : -1;
-                case 0x4D: return idInGroup < 85 ? idInGroup + 1351 : -1;
-                case 0x4E: return idInGroup < 8 ? idInGroup + 1436 : -1;
-                case 0x50: return idInGroup < 1 ? idInGroup + 1444 : -1;
+                case 0x29: return idInGroup < 31 ? idInGroup + 0 : -1;
+                case 0x2B: return idInGroup < 51 ? idInGroup + 31 : -1;
+                case 0x2C: return idInGroup < 3 ? idInGroup + 82 : -1;
+                case 0x2D: return idInGroup < 37 ? idInGroup + 85 : -1;
+                case 0x2F: return idInGroup < 751 ? idInGroup + 122 : -1;
+                case 0x30: return idInGroup < 301 ? idInGroup + 873 : -1;
+                case 0x31: return idInGroup < 10 ? idInGroup + 1174 : -1;
+                case 0x32: return idInGroup < 132 ? idInGroup + 1184 : -1;
+                case 0x34: return idInGroup < 404 ? idInGroup + 1316 : -1;
+                case 0x35: return idInGroup < 15 ? idInGroup + 1720 : -1;
+                case 0x36: return idInGroup < 857 ? idInGroup + 0 : -1;
+                case 0x37: return idInGroup < 5 ? idInGroup + 857 : -1;
+                case 0x3A: return idInGroup < 18 ? idInGroup + 862 : -1;
+                case 0x3B: return idInGroup < 36 ? idInGroup + 880 : -1;
+                case 0x3C: return idInGroup < 49 ? idInGroup + 916 : -1;
+                case 0x3D: return idInGroup < 11 ? idInGroup + 965 : -1;
+                case 0x3E: return idInGroup < 12 ? idInGroup + 976 : -1;
+                case 0x40: return idInGroup < 82 ? idInGroup + 988 : -1;
+                case 0x42: return idInGroup < 71 ? idInGroup + 1070 : -1;
+                case 0x44: return idInGroup < 33 ? idInGroup + 1141 : -1;
+                case 0x46: return idInGroup < 1 ? idInGroup + 1174 : -1;
+                case 0x48: return idInGroup < 120 ? idInGroup + 1175 : -1;
+                case 0x4A: return idInGroup < 49 ? idInGroup + 1295 : -1;
+                case 0x4B: return idInGroup < 41 ? idInGroup + 1344 : -1;
+                case 0x4D: return idInGroup < 85 ? idInGroup + 1385 : -1;
+                case 0x4E: return idInGroup < 8 ? idInGroup + 1470 : -1;
+                case 0x50: return idInGroup < 1 ? idInGroup + 1478 : -1;
                 default: return -1;
             }
         }

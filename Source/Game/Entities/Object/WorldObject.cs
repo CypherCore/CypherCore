@@ -4153,6 +4153,9 @@ namespace Game.Entities
 
         public void ClearChangesMask(HasChangesMask updateData)
         {
+            if (updateData == null)
+                return;
+
             _owner.m_entityFragments.ContentsChangedMask &= (byte)~_owner.m_entityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
             {

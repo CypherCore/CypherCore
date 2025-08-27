@@ -133,7 +133,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(SuccessInfo.NumPlayersHorde.HasValue);
                 _worldPacket.WriteBit(SuccessInfo.NumPlayersAlliance.HasValue);
                 _worldPacket.WriteBit(SuccessInfo.ExpansionTrialExpiration.HasValue);
-                _worldPacket.WriteBit(SuccessInfo.NewBuildKeys != null);
+                _worldPacket.WriteBit(SuccessInfo.CurrentBuild != null);
                 _worldPacket.FlushBits();
 
                 {
@@ -155,12 +155,12 @@ namespace Game.Networking.Packets
                 if (SuccessInfo.ExpansionTrialExpiration.HasValue)
                     _worldPacket.WriteInt64(SuccessInfo.ExpansionTrialExpiration.Value);
 
-                if (SuccessInfo.NewBuildKeys != null)
+                if (SuccessInfo.CurrentBuild != null)
                 {
                     for (int i = 0; i < 16; ++i)
                     {
-                        _worldPacket.WriteUInt8(SuccessInfo.NewBuildKeys.NewBuildKey[i]);
-                        _worldPacket.WriteUInt8(SuccessInfo.NewBuildKeys.SomeKey[i]);
+                        _worldPacket.WriteUInt8(SuccessInfo.CurrentBuild.BuildKey[i]);
+                        _worldPacket.WriteUInt8(SuccessInfo.CurrentBuild.ConfigKey[i]);
                     }
                 }
 
@@ -217,7 +217,7 @@ namespace Game.Networking.Packets
             public ushort? NumPlayersHorde; // number of horde players in this realm. @todo implement
             public ushort? NumPlayersAlliance; // number of alliance players in this realm. @todo implement
             public long? ExpansionTrialExpiration; // expansion trial expiration unix timestamp
-            public NewBuild NewBuildKeys;
+            public BaseBuildKey CurrentBuild;
 
             public struct GameTime
             {
@@ -229,10 +229,10 @@ namespace Game.Networking.Packets
                 public bool IsCAISEnabled;
             }
 
-            public class NewBuild
+            public class BaseBuildKey
             {
-                public Array<byte> NewBuildKey = new Array<byte>(16);
-                public Array<byte> SomeKey = new Array<byte>(16);
+                public Array<byte> BuildKey = new Array<byte>(16);
+                public Array<byte> ConfigKey = new Array<byte>(16);
             }
         }
     }
@@ -337,7 +337,7 @@ namespace Game.Networking.Packets
         {
             DosResponse = _worldPacket.ReadUInt64();
             Key = _worldPacket.ReadUInt64();
-            LocalChallenge = _worldPacket.ReadBytes(16);
+            LocalChallenge = _worldPacket.ReadBytes(32);
             Digest = _worldPacket.ReadBytes(24);
         }
 
@@ -402,7 +402,7 @@ namespace Game.Networking.Packets
         {
             HmacSha512 toSign = new(EncryptionKey);
             toSign.Process(BitConverter.GetBytes(Enabled), 1);
-            toSign.Finish(EnableEncryptionSeed, 16);
+            toSign.Finish(EnableEncryptionSeed, 32);
 
             _worldPacket.WriteInt32(RegionGroup);
             _worldPacket.WriteBytes(Ed25519.Sign(toSign.Digest, expandedPrivateKey, 0, EnableEncryptionContext));

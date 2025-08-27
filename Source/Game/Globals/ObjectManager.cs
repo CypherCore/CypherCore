@@ -1747,7 +1747,7 @@ namespace Game
         }
         public uint GetScriptId(string name, bool isDatabaseBound = true)
         {
-            return _scriptNamesStorage.Insert(name, isDatabaseBound);
+            return _scriptNamesStorage.Insert(name ?? "", isDatabaseBound);
         }
         public uint GetAreaTriggerScriptId(uint triggerid)
         {

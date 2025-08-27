@@ -27,9 +27,9 @@ namespace Game.DataStorage
         public uint OverridesSpellID;
         public uint RequiredSpellID;
         public int[] CategoryMask = new int[2];
-        public uint[] SpellRank = new uint[2];
-        public uint[] PrereqTalent = new uint[2];
-        public byte[] PrereqRank = new byte[2];
+        public uint[] SpellRank = new uint[9];
+        public uint[] PrereqTalent = new uint[3];
+        public byte[] PrereqRank = new byte[3];
     }
 
     public sealed class TaxiNodesRecord

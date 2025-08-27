@@ -2137,8 +2137,8 @@ namespace Framework.Constants
 
         // Opcodes That Are Not Generated Automatically
         AccountHeirloomUpdate = AccountToyUpdate + 1, // No Client Handler
-        CompressedPacket = 0x3E000A,
-        MultiplePackets = 0x3E0009,
+        CompressedPacket = AuthChallenge + 0xA,
+        MultiplePackets = AuthChallenge + 0x9,
 
         Unknown = 0xbadd,
         None = 0

@@ -332,6 +332,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(PlayerIdentityOptionsEnabled);
             _worldPacket.WriteBit(AccountExportEnabled);
             _worldPacket.WriteBit(AccountLockedPostExport);
+
             _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
 
             _worldPacket.WriteBit(BNSendWhisperUseV2Services);
@@ -372,7 +373,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(LaunchDurationETA.Value);
 
             if (!RealmHiddenAlert.IsEmpty())
-                _worldPacket.WriteString(RealmHiddenAlert);
+                _worldPacket.WriteCString(RealmHiddenAlert);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);

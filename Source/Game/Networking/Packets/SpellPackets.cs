@@ -347,13 +347,13 @@ namespace Game.Networking.Packets
 
             Visual.Write(_worldPacket);
 
-            _worldPacket.WriteUInt16(Reason);
+            _worldPacket.WriteUInt8(Reason);
         }
 
         public ObjectGuid CasterUnit;
         public uint SpellID;
         public SpellCastVisual Visual;
-        public ushort Reason;
+        public byte Reason;
         public ObjectGuid CastID;
     }
 

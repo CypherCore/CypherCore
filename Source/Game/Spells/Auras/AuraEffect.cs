@@ -505,7 +505,7 @@ namespace Game.Spells
                 else
                 {
                     foreach (AuraEffect aurEff in aura.GetAuraEffects())
-                        if (aurEff != triggeredBy)
+                        if (aurEff != null && aurEff != triggeredBy)
                             aurEff.RecalculateAmount(triggeredBy);
                 }
             }

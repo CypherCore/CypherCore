@@ -863,7 +863,7 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
             foreach (AuraEffect aurEff in GetAuraEffects())
-                aurEff.CalculatePeriodic(caster, resetPeriodicTimer, false);
+                aurEff?.CalculatePeriodic(caster, resetPeriodicTimer, false);
         }
 
         public void SetCharges(int charges)
@@ -1806,7 +1806,7 @@ namespace Game.Spells
             // At least one effect has to pass checks to proc aura
             uint procEffectMask = aurApp.GetEffectMask();
             foreach (AuraEffect aurEff in GetAuraEffects())
-                if ((procEffectMask & (1u << (int)aurEff.GetEffIndex())) != 0)
+                if (aurEff != null && (procEffectMask & (1u << (int)aurEff.GetEffIndex())) != 0)
                     if ((procEntry.DisableEffectsMask & (1u << (int)aurEff.GetEffIndex())) != 0 || !GetEffect(aurEff.GetEffIndex()).CheckEffectProc(aurApp, eventInfo))
                         procEffectMask &= ~(1u << (int)aurEff.GetEffIndex());
 
