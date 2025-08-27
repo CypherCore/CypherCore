@@ -2701,10 +2701,20 @@ namespace Game.Entities
         }
     }
 
-    public class ChrCustomizationChoice : IEquatable<ChrCustomizationChoice>
+    public class ChrCustomizationChoice : IEquatable<ChrCustomizationChoice>, IComparable<ChrCustomizationChoice>
     {
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationChoiceID;
+
+        public int CompareTo(ChrCustomizationChoice? other)
+        {
+            int result = ChrCustomizationOptionID.CompareTo(other.ChrCustomizationOptionID);
+
+            if (result == 0)
+                result = ChrCustomizationChoiceID.CompareTo(other.ChrCustomizationChoiceID);
+
+            return result;
+        }
 
         public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
         {
