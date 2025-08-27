@@ -81,7 +81,7 @@ namespace Game.Networking.Packets
         public ushort TodayHK;
         public ushort YesterdayHK;
         public byte LifetimeMaxRank;
-        public ClassicTalentInfoUpdate TalentInfo;
+        public ClassicTalentInfoUpdate TalentInfo = new();
         public TraitInspectInfo TraitsInfo = new();
     }
 
