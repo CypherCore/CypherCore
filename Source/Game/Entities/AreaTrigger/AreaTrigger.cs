@@ -1555,7 +1555,7 @@ namespace Game.Entities
         public override ObjectGuid GetOwnerGUID() { return GetCasterGuid(); }
         public ObjectGuid GetCasterGuid() { return m_areaTriggerData.Caster; }
 
-        public bool HasSplines() { return !_spline.Empty(); }
+        public bool HasSplines() { return _spline != null && !_spline.Empty(); }
         public Spline<float> GetSpline() { return _spline; }
 
         bool HasOrbit() { return m_areaTriggerData.PathData.Is<AreaTriggerOrbit>(); }

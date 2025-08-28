@@ -856,7 +856,7 @@ namespace Game.Entities
 
         public void RemoveAreaTrigger(AuraEffect aurEff)
         {
-            foreach (AreaTrigger areaTrigger in m_areaTrigger)
+            foreach (AreaTrigger areaTrigger in m_areaTrigger.ToList())
             {
                 if (areaTrigger.GetAuraEffect() == aurEff)
                 {
@@ -868,7 +868,7 @@ namespace Game.Entities
 
         public void RemoveAllAreaTriggers(AreaTriggerRemoveReason reason = AreaTriggerRemoveReason.Default)
         {
-            foreach (AreaTrigger at in m_areaTrigger)
+            foreach (AreaTrigger at in m_areaTrigger.ToList())
             {
                 if (reason == AreaTriggerRemoveReason.UnitDespawn && at.GetTemplate().ActionSetFlags.HasFlag(AreaTriggerActionSetFlag.DontDespawnWithCreator))
                     continue;

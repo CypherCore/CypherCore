@@ -353,15 +353,14 @@ namespace Game.Entities
         }
     }
 
-    public class VariantUpdateField(int blockBit, int bit, params Type[] types)
+    public class VariantUpdateField(int blockBit, int bit)
     {
         public object _value;
-        Type[] _types = types;
 
         public int BlockBit = blockBit;
         public int Bit = bit;
 
-        public bool Is<T>() { return _types.Contains(typeof(T)); }
+        public bool Is<T>() { return _value is T; }
 
         public T Get<T>() where T : class, new()
         {
@@ -466,7 +465,7 @@ namespace Game.Entities
 
         public void ClearChangesMask(VariantUpdateField field)
         {
-            if (typeof(IHasChangesMask).IsAssignableFrom(field._value.GetType()))
+            if (field._value != null && typeof(IHasChangesMask).IsAssignableFrom(field._value.GetType()))
                 ((IHasChangesMask)field._value).ClearChangesMask();
         }
 
