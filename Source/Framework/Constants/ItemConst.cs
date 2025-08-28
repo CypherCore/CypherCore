@@ -69,7 +69,8 @@ namespace Framework.Constants
             SocketColor.Fragrance,
             SocketColor.SingingThunder,
             SocketColor.SingingSea,
-            SocketColor.SingingWind
+            SocketColor.SingingWind,
+            SocketColor.Fiber
         };
 
         public static ItemModifier[] AppearanceModifierSlotBySpec =
@@ -234,6 +235,7 @@ namespace Framework.Constants
         SingingThunder = 0x08000000,
         SingingSea = 0x10000000,
         SingingWind = 0x20000000,
+        Fiber = 0x40000000,
 
         Standard = (Red | Yellow | Blue)
     }
