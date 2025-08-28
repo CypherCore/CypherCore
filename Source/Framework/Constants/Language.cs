@@ -1021,7 +1021,13 @@ namespace Framework.Constants
         AccountBnetUnlinked = 1216,
         AccountBnetNotLinked = 1217,
         DisallowTicketsConfig = 1218,
-        // 1219-1499 - Free
+
+        // Guild list (.guild list)
+        GuildListTitle = 1219,
+        GuildListHeader = 1220,
+        GuildListRow = 1221,
+        GuildListTotal = 1222,
+        // 1223-1499 - free
 
         // Command Argument Parsers
         CmdparserEither = 1500,

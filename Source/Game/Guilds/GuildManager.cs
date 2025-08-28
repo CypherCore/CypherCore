@@ -487,6 +487,8 @@ namespace Game
 
         public void SetNextGuildId(uint Id) { NextGuildId = Id; }
 
+        public Dictionary<ulong, Guild> GetGuildStore() { return GuildStore; }
+
         public List<GuildReward> GetGuildRewards() { return guildRewards; }
 
         uint NextGuildId;

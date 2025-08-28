@@ -206,5 +206,36 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GuildInfoExtraInfo, guild.GetInfo()); // Extra Information
             return true;
         }
+
+        [Command("info", RBACPermissions.CommandGuildInfo, true)]
+        static bool HandleGuildListCommand(CommandHandler handler)
+        {
+            string titleAndSummaryColor = handler.IsConsole() ? "" : "|cff00ff00";
+            string tableHeaderColor = handler.IsConsole() ? "" : "|cff00ffff";
+            string resetColor = handler.IsConsole() ? "" : "|r";
+
+            handler.SendSysMessage(CypherStrings.GuildListTitle, titleAndSummaryColor, resetColor);
+            handler.SendSysMessage(CypherStrings.GuildListHeader, tableHeaderColor, resetColor);
+
+            var guildStore = Global.GuildMgr.GetGuildStore();
+
+            foreach (var (id, g) in guildStore)
+            {
+                if (!Global.CharacterCacheStorage.GetCharacterNameByGuid(g.GetLeaderGUID(), out string gmName))
+                    gmName = "---";
+
+                handler.SendSysMessage(CypherStrings.GuildListRow,
+                    id,
+                    g.GetName(),
+                    gmName,
+                    Time.GetTimeString(g.GetCreatedDate()),
+                    g.GetMembersCount(),
+                    g.GetBankMoney() / MoneyConstants.Gold
+                );
+            }
+
+            handler.SendSysMessage(CypherStrings.GuildListTotal, titleAndSummaryColor, guildStore.Count, resetColor);
+            return true;
+        }
     }
 }
