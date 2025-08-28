@@ -2891,7 +2891,7 @@ namespace Game.Entities
             if (GetLevel() < levelForTarget)
                 return 1.0f;
 
-            return (float)GetMaxHealthByLevel(levelForTarget) / GetCreateHealth();
+            return (float)GetMaxHealthByLevel(levelForTarget) / (float)GetCreateHealth();
         }
 
         public float GetBaseDamageForLevel(uint level)

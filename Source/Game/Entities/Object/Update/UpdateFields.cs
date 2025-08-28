@@ -1210,7 +1210,7 @@ namespace Game.Entities
         }
     }
 
-    public class UnitData() : HasChangesMask(223)
+    public class UnitData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Unit, 223)
     {
         public UpdateField<bool> Field_314 = new(0, 1);
         public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 2);
