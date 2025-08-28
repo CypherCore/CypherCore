@@ -477,7 +477,7 @@ namespace Game.Networking.Packets
             foreach (QuestObjectiveSimple obj in Objectives)
             {
                 _worldPacket.WriteUInt32(obj.Id);
-                _worldPacket.WriteUInt8(obj.Type);
+                _worldPacket.WriteUInt32(obj.Type);
                 _worldPacket.WriteInt32(obj.ObjectID);
                 _worldPacket.WriteInt32(obj.Amount);
             }
