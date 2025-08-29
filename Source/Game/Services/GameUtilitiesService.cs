@@ -24,7 +24,7 @@ namespace Game
             Dictionary<string, Bgs.Protocol.Variant> Params = new();
             string removeSuffix(string str)
             {
-                var pos = str.IndexOf('_');
+                var pos = str.LastIndexOf('_');
                 if (pos != -1)
                     return str.Substring(0, pos);
 
@@ -60,7 +60,7 @@ namespace Game
         [Service(OriginalHash.GameUtilitiesService, 10)]
         BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response)
         {
-            if (!request.AttributeKey.Contains("Command_RealmListRequest_v1"))
+            if (request.AttributeKey.Contains("Command_RealmListRequest_v1"))
             {
                 Global.RealmMgr.WriteSubRegions(response);
                 return BattlenetRpcErrorCode.Ok;
