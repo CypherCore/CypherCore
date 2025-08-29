@@ -58,7 +58,7 @@ public class PacketLog
 
             int size = data.Length;
             if (isClientPacket)
-                size -= 2;
+                size -= 4;
 
             writer.Write(size + 4);
             writer.Write(SocketIPBytes);
@@ -66,7 +66,7 @@ public class PacketLog
             writer.Write(opcode);
 
             if (isClientPacket)
-                writer.Write(data, 2, size);
+                writer.Write(data, 4, size);
             else
                 writer.Write(data, 0, size);
         }
