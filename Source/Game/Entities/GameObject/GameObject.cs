@@ -633,7 +633,7 @@ namespace Game.Entities
                                 var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, radius);
                                 var searcher = new UnitLastSearcher(this, checker);
                                 Cell.VisitAllObjects(this, searcher, radius);
-                                target = searcher.GetTarget();
+                                target = searcher.GetResult();
                             }
                             else
                             {
@@ -641,7 +641,7 @@ namespace Game.Entities
                                 var check = new AnyUnitInObjectRangeCheck(this, radius);
                                 var searcher = new PlayerSearcher(this, check);
                                 Cell.VisitWorldObjects(this, searcher, radius);
-                                target = searcher.GetTarget();
+                                target = searcher.GetResult();
                             }
 
                             if (target != null)
@@ -1465,7 +1465,7 @@ namespace Game.Entities
             var checker = new GameObjectSearcher(this, u_check);
 
             Cell.VisitGridObjects(this, checker, range);
-            return checker.GetTarget();
+            return checker.GetResult();
         }
 
         public void ResetDoorOrButton()
@@ -3975,7 +3975,7 @@ namespace Game.Entities
         ObjectGuid m_linkedTrap;
         #endregion
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             public GameObject Owner;
             public ObjectFieldData ObjectMask = new();
@@ -3995,6 +3995,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 

@@ -4257,7 +4257,7 @@ namespace Game.AI
             var u_check = new MostHPMissingInRange<Unit>(_me, range, MinHPDiff);
             var searcher = new UnitLastSearcher(_me, u_check);
             Cell.VisitGridObjects(_me, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public Unit DoSelectBelowHpPctFriendlyWithEntry(uint entry, float range, byte minHPDiff = 1, bool excludeSelf = true)
@@ -4266,7 +4266,7 @@ namespace Game.AI
             UnitLastSearcher searcher = new(_me, u_check);
             Cell.VisitAllObjects(_me, searcher, range);
 
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         Unit DoSelectLowestHpPercentFriendly(float range, uint minHpPct, uint maxHpPct)
@@ -4277,7 +4277,7 @@ namespace Game.AI
             MostHPPercentMissingInRange u_check = new(_me, range, minHpPct, maxHpPct);
             UnitLastSearcher searcher = new(_me, u_check);
             Cell.VisitGridObjects(_me, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         void DoFindFriendlyCC(List<Creature> creatures, float range)
@@ -4308,7 +4308,7 @@ namespace Game.AI
             var u_check = new AnyFriendlyUnitInObjectRangeCheck(_me, _me, range);
             var searcher = new UnitLastSearcher(_me, u_check);
             Cell.VisitAllObjects(_me, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker, uint startFromEventId = 0)

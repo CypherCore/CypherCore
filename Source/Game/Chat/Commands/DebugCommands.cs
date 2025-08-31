@@ -142,7 +142,7 @@ namespace Game.Chat
                 var check = new AllCreaturesOfEntryInRange(handler.GetPlayer(), entry, 20.0f);
                 var searcher = new CreatureSearcher(handler.GetPlayer(), check);
                 Cell.VisitAllObjects(handler.GetPlayer(), searcher, 30.0f);
-                var passenger = searcher.GetTarget();
+                var passenger = searcher.GetResult();
                 if (passenger == null || passenger == target)
                     return false;
                 passenger.EnterVehicle(target, seatId);

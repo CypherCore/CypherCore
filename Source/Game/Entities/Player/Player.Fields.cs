@@ -255,7 +255,7 @@ namespace Game.Entities
         List<uint> _playerDataElementsNeedSave = new();
         List<uint> _playerDataFlagsNeedSave = new();
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             Player Owner;
             ObjectFieldData ObjectMask = new();
@@ -277,6 +277,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 

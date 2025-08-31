@@ -7,6 +7,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Chat
@@ -16,7 +17,7 @@ namespace Game.Chat
         public virtual dynamic Invoke(Locale locale = Locale.enUS) { return default; }
     }
 
-    public class ChatPacketSender : IDoWork<Player>
+    public class ChatPacketSender
     {
         ChatMsg Type;
         Language Language;
@@ -71,6 +72,8 @@ namespace Game.Chat
                 SoundPacket.Write();
             }
         }
+
+        public static implicit operator IDoWork<Player>(ChatPacketSender obj) => obj.Invoke;
 
         public void Invoke(Player player)
         {

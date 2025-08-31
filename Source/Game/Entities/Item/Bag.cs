@@ -259,7 +259,7 @@ namespace Game.Entities
         ContainerData m_containerData;
         Item[] m_bagslot = new Item[98];
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             Bag Owner;
             ObjectFieldData ObjectMask = new();
@@ -280,6 +280,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 }

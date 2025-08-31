@@ -307,7 +307,7 @@ namespace Game.Entities
         int _duration; // for non-aura dynobjects
         bool _isViewpoint;
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             DynamicObject Owner;
             ObjectFieldData ObjectMask = new();
@@ -327,6 +327,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 

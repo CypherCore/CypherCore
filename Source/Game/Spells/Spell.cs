@@ -1747,9 +1747,9 @@ namespace Game.Spells
                 return null;
 
             var check = new WorldObjectSpellNearbyTargetCheck(range, m_caster, m_spellInfo, selectionType, condList, objectType);
-            var searcher = new WorldObjectLastSearcher(m_caster, check, containerTypeMask);
+            var searcher = new WorldObjectLastSearcher(PhasingHandler.GetAlwaysVisiblePhaseShift(), check, containerTypeMask);
             SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         void SearchAreaTargets(List<WorldObject> targets, SpellEffectInfo spellEffectInfo, float range, Position position, WorldObject referer,
@@ -1761,7 +1761,7 @@ namespace Game.Spells
 
             float extraSearchRadius = range > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
             var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList, objectType, searchReason);
-            var searcher = new WorldObjectListSearcher(m_caster, targets, check, containerTypeMask);
+            var searcher = new WorldObjectListSearcher(PhasingHandler.GetAlwaysVisiblePhaseShift(), targets, check, containerTypeMask);
             SearchTargets(searcher, containerTypeMask, m_caster, position, range + extraSearchRadius);
         }
 
@@ -1870,7 +1870,7 @@ namespace Game.Spells
             var check = new GameObjectFocusCheck(m_caster, m_spellInfo.RequiresSpellFocus);
             var searcher = new GameObjectSearcher(m_caster, check);
             SearchTargets(searcher, GridMapTypeMask.GameObject, m_caster, m_caster, m_caster.GetVisibilityRange());
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         void PrepareDataForTriggerSystem()

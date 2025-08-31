@@ -71,7 +71,7 @@ namespace Game.Maps
         {
             i_player = pl;
             i_data = new UpdateData(pl.GetMapId());
-            vis_guids = new List<ObjectGuid>(pl.m_clientGUIDs);
+            vis_guids = [.. pl.m_clientGUIDs];
             i_visibleNow = new List<WorldObject>();
         }
 
@@ -385,22 +385,17 @@ namespace Game.Maps
         }
     }
 
-    public class PacketSenderRef : IDoWork<Player>
+    public class PacketSenderRef(ServerPacket message)
     {
-        ServerPacket Data;
-
-        public PacketSenderRef(ServerPacket message)
-        {
-            Data = message;
-        }
-
         public virtual void Invoke(Player player)
         {
-            player.SendPacket(Data);
+            player.SendPacket(message);
         }
+
+        public static implicit operator IDoWork<Player>(PacketSenderRef obj) => obj.Invoke;
     }
 
-    public class PacketSenderOwning<T> : IDoWork<Player> where T : ServerPacket, new()
+    public class PacketSenderOwning<T> where T : ServerPacket, new()
     {
         public T Data = new();
 
@@ -408,6 +403,8 @@ namespace Game.Maps
         {
             player.SendPacket(Data);
         }
+
+        public static implicit operator IDoWork<Player>(PacketSenderOwning<T> obj) => obj.Invoke;
     }
 
     public class MessageDistDeliverer : Notifier
@@ -526,14 +523,14 @@ namespace Game.Maps
         }
     }
 
-    public class MessageDistDelivererToHostile<T> : Notifier where T : IDoWork<Player>
+    public class MessageDistDelivererToHostile<T> : Notifier
     {
         Unit i_source;
-        T i_packetSender;
+        IDoWork<Player> i_packetSender;
         PhaseShift i_phaseShift;
         float i_distSq;
 
-        public MessageDistDelivererToHostile(Unit src, T packetSender, float dist)
+        public MessageDistDelivererToHostile(Unit src, IDoWork<Player> packetSender, float dist)
         {
             i_source = src;
             i_packetSender = packetSender;
@@ -618,13 +615,8 @@ namespace Game.Maps
         }
     }
 
-    public class UpdaterNotifier : Notifier
+    public class ObjectUpdater(uint diff) : Notifier
     {
-        public UpdaterNotifier(uint diff)
-        {
-            i_timeDiff = diff;
-        }
-
         public override void Visit(IList<WorldObject> objs)
         {
             for (var i = 0; i < objs.Count; ++i)
@@ -635,193 +627,7 @@ namespace Game.Maps
                     continue;
 
                 if (obj.IsInWorld)
-                    obj.Update(i_timeDiff);
-            }
-        }
-
-        uint i_timeDiff;
-    }
-
-    public class PlayerWorker : Notifier
-    {
-        PhaseShift i_phaseShift;
-        Action<Player> action;
-
-        public PlayerWorker(WorldObject searcher, Action<Player> _action)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            action = _action;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (player.InSamePhase(i_phaseShift))
-                    action.Invoke(player);
-            }
-        }
-    }
-
-    public class CreatureWorker : Notifier
-    {
-        PhaseShift i_phaseShift;
-        IDoWork<Creature> Do;
-
-        public CreatureWorker(WorldObject searcher, IDoWork<Creature> _Do)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            Do = _Do;
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
-                    Do.Invoke(creature);
-            }
-        }
-    }
-
-    public class GameObjectWorker : Notifier
-    {
-        PhaseShift i_phaseShift;
-        IDoWork<GameObject> _do;
-
-        public GameObjectWorker(WorldObject searcher, IDoWork<GameObject> @do)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            _do = @do;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (gameObject.InSamePhase(i_phaseShift))
-                    _do.Invoke(gameObject);
-            }
-        }
-    }
-
-    public class WorldObjectWorker : Notifier
-    {
-        GridMapTypeMask i_mapTypeMask;
-        PhaseShift i_phaseShift;
-        IDoWork<WorldObject> i_do;
-
-        public WorldObjectWorker(WorldObject searcher, IDoWork<WorldObject> _do, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
-        {
-            i_mapTypeMask = mapTypeMask;
-            i_phaseShift = searcher.GetPhaseShift();
-            i_do = _do;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (gameObject.InSamePhase(i_phaseShift))
-                    i_do.Invoke(gameObject);
-            }
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (player.InSamePhase(i_phaseShift))
-                    i_do.Invoke(player);
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
-                    i_do.Invoke(creature);
-            }
-        }
-
-        public override void Visit(IList<Corpse> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Corpse corpse = objs[i];
-                if (corpse.InSamePhase(i_phaseShift))
-                    i_do.Invoke(corpse);
-            }
-        }
-
-        public override void Visit(IList<DynamicObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                DynamicObject dynamicObject = objs[i];
-                if (dynamicObject.InSamePhase(i_phaseShift))
-                    i_do.Invoke(dynamicObject);
-            }
-        }
-
-        public override void Visit(IList<AreaTrigger> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                AreaTrigger areaTrigger = objs[i];
-                if (areaTrigger.InSamePhase(i_phaseShift))
-                    i_do.Invoke(areaTrigger);
-            }
-        }
-
-        public override void Visit(IList<SceneObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                SceneObject sceneObject = objs[i];
-                if (sceneObject.InSamePhase(i_phaseShift))
-                    i_do.Invoke(sceneObject);
-            }
-        }
-
-        public override void Visit(IList<Conversation> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Conversation conversation = objs[i];
-                if (conversation.InSamePhase(i_phaseShift))
-                    i_do.Invoke(conversation);
+                    obj.Update(diff);
             }
         }
     }
@@ -847,7 +653,7 @@ namespace Game.Maps
         }
     }
 
-    public class WorldObjectChangeAccumulator : IDoWork<Player>
+    public class WorldObjectChangeAccumulator
     {
         Dictionary<Player, UpdateData> updateData;
         WorldObject worldObject;
@@ -865,26 +671,465 @@ namespace Game.Maps
             if (player.HaveAtClient(worldObject) && plr_list.Add(player.GetGUID()))
                 worldObject.BuildFieldsUpdate(player, updateData);
         }
+
+        public static implicit operator IDoWork<Player>(WorldObjectChangeAccumulator obj) => obj.Invoke;
+    }
+
+    //Searchers
+    public enum WorldObjectSearcherContinuation
+    {
+        Continue,
+        Return
+    }
+
+    public interface IResultInserter<T>
+    {
+        WorldObjectSearcherContinuation ShouldContinue();
+        void Insert(T obj);
+        T GetResult();
+    }
+
+    class SearcherFirstObjectResult<T>() : IResultInserter<T>
+    {
+        T result;
+
+        public WorldObjectSearcherContinuation ShouldContinue()
+        {
+            return result != null ? WorldObjectSearcherContinuation.Return : WorldObjectSearcherContinuation.Continue;
+        }
+
+        public void Insert(T obj)
+        {
+            result = obj;
+        }
+
+        public T GetResult()
+        {
+            return result;
+        }
+    }
+
+    class SearcherLastObjectResult<T>() : IResultInserter<T>
+    {
+        T result;
+
+        public WorldObjectSearcherContinuation ShouldContinue()
+        {
+            return WorldObjectSearcherContinuation.Continue;
+        }
+
+        public void Insert(T obj)
+        {
+            result = obj;
+        }
+
+        public T GetResult()
+        {
+            return result;
+        }
+    }
+
+    class SearcherContainerResult<T>(List<T> container_) : IResultInserter<T>
+    {
+        ICollection<T> container = container_;
+
+        public WorldObjectSearcherContinuation ShouldContinue()
+        {
+            return WorldObjectSearcherContinuation.Continue;
+        }
+
+        public void Insert(T obj)
+        {
+            container.Add(obj);
+        }
+
+        public T GetResult()
+        {
+            return default;
+        }
+    }
+
+    struct DynamicGridMapTypeMaskCheck(GridMapTypeMask mask)
+    {
+        static Dictionary<Type, GridMapTypeMask> GridMapTypeMaskForType = new()
+        {
+            { typeof(Corpse), GridMapTypeMask.Corpse },
+            { typeof(Creature), GridMapTypeMask.Creature },
+            { typeof(DynamicObject), GridMapTypeMask.DynamicObject },
+            { typeof(GameObject), GridMapTypeMask.GameObject },
+            { typeof(Player), GridMapTypeMask.Player },
+            { typeof(AreaTrigger), GridMapTypeMask.AreaTrigger },
+            { typeof(SceneObject), GridMapTypeMask.SceneObject },
+            { typeof(Conversation), GridMapTypeMask.Conversation }
+        };
+        GridMapTypeMask MaskValue = mask;
+
+        public bool Includes(GridMapTypeMask mapTypeMask)
+        {
+            return (MaskValue & mapTypeMask) != 0;
+        }
+
+        public static GridMapTypeMask GetTypeMaskByType<T>()
+        {
+            return GridMapTypeMaskForType.LookupByKey(typeof(T));
+        }
+    }
+
+    // WorldObject searchers & workers
+
+    public class WorldObjectSearcherBase<T> : Notifier where T : WorldObject
+    {
+        GridMapTypeMask i_mapTypeMask;
+        public PhaseShift i_phaseShift;
+        ICheck<T> i_check;
+        IResultInserter<T> resultInserter;
+
+        public WorldObjectSearcherBase(PhaseShift phaseShift, IResultInserter<T> result, ICheck<T> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+        {
+            i_mapTypeMask = mapTypeMask;
+            i_phaseShift = phaseShift;
+            i_check = check;
+            resultInserter = result;
+        }
+
+        public override void Visit(IList<GameObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<Player> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<Creature> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<Corpse> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<DynamicObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<AreaTrigger> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<SceneObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        public override void Visit(IList<Conversation> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+                return;
+
+            VisitImpl(objs);
+        }
+
+        void VisitImpl<TT>(IList<TT> objs) where TT : WorldObject
+        {
+            if (resultInserter.ShouldContinue() == WorldObjectSearcherContinuation.Return)
+                return;
+
+            foreach (dynamic obj in objs)
+            {
+                if (!obj.InSamePhase(i_phaseShift))
+                    continue;
+
+                if (i_check.Invoke(obj))
+                {
+                    resultInserter.Insert(obj);
+
+                    if (resultInserter.ShouldContinue() == WorldObjectSearcherContinuation.Return)
+                        return;
+                }
+            }
+        }
+
+        public T GetResult()
+        {
+            return resultInserter.GetResult();
+        }
+    }
+
+    public class WorldObjectWorkerBase<T>(PhaseShift phaseShift, IDoWork<T> work, GridMapTypeMask mapTypeMask = GridMapTypeMask.All) : Notifier where T : WorldObject
+    {
+        DynamicGridMapTypeMaskCheck i_mapTypeMask = new(mapTypeMask);
+        PhaseShift i_phaseShift = phaseShift;
+        IDoWork<T> i_work = work;
+
+        public override void Visit(IList<WorldObject> objs)
+        {
+            if (i_mapTypeMask.Includes(DynamicGridMapTypeMaskCheck.GetTypeMaskByType<T>()))
+                VisitImpl(objs);
+        }
+
+        void VisitImpl(IList<WorldObject> objs)
+        {
+            foreach (var obj in objs)
+                if (obj.InSamePhase(i_phaseShift))
+                    i_work.Invoke(obj as T);
+        }
+    }
+
+    public class WorldObjectSearcher : WorldObjectSearcherBase<WorldObject>
+    {
+        public WorldObjectSearcher(PhaseShift phaseShift, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : base(phaseShift, new SearcherFirstObjectResult<WorldObject>(), check, mapTypeMask) { }
+
+        public WorldObjectSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+             : this(searcher.GetPhaseShift(), check, mapTypeMask) { }
+    }
+
+    public class WorldObjectLastSearcher : WorldObjectSearcherBase<WorldObject>
+    {
+        public WorldObjectLastSearcher(PhaseShift phaseShift, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : base(phaseShift, new SearcherLastObjectResult<WorldObject>(), check, mapTypeMask) { }
+
+        public WorldObjectLastSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : this(searcher.GetPhaseShift(), check, mapTypeMask) { }
+    }
+
+    public class WorldObjectListSearcher : WorldObjectSearcherBase<WorldObject>
+    {
+        public WorldObjectListSearcher(PhaseShift phaseShift, List<WorldObject> container, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : base(phaseShift, new SearcherContainerResult<WorldObject>(container), check, mapTypeMask) { }
+
+        public WorldObjectListSearcher(WorldObject searcher, List<WorldObject> container, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : this(searcher.GetPhaseShift(), container, check, mapTypeMask) { }
+    }
+
+    public class WorldObjectWorker<T> : WorldObjectWorkerBase<T> where T : WorldObject
+    {
+        public WorldObjectWorker(PhaseShift phaseShift, IDoWork<T> work, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : base(phaseShift, work, mapTypeMask) { }
+
+        public WorldObjectWorker(WorldObject searcher, IDoWork<T> work, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
+            : this(searcher.GetPhaseShift(), work, mapTypeMask) { }
+    }
+
+    // Gameobject searchers
+
+    public class GameObjectSearcherBase : WorldObjectSearcherBase<GameObject>
+    {
+        public GameObjectSearcherBase(PhaseShift phaseShift, IResultInserter<GameObject> result, ICheck<GameObject> check)
+           : base(phaseShift, result, check, GridMapTypeMask.GameObject) { }
+    }
+
+    public class GameObjectSearcher : GameObjectSearcherBase
+    {
+        public GameObjectSearcher(PhaseShift phaseShift, ICheck<GameObject> check)
+            : base(phaseShift, new SearcherFirstObjectResult<GameObject>(), check) { }
+
+        public GameObjectSearcher(WorldObject searcher, ICheck<GameObject> check)
+            : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class GameObjectLastSearcher : GameObjectSearcherBase
+    {
+        public GameObjectLastSearcher(PhaseShift phaseShift, ICheck<GameObject> check)
+            : base(phaseShift, new SearcherLastObjectResult<GameObject>(), check) { }
+
+        public GameObjectLastSearcher(WorldObject searcher, ICheck<GameObject> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class GameObjectListSearcher : GameObjectSearcherBase
+    {
+        public GameObjectListSearcher(PhaseShift phaseShift, List<GameObject> container, ICheck<GameObject> check)
+                : base(phaseShift, new SearcherContainerResult<GameObject>(container), check) { }
+
+        public GameObjectListSearcher(WorldObject searcher, List<GameObject> container, ICheck<GameObject> check)
+                : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class GameObjectWorker : WorldObjectWorkerBase<GameObject>
+    {
+        public GameObjectWorker(PhaseShift phaseShift, IDoWork<GameObject> work)
+            : base(phaseShift, work, GridMapTypeMask.GameObject) { }
+
+        public GameObjectWorker(WorldObject searcher, IDoWork<GameObject> work)
+              : this(searcher.GetPhaseShift(), work) { }
+    }
+
+    // Unit searchers
+
+    public class UnitSearcherBase : WorldObjectSearcherBase<Unit>
+    {
+        public UnitSearcherBase(PhaseShift phaseShift, IResultInserter<Unit> result, ICheck<Unit> check)
+           : base(phaseShift, result, check, GridMapTypeMask.Creature | GridMapTypeMask.Player) { }
+    }
+
+    // First accepted by Check Unit if any
+    public class UnitSearcher : UnitSearcherBase
+    {
+        public UnitSearcher(PhaseShift phaseShift, ICheck<Unit> check)
+            : base(phaseShift, new SearcherFirstObjectResult<Unit>(), check) { }
+
+        public UnitSearcher(WorldObject searcher, ICheck<Unit> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    // Last accepted by Check Unit if any (Check can change requirements at each call)
+    public class UnitLastSearcher : UnitSearcherBase
+    {
+        public UnitLastSearcher(PhaseShift phaseShift, ICheck<Unit> check)
+                : base(phaseShift, new SearcherLastObjectResult<Unit>(), check) { }
+
+        public UnitLastSearcher(WorldObject searcher, ICheck<Unit> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    // All accepted by Check units if any
+    public class UnitListSearcher : UnitSearcherBase
+    {
+        public UnitListSearcher(PhaseShift phaseShift, List<Unit> container, ICheck<Unit> check)
+                : base(phaseShift, new SearcherContainerResult<Unit>(container), check) { }
+
+        public UnitListSearcher(WorldObject searcher, List<Unit> container, ICheck<Unit> check)
+            : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class UnitWorker : WorldObjectWorkerBase<Unit>
+    {
+        public UnitWorker(PhaseShift phaseShift, IDoWork<Unit> work)
+                : base(phaseShift, work, GridMapTypeMask.Creature | GridMapTypeMask.Player) { }
+
+        public UnitWorker(WorldObject searcher, IDoWork<Unit> work)
+                    : this(searcher.GetPhaseShift(), work) { }
+    }
+
+    // Creature searchers
+
+    public class CreatureSearcherBase : WorldObjectSearcherBase<Creature>
+    {
+        public CreatureSearcherBase(PhaseShift phaseShift, IResultInserter<Creature> result, ICheck<Creature> check)
+           : base(phaseShift, result, check, GridMapTypeMask.Creature) { }
+    }
+
+    public class CreatureSearcher : CreatureSearcherBase
+    {
+        public CreatureSearcher(PhaseShift phaseShift, ICheck<Creature> check)
+                : base(phaseShift, new SearcherFirstObjectResult<Creature>(), check) { }
+
+        public CreatureSearcher(WorldObject searcher, ICheck<Creature> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    // Last accepted by Check Creature if any (Check can change requirements at each call)
+    public class CreatureLastSearcher : CreatureSearcherBase
+    {
+        public CreatureLastSearcher(PhaseShift phaseShift, ICheck<Creature> check)
+                : base(phaseShift, new SearcherLastObjectResult<Creature>(), check) { }
+
+        public CreatureLastSearcher(WorldObject searcher, ICheck<Creature> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class CreatureListSearcher : CreatureSearcherBase
+    {
+        public CreatureListSearcher(PhaseShift phaseShift, List<Creature> container, ICheck<Creature> check)
+                : base(phaseShift, new SearcherContainerResult<Creature>(container), check) { }
+
+        public CreatureListSearcher(WorldObject searcher, List<Creature> container, ICheck<Creature> check)
+                    : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class CreatureWorker : WorldObjectWorkerBase<Creature>
+    {
+        public CreatureWorker(PhaseShift phaseShift, IDoWork<Creature> work)
+                : base(phaseShift, work) { }
+
+        public CreatureWorker(WorldObject searcher, IDoWork<Creature> work)
+                : this(searcher.GetPhaseShift(), work) { }
+    }
+
+    // Player searchers
+
+    public class PlayerSearcherBase : WorldObjectSearcherBase<Player>
+    {
+        public PlayerSearcherBase(PhaseShift phaseShift, IResultInserter<Player> result, ICheck<Player> check)
+           : base(phaseShift, result, check, GridMapTypeMask.Player) { }
+    }
+
+    public class PlayerSearcher : PlayerSearcherBase
+    {
+        public PlayerSearcher(PhaseShift phaseShift, ICheck<Player> check)
+                : base(phaseShift, new SearcherFirstObjectResult<Player>(), check) { }
+
+        public PlayerSearcher(WorldObject searcher, ICheck<Player> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class PlayerLastSearcher : PlayerSearcherBase
+    {
+        public PlayerLastSearcher(PhaseShift phaseShift, ICheck<Player> check)
+                : base(phaseShift, new SearcherLastObjectResult<Player>(), check) { }
+
+        public PlayerLastSearcher(WorldObject searcher, ICheck<Player> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class PlayerListSearcher : PlayerSearcherBase
+    {
+        public PlayerListSearcher(PhaseShift phaseShift, List<Player> container, ICheck<Player> check)
+                : base(phaseShift, new SearcherContainerResult<Player>(container), check) { }
+
+
+        public PlayerListSearcher(WorldObject searcher, List<Player> container, ICheck<Player> check)
+            : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class PlayerWorker : WorldObjectWorkerBase<Player>
+    {
+        public PlayerWorker(PhaseShift phaseShift, IDoWork<Player> work)
+                : base(phaseShift, work, GridMapTypeMask.Player) { }
+
+        public PlayerWorker(WorldObject searcher, IDoWork<Player> work)
+                    : this(searcher.GetPhaseShift(), work) { }
     }
 
     public class PlayerDistWorker : Notifier
     {
         WorldObject i_searcher;
         float i_dist;
-        Action<Player> _do;
+        IDoWork<Player> i_work;
 
-        public PlayerDistWorker(WorldObject searcher, float _dist, IDoWork<Player> @do)
+        public PlayerDistWorker(WorldObject searcher, float _dist, IDoWork<Player> work)
         {
             i_searcher = searcher;
             i_dist = _dist;
-            _do = @do.Invoke;
-        }
-
-        public PlayerDistWorker(WorldObject searcher, float _dist, Action<Player> destroyer)
-        {
-            i_searcher = searcher;
-            i_dist = _dist;
-            _do = destroyer;
+            i_work = work.Invoke;
         }
 
         public override void Visit(IList<Player> objs)
@@ -893,1000 +1138,352 @@ namespace Game.Maps
             {
                 Player player = objs[i];
                 if (player.InSamePhase(i_searcher) && player.IsWithinDist(i_searcher, i_dist))
-                    _do.Invoke(player);
+                    i_work(player);
             }
         }
     }
 
-    public class CallOfHelpCreatureInRangeDo : IDoWork<Creature>
+    // AreaTrigger searchers
+
+    public class AreaTriggerSearcherBase : WorldObjectSearcherBase<AreaTrigger>
     {
-        public CallOfHelpCreatureInRangeDo(Unit funit, Unit enemy, float range)
-        {
-            i_funit = funit;
-            i_enemy = enemy;
-            i_range = range;
-        }
+        public AreaTriggerSearcherBase(PhaseShift phaseShift, IResultInserter<AreaTrigger> result, ICheck<AreaTrigger> check)
+           : base(phaseShift, result, check, GridMapTypeMask.AreaTrigger) { }
+    }
 
-        public void Invoke(Creature u)
-        {
-            if (u == i_funit)
-                return;
+    public class AreaTriggerSearcher : AreaTriggerSearcherBase
+    {
+        public AreaTriggerSearcher(PhaseShift phaseShift, ICheck<AreaTrigger> check)
+                : base(phaseShift, new SearcherFirstObjectResult<AreaTrigger>(), check) { }
 
-            if (!u.CanAssistTo(i_funit, i_enemy, false))
-                return;
+        public AreaTriggerSearcher(WorldObject searcher, ICheck<AreaTrigger> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
 
-            // too far
-            // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
-            if (!u.IsWithinDist(i_funit, i_range, true, false, false))
-                return;
+    public class AreaTriggerLastSearcher : AreaTriggerSearcherBase
+    {
+        public AreaTriggerLastSearcher(PhaseShift phaseShift, ICheck<AreaTrigger> check)
+                : base(phaseShift, new SearcherLastObjectResult<AreaTrigger>(), check) { }
 
-            // only if see assisted creature's enemy
-            if (!u.IsWithinLOSInMap(i_enemy))
-                return;
+        public AreaTriggerLastSearcher(WorldObject searcher, ICheck<AreaTrigger> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
 
-            u.EngageWithTarget(i_enemy);
-        }
+    public class AreaTriggerListSearcher : AreaTriggerSearcherBase
+    {
+        public AreaTriggerListSearcher(PhaseShift phaseShift, List<AreaTrigger> container, ICheck<AreaTrigger> check)
+                : base(phaseShift, new SearcherContainerResult<AreaTrigger>(container), check) { }
 
-        Unit i_funit;
-        Unit i_enemy;
+        public AreaTriggerListSearcher(WorldObject searcher, List<AreaTrigger> container, ICheck<AreaTrigger> check)
+                    : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class AreaTriggerWorker : WorldObjectWorkerBase<AreaTrigger>
+    {
+        public AreaTriggerWorker(PhaseShift phaseShift, IDoWork<AreaTrigger> work)
+                : base(phaseShift, work, GridMapTypeMask.AreaTrigger) { }
+
+        public AreaTriggerWorker(WorldObject searcher, IDoWork<AreaTrigger> work)
+                    : this(searcher.GetPhaseShift(), work) { }
+    }
+
+    // SceneObject searchers
+
+    public class SceneObjectSearcherBase : WorldObjectSearcherBase<SceneObject>
+    {
+        public SceneObjectSearcherBase(PhaseShift phaseShift, IResultInserter<SceneObject> result, ICheck<SceneObject> check)
+           : base(phaseShift, result, check, GridMapTypeMask.SceneObject) { }
+    }
+
+    public class SceneObjectSearcher : SceneObjectSearcherBase
+    {
+        public SceneObjectSearcher(PhaseShift phaseShift, ICheck<SceneObject> check)
+                : base(phaseShift, new SearcherFirstObjectResult<SceneObject>(), check) { }
+
+        public SceneObjectSearcher(WorldObject searcher, ICheck<SceneObject> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class SceneObjectLastSearcher : SceneObjectSearcherBase
+    {
+        public SceneObjectLastSearcher(PhaseShift phaseShift, ICheck<SceneObject> check)
+                : base(phaseShift, new SearcherLastObjectResult<SceneObject>(), check) { }
+
+        public SceneObjectLastSearcher(WorldObject searcher, ICheck<SceneObject> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class SceneObjectListSearcher : SceneObjectSearcherBase
+    {
+        public SceneObjectListSearcher(PhaseShift phaseShift, List<SceneObject> container, ICheck<SceneObject> check)
+                : base(phaseShift, new SearcherContainerResult<SceneObject>(container), check) { }
+
+        public SceneObjectListSearcher(WorldObject searcher, List<SceneObject> container, ICheck<SceneObject> check)
+            : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class SceneObjectWorker : WorldObjectWorkerBase<SceneObject>
+    {
+        public SceneObjectWorker(PhaseShift phaseShift, IDoWork<SceneObject> work)
+                : base(phaseShift, work, GridMapTypeMask.SceneObject) { }
+
+        public SceneObjectWorker(WorldObject searcher, IDoWork<SceneObject> work)
+                    : this(searcher.GetPhaseShift(), work) { }
+    }
+
+    // Conversation searchers
+
+    public class ConversationSearcherBase : WorldObjectSearcherBase<Conversation>
+    {
+        public ConversationSearcherBase(PhaseShift phaseShift, IResultInserter<Conversation> result, ICheck<Conversation> check)
+           : base(phaseShift, result, check, GridMapTypeMask.Conversation) { }
+    }
+
+    public class ConversationSearcher : ConversationSearcherBase
+    {
+        public ConversationSearcher(PhaseShift phaseShift, ICheck<Conversation> check)
+                : base(phaseShift, new SearcherFirstObjectResult<Conversation>(), check) { }
+
+        public ConversationSearcher(WorldObject searcher, ICheck<Conversation> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class ConversationLastSearcher : ConversationSearcherBase
+    {
+        public ConversationLastSearcher(PhaseShift phaseShift, ICheck<Conversation> check)
+                : base(phaseShift, new SearcherLastObjectResult<Conversation>(), check) { }
+
+        public ConversationLastSearcher(WorldObject searcher, ICheck<Conversation> check)
+                    : this(searcher.GetPhaseShift(), check) { }
+    }
+
+    public class ConversationListSearcher : ConversationSearcherBase
+    {
+        public ConversationListSearcher(PhaseShift phaseShift, List<Conversation> container, ICheck<Conversation> check)
+                : base(phaseShift, new SearcherContainerResult<Conversation>(container), check) { }
+
+        public ConversationListSearcher(WorldObject searcher, List<Conversation> container, ICheck<Conversation> check)
+            : this(searcher.GetPhaseShift(), container, check) { }
+    }
+
+    public class ConversationWorker : WorldObjectWorkerBase<Conversation>
+    {
+        public ConversationWorker(PhaseShift phaseShift, IDoWork<Conversation> work)
+                : base(phaseShift, work, GridMapTypeMask.Conversation) { }
+
+        public ConversationWorker(WorldObject searcher, IDoWork<Conversation> work)
+                    : this(searcher.GetPhaseShift(), work) { }
+    }
+
+    // CHECKS && DO classes
+
+    // CHECK modifiers
+    public class InRangeCheckCustomizer
+    {
+        WorldObject i_obj;
         float i_range;
-    }
 
-    public class LocalizedDo : IDoWork<Player>
-    {
-        public LocalizedDo(MessageBuilder localizer)
-        {
-            _localizer = localizer;
-        }
-
-        public void Invoke(Player player)
-        {
-            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
-            int cache_idx = (int)loc_idx + 1;
-            IDoWork<Player> action;
-
-            // create if not cached yet
-            if (_localizedCache.Length < cache_idx + 1 || _localizedCache[cache_idx] == null)
-            {
-                if (_localizedCache.Length < cache_idx + 1)
-                    Array.Resize(ref _localizedCache, cache_idx + 1);
-
-                action = _localizer.Invoke(loc_idx);
-                _localizedCache[cache_idx] = action;
-            }
-            else
-                action = _localizedCache[cache_idx];
-
-            action.Invoke(player);
-        }
-
-        MessageBuilder _localizer;
-        IDoWork<Player>[] _localizedCache = new IDoWork<Player>[(int)Locale.Total];     // 0 = default, i => i-1 locale index
-    }
-
-    public class RespawnDo : IDoWork<WorldObject>
-    {
-        public void Invoke(WorldObject obj)
-        {
-            switch (obj.GetTypeId())
-            {
-                case TypeId.Unit:
-                    obj.ToCreature().Respawn();
-                    break;
-                case TypeId.GameObject:
-                    obj.ToGameObject().Respawn();
-                    break;
-            }
-        }
-    }
-
-    //Searchers
-    public class WorldObjectSearcher : Notifier
-    {
-        GridMapTypeMask i_mapTypeMask;
-        PhaseShift i_phaseShift;
-        WorldObject i_object;
-        ICheck<WorldObject> i_check;
-
-        public WorldObjectSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
-        {
-            i_mapTypeMask = mapTypeMask;
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (!gameObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(gameObject))
-                {
-                    i_object = gameObject;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!player.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(player))
-                {
-                    i_object = player;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(creature))
-                {
-                    i_object = creature;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<Corpse> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Corpse corpse = objs[i];
-                if (!corpse.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(corpse))
-                {
-                    i_object = corpse;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<DynamicObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                DynamicObject dynamicObject = objs[i];
-                if (!dynamicObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(dynamicObject))
-                {
-                    i_object = dynamicObject;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<AreaTrigger> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                AreaTrigger areaTrigger = objs[i];
-                if (!areaTrigger.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(areaTrigger))
-                {
-                    i_object = areaTrigger;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<SceneObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                SceneObject sceneObject = objs[i];
-                if (!sceneObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(sceneObject))
-                {
-                    i_object = sceneObject;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<Conversation> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                return;
-
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Conversation conversation = objs[i];
-                if (!conversation.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(conversation))
-                {
-                    i_object = conversation;
-                    return;
-                }
-            }
-        }
-
-        public WorldObject GetTarget() { return i_object; }
-    }
-
-    public class WorldObjectLastSearcher : Notifier
-    {
-        GridMapTypeMask i_mapTypeMask;
-        PhaseShift i_phaseShift;
-        WorldObject i_object;
-        ICheck<WorldObject> i_check;
-
-        public WorldObjectLastSearcher(WorldObject searcher, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
-        {
-            i_mapTypeMask = mapTypeMask;
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (!gameObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(gameObject))
-                    i_object = gameObject;
-            }
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!player.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(player))
-                    i_object = player;
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(creature))
-                    i_object = creature;
-            }
-        }
-
-        public override void Visit(IList<Corpse> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Corpse corpse = objs[i];
-                if (!corpse.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(corpse))
-                    i_object = corpse;
-            }
-        }
-
-        public override void Visit(IList<DynamicObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                DynamicObject dynamicObject = objs[i];
-                if (!dynamicObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(dynamicObject))
-                    i_object = dynamicObject;
-            }
-        }
-
-        public override void Visit(IList<AreaTrigger> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                AreaTrigger areaTrigger = objs[i];
-                if (!areaTrigger.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(areaTrigger))
-                    i_object = areaTrigger;
-            }
-        }
-
-        public override void Visit(IList<SceneObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                SceneObject sceneObject = objs[i];
-                if (!sceneObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(sceneObject))
-                    i_object = sceneObject;
-            }
-        }
-
-        public override void Visit(IList<Conversation> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Conversation conversation = objs[i];
-                if (!conversation.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(conversation))
-                    i_object = conversation;
-            }
-        }
-
-        public WorldObject GetTarget() { return i_object; }
-    }
-
-    public class WorldObjectListSearcher : Notifier
-    {
-        GridMapTypeMask i_mapTypeMask;
-        List<WorldObject> i_objects;
-        public PhaseShift i_phaseShift;
-        ICheck<WorldObject> i_check;
-
-        public WorldObjectListSearcher(WorldObject searcher, List<WorldObject> objects, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
-        {
-            i_mapTypeMask = mapTypeMask;
-            i_phaseShift = searcher.GetPhaseShift();
-            i_objects = objects;
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Player))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (i_check.Invoke(player))
-                    i_objects.Add(player);
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Creature))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (i_check.Invoke(creature))
-                    i_objects.Add(creature);
-            }
-        }
-
-        public override void Visit(IList<Corpse> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Corpse))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Corpse corpse = objs[i];
-                if (i_check.Invoke(corpse))
-                    i_objects.Add(corpse);
-            }
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.GameObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (i_check.Invoke(gameObject))
-                    i_objects.Add(gameObject);
-            }
-        }
-
-        public override void Visit(IList<DynamicObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.DynamicObject))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                DynamicObject dynamicObject = objs[i];
-                if (i_check.Invoke(dynamicObject))
-                    i_objects.Add(dynamicObject);
-            }
-        }
-
-        public override void Visit(IList<AreaTrigger> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.AreaTrigger))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                AreaTrigger areaTrigger = objs[i];
-                if (i_check.Invoke(areaTrigger))
-                    i_objects.Add(areaTrigger);
-            }
-        }
-
-        public override void Visit(IList<SceneObject> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                SceneObject sceneObject = objs[i];
-                if (i_check.Invoke(sceneObject))
-                    i_objects.Add(sceneObject);
-            }
-        }
-
-        public override void Visit(IList<Conversation> objs)
-        {
-            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Conversation conversation = objs[i];
-                if (i_check.Invoke(conversation))
-                    i_objects.Add(conversation);
-            }
-        }
-    }
-
-    public class GameObjectSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        GameObject i_object;
-        ICheck<GameObject> i_check;
-
-        public GameObjectSearcher(WorldObject searcher, ICheck<GameObject> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (!gameObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(gameObject))
-                {
-                    i_object = gameObject;
-                    return;
-                }
-            }
-        }
-
-        public GameObject GetTarget() { return i_object; }
-    }
-
-    public class GameObjectLastSearcher : Notifier
-    {
-        public PhaseShift i_phaseShift;
-        GameObject i_object;
-        ICheck<GameObject> i_check;
-
-        public GameObjectLastSearcher(WorldObject searcher, ICheck<GameObject> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (!gameObject.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(gameObject))
-                    i_object = gameObject;
-            }
-        }
-
-        public GameObject GetTarget() { return i_object; }
-    }
-
-    public class GameObjectListSearcher : Notifier
-    {
-        public PhaseShift i_phaseShift;
-        List<GameObject> i_objects;
-        ICheck<GameObject> i_check;
-
-        public GameObjectListSearcher(WorldObject searcher, List<GameObject> objects, ICheck<GameObject> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_objects = objects;
-            i_check = check;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                GameObject gameObject = objs[i];
-                if (gameObject.InSamePhase(i_phaseShift))
-                    if (i_check.Invoke(gameObject))
-                        i_objects.Add(gameObject);
-            }
-        }
-    }
-
-    public class UnitSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        Unit i_object;
-        ICheck<Unit> i_check;
-
-        public UnitSearcher(WorldObject searcher, ICheck<Unit> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!player.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(player))
-                {
-                    i_object = player;
-                    return;
-                }
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(creature))
-                {
-                    i_object = creature;
-                    return;
-                }
-            }
-        }
-
-        public Unit GetTarget() { return i_object; }
-    }
-
-    public class UnitLastSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        Unit i_object;
-        ICheck<Unit> i_check;
-
-        public UnitLastSearcher(WorldObject searcher, ICheck<Unit> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!player.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(player))
-                    i_object = player;
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(creature))
-                    i_object = creature;
-            }
-        }
-
-        public Unit GetTarget() { return i_object; }
-    }
-
-    public class UnitListSearcher : Notifier
-    {
-        public PhaseShift i_phaseShift;
-        List<Unit> i_objects;
-        ICheck<Unit> i_check;
-
-        public UnitListSearcher(WorldObject searcher, List<Unit> objects, ICheck<Unit> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_objects = objects;
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (player.InSamePhase(i_phaseShift))
-                    if (i_check.Invoke(player))
-                        i_objects.Add(player);
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
-                    if (i_check.Invoke(creature))
-                        i_objects.Add(creature);
-            }
-        }
-    }
-
-    public class CreatureSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        Creature i_object;
-        ICheck<Creature> i_check;
-
-        public CreatureSearcher(WorldObject searcher, ICheck<Creature> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(creature))
-                {
-                    i_object = creature;
-                    return;
-                }
-            }
-        }
-
-        public Creature GetTarget() { return i_object; }
-    }
-
-    public class CreatureLastSearcher : Notifier
-    {
-        internal PhaseShift i_phaseShift;
-        Creature i_object;
-        ICheck<Creature> i_check;
-
-        public CreatureLastSearcher(WorldObject searcher, ICheck<Creature> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!creature.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(creature))
-                    i_object = creature;
-            }
-        }
-
-        public Creature GetTarget() { return i_object; }
-    }
-
-    public class CreatureListSearcher : Notifier
-    {
-        internal PhaseShift i_phaseShift;
-        List<Creature> i_objects;
-        ICheck<Creature> i_check;
-
-        public CreatureListSearcher(WorldObject searcher, List<Creature> objects, ICheck<Creature> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_objects = objects;
-            i_check = check;
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (creature.InSamePhase(i_phaseShift))
-                    if (i_check.Invoke(creature))
-                        i_objects.Add(creature);
-            }
-        }
-    }
-
-    public class PlayerSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        Player i_object;
-        ICheck<Player> i_check;
-
-        public PlayerSearcher(WorldObject searcher, ICheck<Player> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            // already found
-            if (i_object != null)
-                return;
-
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!player.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(player))
-                {
-                    i_object = player;
-                    return;
-                }
-            }
-        }
-
-        public Player GetTarget() { return i_object; }
-    }
-
-    public class PlayerLastSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        Player i_object;
-        ICheck<Player> i_check;
-
-        public PlayerLastSearcher(WorldObject searcher, ICheck<Player> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!player.InSamePhase(i_phaseShift))
-                    continue;
-
-                if (i_check.Invoke(player))
-                    i_object = player;
-            }
-        }
-
-        public Player GetTarget() { return i_object; }
-    }
-
-    public class PlayerListSearcher : Notifier
-    {
-        PhaseShift i_phaseShift;
-        List<Player> i_objects;
-        ICheck<Player> i_check;
-
-        public PlayerListSearcher(WorldObject searcher, List<Player> objects, ICheck<Player> check)
-        {
-            i_phaseShift = searcher.GetPhaseShift();
-            i_objects = objects;
-            i_check = check;
-        }
-        public PlayerListSearcher(PhaseShift phaseShift, List<Player> objects, ICheck<Player> check)
-        {
-            i_phaseShift = phaseShift;
-            i_objects = objects;
-            i_check = check;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (player.InSamePhase(i_phaseShift))
-                    if (i_check.Invoke(player))
-                        i_objects.Add(player);
-            }
-        }
-    }
-
-    //Checks
-    #region Checks
-    public class MostHPMissingInRange<T> : ICheck<T> where T : Unit
-    {
-        public MostHPMissingInRange(Unit obj, float range, uint hp)
+        public InRangeCheckCustomizer(WorldObject obj, float range)
         {
             i_obj = obj;
             i_range = range;
-            i_hp = hp;
         }
 
-        public bool Invoke(T u)
+        public virtual bool Test(WorldObject obj)
         {
-            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) && u.GetMaxHealth() - u.GetHealth() > i_hp)
+            return i_obj.IsWithinDist(obj, i_range);
+        }
+
+        public virtual void Update(WorldObject obj) { }
+    }
+
+    public class NearestCheckCustomizer : InRangeCheckCustomizer
+    {
+        WorldObject i_obj;
+        float i_range;
+
+        public NearestCheckCustomizer(WorldObject obj, float range) : base(obj, range)
+        {
+            i_obj = obj;
+            i_range = range;
+        }
+
+        public override bool Test(WorldObject obj)
+        {
+            return i_obj.IsWithinDist(obj, i_range);
+        }
+
+        public override void Update(WorldObject obj)
+        {
+            i_range = i_obj.GetDistance(obj);
+        }
+    }
+
+    // WorldObject check classes
+
+    public class AnyDeadUnitObjectInRangeCheck<T>(WorldObject searchObj, float range) : ICheck<T> where T : WorldObject
+    {
+        public virtual bool Invoke(T obj)
+        {
+            Player player = obj.ToPlayer();
+            if (player != null)
+                return !player.IsAlive() && !player.HasAuraType(AuraType.Ghost) && searchObj.IsWithinDistInMap(player, range);
+
+            Creature creature = obj.ToCreature();
+            if (creature != null)
+                return !creature.IsAlive() && searchObj.IsWithinDistInMap(creature, range);
+
+            Corpse corpse = obj.ToCorpse();
+            if (corpse != null)
+                return corpse.GetCorpseType() != CorpseType.Bones && searchObj.IsWithinDistInMap(corpse, range);
+
+            return false;
+        }
+    }
+
+    public class AnyDeadUnitSpellTargetInRangeCheck<T> : AnyDeadUnitObjectInRangeCheck<T> where T : WorldObject
+    {
+        WorldObjectSpellTargetCheck i_check;
+
+        public AnyDeadUnitSpellTargetInRangeCheck(WorldObject searchObj, float range, SpellInfo spellInfo, SpellTargetCheckTypes check, SpellTargetObjectTypes objectType) : base(searchObj, range)
+        {
+            i_check = new WorldObjectSpellTargetCheck(searchObj, searchObj, spellInfo, check, null, objectType);
+        }
+
+        public override bool Invoke(T obj)
+        {
+            return base.Invoke(obj) && i_check.Invoke(obj);
+        }
+    }
+
+    // WorldObject do classes
+
+    public class RespawnDo
+    {
+        public void Invoke(Creature obj)
+        {
+            obj.Respawn();
+        }
+
+        public void Invoke(GameObject obj)
+        {
+            obj.Respawn();
+        }
+
+        public static implicit operator IDoWork<Creature>(RespawnDo obj) => obj.Invoke;
+        public static implicit operator IDoWork<GameObject>(RespawnDo obj) => obj.Invoke;
+    }
+
+    // GameObject checks
+
+    class GameObjectFocusCheck(WorldObject caster, uint focusId) : ICheck<GameObject>
+    {
+        public bool Invoke(GameObject go)
+        {
+            if (go.GetGoInfo().GetSpellFocusType() != focusId)
+                return false;
+
+            if (!go.IsSpawned())
+                return false;
+
+            float dist = go.GetGoInfo().GetSpellFocusRadius();
+            return go.IsWithinDist(caster, dist);
+        }
+    }
+
+    // Find the nearest Fishing hole and return true only if source object is in range of hole
+    class NearestGameObjectFishingHole(WorldObject obj, float range) : ICheck<GameObject>
+    {
+        public bool Invoke(GameObject go)
+        {
+            if (go.GetGoInfo().type == GameObjectTypes.FishingHole && go.IsSpawned() && obj.IsWithinDist(go, range) && obj.IsWithinDist(go, go.GetGoInfo().FishingHole.radius))
             {
-                i_hp = (uint)(u.GetMaxHealth() - u.GetHealth());
+                range = obj.GetDistance(go);
                 return true;
             }
             return false;
         }
-
-        Unit i_obj;
-        float i_range;
-        ulong i_hp;
     }
 
-    class MostHPPercentMissingInRange : ICheck<Unit>
+    class NearestGameObjectCheck(WorldObject obj) : ICheck<GameObject>
     {
-        Unit _obj;
-        float _range;
-        float _minHpPct;
-        float _maxHpPct;
-        float _hpPct;
+        float i_range = 999f;
 
-        public MostHPPercentMissingInRange(Unit obj, float range, uint minHpPct, uint maxHpPct)
+        public bool Invoke(GameObject go)
         {
-            _obj = obj;
-            _range = range;
-            _minHpPct = minHpPct;
-            _maxHpPct = maxHpPct;
-            _hpPct = 101.0f;
+            if (obj.IsWithinDist(go, i_range))
+            {
+                i_range = obj.GetDistance(go);        // use found GO range as new range limit for next check
+                return true;
+            }
+            return false;
         }
+    }
+
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
+    class NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range, bool spawnedOnly = true) : ICheck<GameObject>
+    {
+        public bool Invoke(GameObject go)
+        {
+            if ((!spawnedOnly || go.IsSpawned()) && go.GetEntry() == entry && go.GetGUID() != obj.GetGUID() && obj.IsWithinDist(go, range))
+            {
+                range = obj.GetDistance(go);        // use found GO range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+    }
+
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest unspawned GO)
+    class NearestUnspawnedGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range) : ICheck<GameObject>
+    {
+        public bool Invoke(GameObject go)
+        {
+            if (!go.IsSpawned() && go.GetEntry() == entry && go.GetGUID() != obj.GetGUID() && obj.IsWithinDist(go, range))
+            {
+                range = obj.GetDistance(go);        // use found GO range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+    }
+
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
+    class NearestGameObjectTypeInObjectRangeCheck(WorldObject obj, GameObjectTypes type, float range) : ICheck<GameObject>
+    {
+        public bool Invoke(GameObject go)
+        {
+            if (go.GetGoType() == type && obj.IsWithinDist(go, range))
+            {
+                range = obj.GetDistance(go);        // use found GO range as new range limit for next check
+                return true;
+            }
+            return false;
+        }
+    }
+
+    // Unit checks
+
+    public class MostHPMissingInRange<T>(Unit obj, float range, uint hp) : ICheck<T> where T : Unit
+    {
+        public bool Invoke(T u)
+        {
+            if (u.IsAlive() && u.IsInCombat() && !obj.IsHostileTo(u) && obj.IsWithinDist(u, range) && u.GetMaxHealth() - u.GetHealth() > hp)
+            {
+                hp = (uint)(u.GetMaxHealth() - u.GetHealth());
+                return true;
+            }
+            return false;
+        }
+    }
+
+    class MostHPPercentMissingInRange(Unit obj, float range, uint minHpPct, uint maxHpPct) : ICheck<Unit>
+    {
+        float _hpPct = 101.0f;
 
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !_obj.IsHostileTo(u) && _obj.IsWithinDist(u, _range) && _minHpPct <= u.GetHealthPct() && u.GetHealthPct() <= _maxHpPct && u.GetHealthPct() < _hpPct)
+            if (u.IsAlive() && u.IsInCombat() && !obj.IsHostileTo(u) && obj.IsWithinDist(u, range) && minHpPct <= u.GetHealthPct() && u.GetHealthPct() <= maxHpPct && u.GetHealthPct() < _hpPct)
             {
                 _hpPct = u.GetHealthPct();
                 return true;
@@ -1895,107 +1492,55 @@ namespace Game.Maps
         }
     }
 
-    public class FriendlyBelowHpPctEntryInRange : ICheck<Unit>
+    public class FriendlyBelowHpPctEntryInRange(Unit obj, uint entry, float range, byte pct, bool excludeSelf) : ICheck<Unit>
     {
-        public FriendlyBelowHpPctEntryInRange(Unit obj, uint entry, float range, byte pct, bool excludeSelf)
-        {
-            i_obj = obj;
-            i_entry = entry;
-            i_range = range;
-            i_pct = pct;
-            i_excludeSelf = excludeSelf;
-        }
-
         public bool Invoke(Unit u)
         {
-            if (i_excludeSelf && i_obj.GetGUID() == u.GetGUID())
+            if (excludeSelf && obj.GetGUID() == u.GetGUID())
                 return false;
-            if (u.GetEntry() == i_entry && u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) && u.HealthBelowPct(i_pct))
+
+            if (u.GetEntry() == entry && u.IsAlive() && u.IsInCombat() && !obj.IsHostileTo(u) && obj.IsWithinDist(u, range) && u.HealthBelowPct(pct))
                 return true;
+
             return false;
         }
-
-        Unit i_obj;
-        uint i_entry;
-        float i_range;
-        byte i_pct;
-        bool i_excludeSelf;
     }
 
-    public class FriendlyCCedInRange : ICheck<Creature>
+    public class FriendlyCCedInRange(Unit obj, float range) : ICheck<Creature>
     {
-        public FriendlyCCedInRange(Unit obj, float range)
-        {
-            i_obj = obj;
-            i_range = range;
-        }
-
         public bool Invoke(Creature u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) &&
+            if (u.IsAlive() && u.IsInCombat() && !obj.IsHostileTo(u) && obj.IsWithinDist(u, range) &&
                 (u.IsFeared() || u.IsCharmed() || u.HasRootAura() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
                 return true;
             return false;
         }
-
-        Unit i_obj;
-        float i_range;
     }
 
-    public class FriendlyMissingBuffInRange : ICheck<Creature>
+    public class FriendlyMissingBuffInRange(Unit obj, float range, uint spellid) : ICheck<Creature>
     {
-        public FriendlyMissingBuffInRange(Unit obj, float range, uint spellid)
-        {
-            i_obj = obj;
-            i_range = range;
-            i_spell = spellid;
-        }
-
         public bool Invoke(Creature u)
         {
-            if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDist(u, i_range) &&
-                !(u.HasAura(i_spell)))
-            {
+            if (u.IsAlive() && u.IsInCombat() && !obj.IsHostileTo(u) && obj.IsWithinDist(u, range) && !u.HasAura(spellid))
                 return true;
-            }
+
             return false;
         }
-
-        Unit i_obj;
-        float i_range;
-        uint i_spell;
     }
 
-    public class AnyUnfriendlyUnitInObjectRangeCheck : ICheck<Unit>
+    public class AnyUnfriendlyUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range) : ICheck<Unit>
     {
-        public AnyUnfriendlyUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range)
-        {
-            i_obj = obj;
-            i_funit = funit;
-            i_range = range;
-        }
-
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && i_obj.IsWithinDist(u, i_range) && !i_funit.IsFriendlyTo(u))
+            if (u.IsAlive() && obj.IsWithinDist(u, range) && !funit.IsFriendlyTo(u))
                 return true;
-            else
-                return false;
-        }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
+            return false;
+        }
     }
 
-    public class NearestAttackableNoTotemUnitInObjectRangeCheck : ICheck<Unit>
+    public class NearestAttackableNoTotemUnitInObjectRangeCheck(WorldObject obj, float range) : ICheck<Unit>
     {
-        public NearestAttackableNoTotemUnitInObjectRangeCheck(WorldObject obj, float range)
-        {
-            i_obj = obj;
-            i_range = range;
-        }
-
         public bool Invoke(Unit u)
         {
             if (!u.IsAlive())
@@ -2010,19 +1555,23 @@ namespace Game.Maps
             if (!u.IsTargetableForAttack(false))
                 return false;
 
-            if (!i_obj.IsWithinDist(u, i_range) || i_obj.IsValidAttackTarget(u))
+            if (!obj.IsWithinDist(u, range) || obj.IsValidAttackTarget(u))
                 return false;
 
-            i_range = i_obj.GetDistance(u);
+            range = obj.GetDistance(u);
             return true;
         }
-
-        WorldObject i_obj;
-        float i_range;
     }
 
     public class AnyFriendlyUnitInObjectRangeCheck : ICheck<Unit>
     {
+        WorldObject i_obj;
+        Unit i_funit;
+        float i_range;
+        bool i_playerOnly;
+        bool i_incOwnRadius;
+        bool i_incTargetRadius;
+
         public AnyFriendlyUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool playerOnly = false, bool incOwnRadius = true, bool incTargetRadius = true)
         {
             i_obj = obj;
@@ -2050,19 +1599,20 @@ namespace Game.Maps
             if (!i_funit.IsFriendlyTo(u))
                 return false;
 
-            return !i_playerOnly || u.GetTypeId() == TypeId.Player;
+            return !i_playerOnly || u.IsPlayer();
         }
-
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
-        bool i_playerOnly;
-        bool i_incOwnRadius;
-        bool i_incTargetRadius;
     }
 
     public class AnyGroupedUnitInObjectRangeCheck : ICheck<Unit>
     {
+        WorldObject _source;
+        Unit _refUnit;
+        float _range;
+        bool _raid;
+        bool _playerOnly;
+        bool i_incOwnRadius;
+        bool i_incTargetRadius;
+
         public AnyGroupedUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, bool raid, bool playerOnly = false, bool incOwnRadius = true, bool incTargetRadius = true)
         {
             _source = obj;
@@ -2101,18 +1651,15 @@ namespace Game.Maps
 
             return u.IsInMap(_source) && u.InSamePhase(_source) && u.IsWithinVerticalCylinder(_source, searchRadius, searchRadius, true);
         }
-
-        WorldObject _source;
-        Unit _refUnit;
-        float _range;
-        bool _raid;
-        bool _playerOnly;
-        bool i_incOwnRadius;
-        bool i_incTargetRadius;
     }
 
     public class AnyUnitInObjectRangeCheck : ICheck<Unit>
     {
+        WorldObject i_obj;
+        float i_range;
+        bool i_check3D;
+        bool i_reqAlive;
+
         public AnyUnitInObjectRangeCheck(WorldObject obj, float range, bool check3D = true, bool reqAlive = true)
         {
             i_obj = obj;
@@ -2131,42 +1678,33 @@ namespace Game.Maps
 
             return false;
         }
-
-        WorldObject i_obj;
-        float i_range;
-        bool i_check3D;
-        bool i_reqAlive;
     }
 
     // Success at unit in range, range update for next check (this can be use with UnitLastSearcher to find nearest unit)
-    public class NearestAttackableUnitInObjectRangeCheck : ICheck<Unit>
+    public class NearestAttackableUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range) : ICheck<Unit>
     {
-        public NearestAttackableUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range)
-        {
-            i_obj = obj;
-            i_funit = funit;
-            i_range = range;
-        }
-
         public bool Invoke(Unit u)
         {
-            if (u.IsTargetableForAttack() && i_obj.IsWithinDist(u, i_range) &&
-                (i_funit.IsInCombatWith(u) || i_funit.IsHostileTo(u)) && i_obj.CanSeeOrDetect(u))
+            if (u.IsTargetableForAttack() && obj.IsWithinDist(u, range) &&
+                (funit.IsInCombatWith(u) || funit.IsHostileTo(u)) && obj.CanSeeOrDetect(u))
             {
-                i_range = i_obj.GetDistance(u);        // use found unit range as new range limit for next check
+                range = obj.GetDistance(u);        // use found unit range as new range limit for next check
                 return true;
             }
 
             return false;
         }
-
-        WorldObject i_obj;
-        Unit i_funit;
-        float i_range;
     }
 
     public class AnyAoETargetUnitInObjectRangeCheck : ICheck<Unit>
     {
+        WorldObject i_obj;
+        Unit i_funit;
+        SpellInfo _spellInfo;
+        float i_range;
+        bool i_incOwnRadius;
+        bool i_incTargetRadius;
+
         public AnyAoETargetUnitInObjectRangeCheck(WorldObject obj, Unit funit, float range, SpellInfo spellInfo = null, bool incOwnRadius = true, bool incTargetRadius = true)
         {
             i_obj = obj;
@@ -2208,13 +1746,31 @@ namespace Game.Maps
 
             return u.IsInMap(i_obj) && u.InSamePhase(i_obj) && u.IsWithinVerticalCylinder(i_obj, searchRadius, searchRadius, true);
         }
+    }
 
-        WorldObject i_obj;
-        Unit i_funit;
-        SpellInfo _spellInfo;
-        float i_range;
-        bool i_incOwnRadius;
-        bool i_incTargetRadius;
+    public class CallOfHelpCreatureInRangeDo(Unit funit, Unit enemy, float range)
+    {
+        public void Invoke(Creature u)
+        {
+            if (u == funit)
+                return;
+
+            if (!u.CanAssistTo(funit, enemy, false))
+                return;
+
+            // too far
+            // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
+            if (!u.IsWithinDist(funit, range, true, false, false))
+                return;
+
+            // only if see assisted creature's enemy
+            if (!u.IsWithinLOSInMap(enemy))
+                return;
+
+            u.EngageWithTarget(enemy);
+        }
+
+        public static implicit operator IDoWork<Creature>(CallOfHelpCreatureInRangeDo obj) => obj.Invoke;
     }
 
     public class AnyDeadUnitCheck : ICheck<Unit>
@@ -2222,8 +1778,14 @@ namespace Game.Maps
         public bool Invoke(Unit u) { return !u.IsAlive(); }
     }
 
+    // Creature checks
+
     public class NearestHostileUnitCheck : ICheck<Unit>
     {
+        Creature me;
+        float m_range;
+        bool i_playerOnly;
+
         public NearestHostileUnitCheck(Creature creature, float dist = 0, bool playerOnly = false)
         {
             me = creature;
@@ -2240,20 +1802,20 @@ namespace Game.Maps
             if (!me.IsValidAttackTarget(u))
                 return false;
 
-            if (i_playerOnly && !u.IsTypeId(TypeId.Player))
+            if (i_playerOnly && !u.IsPlayer())
                 return false;
 
             m_range = me.GetDistance(u);   // use found unit range as new range limit for next check
             return true;
         }
-
-        Creature me;
-        float m_range;
-        bool i_playerOnly;
     }
 
     class NearestHostileUnitInAttackDistanceCheck : ICheck<Unit>
     {
+        Creature me;
+        float m_range;
+        bool m_force;
+
         public NearestHostileUnitInAttackDistanceCheck(Creature creature, float dist = 0)
         {
             me = creature;
@@ -2280,14 +1842,14 @@ namespace Game.Maps
             m_range = me.GetDistance(u);   // use found unit range as new range limit for next check
             return true;
         }
-
-        Creature me;
-        float m_range;
-        bool m_force;
     }
 
     class NearestHostileUnitInAggroRangeCheck : ICheck<Unit>
     {
+        Creature _me;
+        bool _useLOS;
+        bool _ignoreCivilians;
+
         public NearestHostileUnitInAggroRangeCheck(Creature creature, bool useLOS = false, bool ignoreCivilians = false)
         {
             _me = creature;
@@ -2312,91 +1874,68 @@ namespace Game.Maps
             // pets in aggressive do not attack civilians
             if (_ignoreCivilians)
             {
-                Creature c = u.ToCreature();
-                if (c != null)
-                    if (c.IsCivilian())
-                        return false;
+                Creature creature = u.ToCreature();
+                if (creature != null && creature.IsCivilian())
+                    return false;
             }
 
             return true;
         }
-
-        Creature _me;
-        bool _useLOS;
-        bool _ignoreCivilians;
     }
 
-    class AnyAssistCreatureInRangeCheck : ICheck<Creature>
+    class AnyAssistCreatureInRangeCheck(Unit funit, Unit enemy, float range) : ICheck<Creature>
     {
-        public AnyAssistCreatureInRangeCheck(Unit funit, Unit enemy, float range)
-        {
-            i_funit = funit;
-            i_enemy = enemy;
-            i_range = range;
-
-        }
-
         public bool Invoke(Creature u)
         {
-            if (u == i_funit)
+            if (u == funit)
                 return false;
 
-            if (!u.CanAssistTo(i_funit, i_enemy))
+            if (!u.CanAssistTo(funit, enemy))
                 return false;
 
             // too far
             // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
-            if (!i_funit.IsWithinDist(u, i_range, true, false, false))
+            if (!funit.IsWithinDist(u, range, true, false, false))
                 return false;
 
             // only if see assisted creature
-            if (!i_funit.IsWithinLOSInMap(u))
+            if (!funit.IsWithinLOSInMap(u))
                 return false;
 
             return true;
         }
-
-        Unit i_funit;
-        Unit i_enemy;
-        float i_range;
     }
 
-    class NearestAssistCreatureInCreatureRangeCheck : ICheck<Creature>
+    class NearestAssistCreatureInCreatureRangeCheck(Creature obj, Unit enemy, float range) : ICheck<Creature>
     {
-        public NearestAssistCreatureInCreatureRangeCheck(Creature obj, Unit enemy, float range)
-        {
-            i_obj = obj;
-            i_enemy = enemy;
-            i_range = range;
-        }
-
         public bool Invoke(Creature u)
         {
-            if (u == i_obj)
+            if (u == obj)
                 return false;
 
-            if (!u.CanAssistTo(i_obj, i_enemy))
+            if (!u.CanAssistTo(obj, enemy))
                 return false;
 
             // Don't use combat reach distance, range must be an absolute value, otherwise the chain aggro range will be too big
-            if (!i_obj.IsWithinDist(u, i_range, true, false, false))
+            if (!obj.IsWithinDist(u, range, true, false, false))
                 return false;
 
-            if (!i_obj.IsWithinLOSInMap(u))
+            if (!obj.IsWithinLOSInMap(u))
                 return false;
 
-            i_range = i_obj.GetDistance(u);            // use found unit range as new range limit for next check
+            range = obj.GetDistance(u);            // use found unit range as new range limit for next check
             return true;
         }
-
-        Creature i_obj;
-        Unit i_enemy;
-        float i_range;
     }
 
     // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck : ICheck<Creature>
     {
+        WorldObject i_obj;
+        uint i_entry;
+        bool i_alive;
+        float i_range;
+
         public NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject obj, uint entry, bool alive, float range)
         {
             i_obj = obj;
@@ -2414,11 +1953,6 @@ namespace Game.Maps
             }
             return false;
         }
-
-        WorldObject i_obj;
-        uint i_entry;
-        bool i_alive;
-        float i_range;
     }
 
     public class CreatureWithOptionsInObjectRangeCheck<T> : ICheck<Creature> where T : InRangeCheckCustomizer
@@ -2562,150 +2096,94 @@ namespace Game.Maps
         }
     }
 
-    class AnyPlayerInPositionRangeCheck : ICheck<Player>
+    class AnyPlayerInPositionRangeCheck(Position pos, float range, bool reqAlive = true) : ICheck<Player>
     {
-        public AnyPlayerInPositionRangeCheck(Position pos, float range, bool reqAlive = true)
-        {
-            _pos = pos;
-            _range = range;
-            _reqAlive = reqAlive;
-        }
-
         public bool Invoke(Player u)
         {
-            if (_reqAlive && !u.IsAlive())
+            if (reqAlive && !u.IsAlive())
                 return false;
 
-            if (!u.IsWithinDist3d(_pos, _range))
+            if (!u.IsWithinDist3d(pos, range))
                 return false;
 
             return true;
         }
-
-        Position _pos;
-        float _range;
-        bool _reqAlive;
     }
 
-    class NearestPlayerInObjectRangeCheck : ICheck<Player>
+    class NearestPlayerInObjectRangeCheck(WorldObject obj, float range) : ICheck<Player>
     {
-        public NearestPlayerInObjectRangeCheck(WorldObject obj, float range)
-        {
-            i_obj = obj;
-            i_range = range;
-
-        }
-
         public bool Invoke(Player pl)
         {
-            if (pl.IsAlive() && i_obj.IsWithinDist(pl, i_range))
+            if (pl.IsAlive() && obj.IsWithinDist(pl, range))
             {
-                i_range = i_obj.GetDistance(pl);
+                range = obj.GetDistance(pl);
                 return true;
             }
 
             return false;
         }
-
-        WorldObject i_obj;
-        float i_range;
     }
 
-    class AllFriendlyCreaturesInGrid : ICheck<Unit>
+    class AllFriendlyCreaturesInGrid(Unit obj) : ICheck<Unit>
     {
-        public AllFriendlyCreaturesInGrid(Unit obj)
-        {
-            unit = obj;
-        }
-
         public bool Invoke(Unit u)
         {
-            if (u.IsAlive() && u.IsVisible() && u.IsFriendlyTo(unit))
+            if (u.IsAlive() && u.IsVisible() && u.IsFriendlyTo(obj))
                 return true;
 
             return false;
         }
-
-        Unit unit;
     }
 
-    class AllGameObjectsWithEntryInRange : ICheck<GameObject>
+    class AllGameObjectsWithEntryInRange(WorldObject obj, uint entry, float maxRange) : ICheck<GameObject>
     {
-        public AllGameObjectsWithEntryInRange(WorldObject obj, uint entry, float maxRange)
-        {
-            m_pObject = obj;
-            m_uiEntry = entry;
-            m_fRange = maxRange;
-        }
-
         public bool Invoke(GameObject go)
         {
-            if (m_uiEntry == 0 || go.GetEntry() == m_uiEntry && m_pObject.IsWithinDist(go, m_fRange, false))
+            if (entry == 0 || go.GetEntry() == entry && obj.IsWithinDist(go, maxRange, false))
                 return true;
 
             return false;
         }
-
-        WorldObject m_pObject;
-        uint m_uiEntry;
-        float m_fRange;
     }
 
-    public class AllCreaturesOfEntryInRange : ICheck<Creature>
+    public class AllCreaturesOfEntryInRange(WorldObject obj, uint entry, float maxRange = 0f) : ICheck<Creature>
     {
-        public AllCreaturesOfEntryInRange(WorldObject obj, uint entry, float maxRange = 0f)
-        {
-            m_pObject = obj;
-            m_uiEntry = entry;
-            m_fRange = maxRange;
-        }
-
         public bool Invoke(Creature creature)
         {
-            if (m_uiEntry != 0)
+            if (entry != 0)
             {
-                if (creature.GetEntry() != m_uiEntry)
+                if (creature.GetEntry() != entry)
                     return false;
             }
 
-            if (m_fRange != 0f)
+            if (maxRange != 0f)
             {
-                if (m_fRange > 0.0f && !m_pObject.IsWithinDist(creature, m_fRange, false))
+                if (maxRange > 0.0f && !obj.IsWithinDist(creature, maxRange, false))
                     return false;
-                if (m_fRange < 0.0f && m_pObject.IsWithinDist(creature, m_fRange, false))
+                if (maxRange < 0.0f && obj.IsWithinDist(creature, maxRange, false))
                     return false;
             }
             return true;
         }
-
-        WorldObject m_pObject;
-        uint m_uiEntry;
-        float m_fRange;
     }
 
-    class PlayerAtMinimumRangeAway : ICheck<Player>
+    class PlayerAtMinimumRangeAway(Unit unit, float fMinRange) : ICheck<Player>
     {
-        public PlayerAtMinimumRangeAway(Unit _unit, float fMinRange)
-        {
-            unit = _unit;
-            fRange = fMinRange;
-        }
-
         public bool Invoke(Player player)
         {
             //No threat list check, must be done explicit if expected to be in combat with creature
-            if (!player.IsGameMaster() && player.IsAlive() && !unit.IsWithinDist(player, fRange, false))
+            if (!player.IsGameMaster() && player.IsAlive() && !unit.IsWithinDist(player, fMinRange, false))
                 return true;
 
             return false;
         }
-
-        Unit unit;
-        float fRange;
     }
 
     class GameObjectInRangeCheck : ICheck<GameObject>
     {
+        float x, y, z, range;
+        uint entry;
+
         public GameObjectInRangeCheck(float _x, float _y, float _z, float _range, uint _entry = 0)
         {
             x = _x;
@@ -2719,373 +2197,114 @@ namespace Game.Maps
         {
             if (entry == 0 || (go.GetGoInfo() != null && go.GetGoInfo().entry == entry))
                 return go.IsInRange(x, y, z, range);
-            else return false;
-        }
 
-        float x, y, z, range;
-        uint entry;
+            return false;
+        }
     }
 
-    public class AllWorldObjectsInRange : ICheck<WorldObject>
+    public class AllWorldObjectsInRange(WorldObject obj, float maxRange) : ICheck<WorldObject>
     {
-        public AllWorldObjectsInRange(WorldObject obj, float maxRange)
-        {
-            m_pObject = obj;
-            m_fRange = maxRange;
-        }
-
         public bool Invoke(WorldObject go)
         {
-            return m_pObject.IsWithinDist(go, m_fRange, false) && m_pObject.InSamePhase(go);
+            return obj.IsWithinDist(go, maxRange, false) && obj.InSamePhase(go);
         }
-
-        WorldObject m_pObject;
-        float m_fRange;
     }
 
-    public class ObjectTypeIdCheck : ICheck<WorldObject>
+    public class ObjectTypeIdCheck(TypeId typeId, bool equals) : ICheck<WorldObject>
     {
-        public ObjectTypeIdCheck(TypeId typeId, bool equals)
-        {
-            _typeId = typeId;
-            _equals = equals;
-        }
-
         public bool Invoke(WorldObject obj)
         {
-            return (obj.GetTypeId() == _typeId) == _equals;
+            return (obj.GetTypeId() == typeId) == equals;
         }
-
-        TypeId _typeId;
-        bool _equals;
     }
 
-    public class ObjectGUIDCheck : ICheck<WorldObject>
+    public class ObjectGUIDCheck(ObjectGuid Guid) : ICheck<WorldObject>
     {
-        public ObjectGUIDCheck(ObjectGuid GUID)
-        {
-            _GUID = GUID;
-        }
-
         public bool Invoke(WorldObject obj)
         {
-            return obj.GetGUID() == _GUID;
+            return obj.GetGUID() == Guid;
         }
 
-        public static implicit operator Predicate<WorldObject>(ObjectGUIDCheck check)
-        {
-            return check.Invoke;
-        }
-
-        ObjectGuid _GUID;
+        //public static implicit operator Predicate<WorldObject>(ObjectGUIDCheck check) => check.Invoke;
     }
 
-    public class HeightDifferenceCheck : ICheck<WorldObject>
+    public class HeightDifferenceCheck(WorldObject go, float diff, bool reverse) : ICheck<WorldObject>
     {
-        public HeightDifferenceCheck(WorldObject go, float diff, bool reverse)
-        {
-            _baseObject = go;
-            _difference = diff;
-            _reverse = reverse;
-
-        }
-
         public bool Invoke(WorldObject unit)
         {
-            return (unit.GetPositionZ() - _baseObject.GetPositionZ() > _difference) != _reverse;
+            return (unit.GetPositionZ() - go.GetPositionZ() > diff) != reverse;
         }
-
-        WorldObject _baseObject;
-        float _difference;
-        bool _reverse;
     }
 
-    public class UnitAuraCheck : ICheck<WorldObject>
+    public class UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default) : ICheck<WorldObject>
     {
-        public UnitAuraCheck(bool present, uint spellId, ObjectGuid casterGUID = default)
-        {
-            _present = present;
-            _spellId = spellId;
-            _casterGUID = casterGUID;
-        }
-
         public bool Invoke(WorldObject obj)
         {
-            return obj.ToUnit() != null && obj.ToUnit().HasAura(_spellId, _casterGUID) == _present;
+            return obj.ToUnit() != null && obj.ToUnit().HasAura(spellId, casterGUID) == present;
         }
 
-        public static implicit operator Predicate<WorldObject>(UnitAuraCheck unit)
-        {
-            return unit.Invoke;
-        }
-
-        bool _present;
-        uint _spellId;
-        ObjectGuid _casterGUID;
+        //public static implicit operator Predicate<WorldObject>(UnitAuraCheck unit) => unit.Invoke;
     }
 
-    class ObjectEntryAndPrivateOwnerIfExistsCheck : ICheck<WorldObject>
+    class ObjectEntryAndPrivateOwnerIfExistsCheck(ObjectGuid ownerGUID, uint entry) : ICheck<WorldObject>
     {
-        ObjectGuid _ownerGUID;
-        uint _entry;
-
-        public ObjectEntryAndPrivateOwnerIfExistsCheck(ObjectGuid ownerGUID, uint entry)
-        {
-            _ownerGUID = ownerGUID;
-            _entry = entry;
-        }
-
         public bool Invoke(WorldObject obj)
         {
-            return obj.GetEntry() == _entry && (!obj.IsPrivateObject() || obj.GetPrivateObjectOwner() == _ownerGUID);
+            return obj.GetEntry() == entry && (!obj.IsPrivateObject() || obj.GetPrivateObjectOwner() == ownerGUID);
         }
     }
 
-    class GameObjectFocusCheck : ICheck<GameObject>
-    {
-        public GameObjectFocusCheck(WorldObject caster, uint focusId)
-        {
-            _caster = caster;
-            _focusId = focusId;
-        }
-
-        public bool Invoke(GameObject go)
-        {
-            if (go.GetGoInfo().GetSpellFocusType() != _focusId)
-                return false;
-
-            if (!go.IsSpawned())
-                return false;
-
-            float dist = go.GetGoInfo().GetSpellFocusRadius();
-            return go.IsWithinDist(_caster, dist);
-        }
-
-        WorldObject _caster;
-        uint _focusId;
-    }
-
-    // Find the nearest Fishing hole and return true only if source object is in range of hole
-    class NearestGameObjectFishingHole : ICheck<GameObject>
-    {
-        public NearestGameObjectFishingHole(WorldObject obj, float range)
-        {
-            i_obj = obj;
-            i_range = range;
-        }
-
-        public bool Invoke(GameObject go)
-        {
-            if (go.GetGoInfo().type == GameObjectTypes.FishingHole && go.IsSpawned() && i_obj.IsWithinDist(go, i_range) && i_obj.IsWithinDist(go, go.GetGoInfo().FishingHole.radius))
-            {
-                i_range = i_obj.GetDistance(go);
-                return true;
-            }
-            return false;
-        }
-
-        WorldObject i_obj;
-        float i_range;
-    }
-
-    class NearestGameObjectCheck : ICheck<GameObject>
-    {
-        public NearestGameObjectCheck(WorldObject obj)
-        {
-            i_obj = obj;
-            i_range = 999;
-        }
-
-        public bool Invoke(GameObject go)
-        {
-            if (i_obj.IsWithinDist(go, i_range))
-            {
-                i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
-                return true;
-            }
-            return false;
-        }
-
-        WorldObject i_obj;
-        float i_range;
-    }
-
-    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
-    class NearestGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
-    {
-        public NearestGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range, bool spawnedOnly = true)
-        {
-            _obj = obj;
-            _entry = entry;
-            _range = range;
-            _spawnedOnly = spawnedOnly;
-        }
-
-        public bool Invoke(GameObject go)
-        {
-            if ((!_spawnedOnly || go.IsSpawned()) && go.GetEntry() == _entry && go.GetGUID() != _obj.GetGUID() && _obj.IsWithinDist(go, _range))
-            {
-                _range = _obj.GetDistance(go);        // use found GO range as new range limit for next check
-                return true;
-            }
-            return false;
-        }
-
-        WorldObject _obj;
-        uint _entry;
-        float _range;
-        bool _spawnedOnly;
-    }
-
-    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest unspawned GO)
-    class NearestUnspawnedGameObjectEntryInObjectRangeCheck : ICheck<GameObject>
+    class NearestAreaTriggerEntryInObjectRangeCheck : ICheck<AreaTrigger>
     {
         WorldObject i_obj;
         uint i_entry;
         float i_range;
+        bool i_spawnedOnly;
 
-        public NearestUnspawnedGameObjectEntryInObjectRangeCheck(WorldObject obj, uint entry, float range)
+        public NearestAreaTriggerEntryInObjectRangeCheck(WorldObject obj, uint entry, float range, bool spawnedOnly = false)
         {
             i_obj = obj;
             i_entry = entry;
             i_range = range;
+            i_spawnedOnly = spawnedOnly;
         }
 
-        public bool Invoke(GameObject go)
+        public bool Invoke(AreaTrigger at)
         {
-            if (!go.IsSpawned() && go.GetEntry() == i_entry && go.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDist(go, i_range))
+            if ((!i_spawnedOnly || at.IsStaticSpawn()) && at.GetEntry() == i_entry && at.GetGUID() != i_obj.GetGUID() && i_obj.IsWithinDist(at, i_range))
             {
-                i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                i_range = i_obj.GetDistance(at);
                 return true;
             }
             return false;
         }
     }
 
-    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO with a certain type)
-    class NearestGameObjectTypeInObjectRangeCheck : ICheck<GameObject>
+    public class LocalizedDo(MessageBuilder localizer)
     {
-        public NearestGameObjectTypeInObjectRangeCheck(WorldObject obj, GameObjectTypes type, float range)
-        {
-            i_obj = obj;
-            i_type = type;
-            i_range = range;
-        }
+        IDoWork<Player>[] _localizedCache = new IDoWork<Player>[(int)Locale.Total];     // 0 = default, i => i-1 locale index
 
-        public bool Invoke(GameObject go)
+        public void Invoke(Player player)
         {
-            if (go.GetGoType() == i_type && i_obj.IsWithinDist(go, i_range))
+            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            int cache_idx = (int)loc_idx + 1;
+            IDoWork<Player> action;
+
+            // create if not cached yet
+            if (_localizedCache.Length < cache_idx + 1 || _localizedCache[cache_idx] == null)
             {
-                i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
-                return true;
+                if (_localizedCache.Length < cache_idx + 1)
+                    Array.Resize(ref _localizedCache, cache_idx + 1);
+
+                action = localizer.Invoke(loc_idx);
+                _localizedCache[cache_idx] = action;
             }
-            return false;
+            else
+                action = _localizedCache[cache_idx];
+
+            action.Invoke(player);
         }
 
-        WorldObject i_obj;
-        GameObjectTypes i_type;
-        float i_range;
+        public static implicit operator IDoWork<Player>(LocalizedDo obj) => obj.Invoke;
     }
-
-    // CHECK modifiers
-    public class InRangeCheckCustomizer
-    {
-        WorldObject _obj;
-        float _range;
-
-        public InRangeCheckCustomizer(WorldObject obj, float range)
-        {
-            _obj = obj;
-            _range = range;
-        }
-
-        public virtual bool Test(WorldObject obj)
-        {
-            return _obj.IsWithinDist(obj, _range);
-        }
-
-        public virtual void Update(WorldObject o) { }
-    }
-
-    class NearestCheckCustomizer : InRangeCheckCustomizer
-    {
-        WorldObject i_obj;
-        float i_range;
-
-        public NearestCheckCustomizer(WorldObject obj, float range) : base(obj, range)
-        {
-            i_obj = obj;
-            i_range = range;
-        }
-
-        public override bool Test(WorldObject obj)
-        {
-            return i_obj.IsWithinDist(obj, i_range);
-        }
-
-        public override void Update(WorldObject obj)
-        {
-            i_range = i_obj.GetDistance(obj);
-        }
-    }
-
-    public class AnyDeadUnitObjectInRangeCheck<T> : ICheck<T> where T : WorldObject
-    {
-        public AnyDeadUnitObjectInRangeCheck(WorldObject searchObj, float range)
-        {
-            i_searchObj = searchObj;
-            i_range = range;
-        }
-
-        public virtual bool Invoke(T obj)
-        {
-            Player player = obj.ToPlayer();
-            if (player != null)
-                return !player.IsAlive() && !player.HasAuraType(AuraType.Ghost) && i_searchObj.IsWithinDistInMap(player, i_range);
-
-            Creature creature = obj.ToCreature();
-            if (creature != null)
-                return !creature.IsAlive() && i_searchObj.IsWithinDistInMap(creature, i_range);
-
-            Corpse corpse = obj.ToCorpse();
-            if (corpse != null)
-                return corpse.GetCorpseType() != CorpseType.Bones && i_searchObj.IsWithinDistInMap(corpse, i_range);
-
-            return false;
-        }
-
-        WorldObject i_searchObj;
-        float i_range;
-    }
-
-    public class AnyDeadUnitSpellTargetInRangeCheck<T> : AnyDeadUnitObjectInRangeCheck<T> where T : WorldObject
-    {
-        public AnyDeadUnitSpellTargetInRangeCheck(WorldObject searchObj, float range, SpellInfo spellInfo, SpellTargetCheckTypes check, SpellTargetObjectTypes objectType) : base(searchObj, range)
-        {
-            i_check = new WorldObjectSpellTargetCheck(searchObj, searchObj, spellInfo, check, null, objectType);
-        }
-
-        public override bool Invoke(T obj)
-        {
-            return base.Invoke(obj) && i_check.Invoke(obj);
-        }
-
-        WorldObjectSpellTargetCheck i_check;
-    }
-
-    public class PlayerOrPetCheck : ICheck<WorldObject>
-    {
-        public bool Invoke(WorldObject obj)
-        {
-            if (obj.IsTypeId(TypeId.Player))
-                return false;
-
-            Creature creature = obj.ToCreature();
-            if (creature != null)
-                return !creature.IsPet();
-
-            return true;
-        }
-    }
-    #endregion
 }

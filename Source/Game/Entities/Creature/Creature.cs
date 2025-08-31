@@ -747,7 +747,7 @@ namespace Game.Entities
                 var searcher = new CreatureLastSearcher(this, u_check);
                 Cell.VisitGridObjects(this, searcher, radius);
 
-                var creature = searcher.GetTarget();
+                var creature = searcher.GetResult();
 
                 SetNoSearchAssistance(true);
 
@@ -2323,7 +2323,7 @@ namespace Game.Entities
             var searcher = new UnitLastSearcher(this, u_check);
             Cell.VisitAllObjects(this, searcher, dist);
 
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         // select nearest hostile unit within the given attack distance (i.e. distance is ignored if > than ATTACK_DISTANCE), regardless of threat list.
@@ -2340,7 +2340,7 @@ namespace Game.Entities
 
             Cell.VisitAllObjects(this, searcher, Math.Max(dist, SharedConst.AttackDistance));
 
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public void SendAIReaction(AiReaction reactionType)
@@ -3327,7 +3327,7 @@ namespace Game.Entities
             var u_check = new NearestHostileUnitInAggroRangeCheck(this, useLOS, ignoreCivilians);
             var searcher = new UnitSearcher(this, u_check);
             Cell.VisitGridObjects(this, searcher, SharedConst.MaxAggroRadius);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public override float GetNativeObjectScale()
@@ -3880,7 +3880,7 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             Creature Owner;
             ObjectFieldData ObjectMask = new();
@@ -3900,6 +3900,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 

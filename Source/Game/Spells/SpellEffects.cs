@@ -5239,17 +5239,15 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            List<WorldObject> objs = new();
-            ObjectEntryAndPrivateOwnerIfExistsCheck check = new(unitTarget.GetGUID(), (uint)effectInfo.MiscValue);
-            WorldObjectListSearcher checker = new(unitTarget, objs, check, GridMapTypeMask.Conversation);
-            Cell.VisitGridObjects(unitTarget, checker, 100.0f);
-
-            foreach (WorldObject obj in objs)
+            var check = new ObjectEntryAndPrivateOwnerIfExistsCheck(unitTarget.GetGUID(), (uint)effectInfo.MiscValue);
+            IDoWork<Conversation> work = conversation =>
             {
-                Conversation convo = obj.ToConversation();
-                if (convo != null)
-                    convo.Remove();
-            }
+                if (check.Invoke(conversation))
+                    conversation.Remove();
+            };
+
+            ConversationWorker worker = new(unitTarget, work);
+            Cell.VisitGridObjects(unitTarget, worker, 100.0f);
         }
 
         [SpellEffectHandler(SpellEffectName.AddGarrisonFollower)]

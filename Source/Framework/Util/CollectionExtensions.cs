@@ -210,8 +210,5 @@ namespace System.Collections.Generic
         bool Invoke(T obj);
     }
 
-    public interface IDoWork<in T>
-    {
-        void Invoke(T obj);
-    }
+    public delegate void IDoWork<in T>(T obj);
 }

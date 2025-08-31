@@ -1571,7 +1571,8 @@ namespace Game.Chat
             }
 
             // First handle any creatures that still have a corpse around
-            var worker = new WorldObjectWorker(player, new RespawnDo());
+            RespawnDo u_do = new();
+            WorldObjectWorker<Creature> worker = new(player, u_do);
             Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
 
             // Now handle any that had despawned, but had respawn time logged.

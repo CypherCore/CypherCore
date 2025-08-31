@@ -372,7 +372,7 @@ namespace Game.AI
             var searcher = new UnitLastSearcher(me, u_check);
             Cell.VisitAllObjects(me, searcher, range);
 
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         //Returns a list of friendly CC'd units within range
@@ -404,7 +404,7 @@ namespace Game.AI
             var searcher = new PlayerSearcher(me, check);
             Cell.VisitWorldObjects(me, searcher, minimumRange);
 
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public void SetEquipmentSlots(bool loadDefault, int mainHand = -1, int offHand = -1, int ranged = -1)

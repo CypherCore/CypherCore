@@ -2838,7 +2838,7 @@ namespace Game.Entities
         Array<uint> m_gemScalingLevels = new(ItemConst.MaxGemSockets);
         #endregion
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             Item Owner;
             ObjectFieldData ObjectMask = new();
@@ -2858,6 +2858,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 

@@ -183,7 +183,7 @@ namespace Game.Entities
 
         public void SetCreatedBySpellCast(ObjectGuid castId) { _createdBySpellCast = castId; }
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             SceneObject Owner;
             ObjectFieldData ObjectMask = new();
@@ -203,6 +203,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 }

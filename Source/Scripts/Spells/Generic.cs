@@ -678,9 +678,9 @@ namespace Scripts.Spells.Generic
             AnyDeadUnitSpellTargetInRangeCheck<WorldObject> check = new(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy, SpellTargetObjectTypes.CorpseEnemy);
             WorldObjectSearcher searcher = new(caster, check);
             Cell.VisitWorldObjects(caster, searcher, max_range);
-            if (searcher.GetTarget() == null)
+            if (searcher.GetResult() == null)
                 Cell.VisitGridObjects(caster, searcher, max_range);
-            if (searcher.GetTarget() == null)
+            if (searcher.GetResult() == null)
                 return SpellCastResult.NoEdibleCorpses;
             return SpellCastResult.SpellCastOk;
         }

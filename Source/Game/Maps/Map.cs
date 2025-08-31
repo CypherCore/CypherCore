@@ -601,7 +601,7 @@ namespace Game.Maps
             // update active cells around players and active objects
             ResetMarkedCells();
 
-            var update = new UpdaterNotifier(diff);
+            var update = new ObjectUpdater(diff);
 
             var grid_object_update = new Visitor(update, GridMapTypeMask.AllGrid);
             var world_object_update = new Visitor(update, GridMapTypeMask.AllWorld);

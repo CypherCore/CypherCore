@@ -49,7 +49,7 @@ namespace Game.AI
                 var u_check = new NearestAttackableUnitInObjectRangeCheck(me, me.GetCharmerOrOwnerOrSelf(), max_range);
                 var checker = new UnitLastSearcher(me, u_check);
                 Cell.VisitAllObjects(me, checker, max_range + extraSearchRadius);
-                victim = checker.GetTarget();
+                victim = checker.GetResult();
             }
 
             // If have target

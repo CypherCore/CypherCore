@@ -1642,7 +1642,7 @@ namespace Game.Entities
             var searcher = new CreatureLastSearcher(this, checker);
 
             Cell.VisitAllObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public Creature FindNearestCreatureWithOptions(float range, FindCreatureOptions options)
@@ -1654,7 +1654,7 @@ namespace Game.Entities
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
             Cell.VisitAllObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public GameObject FindNearestGameObject(uint entry, float range, bool spawnedOnly = true)
@@ -1663,7 +1663,7 @@ namespace Game.Entities
             var searcher = new GameObjectLastSearcher(this, checker);
 
             Cell.VisitGridObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public GameObject FindNearestGameObjectWithOptions(float range, FindGameObjectOptions options)
@@ -1675,7 +1675,7 @@ namespace Game.Entities
                 searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
 
             Cell.VisitGridObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public GameObject FindNearestUnspawnedGameObject(uint entry, float range)
@@ -1684,7 +1684,7 @@ namespace Game.Entities
             GameObjectLastSearcher searcher = new(this, checker);
 
             Cell.VisitGridObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public GameObject FindNearestGameObjectOfType(GameObjectTypes type, float range)
@@ -1693,7 +1693,7 @@ namespace Game.Entities
             var searcher = new GameObjectLastSearcher(this, checker);
 
             Cell.VisitGridObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public Player SelectNearestPlayer(float range)
@@ -1701,7 +1701,7 @@ namespace Game.Entities
             var checker = new NearestPlayerInObjectRangeCheck(this, range);
             var searcher = new PlayerLastSearcher(this, checker);
             Cell.VisitWorldObjects(this, searcher, range);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public ObjectGuid GetCharmerOrOwnerOrOwnGUID()
@@ -4059,7 +4059,7 @@ namespace Game.Entities
         }
     }
 
-    class CombatLogSender : IDoWork<Player>
+    class CombatLogSender
     {
         CombatLogServerPacket i_message;
 
@@ -4075,6 +4075,8 @@ namespace Game.Entities
 
             player.SendPacket(i_message);
         }
+
+        public static implicit operator IDoWork<Player>(CombatLogSender obj) => obj.Invoke;
     }
 
     public struct FindCreatureOptions
@@ -4257,7 +4259,7 @@ namespace Game.Entities
         }
     }
 
-    struct WorldObjectClientDestroyWork : IDoWork<Player>
+    struct WorldObjectClientDestroyWork
     {
         public WorldObject obj;
 
@@ -4276,5 +4278,7 @@ namespace Game.Entities
             obj.DestroyForPlayer(player);
             player.m_clientGUIDs.Remove(obj.GetGUID());
         }
+
+        public static implicit operator IDoWork<Player>(WorldObjectClientDestroyWork obj) => obj.Invoke;
     }
 }

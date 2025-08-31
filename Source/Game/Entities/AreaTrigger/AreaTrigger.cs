@@ -1589,7 +1589,7 @@ namespace Game.Entities
 
         AreaTriggerAI _ai;
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             AreaTrigger Owner;
             ObjectFieldData ObjectMask = new();
@@ -1609,6 +1609,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject updateObject);
                 player.SendPacket(updateObject);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 }

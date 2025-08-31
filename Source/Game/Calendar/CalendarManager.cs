@@ -558,7 +558,7 @@ namespace Game
 
         void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            var packetBuilder = (Player receiver) =>
+            IDoWork<Player> packetBuilder = (Player receiver) =>
             {
                 CalendarInviteAlert packet = new();
                 packet.Date.SetUtcTimeFromUnixTime(calendarEvent.Date);

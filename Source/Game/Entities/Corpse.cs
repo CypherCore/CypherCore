@@ -320,7 +320,7 @@ namespace Game.Entities
         long m_time;
         CellCoord _cellCoord;                                    // gride for corpse position for fast search
 
-        class ValuesUpdateForPlayerWithMaskSender : IDoWork<Player>
+        class ValuesUpdateForPlayerWithMaskSender
         {
             Corpse Owner;
             ObjectFieldData ObjectMask = new();
@@ -340,6 +340,8 @@ namespace Game.Entities
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
             }
+
+            public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
     }
 }

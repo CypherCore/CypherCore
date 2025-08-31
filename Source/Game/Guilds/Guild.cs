@@ -2473,17 +2473,6 @@ namespace Game.Guilds
             }
         }
 
-        public void BroadcastWorker(Action<Player> _do, Player except = null)
-        {
-            foreach (var member in m_members.Values)
-            {
-                Player player = member.FindPlayer();
-                if (player != null)
-                    if (player != except)
-                        _do.Invoke(player);
-            }
-        }
-
         public int GetMembersCount() { return m_members.Count; }
 
         public GuildAchievementMgr GetAchievementMgr() { return m_achievementSys; }

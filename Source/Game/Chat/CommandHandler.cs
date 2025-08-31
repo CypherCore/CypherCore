@@ -400,7 +400,7 @@ namespace Game.Chat
             NearestGameObjectCheck check = new(pl);
             GameObjectLastSearcher searcher = new(pl, check);
             Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
-            return searcher.GetTarget();
+            return searcher.GetResult();
         }
 
         public string PlayerLink(string name)

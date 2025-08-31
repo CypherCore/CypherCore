@@ -2860,8 +2860,7 @@ namespace Game.Spells
                     if (containerTypeMask != 0)
                     {
                         WorldObjectSpellAreaTargetCheck check = new(radius, unitOwner, refe, unitOwner, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                        UnitListSearcher searcher = new(unitOwner, units, check);
-                        searcher.i_phaseShift = PhasingHandler.GetAlwaysVisiblePhaseShift();
+                        UnitListSearcher searcher = new(PhasingHandler.GetAlwaysVisiblePhaseShift(), units, check);
                         Spell.SearchTargets(searcher, containerTypeMask, unitOwner, unitOwner, radius + extraSearchRadius);
 
                         // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable

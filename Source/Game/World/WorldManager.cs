@@ -2728,15 +2728,17 @@ namespace Game
         uint i_textId;
         object[] i_args;
 
-        public class MultiplePacketSender : IDoWork<Player>
+        public class MultiplePacketSender
         {
+            public List<ServerPacket> Packets = new();
+
             public void Invoke(Player receiver)
             {
                 foreach (var packet in Packets)
                     receiver.SendPacket(packet);
             }
 
-            public List<ServerPacket> Packets = new();
+            public static implicit operator IDoWork<Player>(MultiplePacketSender obj) => obj.Invoke;
         }
     }
 
