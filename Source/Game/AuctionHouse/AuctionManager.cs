@@ -261,9 +261,9 @@ namespace Game
             _itemsByGuid[item.GetGUID()] = item;
         }
 
-        public bool RemoveAItem(ObjectGuid guid, bool deleteItem = false, SQLTransaction trans = null)
+        public bool RemoveAItem(ObjectGuid itemGuid, bool deleteItem = false, SQLTransaction trans = null)
         {
-            var item = _itemsByGuid.LookupByKey(guid);
+            var item = _itemsByGuid.LookupByKey(itemGuid);
             if (item == null)
                 return false;
 
@@ -273,7 +273,7 @@ namespace Game
                 item.SaveToDB(trans);
             }
 
-            _itemsByGuid.Remove(guid);
+            _itemsByGuid.Remove(itemGuid);
             return true;
         }
 
@@ -663,7 +663,7 @@ namespace Game
 
             _itemsByAuctionId[auction.Id] = auction;
 
-            AuctionPosting.Sorter insertSorter = new(Locale.enUS, new AuctionSortDef[] { new AuctionSortDef(AuctionHouseSortOrder.Price, false) }, 1);
+            AuctionPosting.Sorter insertSorter = new(Locale.enUS, [new AuctionSortDef(AuctionHouseSortOrder.Price, false)]);
             var auctionIndex = bucket.Auctions.BinarySearch(auction, insertSorter);
             if (auctionIndex < 0)
                 auctionIndex = ~auctionIndex;
@@ -811,7 +811,7 @@ namespace Game
         }
 
         public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, string name, byte minLevel, byte maxLevel, AuctionHouseFilterMask filters, AuctionSearchClassFilters classFilters,
-            byte[] knownPetBits, int knownPetBitsCount, byte maxKnownPetLevel, uint offset, AuctionSortDef[] sorts, int sortCount)
+            byte[] knownPetBits, byte maxKnownPetLevel, uint offset, AuctionSortDef[] sorts)
         {
             List<uint> knownAppearanceIds = new();
             BitArray knownPetSpecies = new(knownPetBits);
@@ -819,12 +819,11 @@ namespace Game
             if (filters.HasFlag(AuctionHouseFilterMask.UncollectedOnly))
             {
                 knownAppearanceIds = player.GetSession().GetCollectionMgr().GetAppearanceIds();
-                //todo fix me
-                //if (knownPetSpecies.Length < CliDB.BattlePetSpeciesStorage.GetNumRows())
-                //knownPetSpecies.resize(CliDB.BattlePetSpeciesStorage.GetNumRows());
+                if (knownPetSpecies.Length < CliDB.BattlePetSpeciesStorage.GetNumRows())
+                    knownPetSpecies.Length = (int)CliDB.BattlePetSpeciesStorage.GetNumRows();
             }
 
-            var sorter = new AuctionsBucketData.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            var sorter = new AuctionsBucketData.Sorter(player.GetSession().GetSessionDbcLocale(), sorts);
             var builder = new AuctionsResultBuilder<AuctionsBucketData>(offset, sorter, AuctionHouseResultLimits.Browse);
 
             foreach (var bucket in _buckets)
@@ -956,17 +955,17 @@ namespace Game
             listBucketsResult.HasMoreResults = builder.HasMoreResults();
         }
 
-        public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, AuctionBucketKey[] keys, int keysCount, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, AuctionBucketKey[] keys, AuctionSortDef[] sorts)
         {
             List<AuctionsBucketData> buckets = new();
-            for (int i = 0; i < keysCount; ++i)
+            foreach (AuctionBucketKey key in keys)
             {
-                var bucketData = _buckets.LookupByKey(new AuctionsBucketKey(keys[i]));
+                var bucketData = _buckets.LookupByKey(new AuctionsBucketKey(key));
                 if (bucketData != null)
                     buckets.Add(bucketData);
             }
 
-            AuctionsBucketData.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            AuctionsBucketData.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts);
             buckets.Sort(sorter);
 
             foreach (AuctionsBucketData resultBucket in buckets)
@@ -979,7 +978,7 @@ namespace Game
             listBucketsResult.HasMoreResults = false;
         }
 
-        public void BuildListBiddedItems(AuctionListBiddedItemsResult listBidderItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListBiddedItems(AuctionListBiddedItemsResult listBidderItemsResult, Player player, uint offset, AuctionSortDef[] sorts)
         {
             // always full list
             List<AuctionPosting> auctions = new();
@@ -990,7 +989,7 @@ namespace Game
                     auctions.Add(auction);
             }
 
-            AuctionPosting.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            AuctionPosting.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts);
             auctions.Sort(sorter);
 
             foreach (var resultAuction in auctions)
@@ -1003,13 +1002,13 @@ namespace Game
             listBidderItemsResult.HasMoreResults = false;
         }
 
-        public void BuildListAuctionItems(AuctionListItemsResult listItemsResult, Player player, AuctionsBucketKey bucketKey, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListAuctionItems(AuctionListItemsResult listItemsResult, Player player, AuctionsBucketKey bucketKey, uint offset, AuctionSortDef[] sorts)
         {
             listItemsResult.TotalCount = 0;
             AuctionsBucketData bucket = _buckets.LookupByKey(bucketKey);
             if (bucket != null)
             {
-                var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+                var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts);
                 var builder = new AuctionsResultBuilder<AuctionPosting>(offset, sorter, AuctionHouseResultLimits.Items);
 
                 foreach (var auction in bucket.Auctions)
@@ -1030,9 +1029,9 @@ namespace Game
             }
         }
 
-        public void BuildListAuctionItems(AuctionListItemsResult listItemsResult, Player player, uint itemId, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListAuctionItems(AuctionListItemsResult listItemsResult, Player player, uint itemId, uint offset, AuctionSortDef[] sorts)
         {
-            var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts);
             var builder = new AuctionsResultBuilder<AuctionPosting>(offset, sorter, AuctionHouseResultLimits.Items);
 
             listItemsResult.TotalCount = 0;
@@ -1059,7 +1058,7 @@ namespace Game
             listItemsResult.HasMoreResults = builder.HasMoreResults();
         }
 
-        public void BuildListOwnedItems(AuctionListOwnedItemsResult listOwnerItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
+        public void BuildListOwnedItems(AuctionListOwnedItemsResult listOwnerItemsResult, Player player, uint offset, AuctionSortDef[] sorts)
         {
             // always full list
             List<AuctionPosting> auctions = new();
@@ -1070,7 +1069,7 @@ namespace Game
                     auctions.Add(auction);
             }
 
-            AuctionPosting.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            AuctionPosting.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts);
             auctions.Sort(sorter);
 
             foreach (var resultAuction in auctions)
@@ -1726,20 +1725,19 @@ namespace Game
 
         public class Sorter : IComparer<AuctionPosting>
         {
-            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
+            public Sorter(Locale locale, AuctionSortDef[] sorts)
             {
                 _locale = locale;
                 _sorts = sorts;
-                _sortCount = sortCount;
             }
 
             public int Compare(AuctionPosting left, AuctionPosting right)
             {
-                for (var i = 0; i < _sortCount; ++i)
+                foreach (AuctionSortDef sort in _sorts)
                 {
-                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
+                    long ordering = CompareColumns(sort.SortOrder, left, right);
                     if (ordering != 0)
-                        return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
+                        return (ordering < 0).CompareTo(!sort.ReverseSort);
                 }
 
                 // Auctions are processed in LIFO order
@@ -1782,7 +1780,6 @@ namespace Game
 
             Locale _locale;
             AuctionSortDef[] _sorts;
-            int _sortCount;
         }
     }
 
@@ -1800,10 +1797,10 @@ namespace Game
         public uint[] QualityCounts = new uint[(int)ItemQuality.Max];
         public ulong MinPrice; // for sort
         public (uint Id, uint Count)[] ItemModifiedAppearanceId = new (uint Id, uint Count)[4]; // for uncollected search
-        public byte RequiredLevel = 0; // for usable search
-        public byte SortLevel = 0;
-        public byte MinBattlePetLevel = 0;
-        public byte MaxBattlePetLevel = 0;
+        public byte RequiredLevel; // for usable search
+        public ushort SortLevel;
+        public byte MinBattlePetLevel;
+        public byte MaxBattlePetLevel;
         public string[] FullName = new string[(int)Locale.Total];
 
         public List<AuctionPosting> Auctions = new();
@@ -1855,20 +1852,19 @@ namespace Game
 
         public class Sorter : IComparer<AuctionsBucketData>
         {
-            public Sorter(Locale locale, AuctionSortDef[] sorts, int sortCount)
+            public Sorter(Locale locale, AuctionSortDef[] sorts)
             {
                 _locale = locale;
                 _sorts = sorts;
-                _sortCount = sortCount;
             }
 
             public int Compare(AuctionsBucketData left, AuctionsBucketData right)
             {
-                for (var i = 0; i < _sortCount; ++i)
+                foreach (AuctionSortDef sort in _sorts)
                 {
-                    long ordering = CompareColumns(_sorts[i].SortOrder, left, right);
+                    long ordering = CompareColumns(sort.SortOrder, left, right);
                     if (ordering != 0)
-                        return (ordering < 0).CompareTo(!_sorts[i].ReverseSort);
+                        return (ordering < 0).CompareTo(!sort.ReverseSort);
                 }
 
                 return left.Key != right.Key ? 1 : 0;
@@ -1895,7 +1891,6 @@ namespace Game
 
             Locale _locale;
             AuctionSortDef[] _sorts;
-            int _sortCount;
         }
     }
 
