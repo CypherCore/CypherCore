@@ -496,6 +496,7 @@ namespace Game
         public CreatureTextBuilder(WorldObject obj, WorldObject speaker, Gender gender, ChatMsg msgtype, byte textGroup, uint id, Language language, WorldObject target, uint broadcastTextId, ushort emoteId, uint soundKitId, SoundKitPlayType soundKitPlayType, uint playerConditionId)
         {
             _source = obj;
+            _talker = speaker;
             _gender = gender;
             _msgType = msgtype;
             _textGroup = textGroup;
