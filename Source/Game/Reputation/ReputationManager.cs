@@ -298,7 +298,7 @@ namespace Game
                 {
                     state.needSend = false;
                     if (faction == null || state.ReputationListID != faction.ReputationListID)
-                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, getStandingForPacket(state)));
+                        setFactionStanding.Faction.Add(new FactionStandingData((int)state.ReputationListID, getStandingForPacket(state), (int)state.Id));
                 }
             }
 
