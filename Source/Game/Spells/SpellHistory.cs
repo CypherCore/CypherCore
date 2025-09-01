@@ -185,8 +185,7 @@ namespace Game.Spells
             if (spell != null && spell.IsIgnoringCooldowns())
                 return;
 
-            if (ConsumeCharge(spellInfo.ChargeCategoryId))
-                return;
+            ConsumeCharge(spellInfo.ChargeCategoryId);
 
             if (_owner.HasAuraTypeWithAffectMask(AuraType.IgnoreSpellCooldown, spellInfo))
                 return;
@@ -537,7 +536,7 @@ namespace Game.Spells
         public void ModifySpellCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown)
         {
             var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
-            if (cooldownMod.TotalMilliseconds == 0 || cooldownEntry == null)
+            if (cooldownEntry == null)
                 return;
 
             ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
@@ -623,10 +622,8 @@ namespace Game.Spells
             if (cooldownMod == TimeSpan.Zero)
                 return;
 
-            if (GetChargeRecoveryTime(spellInfo.ChargeCategoryId) > 0 && GetMaxCharges(spellInfo.ChargeCategoryId) > 0)
-                ModifyChargeRecoveryTime(spellInfo.ChargeCategoryId, cooldownMod);
-            else
-                ModifySpellCooldown(spellInfo.Id, cooldownMod, withoutCategoryCooldown);
+            ModifyChargeRecoveryTime(spellInfo.ChargeCategoryId, cooldownMod);
+            ModifySpellCooldown(spellInfo.Id, cooldownMod, withoutCategoryCooldown);
         }
 
         public void ModifyCoooldowns(Func<CooldownEntry, bool> predicate, TimeSpan cooldownMod, bool withoutCategoryCooldown = false)
@@ -838,29 +835,26 @@ namespace Game.Spells
             return false;
         }
 
-        public bool ConsumeCharge(uint chargeCategoryId)
+        public void ConsumeCharge(uint chargeCategoryId)
         {
             if (!CliDB.SpellCategoryStorage.ContainsKey(chargeCategoryId))
-                return false;
+                return;
 
             int chargeRecovery = GetChargeRecoveryTime(chargeCategoryId);
-            if (chargeRecovery > 0 && GetMaxCharges(chargeCategoryId) > 0)
-            {
-                if (_owner.HasAuraTypeWithMiscvalue(AuraType.IgnoreSpellChargeCooldown, (int)chargeCategoryId))
-                    return true;
+            if (chargeRecovery <= 0 && GetMaxCharges(chargeCategoryId) <= 0)
+                return;
 
-                DateTime recoveryStart;
-                var charges = _categoryCharges.LookupByKey(chargeCategoryId);
-                if (charges.Empty())
-                    recoveryStart = GameTime.GetSystemTime();
-                else
-                    recoveryStart = charges.Last().RechargeEnd;
+            if (_owner.HasAuraTypeWithMiscvalue(AuraType.IgnoreSpellChargeCooldown, (int)chargeCategoryId))
+                return;
 
-                _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
-                return true;
-            }
+            DateTime recoveryStart;
+            var charges = _categoryCharges.LookupByKey(chargeCategoryId);
+            if (charges.Empty())
+                recoveryStart = GameTime.GetSystemTime();
+            else
+                recoveryStart = charges.Last().RechargeEnd;
 
-            return false;
+            _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
         }
 
         void ModifyChargeRecoveryTime(uint chargeCategoryId, TimeSpan cooldownMod)
