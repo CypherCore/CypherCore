@@ -177,6 +177,12 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE, "SELECT ID, DisplayName_lang, Description_lang FROM barber_shop_style_locale" +
                 " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
+            // BattlePetAbility.db2
+            PrepareStatement(HotfixStatements.SEL_BATTLE_PET_ABILITY, "SELECT ID, Name, Description, IconFileDataID, PetTypeEnum, Cooldown, BattlePetVisualID, Flags" +
+                " FROM battle_pet_ability WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_BATTLE_PET_ABILITY_LOCALE, "SELECT ID, Name_lang, Description_lang FROM battle_pet_ability_locale" +
+                " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // BattlePetBreedQuality.db2
             PrepareStatement(HotfixStatements.SEL_BATTLE_PET_BREED_QUALITY, "SELECT ID, MaxQualityRoll, StateMultiplier, QualityEnum FROM battle_pet_breed_quality" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
@@ -1026,6 +1032,12 @@ namespace Framework.Database
             // PathProperty.db2
             PrepareStatement(HotfixStatements.SEL_PATH_PROPERTY, "SELECT ID, PathID, PropertyIndex, Value FROM path_property WHERE (`VerifiedBuild` > 0) = ?");
 
+            // PerksActivity.db2
+            PrepareStatement(HotfixStatements.SEL_PERKS_ACTIVITY, "SELECT ActivityName, Description, ID, CriteriaTreeID, ThresholdContributionAmount, Supersedes, " +
+                "Priority FROM perks_activity WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_PERKS_ACTIVITY_LOCALE, "SELECT ID, ActivityName_lang, Description_lang FROM perks_activity_locale" +
+                " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
+
             // Phase.db2
             PrepareStatement(HotfixStatements.SEL_PHASE, "SELECT ID, Flags FROM phase WHERE (`VerifiedBuild` > 0) = ?");
 
@@ -1769,6 +1781,9 @@ namespace Framework.Database
         SEL_BARBER_SHOP_STYLE,
         SEL_BARBER_SHOP_STYLE_LOCALE,
 
+        SEL_BATTLE_PET_ABILITY,
+        SEL_BATTLE_PET_ABILITY_LOCALE,
+
         SEL_BATTLE_PET_BREED_QUALITY,
 
         SEL_BATTLE_PET_BREED_STATE,
@@ -2168,6 +2183,9 @@ namespace Framework.Database
         SEL_PATH_NODE,
 
         SEL_PATH_PROPERTY,
+
+        SEL_PERKS_ACTIVITY,
+        SEL_PERKS_ACTIVITY_LOCALE,
 
         SEL_PHASE,
 

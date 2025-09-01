@@ -269,13 +269,13 @@ namespace Game.Chat.Commands
     class BanListCommands
     {
         [Command("account", RBACPermissions.CommandBanlistAccount, true)]
-        static bool HandleBanListAccountCommand(CommandHandler handler, [OptionalArg] string filter)
+        static bool HandleBanListAccountCommand(CommandHandler handler, OptionalArg<string> filter)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS);
             DB.Login.Execute(stmt);
 
             SQLResult result;
-            if (filter.IsEmpty())
+            if (!filter.HasValue)
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BANNED_ALL);
                 result = DB.Login.Query(stmt);
@@ -378,14 +378,14 @@ namespace Game.Chat.Commands
         }
 
         [Command("ip", RBACPermissions.CommandBanlistIp, true)]
-        static bool HandleBanListIPCommand(CommandHandler handler, [OptionalArg] string filter)
+        static bool HandleBanListIPCommand(CommandHandler handler, OptionalArg<string> filter)
         {
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.DEL_EXPIRED_IP_BANS);
             DB.Login.Execute(stmt);
 
             SQLResult result;
 
-            if (filter.IsEmpty())
+            if (!filter.HasValue)
             {
                 stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_IP_BANNED_ALL);
                 result = DB.Login.Query(stmt);

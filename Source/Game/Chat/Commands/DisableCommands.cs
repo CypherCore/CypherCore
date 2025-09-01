@@ -14,7 +14,7 @@ namespace Game.Chat.Commands
         [CommandGroup("add")]
         class DisableAddCommands
         {
-            static bool HandleAddDisables(CommandHandler handler, DisableType disableType, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisables(CommandHandler handler, DisableType disableType, uint entry, OptionalArg<uint> flags, Tail disableComment)
             {
                 switch (disableType)
                 {
@@ -125,19 +125,19 @@ namespace Game.Chat.Commands
             }
 
             [Command("spell", RBACPermissions.CommandDisableAddSpell, true)]
-            static bool HandleAddDisableSpellCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisableSpellCommand(CommandHandler handler, uint entry, OptionalArg<uint> flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Spell, entry, flags, disableComment);
             }
 
             [Command("quest", RBACPermissions.CommandDisableAddQuest, true)]
-            static bool HandleAddDisableQuestCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisableQuestCommand(CommandHandler handler, uint entry, OptionalArg<uint> flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Quest, entry, flags, disableComment);
             }
 
             [Command("map", RBACPermissions.CommandDisableAddMap, true)]
-            static bool HandleAddDisableMapCommand(CommandHandler handler, uint entry, uint? flags, Tail disableComment)
+            static bool HandleAddDisableMapCommand(CommandHandler handler, uint entry, OptionalArg<uint> flags, Tail disableComment)
             {
                 return HandleAddDisables(handler, DisableType.Map, entry, flags, disableComment);
             }

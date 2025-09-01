@@ -12,7 +12,7 @@ namespace Game.Chat
     class GMCommands
     {
         [Command("chat", RBACPermissions.CommandGmChat)]
-        static bool HandleGMChatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleGMChatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             WorldSession session = handler.GetSession();
             if (session != null)
@@ -160,7 +160,7 @@ namespace Game.Chat
         }
 
         [Command("visible", RBACPermissions.CommandGmVisible)]
-        static bool HandleGMVisibleCommand(CommandHandler handler, bool? visibleArg)
+        static bool HandleGMVisibleCommand(CommandHandler handler, OptionalArg<bool> visibleArg)
         {
             Player _player = handler.GetSession().GetPlayer();
 

@@ -59,7 +59,7 @@ namespace Game.Chat
         }
 
         [Command("playpackage", RBACPermissions.CommandScenePlayPackage)]
-        static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, SceneFlags? flags)
+        static bool HandlePlayScenePackageCommand(CommandHandler handler, uint sceneScriptPackageId, OptionalArg<SceneFlags> flags)
         {
             Player target = handler.GetSelectedPlayerOrSelf();
             if (target == null)

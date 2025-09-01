@@ -12,7 +12,7 @@ namespace Game.Chat.Commands
     class BNetAccountCommands
     {
         [Command("create", RBACPermissions.CommandBnetAccountCreate, true)]
-        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, bool? createGameAccount)
+        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, OptionalArg<bool> createGameAccount)
         {
             if (accountName.IsEmpty() || !accountName.Contains('@'))
             {

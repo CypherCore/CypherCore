@@ -55,7 +55,7 @@ namespace Game.Chat
         }
 
         [Command("2fa remove", CypherStrings.CommandAcc2faRemoveHelp, RBACPermissions.CommandAccount2FaRemove)]
-        static bool HandleAccount2FARemoveCommand(CommandHandler handler, uint? token)
+        static bool HandleAccount2FARemoveCommand(CommandHandler handler, OptionalArg<uint> token)
         {
             /*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
             if (!masterKey.IsAvailable())
@@ -118,7 +118,7 @@ namespace Game.Chat
         }
 
         [Command("2fa setup", CypherStrings.CommandAcc2faSetupHelp, RBACPermissions.CommandAccount2FaSetup)]
-        static bool HandleAccount2FASetupCommand(CommandHandler handler, uint? token)
+        static bool HandleAccount2FASetupCommand(CommandHandler handler, OptionalArg<uint> token)
         {
             /*var masterKey = Global.SecretMgr.GetSecret(Secrets.TOTPMasterKey);
             if (!masterKey.IsAvailable())
@@ -197,7 +197,7 @@ namespace Game.Chat
         }
 
         [Command("create", CypherStrings.CommandAccCreateHelp, RBACPermissions.CommandAccountCreate, true)]
-        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, [OptionalArg] string email)
+        static bool HandleAccountCreateCommand(CommandHandler handler, string accountName, string password, OptionalArg<string> email)
         {
             if (accountName.Contains("@"))
             {
@@ -205,7 +205,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email ?? "");
+            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email.GetValueOrDefault(""));
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -215,7 +215,7 @@ namespace Game.Chat
                         Log.outInfo(LogFilter.Player, "Account: {0} (IP: {1}) Character:[{2}] (GUID: {3}) created Account {4} (Email: '{5}')",
                             handler.GetSession().GetAccountId(), handler.GetSession().GetRemoteAddress(),
                             handler.GetSession().GetPlayer().GetName(), handler.GetSession().GetPlayer().GetGUID().ToString(),
-                            accountName, email ?? "");
+                            accountName, email.GetValueOrDefault(""));
                     }
                     break;
                 case AccountOpResult.NameTooLong:
@@ -337,7 +337,7 @@ namespace Game.Chat
         }
 
         [Command("password", CypherStrings.CommandAccPasswordHelp, RBACPermissions.CommandAccountPassword)]
-        static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, [OptionalArg] string confirmEmail)
+        static bool HandleAccountPasswordCommand(CommandHandler handler, string oldPassword, string newPassword, string confirmPassword, OptionalArg<string> confirmEmail)
         {
             // First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
             uint pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
@@ -466,34 +466,34 @@ namespace Game.Chat
             [Command("", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListCommand(CommandHandler handler)
             {
-                return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, null);
+                return HandleAccountOnlineListCommandWithParameters(handler, null, default, default, default);
             }
 
             [Command("ip", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithIpFilterCommand(CommandHandler handler, string ipAddress)
             {
-                return HandleAccountOnlineListCommandWithParameters(handler, ipAddress, null, null, null);
+                return HandleAccountOnlineListCommandWithParameters(handler, ipAddress, default, default, default);
             }
 
             [Command("limit", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithLimitCommand(CommandHandler handler, uint limit)
             {
-                return HandleAccountOnlineListCommandWithParameters(handler, null, limit, null, null);
+                return HandleAccountOnlineListCommandWithParameters(handler, null, limit, default, default);
             }
 
             [Command("map", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithMapFilterCommand(CommandHandler handler, uint mapId)
             {
-                return HandleAccountOnlineListCommandWithParameters(handler, null, null, mapId, null);
+                return HandleAccountOnlineListCommandWithParameters(handler, null, default, mapId, default);
             }
 
             [Command("zone", CypherStrings.CommandAccOnlinelistHelp, RBACPermissions.CommandAccountOnlineList, true)]
             static bool HandleAccountOnlineListWithZoneFilterCommand(CommandHandler handler, uint zoneId)
             {
-                return HandleAccountOnlineListCommandWithParameters(handler, null, null, null, zoneId);
+                return HandleAccountOnlineListCommandWithParameters(handler, null, default, default, zoneId);
             }
 
-            static bool HandleAccountOnlineListCommandWithParameters(CommandHandler handler, string ipAddress, uint? limit, uint? mapId, uint? zoneId)
+            static bool HandleAccountOnlineListCommandWithParameters(CommandHandler handler, string ipAddress, OptionalArg<uint> limit, OptionalArg<uint> mapId, OptionalArg<uint> zoneId)
             {
                 int sessionsMatchCount = 0;
 
@@ -614,13 +614,13 @@ namespace Game.Chat
             }
 
             [Command("addon", CypherStrings.CommandAccSetAddonHelp, RBACPermissions.CommandAccountSetAddon, true)]
-            static bool HandleAccountSetAddonCommand(CommandHandler handler, [OptionalArg] string accountName, byte expansion)
+            static bool HandleAccountSetAddonCommand(CommandHandler handler, OptionalArg<string> accountName, byte expansion)
             {
                 uint accountId;
-                if (!accountName.IsEmpty())
+                if (accountName.HasValue)
                 {
                     // Convert Account name to Upper Format
-                    accountName = accountName.ToUpper();
+                    accountName = accountName.Value.ToUpper();
 
                     accountId = Global.AccountMgr.GetId(accountName);
                     if (accountId == 0)
@@ -636,7 +636,8 @@ namespace Game.Chat
                         return false;
 
                     accountId = player.GetSession().GetAccountId();
-                    Global.AccountMgr.GetName(accountId, out accountName);
+                    Global.AccountMgr.GetName(accountId, out string tempAccountName);
+                    accountName = tempAccountName;
                 }
 
                 // Let set addon state only for lesser (strong) security level
@@ -702,10 +703,10 @@ namespace Game.Chat
 
             [Command("seclevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
             [Command("gmlevel", CypherStrings.CommandAccSetSeclevelHelp, RBACPermissions.CommandAccountSetSecLevel, true)]
-            static bool HandleAccountSetSecLevelCommand(CommandHandler handler, [OptionalArg] string accountName, byte securityLevel, int? realmId)
+            static bool HandleAccountSetSecLevelCommand(CommandHandler handler, OptionalArg<string> accountName, byte securityLevel, OptionalArg<int> realmId)
             {
                 uint accountId;
-                if (!accountName.IsEmpty())
+                if (accountName.HasValue)
                 {
                     accountId = Global.AccountMgr.GetId(accountName);
                     if (accountId == 0)
@@ -721,7 +722,8 @@ namespace Game.Chat
                         return false;
 
                     accountId = player.GetSession().GetAccountId();
-                    Global.AccountMgr.GetName(accountId, out accountName);
+                    Global.AccountMgr.GetName(accountId, out string tempAccountName);
+                    accountName = tempAccountName;
                 }
 
                 if (securityLevel > (uint)AccountTypes.Console)

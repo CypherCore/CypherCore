@@ -141,7 +141,7 @@ namespace Game.Chat
         }
 
         [Command("unbind", RBACPermissions.CommandInstanceUnbind)]
-        static bool HandleInstanceUnbindCommand(CommandHandler handler, [VariantArg<uint, string>] object mapArg, uint? difficultyArg)
+        static bool HandleInstanceUnbindCommand(CommandHandler handler, VariantArg<uint, string> mapArg, OptionalArg<uint> difficultyArg)
         {
             Player player = handler.GetSelectedPlayer();
             if (player == null)
@@ -150,11 +150,11 @@ namespace Game.Chat
             uint? mapId = null;
             Difficulty? difficulty = null;
 
-            if (mapArg is uint)
-                mapId = (uint)mapArg;
+            if (mapArg.Is<uint>())
+                mapId = mapArg;
 
             if (difficultyArg.HasValue && CliDB.DifficultyStorage.ContainsKey(difficultyArg.Value))
-                difficulty = (Difficulty)difficultyArg;
+                difficulty = (Difficulty)difficultyArg.Value;
 
             List<InstanceLock> locksReset = new();
             List<InstanceLock> locksNotReset = new();

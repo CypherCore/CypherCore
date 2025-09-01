@@ -13,7 +13,7 @@ namespace Game.Chat.Commands
     class RbacComands
     {
         [Command("list", RBACPermissions.CommandRbacList, true)]
-        static bool HandleRBACListPermissionsCommand(CommandHandler handler, uint? permId)
+        static bool HandleRBACListPermissionsCommand(CommandHandler handler, OptionalArg<uint> permId)
         {
             if (!permId.HasValue)
             {
@@ -49,7 +49,7 @@ namespace Game.Chat.Commands
         class RbacAccountCommands
         {
             [Command("deny", RBACPermissions.CommandRbacAccPermDeny, true)]
-            static bool HandleRBACPermDenyCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
+            static bool HandleRBACPermDenyCommand(CommandHandler handler, AccountIdentifier account, uint permId, OptionalArg<int> realmId)
             {
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
@@ -92,7 +92,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]
-            static bool HandleRBACPermGrantCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
+            static bool HandleRBACPermGrantCommand(CommandHandler handler, AccountIdentifier account, uint permId, OptionalArg<int> realmId)
             {
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);
@@ -186,7 +186,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("revoke", RBACPermissions.CommandRbacAccPermRevoke, true)]
-            static bool HandleRBACPermRevokeCommand(CommandHandler handler, AccountIdentifier account, uint permId, int? realmId)
+            static bool HandleRBACPermRevokeCommand(CommandHandler handler, AccountIdentifier account, uint permId, OptionalArg<int> realmId)
             {
                 if (account == null)
                     account = AccountIdentifier.FromTarget(handler);

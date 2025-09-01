@@ -86,6 +86,7 @@ namespace Game.DataStorage
             BankTabStorage = ReadDB2<BankTabRecord>("BankTab.db2", HotfixStatements.SEL_BANK_TAB);
             BannedAddOnsStorage = ReadDB2<BannedAddonsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
             BarberShopStyleStorage = ReadDB2<BarberShopStyleRecord>("BarberShopStyle.db2", HotfixStatements.SEL_BARBER_SHOP_STYLE, HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE);
+            BattlePetAbilityStorage = ReadDB2<BattlePetAbilityRecord>("BattlePetAbility.db2", HotfixStatements.SEL_BATTLE_PET_ABILITY, HotfixStatements.SEL_BATTLE_PET_ABILITY_LOCALE);
             BattlePetBreedQualityStorage = ReadDB2<BattlePetBreedQualityRecord>("BattlePetBreedQuality.db2", HotfixStatements.SEL_BATTLE_PET_BREED_QUALITY);
             BattlePetBreedStateStorage = ReadDB2<BattlePetBreedStateRecord>("BattlePetBreedState.db2", HotfixStatements.SEL_BATTLE_PET_BREED_STATE);
             BattlePetSpeciesStorage = ReadDB2<BattlePetSpeciesRecord>("BattlePetSpecies.db2", HotfixStatements.SEL_BATTLE_PET_SPECIES, HotfixStatements.SEL_BATTLE_PET_SPECIES_LOCALE);
@@ -261,6 +262,7 @@ namespace Game.DataStorage
             PathStorage = ReadDB2<PathRecord>("Path.db2", HotfixStatements.SEL_PATH);
             PathNodeStorage = ReadDB2<PathNodeRecord>("PathNode.db2", HotfixStatements.SEL_PATH_NODE);
             PathPropertyStorage = ReadDB2<PathPropertyRecord>("PathProperty.db2", HotfixStatements.SEL_PATH_PROPERTY);
+            PerksActivityStorage = ReadDB2<PerksActivityRecord>("PerksActivity.db2", HotfixStatements.SEL_PERKS_ACTIVITY, HotfixStatements.SEL_PERKS_ACTIVITY_LOCALE);
             PhaseStorage = ReadDB2<PhaseRecord>("Phase.db2", HotfixStatements.SEL_PHASE);
             PhaseXPhaseGroupStorage = ReadDB2<PhaseXPhaseGroupRecord>("PhaseXPhaseGroup.db2", HotfixStatements.SEL_PHASE_X_PHASE_GROUP);
             PlayerConditionStorage = ReadDB2<PlayerConditionRecord>("PlayerCondition.db2", HotfixStatements.SEL_PLAYER_CONDITION, HotfixStatements.SEL_PLAYER_CONDITION_LOCALE);
@@ -492,6 +494,7 @@ namespace Game.DataStorage
         public static DB6Storage<BankTabRecord> BankTabStorage;
         public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
+        public static DB6Storage<BattlePetAbilityRecord> BattlePetAbilityStorage;
         public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage;
         public static DB6Storage<BattlePetBreedStateRecord> BattlePetBreedStateStorage;
         public static DB6Storage<BattlePetSpeciesRecord> BattlePetSpeciesStorage;
@@ -664,6 +667,7 @@ namespace Game.DataStorage
         public static DB6Storage<NumTalentsAtLevelRecord> NumTalentsAtLevelStorage;
         public static DB6Storage<OverrideSpellDataRecord> OverrideSpellDataStorage;
         public static DB6Storage<ParagonReputationRecord> ParagonReputationStorage;
+        public static DB6Storage<PerksActivityRecord> PerksActivityStorage;
         public static DB6Storage<PathRecord> PathStorage;
         public static DB6Storage<PathNodeRecord> PathNodeStorage;
         public static DB6Storage<PathPropertyRecord> PathPropertyStorage;

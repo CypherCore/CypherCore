@@ -43,6 +43,17 @@ namespace Game.DataStorage
         public PathPropertyIndex GetPropertyIndex() { return (PathPropertyIndex)PropertyIndex; }
     }
 
+    public sealed class PerksActivityRecord
+    {
+        public LocalizedString ActivityName;
+        public LocalizedString Description;
+        public uint Id;
+        public int CriteriaTreeID;
+        public int ThresholdContributionAmount;
+        public int Supersedes;
+        public int Priority;
+    }
+
     public sealed class PhaseRecord
     {
         public uint Id;

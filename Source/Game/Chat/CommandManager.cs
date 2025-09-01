@@ -399,7 +399,7 @@ namespace Game.Chat
         public bool Invoke(CommandHandler handler, string args)
         {
             if (parameters.Any(p => p.ParameterType == typeof(StringArguments)))//Old system, can remove once all commands are changed.
-                return (bool)_methodInfo.Invoke(null, new object[] { handler, new StringArguments(args) });
+                return (bool)_methodInfo.Invoke(null, [handler, new StringArguments(args)]);
             else
             {
                 var parseArgs = new dynamic[parameters.Length];

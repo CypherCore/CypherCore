@@ -10,7 +10,7 @@ namespace Game.Chat
     class EventCommands
     {
         [Command("info", RBACPermissions.CommandEventInfo, true)]
-        static bool HandleEventInfoCommand(CommandHandler handler, ushort eventId)
+        static bool HandleEventInfoCommand(CommandHandler handler, VariantArg<GameeventLinkData, ushort> eventId)
         {
             var events = Global.GameEventMgr.GetEventMap();
             if (eventId >= events.Length)
@@ -74,7 +74,7 @@ namespace Game.Chat
         }
 
         [Command("start", RBACPermissions.CommandEventStart, true)]
-        static bool HandleEventStartCommand(CommandHandler handler, ushort eventId)
+        static bool HandleEventStartCommand(CommandHandler handler, VariantArg<GameeventLinkData, ushort> eventId)
         {
             var events = Global.GameEventMgr.GetEventMap();
             if (eventId < 1 || eventId >= events.Length)
@@ -102,7 +102,7 @@ namespace Game.Chat
         }
 
         [Command("stop", RBACPermissions.CommandEventStop, true)]
-        static bool HandleEventStopCommand(CommandHandler handler, ushort eventId)
+        static bool HandleEventStopCommand(CommandHandler handler, VariantArg<GameeventLinkData, ushort> eventId)
         {
             var events = Global.GameEventMgr.GetEventMap();
             if (eventId < 1 || eventId >= events.Length)

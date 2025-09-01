@@ -63,9 +63,9 @@ namespace Game.Chat
 
         //rename characters
         [Command("rename", RBACPermissions.CommandCharacterRename, true)]
-        static bool HandleCharacterRenameCommand(CommandHandler handler, PlayerIdentifier player, [OptionalArg] string newName)
+        static bool HandleCharacterRenameCommand(CommandHandler handler, PlayerIdentifier player, OptionalArg<string> newNameV)
         {
-            if (player == null && !newName.IsEmpty())
+            if (player == null && !newNameV.HasValue)
                 return false;
 
             if (player == null)
@@ -77,8 +77,9 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(null, player.GetGUID()))
                 return false;
 
-            if (!newName.IsEmpty())
+            if (newNameV.HasValue)
             {
+                string newName = newNameV;
                 if (!ObjectManager.NormalizePlayerName(ref newName))
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
@@ -455,7 +456,7 @@ namespace Game.Chat
             }
 
             [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
-            static bool HandleCharacterDeletedListCommand(CommandHandler handler, [OptionalArg] string needle)
+            static bool HandleCharacterDeletedListCommand(CommandHandler handler, OptionalArg<string> needle)
             {
                 List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, needle))
@@ -474,7 +475,7 @@ namespace Game.Chat
             }
 
             [Command("restore", RBACPermissions.CommandCharacterDeletedRestore, true)]
-            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, [OptionalArg] string newCharName, AccountIdentifier newAccount)
+            static bool HandleCharacterDeletedRestoreCommand(CommandHandler handler, string needle, OptionalArg<string> newCharName, AccountIdentifier newAccount)
             {
                 List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, needle))
@@ -489,7 +490,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.CharacterDeletedRestore);
                 HandleCharacterDeletedListHelper(foundList, handler);
 
-                if (newCharName.IsEmpty())
+                if (!newCharName.HasValue)
                 {
                     // Drop not existed account cases
                     foreach (var info in foundList)
@@ -521,7 +522,7 @@ namespace Game.Chat
             }
 
             [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
-            static bool HandleCharacterDeletedOldCommand(CommandHandler handler, ushort? days)
+            static bool HandleCharacterDeletedOldCommand(CommandHandler handler, OptionalArg<ushort> days)
             {
                 int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
 
@@ -658,12 +659,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("levelup", RBACPermissions.CommandLevelup)]
-        static bool HandleLevelUpCommand(CommandHandler handler, [OptionalArg]PlayerIdentifier player, short level)
+        static bool HandleLevelUpCommand(CommandHandler handler, OptionalArg<PlayerIdentifier> playerIdentifier, short level)
         {
-            if (player == null)
-                player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null)
+            if (!playerIdentifier.HasValue)
+                playerIdentifier = PlayerIdentifier.FromTargetOrSelf(handler);
+            if (playerIdentifier.Value == null)
                 return false;
+
+            PlayerIdentifier player = playerIdentifier.Value;
 
             int oldlevel = (int)(player.IsConnected() ? player.GetConnectedPlayer().GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(player.GetGUID()));
             int newlevel = oldlevel + level;
@@ -711,7 +714,7 @@ namespace Game.Chat
     class PdumpCommand
     {
         [Command("copy", RBACPermissions.CommandPdumpCopy, true)]
-        static bool HandlePDumpCopyCommand(CommandHandler handler, PlayerIdentifier player, AccountIdentifier account, [OptionalArg] string characterName, ulong? characterGUID)
+        static bool HandlePDumpCopyCommand(CommandHandler handler, PlayerIdentifier player, AccountIdentifier account, OptionalArg<string> characterName, OptionalArg<ulong> characterGUID)
         {
             /*
             std::string name;
@@ -757,7 +760,7 @@ namespace Game.Chat
         }
 
         [Command("load", RBACPermissions.CommandPdumpLoad, true)]
-        static bool HandlePDumpLoadCommand(CommandHandler handler, string fileName, AccountIdentifier account, [OptionalArg] string characterName, ulong? characterGuid)
+        static bool HandlePDumpLoadCommand(CommandHandler handler, string fileName, AccountIdentifier account, OptionalArg<string> characterName, OptionalArg<ulong> characterGuid)
         {
             /*
             if (!AccountMgr.normalizeString(accountName))

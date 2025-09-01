@@ -92,7 +92,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("whispers", RBACPermissions.CommandWhispers)]
-        static bool HandleWhispersCommand(CommandHandler handler, bool? operationArg, [OptionalArg] string playerNameArg)
+        static bool HandleWhispersCommand(CommandHandler handler, OptionalArg<bool> operationArg, OptionalArg<string> playerNameArg)
         {
             if (!operationArg.HasValue)
             {

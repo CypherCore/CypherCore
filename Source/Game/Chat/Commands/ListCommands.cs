@@ -17,7 +17,7 @@ namespace Game.Chat.Commands
     class ListCommands
     {
         [Command("creature", RBACPermissions.CommandListCreature, true)]
-        static bool HandleListCreatureCommand(CommandHandler handler, uint creatureId, uint? countArg)
+        static bool HandleListCreatureCommand(CommandHandler handler, VariantArg<CreatureEntryLinkData, uint> creatureId, OptionalArg<uint> countArg)
         {
             CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(creatureId);
             if (cInfo == null)
@@ -88,8 +88,9 @@ namespace Game.Chat.Commands
         }
 
         [Command("item", RBACPermissions.CommandListItem, true)]
-        static bool HandleListItemCommand(CommandHandler handler, uint itemId, uint? countArg)
+        static bool HandleListItemCommand(CommandHandler handler, VariantArg<ItemLinkData> item, OptionalArg<uint> countArg)
         {
+            uint itemId = item.GetValue().Item.GetId();
             uint count = countArg.GetValueOrDefault(10);
 
             if (count == 0)
@@ -258,26 +259,26 @@ namespace Game.Chat.Commands
         }
 
         [Command("mail", RBACPermissions.CommandListMail, true)]
-        static bool HandleListMailCommand(CommandHandler handler, PlayerIdentifier player)
+        static bool HandleListMailCommand(CommandHandler handler, OptionalArg<PlayerIdentifier> player)
         {
-            if (player == null)
+            if (!player.HasValue)
                 player = PlayerIdentifier.FromTargetOrSelf(handler);
-            if (player == null)
+            if (player.Value == null)
                 return false;
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);
-            stmt.AddValue(0, player.GetGUID().GetCounter());
+            stmt.AddValue(0, player.Value.GetGUID().GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 uint countMail = result.Read<uint>(0);
 
-                string nameLink = handler.PlayerLink(player.GetName());
-                handler.SendSysMessage(CypherStrings.ListMailHeader, countMail, nameLink, player.GetGUID().ToString());
+                string nameLink = handler.PlayerLink(player.Value.GetName());
+                handler.SendSysMessage(CypherStrings.ListMailHeader, countMail, nameLink, player.Value.GetGUID().ToString());
                 handler.SendSysMessage(CypherStrings.AccountListBar);
 
                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_INFO);
-                stmt.AddValue(0, player.GetGUID().GetCounter());
+                stmt.AddValue(0, player.Value.GetGUID().GetCounter());
                 SQLResult result1 = DB.Characters.Query(stmt);
 
                 if (!result1.IsEmpty())
@@ -354,7 +355,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("object", RBACPermissions.CommandListObject, true)]
-        static bool HandleListObjectCommand(CommandHandler handler, uint gameObjectId, uint? countArg)
+        static bool HandleListObjectCommand(CommandHandler handler, VariantArg<GameobjectEntryLinkData, uint> gameObjectId, OptionalArg<uint> countArg)
         {
             GameObjectTemplate gInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObjectId);
             if (gInfo == null)
@@ -426,7 +427,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("respawns", RBACPermissions.CommandListRespawns)]
-        static bool HandleListRespawnsCommand(CommandHandler handler, uint? range)
+        static bool HandleListRespawnsCommand(CommandHandler handler, OptionalArg<uint> range)
         {
             Player player = handler.GetSession().GetPlayer();
             Map map = player.GetMap();
@@ -552,7 +553,7 @@ namespace Game.Chat.Commands
             [Command("", RBACPermissions.CommandListAuras)]
             static bool HandleListAllAurasCommand(CommandHandler handler)
             {
-                return ListAurasCommand(handler, null, null);
+                return ListAurasCommand(handler, default, null);
             }
 
             [Command("id", RBACPermissions.CommandListAuras)]
@@ -564,10 +565,10 @@ namespace Game.Chat.Commands
             [Command("name", RBACPermissions.CommandListAuras)]
             static bool HandleListAurasByNameCommand(CommandHandler handler, Tail namePart)
             {
-                return ListAurasCommand(handler, null, namePart);
+                return ListAurasCommand(handler, default, namePart);
             }
 
-            static bool ListAurasCommand(CommandHandler handler, uint? spellId, string namePart)
+            static bool ListAurasCommand(CommandHandler handler, OptionalArg<uint> spellId, string namePart)
             {
                 Unit unit = handler.GetSelectedUnit();
                 if (unit == null)
@@ -625,7 +626,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            static bool ShouldListAura(SpellInfo spellInfo, uint? spellId, string namePart, Locale locale)
+            static bool ShouldListAura(SpellInfo spellInfo, OptionalArg<uint> spellId, string namePart, Locale locale)
             {
                 if (spellId.HasValue)
                     return spellInfo.Id == spellId.Value;

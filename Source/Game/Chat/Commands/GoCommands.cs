@@ -17,7 +17,7 @@ namespace Game.Chat.Commands
     class GoCommands
     {
         [Command("areatrigger", RBACPermissions.CommandGo)]
-        static bool HandleGoAreaTriggerCommand(CommandHandler handler, uint areaTriggerId)
+        static bool HandleGoAreaTriggerCommand(CommandHandler handler, VariantArg<AreatriggerLinkData, uint> areaTriggerId)
         {
             var at = CliDB.AreaTriggerStorage.LookupByKey(areaTriggerId);
             if (at == null)
@@ -168,7 +168,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("grid", RBACPermissions.CommandGo)]
-        static bool HandleGoGridCommand(CommandHandler handler, float gridX, float gridY, uint? mapIdArg)
+        static bool HandleGoGridCommand(CommandHandler handler, float gridX, float gridY, OptionalArg<uint> mapIdArg)
         {
             Player player = handler.GetSession().GetPlayer();
             uint mapId = mapIdArg.GetValueOrDefault(player.GetMapId());
@@ -286,7 +286,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("offset", RBACPermissions.CommandGo)]
-        static bool HandleGoOffsetCommand(CommandHandler handler, float dX, float? dY, float? dZ, float? dO)
+        static bool HandleGoOffsetCommand(CommandHandler handler, float dX, OptionalArg<float> dY, OptionalArg<float> dZ, OptionalArg<float> dO)
         {
             Position loc = handler.GetSession().GetPlayer().GetPosition();
             loc.RelocateOffset(new Position(dX, dY.GetValueOrDefault(0f), dZ.GetValueOrDefault(0f), dO.GetValueOrDefault(0f)));
@@ -295,7 +295,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("quest", RBACPermissions.CommandGo)]
-        static bool HandleGoQuestCommand(CommandHandler handler, uint questId)
+        static bool HandleGoQuestCommand(CommandHandler handler, VariantArg<QuestLinkData, uint> questId)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -350,7 +350,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("taxinode", RBACPermissions.CommandGo)]
-        static bool HandleGoTaxinodeCommand(CommandHandler handler, uint nodeId)
+        static bool HandleGoTaxinodeCommand(CommandHandler handler, VariantArg<TaxiNodeLinkData, uint> nodeId)
         {
             var node = CliDB.TaxiNodesStorage.LookupByKey(nodeId);
             if (node == null)
@@ -363,7 +363,7 @@ namespace Game.Chat.Commands
 
         //teleport at coordinates, including Z and orientation
         [Command("xyz", RBACPermissions.CommandGo)]
-        static bool HandleGoXYZCommand(CommandHandler handler, float x, float y, float? z, uint? id, float? o)
+        static bool HandleGoXYZCommand(CommandHandler handler, float x, float y, OptionalArg<float> z, OptionalArg<uint> id, OptionalArg<float> o)
         {
             Player player = handler.GetSession().GetPlayer();
             uint mapId = id.GetValueOrDefault(player.GetMapId());
@@ -386,12 +386,12 @@ namespace Game.Chat.Commands
                 z = Math.Max(terrain.GetStaticHeight(PhasingHandler.EmptyPhaseShift, mapId, x, y, MapConst.MaxHeight), terrain.GetWaterLevel(PhasingHandler.EmptyPhaseShift, mapId, x, y));
             }
 
-            return DoTeleport(handler, new Position(x, y, z.Value, o.GetValueOrDefault()), mapId);
+            return DoTeleport(handler, new Position(x, y, z.Value, o.GetValueOrDefault(0f)), mapId);
         }
 
         //teleport at coordinates
         [Command("zonexy", RBACPermissions.CommandGo)]
-        static bool HandleGoZoneXYCommand(CommandHandler handler, float x, float y, uint? areaIdArg)
+        static bool HandleGoZoneXYCommand(CommandHandler handler, float x, float y, OptionalArg<VariantArg<AreaLinkData, uint>> areaIdArg)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -486,7 +486,7 @@ namespace Game.Chat.Commands
         class GoCommandCreature
         {
             [Command("", RBACPermissions.CommandGo)]
-            static bool HandleGoCreatureSpawnIdCommand(CommandHandler handler, ulong spawnId)
+            static bool HandleGoCreatureSpawnIdCommand(CommandHandler handler, VariantArg<CreatureLinkData, ulong> spawnId)
             {
                 CreatureData spawnpoint = Global.ObjectMgr.GetCreatureData(spawnId);
                 if (spawnpoint == null)
@@ -499,7 +499,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("id", RBACPermissions.CommandGo)]
-            static bool HandleGoCreatureCIdCommand(CommandHandler handler, uint id)
+            static bool HandleGoCreatureCIdCommand(CommandHandler handler, VariantArg<CreatureEntryLinkData, uint> id)
             {
                 CreatureData spawnpoint = null;
                 foreach (var pair in Global.ObjectMgr.GetAllCreatureData())
@@ -530,7 +530,7 @@ namespace Game.Chat.Commands
         class GoCommandGameobject
         {
             [Command("", RBACPermissions.CommandGo)]
-            static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, ulong spawnId)
+            static bool HandleGoGameObjectSpawnIdCommand(CommandHandler handler, VariantArg<GameobjectLinkData, ulong> spawnId)
             {
                 GameObjectData spawnpoint = Global.ObjectMgr.GetGameObjectData(spawnId);
                 if (spawnpoint == null)
@@ -543,7 +543,7 @@ namespace Game.Chat.Commands
             }
 
             [Command("id", RBACPermissions.CommandGo)]
-            static bool HandleGoGameObjectGOIdCommand(CommandHandler handler, uint goId)
+            static bool HandleGoGameObjectGOIdCommand(CommandHandler handler, VariantArg<GameobjectEntryLinkData, uint> goId)
             {
                 GameObjectData spawnpoint = null;
                 foreach (var pair in Global.ObjectMgr.GetAllGameObjectData())

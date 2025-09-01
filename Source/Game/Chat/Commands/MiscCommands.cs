@@ -213,7 +213,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool HandleDamageCommand(CommandHandler handler, uint damage, SpellSchools? school, [OptionalArg] SpellInfo spellInfo)
+        static bool HandleDamageCommand(CommandHandler handler, uint damage, OptionalArg<SpellSchools> school, OptionalArg<SpellInfo> spellInfo)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
@@ -246,7 +246,7 @@ namespace Game.Chat
                 damage = Unit.CalcArmorReducedDamage(handler.GetPlayer(), target, damage, null, WeaponAttackType.BaseAttack);
 
             // melee damage by specific school
-            if (spellInfo == null)
+            if (!spellInfo.HasValue)
             {
                 DamageInfo dmgInfo = new(attacker, target, damage, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 Unit.CalcAbsorbResist(dmgInfo);
@@ -266,7 +266,7 @@ namespace Game.Chat
 
             // non-melee damage
 
-            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.Value.GetSpellXSpellVisualId(attacker), 0), spellInfo.Value.SchoolMask);
             damageInfo.damage = damage;
             Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
@@ -275,7 +275,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("damage go", RBACPermissions.CommandDamage)]
-        static bool HandleDamageGoCommand(CommandHandler handler, ulong spawnId, int damage)
+        static bool HandleDamageGoCommand(CommandHandler handler, VariantArg<GameobjectLinkData, ulong> spawnId, int damage)
         {
             GameObject go = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
             if (go == null)
@@ -296,7 +296,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("dev", RBACPermissions.CommandDev)]
-        static bool HandleDevCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleDevCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -755,14 +755,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("linkgrave", RBACPermissions.CommandLinkgrave)]
-        static bool HandleLinkGraveCommand(CommandHandler handler, uint graveyardId, [OptionalArg] string teamArg)
+        static bool HandleLinkGraveCommand(CommandHandler handler, uint graveyardId, OptionalArg<string> teamArg)
         {
             Team team;
-            if (teamArg.IsEmpty())
+            if (!teamArg.HasValue)
                 team = 0;
-            else if (teamArg.Equals("horde", StringComparison.OrdinalIgnoreCase))
+            else if (teamArg.Value.Equals("horde", StringComparison.OrdinalIgnoreCase))
                 team = Team.Horde;
-            else if (teamArg.Equals("alliance", StringComparison.OrdinalIgnoreCase))
+            else if (teamArg.Value.Equals("alliance", StringComparison.OrdinalIgnoreCase))
                 team = Team.Alliance;
             else
                 return false;
@@ -925,22 +925,22 @@ namespace Game.Chat
 
         // mute player for the specified duration
         [CommandNonGroup("mute", RBACPermissions.CommandMute, true)]
-        static bool HandleMuteCommand(CommandHandler handler, PlayerIdentifier player, uint muteTime, Tail muteReason)
+        static bool HandleMuteCommand(CommandHandler handler, OptionalArg<PlayerIdentifier> player, uint muteTime, Tail muteReason)
         {
             string muteReasonStr = muteReason;
             if (muteReason.IsEmpty())
                 muteReasonStr = handler.GetCypherString(CypherStrings.NoReason);
 
-            if (player == null)
+            if (!player.HasValue)
                 player = PlayerIdentifier.FromTarget(handler);
-            if (player == null)
+            if (player.Value == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            Player target = player.GetConnectedPlayer();
-            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.GetGUID());
+            Player target = player.Value.GetConnectedPlayer();
+            uint accountId = target != null ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(player.Value.GetGUID());
 
             // find only player from same account if any
             if (target == null)
@@ -951,7 +951,7 @@ namespace Game.Chat
             }
 
             // must have strong lesser security level
-            if (handler.HasLowerSecurity(target, player.GetGUID(), true))
+            if (handler.HasLowerSecurity(target, player.Value.GetGUID(), true))
                 return false;
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
@@ -986,7 +986,7 @@ namespace Game.Chat
             stmt.AddValue(3, muteReasonStr);
             DB.Login.Execute(stmt);
 
-            string nameLink = handler.PlayerLink(player.GetName());
+            string nameLink = handler.PlayerLink(player.Value.GetName());
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
                 Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, muteBy, nameLink, muteTime, muteReasonStr);
@@ -1040,14 +1040,14 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("neargrave", RBACPermissions.CommandNeargrave)]
-        static bool HandleNearGraveCommand(CommandHandler handler, [OptionalArg] string teamArg)
+        static bool HandleNearGraveCommand(CommandHandler handler, OptionalArg<string> teamArg)
         {
             Team team;
-            if (teamArg.IsEmpty())
+            if (!teamArg.HasValue)
                 team = 0;
-            else if (teamArg.Equals("horde", StringComparison.OrdinalIgnoreCase))
+            else if (teamArg.Value.Equals("horde", StringComparison.OrdinalIgnoreCase))
                 team = Team.Horde;
-            else if (teamArg.Equals("alliance", StringComparison.OrdinalIgnoreCase))
+            else if (teamArg.Value.Equals("alliance", StringComparison.OrdinalIgnoreCase))
                 team = Team.Alliance;
             else
                 return false;
@@ -1097,18 +1097,17 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("pinfo", RBACPermissions.CommandPinfo, true)]
-        static bool HandlePInfoCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier arg)
+        static bool HandlePInfoCommand(CommandHandler handler, OptionalArg<PlayerIdentifier> arg)
         {
-            if (arg == null)
+            if (!arg.HasValue)
                 arg = PlayerIdentifier.FromTargetOrSelf(handler);
-
-            if (arg == null)
+            if (arg.Value == null)
                 return false;
 
             // Define ALL the player variables!
-            Player target = arg.GetConnectedPlayer();
-            ObjectGuid targetGuid = arg.GetGUID();
-            string targetName = arg.GetName();
+            Player target = arg.Value.GetConnectedPlayer();
+            ObjectGuid targetGuid = arg.Value.GetGUID();
+            string targetName = arg.Value.GetName();
             PreparedStatement stmt;
 
             /* The variables we extract for the command. They are
@@ -1450,7 +1449,7 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("playall", RBACPermissions.CommandPlayall)]
-        static bool HandlePlayAllCommand(CommandHandler handler, uint soundId, uint? broadcastTextId)
+        static bool HandlePlayAllCommand(CommandHandler handler, uint soundId, OptionalArg<uint> broadcastTextId)
         {
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
@@ -1801,12 +1800,12 @@ namespace Game.Chat
         }
 
         [CommandNonGroup("unfreeze", RBACPermissions.CommandUnfreeze)]
-        static bool HandleUnFreezeCommand(CommandHandler handler, [OptionalArg] string targetNameArg)
+        static bool HandleUnFreezeCommand(CommandHandler handler, OptionalArg<string> targetNameArg)
         {
             string name = "";
             Player player;
 
-            if (!targetNameArg.IsEmpty())
+            if (targetNameArg.HasValue)
             {
                 name = targetNameArg;
                 ObjectManager.NormalizePlayerName(ref name);
@@ -1830,7 +1829,7 @@ namespace Game.Chat
             }
             else
             {
-                if (!targetNameArg.IsEmpty())
+                if (!targetNameArg.HasValue)
                 {
                     // Check for offline players
                     ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
@@ -2022,82 +2021,70 @@ namespace Game.Chat
     [CommandGroup("additem")]
     class MiscAddItemCommands
     {
-        [Command("", RBACPermissions.CommandAdditem)]
-        static bool HandleAddItemCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAddItemCommandHelper(CommandHandler handler, Player player, Player playerTarget, VariantArg<ItemLinkData, uint, string> itemArg, OptionalArg<int> countArg, OptionalArg<string> bonusListIdString, OptionalArg<byte> itemContextArg)
         {
-            if (args.Empty())
-                return false;
-
             uint itemId = 0;
-
-            if (args[0] == '[')                                        // [name] manual form
+            List<uint> bonusListIDs = new();
+            ItemContext itemContext = ItemContext.None;
+            if (itemArg.Is<ItemLinkData>())
             {
-                string itemName = args.NextString("]").Substring(1);
+                ItemLinkData itemLinkData = itemArg.GetValue();
+                itemId = itemLinkData.Item.GetId();
+                bonusListIDs = itemLinkData.ItemBonusListIDs;
+                itemContext = (ItemContext)itemLinkData.Context;
+            }
+            else if (itemArg.Is<uint>())
+                itemId = itemArg;
+            else if (itemArg.Is<string>())
+            {
+                string itemName = itemArg;
+                if (itemName.StartsWith('['))
+                    itemName.Remove(0, 1);
+                if (itemName.EndsWith(']'))
+                    itemName.Remove(itemName.Length - 1, 1);
 
-                if (!string.IsNullOrEmpty(itemName))
+                var record = CliDB.ItemSparseStorage.Values.FirstOrDefault(sparse =>
                 {
-                    var record = CliDB.ItemSparseStorage.Values.FirstOrDefault(itemSparse =>
-                    {
-                        for (Locale i = 0; i < Locale.Total; ++i)
-                            if (itemName == itemSparse.Display[i])
-                                return true;
-                        return false;
-                    });
+                    for (Locale i = Locale.enUS; i < Locale.Total; i += 1)
+                        if (itemName == sparse.Display[i])
+                            return true;
+                    return false;
+                });
 
-                    if (record == null)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandCouldnotfind, itemName);
-                        return false;
-                    }
-                    itemId = record.Id;
+                if (record == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandCouldnotfind, itemName);
+                    return false;
                 }
-                else
-                    return false;
-            }
-            else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
-            {
-                string idStr = handler.ExtractKeyFromLink(args, "Hitem");
-                if (string.IsNullOrEmpty(idStr))
-                    return false;
 
-                if (!uint.TryParse(idStr, out itemId))
-                    return false;
+                itemId = record.Id;
             }
 
-            int count = args.NextInt32();
+            int count = countArg.GetValueOrDefault(1);
             if (count == 0)
                 count = 1;
 
-            List<uint> bonusListIDs = new();
-            var bonuses = args.NextString();
-            var context = args.NextString();
-
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
-            if (!bonuses.IsEmpty())
+            if (bonusListIdString.HasValue)
             {
-                var tokens = new StringArray(bonuses, ';');
-                for (var i = 0; i < tokens.Length; ++i)
+                var tokens = new StringArray(bonusListIdString.Value, ';');
+                foreach (string token in tokens)
                 {
-                    if (uint.TryParse(tokens[i], out uint id))
-                        bonusListIDs.Add(id);
+                    if (uint.TryParse(token, out uint bonusListId))
+                        bonusListIDs.Add(bonusListId);
                 }
             }
 
-            ItemContext itemContext = ItemContext.None;
-            if (!context.IsEmpty())
+            if (itemContextArg.HasValue)
             {
-                itemContext = context.ToEnum<ItemContext>();
+                itemContext = (ItemContext)itemContextArg.Value;
                 if (itemContext < ItemContext.Max)
                 {
                     var contextBonuses = ItemBonusMgr.GetBonusListsForItem(itemId, new(itemContext));
                     bonusListIDs.AddRange(contextBonuses);
+                    bonusListIDs.Sort();
                 }
             }
-
-            Player player = handler.GetSession().GetPlayer();
-            Player playerTarget = handler.GetSelectedPlayer();
-            if (playerTarget == null)
-                playerTarget = player;
 
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
             if (itemTemplate == null)
@@ -2129,15 +2116,14 @@ namespace Game.Chat
                     // failed to destroy items of the amount requested
                     handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, -count, handler.GetNameLink(playerTarget));
                 }
+
                 return true;
             }
 
             // Adding items
-            uint noSpaceForCount = 0;
-
             // check space and find places
             List<ItemPosCount> dest = new();
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
+            InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out uint noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 
@@ -2147,14 +2133,15 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
+            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext,
+                bonusListIDs.Empty() ? null : bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
             {
-                foreach (var posCount in dest)
+                foreach (var itemPosCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(posCount.pos);
+                    Item item1 = player.GetItemByPos(itemPosCount.pos);
                     if (item1 != null)
                         item1.SetBinding(false);
                 }
@@ -2172,10 +2159,21 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
 
             return true;
+
+
+        }
+
+        [Command("", RBACPermissions.CommandAdditem, true)]
+        static bool HandleAddItemCommand(CommandHandler handler, VariantArg<ItemLinkData, uint, string> item, OptionalArg<int> countArg, OptionalArg<string> bonusListIdString, OptionalArg<byte> itemContextArg)
+        {
+            Player player = handler.GetSession().GetPlayer();
+            Player playerTarget = handler.GetSelectedPlayerOrSelf();
+
+            return HandleAddItemCommandHelper(handler, player, playerTarget, item, countArg, bonusListIdString, itemContextArg);
         }
 
         [Command("set", RBACPermissions.CommandAdditemset)]
-        static bool HandleAddItemSetCommand(CommandHandler handler, uint itemSetId, [OptionalArg] string bonuses, byte? context)
+        static bool HandleAddItemSetCommand(CommandHandler handler, VariantArg<ItemLinkData, uint> itemSetId, OptionalArg<string> bonuses, OptionalArg<byte> context)
         {
             // prevent generation all items with itemset field value '0'
             if (itemSetId == 0)
@@ -2187,7 +2185,7 @@ namespace Game.Chat
             List<uint> bonusListIDs = new();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
-            if (!bonuses.IsEmpty())
+            if (bonuses.HasValue)
             {
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
@@ -2255,164 +2253,16 @@ namespace Game.Chat
         }
 
         [Command("to", RBACPermissions.CommandAdditemset)]
-        static bool HandleAddItemToCommand(CommandHandler handler, StringArguments args)
+        static bool HandleAddItemToCommand(CommandHandler handler, PlayerIdentifier target, VariantArg<ItemLinkData, uint, string> item, OptionalArg<int> countArg, OptionalArg<string> bonusListIdString, OptionalArg<byte> itemContextArg)
         {
-            if (args.Empty())
-                return false;
-
             Player player = handler.GetSession().GetPlayer();
-            Player playerTarget = null;
-            if (!handler.ExtractPlayerTarget(args, out playerTarget))
-                return false;
-
-            StringArguments tailArgs = new StringArguments(args.NextString(""));
-            if (tailArgs.Empty())
-                return false;
-
-            uint itemId = 0;
-
-            if (tailArgs[0] == '[')                                        // [name] manual form
+            if (!target.IsConnected())
             {
-                string itemNameStr = tailArgs.NextString("]");
-
-                if (!itemNameStr.IsEmpty())
-                {
-                    string itemName = itemNameStr.Substring(1);
-                    var itr = CliDB.ItemSparseStorage.Values.FirstOrDefault(sparse =>
-                    {
-                        for (Locale i = Locale.enUS; i < Locale.Total; ++i)
-                            if (itemName == sparse.Display[i])
-                                return true;
-                        return false;
-                    });
-
-                    if (itr == null)
-                    {
-                        handler.SendSysMessage(CypherStrings.CommandCouldnotfind, itemName);
-                        return false;
-                    }
-
-                    itemId = itr.Id;
-                }
-                else
-                    return false;
-            }
-            else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
-            {
-                string id = handler.ExtractKeyFromLink(tailArgs, "Hitem");
-                if (id.IsEmpty())
-                    return false;
-                itemId = uint.Parse(id);
-            }
-
-            string ccount = tailArgs.NextString();
-
-            int count = 1;
-            if (!ccount.IsEmpty())
-                count = int.Parse(ccount);
-
-            if (count == 0)
-                count = 1;
-
-            List<uint> bonusListIDs = new();
-            string bonuses = tailArgs.NextString();
-
-            string context = tailArgs.NextString();
-
-            ItemContext itemContext = ItemContext.None;
-            if (!context.IsEmpty())
-            {
-                itemContext = context.ToEnum<ItemContext>();
-                if (itemContext < ItemContext.Max)
-                {
-                    var contextBonuses = ItemBonusMgr.GetBonusListsForItem(itemId, new(itemContext));
-                    bonusListIDs.AddRange(contextBonuses);
-                }
-            }
-
-            // semicolon separated bonuslist ids
-            if (!bonuses.IsEmpty())
-            {
-                foreach (var token in bonuses.Split(';', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    if (uint.TryParse(token, out uint bonusListId))
-                        bonusListIDs.Add(bonusListId);
-                }
-            }
-
-            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
-            if (itemTemplate == null)
-            {
-                handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            // Subtract
-            if (count < 0)
-            {
-                uint destroyedItemCount = playerTarget.DestroyItemCount(itemId, (uint)-count, true, false);
-
-                if (destroyedItemCount > 0)
-                {
-                    // output the amount of items successfully destroyed
-                    handler.SendSysMessage(CypherStrings.Removeitem, itemId, destroyedItemCount, handler.GetNameLink(playerTarget));
-
-                    // check to see if we were unable to destroy all of the amount requested.
-                    uint unableToDestroyItemCount = (uint)(-count - destroyedItemCount);
-                    if (unableToDestroyItemCount > 0)
-                    {
-                        // output message for the amount of items we couldn't destroy
-                        handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, unableToDestroyItemCount, handler.GetNameLink(playerTarget));
-                    }
-                }
-                else
-                {
-                    // failed to destroy items of the amount requested
-                    handler.SendSysMessage(CypherStrings.RemoveitemFailure, itemId, -count, handler.GetNameLink(playerTarget));
-                }
-
-                return true;
-            }
-
-            // Adding items
-            uint noSpaceForCount = 0;
-
-            // check space and find places
-            List<ItemPosCount> dest = new();
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
-            if (msg != InventoryResult.Ok)                               // convert to possible store amount
-                count -= (int)noSpaceForCount;
-
-            if (count == 0 || dest.Empty())                         // can't add any
-            {
-                handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
-                return false;
-            }
-
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, itemContext, bonusListIDs.Empty() ? null : bonusListIDs);
-
-            // remove binding (let GM give it to another player later)
-            if (player == playerTarget)
-            {
-                foreach (var itemPostCount in dest)
-                {
-                    Item item1 = player.GetItemByPos(itemPostCount.pos);
-                    if (item1 != null)
-                        item1.SetBinding(false);
-                }
-            }
-
-            if (count > 0 && item != null)
-            {
-                player.SendNewItem(item, (uint)count, false, true);
-                if (player != playerTarget)
-                    playerTarget.SendNewItem(item, (uint)count, true, false);
-            }
-
-            if (noSpaceForCount > 0)
-                handler.SendSysMessage(CypherStrings.ItemCannotCreate, itemId, noSpaceForCount);
-
-            return true;
+            return HandleAddItemCommandHelper(handler, player, target.GetConnectedPlayer(), item, countArg, bonusListIdString, itemContextArg);
         }
     }
 }

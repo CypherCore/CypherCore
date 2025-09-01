@@ -223,23 +223,23 @@ namespace Game.Chat
         class TeleNameCommands
         {
             [Command("", RBACPermissions.CommandTeleName, true)]
-            static bool HandleTeleNameCommand(CommandHandler handler, [OptionalArg] PlayerIdentifier player, [VariantArg<GameTele, string>] object where)
+            static bool HandleTeleNameCommand(CommandHandler handler, OptionalArg<PlayerIdentifier> player, VariantArg<GameTele, string> where)
             {
-                if (player == null)
+                if (!player.HasValue)
                     player = PlayerIdentifier.FromTargetOrSelf(handler);
-                if (player == null)
+                if (player.Value == null)
                     return false;
 
-                Player target = player.GetConnectedPlayer();
+                Player target = player.Value.GetConnectedPlayer();
 
-                if (where is string && where.Equals("$home"))    // References target's homebind
+                if (where.Is<string>() && ((string)where).Equals("$home"))    // References target's homebind
                 {
                     if (target != null)
                         target.TeleportTo(target.GetHomebind());
                     else
                     {
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
-                        stmt.AddValue(0, player.GetGUID().GetCounter());
+                        stmt.AddValue(0, player.Value.GetGUID().GetCounter());
                         SQLResult result = DB.Characters.Query(stmt);
 
                         if (!result.IsEmpty())
@@ -247,7 +247,7 @@ namespace Game.Chat
                             WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
                             uint zoneId = result.Read<ushort>(1);
 
-                            Player.SavePositionInDB(loc, zoneId, player.GetGUID());
+                            Player.SavePositionInDB(loc, zoneId, player.Value.GetGUID());
                         }
                     }
 
@@ -255,7 +255,7 @@ namespace Game.Chat
                 }
 
                 // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-                GameTele tele = where as GameTele;
+                GameTele tele = where;
                 return DoNameTeleport(handler, player, tele.mapId, new Position(tele.posX, tele.posY, tele.posZ, tele.orientation), tele.name);
             }
 

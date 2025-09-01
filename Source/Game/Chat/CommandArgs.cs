@@ -26,13 +26,13 @@ namespace Game.Chat
 
         static ChatCommandResult TryConsumeTo(dynamic[] tuple, int offset, ParameterInfo[] parameterInfos, CommandHandler handler, string args)
         {
-            var optionalArgAttribute = parameterInfos[offset].GetCustomAttribute<OptionalArgAttribute>(true);
-            if (optionalArgAttribute != null || parameterInfos[offset].ParameterType.IsGenericType && parameterInfos[offset].ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (parameterInfos[offset].ParameterType.IsGenericType && parameterInfos[offset].ParameterType.GetGenericTypeDefinition() == typeof(OptionalArg<>))
             {
                 // try with the argument
-                Type myArg = Nullable.GetUnderlyingType(parameterInfos[offset].ParameterType) ?? parameterInfos[offset].ParameterType;
+                Type myArg = parameterInfos[offset].ParameterType.GetGenericArguments()?[0];
 
-                ChatCommandResult result1 = TryConsume(out tuple[offset], myArg, handler, args);
+                ChatCommandResult result1 = TryConsume(out dynamic tempValue, myArg, handler, args);
+                tuple[offset] = Activator.CreateInstance(typeof(OptionalArg<>).MakeGenericType(myArg), [tempValue]);
                 if (result1.IsSuccessful())
                     if ((result1 = ConsumeFromOffset(tuple, offset + 1, parameterInfos, handler, result1)).IsSuccessful())
                         return result1;
@@ -55,9 +55,9 @@ namespace Game.Chat
             {
                 ChatCommandResult next;
 
-                var variantArgAttribute = parameterInfos[offset].GetCustomAttribute<VariantArgAttribute>(true);
-                if (variantArgAttribute != null)
-                    next = TryConsumeVariant(out tuple[offset], variantArgAttribute.Types, handler, args);
+                var genericTypes = parameterInfos[offset].ParameterType.GetGenericArguments();
+                if (!genericTypes.Empty())
+                    next = TryConsumeVariant(out tuple[offset], parameterInfos[offset].ParameterType, genericTypes, handler, args);
                 else
                     next = TryConsume(out tuple[offset], parameterInfos[offset].ParameterType, handler, args);
 
@@ -238,54 +238,123 @@ namespace Game.Chat
                             return val.TryConsume(handler, args);
                         case nameof(AchievementRecord):
                         {
-                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(AchievementLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal.Achievement) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(uint), handler, args);
                             if (!result.IsSuccessful() || (val = CliDB.AchievementStorage.LookupByKey((uint)tempVal)) != null)
                                 return result;
-                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAchievementNoExist, tempVal));
+
+                            if (val is uint)
+                                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserAchievementNoExist, tempVal));
+
+                            return result;
                         }
                         case nameof(CurrencyTypesRecord):
                         {
-                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(CurrencyLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal.Currency) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(uint), handler, args);
                             if (!result.IsSuccessful() || (val = CliDB.CurrencyTypesStorage.LookupByKey((uint)tempVal)) != null)
                                 return result;
-                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCurrencyNoExist, tempVal));
+
+                            if (val is uint)
+                                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserCurrencyNoExist, tempVal));
+
+                            return result;
                         }
                         case nameof(GameTele):
                         {
-                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
-                            if (!result.IsSuccessful())
-                                result = TryConsume(out tempVal, typeof(string), handler, args);
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(TeleLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = Global.ObjectMgr.GetGameTele(tempVal)) != null)
+                                return result;
 
+                            result = TryConsume(out tempVal, typeof(string), handler, args);
                             if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetGameTele(tempVal)) != null)
                                 return result;
-                            if (tempVal is uint)
+
+                            if (tempVal is not string)
                                 return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserGameTeleIdNoExist, tempVal));
                             else
                                 return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserGameTeleNoExist, tempVal));
                         }
                         case nameof(ItemTemplate):
                         {
-                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(ItemLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal.Item) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(uint), handler, args);
                             if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetItemTemplate(tempVal)) != null)
                                 return result;
 
-                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserItemNoExist, tempVal));
+                            if (val is uint)
+                                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserItemNoExist, tempVal));
+
+                            return result;
                         }
                         case nameof(SpellInfo):
                         {
-                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(uint), handler, args);
-                            if (!result.IsSuccessful() || (val = Global.SpellMgr.GetSpellInfo(tempVal, Difficulty.None)) != null)
+                            SpellInfo getSpellInfo(uint spellId)
+                            {
+                                return Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+                            }
+
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(ArtifactPowerLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = getSpellInfo(tempVal.ArtifactPower.SpellID)) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(ConduitLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = getSpellInfo(tempVal.SpellID)) != null)
+                                return result;
+
+                             result = TryConsume(out tempVal, typeof(EnchantLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(MawPowerLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = getSpellInfo(tempVal.SpellID)) != null)
+                                return result;
+
+                             result = TryConsume(out tempVal, typeof(MountLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal.Spell) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(PvpTalLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = getSpellInfo(tempVal.SpellID)) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(SpellLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal.Spell) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(TalentBuildLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = getSpellInfo(tempVal.SpellID)) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(TradeskillLinkData), handler, args);
+                            if (!result.IsSuccessful() || (val = tempVal.Spell) != null)
                                 return result;
 
                             return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserSpellNoExist, tempVal));
                         }
                         case nameof(Quest):
                         {
-                            ChatCommandResult result =  TryConsume(out dynamic tempVal, typeof(uint), handler, args);
+                            ChatCommandResult result = TryConsume(out dynamic tempVal, typeof(QuestLinkData), handler, args);
+                            if (result.IsSuccessful() && (val = tempVal.Quest) != null)
+                                return result;
+
+                            result = TryConsume(out tempVal, typeof(uint), handler, args);
                             if (!result.IsSuccessful() || (val = Global.ObjectMgr.GetQuestTemplate(tempVal)) != null)
                                 return result;
-                            
-                            return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserQuestNoExist, tempVal));
+
+                            if (val is uint)
+                                return ChatCommandResult.FromErrorMessage(handler.GetParsedString(CypherStrings.CmdparserQuestNoExist, tempVal));
+
+                            return result;
                         }
                     }
                     break;
@@ -295,11 +364,16 @@ namespace Game.Chat
             return default;
         }
 
-        public static ChatCommandResult TryConsumeVariant(out dynamic val, Type[] types, CommandHandler handler, string args)
+        public static ChatCommandResult TryConsumeVariant(out dynamic val, Type type, Type[] types, CommandHandler handler, string args)
         {
-            ChatCommandResult result = TryAtIndex(out val, types, 0, handler, args);
+            val = default;
+
+            ChatCommandResult result = TryAtIndex(out dynamic tempVal, types, 0, handler, args);
             if (result.HasErrorMessage() && (result.GetErrorMessage().IndexOf('\n') != -1))
                 return ChatCommandResult.FromErrorMessage($"{handler.GetCypherString(CypherStrings.CmdparserEither)} {result.GetErrorMessage()}");
+
+            val = Activator.CreateInstance(type);
+            val.Set(tempVal);
             return result;
         }
 
@@ -314,7 +388,7 @@ namespace Game.Chat
                     return thisResult;
                 else
                 {
-                    ChatCommandResult nestedResult = TryAtIndex(out val, types, index+1, handler, args);
+                    ChatCommandResult nestedResult = TryAtIndex(out val, types, index + 1, handler, args);
                     if (nestedResult.IsSuccessful() || !thisResult.HasErrorMessage())
                         return nestedResult;
                     if (!nestedResult.HasErrorMessage())
@@ -349,7 +423,7 @@ namespace Game.Chat
 
         public string GetErrorMessage() { return errorMessage; }
 
-        public void SetErrorMessage(string _value) 
+        public void SetErrorMessage(string _value)
         {
             result = false;
             errorMessage = _value;

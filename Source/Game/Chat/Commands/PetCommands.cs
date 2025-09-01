@@ -119,7 +119,7 @@ namespace Game.Chat
         }
 
         [Command("level", RBACPermissions.CommandPetLevel)]
-        static bool HandlePetLevelCommand(CommandHandler handler, int? level)
+        static bool HandlePetLevelCommand(CommandHandler handler, OptionalArg<int> level)
         {
             Pet pet = GetSelectedPlayerPetOrOwn(handler);
             Player owner = pet != null ? pet.GetOwner() : null;

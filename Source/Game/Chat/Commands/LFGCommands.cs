@@ -74,7 +74,7 @@ namespace Game.Chat
         }
 
         [Command("options", RBACPermissions.CommandLfgOptions, true)]
-        static bool HandleLfgOptionsCommand(CommandHandler handler, uint? optionsArg)
+        static bool HandleLfgOptionsCommand(CommandHandler handler, OptionalArg<uint> optionsArg)
         {
             if (optionsArg.HasValue)
             {

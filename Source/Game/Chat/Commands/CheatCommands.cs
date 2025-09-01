@@ -11,7 +11,7 @@ namespace Game.Chat.Commands
     class CheatCommands
     {
         [Command("casttime", RBACPermissions.CommandCheatCasttime)]
-        static bool HandleCasttimeCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleCasttimeCheatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Casttime);
             if (enableArg.HasValue)
@@ -32,7 +32,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("cooldown", RBACPermissions.CommandCheatCooldown)]
-        static bool HandleCoolDownCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleCoolDownCheatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Cooldown);
             if (enableArg.HasValue)
@@ -87,7 +87,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("god", RBACPermissions.CommandCheatGod)]
-        static bool HandleGodModeCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleGodModeCheatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.God);
             if (enableArg.HasValue)
@@ -108,7 +108,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("power", RBACPermissions.CommandCheatPower)]
-        static bool HandlePowerCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandlePowerCheatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Power);
             if (enableArg.HasValue)
@@ -152,7 +152,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("taxi", RBACPermissions.CommandCheatTaxi)]
-        static bool HandleTaxiCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleTaxiCheatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             Player chr = handler.GetSelectedPlayer();
             if (chr == null)
@@ -183,7 +183,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("waterwalk", RBACPermissions.CommandCheatWaterwalk)]
-        static bool HandleWaterWalkCheatCommand(CommandHandler handler, bool? enableArg)
+        static bool HandleWaterWalkCheatCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
             bool enable = !handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Waterwalk);
             if (enableArg.HasValue)

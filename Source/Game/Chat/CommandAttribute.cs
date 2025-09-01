@@ -64,40 +64,67 @@ namespace Game.Chat
         public CommandNonGroupAttribute(string command, RBACPermissions rbac, bool allowConsole = false) : base(command, rbac, allowConsole) { }
     }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class OptionalArgAttribute : Attribute { }
-
-    public class VariantArgAttribute : Attribute
+    public struct OptionalArg<T>
     {
-        public Type[] Types { get; set; }
+        public T Value { get; set { field = value; HasValue = true; } }
+        public bool HasValue { get; private set; }
 
-        public VariantArgAttribute(params Type[] types)
+        public OptionalArg(T value)
         {
-            Types = types;
+            Value = value;
         }
+
+        public T GetValueOrDefault(T defaultValue) => HasValue ? Value : defaultValue;
+
+        public static implicit operator T(OptionalArg<T> optionalArg) => optionalArg.Value;
+        public static implicit operator OptionalArg<T>(T value) => new OptionalArg<T>(value);
     }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class VariantArg<T1> : VariantArgAttribute
+    public class VariantArg<T1>
     {
-        public VariantArg() : base(typeof(T1)) { }
+        dynamic value;
+
+        public dynamic GetValue() { return value; }
+
+        public bool Set(dynamic val)
+        {
+            return CheckAndSet<T1>(val);
+        }
+
+        public bool Is<T>() { return value is T; }
+
+        internal bool CheckAndSet<T>(dynamic val)
+        {
+            if (val is not T)
+                return false;
+
+            value = val;
+            return true;
+        }
+
+        public static implicit operator T1(VariantArg<T1> variant) => variant.GetValue();
     }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class VariantArg<T1, T2> : VariantArgAttribute
+    public class VariantArg<T1, T2> : VariantArg<T1>
     {
-        public VariantArg() : base(typeof(T1), typeof(T2)) { }
+        public new bool Set(dynamic val)
+        {
+            return CheckAndSet<T1>(val) || CheckAndSet<T2>(val);
+        }
+
+        public static implicit operator T1(VariantArg<T1, T2> variant) => variant.GetValue();
+        public static implicit operator T2(VariantArg<T1, T2> variant) => variant.Is<T2>() ? variant.GetValue() : default;
     }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class VariantArg<T1, T2, T3> : VariantArgAttribute
+    public class VariantArg<T1, T2, T3> : VariantArg<T1, T2>
     {
-        public VariantArg() : base(typeof(T1), typeof(T2), typeof(T3)) { }
-    }
+        public new bool Set(dynamic val)
+        {
+            return CheckAndSet<T1>(val) || CheckAndSet<T2>(val) || CheckAndSet<T3>(val);
+        }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class VariantArg<T1, T2, T3, T4> : VariantArgAttribute
-    {
-        public VariantArg() : base(typeof(T1), typeof(T2), typeof(T3), typeof(T4)) { }
+        public static implicit operator T1(VariantArg<T1, T2, T3> variant) => variant.GetValue();
+        public static implicit operator T2(VariantArg<T1, T2, T3> variant) => variant.GetValue();
+        public static implicit operator T3(VariantArg<T1, T2, T3> variant) => variant.GetValue();
     }
 }

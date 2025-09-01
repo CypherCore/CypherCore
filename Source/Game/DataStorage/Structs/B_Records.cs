@@ -39,6 +39,18 @@ namespace Game.DataStorage
         public byte Data;                                                     // real ID to hair/facial hair
     }
 
+    public sealed class BattlePetAbilityRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public int IconFileDataID;
+        public sbyte PetTypeEnum;
+        public uint Cooldown;
+        public ushort BattlePetVisualID;
+        public byte Flags;
+    }
+
     public sealed class BattlePetBreedQualityRecord
     {
         public uint Id;

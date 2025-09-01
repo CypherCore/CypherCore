@@ -167,16 +167,16 @@ namespace Game.Chat
         }
 
         [Command("info", RBACPermissions.CommandGuildInfo, true)]
-        static bool HandleGuildInfoCommand(CommandHandler handler, [OptionalArg][VariantArg<ulong, string>] dynamic guildIdentifier)
+        static bool HandleGuildInfoCommand(CommandHandler handler, OptionalArg<VariantArg<ulong, string>> guildIdentifier)
         {
             Guild guild = null;
 
-            if (guildIdentifier != null)
+            if (guildIdentifier.HasValue)
             {
-                if (guildIdentifier is ulong)
-                    guild = Global.GuildMgr.GetGuildById(guildIdentifier);
+                if (guildIdentifier.Value.Is<ulong>())
+                    guild = Global.GuildMgr.GetGuildById(guildIdentifier.Value);
                 else
-                    guild = Global.GuildMgr.GetGuildByName(guildIdentifier);
+                    guild = Global.GuildMgr.GetGuildByName(guildIdentifier.Value);
             }
             else
             {

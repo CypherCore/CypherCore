@@ -440,7 +440,7 @@ namespace Game.Chat
         }
 
         [Command("instancespawn", RBACPermissions.CommandDebug)]
-        static bool HandleDebugInstanceSpawns(CommandHandler handler, [VariantArg<uint, string>] object optArg)
+        static bool HandleDebugInstanceSpawns(CommandHandler handler, VariantArg<uint, string> optArg)
         {
             Player player = handler.GetPlayer();
             if (player == null)
@@ -448,10 +448,10 @@ namespace Game.Chat
 
             bool explain = false;
             uint groupID = 0;
-            if (optArg is string && (optArg as string).Equals("explain", StringComparison.OrdinalIgnoreCase))
+            if (optArg.Is<string>() && ((string)optArg).Equals("explain", StringComparison.OrdinalIgnoreCase))
                 explain = true;
             else
-                groupID = (uint)optArg;
+                groupID = optArg;
 
             if (groupID != 0 && Global.ObjectMgr.GetSpawnGroupData(groupID) == null)
             {
@@ -560,7 +560,7 @@ namespace Game.Chat
         }
 
         [Command("loadcells", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugLoadCellsCommand(CommandHandler handler, uint? mapId, uint? tileX, uint? tileY)
+        static bool HandleDebugLoadCellsCommand(CommandHandler handler, OptionalArg<uint> mapId, OptionalArg<uint> tileX, OptionalArg<uint> tileY)
         {
             if (mapId.HasValue)
             {
@@ -578,7 +578,7 @@ namespace Game.Chat
             return false;
         }
 
-        static bool HandleDebugLoadCellsCommandHelper(CommandHandler handler, Map map, uint? tileX, uint? tileY)
+        static bool HandleDebugLoadCellsCommandHelper(CommandHandler handler, Map map, OptionalArg<uint> tileX, OptionalArg<uint> tileY)
         {
             if (map == null)
                 return false;
@@ -640,7 +640,7 @@ namespace Game.Chat
         }
 
         [Command("moveflags", RBACPermissions.CommandDebug)]
-        static bool HandleDebugMoveflagsCommand(CommandHandler handler, uint? moveFlags, uint? moveFlagsExtra, uint? moveFlagsExtra2)
+        static bool HandleDebugMoveflagsCommand(CommandHandler handler, OptionalArg<uint> moveFlags, OptionalArg<uint> moveFlagsExtra, OptionalArg<uint> moveFlagsExtra2)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -653,10 +653,10 @@ namespace Game.Chat
             }
             else
             {
-                target.SetUnitMovementFlags((MovementFlag)moveFlags);
+                target.SetUnitMovementFlags((MovementFlag)moveFlags.Value);
 
                 if (moveFlagsExtra.HasValue)
-                    target.SetUnitMovementFlags2((MovementFlag2)moveFlagsExtra);
+                    target.SetUnitMovementFlags2((MovementFlag2)moveFlagsExtra.Value);
 
                 if (moveFlagsExtra2.HasValue)
                     target.SetExtraUnitMovementFlags2((MovementFlags3)moveFlagsExtra2.Value);
@@ -721,7 +721,7 @@ namespace Game.Chat
         }
 
         [Command("objectcount", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugObjectCountCommand(CommandHandler handler, uint? mapId)
+        static bool HandleDebugObjectCountCommand(CommandHandler handler, OptionalArg<uint> mapId)
         {
             void HandleDebugObjectCountMap(Map map)
             {
@@ -792,7 +792,7 @@ namespace Game.Chat
         }
 
         [Command("pvp warmode", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugWarModeBalanceCommand(CommandHandler handler, string command, int? rewardValue)
+        static bool HandleDebugWarModeBalanceCommand(CommandHandler handler, string command, OptionalArg<int> rewardValue)
         {
             // USAGE: .debug pvp fb <alliance|horde|neutral|off> [pct]
             // neutral     Sets faction balance off.
@@ -888,7 +888,7 @@ namespace Game.Chat
         }
 
         [Command("setaurastate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugSetAuraStateCommand(CommandHandler handler, AuraStateType? state, bool apply)
+        static bool HandleDebugSetAuraStateCommand(CommandHandler handler, OptionalArg<AuraStateType> state, bool apply)
         {
             Unit unit = handler.GetSelectedUnit();
             if (unit == null)
@@ -1230,7 +1230,7 @@ namespace Game.Chat
             }
 
             [Command("objectsound", RBACPermissions.CommandDebug)]
-            static bool HandleDebugPlayObjectSoundCommand(CommandHandler handler, uint soundKitId, int? broadcastTextId)
+            static bool HandleDebugPlayObjectSoundCommand(CommandHandler handler, uint soundKitId, OptionalArg<int> broadcastTextId)
             {
                 if (!CliDB.SoundKitStorage.ContainsKey(soundKitId))
                 {
@@ -1409,7 +1409,7 @@ namespace Game.Chat
             }
 
             [Command("spellfail", RBACPermissions.CommandDebug)]
-            static bool HandleDebugSendSpellFailCommand(CommandHandler handler, SpellCastResult result, int? failArg1, int? failArg2)
+            static bool HandleDebugSendSpellFailCommand(CommandHandler handler, SpellCastResult result, OptionalArg<int> failArg1, OptionalArg<int> failArg2)
             {
                 CastFailed castFailed = new();
                 castFailed.CastID = ObjectGuid.Empty;

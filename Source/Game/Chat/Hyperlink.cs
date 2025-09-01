@@ -12,15 +12,25 @@ namespace Game.Chat
         {
             value = default;
 
-            HyperlinkInfo info = ParseHyperlink(arg);
+            HyperlinkInfo info = ParseSingleHyperlink(arg);
             // invalid hyperlinks cannot be consumed
             if (info == null)
                 return default;
 
+            if (!typeof(IHyperlink).IsAssignableFrom(type))
+                return default;
+
+            IHyperlink hyperLinkValue = (IHyperlink)Activator.CreateInstance(type);
+
+            // check if we got the right tag
+            if (info.Tag != hyperLinkValue.tag())
+                return default;
+
             // store value
-            HyperlinkDataTokenizer t = new(info.Data, true);
-            if (!t.TryConsumeTo(out value, type))
+            if (!hyperLinkValue.Parse(info.Data))
                 return new ChatCommandResult(handler.GetCypherString(CypherStrings.CmdparserLinkdataInvalid));
+
+            value = hyperLinkValue;
 
             // finally, skip any potential delimiters
             var (token, next) = info.Tail.Tokenize();
@@ -61,7 +71,7 @@ namespace Game.Chat
                         continue;
                     }
 
-                    HyperlinkInfo info = ParseHyperlink(str.Substring(pos));
+                    HyperlinkInfo info = ParseSingleHyperlink(str.Substring(pos));
                     if (info == null)// todo fix me || !ValidateLinkInfo(info))
                         return false;
 
@@ -74,107 +84,126 @@ namespace Game.Chat
             return true;
         }
 
-        static byte toHex(char c) { return (byte)((c >= '0' && c <= '9') ? c - '0' + 0x10 : (c >= 'a' && c <= 'f') ? c - 'a' + 0x1a : 0x00); }
-
-        public static HyperlinkInfo ParseHyperlink(string currentString)
+        public static HyperlinkInfo ParseSingleHyperlink(string str)
         {
-            if (currentString.IsEmpty())
+            if (str.IsEmpty())
                 return null;
+
+            string color = "";
+            string tag = "";
+            string data = "";
+            string text = "";
 
             int pos = 0;
 
             //color tag
-            if (currentString[pos++] != '|' || currentString[pos++] != 'c')
+            if (str[pos++] != '|' || str[pos++] != 'c')
                 return null;
 
-            uint color = 0;
-            for (byte i = 0; i < 8; ++i)
+            if (str.Length < 8)
+                return null;
+
+            if (str[pos] == 'n')
             {
-                byte hex = toHex(currentString[pos++]);
-                if (hex != 0)
-                    color = (uint)((int)(color << 4) | (hex & 0xf));
+                // numeric color id
+                pos++;
+                int endOfColor = str.IndexOf(":", pos);
+                if (endOfColor != -1)
+                {
+                    color = str.Substring(pos, endOfColor - pos);
+                    pos = endOfColor + 1;
+                }
                 else
                     return null;
             }
-
-            // link data start tag
-            if (currentString[pos++] != '|' || currentString[pos++] != 'H')
-                return null;
-
-            // link tag, find next : or |
-            int tagStart = pos;
-            int tagLength = 0;
-            while (pos < currentString.Length && currentString[pos] != '|' && currentString[pos++] != ':') // we only advance pointer to one past if the last thing is : (not for |), this is intentional!
-                ++tagLength;
-
-            // ok, link data, skip to next |
-            int dataStart = pos;
-            int dataLength = 0;
-            while (pos < currentString.Length && currentString[pos++] != '|')
-                ++dataLength;
-
-            // ok, next should be link data end tag...
-            if (currentString[pos++] != 'h')
-                return null;
-
-            // then visible link text, starts with [
-            if (currentString[pos++] != '[')
-                return null;
-
-            // skip until we hit the next ], abort on unexpected |
-            int textStart = pos;
-            int textLength = 0;
-            while (pos < currentString.Length)
+            else
             {
-                if (currentString[pos] == '|')
-                    return null;
-
-                if (currentString[pos++] == ']')
-                    break;
-
-                ++textLength;
+                // hex color
+                color = str.Substring(pos, 8);
+                pos += 8;
             }
 
-            // link end tag
-            if (currentString[pos++] != '|' || currentString[pos++] != 'h' || currentString[pos++] != '|' || currentString[pos++] != 'r')
+            if (str[pos++] != '|' || str[pos++] != 'H')
+                return null;
+
+            // tag+data part follows
+            int delimPos = str.IndexOf('|', pos);
+            if (delimPos != -1)
+            {
+                tag = str.Substring(pos, delimPos - pos);
+                pos = (delimPos + 1);
+            }
+            else
+                return null;
+
+            // split tag if : is present (data separator)
+            int dataStart = tag.IndexOf(':');
+            if (dataStart != -1)
+            {
+                data = tag.Substring(dataStart + 1);
+                tag = tag.Substring(0, dataStart);
+            }
+
+            // ok, next should be link data end tag...
+            if (str[pos++] != 'h')
+                return null;
+
+            // extract text, must be between []
+            if (str[pos] != '[')
+                return null;
+
+            int openBrackets = 0;
+            for (int nameItr = pos; nameItr < str.Length; ++nameItr)
+            {
+                switch (str[nameItr])
+                {
+                    case '[':
+                        ++openBrackets;
+                        break;
+                    case ']':
+                        --openBrackets;
+                        break;
+                    default:
+                        break;
+                }
+
+                if (openBrackets == 0)
+                {
+                    text = str.Substring(pos + 1, (nameItr - 1) - pos);
+                    pos = nameItr + 1;
+                    break;
+                }
+            }
+
+            // check end tag
+            if (str[pos++] != '|' || str[pos++] != 'h' || str[pos++] != '|' || str[pos++] != 'r')
                 return null;
 
             // ok, valid hyperlink, return info
-            return new HyperlinkInfo(currentString.Substring(pos), color, currentString.Substring(tagStart, tagLength), currentString.Substring(dataStart, dataLength), currentString.Substring(textStart, textLength));
-        }
+            return new(str.Substring(pos), color, tag, data, text);
+        }        
     }
 
     class HyperlinkInfo
     {
-        public HyperlinkInfo(string t = null, uint c = 0, string tag = null, string data = null, string text = null)
-        {
-            Tail = t;
-            color = new(c);
-            Tag = tag;
-            Data = data;
-            Text = text;
-        }
-
         public string Tail;
         public HyperlinkColor color;
         public string Tag;
         public string Data;
         public string Text;
+
+        public HyperlinkInfo(string t, string c, string ta, string d, string te)
+        {
+            Tail = t;
+            color = new(c);
+            Tag = ta;
+            Data = d;
+            Text = te;
+        }
     }
 
-    struct HyperlinkColor
+    struct HyperlinkColor(string c)
     {
-        public byte r;
-        public byte g;
-        public byte b;
-        public byte a;
-
-        public HyperlinkColor(uint c)
-        {
-            r = (byte)(c >> 16);
-            g = (byte)(c >> 8);
-            b = (byte)c;
-            a = (byte)(c >> 24);
-        }
+        public string data = c;
     }
 }

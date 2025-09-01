@@ -47,7 +47,7 @@ namespace Game.Chat
         }
 
         [Command("evade", RBACPermissions.CommandNpcEvade)]
-        static bool HandleNpcEvadeCommand(CommandHandler handler, EvadeReason? why, string force)
+        static bool HandleNpcEvadeCommand(CommandHandler handler, OptionalArg<EvadeReason> why, string force)
         {
             Creature creatureTarget = handler.GetSelectedCreature();
             if (creatureTarget == null || creatureTarget.IsPet())
@@ -165,7 +165,7 @@ namespace Game.Chat
         }
 
         [Command("move", RBACPermissions.CommandNpcMove)]
-        static bool HandleNpcMoveCommand(CommandHandler handler, ulong? spawnId)
+        static bool HandleNpcMoveCommand(CommandHandler handler, OptionalArg<ulong> spawnId)
         {
             Creature creature = handler.GetSelectedCreature();
             Player player = handler.GetSession().GetPlayer();
@@ -214,7 +214,7 @@ namespace Game.Chat
         }
 
         [Command("near", RBACPermissions.CommandNpcNear)]
-        static bool HandleNpcNearCommand(CommandHandler handler, float? dist)
+        static bool HandleNpcNearCommand(CommandHandler handler, OptionalArg<float> dist)
         {
             float distance = dist.GetValueOrDefault(10.0f);
             uint count = 0;
@@ -699,7 +699,7 @@ namespace Game.Chat
             }
 
             [Command("item", RBACPermissions.CommandNpcAddItem)]
-            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, uint itemId, uint? mc, uint? it, uint? ec, [OptionalArg] string bonusListIds)
+            static bool HandleNpcAddVendorItemCommand(CommandHandler handler, uint itemId, OptionalArg<uint> mc, OptionalArg<uint> it, OptionalArg<uint> ec, OptionalArg<string> bonusListIds)
             {
                 if (itemId == 0)
                 {
@@ -726,7 +726,7 @@ namespace Game.Chat
                 vItem.ExtendedCost = extendedcost;
                 vItem.Type = ItemVendorType.Item;
 
-                if (!bonusListIds.IsEmpty())
+                if (bonusListIds.HasValue)
                 {
                     var bonusListIDsTok = new StringArray(bonusListIds, ';');
                     if (!bonusListIDsTok.IsEmpty())
@@ -773,7 +773,7 @@ namespace Game.Chat
             }
 
             [Command("formation", RBACPermissions.CommandNpcAddFormation)]
-            static bool HandleNpcAddFormationCommand(CommandHandler handler, ulong leaderGUID, bool? linkedAggro, bool? formationMovement)
+            static bool HandleNpcAddFormationCommand(CommandHandler handler, ulong leaderGUID, OptionalArg<bool> linkedAggro, OptionalArg<bool> formationMovement)
             {
                 Creature creature = handler.GetSelectedCreature();
                 if (creature == null || creature.GetSpawnId() == 0)
@@ -819,14 +819,14 @@ namespace Game.Chat
             }
 
             [Command("temp", RBACPermissions.CommandNpcAddTemp)]
-            static bool HandleNpcAddTempSpawnCommand(CommandHandler handler, [OptionalArg] string lootStr, uint id)
+            static bool HandleNpcAddTempSpawnCommand(CommandHandler handler, OptionalArg<string> lootStr, uint id)
             {
                 bool loot = false;
-                if (!lootStr.IsEmpty())
+                if (lootStr.HasValue)
                 {
-                    if (lootStr.Equals("loot", StringComparison.OrdinalIgnoreCase))
+                    if (lootStr.Value.Equals("loot", StringComparison.OrdinalIgnoreCase))
                         loot = true;
-                    else if (lootStr.Equals("noloot", StringComparison.OrdinalIgnoreCase))
+                    else if (lootStr.Value.Equals("noloot", StringComparison.OrdinalIgnoreCase))
                         loot = false;
                     else
                         return false;
@@ -846,7 +846,7 @@ namespace Game.Chat
         class DeleteCommands
         {
             [Command("", RBACPermissions.CommandNpcDelete)]
-            static bool HandleNpcDeleteCommand(CommandHandler handler, ulong? spawnIdArg)
+            static bool HandleNpcDeleteCommand(CommandHandler handler, OptionalArg<ulong> spawnIdArg)
             {
                 ulong spawnId;
                 if (spawnIdArg.HasValue)
@@ -1151,7 +1151,7 @@ namespace Game.Chat
             }
 
             [Command("movetype", RBACPermissions.CommandNpcSetMovetype)]
-            static bool HandleNpcSetMoveTypeCommand(CommandHandler handler, ulong? lowGuid, string type, string nodel)
+            static bool HandleNpcSetMoveTypeCommand(CommandHandler handler, OptionalArg<ulong> lowGuid, string type, string nodel)
             {
                 // 3 arguments:
                 // GUID (optional - you can also select the creature)

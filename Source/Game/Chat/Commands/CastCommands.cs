@@ -13,7 +13,7 @@ namespace Game.Chat
     class CastCommands
     {
         [Command("", RBACPermissions.CommandCast)]
-        static bool HandleCastCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastCommand(CommandHandler handler, uint spellId, OptionalArg<string> triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -34,7 +34,7 @@ namespace Game.Chat
         }
 
         [Command("back", RBACPermissions.CommandCastBack)]
-        static bool HandleCastBackCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastBackCommand(CommandHandler handler, uint spellId, OptionalArg<string> triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
             if (caster == null)
@@ -56,7 +56,7 @@ namespace Game.Chat
         }
 
         [Command("dist", RBACPermissions.CommandCastDist)]
-        static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, [OptionalArg] string triggeredStr)
+        static bool HandleCastDistCommand(CommandHandler handler, uint spellId, float dist, OptionalArg<string> triggeredStr)
         {
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
@@ -74,7 +74,7 @@ namespace Game.Chat
         }
 
         [Command("self", RBACPermissions.CommandCastSelf)]
-        static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastSelfCommand(CommandHandler handler, uint spellId, OptionalArg<string> triggeredStr)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -96,7 +96,7 @@ namespace Game.Chat
         }
 
         [Command("target", RBACPermissions.CommandCastTarget)]
-        static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, [OptionalArg] string triggeredStr)
+        static bool HandleCastTargetCommad(CommandHandler handler, uint spellId, OptionalArg<string> triggeredStr)
         {
             Creature caster = handler.GetSelectedCreature();
             if (caster == null)
@@ -124,7 +124,7 @@ namespace Game.Chat
         }
 
         [Command("dest", RBACPermissions.CommandCastDest)]
-        static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, [OptionalArg] string triggeredStr)
+        static bool HandleCastDestCommand(CommandHandler handler, uint spellId, float x, float y, float z, OptionalArg<string> triggeredStr)
         {
             Unit caster = handler.GetSelectedUnit();
             if (caster == null)

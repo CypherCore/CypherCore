@@ -94,7 +94,7 @@ namespace Game.Chat
         }
 
         [Command("faction", RBACPermissions.CommandModifyFaction)]
-        static bool HandleModifyFactionCommand(CommandHandler handler, uint? factionid, uint? flag, ulong? npcflag, uint? dyflag)
+        static bool HandleModifyFactionCommand(CommandHandler handler, OptionalArg<uint> factionid, OptionalArg<uint> flag, OptionalArg<ulong> npcflag, OptionalArg<uint> dyflag)
         {
             Creature target = handler.GetSelectedCreature();
             if (target == null)
@@ -104,13 +104,13 @@ namespace Game.Chat
             }
 
             if (!flag.HasValue)
-                flag = target.m_unitData.Flags;
+                flag = (uint)target.m_unitData.Flags;
 
             if (!npcflag.HasValue)
                 npcflag = (ulong)target.m_unitData.NpcFlags2 << 32 | target.m_unitData.NpcFlags;
 
             if (!dyflag.HasValue)
-                dyflag = target.m_objectData.DynamicFlags;
+                dyflag = (uint)target.m_objectData.DynamicFlags;
 
             if (!factionid.HasValue)
             {
@@ -127,10 +127,10 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.YouChangeFaction, target.GetGUID().ToString(), factionid.Value, flag.Value, npcflag.Value, dyflag.Value);
 
             target.SetFaction(factionid.Value);
-            target.ReplaceAllUnitFlags((UnitFlags)flag);
+            target.ReplaceAllUnitFlags((UnitFlags)flag.Value);
             target.ReplaceAllNpcFlags((NPCFlags)(npcflag & 0xFFFFFFFF));
             target.ReplaceAllNpcFlags2((NPCFlags2)(npcflag >> 32));
-            target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag);
+            target.ReplaceAllDynamicFlags((UnitDynFlags)dyflag.Value);
 
             return true;
         }
@@ -427,7 +427,7 @@ namespace Game.Chat
         }
 
         [Command("phase", RBACPermissions.CommandModifyPhase)]
-        static bool HandleModifyPhaseCommand(CommandHandler handler, uint phaseId, uint? visibleMapId)
+        static bool HandleModifyPhaseCommand(CommandHandler handler, uint phaseId, OptionalArg<uint> visibleMapId)
         {
             if (phaseId != 0 && !CliDB.PhaseStorage.ContainsKey(phaseId))
             {

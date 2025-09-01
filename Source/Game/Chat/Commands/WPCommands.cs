@@ -16,7 +16,7 @@ namespace Game.Chat.Commands
     class WPCommands
     {
         [Command("add", RBACPermissions.CommandWpAdd)]
-        static bool HandleWpAddCommand(CommandHandler handler, uint? pathId)
+        static bool HandleWpAddCommand(CommandHandler handler, OptionalArg<uint> pathId)
         {
             Creature target = handler.GetSelectedCreature();
 
@@ -91,7 +91,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("load", RBACPermissions.CommandWpLoad)]
-        static bool HandleWpLoadCommand(CommandHandler handler, uint? pathId)
+        static bool HandleWpLoadCommand(CommandHandler handler, OptionalArg<uint> pathId)
         {
             Creature target = handler.GetSelectedCreature();
             if (target == null)
@@ -224,7 +224,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("show", RBACPermissions.CommandWpShow)]
-        static bool HandleWpShowCommand(CommandHandler handler, string subCommand, uint? pathId)
+        static bool HandleWpShowCommand(CommandHandler handler, string subCommand, OptionalArg<uint> pathId)
         {
             // first arg: on, off, first, last
             if (subCommand.IsEmpty())

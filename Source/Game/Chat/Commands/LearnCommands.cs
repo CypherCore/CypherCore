@@ -15,7 +15,7 @@ namespace Game.Chat.Commands
     class LearnCommands
     {
         [Command("", CypherStrings.CommandLearnHelp, RBACPermissions.CommandLearn)]
-        static bool HandleLearnCommand(CommandHandler handler, uint spellId, [OptionalArg] string allRanksStr)
+        static bool HandleLearnCommand(CommandHandler handler, uint spellId, OptionalArg<string> allRanksStr)
         {
             Player targetPlayer = handler.GetSelectedPlayerOrSelf();
             if (targetPlayer == null)
@@ -30,7 +30,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
+            bool allRanks = allRanksStr.HasValue && allRanksStr.Value.Equals("all", StringComparison.OrdinalIgnoreCase);
 
             if (!allRanks && targetPlayer.HasSpell(spellId))
             {
@@ -314,7 +314,7 @@ namespace Game.Chat.Commands
         }
 
         [CommandNonGroup("unlearn", CypherStrings.CommandUnlearnHelp, RBACPermissions.CommandUnlearn)]
-        static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, [OptionalArg] string allRanksStr)
+        static bool HandleUnLearnCommand(CommandHandler handler, uint spellId, OptionalArg<string> allRanksStr)
         {
             Player target = handler.GetSelectedPlayer();
             if (target == null)
@@ -323,7 +323,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            bool allRanks = !allRanksStr.IsEmpty() && allRanksStr.Equals("all", StringComparison.OrdinalIgnoreCase);
+            bool allRanks = allRanksStr.HasValue && allRanksStr.Value.Equals("all", StringComparison.OrdinalIgnoreCase);
 
             if (allRanks)
                 spellId = Global.SpellMgr.GetFirstSpellInChain(spellId);
