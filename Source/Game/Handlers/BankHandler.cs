@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Chat;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
@@ -152,19 +153,17 @@ namespace Game
                 case BankType.Character:
                     itemId = 242709;
                     slot = _player.GetCharacterBankTabCount();
-                    inventorySlot = InventorySlots.BankBagStart;
+                    inventorySlot = (byte)(InventorySlots.BankBagStart + slot);
                     break;
                 case BankType.Account:
                     itemId = 208392;
                     slot = _player.GetAccountBankTabCount();
-                    inventorySlot = (byte)AccountBankBagSlots.Start;
+                    inventorySlot = (byte)(InventorySlots.AccountBankBagStart + slot);
                     break;
                 default:
                     Log.outDebug(LogFilter.Network, $"WorldSession::HandleBuyBankTab {_player.GetGUID()} - Bank type {buyBankTab.BankType} is not supported.");
                     return;
             }
-            // next slot
-            ++slot;
 
             var bankTab = CliDB.BankTabStorage.FirstOrDefault(record => record.Value.BankType == (byte)buyBankTab.BankType && record.Value.OrderIndex == slot).Value;
             if (bankTab == null)
@@ -188,10 +187,12 @@ namespace Game
             switch (buyBankTab.BankType)
             {
                 case BankType.Character:
-                    _player.SetCharacterBankTabCount(slot);
+                    _player.SetCharacterBankTabCount((byte)(slot + 1));
+                    _player.SetCharacterBankTabSettings(slot, new CommandHandler(this).GetParsedString(CypherStrings.BankTabName, slot + 1), "", "", BagSlotFlags.None);
                     break;
                 case BankType.Account:
-                    _player.SetAccountBankTabCount(slot);
+                    _player.SetAccountBankTabCount((byte)(slot + 1));
+                    _player.SetAccountBankTabSettings(slot, new CommandHandler(this).GetParsedString(CypherStrings.BankTabName, slot + 1), "", "", BagSlotFlags.None);
                     break;
                 default:
                     break;

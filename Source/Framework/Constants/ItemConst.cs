@@ -154,6 +154,9 @@ namespace Framework.Constants
         public const byte ChildEquipmentStart = 81;
         public const byte ChildEquipmentEnd = 84;
 
+        public const byte AccountBankBagStart = 100;
+        public const byte AccountBankBagEnd = 105;
+
         public const byte Bag0 = 255;
         public const byte DefaultSize = 16;
     }

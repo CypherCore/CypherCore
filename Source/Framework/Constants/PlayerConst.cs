@@ -599,12 +599,6 @@ namespace Framework.Constants
         Count = (End - Start)
     }
 
-    public enum AccountBankBagSlots
-    {
-        Start = 100,
-        End = 105
-    }
-
     public enum PlayerTitle : ulong
     {
         Disabled = 0x0000000000000000,

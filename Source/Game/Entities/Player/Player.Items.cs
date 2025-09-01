@@ -4597,9 +4597,9 @@ namespace Game.Entities
             return false;
         }
 
-        byte FindEquipSlot(Item item, uint slot, bool swap)
+        byte FindEquipSlot(Item item, byte slot, bool swap)
         {
-            byte[] slots = [ItemConst.NullSlot, ItemConst.NullSlot, ItemConst.NullSlot, ItemConst.NullSlot];
+            byte[] slots = [ItemConst.NullSlot, ItemConst.NullSlot, ItemConst.NullSlot, ItemConst.NullSlot, ItemConst.NullSlot, ItemConst.NullSlot];
             switch (item.GetTemplate().GetInventoryType())
             {
                 case InventoryType.Head:
@@ -4683,8 +4683,12 @@ namespace Game.Entities
                     slots[0] = EquipmentSlot.MainHand;
                     break;
                 case InventoryType.Bag:
-                    if (item.GetTemplate().GetClass() != ItemClass.Container || item.GetTemplate().GetSubClass() != (uint)ItemSubClassContainer.ReagentContainer)
-                        slots = [InventorySlots.BagStart + 0, InventorySlots.BagStart + 1, InventorySlots.BagStart + 2, InventorySlots.BagStart + 3];
+                    if (item.GetTemplate().GetId() == 208392)
+                        slots = [InventorySlots.AccountBankBagStart + 0, InventorySlots.AccountBankBagStart + 1, InventorySlots.AccountBankBagStart + 2, InventorySlots.AccountBankBagStart + 3, InventorySlots.AccountBankBagStart + 4, ItemConst.NullSlot];
+                    else if (item.GetTemplate().GetId() == 242709)
+                        slots = [InventorySlots.BankBagStart + 0, InventorySlots.BankBagStart + 1, InventorySlots.BankBagStart + 2, InventorySlots.BankBagStart + 3, InventorySlots.BankBagStart + 4, InventorySlots.BankBagStart + 5];
+                    else if (item.GetTemplate().GetClass() != ItemClass.Container || item.GetTemplate().GetSubClass() != (int)ItemSubClassContainer.ReagentContainer)
+                        slots = [InventorySlots.BagStart + 0, InventorySlots.BagStart + 1, InventorySlots.BagStart + 2, InventorySlots.BagStart + 3, ItemConst.NullSlot, ItemConst.NullSlot];
                     else
                         slots[0] = InventorySlots.ReagentBagStart;
                     break;
@@ -4753,43 +4757,42 @@ namespace Game.Entities
 
             if (slot != ItemConst.NullSlot)
             {
-                if (swap || GetItemByPos(InventorySlots.Bag0, (byte)slot) == null)
-                    for (byte i = 0; i < 4; ++i)
-                        if (slots[i] == slot)
-                            return (byte)slot;
+                if (swap || GetItemByPos(InventorySlots.Bag0, slot) == null)
+                    if (slots.Contains(slot))
+                        return slot;
             }
             else
             {
                 // search free slot at first
-                for (byte i = 0; i < 4; ++i)
-                    if (slots[i] != ItemConst.NullSlot && GetItemByPos(InventorySlots.Bag0, slots[i]) == null)
+                var freeSlot = slots.FirstOrDefault(candidateSlot =>
+                {
+                    if (candidateSlot != ItemConst.NullSlot && GetItemByPos(InventorySlots.Bag0, candidateSlot) == null)
                         // in case 2hand equipped weapon (without titan grip) offhand slot empty but not free
-                        if (slots[i] != EquipmentSlot.OffHand || !IsTwoHandUsed())
-                            return slots[i];
+                        if (candidateSlot != EquipmentSlot.OffHand || !IsTwoHandUsed())
+                            return true;
+                    return false;
+                });
+
+                if (freeSlot != 0)
+                    return freeSlot;
 
                 // if not found free and can swap return slot with lower item level equipped
                 if (swap)
                 {
-                    uint minItemLevel = uint.MaxValue;
-                    byte minItemLevelIndex = 0;
-                    for (byte i = 0; i < 4; ++i)
+                    freeSlot = (byte)slots.Min(candidateSlot =>
                     {
-                        if (slots[i] != ItemConst.NullSlot)
-                        {
-                            Item equipped = GetItemByPos(InventorySlots.Bag0, slots[i]);
-                            if (equipped != null)
-                            {
-                                uint itemLevel = equipped.GetItemLevel(this);
-                                if (itemLevel < minItemLevel)
-                                {
-                                    minItemLevel = itemLevel;
-                                    minItemLevelIndex = i;
-                                }
-                            }
-                        }
-                    }
+                        if (candidateSlot == ItemConst.NullSlot)
+                            return uint.MaxValue;
 
-                    return slots[minItemLevelIndex];
+                        Item equipped = GetItemByPos(InventorySlots.Bag0, candidateSlot);
+                        if (equipped != null)
+                            return equipped.GetItemLevel(this);
+
+                        return 0u;
+                    });
+
+                    if (freeSlot != 0)
+                        return freeSlot;
                 }
             }
 
@@ -5155,7 +5158,7 @@ namespace Game.Entities
         public static bool IsAccountBankPos(ushort pos) { return IsBankPos((byte)(pos >> 8), (byte)(pos & 255)); }
         public static bool IsAccountBankPos(byte bag, byte slot)
         {
-            if (bag >= (int)AccountBankBagSlots.Start && bag < (int)AccountBankBagSlots.End)
+            if (bag >= (int)InventorySlots.AccountBankBagStart && bag < InventorySlots.AccountBankBagEnd)
                 return true;
             return false;
         }
