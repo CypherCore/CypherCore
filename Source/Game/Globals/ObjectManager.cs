@@ -11408,6 +11408,14 @@ namespace Game
                 vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(result.Read<int>(1));
                 vehicleTemplate.CustomFlags = (VehicleCustomFlags)result.Read<int>(3);
 
+                if (vehicleTemplate.DespawnDelay < TimeSpan.Zero)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `vehicle_template`: Creature (Entry: {creatureId}) has negative despawnDelayMs ({vehicleTemplate.DespawnDelay}).`. Ignoring");
+                    vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(1);
+                }
+                else if (vehicleTemplate.DespawnDelay == TimeSpan.Zero)
+                    vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(1);
+
                 if (!result.IsNull(2))
                 {
                     var vehicle = CliDB.VehicleStorage.LookupByKey(creatureInfo.VehicleId);
