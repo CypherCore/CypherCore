@@ -625,7 +625,7 @@ namespace Game
                 }
             }
 
-            bucket.QualityMask |= (AuctionHouseFilterMask)(1 << ((int)quality + 4));
+            bucket.QualityMask |= (AuctionHouseFilterMask)((uint)AuctionHouseFilterMask.PoorQuality << (int)quality);
             ++bucket.QualityCounts[quality];
 
             if (trans != null)
@@ -733,7 +733,7 @@ namespace Game
                 }
 
                 if (--bucket.QualityCounts[quality] == 0)
-                    bucket.QualityMask &= (AuctionHouseFilterMask)(~(1 << ((int)quality + 4)));
+                    bucket.QualityMask &= (AuctionHouseFilterMask)((uint)AuctionHouseFilterMask.PoorQuality << (int)quality);
             }
             else
                 _buckets.Remove(bucket.Key);
@@ -934,6 +934,13 @@ namespace Game
 
                     // cannot learn caged pets whose level exceeds highest level of currently owned pet
                     if (bucketData.MinBattlePetLevel != 0 && bucketData.MinBattlePetLevel > maxKnownPetLevel)
+                        continue;
+                }
+
+                if (filters.HasFlag(AuctionHouseFilterMask.CurrentExpansionOnly))
+                {
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(bucket.Key.ItemId);
+                    if (itemTemplate.GetRequiredExpansion() != WorldConfig.GetIntValue(WorldCfg.Expansion))
                         continue;
                 }
 

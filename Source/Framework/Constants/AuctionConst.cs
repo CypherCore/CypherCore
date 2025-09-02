@@ -50,19 +50,20 @@ namespace Framework.Constants
     [Flags]
     public enum AuctionHouseFilterMask
     {
-        None = 0x0,
-        UncollectedOnly = 0x1,
-        UsableOnly = 0x2,
-        UpgradesOnly = 0x4,
-        ExactMatch = 0x8,
-        PoorQuality = 0x10,
-        CommonQuality = 0x20,
-        UncommonQuality = 0x40,
-        RareQuality = 0x80,
-        EpicQuality = 0x100,
-        LegendaryQuality = 0x200,
-        ArtifactQuality = 0x400,
-        LegendaryCraftedItemOnly = 0x800,
+        None = 0x00,
+        UncollectedOnly = 0x02,
+        UsableOnly = 0x04,
+        CurrentExpansionOnly = 0x08,
+        UpgradesOnly = 0x10,
+        ExactMatch = 0x20,
+        PoorQuality = 0x40,
+        CommonQuality = 0x80,
+        UncommonQuality = 0x100,
+        RareQuality = 0x200,
+        EpicQuality = 0x400,
+        LegendaryQuality = 0x800,
+        ArtifactQuality = 0x1000,
+        LegendaryCraftedItemOnly = 0x2000,
     }
 
     public enum AuctionHouseSortOrder
