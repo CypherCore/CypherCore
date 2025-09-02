@@ -1140,6 +1140,9 @@ namespace Game
             uint remainingQuantity = quantity;
             foreach (AuctionPosting auction in bucketData.Auctions)
             {
+                if (auction.Owner == player.GetGUID() || auction.OwnerAccount == player.GetSession().GetAccountGUID())
+                    continue;
+
                 foreach (Item auctionItem in auction.Items)
                 {
                     if (auctionItem.GetCount() >= remainingQuantity)
@@ -1199,6 +1202,9 @@ namespace Game
             for (var i = 0; i < bucketItr.Auctions.Count;)
             {
                 AuctionPosting auction = bucketItr.Auctions[i++];
+                if (auction.Owner == player.GetGUID() || auction.OwnerAccount == player.GetSession().GetAccountGUID())
+                    continue;
+
                 auctions.Add(auction);
                 foreach (Item auctionItem in auction.Items)
                 {
@@ -1239,8 +1245,7 @@ namespace Game
             ObjectGuid? uniqueSeller = new();
 
             // prepare items
-            List<MailedItemsBatch> items = new();
-            items.Add(new MailedItemsBatch());
+            List<MailedItemsBatch> items = [new MailedItemsBatch()];
 
             remainingQuantity = quantity;
             List<int> removedItemsFromAuction = new();
@@ -1248,6 +1253,9 @@ namespace Game
             for (var i = 0; i < bucketItr.Auctions.Count;)
             {
                 AuctionPosting auction = bucketItr.Auctions[i++];
+                if (auction.Owner == player.GetGUID() || auction.OwnerAccount == player.GetSession().GetAccountGUID())
+                    continue;
+
                 if (!uniqueSeller.HasValue)
                     uniqueSeller = auction.Owner;
                 else if (uniqueSeller != auction.Owner)
