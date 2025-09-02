@@ -4016,7 +4016,7 @@ namespace Game.Spells
                 Effect = (SpellEffectName)effect.Effect;
                 ApplyAuraName = (AuraType)effect.EffectAura;
                 ApplyAuraPeriod = effect.EffectAuraPeriod;
-                BasePoints = (int)effect.EffectBasePoints;
+                BasePoints = effect.EffectBasePoints;
                 RealPointsPerLevel = effect.EffectRealPointsPerLevel;
                 PointsPerResource = effect.EffectPointsPerResource;
                 Amplitude = effect.EffectAmplitude;
