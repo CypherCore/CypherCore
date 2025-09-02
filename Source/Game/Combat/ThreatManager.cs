@@ -362,17 +362,17 @@ namespace Game.Combat
         public void TauntUpdate()
         {
             var tauntEffects = _owner.GetAuraEffectsByType(AuraType.ModTaunt);
-            TauntState state = TauntState.Taunt;
-            Dictionary<ObjectGuid, TauntState> tauntStates = new();
+            uint tauntPriority = 0; // lowest is highest
+            Dictionary<ObjectGuid, uint> tauntStates = new();
 
             // Only the last taunt effect applied by something still on our threat list is considered
-            foreach (var auraEffect in tauntEffects)
-                tauntStates[auraEffect.GetCasterGUID()] = state++;
+            foreach (AuraEffect tauntEffect in tauntEffects)
+                tauntStates[tauntEffect.GetCasterGUID()] = ++tauntPriority;
 
             foreach (var pair in _myThreatListEntries)
             {
-                if (tauntStates.TryGetValue(pair.Key, out TauntState tauntState))
-                    pair.Value.UpdateTauntState(tauntState);
+                if (tauntStates.TryGetValue(pair.Key, out uint tauntState))
+                    pair.Value.UpdateTauntState((TauntState)((uint)TauntState.Taunt + tauntStates.Count - tauntState));
                 else
                     pair.Value.UpdateTauntState();
             }

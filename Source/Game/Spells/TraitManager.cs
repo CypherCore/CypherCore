@@ -748,19 +748,17 @@ namespace Game
 
             bool isNodeFullyFilled(Node node)
             {
-                if (node.Data.GetNodeType() == TraitNodeType.Selection)
-                    return node.Entries.Any(nodeEntry =>
-                    {
-                        TraitEntryPacket traitEntry = getNodeEntry(node.Data.Id, nodeEntry.Data.Id);
-                        return traitEntry != null && (traitEntry.Rank + traitEntry.GrantedRanks) == nodeEntry.Data.MaxRanks;
-                    });
-
-                return node.Entries.All(nodeEntry =>
+                bool nodeEntryMatches(NodeEntry nodeEntry)
                 {
                     TraitEntryPacket traitEntry = getNodeEntry(node.Data.Id, nodeEntry.Data.Id);
                     return traitEntry != null && (traitEntry.Rank + traitEntry.GrantedRanks) == nodeEntry.Data.MaxRanks;
-                });
-            };
+                };
+
+                if (node.Data.GetNodeType() == TraitNodeType.Selection)
+                    return node.Entries.Any(nodeEntryMatches);
+
+                return node.Entries.All(nodeEntryMatches);
+            }
 
             Dictionary<int, int> spentCurrencies = new();
             FillSpentCurrenciesMap(traitConfig.Entries, spentCurrencies);
