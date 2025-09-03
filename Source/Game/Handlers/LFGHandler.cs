@@ -205,12 +205,9 @@ namespace Game
             LfgPartyInfo lfgPartyInfo = new();
 
             // Get the Locked dungeons of the other party members
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player plrg = refe.GetSource();
-                if (plrg == null)
-                    continue;
-
+                Player plrg = groupRef.GetSource();
                 ObjectGuid pguid = plrg.GetGUID();
                 if (pguid == guid)
                     continue;

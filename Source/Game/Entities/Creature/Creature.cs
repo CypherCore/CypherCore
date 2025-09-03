@@ -1178,10 +1178,10 @@ namespace Game.Entities
 
             foreach (Group partyToForceIntoCombat in partiesToForceIntoCombat)
             {
-                for (GroupReference refe = partyToForceIntoCombat.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in partyToForceIntoCombat.GetMembers())
                 {
-                    Player player = refe.GetSource();
-                    if (player == null || !player.IsInWorld || player.GetMap() != GetMap() || player.IsGameMaster())
+                    Player player = groupRef.GetSource();
+                    if (!player.IsInWorld || player.GetMap() != GetMap() || player.IsGameMaster())
                         continue;
 
                     EngageWithTarget(player);
@@ -1334,9 +1334,9 @@ namespace Game.Entities
             {
                 Group group = player.GetGroup();
                 if (group != null)
-                    for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                        if (GetMap().IsRaid() || group.SameSubGroup(player, itr.GetSource()))
-                            m_tapList.Add(itr.GetSource().GetGUID());
+                    foreach (GroupReference groupRef in group.GetMembers())
+                        if (GetMap().IsRaid() || group.SameSubGroup(player, groupRef.GetSource()))
+                            m_tapList.Add(groupRef.GetSource().GetGUID());
             }
 
             if (m_tapList.Count >= SharedConst.CreatureTappersSoftCap)

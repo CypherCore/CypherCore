@@ -127,18 +127,16 @@ namespace Game.Chat
 
             string nameLink = handler.GetNameLink(target);
 
-            Group grp = target.GetGroup();
-            if (grp == null)
+            Group group = target.GetGroup();
+            if (group == null)
             {
                 handler.SendSysMessage(CypherStrings.NotInGroup, nameLink);
                 return false;
             }
 
-            for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player player = refe.GetSource();
-                if (player == null || player.GetSession() == null)
-                    continue;
+                Player player = groupRef.GetSource();
 
                 // check online security
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty))

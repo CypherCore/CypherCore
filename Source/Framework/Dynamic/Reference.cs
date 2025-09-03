@@ -1,11 +1,14 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Collections;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Framework.Dynamic
 {
-    public class Reference<TO, FROM> : LinkedListElement where TO : class where FROM : class
+    public class Reference<TO, FROM> where TO : class where FROM : class
     {
         TO _RefTo;
         FROM _RefFrom;
@@ -21,7 +24,8 @@ namespace Framework.Dynamic
 
         public Reference()
         {
-            _RefTo = null; _RefFrom = null;
+            _RefTo = null;
+            _RefFrom = null;
         }
 
         // Create new link
@@ -43,7 +47,6 @@ namespace Framework.Dynamic
         public void Unlink()
         {
             TargetObjectDestroyLink();
-            Delink();
             _RefTo = null;
             _RefFrom = null;
         }
@@ -53,7 +56,6 @@ namespace Framework.Dynamic
         public void Invalidate()                                   // the iRefFrom MUST remain!!
         {
             SourceObjectDestroyLink();
-            Delink();
             _RefTo = null;
         }
 
@@ -62,26 +64,60 @@ namespace Framework.Dynamic
             return _RefTo != null;
         }
 
-        public Reference<TO, FROM> Next() { return ((Reference<TO, FROM>)GetNextElement()); }
-        public Reference<TO, FROM> Prev() { return ((Reference<TO, FROM>)GetPrevElement()); }
-
         public TO GetTarget() { return _RefTo; }
 
         public FROM GetSource() { return _RefFrom; }
     }
 
-    public class RefManager<TO, FROM> : LinkedListHead where TO : class where FROM : class
+    public class RefManager<ReferenceType> : IEnumerable where ReferenceType : class, new()
     {
+        LinkedList<ReferenceType> linkedList = new LinkedList<ReferenceType>();
+
         ~RefManager() { ClearReferences(); }
 
-        public Reference<TO, FROM> GetFirst() { return (Reference<TO, FROM>)base.GetFirstElement(); }
-        public Reference<TO, FROM> GetLast() { return (Reference<TO, FROM>)base.GetLastElement(); }
+        public void InsertFirst(ReferenceType pElem)
+        {
+            linkedList.AddFirst(pElem);
+        }
+
+        public void InsertLast(ReferenceType pElem)
+        {
+            linkedList.AddLast(pElem);
+        }
+
+        public ReferenceType Find(Func<ReferenceType, bool> func)
+        {
+            return linkedList.FirstOrDefault(func);
+        }
+
+        public void Remove(Func<ReferenceType, bool> func)
+        {
+            linkedList.Remove(Find(func));
+        }
+
+        public int GetSize()
+        {
+            return linkedList.Count;
+        }
+
+        public ReferenceType GetFirst() { return linkedList.First?.Value; }
+        public ReferenceType GetLast() { return linkedList.Last?.Value; }
+
+        public IEnumerator<ReferenceType> GetEnumerator()
+        {
+            return linkedList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         public void ClearReferences()
         {
-            Reference<TO, FROM> refe;
+            ReferenceType refe;
             while ((refe = GetFirst()) != null)
-                refe.Invalidate();
+                linkedList.Remove(refe);
         }
     }
 }

@@ -2889,12 +2889,11 @@ namespace Game.AI
                             Group group = player.GetGroup();
                             if (group != null)
                             {
-                                for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                                foreach (GroupReference groupRef in group.GetMembers())
                                 {
                                     Player member = groupRef.GetSource();
-                                    if (member != null)
-                                        if (member.IsInMap(player))
-                                            targets.Add(member);
+                                    if (member.IsInMap(player))
+                                        targets.Add(member);
                                 }
                             }
                             // We still add the player to the list if there is no group. If we do

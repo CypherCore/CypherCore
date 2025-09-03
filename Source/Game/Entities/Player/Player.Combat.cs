@@ -40,12 +40,9 @@ namespace Game.Entities
             Group group = GetGroup();
             if (group != null)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in group.GetMembers())
                 {
-                    Player player = refe.GetSource();
-                    if (player == null)
-                        continue;
-
+                    Player player = groupRef.GetSource();
                     if (!player.IsAtGroupRewardDistance(pRewardSource))
                         continue;                               // member (alive or dead) or his corpse at req. distance
 

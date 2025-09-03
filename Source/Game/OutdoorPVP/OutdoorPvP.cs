@@ -61,12 +61,9 @@ namespace Game.PvP
             Group group = killer.GetGroup();
             if (group != null)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in group.GetMembers())
                 {
-                    Player groupGuy = refe.GetSource();
-
-                    if (groupGuy == null)
-                        continue;
+                    Player groupGuy = groupRef.GetSource();
 
                     // skip if too far away
                     if (!groupGuy.IsAtGroupRewardDistance(killed))

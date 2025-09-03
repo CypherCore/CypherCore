@@ -8,9 +8,7 @@ namespace Game.Groups
 {
     public class GroupInstanceReference : Reference<Group, InstanceMap>
     {
-        ~GroupInstanceReference() { Unlink(); }
-
-        public new GroupInstanceReference Next() { return (GroupInstanceReference)base.Next(); }
+        public void Dispose() { Unlink(); }
 
         public override void TargetObjectBuildLink()
         {
@@ -18,8 +16,5 @@ namespace Game.Groups
         }
     }
 
-    class GroupInstanceRefManager : RefManager<Group, InstanceMap>
-    {
-        public new GroupInstanceReference GetFirst() { return (GroupInstanceReference)base.GetFirst(); }
-    }
+    class GroupInstanceRefManager : RefManager<GroupInstanceReference> { }
 }

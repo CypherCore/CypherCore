@@ -671,7 +671,7 @@ namespace Game.Achievements
                 achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();
                 receiver.SendPacket(achievementEarned);
             };
-            
+
             achievementEarnedBuilder(_owner);
 
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
@@ -985,12 +985,11 @@ namespace Game.Achievements
                 Group group = referencePlayer.GetGroup();
                 if (group != null)
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                    foreach (GroupReference groupRef in group.GetMembers())
                     {
-                        Player groupMember = refe.GetSource();
-                        if (groupMember != null)
-                            if (groupMember.GetGuildId() == _owner.GetId())
-                                ca.CompletingPlayers.Add(groupMember.GetGUID());
+                        Player groupMember = groupRef.GetSource();
+                        if (groupMember.GetGuildId() == _owner.GetId())
+                            ca.CompletingPlayers.Add(groupMember.GetGUID());
                     }
                 }
             }

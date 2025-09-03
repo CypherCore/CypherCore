@@ -83,12 +83,11 @@ namespace Game.AI
                 Group group = player.GetGroup();
                 if (group != null)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    foreach (GroupReference groupRef in group.GetMembers())
                     {
                         Player member = groupRef.GetSource();
-                        if (member != null)
-                            if (member.IsInMap(player))
-                                member.FailQuest(_escortQuest.Id);
+                        if (member.IsInMap(player))
+                            member.FailQuest(_escortQuest.Id);
                     }
                 }
                 else
@@ -150,12 +149,11 @@ namespace Game.AI
                 Group group = player.GetGroup();
                 if (group != null)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    foreach (GroupReference groupRef in group.GetMembers())
                     {
                         Player member = groupRef.GetSource();
-                        if (member != null)
-                            if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
-                                return true;
+                        if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
+                            return true;
                     }
                 }
                 else if (me.IsWithinDistInMap(player, GetMaxPlayerDistance()))

@@ -158,7 +158,7 @@ namespace Game
             if (group == null)
                 return;
 
-            if (packet.PartyIndex != 0 && group.GetGroupCategory() != (GroupCategory)packet.PartyIndex)
+            if (packet.PartyIndex.HasValue && group.GetGroupCategory() != (GroupCategory)packet.PartyIndex)
                 return;
 
             if (packet.Accept)
@@ -702,9 +702,9 @@ namespace Game
             broadcastPingUnit.SpellOverrideNameID = pingUnit.SpellOverrideNameID;
             broadcastPingUnit.Write();
 
-            for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player member = itr.GetSource();
+                Player member = groupRef.GetSource();
                 if (_player == member || !_player.IsInMap(member))
                     continue;
 
@@ -732,9 +732,9 @@ namespace Game
             broadcastPingWorldPoint.PingDuration = pingWorldPoint.PingDuration;
             broadcastPingWorldPoint.Write();
 
-            for (GroupReference itr = group.GetFirstMember(); itr != null; itr = itr.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player member = itr.GetSource();
+                Player member = groupRef.GetSource();
                 if (_player == member || !_player.IsInMap(member))
                     continue;
 

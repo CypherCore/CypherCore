@@ -487,27 +487,24 @@ namespace Game.Groups
                 UpdateObject groupDataPacket;
 
                 // Broadcast group members' fields to player
-                for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in GetMembers())
                 {
-                    if (refe.GetSource() == player)
+                    Player existingMember = groupRef.GetSource();
+                    if (existingMember == player)
                         continue;
 
-                    Player existingMember = refe.GetSource();
-                    if (existingMember != null)
-                    {
-                        if (player.HaveAtClient(existingMember))
-                            existingMember.BuildValuesUpdateBlockForPlayerWithFlag(groupData, UpdateFieldFlag.PartyMember, player);
+                    if (player.HaveAtClient(existingMember))
+                        existingMember.BuildValuesUpdateBlockForPlayerWithFlag(groupData, UpdateFieldFlag.PartyMember, player);
 
-                        if (existingMember.HaveAtClient(player))
+                    if (existingMember.HaveAtClient(player))
+                    {
+                        UpdateData newData = new(player.GetMapId());
+                        UpdateObject newDataPacket;
+                        player.BuildValuesUpdateBlockForPlayerWithFlag(newData, UpdateFieldFlag.PartyMember, existingMember);
+                        if (newData.HasData())
                         {
-                            UpdateData newData = new(player.GetMapId());
-                            UpdateObject newDataPacket;
-                            player.BuildValuesUpdateBlockForPlayerWithFlag(newData, UpdateFieldFlag.PartyMember, existingMember);
-                            if (newData.HasData())
-                            {
-                                newData.BuildPacket(out newDataPacket);
-                                existingMember.SendPacket(newDataPacket);
-                            }
+                            newData.BuildPacket(out newDataPacket);
+                            existingMember.SendPacket(newDataPacket);
                         }
                     }
                 }
@@ -531,17 +528,14 @@ namespace Game.Groups
             Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
             if (player != null)
             {
-                for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in GetMembers())
                 {
-                    Player groupMember = refe.GetSource();
-                    if (groupMember != null)
-                    {
-                        if (groupMember.GetGUID() == guid)
-                            continue;
+                    Player groupMember = groupRef.GetSource();
+                    if (groupMember.GetGUID() == guid)
+                        continue;
 
-                        groupMember.RemoveAllGroupBuffsFromCaster(guid);
-                        player.RemoveAllGroupBuffsFromCaster(groupMember.GetGUID());
-                    }
+                    groupMember.RemoveAllGroupBuffsFromCaster(guid);
+                    player.RemoveAllGroupBuffsFromCaster(groupMember.GetGUID());
                 }
             }
 
@@ -925,37 +919,36 @@ namespace Game.Groups
             PartyMemberFullState packet = new();
             packet.Initialize(player);
 
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player member = refe.GetSource();
-                if (member != null && member != player && (!member.IsInMap(player) || !member.IsWithinDist(player, member.GetSightRange(), false)))
+                Player member = groupRef.GetSource();
+                if (member != player && (!member.IsInMap(player) || !member.IsWithinDist(player, member.GetSightRange(), false)))
                     member.SendPacket(packet);
             }
         }
 
         public void BroadcastAddonMessagePacket(ServerPacket packet, string prefix, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default)
         {
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player player = refe.GetSource();
-                if (player == null || (!ignore.IsEmpty() && player.GetGUID() == ignore) || (ignorePlayersInBGRaid && player.GetGroup() != this))
+                Player player = groupRef.GetSource();
+                if ((!ignore.IsEmpty() && player.GetGUID() == ignore) || (ignorePlayersInBGRaid && player.GetGroup() != this))
                     continue;
 
-                if ((group == -1 || refe.GetSubGroup() == group))
-                    if (player.GetSession().IsAddonRegistered(prefix))
-                        player.SendPacket(packet);
+                if (player.GetSession().IsAddonRegistered(prefix) && (group == -1 || groupRef.GetSubGroup() == group))
+                    player.SendPacket(packet);
             }
         }
 
         public void BroadcastPacket(ServerPacket packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = default)
         {
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player player = refe.GetSource();
-                if (player == null || (!ignore.IsEmpty() && player.GetGUID() == ignore) || (ignorePlayersInBGRaid && player.GetGroup() != this))
+                Player player = groupRef.GetSource();
+                if ((!ignore.IsEmpty() && player.GetGUID() == ignore) || (ignorePlayersInBGRaid && player.GetGroup() != this))
                     continue;
 
-                if (player.GetSession() != null && (group == -1 || refe.GetSubGroup() == group))
+                if (group == -1 || groupRef.GetSubGroup() == group)
                     player.SendPacket(packet);
             }
         }
@@ -1183,11 +1176,12 @@ namespace Game.Groups
                 return GroupJoinBattlegroundResult.None;                        // ERR_GROUP_JOIN_Battleground_TOO_MANY handled on client side
 
             // get a player as reference, to compare other players' stats to (arena team id, queue id based on level, etc.)
-            Player reference = GetFirstMember().GetSource();
+            var membersRefe = GetMembers().GetFirst();
             // no reference found, can't join this way
-            if (reference == null)
+            if (membersRefe == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
+            Player reference = membersRefe.GetSource();
             PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.MapIDs[0], reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
@@ -1198,9 +1192,9 @@ namespace Game.Groups
 
             // check every member of the group to be able to join
             memberscount = 0;
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next(), ++memberscount)
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player member = refe.GetSource();
+                Player member = groupRef.GetSource();
                 // offline member? don't let join
                 if (member == null)
                     return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
@@ -1243,6 +1237,8 @@ namespace Game.Groups
                     return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
                 if (isMercenary != (member.HasAura(BattlegroundConst.SpellMercenaryContractHorde) || member.HasAura(BattlegroundConst.SpellMercenaryContractAlliance)))
                     return GroupJoinBattlegroundResult.BattlegroundJoinMercenary;
+
+                memberscount++;
             }
 
             errorGuid = ObjectGuid.Empty;
@@ -1267,12 +1263,9 @@ namespace Game.Groups
                 DB.Characters.Execute(stmt);
             }
 
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player player = refe.GetSource();
-                if (player.GetSession() == null)
-                    continue;
-
+                Player player = groupRef.GetSource();
                 player.SetDungeonDifficultyID(difficulty);
                 player.SendDungeonDifficulty();
             }
@@ -1291,12 +1284,9 @@ namespace Game.Groups
                 DB.Characters.Execute(stmt);
             }
 
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player player = refe.GetSource();
-                if (player.GetSession() == null)
-                    continue;
-
+                Player player = groupRef.GetSource();
                 player.SetRaidDifficultyID(difficulty);
                 player.SendRaidDifficulty(false);
             }
@@ -1315,12 +1305,9 @@ namespace Game.Groups
                 DB.Characters.Execute(stmt);
             }
 
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in GetMembers())
             {
-                Player player = refe.GetSource();
-                if (player.GetSession() == null)
-                    continue;
-
+                Player player = groupRef.GetSource();
                 player.SetLegacyRaidDifficultyID(difficulty);
                 player.SendRaidDifficulty(true);
             }
@@ -1348,9 +1335,9 @@ namespace Game.Groups
 
         public void ResetInstances(InstanceResetMethod method, Player notifyPlayer)
         {
-            for (GroupInstanceReference refe = m_ownedInstancesMgr.GetFirst(); refe != null; refe = refe.Next())
+            foreach (GroupInstanceReference groupInstanceRef in m_ownedInstancesMgr)
             {
-                InstanceMap map = refe.GetSource();
+                InstanceMap map = groupInstanceRef.GetSource();
                 switch (map.Reset(method))
                 {
                     case InstanceResetResult.Success:
@@ -1795,19 +1782,9 @@ namespace Game.Groups
             m_memberMgr.InsertFirst(pRef);
         }
 
-        void DelinkMember(ObjectGuid guid)
+        public void DelinkMember(ObjectGuid guid)
         {
-            GroupReference refe = m_memberMgr.GetFirst();
-            while (refe != null)
-            {
-                GroupReference nextRef = refe.Next();
-                if (refe.GetSource().GetGUID() == guid)
-                {
-                    refe.Unlink();
-                    break;
-                }
-                refe = nextRef;
-            }
+            m_memberMgr.Remove(p => p.GetSource().GetGUID() == guid);
         }
 
         void _initRaidSubGroupsCounter()
@@ -1915,7 +1892,7 @@ namespace Game.Groups
 
         public uint GetDbStoreId() { return m_dbStoreId; }
         public List<MemberSlot> GetMemberSlots() { return m_memberSlots; }
-        public GroupReference GetFirstMember() { return (GroupReference)m_memberMgr.GetFirst(); }
+        public GroupRefManager GetMembers() { return m_memberMgr; }
         public uint GetMembersCount() { return (uint)m_memberSlots.Count; }
         public uint GetInviteeCount() { return (uint)m_invitees.Count; }
         public GroupFlags GetGroupFlags() { return m_groupFlags; }
@@ -1924,8 +1901,8 @@ namespace Game.Groups
 
         public void BroadcastWorker(Action<Player> worker)
         {
-            for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
-                worker(refe.GetSource());
+            foreach (GroupReference groupRef in GetMembers())
+                worker(groupRef.GetSource());
         }
 
         public ObjectGuid GetRecentInstanceOwner(uint mapId)

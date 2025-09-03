@@ -227,7 +227,7 @@ namespace Game.AI
                     Group group = player.GetGroup();
                     if (group != null)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        foreach (GroupReference groupRef in group.GetMembers())
                         {
                             Player groupGuy = groupRef.GetSource();
                             if (!groupGuy.IsInMap(player))
@@ -333,7 +333,7 @@ namespace Game.AI
                     Group group = player.GetGroup();
                     if (group != null)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        foreach (GroupReference groupRef in group.GetMembers())
                         {
                             Player groupGuy = groupRef.GetSource();
                             if (groupGuy.IsInMap(player) && me.GetDistance(groupGuy) <= checkDist)

@@ -18,14 +18,14 @@ namespace Game.Entities
 
             List<Player> nearMembers = new();
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player Target = refe.GetSource();
+                Player target = groupRef.GetSource();
 
                 // IsHostileTo check duel and controlled by enemy
-                if (Target != null && Target != this && IsWithinDistInMap(Target, radius) &&
-                    !Target.HasInvisibilityAura() && !IsHostileTo(Target))
-                    nearMembers.Add(Target);
+                if (target != this && IsWithinDistInMap(target, radius) &&
+                    !target.HasInvisibilityAura() && !IsHostileTo(target))
+                    nearMembers.Add(target);
             }
 
             if (nearMembers.Empty())
@@ -37,13 +37,13 @@ namespace Game.Entities
 
         public PartyResult CanUninviteFromGroup(ObjectGuid guidMember, byte? partyIndex)
         {
-            Group grp = GetGroup(partyIndex);
-            if (grp == null)
+            Group group = GetGroup(partyIndex);
+            if (group == null)
                 return PartyResult.NotInGroup;
 
-            if (grp.IsLFGGroup())
+            if (group.IsLFGGroup())
             {
-                ObjectGuid gguid = grp.GetGUID();
+                ObjectGuid gguid = group.GetGUID();
                 if (Global.LFGMgr.GetKicksLeft(gguid) == 0)
                     return PartyResult.PartyLfgBootLimit;
 
@@ -51,7 +51,7 @@ namespace Game.Entities
                 if (Global.LFGMgr.IsVoteKickActive(gguid))
                     return PartyResult.PartyLfgBootInProgress;
 
-                if (grp.GetMembersCount() <= SharedConst.LFGKickVotesNeeded)
+                if (group.GetMembersCount() <= SharedConst.LFGKickVotesNeeded)
                     return PartyResult.PartyLfgBootTooFewPlayers;
 
                 if (state == LfgState.FinishedDungeon)
@@ -62,8 +62,8 @@ namespace Game.Entities
                     return PartyResult.PartyLfgBootLootRolls;
 
                 // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
-                    if (refe.GetSource() != null && refe.GetSource().IsInMap(this) && refe.GetSource().IsInCombat())
+                foreach (GroupReference groupRef in group.GetMembers())
+                    if (groupRef.GetSource().IsInMap(this) && groupRef.GetSource().IsInCombat())
                         return PartyResult.PartyLfgBootInCombat;
 
                 /* Missing support for these types
@@ -73,13 +73,13 @@ namespace Game.Entities
             }
             else
             {
-                if (!grp.IsLeader(GetGUID()) && !grp.IsAssistant(GetGUID()))
+                if (!group.IsLeader(GetGUID()) && !group.IsAssistant(GetGUID()))
                     return PartyResult.NotLeader;
 
                 if (InBattleground())
                     return PartyResult.InviteRestricted;
 
-                if (grp.IsLeader(guidMember))
+                if (group.IsLeader(guidMember))
                     return PartyResult.NotLeader;
             }
 

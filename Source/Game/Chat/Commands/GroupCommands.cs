@@ -106,27 +106,24 @@ namespace Game.Chat
             if (groupTarget == null)
                 return false;
 
-            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
+            foreach (GroupReference groupRef in groupTarget.GetMembers())
             {
-                target = it.GetSource();
-                if (target != null)
+                target = groupRef.GetSource();
+                uint oldlevel = target.GetLevel();
+
+                if (level != oldlevel)
                 {
-                    uint oldlevel = target.GetLevel();
+                    target.SetLevel((uint)level);
+                    target.InitTalentForLevel();
+                    target.SetXP(0);
+                }
 
-                    if (level != oldlevel)
-                    {
-                        target.SetLevel((uint)level);
-                        target.InitTalentForLevel();
-                        target.SetXP(0);
-                    }
-
-                    if (handler.NeedReportToTarget(target))
-                    {
-                        if (oldlevel < level)
-                            target.SendSysMessage(CypherStrings.YoursLevelUp, handler.GetNameLink(), level);
-                        else                                                // if (oldlevel > newlevel)
-                            target.SendSysMessage(CypherStrings.YoursLevelDown, handler.GetNameLink(), level);
-                    }
+                if (handler.NeedReportToTarget(target))
+                {
+                    if (oldlevel < level)
+                        target.SendSysMessage(CypherStrings.YoursLevelUp, handler.GetNameLink(), level);
+                    else                                                // if (oldlevel > newlevel)
+                        target.SendSysMessage(CypherStrings.YoursLevelDown, handler.GetNameLink(), level);
                 }
             }
             return true;
@@ -248,12 +245,8 @@ namespace Game.Chat
             if (groupTarget == null)
                 return false;
 
-            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
-            {
-                Player target = it.GetSource();
-                if (target != null)
-                    target.DurabilityRepairAll(false, 0, false);
-            }
+            foreach (GroupReference groupRef in groupTarget.GetMembers())
+                groupRef.GetSource().DurabilityRepairAll(false, 0, false);
 
             return true;
         }
@@ -270,15 +263,12 @@ namespace Game.Chat
             if (groupTarget == null)
                 return false;
 
-            for (GroupReference it = groupTarget.GetFirstMember(); it != null; it = it.Next())
+            foreach (GroupReference groupRef in groupTarget.GetMembers())
             {
-                Player target = it.GetSource();
-                if (target != null)
-                {
-                    target.ResurrectPlayer(target.GetSession().HasPermission(RBACPermissions.ResurrectWithFullHps) ? 1.0f : 0.5f);
-                    target.SpawnCorpseBones();
-                    target.SaveToDB();
-                }
+                Player target = groupRef.GetSource();
+                target.ResurrectPlayer(target.GetSession().HasPermission(RBACPermissions.ResurrectWithFullHps) ? 1.0f : 0.5f);
+                target.SpawnCorpseBones();
+                target.SaveToDB();
             }
 
             return true;
@@ -326,11 +316,10 @@ namespace Game.Chat
                 }
             }
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player player = refe.GetSource();
-
-                if (player == null || player == gmPlayer || player.GetSession() == null)
+                Player player = groupRef.GetSource();
+                if (player == gmPlayer || player.GetSession() == null)
                     continue;
 
                 // check online security
@@ -364,7 +353,7 @@ namespace Game.Chat
 
                 // stop flight if need
                 if (player.IsInFlight())
-                    player.FinishTaxiFlight();                
+                    player.FinishTaxiFlight();
                 else
                     player.SaveRecallPosition(); // save only in non-flight case
 

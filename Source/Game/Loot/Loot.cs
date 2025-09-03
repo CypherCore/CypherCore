@@ -936,12 +936,11 @@ namespace Game.Loots
                 if (loot_type == LootType.Corpse)
                     roundRobinPlayer = lootOwner.GetGUID();
 
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in group.GetMembers())
                 {
-                    Player player = refe.GetSource();
-                    if (player != null)   // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
-                        if (player.IsAtGroupRewardDistance(lootOwner))
-                            FillNotNormalLootFor(player);
+                    Player player = groupRef.GetSource();// should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
+                    if (player.IsAtGroupRewardDistance(lootOwner))
+                        FillNotNormalLootFor(player);
                 }
 
                 foreach (LootItem item in items)

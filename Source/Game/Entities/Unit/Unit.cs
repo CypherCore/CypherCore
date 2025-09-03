@@ -3382,21 +3382,18 @@ namespace Game.Entities
             List<Unit> nearMembers = new();
             // reserve place for players and pets because resizing vector every unit push is unefficient (vector is reallocated then)
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player target = refe.GetSource();
-                if (target != null)
-                {
-                    // IsHostileTo check duel and controlled by enemy
-                    if (target != this && IsWithinDistInMap(target, radius) && target.IsAlive() && !IsHostileTo(target))
-                        nearMembers.Add(target);
+                Player target = groupRef.GetSource();
+                // IsHostileTo check duel and controlled by enemy
+                if (target != this && IsWithinDistInMap(target, radius) && target.IsAlive() && !IsHostileTo(target))
+                    nearMembers.Add(target);
 
-                    // Push player's pet to vector
-                    Unit pet = target.GetGuardianPet();
-                    if (pet != null)
-                        if (pet != this && IsWithinDistInMap(pet, radius) && pet.IsAlive() && !IsHostileTo(pet))
-                            nearMembers.Add(pet);
-                }
+                // Push player's pet to vector
+                Unit pet = target.GetGuardianPet();
+                if (pet != null)
+                    if (pet != this && IsWithinDistInMap(pet, radius) && pet.IsAlive() && !IsHostileTo(pet))
+                        nearMembers.Add(pet);
             }
 
             if (nearMembers.Empty())

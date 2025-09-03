@@ -3763,6 +3763,11 @@ namespace Game.Entities
 
         public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }
 
+        public override string ToString()
+        {
+            return GetName();
+        }
+
         #region Fields
         public TypeMask ObjectTypeMask { get; set; }
         protected TypeId ObjectTypeId { get; set; }

@@ -9,6 +9,7 @@ using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Garrisons;
+using Game.Groups;
 using Game.Maps;
 using Game.Miscellaneous;
 using Game.Networking;
@@ -1725,8 +1726,8 @@ namespace Game.Achievements
                     var group = referencePlayer.GetGroup();
                     if (group != null)
                     {
-                        for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            if (itr.GetSource().GetGuildId() == referencePlayer.GetGuildId())
+                        foreach (GroupReference groupRefe in group.GetMembers())
+                            if (groupRefe.GetSource().GetGuildId() == referencePlayer.GetGuildId())
                                 ++guildMemberCount;
                     }
 
@@ -2739,8 +2740,8 @@ namespace Game.Achievements
                     var group = referencePlayer.GetGroup();
                     if (group != null)
                     {
-                        for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            if (itr.GetSource() != referencePlayer && referencePlayer.m_playerData.VirtualPlayerRealm == itr.GetSource().m_playerData.VirtualPlayerRealm)
+                        foreach (GroupReference groupRef in group.GetMembers())
+                            if (groupRef.GetSource() != referencePlayer && referencePlayer.m_playerData.VirtualPlayerRealm == groupRef.GetSource().m_playerData.VirtualPlayerRealm)
                                 ++memberCount;
                     }
 
@@ -2845,8 +2846,8 @@ namespace Game.Achievements
                     if (group != null)
                     {
                         uint membersWithAchievement = 0;
-                        for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            if (itr.GetSource().HasAchieved((uint)secondaryAsset))
+                        foreach (GroupReference groupRef in group.GetMembers())
+                            if (groupRef.GetSource().HasAchieved((uint)secondaryAsset))
                                 ++membersWithAchievement;
 
                         if (membersWithAchievement > reqValue)
@@ -3283,8 +3284,8 @@ namespace Game.Achievements
                     if (group == null)
                         return false;
 
-                    for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                        if (itr.GetSource().GetSession().GetRecruiterId() == referencePlayer.GetSession().GetAccountId())
+                    foreach (GroupReference groupRef in group.GetMembers())
+                        if (groupRef.GetSource().GetSession().GetRecruiterId() == referencePlayer.GetSession().GetAccountId())
                             return true;
 
                     return false;
@@ -3295,8 +3296,8 @@ namespace Game.Achievements
                     if (group == null)
                         return false;
 
-                    for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                        if (itr.GetSource().GetSession().GetAccountId() == referencePlayer.GetSession().GetRecruiterId())
+                    foreach (GroupReference groupRef in group.GetMembers())
+                        if (groupRef.GetSource().GetSession().GetAccountId() == referencePlayer.GetSession().GetRecruiterId())
                             return true;
 
                     return false;
@@ -3430,8 +3431,8 @@ namespace Game.Achievements
                     var group = referencePlayer.GetGroup();
                     if (group != null)
                     {
-                        for (var itr = group.GetFirstMember(); itr != null; itr = itr.Next())
-                            if (!itr.GetSource().HasAchieved(reqValue))
+                        foreach (GroupReference groupRef in group.GetMembers())
+                            if (!groupRef.GetSource().HasAchieved(reqValue))
                                 return false;
                     }
                     else if (!referencePlayer.HasAchieved(reqValue))

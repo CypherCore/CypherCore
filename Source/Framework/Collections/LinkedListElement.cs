@@ -1,12 +1,28 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+
 namespace Framework.Collections
 {
     public class LinkedListElement
     {
-        internal LinkedListElement INext;
-        internal LinkedListElement IPrev;
+        internal LinkedListElement INext
+        {
+            get;
+            set
+            {
+                field = value;
+            }
+        }
+        internal LinkedListElement IPrev
+        {
+            get;
+            set
+            {
+                field = value;
+            }
+        }
 
         public LinkedListElement()
         {
@@ -52,32 +68,31 @@ namespace Framework.Collections
 
     public class LinkedListHead
     {
-        LinkedListElement _iFirst = new();
-        LinkedListElement _iLast = new();
+        LinkedListElement iHeader = new();
         uint _iSize;
 
         public LinkedListHead()
         {
             _iSize = 0;
+            
             // create empty list
-
-            _iFirst.INext = _iLast;
-            _iLast.IPrev = _iFirst;
+            iHeader.INext = new();
+            iHeader.IPrev = new();
         }
 
-        public bool IsEmpty() { return (!_iFirst.INext.IsInList()); }
+        public bool IsEmpty() { return iHeader.INext == iHeader; }
 
-        public LinkedListElement GetFirstElement() { return (IsEmpty() ? null : _iFirst.INext); }
-        public LinkedListElement GetLastElement() { return (IsEmpty() ? null : _iLast.IPrev); }
+        public LinkedListElement GetFirstElement() { return (IsEmpty() ? null : iHeader.INext); }
+        public LinkedListElement GetLastElement() { return (IsEmpty() ? null : iHeader); }
 
         public void InsertFirst(LinkedListElement pElem)
         {
-            _iFirst.InsertAfter(pElem);
+            iHeader.InsertBefore(pElem);
         }
 
         public void InsertLast(LinkedListElement pElem)
         {
-            _iLast.InsertBefore(pElem);
+            iHeader.InsertBefore(pElem);
         }
 
         public uint GetSize()

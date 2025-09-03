@@ -99,12 +99,9 @@ namespace Game
                     Group group = player.GetGroup();
 
                     List<Player> playersNear = new();
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                    foreach (GroupReference groupRef in group.GetMembers())
                     {
-                        Player member = refe.GetSource();
-                        if (member == null)
-                            continue;
-
+                        Player member = groupRef.GetSource();
                         if (!loot.HasAllowedLooter(member.GetGUID()))
                             continue;
 

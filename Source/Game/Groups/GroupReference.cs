@@ -13,14 +13,17 @@ namespace Game.Groups
             iSubGroup = 0;
         }
 
-        ~GroupReference() { Unlink(); }
+        public void Dispose() { Unlink(); }
 
         public override void TargetObjectBuildLink()
         {
             GetTarget().LinkMember(this);
         }
 
-        public new GroupReference Next() { return (GroupReference)base.Next(); }
+        public override void TargetObjectDestroyLink()
+        {
+            GetTarget()?.DelinkMember(GetSource().GetGUID());
+        }
 
         public byte GetSubGroup() { return iSubGroup; }
 
@@ -29,8 +32,5 @@ namespace Game.Groups
         byte iSubGroup;
     }
 
-    public class GroupRefManager : RefManager<Group, Player>
-    {
-        public new GroupReference GetFirst() { return (GroupReference)base.GetFirst(); }
-    }
+    public class GroupRefManager : RefManager<GroupReference> { }
 }

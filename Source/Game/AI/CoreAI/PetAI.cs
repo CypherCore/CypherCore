@@ -592,10 +592,10 @@ namespace Game.AI
             _allySet.Add(me.GetGUID());
             if (group != null) // add group
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in group.GetMembers())
                 {
-                    Player target = refe.GetSource();
-                    if (target == null || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
+                    Player target = groupRef.GetSource();
+                    if (!target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
                         continue;
 
                     if (target.GetGUID() == owner.GetGUID())

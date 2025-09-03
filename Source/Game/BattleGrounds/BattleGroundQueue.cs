@@ -82,12 +82,9 @@ namespace Game.BattleGrounds
             //add players from group to ginfo
             if (group != null)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in group.GetMembers())
                 {
-                    Player member = refe.GetSource();
-                    if (member == null)
-                        continue;   // this should never happen
-
+                    Player member = groupRef.GetSource();
                     PlayerQueueInfo pl_info = new();
                     pl_info.LastOnlineTime = lastOnlineTime;
                     pl_info.GroupInfo = ginfo;

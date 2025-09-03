@@ -126,11 +126,10 @@ namespace Game
                 var group = _player.GetGroup();
                 if (group != null)
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                    foreach (GroupReference groupRef in group.GetMembers())
                     {
-                        Player player = refe.GetSource();
-
-                        if (player == null || player == _player || !player.IsInMap(_player))     // not self and in same map
+                        Player player = groupRef.GetSource();
+                        if (player == _player || !player.IsInMap(_player))     // not self and in same map
                             continue;
 
                         if (player.CanTakeQuest(quest, true))
@@ -551,11 +550,10 @@ namespace Game
                 return;
             }
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            foreach (GroupReference groupRef in group.GetMembers())
             {
-                Player receiver = refe.GetSource();
-
-                if (receiver == null || receiver == sender)
+                Player receiver = groupRef.GetSource();
+                if (receiver == sender)
                     continue;
 
                 if (!receiver.GetPlayerSharingQuest().IsEmpty())

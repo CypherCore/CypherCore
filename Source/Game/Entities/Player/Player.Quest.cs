@@ -2442,12 +2442,11 @@ namespace Game.Entities
             var group = GetGroup();
             if (group != null)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                foreach (GroupReference groupRef in group.GetMembers())
                 {
-                    Player player = refe.GetSource();
-
+                    Player player = groupRef.GetSource();
                     // for any leave or dead (with not released body) group member at appropriate distance
-                    if (player != null && player.IsAtGroupRewardDistance(pEventObject) && player.GetCorpse() == null)
+                    if (player.IsAtGroupRewardDistance(pEventObject) && player.GetCorpse() == null)
                         player.AreaExploredOrEventHappens(questId);
                 }
             }
@@ -3481,7 +3480,7 @@ namespace Game.Entities
                 {
                     if (IsQuestRewarded(questObjective.QuestID) || IsQuestObjectiveComplete(questObjective.QuestID, questObjective.Id))
                         return SpawnTrackingState.Complete;
-                    
+
                     if (GetQuestStatus(questObjective.QuestID) != QuestStatus.None && IsQuestObjectiveCompletable(questObjective.QuestID, questObjective.Id))
                     {
                         var itr = m_QuestStatus.LookupByKey(questObjective.QuestID);

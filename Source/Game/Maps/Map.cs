@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
 using Game.BattleGrounds;
 using Game.Collision;
 using Game.DataStorage;
@@ -15,7 +14,6 @@ using Game.Scenarios;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -62,7 +60,7 @@ namespace Game.Maps
             _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             // Delete all waiting spawns
             // This doesn't delete from database.
@@ -388,7 +386,6 @@ namespace Game.Maps
                 player.SendPacket(updateWorldState);
             }
         }
-
 
         public void AddInfiniteAOIVignette(VignetteData vignette)
         {
@@ -4905,10 +4902,14 @@ namespace Game.Maps
             }
         }
 
-        ~InstanceMap()
+        public override void Dispose()
         {
             if (i_instanceLock != null)
                 i_instanceLock.SetInUse(false);
+
+            i_owningGroupRef.Dispose();
+
+            base.Dispose();
         }
 
         public override void InitVisibilityDistance()
@@ -5337,6 +5338,18 @@ namespace Game.Maps
             : base(id, expiry, InstanceId, spawnMode)
         {
             InitVisibilityDistance();
+        }
+
+        public override void Dispose()
+        {
+            if (m_bg != null)
+            {
+                //unlink to prevent crash, always unlink all pointer reference before destruction
+                m_bg.SetBgMap(null);
+                m_bg.Dispose();
+            }
+
+            base.Dispose();
         }
 
         public override void InitVisibilityDistance()

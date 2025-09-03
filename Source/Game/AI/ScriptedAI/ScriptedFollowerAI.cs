@@ -52,12 +52,11 @@ namespace Game.AI
                 Group group = player.GetGroup();
                 if (group != null)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    foreach (GroupReference groupRef in group.GetMembers())
                     {
                         Player member = groupRef.GetSource();
-                        if (member != null)
-                            if (member.IsInMap(player))
-                                member.FailQuest(_questForFollow);
+                        if (member.IsInMap(player))
+                            member.FailQuest(_questForFollow);
                     }
                 }
                 else
@@ -109,12 +108,9 @@ namespace Game.AI
                         Group group = player.GetGroup();
                         if (group != null)
                         {
-                            for (GroupReference groupRef = group.GetFirstMember(); groupRef != null && (maxRangeExceeded || questAbandoned); groupRef = groupRef.Next())
+                            foreach (GroupReference groupRef in group.GetMembers())
                             {
                                 Player member = groupRef.GetSource();
-                                if (member == null)
-                                    continue;
-
                                 if (maxRangeExceeded && me.IsWithinDistInMap(member, 100.0f))
                                     maxRangeExceeded = false;
 
@@ -253,10 +249,10 @@ namespace Game.AI
                     Group group = player.GetGroup();
                     if (group != null)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        foreach (GroupReference groupRef in group.GetMembers())
                         {
                             Player member = groupRef.GetSource();
-                            if (member != null && me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
+                            if (me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
                                 Log.outDebug(LogFilter.Scripts, $"FollowerAI::GetLeaderForFollower: GetLeader changed and returned new leader. ({me.GetGUID()})");
                                 _leaderGUID = member.GetGUID();

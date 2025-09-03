@@ -1966,12 +1966,11 @@ namespace Game.Entities
                         Group group = player.GetGroup();
                         if (group != null)
                         {
-                            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                            foreach (GroupReference groupRef in group.GetMembers())
                             {
-                                Player member = refe.GetSource();
-                                if (member != null)
-                                    if (member.IsAtGroupRewardDistance(this))
-                                        member.KillCreditGO(info.entry, GetGUID());
+                                Player member = groupRef.GetSource();
+                                if (member.IsAtGroupRewardDistance(this))
+                                    member.KillCreditGO(info.entry, GetGUID());
                             }
                         }
                         else
