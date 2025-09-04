@@ -2708,6 +2708,28 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.DestroyConversation:
+                {
+                    void work(Conversation conversation)
+                    {
+                        if (conversation.GetEntry() != e.Action.destroyConversation.id)
+                            return;
+
+                        if (conversation.IsPrivateObject())
+                        {
+                            if (e.Action.destroyConversation.isPrivate == 0 || !targets.Any(target => target.GetGUID() == conversation.GetPrivateObjectOwner()))
+                                return;
+                        }
+                        else if (e.Action.destroyConversation.isPrivate != 0)
+                            return;
+
+                        conversation.Remove();
+                    }
+
+                    ConversationWorker worker = new(PhasingHandler.GetAlwaysVisiblePhaseShift(), work);
+                    Cell.VisitGridObjects(GetBaseObject(), worker, e.Action.destroyConversation.range);
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;

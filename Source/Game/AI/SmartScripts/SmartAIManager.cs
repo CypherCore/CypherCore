@@ -821,6 +821,7 @@ namespace Game.AI
                 SmartActions.DoAction => Marshal.SizeOf(typeof(SmartAction.DoAction)),
                 SmartActions.CompleteQuest => Marshal.SizeOf(typeof(SmartAction.Quest)),
                 SmartActions.CreditQuestObjectiveTalkTo => 0,
+                SmartActions.DestroyConversation => Marshal.SizeOf(typeof(SmartAction.DestroyConversation)),
                 SmartActions.EnterVehicle => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
                 SmartActions.BoardPassenger => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
                 SmartActions.ExitVehicle => 0,
@@ -870,7 +871,7 @@ namespace Game.AI
                 }
 
                 return false;
-            };
+            }
 
             if (!actionUsesStringParam() && !e.Action.param_string.IsEmpty())
                 Log.outWarn(LogFilter.Sql, $"SmartAIMgr: {e} has unused action_param_string with value {e.Action.param_string}, it should be NULL.");
@@ -1804,7 +1805,7 @@ namespace Game.AI
                         }
 
                         return true;
-                    };
+                    }
 
                     if (e.Action.equip.slot1 != 0 && !isValidEquipmentSlot(e.Action.equip.slot1, 0))
                         return false;
@@ -2232,6 +2233,17 @@ namespace Game.AI
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses incorrect seat id (out of range 0 - {SharedConst.MaxVehicleSeats - 1}), skipped.");
                         return false;
                     }
+                    break;
+                }
+                case SmartActions.DestroyConversation:
+                {
+                    if (Global.ConversationDataStorage.GetConversationTemplate(e.Action.destroyConversation.id) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: SMART_ACTION_DESTROY_CONVERSATION {e} uses invalid entry {e.Action.destroyConversation.id}, skipped.");
+                        return false;
+                    }
+
+                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.destroyConversation.isPrivate);
                     break;
                 }
                 // No longer supported
@@ -3277,6 +3289,9 @@ namespace Game.AI
         public DoAction doAction;
 
         [FieldOffset(4)]
+        public DestroyConversation destroyConversation;
+
+        [FieldOffset(4)]
         public EnterVehicle enterVehicle;
 
         [FieldOffset(4)]
@@ -3832,6 +3847,12 @@ namespace Game.AI
         public struct DoAction
         {
             public uint actionId;
+        }
+        public struct DestroyConversation
+        {
+            public uint id;
+            public uint isPrivate;
+            public uint range;
         }
         public struct EnterVehicle
         {
