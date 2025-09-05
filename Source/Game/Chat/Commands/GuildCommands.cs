@@ -207,7 +207,7 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("info", RBACPermissions.CommandGuildInfo, true)]
+        [Command("list", RBACPermissions.CommandGuildInfo, true)]
         static bool HandleGuildListCommand(CommandHandler handler)
         {
             string titleAndSummaryColor = handler.IsConsole() ? "" : "|cff00ff00";

@@ -500,7 +500,7 @@ namespace Game
             validateStartLevel(WorldCfg.StartAlliedRaceLevel, "StartDemonHunterPlayerLevel");
             validateStartLevel(WorldCfg.MaxRecruitAFriendBonusPlayerLevel, "RecruitAFriend.MaxLevel");
 
-            if ((int)Values[WorldCfg.StartGmLevel] < (int)Values[WorldCfg.StartPlayerLevel])
+            if ((uint)Values[WorldCfg.StartGmLevel] < (uint)Values[WorldCfg.StartPlayerLevel])
             {
                 Log.outError(LogFilter.ServerLoading, $"GM.StartLevel ({Values[WorldCfg.StartGmLevel]}) must be in range StartPlayerLevel({Values[WorldCfg.StartPlayerLevel]})..{SharedConst.MaxLevel}. Set to {Values[WorldCfg.StartPlayerLevel]}.");
                 Values[WorldCfg.StartGmLevel] = Values[WorldCfg.StartPlayerLevel];
@@ -508,18 +508,13 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, $"Will clear `logs` table of entries older than {Values[WorldCfg.LogdbCleartime]} seconds every {Values[WorldCfg.LogdbClearinterval]} minutes.");
 
-            if ((int)Values[WorldCfg.MaxOverspeedPings] != 0 && (int)Values[WorldCfg.MaxOverspeedPings] < 2)
+            if ((uint)Values[WorldCfg.MaxOverspeedPings] != 0 && (uint)Values[WorldCfg.MaxOverspeedPings] < 2)
             {
                 Log.outError(LogFilter.ServerLoading, $"MaxOverspeedPings ({Values[WorldCfg.MaxOverspeedPings]}) must be in range 2..infinity (or 0 to disable check). Set to 2.");
                 Values[WorldCfg.MaxOverspeedPings] = 2;
             }
 
-            // always use declined names in the russian client
-            Cfg_CategoriesRecord category = CliDB.CfgCategoriesStorage.LookupByKey(Values[WorldCfg.RealmZone]);
-            if (category != null && category.GetCreateCharsetMask().HasFlag(CfgCategoriesCharsets.Russian))
-                Values[WorldCfg.DeclinedNamesUsed] = true;
-
-            if ((int)Values[WorldCfg.ClientCacheVersion] == 0)
+            if ((uint)Values[WorldCfg.ClientCacheVersion] == 0)
                 Values[WorldCfg.ClientCacheVersion] = databaseCacheVersion;
 
             void validateVisibilityDistance(WorldCfg config, string name)
@@ -545,17 +540,17 @@ namespace Game
             validateVisibilityDistance(WorldCfg.MaxVisibilityDistanceArena, "Visibility.Distance.Arenas");
 
             // No aggro from gray mobs
-            if ((int)Values[WorldCfg.NoGrayAggroAbove] > (int)Values[WorldCfg.MaxPlayerLevel])
+            if ((uint)Values[WorldCfg.NoGrayAggroAbove] > (uint)Values[WorldCfg.MaxPlayerLevel])
             {
                 Log.outError(LogFilter.ServerLoading, $"NoGrayAggro.Above ({Values[WorldCfg.NoGrayAggroAbove]}) must be in range 0..{Values[WorldCfg.MaxPlayerLevel]}. Set to {Values[WorldCfg.MaxPlayerLevel]}.");
                 Values[WorldCfg.NoGrayAggroAbove] = Values[WorldCfg.MaxPlayerLevel];
             }
-            if ((int)Values[WorldCfg.NoGrayAggroBelow] > (int)Values[WorldCfg.MaxPlayerLevel])
+            if ((uint)Values[WorldCfg.NoGrayAggroBelow] > (uint)Values[WorldCfg.MaxPlayerLevel])
             {
                 Log.outError(LogFilter.ServerLoading, $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) must be in range 0..{Values[WorldCfg.MaxPlayerLevel]}. Set to {Values[WorldCfg.MaxPlayerLevel]}.");
                 Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.MaxPlayerLevel];
             }
-            if ((int)Values[WorldCfg.NoGrayAggroAbove] > 0 && (int)Values[WorldCfg.NoGrayAggroAbove] < (int)Values[WorldCfg.NoGrayAggroBelow])
+            if ((uint)Values[WorldCfg.NoGrayAggroAbove] > 0 && (uint)Values[WorldCfg.NoGrayAggroAbove] < (uint)Values[WorldCfg.NoGrayAggroBelow])
             {
                 Log.outError(LogFilter.ServerLoading, $"NoGrayAggro.Below ({Values[WorldCfg.NoGrayAggroBelow]}) cannot be greater than NoGrayAggro.Above ({Values[WorldCfg.NoGrayAggroAbove]}). Set to {Values[WorldCfg.NoGrayAggroAbove]}.");
                 Values[WorldCfg.NoGrayAggroBelow] = Values[WorldCfg.NoGrayAggroAbove];

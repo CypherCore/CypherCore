@@ -212,89 +212,6 @@ namespace Game.Chat
             return true;
         }
 
-        [CommandNonGroup("damage", RBACPermissions.CommandDamage)]
-        static bool HandleDamageCommand(CommandHandler handler, uint damage, OptionalArg<SpellSchools> school, OptionalArg<SpellInfo> spellInfo)
-        {
-            Unit target = handler.GetSelectedUnit();
-            if (target == null || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
-                return false;
-            }
-            Player player = target.ToPlayer();
-            if (player != null)
-                if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
-                    return false;
-
-            if (!target.IsAlive())
-                return true;
-
-            Player attacker = handler.GetSession().GetPlayer();
-
-            // flat melee damage without resistence/etc reduction
-            if (!school.HasValue)
-            {
-                Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
-                if (target != attacker)
-                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0, 0);
-                return true;
-            }
-
-            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << (int)school.Value);
-
-            if (Unit.IsDamageReducedByArmor(schoolmask))
-                damage = Unit.CalcArmorReducedDamage(handler.GetPlayer(), target, damage, null, WeaponAttackType.BaseAttack);
-
-            // melee damage by specific school
-            if (!spellInfo.HasValue)
-            {
-                DamageInfo dmgInfo = new(attacker, target, damage, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
-                Unit.CalcAbsorbResist(dmgInfo);
-
-                if (dmgInfo.GetDamage() == 0)
-                    return true;
-
-                damage = dmgInfo.GetDamage();
-
-                uint absorb = dmgInfo.GetAbsorb();
-                uint resist = dmgInfo.GetResist();
-                Unit.DealDamageMods(attacker, target, ref damage, ref absorb);
-                Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, schoolmask, null, false);
-                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage, absorb, resist, VictimState.Hit, 0, 0);
-                return true;
-            }
-
-            // non-melee damage
-
-            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.Value.GetSpellXSpellVisualId(attacker), 0), spellInfo.Value.SchoolMask);
-            damageInfo.damage = damage;
-            Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
-            target.DealSpellDamage(damageInfo, true);
-            target.SendSpellNonMeleeDamageLog(damageInfo);
-            return true;
-        }
-
-        [CommandNonGroup("damage go", RBACPermissions.CommandDamage)]
-        static bool HandleDamageGoCommand(CommandHandler handler, VariantArg<GameobjectLinkData, ulong> spawnId, int damage)
-        {
-            GameObject go = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
-            if (go == null)
-            {
-                handler.SendSysMessage(CypherStrings.CommandObjnotfound, spawnId);
-                return false;
-            }
-
-            if (!go.IsDestructibleBuilding())
-            {
-                handler.SendSysMessage(CypherStrings.InvalidGameobjectType);
-                return false;
-            }
-
-            go.ModifyHealth(-damage, handler.GetSession().GetPlayer());
-            handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), spawnId, -damage, go.GetGoValue().Building.Health);
-            return true;
-        }
-
         [CommandNonGroup("dev", RBACPermissions.CommandDev)]
         static bool HandleDevCommand(CommandHandler handler, OptionalArg<bool> enableArg)
         {
@@ -2163,7 +2080,7 @@ namespace Game.Chat
 
         }
 
-        [Command("", RBACPermissions.CommandAdditem, true)]
+        [Command("", RBACPermissions.CommandAdditem)]
         static bool HandleAddItemCommand(CommandHandler handler, VariantArg<ItemLinkData, uint, string> item, OptionalArg<int> countArg, OptionalArg<string> bonusListIdString, OptionalArg<byte> itemContextArg)
         {
             Player player = handler.GetSession().GetPlayer();
@@ -2263,6 +2180,93 @@ namespace Game.Chat
             }
 
             return HandleAddItemCommandHelper(handler, player, target.GetConnectedPlayer(), item, countArg, bonusListIdString, itemContextArg);
+        }
+    }
+
+    [CommandGroup("damage")]
+    class MiscDamageCommands
+    {
+        [Command("", RBACPermissions.CommandDamage)]
+        static bool HandleDamageCommand(CommandHandler handler, uint damage, OptionalArg<SpellSchools> school, OptionalArg<SpellInfo> spellInfo)
+        {
+            Unit target = handler.GetSelectedUnit();
+            if (target == null || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                return false;
+            }
+            Player player = target.ToPlayer();
+            if (player != null)
+                if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
+                    return false;
+
+            if (!target.IsAlive())
+                return true;
+
+            Player attacker = handler.GetSession().GetPlayer();
+
+            // flat melee damage without resistence/etc reduction
+            if (!school.HasValue)
+            {
+                Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
+                if (target != attacker)
+                    attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage, 0, 0, VictimState.Hit, 0, 0);
+                return true;
+            }
+
+            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << (int)school.Value);
+
+            if (Unit.IsDamageReducedByArmor(schoolmask))
+                damage = Unit.CalcArmorReducedDamage(handler.GetPlayer(), target, damage, null, WeaponAttackType.BaseAttack);
+
+            // melee damage by specific school
+            if (!spellInfo.HasValue)
+            {
+                DamageInfo dmgInfo = new(attacker, target, damage, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                Unit.CalcAbsorbResist(dmgInfo);
+
+                if (dmgInfo.GetDamage() == 0)
+                    return true;
+
+                damage = dmgInfo.GetDamage();
+
+                uint absorb = dmgInfo.GetAbsorb();
+                uint resist = dmgInfo.GetResist();
+                Unit.DealDamageMods(attacker, target, ref damage, ref absorb);
+                Unit.DealDamage(attacker, target, damage, null, DamageEffectType.Direct, schoolmask, null, false);
+                attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage, absorb, resist, VictimState.Hit, 0, 0);
+                return true;
+            }
+
+            // non-melee damage
+
+            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.Value.GetSpellXSpellVisualId(attacker), 0), spellInfo.Value.SchoolMask);
+            damageInfo.damage = damage;
+            Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+            target.DealSpellDamage(damageInfo, true);
+            target.SendSpellNonMeleeDamageLog(damageInfo);
+            return true;
+        }
+
+        [Command("go", RBACPermissions.CommandDamage)]
+        static bool HandleDamageGoCommand(CommandHandler handler, VariantArg<GameobjectLinkData, ulong> spawnId, int damage)
+        {
+            GameObject go = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
+            if (go == null)
+            {
+                handler.SendSysMessage(CypherStrings.CommandObjnotfound, spawnId);
+                return false;
+            }
+
+            if (!go.IsDestructibleBuilding())
+            {
+                handler.SendSysMessage(CypherStrings.InvalidGameobjectType);
+                return false;
+            }
+
+            go.ModifyHealth(-damage, handler.GetSession().GetPlayer());
+            handler.SendSysMessage(CypherStrings.GameobjectDamaged, go.GetName(), spawnId, -damage, go.GetGoValue().Building.Health);
+            return true;
         }
     }
 }
