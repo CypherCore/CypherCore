@@ -474,7 +474,7 @@ namespace Game
 
             // Config values are in "milliseconds" but we handle SocketTimeOut only as "seconds" so divide by 1000
             Values[WorldCfg.SocketTimeoutTime] = (uint)Values[WorldCfg.SocketTimeoutTime] / 1000;
-            Values[WorldCfg.SocketTimeoutTimeActive] = (uint)Values[WorldCfg.SocketTimeoutTime] / 1000;
+            Values[WorldCfg.SocketTimeoutTimeActive] = (uint)Values[WorldCfg.SocketTimeoutTimeActive] / 1000;
 
             // must be after CONFIG_CHARACTERS_PER_REALM
             if ((uint)Values[WorldCfg.CharactersPerAccount] < (uint)Values[WorldCfg.CharactersPerRealm])
