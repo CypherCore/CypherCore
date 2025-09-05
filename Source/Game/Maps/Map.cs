@@ -90,8 +90,8 @@ namespace Game.Maps
         public virtual void InitVisibilityDistance()
         {
             //init visibility for continents
-            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceOnContinents();
-            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodOnContinents();
+            m_VisibleDistance = WorldConfig.GetFloatValue(WorldCfg.MaxVisibilityDistanceContinent);
+            m_VisibilityNotifyPeriod = WorldConfig.GetIntValue(WorldCfg.VisibilityNotifyPeriodContinent);
         }
 
         public void AddToGrid<T>(T obj, Cell cell) where T : WorldObject
@@ -4915,8 +4915,8 @@ namespace Game.Maps
         public override void InitVisibilityDistance()
         {
             //init visibility distance for instances
-            m_VisibleDistance = Global.WorldMgr.GetMaxVisibleDistanceInInstances();
-            m_VisibilityNotifyPeriod = Global.WorldMgr.GetVisibilityNotifyPeriodInInstances();
+            m_VisibleDistance = WorldConfig.GetFloatValue(WorldCfg.MaxVisibilityDistanceInstance);
+            m_VisibilityNotifyPeriod = WorldConfig.GetIntValue(WorldCfg.VisibilityNotifyPeriodInstance);
         }
 
         public override TransferAbortParams CannotEnter(Player player)
@@ -5354,8 +5354,8 @@ namespace Game.Maps
 
         public override void InitVisibilityDistance()
         {
-            m_VisibleDistance = IsBattleArena() ? Global.WorldMgr.GetMaxVisibleDistanceInArenas() : Global.WorldMgr.GetMaxVisibleDistanceInBG();
-            m_VisibilityNotifyPeriod = IsBattleArena() ? Global.WorldMgr.GetVisibilityNotifyPeriodInArenas() : Global.WorldMgr.GetVisibilityNotifyPeriodInBG();
+            m_VisibleDistance = WorldConfig.GetFloatValue(IsBattleArena() ? WorldCfg.MaxVisibilityDistanceArena : WorldCfg.MaxVisibilityDistanceBattleground);
+            m_VisibilityNotifyPeriod = WorldConfig.GetIntValue(IsBattleArena() ? WorldCfg.VisibilityNotifyPeriodArena : WorldCfg.VisibilityNotifyPeriodBattleground);
         }
 
         string GetScriptName()

@@ -104,6 +104,10 @@ namespace Game
             return m_motd;
         }
 
+        public void SetNewCharString(string str) { m_newCharString = str; }
+
+        public string GetNewCharString() { return m_newCharString; }
+
         public void TriggerGuidWarning()
         {
             // Lock this only to prevent multiple maps triggering at the same time
@@ -938,9 +942,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Persistend World Variables...");              // must be loaded before Battleground, outdoor PvP and conditions
             LoadPersistentWorldVariables();
 
-            Global.WorldStateMgr.SetValue(WorldStates.CurrentPvpSeasonId, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) : 0, false, null);
-            Global.WorldStateMgr.SetValue(WorldStates.PreviousPvpSeasonId, WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0), false, null);
-
             Global.ObjectMgr.LoadPhases();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Conditions...");
@@ -1204,68 +1205,19 @@ namespace Game
 
                 m_timers[WorldTimers.AutoBroadcast].SetInterval(WorldConfig.GetIntValue(WorldCfg.AutoBroadcastInterval));
                 m_timers[WorldTimers.AutoBroadcast].Reset();
+
+                Global.WorldStateMgr.SetValue(WorldStates.CurrentPvpSeasonId, WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) : 0, false, null);
+                Global.WorldStateMgr.SetValue(WorldStates.PreviousPvpSeasonId, WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0), false, null);
+
+                // call ScriptMgr if we're reloading the configuration
+                Global.ScriptMgr.OnConfigLoad(reload);
             }
+
+            // Get string for new logins (newly created characters)
+            SetNewCharString(ConfigMgr.GetDefaultValue("PlayerStart.String", ""));
 
             for (byte i = 0; i < (int)UnitMoveType.Max; ++i)
                 SharedConst.playerBaseMoveSpeed[i] = SharedConst.baseMoveSpeed[i] * WorldConfig.GetFloatValue(WorldCfg.RateMovespeed);
-
-            var rateCreatureAggro = WorldConfig.GetFloatValue(WorldCfg.RateCreatureAggro);
-            //visibility on continents
-            m_MaxVisibleDistanceOnContinents = ConfigMgr.GetDefaultValue("Visibility.Distance.Continents", SharedConst.DefaultVisibilityDistance);
-            if (m_MaxVisibleDistanceOnContinents < 45 * rateCreatureAggro)
-            {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Continents can't be less max aggro radius {0}", 45 * rateCreatureAggro);
-                m_MaxVisibleDistanceOnContinents = 45 * rateCreatureAggro;
-            }
-            else if (m_MaxVisibleDistanceOnContinents > SharedConst.MaxVisibilityDistance)
-            {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Continents can't be greater {0}", SharedConst.MaxVisibilityDistance);
-                m_MaxVisibleDistanceOnContinents = SharedConst.MaxVisibilityDistance;
-            }
-
-            //visibility in instances
-            m_MaxVisibleDistanceInInstances = ConfigMgr.GetDefaultValue("Visibility.Distance.Instances", SharedConst.DefaultVisibilityInstance);
-            if (m_MaxVisibleDistanceInInstances < 45 * rateCreatureAggro)
-            {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Instances can't be less max aggro radius {0}", 45 * rateCreatureAggro);
-                m_MaxVisibleDistanceInInstances = 45 * rateCreatureAggro;
-            }
-            else if (m_MaxVisibleDistanceInInstances > SharedConst.MaxVisibilityDistance)
-            {
-                Log.outError(LogFilter.ServerLoading, "Visibility.Distance.Instances can't be greater {0}", SharedConst.MaxVisibilityDistance);
-                m_MaxVisibleDistanceInInstances = SharedConst.MaxVisibilityDistance;
-            }
-
-            //visibility in BG
-            m_MaxVisibleDistanceInBG = ConfigMgr.GetDefaultValue("Visibility.Distance.BG", SharedConst.DefaultVisibilityBGAreans);
-            if (m_MaxVisibleDistanceInBG < 45 * rateCreatureAggro)
-            {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.BG can't be less max aggro radius {45 * rateCreatureAggro}");
-                m_MaxVisibleDistanceInBG = 45 * rateCreatureAggro;
-            }
-            else if (m_MaxVisibleDistanceInBG > SharedConst.MaxVisibilityDistance)
-            {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.BG can't be greater {SharedConst.MaxVisibilityDistance}");
-                m_MaxVisibleDistanceInBG = SharedConst.MaxVisibilityDistance;
-            }
-
-            // Visibility in Arenas
-            m_MaxVisibleDistanceInArenas = ConfigMgr.GetDefaultValue("Visibility.Distance.Arenas", SharedConst.DefaultVisibilityBGAreans);
-            if (m_MaxVisibleDistanceInArenas < 45 * rateCreatureAggro)
-            {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.Arenas can't be less max aggro radius {45 * rateCreatureAggro}");
-                m_MaxVisibleDistanceInArenas = 45 * rateCreatureAggro;
-            }
-            else if (m_MaxVisibleDistanceInArenas > SharedConst.MaxVisibilityDistance)
-            {
-                Log.outError(LogFilter.ServerLoading, $"Visibility.Distance.Arenas can't be greater {SharedConst.MaxVisibilityDistance}");
-                m_MaxVisibleDistanceInArenas = SharedConst.MaxVisibilityDistance;
-            }
-
-            m_visibility_notify_periodOnContinents = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.OnContinents", SharedConst.DefaultVisibilityNotifyPeriod);
-            m_visibility_notify_periodInInstances = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InInstances", SharedConst.DefaultVisibilityNotifyPeriod);
-            m_visibility_notify_periodInBG = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InBG", SharedConst.DefaultVisibilityNotifyPeriod);
-            m_visibility_notify_periodInArenas = ConfigMgr.GetDefaultValue("Visibility.Notify.Period.InArenas", SharedConst.DefaultVisibilityNotifyPeriod);
 
             _guidWarningMsg = WorldConfig.GetDefaultValue("Respawn.WarningMessage", "There will be an unscheduled server restart at 03:00. The server will be available again shortly after.");
             _alertRestartReason = WorldConfig.GetDefaultValue("Respawn.AlertRestartReason", "Urgent Maintenance");
@@ -2535,16 +2487,6 @@ namespace Game
             return Global.RealmMgr.GetCurrentRealmId().GetAddress();
         }
 
-        public float GetMaxVisibleDistanceOnContinents() { return m_MaxVisibleDistanceOnContinents; }
-        public float GetMaxVisibleDistanceInInstances() { return m_MaxVisibleDistanceInInstances; }
-        public float GetMaxVisibleDistanceInBG() { return m_MaxVisibleDistanceInBG; }
-        public float GetMaxVisibleDistanceInArenas() { return m_MaxVisibleDistanceInArenas; }
-
-        public int GetVisibilityNotifyPeriodOnContinents() { return m_visibility_notify_periodOnContinents; }
-        public int GetVisibilityNotifyPeriodInInstances() { return m_visibility_notify_periodInInstances; }
-        public int GetVisibilityNotifyPeriodInBG() { return m_visibility_notify_periodInBG; }
-        public int GetVisibilityNotifyPeriodInArenas() { return m_visibility_notify_periodInArenas; }
-
         public Locale GetAvailableDbcLocale(Locale locale)
         {
             if (m_availableDbcLocaleMask[(int)locale])
@@ -2576,16 +2518,6 @@ namespace Game
 
         CleaningFlags m_CleaningFlags;
 
-        float m_MaxVisibleDistanceOnContinents = SharedConst.DefaultVisibilityDistance;
-        float m_MaxVisibleDistanceInInstances = SharedConst.DefaultVisibilityInstance;
-        float m_MaxVisibleDistanceInBG = SharedConst.DefaultVisibilityBGAreans;
-        float m_MaxVisibleDistanceInArenas = SharedConst.DefaultVisibilityBGAreans;
-
-        int m_visibility_notify_periodOnContinents = SharedConst.DefaultVisibilityNotifyPeriod;
-        int m_visibility_notify_periodInInstances = SharedConst.DefaultVisibilityNotifyPeriod;
-        int m_visibility_notify_periodInBG = SharedConst.DefaultVisibilityNotifyPeriod;
-        int m_visibility_notify_periodInArenas = SharedConst.DefaultVisibilityNotifyPeriod;
-
         bool m_isClosed;
 
         Dictionary<WorldTimers, IntervalTimer> m_timers = new();
@@ -2607,6 +2539,7 @@ namespace Game
         Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales
         BitSet m_availableDbcLocaleMask;                       // by loaded DBC
         List<string> m_motd = new();
+        string m_newCharString;
 
         // scheduled reset times
         long m_NextDailyQuestReset;

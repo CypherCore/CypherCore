@@ -131,6 +131,7 @@ namespace Framework.Constants
         /// <summary>
         /// Misc Const
         /// </summary>
+        public const int MaxCharactersPerRealm = 200;
         public const Locale DefaultLocale = Locale.enUS;
         public const int MaxAccountTutorialValues = 8;
         public const int MinAuctionTime = (12 * Time.Hour);
@@ -1584,6 +1585,8 @@ namespace Framework.Constants
         ChatChannelLevelReq,
         ChatEmoteLevelReq,
         ChatFakeMessagePreventing,
+        ChatFloodAddonMessageCount,
+        ChatFloodAddonMessageDelay,
         ChatFloodMessageCount,
         ChatFloodMessageDelay,
         ChatFloodMuteTime,
@@ -1621,6 +1624,7 @@ namespace Framework.Constants
         CurrencyResetHour,
         CurrencyResetInterval,
         DailyQuestResetTimeHour,
+        DbPingInterval,
         DbcEnforceItemAttributes,
         DeathBonesBgOrArena,
         DeathBonesWorld,
@@ -1693,6 +1697,10 @@ namespace Framework.Constants
         MaxRecruitAFriendBonusPlayerLevelDifference,
         MaxRecruitAFriendDistance,
         MaxResultsLookupCommands,
+        MaxVisibilityDistanceContinent,
+        MaxVisibilityDistanceInstance,
+        MaxVisibilityDistanceBattleground,
+        MaxVisibilityDistanceArena,
         MaxWho,
         MinCharterName,
         MinCreatureScaledXpRatio,
@@ -1885,6 +1893,10 @@ namespace Framework.Constants
         TolbaradRestartAfterCrash,
         TradeLevelReq,
         UptimeUpdate,
+        VisibilityNotifyPeriodContinent,
+        VisibilityNotifyPeriodInstance,
+        VisibilityNotifyPeriodBattleground,
+        VisibilityNotifyPeriodArena,
         VmapIndoorCheck,
         WardenClientResponseDelay,
         WardenClientCheckHoldoff,

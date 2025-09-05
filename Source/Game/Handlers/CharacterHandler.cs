@@ -109,7 +109,7 @@ namespace Game
 
                     charResult.MaxCharacterLevel = Math.Max(charResult.MaxCharacterLevel, charInfo.ExperienceLevel);
                 }
-                while (result.NextRow() && charResult.Characters.Count < 200);
+                while (result.NextRow() && charResult.Characters.Count < SharedConst.MaxCharactersPerRealm);
             }
 
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
@@ -893,6 +893,10 @@ namespace Game
                             break;
                     }
                 }
+
+                // send new char string if not empty
+                if (!Global.WorldMgr.GetNewCharString().IsEmpty())
+                    pCurrChar.SendSysMessage(Global.WorldMgr.GetNewCharString());
             }
 
             if (!pCurrChar.GetMap().AddPlayerToMap(pCurrChar))

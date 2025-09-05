@@ -1284,7 +1284,7 @@ namespace Game
         WorldSession Session;
         Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
 
-        enum Policy
+        public enum Policy
         {
             Log,
             Kick,
