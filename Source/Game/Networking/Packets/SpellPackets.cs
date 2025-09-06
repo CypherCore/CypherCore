@@ -1931,7 +1931,7 @@ namespace Game.Networking.Packets
             for (var i = 0; i < optionalCurrenciesCount; ++i)
                 OptionalCurrencies[i].Read(data);
 
-            SendCastFlags = data.ReadBits<uint>(5);
+            SendCastFlags = data.ReadBits<uint>(6);
             bool hasMoveUpdate = data.HasBit();
             var weightCount = data.ReadBits<uint>(2);
             bool hasCraftingOrderID = data.HasBit();
