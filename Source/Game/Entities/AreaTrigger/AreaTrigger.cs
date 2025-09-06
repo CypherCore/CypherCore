@@ -832,55 +832,70 @@ namespace Game.Entities
 
             // Handle after _insideUnits have been reinserted so we can use GetInsideUnits() in hooks
             foreach (Unit unit in enteringUnits)
-            {
-                Player player = unit.ToPlayer();
-                if (player != null)
-                {
-                    if (player.IsDebugAreaTriggers)
-                        player.SendSysMessage(CypherStrings.DebugAreatriggerEntityEntered, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
-
-                    player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, (int)GetEntry(), 1);
-
-                    if (GetTemplate().ActionSetId != 0)
-                        player.UpdateCriteria(CriteriaType.EnterAreaTriggerWithActionSet, GetTemplate().ActionSetId);
-                }
-
-                DoActions(unit);
-
-                _ai.OnUnitEnter(unit);
-            }
+                HandleUnitEnter(unit);
 
             foreach (ObjectGuid exitUnitGuid in exitUnits)
             {
                 Unit leavingUnit = Global.ObjAccessor.GetUnit(this, exitUnitGuid);
                 if (leavingUnit != null)
-                {
-                    Player player = leavingUnit.ToPlayer();
-                    if (player != null)
-                    {
-                        if (player.IsDebugAreaTriggers)
-                            player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
-
-                        player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
-
-                        if (GetTemplate().ActionSetId != 0)
-                            player.UpdateCriteria(CriteriaType.LeaveAreaTriggerWithActionSet, GetTemplate().ActionSetId);
-                    }
-
-                    UndoActions(leavingUnit);
-
-                    _ai.OnUnitExit(leavingUnit);
-                }
+                    HandleUnitExitInternal(leavingUnit);
             }
 
-            if (_insideUnits.Any(guid => guid.IsPlayer()))
-                SetAreaTriggerFlag(AreaTriggerFieldFlags.HasPlayers);
-            else
-                RemoveAreaTriggerFlag(AreaTriggerFieldFlags.HasPlayers);
+            UpdateHasPlayersFlag();
 
             if (IsStaticSpawn())
                 SetActive(!_insideUnits.Empty());
         }
+
+        void HandleUnitEnter(Unit unit)
+        {
+            Player player = unit.ToPlayer();
+            if (player != null)
+            {
+                if (player.IsDebugAreaTriggers)
+                    player.SendSysMessage(CypherStrings.DebugAreatriggerEntityEntered, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
+
+                player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, (int)GetEntry(), 1);
+
+                if (GetTemplate().ActionSetId != 0)
+                    player.UpdateCriteria(CriteriaType.EnterAreaTriggerWithActionSet, GetTemplate().ActionSetId);
+            }
+
+            DoActions(unit);
+
+            _ai.OnUnitEnter(unit);
+            unit.EnterAreaTrigger(this);
+        }
+
+        void HandleUnitExitInternal(Unit unit)
+        {
+            Player player = unit.ToPlayer();
+            if (player != null)
+            {
+                if (player.IsDebugAreaTriggers)
+                    player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
+
+                player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
+
+                if (GetTemplate().ActionSetId != 0)
+                    player.UpdateCriteria(CriteriaType.LeaveAreaTriggerWithActionSet, GetTemplate().ActionSetId);
+            }
+
+            UndoActions(unit);
+
+            _ai.OnUnitExit(unit);
+            unit.ExitAreaTrigger(this);
+        }
+
+        public void HandleUnitExit(Unit unit)
+        {
+            _insideUnits.Remove(unit.GetGUID());
+
+            HandleUnitExitInternal(unit);
+
+            UpdateHasPlayersFlag();
+        }
+
 
         public AreaTriggerTemplate GetTemplate()
         {
@@ -1500,6 +1515,14 @@ namespace Game.Entities
         public bool IsServerSide() { return _areaTriggerTemplate.Flags.HasFlag(AreaTriggerFlag.IsServerSide); }
         public bool IsStaticSpawn() { return _spawnId != 0; }
         public bool HasActionSetFlag(AreaTriggerActionSetFlag flag) { return _areaTriggerTemplate.ActionSetFlags.HasFlag(flag); }
+
+        void UpdateHasPlayersFlag()
+        {
+            if (_insideUnits.Any(guid => guid.IsPlayer()))
+                SetAreaTriggerFlag(AreaTriggerFieldFlags.HasPlayers);
+            else
+                RemoveAreaTriggerFlag(AreaTriggerFieldFlags.HasPlayers);
+        }
 
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()

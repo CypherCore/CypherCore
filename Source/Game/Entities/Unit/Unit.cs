@@ -877,6 +877,24 @@ namespace Game.Entities
             }
         }
 
+        public void EnterAreaTrigger(AreaTrigger areaTrigger)
+        {
+            m_insideAreaTriggers.Add(areaTrigger);
+        }
+
+        public void ExitAreaTrigger(AreaTrigger areaTrigger)
+        {
+            m_insideAreaTriggers.Remove(areaTrigger);
+        }
+
+        public void ExitAllAreaTriggers()
+        {
+            foreach (AreaTrigger at in m_insideAreaTriggers.ToList())
+                at.HandleUnitExit(this);
+        }
+
+        public List<AreaTrigger> GetInsideAreaTriggers() { return m_insideAreaTriggers; }
+
         public NPCFlags GetNpcFlags() { return (NPCFlags)m_unitData.NpcFlags.GetValue(); }
         public bool HasNpcFlag(NPCFlags flags) { return (m_unitData.NpcFlags & (uint)flags) != 0; }
         public void SetNpcFlag(NPCFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.NpcFlags), (uint)flags); }

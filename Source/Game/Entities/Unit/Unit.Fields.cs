@@ -101,6 +101,7 @@ namespace Game.Entities
         DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
         protected List<GameObject> m_gameObj = new();
         List<AreaTrigger> m_areaTrigger = new();
+        List<AreaTrigger> m_insideAreaTriggers = new();
         protected List<DynamicObject> m_dynObj = new();
         protected float[] CreateStats = new float[(int)Stats.Max];
         float[] m_floatStatPosBuff = new float[(int)Stats.Max];

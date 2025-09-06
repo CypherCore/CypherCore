@@ -163,6 +163,9 @@ namespace Game
 
                 _player.FailQuestsWithFlag(QuestFlags.FailOnLogout);
 
+                // exit areatriggers before saving to remove auras applied by them
+                _player.ExitAllAreaTriggers();
+
                 // empty buyback items and save the player in the database
                 // some save parts only correctly work in case player present in map/player_lists (pets, etc)
                 if (save)
