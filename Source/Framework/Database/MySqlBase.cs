@@ -279,8 +279,8 @@ namespace Framework.Database
 
             // Since MySQL 9.4 command line client commands are disabled by default
             // We need to enable them to use `SOURCE` command
-            if (version.Build >= 9 && version.Major >= 4)
-                args += "--commands=ON";
+            if (version.Major >= 9 && version.Minor >= 4)
+                args += "--commands=ON ";
 
             // Execute sql file
             args += "-e ";
