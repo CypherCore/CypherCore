@@ -1179,6 +1179,15 @@ namespace Game
         {
             switch (cond.ConditionType)
             {
+                case ConditionTypes.None:
+                {
+                    if (cond.ScriptId == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} must have a `ScriptName` in `condition` table, ignoring.");
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionTypes.Aura:
                 {
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cond.ConditionValue1, Difficulty.None);
