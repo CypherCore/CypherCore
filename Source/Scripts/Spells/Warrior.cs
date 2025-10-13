@@ -18,6 +18,8 @@ namespace Scripts.Spells.Warrior
         public const uint Bladestorm = 227847;
         public const uint BladestormPeriodicWhirlwind = 50622;
         public const uint BloodthirstHeal = 117313;
+        public const uint BoundingStrideAura = 202163;
+        public const uint BoundingStride = 202164;
         public const uint Charge = 34846;
         public const uint ChargeDropFirePeriodic = 126661;
         public const uint ChargeEffect = 198337;
@@ -40,6 +42,7 @@ namespace Scripts.Spells.Warrior
         public const uint GlyphOfHeroicLeapBuff = 133278;
         public const uint GushingWound = 385042;
         public const uint HeroicLeapJump = 178368;
+        public const uint HeroicLeapDamage = 52174;
         public const uint IgnorePain = 190456;
         public const uint ImprovedRagingBlow = 383854;
         public const uint ImprovedWhirlwind = 12950;
@@ -799,7 +802,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.HeroicLeapJump);
+            return ValidateSpellInfo(SpellIds.HeroicLeapDamage, SpellIds.Taunt);
         }
 
         SpellCastResult CheckElevation()
@@ -820,7 +823,8 @@ namespace Scripts.Spells.Warrior
                     bool result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
                     if (generatedPath.GetPathType().HasAnyFlag(PathType.Short))
                         return SpellCastResult.OutOfRange;
-                    else if (!result || generatedPath.GetPathType().HasAnyFlag(PathType.NoPath))
+
+                    if (!result || generatedPath.GetPathType().HasAnyFlag(PathType.NoPath))
                         return SpellCastResult.NoPath;
                 }
                 else if (dest.GetPositionZ() > GetCaster().GetPositionZ() + 4.0f)
@@ -832,39 +836,45 @@ namespace Scripts.Spells.Warrior
             return SpellCastResult.NoValidTargets;
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleCast()
         {
-            WorldLocation dest = GetHitDest();
-            if (dest != null)
-                GetCaster().CastSpell(dest, SpellIds.HeroicLeapJump, true);
+            Player playerCaster = GetCaster().ToPlayer();
+            if (playerCaster != null && playerCaster.GetPrimarySpecialization() == ChrSpecialization.WarriorProtection)
+                playerCaster.GetSpellHistory().ResetCooldown(SpellIds.Taunt);
         }
 
         public override void Register()
         {
+            OnCast.Add(new(HandleCast));
             OnCheckCast.Add(new(CheckElevation));
-            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+
         }
     }
 
-    [Script] // Heroic Leap (triggered by Heroic Leap (6544)) - 178368
-    class spell_warr_heroic_leap_jump : SpellScript
+    [Script] // 52174 - Heroic Leap (Damage)
+    class spell_warr_heroic_leap_damage : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GlyphOfHeroicLeap, SpellIds.GlyphOfHeroicLeapBuff, SpellIds.ImprovedHeroicLeap, SpellIds.Taunt);
+            return ValidateSpellInfo(SpellIds.BoundingStrideAura, SpellIds.BoundingStride);
         }
 
-        void AfterJump(uint effIndex)
+        public override bool Load()
         {
-            if (GetCaster().HasAura(SpellIds.GlyphOfHeroicLeap))
-                GetCaster().CastSpell(GetCaster(), SpellIds.GlyphOfHeroicLeapBuff, true);
-            if (GetCaster().HasAura(SpellIds.ImprovedHeroicLeap))
-                GetCaster().GetSpellHistory().ResetCooldown(SpellIds.Taunt, true);
+            return GetCaster().HasAura(SpellIds.BoundingStrideAura);
+        }
+
+        void HandleCast()
+        {
+            GetCaster().CastSpell(GetCaster(), SpellIds.BoundingStride, new CastSpellExtraArgs()
+            {
+                TriggeringSpell = GetSpell()
+            });
         }
 
         public override void Register()
         {
-            OnEffectHit.Add(new(AfterJump, 1, SpellEffectName.JumpDest));
+            OnCast.Add(new(HandleCast));
         }
     }
 
