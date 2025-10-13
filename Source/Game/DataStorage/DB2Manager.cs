@@ -1842,7 +1842,7 @@ namespace Game.DataStorage
             {
                 return playerClass switch
                 {
-                    Class.Deathknight => numTalentsAtLevel.NumTalentsDeathKnight,
+                    Class.DeathKnight => numTalentsAtLevel.NumTalentsDeathKnight,
                     Class.DemonHunter => numTalentsAtLevel.NumTalentsDemonHunter,
                     _ => numTalentsAtLevel.NumTalents,
                 };
@@ -1897,7 +1897,7 @@ namespace Game.DataStorage
             {
                 switch (class_)
                 {
-                    case Class.Deathknight:
+                    case Class.DeathKnight:
                         return _pvpTalentSlotUnlock[slot].DeathKnightLevelRequired;
                     case Class.DemonHunter:
                         return _pvpTalentSlotUnlock[slot].DemonHunterLevelRequired;

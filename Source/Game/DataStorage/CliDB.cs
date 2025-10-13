@@ -845,7 +845,7 @@ namespace Game.DataStorage
                     return row.Rogue;
                 case Class.Priest:
                     return row.Priest;
-                case Class.Deathknight:
+                case Class.DeathKnight:
                     return row.DeathKnight;
                 case Class.Shaman:
                     return row.Shaman;
@@ -884,7 +884,7 @@ namespace Game.DataStorage
                     return row.Rogue;
                 case (int)Class.Priest:
                     return row.Priest;
-                case (int)Class.Deathknight:
+                case (int)Class.DeathKnight:
                     return row.DeathKnight;
                 case (int)Class.Shaman:
                     return row.Shaman;

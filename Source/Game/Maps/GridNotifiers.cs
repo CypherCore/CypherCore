@@ -687,6 +687,7 @@ namespace Game.Maps
         WorldObjectSearcherContinuation ShouldContinue();
         void Insert(T obj);
         T GetResult();
+        bool HasResult();
     }
 
     class SearcherFirstObjectResult<T>() : IResultInserter<T>
@@ -701,6 +702,11 @@ namespace Game.Maps
         public void Insert(T obj)
         {
             result = obj;
+        }
+
+        public bool HasResult()
+        {
+            return result != null;
         }
 
         public T GetResult()
@@ -723,6 +729,11 @@ namespace Game.Maps
             result = obj;
         }
 
+        public bool HasResult()
+        {
+            return result != null;
+        }
+
         public T GetResult()
         {
             return result;
@@ -741,6 +752,11 @@ namespace Game.Maps
         public void Insert(T obj)
         {
             container.Add(obj);
+        }
+
+        public bool HasResult()
+        {
+            return !container.Empty();
         }
 
         public T GetResult()
@@ -874,6 +890,11 @@ namespace Game.Maps
                         return;
                 }
             }
+        }
+
+        public bool HasResult()
+        {
+            return resultInserter.HasResult();
         }
 
         public T GetResult()

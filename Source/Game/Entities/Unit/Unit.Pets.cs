@@ -528,14 +528,17 @@ namespace Game.Entities
             }
         }
 
-        public void GetAllMinionsByEntry(List<TempSummon> Minions, uint entry)
+        public List<TempSummon> GetAllMinionsByEntry(uint entry)
         {
+            List<TempSummon> minions = new();
             for (var i = 0; i < m_Controlled.Count; ++i)
             {
                 Unit unit = m_Controlled[i];
                 if (unit.GetEntry() == entry && unit.IsSummon()) // minion, actually
-                    Minions.Add(unit.ToTempSummon());
+                    minions.Add(unit.ToTempSummon());
             }
+
+            return minions;
         }
 
         public void RemoveAllMinionsByEntry(uint entry)

@@ -1,66 +1,233 @@
 // Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
-// Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
+// Licensed under the Gnu General Public License. See License file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Entities;
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using static Global;
 
 namespace Scripts.Spells.Warrior
 {
     struct SpellIds
     {
+        public const uint Avatar = 107574;
+        public const uint Bladestorm = 227847;
         public const uint BladestormPeriodicWhirlwind = 50622;
         public const uint BloodthirstHeal = 117313;
         public const uint Charge = 34846;
-        public const uint ChargeEffect = 218104;
-        public const uint ChargeEffectBlazingTrail = 198337;
-        public const uint ChargePauseRageDecay = 109128;
+        public const uint ChargeDropFirePeriodic = 126661;
+        public const uint ChargeEffect = 198337;
         public const uint ChargeRootEffect = 105771;
-        public const uint ChargeSlowEffect = 236027;
+        public const uint ColdSteelHotBloodTalent = 383959;
         public const uint ColossusSmash = 167105;
         public const uint ColossusSmashAura = 208086;
         public const uint CriticalThinkingEnergize = 392776;
+        public const uint DeftExperience = 383295;
         public const uint Execute = 20647;
+        public const uint Enrage = 184362;
+        public const uint FrenziedEnrage = 383848;
+        public const uint FrenzyTalent = 335077;
+        public const uint FrenzyBuff = 335082;
+        public const uint FreshMeatDebuff = 316044;
+        public const uint FreshMeatTalent = 215568;
         public const uint FueledByViolenceHeal = 383104;
         public const uint GlyphOfTheBlazingTrail = 123779;
         public const uint GlyphOfHeroicLeap = 159708;
         public const uint GlyphOfHeroicLeapBuff = 133278;
+        public const uint GushingWound = 385042;
         public const uint HeroicLeapJump = 178368;
         public const uint IgnorePain = 190456;
+        public const uint ImprovedRagingBlow = 383854;
+        public const uint ImprovedWhirlwind = 12950;
+        public const uint IntimidatingShoutMenaceAoe = 316595;
+        public const uint InvigoratingFury = 385174;
+        public const uint InvigoratingFuryTalent = 383468;
         public const uint InForTheKill = 248621;
         public const uint InForTheKillHaste = 248622;
         public const uint ImpendingVictory = 202168;
         public const uint ImpendingVictoryHeal = 202166;
         public const uint ImprovedHeroicLeap = 157449;
         public const uint MortalStrike = 12294;
-        public const uint MortalWounds = 213667;
+        public const uint MortalWounds = 115804;
+        public const uint PowerfulEnrage = 440277;
         public const uint RallyingCry = 97463;
+        public const uint Ravager = 228920;
+        public const uint Recklessness = 1719;
+        public const uint RumblingEarth = 275339;
         public const uint ShieldBlockAura = 132404;
         public const uint ShieldChargeEffect = 385953;
         public const uint ShieldSlam = 23922;
         public const uint ShieldSlamMarker = 224324;
+        public const uint ShieldWall = 871;
         public const uint Shockwave = 46968;
         public const uint ShockwaveStun = 132168;
+        public const uint SlaughteringStrikes = 388004;
+        public const uint SlaughteringStrikesBuff = 393931;
         public const uint Stoicism = 70845;
         public const uint StormBoltStun = 132169;
+        public const uint StormBolts = 436162;
         public const uint Strategist = 384041;
+        public const uint SuddenDeath = 280721;
+        public const uint SuddenDeathBuff = 280776;
         public const uint SweepingStrikesExtraAttack1 = 12723;
         public const uint SweepingStrikesExtraAttack2 = 26654;
         public const uint Taunt = 355;
+        public const uint TitanicRage = 394329;
         public const uint TraumaEffect = 215537;
+        public const uint ViciousContempt = 383885;
         public const uint Victorious = 32216;
         public const uint VictoryRushHeal = 118779;
+        public const uint Warbreaker = 262161;
+        public const uint WhirlwindCleaveAura = 85739;
+        public const uint WhirlwindEnergize = 280715;
+        public const uint WrathAndFury = 392936;
 
         public const uint VisualBlazingCharge = 26423;
     }
 
-    [Script] // 23881 - Bloodthirst
+    struct WarriorMisc
+    {
+        public static void ApplyWhirlwindCleaveAura(Player caster, Difficulty difficulty, Spell triggeringSpell)
+        {
+            SpellInfo whirlwindCleaveAuraInfo = Global.SpellMgr.GetSpellInfo(SpellIds.WhirlwindCleaveAura, difficulty);
+            int stackAmount = (int)(whirlwindCleaveAuraInfo.StackAmount);
+            caster.ApplySpellMod(whirlwindCleaveAuraInfo, SpellModOp.MaxAuraStacks, ref stackAmount);
+
+            caster.CastSpell(null, SpellIds.WhirlwindCleaveAura, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = triggeringSpell,
+                SpellValueOverrides = { new(SpellValueMod.AuraStack, stackAmount) }
+            });
+        }
+    }
+
+    [Script] // 152278 - Anger Management
+    class spell_warr_anger_management_proc : AuraScript
+    {
+        static TimeSpan CooldownReduction = TimeSpan.FromSeconds(1);
+        static uint[] ArmsSpellIds = [SpellIds.ColossusSmash, SpellIds.Warbreaker, SpellIds.Bladestorm, SpellIds.Ravager];
+        static uint[] FurySpellIds = [SpellIds.Recklessness, SpellIds.Bladestorm, SpellIds.Ravager];
+        static uint[] ProtectionSpellIds = [SpellIds.Avatar, SpellIds.ShieldWall];
+
+        static bool ValidateProc(AuraEffect aurEff, ProcEventInfo eventInfo, ChrSpecialization spec)
+        {
+            if (aurEff.GetAmount() == 0)
+                return false;
+
+            Player player = eventInfo.GetActor().ToPlayer();
+            if (player == null)
+                return false;
+
+            Spell procSpell = eventInfo.GetProcSpell();
+            if (procSpell == null)
+                return false;
+
+            if (procSpell.GetPowerTypeCostAmount(PowerType.Rage) <= 0)
+                return false;
+
+            return player.GetPrimarySpecialization() == spec;
+        }
+
+        static bool CheckArmsProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            if (!ValidateProc(aurEff, eventInfo, ChrSpecialization.WarriorArms))
+                return false;
+
+            // exclude non-attacks such as Ignore Pain
+            if (!eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Warrior, new FlagArray128(0x100, 0x0, 0x0, 0x0)))
+                return false;
+
+            return true;
+        }
+
+        static bool CheckFuryProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return ValidateProc(aurEff, eventInfo, ChrSpecialization.WarriorFury);
+        }
+
+        static bool CheckProtectionProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return ValidateProc(aurEff, eventInfo, ChrSpecialization.WarriorProtection);
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ColossusSmash, SpellIds.Bladestorm, SpellIds.Ravager, SpellIds.Warbreaker, SpellIds.Recklessness, SpellIds.Avatar, SpellIds.ShieldWall);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo, uint[] spellIds)
+        {
+            int rageCost = (int)eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Rage) / 10; // db values are 10x the actual rage cost
+            float multiplier = (float)(rageCost) / (float)(aurEff.GetAmount());
+            TimeSpan cooldownMod = -(multiplier * CooldownReduction);
+
+            foreach (uint spellId in spellIds)
+                GetTarget().GetSpellHistory().ModifyCooldown(spellId, cooldownMod);
+        }
+
+        void OnProcArms(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            HandleProc(aurEff, eventInfo, ArmsSpellIds);
+        }
+
+        void OnProcFury(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            HandleProc(aurEff, eventInfo, FurySpellIds);
+        }
+
+        void OnProcProtection(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            HandleProc(aurEff, eventInfo, ProtectionSpellIds);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckArmsProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new(CheckProtectionProc, 1, AuraType.Dummy));
+            DoCheckEffectProc.Add(new(CheckFuryProc, 2, AuraType.Dummy));
+
+            OnEffectProc.Add(new(OnProcArms, 0, AuraType.Dummy));
+            OnEffectProc.Add(new(OnProcProtection, 1, AuraType.Dummy));
+            OnEffectProc.Add(new(OnProcFury, 2, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 392536 - Ashen Juggernaut
+    class spell_warr_ashen_juggernaut : AuraScript
+    {
+        static bool CheckProc(ProcEventInfo eventInfo)
+        {
+            // should only proc on primary target
+            return eventInfo.GetActionTarget() == eventInfo.GetProcSpell().m_targets.GetUnitTarget();
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new(CheckProc));
+        }
+    }
+
+    [Script] // 107574 - Avatar
+    class spell_warr_avatar : SpellScript
+    {
+        void HandleRemoveImpairingAuras(uint effIndex)
+        {
+            GetCaster().RemoveMovementImpairingAuras(true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleRemoveImpairingAuras, 5, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // 23881 - Bloodthirst
+    [Script] // 335096 - Bloodbath
     class spell_warr_bloodthirst : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -68,14 +235,21 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.BloodthirstHeal);
         }
 
-        void HandleDummy(uint effIndex)
+        void CastHeal(uint effIndex)
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, true);
+            if (GetHitUnit() != GetExplTargetUnit())
+                return;
+
+            GetCaster().CastSpell(GetCaster(), SpellIds.BloodthirstHeal, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            });
         }
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleDummy, 3, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(CastHeal, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -118,16 +292,16 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ChargeEffect, SpellIds.ChargeEffectBlazingTrail);
+            return ValidateSpellInfo(SpellIds.ChargeEffect);
         }
 
         void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.ChargeEffect;
-            if (GetCaster().HasAura(SpellIds.GlyphOfTheBlazingTrail))
-                spellId = SpellIds.ChargeEffectBlazingTrail;
-
-            GetCaster().CastSpell(GetHitUnit(), spellId, true);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.ChargeEffect, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            });
         }
 
         public override void Register()
@@ -142,44 +316,89 @@ namespace Scripts.Spells.Warrior
         void DropFireVisual(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            if (GetTarget().IsSplineEnabled())
+
+            Unit target = GetTarget();
+            if (target.IsSplineEnabled())
             {
-                for (int i = 0; i < 5; ++i)
+                var from = target.MoveSpline.ComputePosition();
+                var to = target.MoveSpline.ComputePosition(aurEff.GetPeriod());
+
+                int fireCount = (int)Math.Round((to - from).Length());
+
+                for (int i = 0; i < fireCount; ++i)
                 {
-                    int timeOffset = (int)(6 * i * aurEff.GetPeriod() / 25);
-                    Vector4 loc = GetTarget().MoveSpline.ComputePosition(timeOffset);
-                    GetTarget().SendPlaySpellVisual(new Position(loc.X, loc.Y, loc.Z), SpellIds.VisualBlazingCharge, 0, 0, 1.0f, true);
+                    int timeOffset = i * aurEff.GetPeriod() / fireCount;
+                    var loc = target.MoveSpline.ComputePosition(timeOffset);
+                    target.SendPlaySpellVisual(new Position(loc.X, loc.Y, loc.Z), SpellIds.VisualBlazingCharge, 0, 0, 1.0f, true);
                 }
             }
         }
 
         public override void Register()
         {
-            OnEffectPeriodic.Add(new(DropFireVisual, 0, AuraType.PeriodicTriggerSpell));
+            OnEffectPeriodic.Add(new(DropFireVisual, 0, AuraType.PeriodicDummy));
         }
     }
 
-    // 198337 - Charge Effect (dropping Blazing Trail)
-    [Script] // 218104 - Charge Effect
+    [Script] // 198337 - Charge Effect
     class spell_warr_charge_effect : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ChargePauseRageDecay, SpellIds.ChargeRootEffect, SpellIds.ChargeSlowEffect);
+            return ValidateSpellInfo(SpellIds.ChargeRootEffect, SpellIds.ChargeDropFirePeriodic);
         }
 
         void HandleCharge(uint effIndex)
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            caster.CastSpell(caster, SpellIds.ChargePauseRageDecay, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
-            caster.CastSpell(target, SpellIds.ChargeRootEffect, true);
-            caster.CastSpell(target, SpellIds.ChargeSlowEffect, true);
+
+            CastSpellExtraArgs args = new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.FullMask & ~TriggerCastFlags.CastDirectly,
+                TriggeringSpell = GetSpell()
+            };
+
+            if (caster.HasAura(SpellIds.GlyphOfTheBlazingTrail))
+                caster.CastSpell(target, SpellIds.ChargeDropFirePeriodic, args);
+
+            caster.CastSpell(target, SpellIds.ChargeRootEffect, args);
         }
 
         public override void Register()
         {
             OnEffectLaunchTarget.Add(new(HandleCharge, 0, SpellEffectName.Charge));
+        }
+    }
+
+    // 23881 - Bloodthirst
+    [Script] // 335096 - Bloodbath
+    class spell_warr_cold_steel_hot_blood_bloodthirst : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GushingWound, SpellIds.ColdSteelHotBloodTalent);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.ColdSteelHotBloodTalent);
+        }
+
+        void CastGushingWound(uint effIndex)
+        {
+            if (!IsHitCrit())
+                return;
+
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.GushingWound, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError
+            });
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(CastGushingWound, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -192,7 +411,7 @@ namespace Scripts.Spells.Warrior
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.ColossusSmashAura, SpellIds.InForTheKill, SpellIds.InForTheKillHaste)
-            && ValidateSpellEffect((SpellIds.InForTheKill, 2));
+                && ValidateSpellEffect((SpellIds.InForTheKill, 2));
         }
 
         void HandleHit()
@@ -204,7 +423,7 @@ namespace Scripts.Spells.Warrior
 
             if (caster.HasAura(SpellIds.InForTheKill))
             {
-                SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
+                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
                 if (spellInfo != null)
                 {
                     if (target.HealthBelowPct(spellInfo.GetEffect(2).CalcValue(caster)))
@@ -216,7 +435,7 @@ namespace Scripts.Spells.Warrior
         void HandleAfterCast()
         {
             Unit caster = GetCaster();
-            SpellInfo spellInfo = SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
             if (spellInfo == null)
                 return;
 
@@ -244,7 +463,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            int? rageCost = eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Rage);
+            var rageCost = eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Rage);
             if (rageCost.HasValue)
                 GetTarget().CastSpell(null, SpellIds.CriticalThinkingEnergize, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                     .AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(rageCost.Value, aurEff.GetAmount())));
@@ -256,6 +475,41 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    // 383295 - Deft Experience (attached to 23881 - Bloodthirst)
+    [Script] // 383295 - Deft Experience (attached to 335096 - Bloodbath)
+    class spell_warr_deft_experience : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.DeftExperience, 1));
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.DeftExperience);
+        }
+
+        void HandleDeftExperience(uint effIndex)
+        {
+            if (GetHitUnit() != GetExplTargetUnit())
+                return;
+
+            Unit caster = GetCaster();
+            Aura enrageAura = caster.GetAura(SpellIds.Enrage);
+            if (enrageAura != null)
+            {
+                AuraEffect aurEff = caster.GetAuraEffect(SpellIds.DeftExperience, 1);
+                if (aurEff != null)
+                    enrageAura.SetDuration(enrageAura.GetDuration() + aurEff.GetAmount());
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleDeftExperience, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
     [Script] // 236279 - Devastator
     class spell_warr_devastator : AuraScript
     {
@@ -264,7 +518,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellEffect((spellInfo.Id, 1)) && ValidateSpellInfo(SpellIds.ShieldSlam, SpellIds.ShieldSlamMarker);
         }
 
-        void OnProcSpell(AuraEffect aurEff, ProcEventInfo eventInfo)
+        void OnProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             if (GetTarget().GetSpellHistory().HasCooldown(SpellIds.ShieldSlam))
             {
@@ -278,14 +532,235 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectProc.Add(new(OnProcSpell, 0, AuraType.ProcTriggerSpell));
+            OnEffectProc.Add(new(OnProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 184361 - Enrage
+    class spell_warr_enrage_proc : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FreshMeatTalent, SpellIds.FreshMeatDebuff);
+        }
+
+        static bool CheckRampageProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo == null || !spellInfo.IsAffected(SpellFamilyNames.Warrior, new FlagArray128(0x0, 0x0, 0x0, 0x8000000)))  // Rampage
+                return false;
+
+            return true;
+        }
+
+        static bool IsBloodthirst(SpellInfo spellInfo)
+        {
+            // Bloodthirst/Bloodbath
+            return spellInfo.IsAffected(SpellFamilyNames.Warrior, new FlagArray128(0x0, 0x400));
+        }
+
+        static bool CheckBloodthirstProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo == null || !IsBloodthirst(spellInfo))
+                return false;
+
+            // Fresh Meat talent handling
+            Unit actor = eventInfo.GetActor();
+            if (actor != null)
+            {
+                if (actor.HasAura(SpellIds.FreshMeatTalent))
+                {
+                    Spell procSpell = eventInfo.GetProcSpell();
+                    if (procSpell == null)
+                        return false;
+
+                    Unit target = procSpell.m_targets.GetUnitTarget();
+                    if (target == null)
+                        return false;
+
+                    if (!target.HasAura(SpellIds.FreshMeatDebuff, actor.GetGUID()))
+                        return true;
+                }
+            }
+
+            return RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            Unit auraTarget = GetTarget();
+
+            auraTarget.CastSpell(null, SpellIds.Enrage, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = eventInfo.GetProcSpell()
+            });
+
+            // Fresh Meat talent handling
+            if (auraTarget.HasAura(SpellIds.FreshMeatTalent))
+            {
+                Spell procSpell = eventInfo.GetProcSpell();
+                if (procSpell == null)
+                    return;
+
+                if (!IsBloodthirst(procSpell.GetSpellInfo()))
+                    return;
+
+                Unit bloodthirstTarget = procSpell.m_targets.GetUnitTarget();
+                if (bloodthirstTarget != null)
+                    if (!bloodthirstTarget.HasAura(SpellIds.FreshMeatDebuff, auraTarget.GetGUID()))
+                        auraTarget.CastSpell(bloodthirstTarget, SpellIds.FreshMeatDebuff, new CastSpellExtraArgs()
+                        {
+                            TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError
+                        });
+            }
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new(CheckRampageProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new(CheckBloodthirstProc, 1, AuraType.Dummy));
+            OnProc.Add(new(HandleProc));
+        }
+    }
+
+    [Script] // 260798 - Execute (Arms, Protection)
+    class spell_warr_execute_damage : SpellScript
+    {
+        static void CalculateExecuteDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+        {
+            // tooltip has 2 multiplier hardcoded in it $damage=${2.0*$260798s1}
+            pctMod *= 2.0f;
+        }
+
+        public override void Register()
+        {
+            CalcDamage.Add(new(CalculateExecuteDamage));
+        }
+    }
+
+    [Script] // 383848 - Frenzied Enrage (attached to 184362 - Enrage)
+    class spell_warr_frenzied_enrage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FrenziedEnrage)
+                && ValidateSpellEffect((spellInfo.Id, 1))
+                && spellInfo.GetEffect(0).IsAura(AuraType.MeleeSlow)
+                && spellInfo.GetEffect(1).IsAura(AuraType.ModIncreaseSpeed);
+        }
+
+        public override bool Load()
+        {
+            return !GetCaster().HasAura(SpellIds.FrenziedEnrage);
+        }
+
+        void HandleFrenziedEnrage(ref WorldObject target)
+        {
+            target = null;
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new(HandleFrenziedEnrage, 0, Targets.UnitCaster));
+            OnObjectTargetSelect.Add(new(HandleFrenziedEnrage, 1, Targets.UnitCaster));
+        }
+    }
+
+    [Script] // 335082 - frenzy
+    class spell_warr_frenzy : AuraScript
+    {
+        ObjectGuid _targetGuid;
+
+        public void SetTargetGuid(ObjectGuid guid) { _targetGuid = guid; }
+
+        public ObjectGuid GetTarGetGUID() { return _targetGuid; }
+
+        public override void Register() { }
+    }
+
+    [Script] // 335077 - Frenzy (attached to 184367 - Rampage)
+    class spell_warr_frenzy_rampage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FrenzyBuff, SpellIds.FrenzyTalent);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.FrenzyTalent);
+        }
+
+        void HandleAfterCast(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit hitUnit = GetHitUnit();
+
+            if (hitUnit != GetExplTargetUnit())
+                return;
+
+            caster.CastSpell(null, SpellIds.FrenzyBuff, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            });
+
+            Aura frenzyAura = caster.GetAura(SpellIds.FrenzyBuff);
+            if (frenzyAura != null)
+            {
+                spell_warr_frenzy script = frenzyAura.GetScript<spell_warr_frenzy>();
+                if (script != null)
+                {
+                    if (!script.GetTarGetGUID().IsEmpty() && script.GetTarGetGUID() != hitUnit.GetGUID())
+                        frenzyAura.SetStackAmount(1);
+
+                    script.SetTargetGuid(hitUnit.GetGUID());
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleAfterCast, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 440277 - Powerful Enrage (attached to 184362 - Enrage)
+    class spell_warr_powerful_enrage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.PowerfulEnrage)
+                && ValidateSpellEffect((spellInfo.Id, 4))
+                && spellInfo.GetEffect(3).IsAura(AuraType.AddPctModifier) && spellInfo.GetEffect(3).MiscValue == (int)SpellModOp.HealingAndDamage
+                && spellInfo.GetEffect(4).IsAura(AuraType.AddPctModifier) && spellInfo.GetEffect(4).MiscValue == (int)SpellModOp.PeriodicHealingAndDamage;
+        }
+
+        public override bool Load()
+        {
+            return !GetCaster().HasAura(SpellIds.PowerfulEnrage);
+        }
+
+        void HandlePowerfulEnrage(ref WorldObject target)
+        {
+            target = null;
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new(HandlePowerfulEnrage, 3, Targets.UnitCaster));
+            OnObjectTargetSelect.Add(new(HandlePowerfulEnrage, 4, Targets.UnitCaster));
         }
     }
 
     [Script] // 383103  - Fueled by Violence
     class spell_warr_fueled_by_violence : AuraScript
     {
-        uint _nextHealAmount = 0;
+        uint _nextHealAmount;
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -343,9 +818,9 @@ namespace Scripts.Spells.Warrior
                     generatedPath.SetPathLengthLimit(range);
 
                     bool result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
-                    if (generatedPath.GetPathType().HasFlag(PathType.Short))
+                    if (generatedPath.GetPathType().HasAnyFlag(PathType.Short))
                         return SpellCastResult.OutOfRange;
-                    else if (!result || generatedPath.GetPathType().HasFlag(PathType.NoPath))
+                    else if (!result || generatedPath.GetPathType().HasAnyFlag(PathType.NoPath))
                         return SpellCastResult.NoPath;
                 }
                 else if (dest.GetPositionZ() > GetCaster().GetPositionZ() + 4.0f)
@@ -414,6 +889,51 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    [Script] // 12950 - Improved Whirlwind (attached to 190411 - Whirlwind)
+    class spell_improved_whirlwind : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ImprovedWhirlwind, SpellIds.WhirlwindCleaveAura)
+                && ValidateSpellEffect((spellInfo.Id, 2), (SpellIds.WhirlwindEnergize, 0));
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.ImprovedWhirlwind);
+        }
+
+        void HandleHit(uint effIndex)
+        {
+            long targetsHit = GetUnitTargetCountForEffect(0);
+            if (targetsHit == 0)
+                return;
+
+            Player caster = GetCaster().ToPlayer();
+            if (caster == null)
+                return;
+
+            int ragePerTarget = GetEffectValue();
+            int baseRage = GetEffectInfo(0).CalcValue();
+            int maxRage = baseRage + (ragePerTarget * GetEffectInfo(2).CalcValue());
+            int rageGained = (int)Math.Min(baseRage + (targetsHit * ragePerTarget), maxRage);
+
+            caster.CastSpell(null, SpellIds.WhirlwindEnergize, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell(),
+                SpellValueOverrides = { new(SpellValueMod.BasePoint0, rageGained * 10) }
+            });
+
+            WarriorMisc.ApplyWhirlwindCleaveAura(caster, GetCastDifficulty(), GetSpell());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleHit, 1, SpellEffectName.Dummy));
+        }
+    }
+
     [Script] // 5246 - Intimidating Shout
     class spell_warr_intimidating_shout : SpellScript
     {
@@ -422,10 +942,83 @@ namespace Scripts.Spells.Warrior
             unitList.Remove(GetExplTargetWorldObject());
         }
 
+        void ClearTargets(List<WorldObject> unitList)
+        {
+            // This is used in effect 3, which is an Aoe Root effect.
+            // This doesn't seem to be a thing anymore, so we clear the targets list here.
+            unitList.Clear();
+        }
+
         public override void Register()
         {
-            OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitSrcAreaEnemy));
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 2, Targets.UnitSrcAreaEnemy));
+            OnObjectAreaTargetSelect.Add(new(ClearTargets, 3, Targets.UnitSrcAreaEnemy));
+        }
+    }
+
+    [Script] // 316594 - Intimidating Shout (Menace Talent, knock back . root)
+    class spell_warr_intimidating_shout_menace_knock_back : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IntimidatingShoutMenaceAoe);
+        }
+
+        void FilterTargets(List<WorldObject> unitList)
+        {
+            unitList.Remove(GetExplTargetWorldObject());
+        }
+
+        void HandleRoot(uint effIndex)
+        {
+            CastSpellExtraArgs args = new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            };
+
+            var caster = GetCaster();
+            var targetsGuid = GetHitUnit().GetGUID();
+            GetCaster().m_Events.AddEventAtOffset(() =>
+            {
+                Unit targetUnit = Global.ObjAccessor.GetUnit(caster, targetsGuid);
+                if (targetUnit != null)
+                    caster.CastSpell(targetUnit, SpellIds.IntimidatingShoutMenaceAoe, args);
+            }, TimeSpan.FromSeconds(500));
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
+            OnEffectHitTarget.Add(new(HandleRoot, 0, SpellEffectName.KnockBack));
+        }
+    }
+
+    [Script] // 385174 - Invigorating Fury (attached to 184364 - Enraged Regeneration)
+    class spell_warr_invigorating_fury : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.InvigoratingFury, SpellIds.InvigoratingFuryTalent);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.InvigoratingFuryTalent);
+        }
+
+        void CastHeal()
+        {
+            GetCaster().CastSpell(null, SpellIds.InvigoratingFury, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            });
+        }
+
+        public override void Register()
+        {
+            AfterCast.Add(new(CastHeal));
         }
     }
 
@@ -435,7 +1028,7 @@ namespace Scripts.Spells.Warrior
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Stoicism)
-            && ValidateSpellEffect((spellInfo.Id, 1));
+                && ValidateSpellEffect((spellInfo.Id, 1));
         }
 
         void HandleProc(ProcEventInfo eventInfo)
@@ -455,7 +1048,7 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    [Script] // 12294 - Mortal Strike 7.1.5
+    [Script] // 12294 - Mortal Strike
     class spell_warr_mortal_strike : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -463,16 +1056,56 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.MortalWounds);
         }
 
-        void HandleDummy(uint effIndex)
+        void HandleMortalWounds(uint effIndex)
         {
-            Unit target = GetHitUnit();
-            if (target != null)
-                GetCaster().CastSpell(target, SpellIds.MortalWounds, true);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.MortalWounds, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            });
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleMortalWounds, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    // 383854 - Improved Raging Blow (attached to 85288 - Raging Blow, 335097 - Crushing Blow)
+    [Script] // 392936 - Wrath and Fury (attached to 85288 - Raging Blow, 335097 - Crushing Blow)
+    class spell_warr_raging_blow_cooldown_reset : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ImprovedRagingBlow)
+                && ValidateSpellEffect((SpellIds.WrathAndFury, 0));
+        }
+
+        public override bool Load()
+        {
+            Unit caster = GetCaster();
+            return caster.HasAura(SpellIds.ImprovedRagingBlow) || caster.HasAuraEffect(SpellIds.WrathAndFury, 0);
+        }
+
+        void HandleResetCooldown(uint effIndex)
+        {
+            // it is currently impossible to have Wrath and Fury without having Improved Raging Blow, but we will check it anyway
+            Unit caster = GetCaster();
+            int value = 0;
+            if (caster.HasAura(SpellIds.ImprovedRagingBlow))
+                value = GetEffectValue();
+
+            AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.WrathAndFury, 0);
+            if (auraEffect != null)
+                value += auraEffect.GetAmount();
+
+            if (RandomHelper.randChance(value))
+                caster.GetSpellHistory().RestoreCharge(GetSpellInfo().ChargeCategoryId);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleResetCooldown, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -500,6 +1133,41 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 275339 - (attached to 46968 - Shockwave)
+    class spell_warr_rumbling_earth : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.RumblingEarth, 1));
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.RumblingEarth);
+        }
+
+        void HandleCooldownReduction(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Aura rumblingEarth = caster.GetAura(SpellIds.RumblingEarth);
+            if (rumblingEarth == null)
+                return;
+
+            AuraEffect minTargetCount = rumblingEarth.GetEffect(0);
+            AuraEffect cooldownReduction = rumblingEarth.GetEffect(1);
+            if (minTargetCount == null || cooldownReduction == null)
+                return;
+
+            if (GetUnitTargetCountForEffect(0) >= minTargetCount.GetAmount())
+                GetCaster().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-cooldownReduction.GetAmount()));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new(HandleCooldownReduction, 1, SpellEffectName.ScriptEffect));
         }
     }
 
@@ -544,36 +1212,23 @@ namespace Scripts.Spells.Warrior
     [Script] // 46968 - Shockwave
     class spell_warr_shockwave : SpellScript
     {
-        uint _targetCount;
-
         public override bool Validate(SpellInfo spellInfo)
         {
-            return !ValidateSpellInfo(SpellIds.Shockwave, SpellIds.ShockwaveStun)
-            && ValidateSpellEffect((spellInfo.Id, 3));
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().IsPlayer();
+            return ValidateSpellInfo(SpellIds.ShockwaveStun);
         }
 
         void HandleStun(uint effIndex)
         {
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.ShockwaveStun, true);
-            ++_targetCount;
-        }
-
-        // Cooldown reduced by 20 sec if it strikes at least 3 targets.
-        void HandleAfterCast()
-        {
-            if (_targetCount >= (uint)GetEffectInfo(0).CalcValue())
-                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetEffectInfo(3).CalcValue()));
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.ShockwaveStun, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = GetSpell()
+            });
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleStun, 0, SpellEffectName.Dummy));
-            AfterCast.Add(new(HandleAfterCast));
+            OnEffectHitTarget.Add(new(HandleStun, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -592,7 +1247,35 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleOnHit, 1, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 107570 - Storm Bolt
+    class spell_warr_storm_bolts : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.StormBolts);
+        }
+
+        public override bool Load()
+        {
+            return !GetCaster().HasAura(SpellIds.StormBolts);
+        }
+
+        void FilterTargets(List<WorldObject> targets)
+        {
+            targets.Clear();
+
+            Unit target = GetExplTargetUnit();
+            if (target != null)
+                targets.Add(target);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
         }
     }
 
@@ -624,25 +1307,40 @@ namespace Scripts.Spells.Warrior
         }
     }
 
-    [Script] // 52437 - Sudden Death
+    [Script] // 280776 - Sudden Death
     class spell_warr_sudden_death : AuraScript
     {
-        public override bool Validate(SpellInfo spellInfo)
+        static bool CheckProc(ProcEventInfo eventInfo)
         {
-            return ValidateSpellInfo(SpellIds.ColossusSmash);
-        }
-
-        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            // Remove cooldown on Colossus Smash
-            Player player = GetTarget().ToPlayer();
-            if (player != null)
-                player.GetSpellHistory().ResetCooldown(SpellIds.ColossusSmash, true);
+            // should only proc on primary target
+            return eventInfo.GetActionTarget() == eventInfo.GetProcSpell().m_targets.GetUnitTarget();
         }
 
         public override void Register()
         {
-            AfterEffectApply.Add(new(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real)); // correct?
+            DoCheckProc.Add(new(CheckProc));
+        }
+    }
+
+    [Script] // 280721 - Sudden Death
+    class spell_warr_sudden_death_proc : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.SuddenDeathBuff);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(null, SpellIds.SuddenDeathBuff, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError
+            });
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
         }
     }
 
@@ -690,6 +1388,73 @@ namespace Scripts.Spells.Warrior
         }
     }
 
+    [Script] // 388933 - Tenderize
+    class spell_warr_tenderize : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Enrage, SpellIds.SlaughteringStrikesBuff, SpellIds.SlaughteringStrikes);
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            GetTarget().CastSpell(null, SpellIds.Enrage, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = eventInfo.GetProcSpell()
+            });
+        }
+
+        void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit target = GetTarget();
+            if (!target.HasAura(SpellIds.SlaughteringStrikes))
+                return;
+
+            target.CastSpell(null, SpellIds.SlaughteringStrikesBuff, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = eventInfo.GetProcSpell(),
+                SpellValueOverrides = { new(SpellValueMod.AuraStack, aurEff.GetAmount()) }
+            });
+        }
+
+        public override void Register()
+        {
+            OnProc.Add(new(HandleProc));
+            OnEffectProc.Add(new(HandleEffectProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 394329 - Titanic Rage
+    class spell_warr_titanic_rage : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.WhirlwindCleaveAura);
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            Player target = GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            target.CastSpell(null, SpellIds.Enrage, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+                TriggeringSpell = eventInfo.GetProcSpell()
+            });
+
+            WarriorMisc.ApplyWhirlwindCleaveAura(target, GetCastDifficulty(), null);
+        }
+
+        public override void Register()
+        {
+            OnProc.Add(new(HandleProc));
+        }
+    }
+
     [Script] // 215538 - Trauma
     class spell_warr_trauma : AuraScript
     {
@@ -702,7 +1467,7 @@ namespace Scripts.Spells.Warrior
         {
             Unit target = eventInfo.GetActionTarget();
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks());
+            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, damage);
             GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);
@@ -733,6 +1498,70 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             DoCheckProc.Add(new(CheckProc));
+        }
+    }
+
+    [Script] // 389603 - Unbridled Ferocity
+    class spell_warr_unbridled_ferocity : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Recklessness)
+                && ValidateSpellEffect((spellInfo.Id, 1))
+                && spellInfo.GetEffect(0).IsAura(AuraType.Dummy)
+                && spellInfo.GetEffect(1).IsAura(AuraType.Dummy);
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            int durationMs = GetEffect(1).GetAmount();
+
+            GetTarget().CastSpell(null, SpellIds.Recklessness, new CastSpellExtraArgs()
+            {
+                TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError | TriggerCastFlags.IgnoreSpellAndCategoryCD,
+                SpellValueOverrides = { new(SpellValueMod.Duration, durationMs) }
+            });
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return RandomHelper.randChance(GetEffect(0).GetAmount());
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new(CheckProc));
+            OnProc.Add(new(HandleProc));
+        }
+    }
+
+    // 383885 - Vicious Contempt (attached to 23881 - Bloodthirst)
+    [Script] // 383885 - Vicious Contempt (attached to 335096 - Bloodbath)
+    class spell_warr_vicious_contempt : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellEffect((SpellIds.ViciousContempt, 0));
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().HasAura(SpellIds.ViciousContempt);
+        }
+
+        void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
+        {
+            if (!victim.HasAuraState(AuraStateType.Wounded35Percent))
+                return;
+
+            AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.ViciousContempt, 0);
+            if (aurEff != null)
+                MathFunctions.AddPct(ref pctMod, aurEff.GetAmount());
+        }
+
+        public override void Register()
+        {
+            CalcDamage.Add(new(CalculateDamage));
         }
     }
 

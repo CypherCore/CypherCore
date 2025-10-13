@@ -2088,7 +2088,7 @@ namespace Game.Entities
                     ushort maxValue = GetMaxSkillValueForLevel();
                     if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         skillValue = maxValue;
-                    else if (GetClass() == Class.Deathknight)
+                    else if (GetClass() == Class.DeathKnight)
                         skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
 
                     SetSkill(skillId, 0, skillValue, maxValue);
@@ -2104,7 +2104,7 @@ namespace Game.Entities
                     ushort skillValue = 1;
                     if (rcInfo.HasFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         skillValue = maxValue;
-                    else if (GetClass() == Class.Deathknight)
+                    else if (GetClass() == Class.DeathKnight)
                         skillValue = (ushort)Math.Min(Math.Max(1, (GetLevel() - 1) * 5), maxValue);
 
                     SetSkill(skillId, 1, skillValue, maxValue);
@@ -3394,7 +3394,7 @@ namespace Game.Entities
 
         public void InitRunes()
         {
-            if (GetClass() != Class.Deathknight)
+            if (GetClass() != Class.DeathKnight)
                 return;
 
             uint runeIndex = GetPowerIndex(PowerType.Runes);
@@ -3414,7 +3414,7 @@ namespace Game.Entities
 
         public void UpdateAllRunesRegen()
         {
-            if (GetClass() != Class.Deathknight)
+            if (GetClass() != Class.DeathKnight)
                 return;
 
             uint runeIndex = GetPowerIndex(PowerType.Runes);

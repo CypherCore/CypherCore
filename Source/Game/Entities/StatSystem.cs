@@ -917,7 +917,7 @@ namespace Game.Entities
             return Math.Max(missChance, 0f);
         }
 
-        float GetUnitCriticalChanceDone(WeaponAttackType attackType)
+        public float GetUnitCriticalChanceDone(WeaponAttackType attackType)
         {
             float chance = 0.0f;
             Player thisPlayer = ToPlayer();
@@ -1585,7 +1585,7 @@ namespace Game.Entities
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, oldVal, false);
                             ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
-                            if (GetClass() == Class.Deathknight)
+                            if (GetClass() == Class.DeathKnight)
                                 UpdateAllRunesRegen();
                             break;
                         case CombatRating.HasteRanged:

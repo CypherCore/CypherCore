@@ -4047,7 +4047,7 @@ namespace Game.Spells
             if ((m_caster.IsPlayer() || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
-            if (m_caster.IsPlayer() && m_caster.ToPlayer().GetClass() == Class.Deathknight &&
+            if (m_caster.IsPlayer() && m_caster.ToPlayer().GetClass() == Class.DeathKnight &&
                 HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
             {
                 castFlags |= SpellCastFlags.NoGCD; // not needed, but it's being sent according to sniffs
@@ -4820,7 +4820,7 @@ namespace Game.Spells
             if (player == null)
                 return SpellCastResult.SpellCastOk;
 
-            if (player.GetClass() != Class.Deathknight)
+            if (player.GetClass() != Class.DeathKnight)
                 return SpellCastResult.SpellCastOk;
 
             int readyRunes = 0;
@@ -4836,7 +4836,7 @@ namespace Game.Spells
 
         void TakeRunePower(bool didHit)
         {
-            if (!m_caster.IsTypeId(TypeId.Player) || m_caster.ToPlayer().GetClass() != Class.Deathknight)
+            if (!m_caster.IsTypeId(TypeId.Player) || m_caster.ToPlayer().GetClass() != Class.DeathKnight)
                 return;
 
             Player player = m_caster.ToPlayer();
@@ -4858,7 +4858,7 @@ namespace Game.Spells
 
         void RefundRunePower()
         {
-            if (!m_caster.IsPlayer() || m_caster.ToPlayer().GetClass() != Class.Deathknight)
+            if (!m_caster.IsPlayer() || m_caster.ToPlayer().GetClass() != Class.DeathKnight)
                 return;
 
             Player player = m_caster.ToPlayer();
@@ -6578,7 +6578,7 @@ namespace Game.Spells
             return unit.HasUnitMovementFlag(MovementFlag.Forward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight | MovementFlag.Falling) && !unit.IsWalking();
         }
 
-        (float minRange, float maxRange) GetMinMaxRange(bool strict)
+        public (float minRange, float maxRange) GetMinMaxRange(bool strict)
         {
             float rangeMod = 0.0f;
             float minRange = 0.0f;
@@ -8421,7 +8421,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
+        public int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
         {
             return CalculateDamage(spellEffectInfo, target, out _);
         }

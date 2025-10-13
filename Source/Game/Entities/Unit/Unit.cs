@@ -3568,7 +3568,7 @@ namespace Game.Entities
             if (spell != null)
                 spell.CallScriptOnResistAbsorbCalculateHandlers(damageInfo, ref resistedDamage, ref absorbIgnoringDamage);
 
-            damageInfo.ResistDamage(resistedDamage);
+            damageInfo.ResistDamage(ref resistedDamage);
 
             // We're going to call functions which can modify content of the list during iteration over it's elements
             // Let's copy the list so we can prevent iterator invalidation
@@ -3608,9 +3608,10 @@ namespace Game.Entities
                     // absorb must be smaller than the damage itself
                     currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
 
-                    damageInfo.AbsorbDamage((uint)currentAbsorb);
+                    uint temp = (uint)currentAbsorb;
+                    damageInfo.AbsorbDamage(ref temp);
+                    tempAbsorb = temp;
 
-                    tempAbsorb = (uint)currentAbsorb;
                     absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
 
                     // Check if our aura is using amount to count heal
@@ -3625,7 +3626,7 @@ namespace Game.Entities
                 }
 
                 if (!absorbAurEff.GetSpellInfo().HasAttribute(SpellAttr6.AbsorbCannotBeIgnore))
-                    damageInfo.ModifyDamage(absorbIgnoringDamage);
+                    damageInfo.ModifyDamage(ref absorbIgnoringDamage);
 
                 if (currentAbsorb != 0)
                 {

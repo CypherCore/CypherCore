@@ -630,7 +630,7 @@ namespace Game
             if (target == null)
                 return;
 
-            if (target.GetCasterGuid() != _player.GetGUID())
+            if (target.GetCasterGUID() != _player.GetGUID())
                 return;
 
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(target.m_areaTriggerData.SpellForVisuals, _player.GetMap().GetDifficultyID());

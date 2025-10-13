@@ -152,7 +152,7 @@ namespace Game.Networking.Packets
                 FirstLogin = atLoginFlags.HasAnyFlag(AtLoginFlags.FirstLogin);
 
                 // show pet at selection character in character list only for non-ghost character
-                if (!playerFlags.HasAnyFlag(PlayerFlags.Ghost) && (ClassId == Class.Warlock || ClassId == Class.Hunter || ClassId == Class.Deathknight))
+                if (!playerFlags.HasAnyFlag(PlayerFlags.Ghost) && (ClassId == Class.Warlock || ClassId == Class.Hunter || ClassId == Class.DeathKnight))
                 {
                     CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(fields.Read<uint>(14));
                     if (creatureInfo != null)

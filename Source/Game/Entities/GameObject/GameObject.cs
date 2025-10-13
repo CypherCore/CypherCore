@@ -3902,6 +3902,18 @@ namespace Game.Entities
                 command.Execute(m_goTypeImpl);
         }
 
+        public int GetControllingTeam()
+        {
+            if (GetGoType() != GameObjectTypes.ControlZone)
+                return BattleGroundTeamId.Neutral;
+
+            var controlZone = (ControlZone)m_goTypeImpl;
+            if (controlZone == null)
+                return BattleGroundTeamId.Neutral;
+
+            return controlZone.GetControllingTeam();
+        }
+
         public void CreateModel()
         {
             m_model = GameObjectModel.Create(new GameObjectModelOwnerImpl(this));
@@ -4600,7 +4612,7 @@ namespace Game.Entities
             }
         }
 
-        int GetControllingTeam()
+        public int GetControllingTeam()
         {
             if (_value < GetMaxHordeValue())
                 return BattleGroundTeamId.Horde;

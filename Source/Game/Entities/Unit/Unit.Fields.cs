@@ -312,10 +312,22 @@ namespace Game.Entities
                 m_hitMask |= ProcFlagsHit.Absorb;
         }
 
+        public void ModifyDamage(ref int amount)
+        {
+            amount = Math.Max(amount, -((int)GetDamage()));
+            m_damage += (uint)amount;
+        }
         public void ModifyDamage(int amount)
         {
             amount = Math.Max(amount, -((int)GetDamage()));
             m_damage += (uint)amount;
+        }
+        public void AbsorbDamage(ref uint amount)
+        {
+            amount = Math.Min(amount, GetDamage());
+            m_absorb += amount;
+            m_damage -= amount;
+            m_hitMask |= ProcFlagsHit.Absorb;
         }
         public void AbsorbDamage(uint amount)
         {
@@ -324,7 +336,7 @@ namespace Game.Entities
             m_damage -= amount;
             m_hitMask |= ProcFlagsHit.Absorb;
         }
-        public void ResistDamage(uint amount)
+        public void ResistDamage(ref uint amount)
         {
             amount = Math.Min(amount, GetDamage());
             m_resist += amount;
@@ -335,7 +347,18 @@ namespace Game.Entities
                 m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
             }
         }
-        void BlockDamage(uint amount)
+        public void ResistDamage(uint amount)
+        {
+            amount = Math.Min(amount, GetDamage());
+            m_resist += amount;
+            m_damage -= amount;
+            if (m_damage == 0)
+            {
+                m_hitMask |= ProcFlagsHit.FullResist;
+                m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
+            }
+        }
+        public void BlockDamage(ref uint amount)
         {
             amount = Math.Min(amount, GetDamage());
             m_block += amount;

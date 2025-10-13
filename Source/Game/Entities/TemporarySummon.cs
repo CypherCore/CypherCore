@@ -623,7 +623,7 @@ namespace Game.Entities
             {
                 if (GetOwner().GetClass() == Class.Warlock
                         || GetOwner().GetClass() == Class.Shaman        // Fire Elemental
-                        || GetOwner().GetClass() == Class.Deathknight) // Risen Ghoul
+                        || GetOwner().GetClass() == Class.DeathKnight) // Risen Ghoul
                 {
                     petType = PetType.Summon;
                 }

@@ -637,7 +637,7 @@ namespace Game.Entities
                 var conditions = Global.ConditionMgr.GetConditionsForAreaTrigger(GetTemplate().Id.Id, GetTemplate().Id.IsCustom);
                 targetList.RemoveAll(target =>
                 {
-                    if (GetCasterGuid() == target.GetGUID())
+                    if (GetCasterGUID() == target.GetGUID())
                     {
                         if (HasActionSetFlag(AreaTriggerActionSetFlag.NotTriggeredbyCaster))
                             return true;
@@ -921,7 +921,7 @@ namespace Game.Entities
 
         public Unit GetCaster()
         {
-            return Global.ObjAccessor.GetUnit(this, GetCasterGuid());
+            return Global.ObjAccessor.GetUnit(this, GetCasterGUID());
         }
 
         Unit GetTarget()
@@ -1015,7 +1015,7 @@ namespace Game.Entities
             }
         }
 
-        float GetMaxSearchRadius()
+        public float GetMaxSearchRadius()
         {
             return m_areaTriggerData.BoundsRadius2D * CalcCurrentScale();
         }
@@ -1161,7 +1161,7 @@ namespace Game.Entities
                         case AreaTriggerActionTypes.Cast:
                             goto case AreaTriggerActionTypes.AddAura;
                         case AreaTriggerActionTypes.AddAura:
-                            unit.RemoveAurasDueToSpell(action.Param, GetCasterGuid());
+                            unit.RemoveAurasDueToSpell(action.Param, GetCasterGUID());
                             break;
                         case AreaTriggerActionTypes.Tavern:
                             Player player = unit.ToPlayer();
@@ -1574,9 +1574,9 @@ namespace Game.Entities
 
         public AreaTriggerCreateProperties GetCreateProperties() { return _areaTriggerCreateProperties; }
 
-        public override ObjectGuid GetCreatorGUID() { return GetCasterGuid(); }
-        public override ObjectGuid GetOwnerGUID() { return GetCasterGuid(); }
-        public ObjectGuid GetCasterGuid() { return m_areaTriggerData.Caster; }
+        public override ObjectGuid GetCreatorGUID() { return GetCasterGUID(); }
+        public override ObjectGuid GetOwnerGUID() { return GetCasterGUID(); }
+        public ObjectGuid GetCasterGUID() { return m_areaTriggerData.Caster; }
 
         public bool HasSplines() { return _spline != null && !_spline.Empty(); }
         public Spline<float> GetSpline() { return _spline; }

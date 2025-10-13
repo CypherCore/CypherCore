@@ -2018,7 +2018,7 @@ namespace Game
                         {
                             // i = (315 - 1) / 8 = 39
                             // m = 1 << ((315 - 1) % 8) = 4
-                            int deathKnightExtraNode = playerClass != Class.Deathknight || i != 39 ? 0 : 4;
+                            int deathKnightExtraNode = playerClass != Class.DeathKnight || i != 39 ? 0 : 4;
                             taximaskstream += (uint)(factionMask[i] | deathKnightExtraNode) + ' ';
                         }
 

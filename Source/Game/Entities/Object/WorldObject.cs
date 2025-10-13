@@ -2454,7 +2454,7 @@ namespace Game.Entities
             return spell.Prepare(targets.Targets, args.TriggeringAura);
         }
 
-        void SendPlayOrphanSpellVisual(Position sourceLocation, ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        public void SendPlayOrphanSpellVisual(Position sourceLocation, ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             PlayOrphanSpellVisual playOrphanSpellVisual = new();
             playOrphanSpellVisual.SourceLocation = sourceLocation;
@@ -2479,7 +2479,7 @@ namespace Game.Entities
             SendMessageToSet(playOrphanSpellVisual, true);
         }
 
-        void SendPlayOrphanSpellVisual(Position sourceLocation, Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
+        public void SendPlayOrphanSpellVisual(Position sourceLocation, Position targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
             PlayOrphanSpellVisual playOrphanSpellVisual = new();
             playOrphanSpellVisual.SourceLocation = sourceLocation;

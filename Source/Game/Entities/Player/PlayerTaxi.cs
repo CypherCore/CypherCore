@@ -22,7 +22,7 @@ namespace Game.Entities
             m_taximask = new byte[((CliDB.TaxiNodesStorage.GetNumRows() - 1) / (1 * 64) + 1) * 8];
 
             // class specific initial known nodes
-            if (chrClass == Class.Deathknight)
+            if (chrClass == Class.DeathKnight)
             {
                 var factionMask = Player.TeamForRace(race) == Team.Horde ? DB2Manager.HordeTaxiNodesMask : DB2Manager.AllianceTaxiNodesMask;
                 m_taximask = new byte[factionMask.Length];

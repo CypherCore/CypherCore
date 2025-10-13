@@ -30,7 +30,7 @@ namespace Game.Scripting
             return true;
         }
 
-        public bool ValidateSpellInfo(params uint[] spellIds)
+        public static bool ValidateSpellInfo(params uint[] spellIds)
         {
             bool allValid = true;
             foreach (uint spellId in spellIds)
@@ -45,7 +45,7 @@ namespace Game.Scripting
             return allValid;
         }
 
-        public bool ValidateSpellEffect(params (uint spellId, uint effectIndex)[] pairs)
+        public static bool ValidateSpellEffect(params (uint spellId, uint effectIndex)[] pairs)
         {
             bool allValid = true;
             foreach (var (spellId, effectIndex) in pairs)
@@ -56,7 +56,7 @@ namespace Game.Scripting
             return allValid;
         }
 
-        public bool ValidateSpellEffect(uint spellId, uint effectIndex)
+        public static bool ValidateSpellEffect(uint spellId, uint effectIndex)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)

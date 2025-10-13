@@ -6139,7 +6139,7 @@ namespace Game
                                         switch ((SpellCategories)itemTemplate.Effects[0].SpellCategoryID)
                                         {
                                             case SpellCategories.Food:                                // food
-                                                count = characterLoadout.ChrClassID == (int)Class.Deathknight ? 10 : 4u;
+                                                count = characterLoadout.ChrClassID == (int)Class.DeathKnight ? 10 : 4u;
                                                 break;
                                             case SpellCategories.Drink:                                // drink
                                                 count = 2;
@@ -6502,7 +6502,7 @@ namespace Game
                             continue;
 
                         // skip expansion classes if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == Class.Deathknight)
+                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == Class.DeathKnight)
                             continue;
 
                         if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.MistsOfPandaria && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))

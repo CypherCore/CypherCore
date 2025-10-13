@@ -2685,6 +2685,11 @@ namespace Game.Entities
             return m_appliedAuras.KeyValueList;
         }
 
+        public List<AuraApplication> GetAppliedAuras(uint key)
+        {
+            return m_appliedAuras.LookupByKey(key);
+        }
+
         public Aura AddAura(uint spellId, Unit target)
         {
             if (target == null)

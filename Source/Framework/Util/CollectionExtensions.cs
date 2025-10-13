@@ -203,6 +203,33 @@ namespace System.Collections.Generic
             while (list.Count <= index)
                 list.Add(defaultValue);
         }
+
+        public static void PartitionInPlace<T>(this IList<T> list, Func<T, bool> predicate)
+        {
+            int left = 0;
+            int right = list.Count - 1;
+
+            while (left <= right)
+            {
+                while (left <= right && predicate(list[left]))
+                {
+                    left++;
+                }
+                while (left <= right && !predicate(list[right]))
+                {
+                    right--;
+                }
+
+                if (left < right)
+                {
+                    T temp = list[left];
+                    list[left] = list[right];
+                    list[right] = temp;
+                    left++;
+                    right--;
+                }
+            }
+        }
     }
 
     public interface ICheck<in T>

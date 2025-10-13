@@ -857,7 +857,7 @@ namespace Game.Spells
             _categoryCharges.Add(chargeCategoryId, new ChargeEntry(recoveryStart, TimeSpan.FromMilliseconds(chargeRecovery)));
         }
 
-        void ModifyChargeRecoveryTime(uint chargeCategoryId, TimeSpan cooldownMod)
+        public void ModifyChargeRecoveryTime(uint chargeCategoryId, TimeSpan cooldownMod)
         {
             var chargeCategoryEntry = CliDB.SpellCategoryStorage.LookupByKey(chargeCategoryId);
             if (chargeCategoryEntry == null)
@@ -1119,10 +1119,17 @@ namespace Game.Spells
             }
         }
 
-        void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref uint categoryId)
+        public static void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref uint categoryId)
         {
             TimeSpan notUsed = TimeSpan.Zero;
             GetCooldownDurations(spellInfo, itemId, ref notUsed, ref categoryId, ref notUsed);
+        }
+
+        public static void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref TimeSpan cooldown)
+        {
+            TimeSpan notUsed = TimeSpan.Zero;
+            uint notUsedId = 0;
+            GetCooldownDurations(spellInfo, itemId, ref cooldown, ref notUsedId, ref notUsed);
         }
 
         public static void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref TimeSpan cooldown, ref uint categoryId, ref TimeSpan categoryCooldown)

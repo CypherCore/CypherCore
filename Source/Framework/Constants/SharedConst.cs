@@ -663,7 +663,7 @@ namespace Framework.Constants
         Hunter = 3,
         Rogue = 4,
         Priest = 5,
-        Deathknight = 6,
+        DeathKnight = 6,
         Shaman = 7,
         Mage = 8,
         Warlock = 9,
@@ -675,7 +675,7 @@ namespace Framework.Constants
         Max = 15,
 
         ClassMaskAllPlayable = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Hunter - 1)) |
-            (1 << (Rogue - 1)) | (1 << (Priest - 1)) | (1 << (Deathknight - 1)) | (1 << (Shaman - 1)) |
+            (1 << (Rogue - 1)) | (1 << (Priest - 1)) | (1 << (DeathKnight - 1)) | (1 << (Shaman - 1)) |
             (1 << (Mage - 1)) | (1 << (Warlock - 1)) | (1 << (Monk - 1)) | (1 << (Druid - 1)) | (1 << (DemonHunter - 1)) | (1 << (Evoker - 1))),
 
         ClassMaskAllCreatures = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Rogue - 1)) | (1 << (Mage - 1))),

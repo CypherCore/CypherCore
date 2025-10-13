@@ -74,7 +74,7 @@ namespace Game.Scripting
                     var constructors = type.GetConstructors();
                     if (constructors.Length == 0)
                     {
-                        Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors. Can't load script.", type.Name);
+                        Log.outError(LogFilter.Scripts, $"Script: {type.Name} contains no Public Constructors. Can't load script.");
                         continue;
                     }
 
@@ -84,16 +84,15 @@ namespace Game.Scripting
                         string name = type.Name;
 
                         bool validArgs = true;
-                        int i = 0;
                         foreach (var constructor in constructors)
                         {
                             var parameters = constructor.GetParameters();
                             if (parameters.Length != attribute.Args.Length)
                                 continue;
 
-                            foreach (var arg in constructor.GetParameters())
+                            for (var i = 0; i < parameters.Length; ++i)
                             {
-                                if (arg.ParameterType != attribute.Args[i++].GetType())
+                                if (attribute.Args[i] != null && attribute.Args[i].GetType() != parameters[i].ParameterType)
                                 {
                                     validArgs = false;
                                     break;
@@ -109,6 +108,9 @@ namespace Game.Scripting
                             Log.outError(LogFilter.Scripts, "Script: {0} contains no Public Constructors with the right parameter types. Can't load script.", type.Name);
                             continue;
                         }
+
+                        if (!attribute.Name.IsEmpty())
+                            name = attribute.Name;
 
                         switch (type.BaseType.Name)
                         {
@@ -128,6 +130,9 @@ namespace Game.Scripting
                                 break;
                             case nameof(ConversationAI):
                                 genericType = typeof(GenericConversationScript<>).MakeGenericType(type);
+                                break;
+                            case nameof(BattlegroundScript):
+                                genericType = typeof(GenericBattlegroundMapScript<>).MakeGenericType(type);
                                 break;
                             case "SpellScriptLoader":
                             case "AuraScriptLoader":
@@ -161,21 +166,15 @@ namespace Game.Scripting
                             case "AchievementScript":
                             case "BattlefieldScript":
                             case "EventScript":
-                                if (!attribute.Name.IsEmpty())
-                                    name = attribute.Name;
-
                                 if (attribute.Args.Empty())
                                     Activator.CreateInstance(genericType);
                                 else
-                                    Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
+                                    Activator.CreateInstance(genericType, name, attribute.Args);
                                 continue;
                             default:
                                 genericType = typeof(GenericCreatureScript<>).MakeGenericType(type);
                                 break;
                         }
-
-                        if (!attribute.Name.IsEmpty())
-                            name = attribute.Name;
 
                         Activator.CreateInstance(genericType, name, attribute.Args);
                     }

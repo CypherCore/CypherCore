@@ -2072,7 +2072,7 @@ namespace Game.Entities
             }
             else
             {
-                if (GetClass() == Class.Deathknight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
+                if (GetClass() == Class.DeathKnight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
                 {
                     SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.UniqueMessage, 1);
                     return false;
@@ -2230,7 +2230,7 @@ namespace Game.Entities
             if (CliDB.ChrRacesStorage.LookupByKey(race).HasFlag(ChrRacesFlag.IsAlliedRace))
                 startLevel = WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel);
 
-            if (playerClass == Class.Deathknight)
+            if (playerClass == Class.DeathKnight)
             {
                 if (race == Race.PandarenAlliance || race == Race.PandarenHorde)
                     startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel), startLevel);
@@ -3587,7 +3587,7 @@ namespace Game.Entities
                     Regenerate(power);
 
             // Runes act as cooldowns, and they don't need to send any data
-            if (GetClass() == Class.Deathknight)
+            if (GetClass() == Class.DeathKnight)
             {
                 uint regeneratedRunes = 0;
                 int regenIndex = 0;
@@ -7393,7 +7393,7 @@ namespace Game.Entities
             if (node.HasFlag(TaxiNodeFlags.UsePlayerFavoriteMount) && preferredMountDisplay != 0)
                 mount_display_id = preferredMountDisplay;
             else
-                mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.Deathknight));
+                mount_display_id = ObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == null || (sourcenode == 315 && GetClass() == Class.DeathKnight));
 
             // in spell case allow 0 model
             if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
