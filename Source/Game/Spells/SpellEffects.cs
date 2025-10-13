@@ -5668,10 +5668,11 @@ namespace Game.Spells
                 facing = target;
 
             JumpArrivalCastArgs arrivalCast = null;
-            if (effectInfo.TriggerSpell != 0)
+            if (effectInfo.TriggerSpell != 0 || jumpParams.TriggerSpellId.HasValue)
             {
                 arrivalCast = new();
-                arrivalCast.SpellId = effectInfo.TriggerSpell;
+                arrivalCast.SpellId = jumpParams.TriggerSpellId.HasValue ? jumpParams.TriggerSpellId.Value : effectInfo.TriggerSpell;
+                arrivalCast.Target = unitTarget != null ? unitTarget.GetGUID() : ObjectGuid.Empty;
             }
 
             SpellEffectExtraData effectExtra = null;

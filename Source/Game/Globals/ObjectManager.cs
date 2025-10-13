@@ -10757,8 +10757,8 @@ namespace Game
             // need for reload case
             _jumpChargeParams.Clear();
 
-            //                                         0   1      2                            3            4              5                6
-            SQLResult result = DB.World.Query("SELECT id, speed, treatSpeedAsMoveTimeSeconds, jumpGravity, spellVisualId, progressCurveId, parabolicCurveId FROM jump_charge_params");
+            //                                         0   1      2                            3            4              5                6                 7
+            SQLResult result = DB.World.Query("SELECT id, speed, treatSpeedAsMoveTimeSeconds, jumpGravity, spellVisualId, progressCurveId, parabolicCurveId, triggerSpellId FROM jump_charge_params");
             if (result.IsEmpty())
                 return;
 
@@ -10771,6 +10771,7 @@ namespace Game
                 uint? spellVisualId = null;
                 uint? progressCurveId = null;
                 uint? parabolicCurveId = null;
+                uint? triggerSpellId = null;
 
                 if (speed <= 0.0f)
                 {
@@ -10808,6 +10809,14 @@ namespace Game
                         Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing parabolic Curve: {result.Read<uint>(6)} for id {id}, ignored.");
                 }
 
+                if (!result.IsNull(7))
+                {
+                    if (Global.SpellMgr.GetSpellInfo(result.Read<uint>(7), Difficulty.None) != null)
+                        triggerSpellId = result.Read<uint>(7);
+                    else
+                        Log.outDebug(LogFilter.Sql, $"Table `jump_charge_params` references non-existing trigger spell id: {result.Read<uint>(7)} for id {id}, ignored.");
+                }
+
                 JumpChargeParams jumpParams = new();
                 jumpParams.Speed = speed;
                 jumpParams.TreatSpeedAsMoveTimeSeconds = treatSpeedAsMoveTimeSeconds;
@@ -10815,6 +10824,7 @@ namespace Game
                 jumpParams.SpellVisualId = spellVisualId;
                 jumpParams.ProgressCurveId = progressCurveId;
                 jumpParams.ParabolicCurveId = parabolicCurveId;
+                jumpParams.TriggerSpellId = triggerSpellId;
                 _jumpChargeParams[id] = jumpParams;
 
             } while (result.NextRow());

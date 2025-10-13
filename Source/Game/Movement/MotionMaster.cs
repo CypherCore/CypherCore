@@ -1339,6 +1339,7 @@ namespace Game.Movement
         public uint? SpellVisualId;
         public uint? ProgressCurveId;
         public uint? ParabolicCurveId;
+        public uint? TriggerSpellId;
     }
 
     public struct ChaseRange
