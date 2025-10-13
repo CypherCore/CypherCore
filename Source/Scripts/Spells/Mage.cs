@@ -1143,7 +1143,7 @@ class spell_mage_improved_scorch : AuraScript
         return ValidateSpellInfo(SpellIds.ImprovedScorch);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return eventInfo.GetProcTarget().HealthBelowPct(aurEff.GetAmount());
     }
@@ -1335,7 +1335,7 @@ class spell_mage_molten_fury : AuraScript
         return ValidateSpellInfo(SpellIds.MoltenFury);
     }
 
-    static void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         if (!eventInfo.GetActionTarget().HealthAbovePct(aurEff.GetAmount()))
             eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.MoltenFury, new CastSpellExtraArgs()

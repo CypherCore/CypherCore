@@ -341,7 +341,7 @@ class spell_monk_pressure_points : SpellScript
         return !GetCaster().HasAura(SpellIds.PressurePoints);
     }
 
-    static void PreventDispel(ref WorldObject target)
+    void PreventDispel(ref WorldObject target)
     {
         target = null;
     }

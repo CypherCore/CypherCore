@@ -697,7 +697,6 @@ class spell_dru_efflorescence_heal : SpellScript
 {
     void FilterTargets(List<WorldObject> targets)
     {
-        // Efflorescence became a smart heal which prioritizes players and their pets in their group before any unit outside their group.
         SelectRandomInjuredTargets(targets, 3, true, GetCaster());
     }
 
@@ -1316,7 +1315,7 @@ class spell_dru_luxuriant_soil : AuraScript
         return ValidateSpellInfo(SpellIds.Rejuvenation);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return RandomHelper.randChance(aurEff.GetAmount());
     }
@@ -1520,12 +1519,12 @@ class spell_dru_power_of_the_archdruid : AuraScript
         return ValidateSpellEffect((SpellIds.PowerOfTheArchdruid, 0));
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return eventInfo.GetActor().HasAuraEffect(SpellIds.PowerOfTheArchdruid, 0);
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit druid = eventInfo.GetActor();
         Unit procTarget = eventInfo.GetActionTarget();
@@ -1700,7 +1699,7 @@ class spell_dru_shooting_stars : AuraScript
         ProcessDoT(aurEff, caster, sunfires);
     }
 
-    static void ProcessDoT(AuraEffect aurEff, Unit caster, List<Unit> targets)
+    void ProcessDoT(AuraEffect aurEff, Unit caster, List<Unit> targets)
     {
         if (targets.Empty())
             return;
@@ -1722,7 +1721,6 @@ class spell_dru_shooting_stars : AuraScript
             });
         }
     }
-
 
     public override void Register()
     {
@@ -2361,7 +2359,7 @@ class spell_dru_umbral_embrace : AuraScript
         return ValidateSpellInfo(SpellIds.EclipseLunarAura, SpellIds.EclipseSolarAura);
     }
 
-    static bool CheckEclipse(ProcEventInfo eventInfo)
+    bool CheckEclipse(ProcEventInfo eventInfo)
     {
         return eventInfo.GetActor().HasAura(SpellIds.EclipseLunarAura) || eventInfo.GetActor().HasAura(SpellIds.EclipseSolarAura);
     }
@@ -2437,7 +2435,7 @@ class spell_dru_ursocs_fury : AuraScript
         return ValidateSpellInfo(SpellIds.UrsocsFuryShield);
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         DamageInfo damageInfo = eventInfo.GetDamageInfo();
         if (damageInfo == null || damageInfo.GetDamage() == 0)

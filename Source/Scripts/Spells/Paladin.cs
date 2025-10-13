@@ -120,7 +120,7 @@ class spell_pal_a_just_reward : AuraScript
         return ValidateSpellInfo(SpellIds.AJustRewardHeal);
     }
 
-    static void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.AJustRewardHeal, new CastSpellExtraArgs()
         {
@@ -311,7 +311,7 @@ class spell_pal_blade_of_vengeance : SpellScript
         return !GetCaster().HasAura(SpellIds.BladeOfVengeance);
     }
 
-    static void PreventProc(ref WorldObject target)
+    void PreventProc(ref WorldObject target)
     {
         target = null;
     }

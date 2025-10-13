@@ -161,7 +161,7 @@ class spell_hun_aspect_of_the_fox : SpellScript
         return !GetCaster().HasAura(SpellIds.AspectOfTheFox);
     }
 
-    static void HandleCastWhileWalking(ref WorldObject target)
+    void HandleCastWhileWalking(ref WorldObject target)
     {
         target = null;
     }
@@ -290,7 +290,7 @@ class at_hun_binding_shot(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 [Script] // 204089 - Bullseye
 class spell_hun_bullseye : AuraScript
 {
-    static bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return eventInfo.GetActionTarget().HealthBelowPct(aurEff.GetAmount());
     }
@@ -618,12 +618,12 @@ class spell_hun_manhunter : AuraScript
         return ValidateSpellInfo(SpellIds.GreviousInjury);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetProcTarget().IsPlayer();
     }
 
-    static void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.GreviousInjury, new CastSpellExtraArgs()
         {
@@ -647,7 +647,7 @@ class spell_hun_master_marksman : AuraScript
         return ValidateSpellInfo(SpellIds.MasterMarksman);
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.MasterMarksman, Difficulty.None).GetMaxTicks();
         if (ticks == 0)
@@ -1059,7 +1059,7 @@ class spell_hun_scouts_instincts : SpellScript
         return !GetCaster().HasAura(SpellIds.ScoutsInstincts);
     }
 
-    static void HandleMinSpeed(ref WorldObject target)
+    void HandleMinSpeed(ref WorldObject target)
     {
         target = null;
     }

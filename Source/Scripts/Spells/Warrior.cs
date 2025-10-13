@@ -114,7 +114,7 @@ namespace Scripts.Spells.Warrior
         static uint[] FurySpellIds = [SpellIds.Recklessness, SpellIds.Bladestorm, SpellIds.Ravager];
         static uint[] ProtectionSpellIds = [SpellIds.Avatar, SpellIds.ShieldWall];
 
-        static bool ValidateProc(AuraEffect aurEff, ProcEventInfo eventInfo, ChrSpecialization spec)
+        bool ValidateProc(AuraEffect aurEff, ProcEventInfo eventInfo, ChrSpecialization spec)
         {
             if (aurEff.GetAmount() == 0)
                 return false;
@@ -133,7 +133,7 @@ namespace Scripts.Spells.Warrior
             return player.GetPrimarySpecialization() == spec;
         }
 
-        static bool CheckArmsProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        bool CheckArmsProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             if (!ValidateProc(aurEff, eventInfo, ChrSpecialization.WarriorArms))
                 return false;
@@ -145,12 +145,12 @@ namespace Scripts.Spells.Warrior
             return true;
         }
 
-        static bool CheckFuryProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        bool CheckFuryProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             return ValidateProc(aurEff, eventInfo, ChrSpecialization.WarriorFury);
         }
 
-        static bool CheckProtectionProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        bool CheckProtectionProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             return ValidateProc(aurEff, eventInfo, ChrSpecialization.WarriorProtection);
         }
@@ -200,7 +200,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 392536 - Ashen Juggernaut
     class spell_warr_ashen_juggernaut : AuraScript
     {
-        static bool CheckProc(ProcEventInfo eventInfo)
+        bool CheckProc(ProcEventInfo eventInfo)
         {
             // should only proc on primary target
             return eventInfo.GetActionTarget() == eventInfo.GetProcSpell().m_targets.GetUnitTarget();
@@ -544,7 +544,7 @@ namespace Scripts.Spells.Warrior
             return ValidateSpellInfo(SpellIds.FreshMeatTalent, SpellIds.FreshMeatDebuff);
         }
 
-        static bool CheckRampageProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        bool CheckRampageProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null || !spellInfo.IsAffected(SpellFamilyNames.Warrior, new FlagArray128(0x0, 0x0, 0x0, 0x8000000)))  // Rampage
@@ -553,13 +553,13 @@ namespace Scripts.Spells.Warrior
             return true;
         }
 
-        static bool IsBloodthirst(SpellInfo spellInfo)
+        bool IsBloodthirst(SpellInfo spellInfo)
         {
             // Bloodthirst/Bloodbath
             return spellInfo.IsAffected(SpellFamilyNames.Warrior, new FlagArray128(0x0, 0x400));
         }
 
-        static bool CheckBloodthirstProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        bool CheckBloodthirstProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null || !IsBloodthirst(spellInfo))
@@ -630,7 +630,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 260798 - Execute (Arms, Protection)
     class spell_warr_execute_damage : SpellScript
     {
-        static void CalculateExecuteDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+        void CalculateExecuteDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
         {
             // tooltip has 2 multiplier hardcoded in it $damage=${2.0*$260798s1}
             pctMod *= 2.0f;
@@ -1288,7 +1288,7 @@ namespace Scripts.Spells.Warrior
                 && ValidateSpellEffect((SpellIds.Strategist, 0));
         }
 
-        static bool CheckProc(AuraEffect aurEff, ProcEventInfo procEvent)
+        bool CheckProc(AuraEffect aurEff, ProcEventInfo procEvent)
         {
             return RandomHelper.randChance(aurEff.GetAmount());
         }
@@ -1310,7 +1310,7 @@ namespace Scripts.Spells.Warrior
     [Script] // 280776 - Sudden Death
     class spell_warr_sudden_death : AuraScript
     {
-        static bool CheckProc(ProcEventInfo eventInfo)
+        bool CheckProc(ProcEventInfo eventInfo)
         {
             // should only proc on primary target
             return eventInfo.GetActionTarget() == eventInfo.GetProcSpell().m_targets.GetUnitTarget();

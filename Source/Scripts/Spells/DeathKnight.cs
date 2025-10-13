@@ -340,12 +340,12 @@ class spell_dk_crimson_scourge : AuraScript
         return ValidateSpellInfo(SpellIds.BloodPlague, SpellIds.CrimsonScourgeBuff, SpellIds.DeathAndDecay);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
         return procInfo.GetProcTarget().HasAura(SpellIds.BloodPlague, procInfo.GetActor().GetGUID());
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit actor = eventInfo.GetActor();
         actor.GetSpellHistory().RestoreCharge(Global.SpellMgr.GetSpellInfo(SpellIds.DeathAndDecay, Difficulty.None).ChargeCategoryId);

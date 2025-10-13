@@ -141,12 +141,12 @@ class spell_evo_burnout : AuraScript
         return ValidateSpellInfo(SpellIds.Burnout);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return RandomHelper.randChance(aurEff.GetAmount());
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.Burnout, TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
     }
@@ -583,7 +583,6 @@ class spell_evo_pyre : SpellScript
         GetCaster().CastSpell(GetHitUnit().GetPosition(), SpellIds.PyreDamage, true);
     }
 
-
     public override void Register()
     {
         OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.Dummy));
@@ -607,8 +606,7 @@ class spell_evo_ruby_embers : SpellScript
         return !GetCaster().HasAura(SpellIds.RubyEmbers);
     }
 
-
-    static void PreventPeriodic(ref WorldObject target)
+    void PreventPeriodic(ref WorldObject target)
     {
         target = null;
     }

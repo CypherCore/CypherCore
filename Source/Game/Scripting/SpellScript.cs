@@ -1127,6 +1127,71 @@ namespace Game.Scripting
             targets.AddRange(tempTargets.Select(pair => pair.Item1));
             targets.Resize(maxTargets);
         }
+
+        public List<PriorityRules> CreatePriorityRules(List<PriorityRules> rules) { return rules; }
+
+        public void SortTargetsWithPriorityRules(List<WorldObject> targets, int maxTargets, List<PriorityRules> rules)
+        {
+            if (targets.Count <= maxTargets)
+                return;
+
+            List<(WorldObject, int)> prioritizedTargets = new();
+
+            // score each target based on how many rules they satisfy.
+            foreach (WorldObject obj in targets)
+            {
+                Unit unit = obj?.ToUnit();
+                if (unit == null)
+                    continue;
+
+                int score = 0;
+
+                foreach (PriorityRules rule in rules)
+                {
+                    if (rule.condition(unit))
+                        score += rule.weight;
+                }
+
+                prioritizedTargets.Add((obj, score));
+            }
+
+            // the higher the value, the higher the priority is.
+            prioritizedTargets.Sort((left, right) => left.Item2.CompareTo(right.Item2));
+
+            int cutOff = Math.Min(maxTargets, prioritizedTargets.Count);
+
+            // if there are ties at the cutoff, shuffle them to avoid selection bias.
+            if (cutOff < prioritizedTargets.Count)
+            {
+                int tieScore = prioritizedTargets[cutOff - 1].Item2;
+
+                bool isTieScore((WorldObject, int) entry) { return entry.Item2 == tieScore; }
+
+                // scan backwards to include tied entries before the cutoff.
+                int tieStart = (cutOff - 1);
+                while (tieStart > 0 && isTieScore(prioritizedTargets[tieStart - 1]))
+                    --tieStart;
+
+                // scan forward to include tied entries after the cutoff.
+                int tieEnd = cutOff;
+                while (tieEnd < prioritizedTargets.Count && isTieScore(prioritizedTargets[tieEnd]))
+                    ++tieEnd;
+
+                // shuffle only the tied range to randomize final selection.
+                prioritizedTargets.RandomShuffle(tieStart, tieStart - tieEnd);
+            }
+
+            targets.Clear();
+
+            for (int i = 0; i < cutOff; ++i)
+                targets.Add(prioritizedTargets[i].Item1);
+        }
+    }
+
+    public struct PriorityRules
+    {
+        public int weight;
+        public Func<Unit, bool> condition;
     }
 
     public class AuraScript : SpellScriptBase

@@ -357,7 +357,7 @@ class spell_sha_aftershock : AuraScript
         return ValidateSpellInfo(SpellIds.AftershockEnergize);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Spell procSpell = eventInfo.GetProcSpell();
         if (procSpell != null)
@@ -370,7 +370,7 @@ class spell_sha_aftershock : AuraScript
         return false;
     }
 
-    static void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Spell procSpell = eventInfo.GetProcSpell();
         eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.AftershockEnergize, new CastSpellExtraArgs()
@@ -397,7 +397,7 @@ class spell_sha_ancestral_guidance : AuraScript
         return ValidateSpellInfo(SpellIds.AncestralGuidanceHeal);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         if (eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().Id == SpellIds.AncestralGuidanceHeal)
             return false;
@@ -433,11 +433,6 @@ class spell_sha_ancestral_guidance : AuraScript
 [Script] // 114911 - Ancestral Guidance Heal
 class spell_sha_ancestral_guidance_heal : SpellScript
 {
-    public override bool Validate(SpellInfo spellInfo)
-    {
-        return ValidateSpellInfo(SpellIds.AncestralGuidance);
-    }
-
     void ResizeTargets(List<WorldObject> targets)
     {
         SelectRandomInjuredTargets(targets, 3, true);
@@ -511,7 +506,7 @@ class spell_sha_ascendance_restoration : AuraScript
         return ValidateSpellInfo(SpellIds.RestorativeMists);
     }
 
-    static bool CheckProc(ProcEventInfo procInfo)
+    bool CheckProc(ProcEventInfo procInfo)
     {
         return procInfo.GetHealInfo() != null && procInfo.GetHealInfo().GetOriginalHeal() != 0 && procInfo.GetSpellInfo().Id != SpellIds.RestorativeMistsInitial;
     }
@@ -1030,7 +1025,7 @@ class spell_sha_earthen_rage_passive : AuraScript
         return ValidateSpellInfo(SpellIds.EarthenRagePeriodic, SpellIds.EarthenRageDamage);
     }
 
-    static bool CheckProc(ProcEventInfo procInfo)
+    bool CheckProc(ProcEventInfo procInfo)
     {
         return procInfo.GetSpellInfo() != null && procInfo.GetSpellInfo().Id != SpellIds.EarthenRageDamage;
     }
@@ -1581,7 +1576,7 @@ class spell_sha_healing_stream_totem_heal : SpellScript
 [Script] // 201900 - Hot Hand
 class spell_sha_hot_hand : AuraScript
 {
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return eventInfo.GetActor().HasAura(SpellIds.FlametongueWeaponAura);
     }
@@ -1714,7 +1709,7 @@ class spell_sha_item_mana_surge : AuraScript
         return ValidateSpellInfo(SpellIds.ItemManaSurge);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetProcSpell() != null;
     }
@@ -2165,13 +2160,13 @@ class spell_sha_mastery_elemental_overload : AuraScript
        );
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         SpellInfo spellInfo = eventInfo.GetSpellInfo();
         if (spellInfo == null || eventInfo.GetProcSpell() == null)
             return false;
 
-        if (GetTriggeredSpellId(spellInfo.Id) == null)
+        if (GetTriggeredSpellId(spellInfo.Id) == 0)
             return false;
 
         float chance = aurEff.GetAmount();   // Mastery % amount
@@ -2380,13 +2375,13 @@ class spell_sha_natures_guardian : AuraScript
         return ValidateSpellInfo(SpellIds.NaturesGuardianCooldown);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return eventInfo.GetActionTarget().HealthBelowPct(aurEff.GetAmount())
             && !eventInfo.GetActionTarget().HasAura(SpellIds.NaturesGuardianCooldown);
     }
 
-    static void StartCooldown(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void StartCooldown(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit shaman = eventInfo.GetActionTarget();
         shaman.CastSpell(shaman, SpellIds.NaturesGuardianCooldown, new CastSpellExtraArgs()
@@ -2766,7 +2761,7 @@ class spell_sha_stormsurge : AuraScript
         return ValidateSpellInfo(SpellIds.StormsurgeProc);
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.StormsurgeProc, new CastSpellExtraArgs()
         {
@@ -3194,7 +3189,7 @@ class spell_sha_unlimited_power : AuraScript
         return ValidateSpellInfo(SpellIds.UnlimitedPowerBuff);
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
         Unit caster = procInfo.GetActor();
         Aura aura = caster.GetAura(SpellIds.UnlimitedPowerBuff);
@@ -3329,7 +3324,7 @@ class spell_sha_voltaic_blaze : SpellScript
 [Script] // 470058 - Voltaic Blaze
 class spell_sha_voltaic_blaze_aura : AuraScript
 {
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         // 470057 - Voltaic Blaze does not have any unique SpellFamilyFlags, check by id
         return eventInfo.GetSpellInfo().Id == SpellIds.VoltaicBlazeDamage;
@@ -3344,12 +3339,12 @@ class spell_sha_voltaic_blaze_aura : AuraScript
 [Script] // 470053 - Voltaic Blaze
 class spell_sha_voltaic_blaze_talent : AuraScript
 {
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return RandomHelper.randChance(aurEff.GetAmount());
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.VoltaicBlazeOverride);
     }
@@ -3474,7 +3469,7 @@ class areatrigger_sha_wind_rush_totem(AreaTrigger areaTrigger) : AreaTriggerAI(a
             CastSpeedBuff(caster, unit);
     }
 
-    static void CastSpeedBuff(Unit caster, Unit unit)
+    void CastSpeedBuff(Unit caster, Unit unit)
     {
         if (!caster.IsValidAssistTarget(unit))
             return;

@@ -1282,9 +1282,7 @@ class spell_warl_shadowburn : SpellScript
         OnCalcCritChance.Add(new(CalcCritChance));
     }
 
-    public
-        static void TryEnergize(Player caster, Unit target, SpellInfo spellInfo,
-            Spell triggeringSpell, AuraEffect triggeringAura)
+    public static void TryEnergize(Player caster, Unit target, SpellInfo spellInfo, Spell triggeringSpell, AuraEffect triggeringAura)
     {
         if (caster == null)
             return;

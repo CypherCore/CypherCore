@@ -358,7 +358,7 @@ class spell_pri_aq_3p_bonus : AuraScript
 [Script] // 81749 - Atonement
 class spell_pri_atonement : AuraScript
 {
-    List<ObjectGuid> _appliedAtonements;
+    List<ObjectGuid> _appliedAtonements = new();
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -366,7 +366,7 @@ class spell_pri_atonement : AuraScript
             && ValidateSpellEffect((spellInfo.Id, 1), (SpellIds.SinsOfTheMany, 2));
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetDamageInfo() != null;
     }
@@ -598,7 +598,7 @@ class spell_pri_atonement_passive : AuraScript
         return ValidateSpellEffect((SpellIds.Atonement, 0));
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetDamageInfo() != null;
     }
@@ -848,7 +848,7 @@ class spell_pri_divine_image : AuraScript
         return ValidateSpellInfo(SpellIds.DivineImageSummon, SpellIds.DivineImageEmpower, SpellIds.DivineImageEmpowerStack);
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit target = eventInfo.GetActor();
         if (target == null)
@@ -930,7 +930,7 @@ class spell_pri_divine_image_spell_triggered : AuraScript
        );
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return DivineImageHelpers.GetSummon(eventInfo.GetActor()) != null;
     }
@@ -1151,7 +1151,7 @@ class spell_pri_epiphany : AuraScript
         return ValidateSpellInfo(SpellIds.PrayerOfMending, SpellIds.EpiphanyHighlight);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return RandomHelper.randChance(aurEff.GetAmount());
     }
@@ -1272,7 +1272,7 @@ class spell_pri_guardian_spirit : AuraScript
         return true;
     }
 
-    static void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
     {
         // Set absorbtion amount to unlimited
         amount = -1;
@@ -1308,12 +1308,12 @@ class spell_pri_heavens_wrath : AuraScript
         return ValidateSpellInfo(SpellIds.UltimatePenitence);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return !(eventInfo.GetSpellInfo().Id == SpellIds.UltimatePenitenceDamage || eventInfo.GetSpellInfo().Id == SpellIds.UltimatePenitenceHeal);
     }
 
-    static void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit caster = eventInfo.GetActor();
         if (caster == null)
@@ -1373,12 +1373,12 @@ class spell_pri_holy_mending : AuraScript
         return ValidateSpellInfo(SpellIds.Renew, SpellIds.HolyMendingHeal);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
         return procInfo.GetProcTarget().HasAura(SpellIds.Renew, procInfo.GetActor().GetGUID());
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.HolyMendingHeal, new CastSpellExtraArgs(aurEff));
     }
@@ -1763,7 +1763,7 @@ class spell_pri_painful_punishment : AuraScript
         return ValidateSpellInfo(SpellIds.ShadowWordPain, SpellIds.PurgeTheWickedPeriodic);
     }
 
-    static void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetActionTarget();
@@ -1916,7 +1916,7 @@ class spell_pri_power_leech_passive : AuraScript
             && ValidateSpellEffect((SpellIds.PowerLeechShadowfiendInsanity, 0), (SpellIds.PowerLeechShadowfiendMana, 0), (SpellIds.PowerLeechMindbenderInsanity, 0), (SpellIds.PowerLeechMindbenderMana, 0));
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetDamageInfo() != null;
     }
@@ -2042,6 +2042,8 @@ class spell_pri_power_of_the_dark_side_healing_bonus : SpellScript
 [Script] // 194509 - Power Word: Radiance
 class spell_pri_power_word_radiance : SpellScript
 {
+    List<ObjectGuid> _visualTargets = new();
+
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellInfo(SpellIds.AtonementEffect);
@@ -2049,26 +2051,13 @@ class spell_pri_power_word_radiance : SpellScript
 
     void FilterTargets(List<WorldObject> targets)
     {
+        Unit caster = GetCaster();
         Unit explTarget = GetExplTargetUnit();
 
         // we must add one since explicit target is always chosen.
-        uint maxTargets = (uint)GetEffectInfo(2).CalcValue(GetCaster()) + 1;
+        int maxTargets = GetEffectInfo(2).CalcValue(GetCaster()) + 1;
 
-        if (targets.Count > maxTargets)
-        {
-            // priority is: a) no Atonement b) injured c) anything else (excluding explicit target which is always added).
-            targets.Sort((lhs, rhs) =>
-            {
-                if (lhs == explTarget) // explTarget > anything: always true
-                    return 1;
-                if (rhs == explTarget) // anything > explTarget: always false
-                    return -1;
-
-                return MakeSortTuple(lhs).Equals(MakeSortTuple(rhs)) ? 1 : -1;
-            });
-
-            targets.Resize(maxTargets);
-        }
+        SortTargetsWithPriorityRules(targets, maxTargets, GetRadianceRules(caster, explTarget));
 
         foreach (WorldObject target in targets)
         {
@@ -2089,33 +2078,23 @@ class spell_pri_power_word_radiance : SpellScript
         }
     }
 
+    List<PriorityRules> GetRadianceRules(Unit caster, Unit explTarget)
+    {
+        return new List<PriorityRules>()
+        {
+            new PriorityRules() { weight = 1,  condition = target => target.IsInRaidWith(caster) },
+            new PriorityRules() { weight = 2,  condition =  target => target.IsPlayer() || (target.IsCreature() && target.ToCreature().IsTreatedAsRaidUnit()) },
+            new PriorityRules() { weight = 4,  condition =  target => !target.IsFullHealth() },
+            new PriorityRules() { weight = 8,  condition =  target => !target.HasAura(SpellIds.AtonementEffect, caster.GetGUID()) },
+            new PriorityRules() { weight = 16, condition =  target => target == explTarget }
+        };
+    }
+
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaAlly));
         OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
     }
-
-
-    (bool, bool) MakeSortTuple(WorldObject obj)
-    {
-        return (IsUnitWithNoAtonement(obj), IsUnitInjured(obj));
-    }
-
-    // Returns true if obj is a unit but has no atonement
-    bool IsUnitWithNoAtonement(WorldObject obj)
-    {
-        Unit unit = obj.ToUnit();
-        return unit != null && !unit.HasAura(SpellIds.AtonementEffect, GetCaster().GetGUID());
-    }
-
-    // Returns true if obj is a unit and is injured
-    static bool IsUnitInjured(WorldObject obj)
-    {
-        Unit unit = obj.ToUnit();
-        return unit != null && !unit.IsFullHealth();
-    }
-
-    List<ObjectGuid> _visualTargets;
 }
 
 [Script] // 17 - Power Word: Shield
@@ -2227,12 +2206,12 @@ class spell_pri_divine_aegis : AuraScript
         return ValidateSpellEffect((SpellIds.DivineAegisAbsorb, 0));
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetHealInfo() != null;
     }
 
-    static void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit caster = eventInfo.GetActor();
         if (caster == null)
@@ -2486,7 +2465,7 @@ class spell_pri_holy_10_1_class_set_2pc : AuraScript
             && ValidateSpellEffect((SpellIds.PrayerOfMending, 0));
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return RandomHelper.randChance(aurEff.GetAmount());
     }
@@ -3055,7 +3034,7 @@ class spell_pri_shadow_mend_periodic_damage : AuraScript
         GetTarget().CastSpell(GetTarget(), SpellIds.ShadowMendDamage, args);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         return eventInfo.GetDamageInfo() != null;
     }
@@ -3133,7 +3112,7 @@ class spell_pri_surge_of_light : AuraScript
         return ValidateSpellInfo(SpellIds.Smite, SpellIds.SurgeOfLightEffect);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         if (eventInfo.GetSpellInfo().Id == SpellIds.Smite)
             return true;
@@ -3185,7 +3164,7 @@ class spell_pri_t5_heal_2p_bonus : AuraScript
         return ValidateSpellInfo(SpellIds.ItemEfficiency);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         HealInfo healInfo = eventInfo.GetHealInfo();
         if (healInfo != null)
@@ -3312,13 +3291,13 @@ class spell_pri_train_of_thought : AuraScript
         return ValidateSpellInfo(SpellIds.PowerWordShield, SpellIds.Penance);
     }
 
-    static bool CheckEffect0(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckEffect0(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         // Renew & Flash Heal
         return eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Priest, new FlagArray128(0x840));
     }
 
-    static bool Check1(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool Check1(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         // Smite
         return eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Priest, new FlagArray128(0x80));
@@ -3347,7 +3326,7 @@ class spell_pri_train_of_thought : AuraScript
 [Script] // 265259 - Twist of Fate (Discipline)
 class spell_pri_twist_of_fate : AuraScript
 {
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         return eventInfo.GetProcTarget().GetHealthPct() < aurEff.GetAmount();
     }
@@ -3422,7 +3401,7 @@ class spell_pri_vampiric_embrace : AuraScript
         return ValidateSpellInfo(SpellIds.VampiricEmbraceHeal);
     }
 
-    static bool CheckProc(ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
         // Not proc from Mind Sear
         return (eventInfo.GetDamageInfo().GetSpellInfo().SpellFamilyFlags[1] & 0x80000) == 0;

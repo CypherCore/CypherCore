@@ -366,7 +366,7 @@ class spell_rog_deepening_shadows : AuraScript
         return ValidateSpellInfo(SpellIds.ShadowDance);
     }
 
-    static bool CheckProc(AuraEffect aurEff, ProcEventInfo procEvent)
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo procEvent)
     {
         Spell procSpell = procEvent.GetProcSpell();
         if (procSpell != null)
