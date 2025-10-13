@@ -2055,7 +2055,7 @@ class spell_pri_power_word_radiance : SpellScript
         Unit explTarget = GetExplTargetUnit();
 
         // we must add one since explicit target is always chosen.
-        int maxTargets = GetEffectInfo(2).CalcValue(GetCaster()) + 1;
+        int maxTargets = GetEffectInfo(2).CalcValue(caster) + 1;
 
         SortTargetsWithPriorityRules(targets, maxTargets, GetRadianceRules(caster, explTarget));
 
@@ -2078,15 +2078,15 @@ class spell_pri_power_word_radiance : SpellScript
         }
     }
 
-    List<PriorityRules> GetRadianceRules(Unit caster, Unit explTarget)
+    List<TargetPriorityRule> GetRadianceRules(Unit caster, Unit explTarget)
     {
-        return new List<PriorityRules>()
+        return new List<TargetPriorityRule>()
         {
-            new PriorityRules() { weight = 1,  condition = target => target.IsInRaidWith(caster) },
-            new PriorityRules() { weight = 2,  condition =  target => target.IsPlayer() || (target.IsCreature() && target.ToCreature().IsTreatedAsRaidUnit()) },
-            new PriorityRules() { weight = 4,  condition =  target => !target.IsFullHealth() },
-            new PriorityRules() { weight = 8,  condition =  target => !target.HasAura(SpellIds.AtonementEffect, caster.GetGUID()) },
-            new PriorityRules() { weight = 16, condition =  target => target == explTarget }
+            new TargetPriorityRule((WorldObject target) => target == explTarget),
+            new TargetPriorityRule((Unit target) => !target.HasAura(SpellIds.AtonementEffect, caster.GetGUID())),
+            new TargetPriorityRule((Unit target) => !target.ToUnit().IsFullHealth()),
+            new TargetPriorityRule((WorldObject target) => target.IsPlayer() || (target.IsCreature() && target.ToCreature().IsTreatedAsRaidUnit())),
+            new TargetPriorityRule((Unit target) => target.ToUnit().IsInRaidWith(caster))
         };
     }
 

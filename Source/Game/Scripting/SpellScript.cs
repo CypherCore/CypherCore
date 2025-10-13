@@ -1128,9 +1128,7 @@ namespace Game.Scripting
             targets.Resize(maxTargets);
         }
 
-        public List<PriorityRules> CreatePriorityRules(List<PriorityRules> rules) { return rules; }
-
-        public void SortTargetsWithPriorityRules(List<WorldObject> targets, int maxTargets, List<PriorityRules> rules)
+        public void SortTargetsWithPriorityRules(List<WorldObject> targets, int maxTargets, List<TargetPriorityRule> rules)
         {
             if (targets.Count <= maxTargets)
                 return;
@@ -1138,42 +1136,33 @@ namespace Game.Scripting
             List<(WorldObject, int)> prioritizedTargets = new();
 
             // score each target based on how many rules they satisfy.
-            foreach (WorldObject obj in targets)
+            foreach (WorldObject target in targets)
             {
-                Unit unit = obj?.ToUnit();
-                if (unit == null)
-                    continue;
-
                 int score = 0;
+                for (int i = 0; i < rules.Count; ++i)
+                    if (rules[i].Rule(target))
+                        score |= 1 << (rules.Count - 1 - i);
 
-                foreach (PriorityRules rule in rules)
-                {
-                    if (rule.condition(unit))
-                        score += rule.weight;
-                }
-
-                prioritizedTargets.Add((obj, score));
+                prioritizedTargets.Add((target, score));
             }
 
             // the higher the value, the higher the priority is.
-            prioritizedTargets.Sort((left, right) => left.Item2.CompareTo(right.Item2));
+            prioritizedTargets.OrderBy(pair => pair.Item2);
 
-            int cutOff = Math.Min(maxTargets, prioritizedTargets.Count);
+            int tieScore = prioritizedTargets[maxTargets - 1].Item2;
 
             // if there are ties at the cutoff, shuffle them to avoid selection bias.
-            if (cutOff < prioritizedTargets.Count)
+            if (prioritizedTargets[maxTargets].Item2 == tieScore)
             {
-                int tieScore = prioritizedTargets[cutOff - 1].Item2;
-
                 bool isTieScore((WorldObject, int) entry) { return entry.Item2 == tieScore; }
 
                 // scan backwards to include tied entries before the cutoff.
-                int tieStart = (cutOff - 1);
+                int tieStart = (maxTargets - 1);
                 while (tieStart > 0 && isTieScore(prioritizedTargets[tieStart - 1]))
                     --tieStart;
 
                 // scan forward to include tied entries after the cutoff.
-                int tieEnd = cutOff;
+                int tieEnd = maxTargets;
                 while (tieEnd < prioritizedTargets.Count && isTieScore(prioritizedTargets[tieEnd]))
                     ++tieEnd;
 
@@ -1183,15 +1172,27 @@ namespace Game.Scripting
 
             targets.Clear();
 
-            for (int i = 0; i < cutOff; ++i)
+            for (int i = 0; i < maxTargets; ++i)
                 targets.Add(prioritizedTargets[i].Item1);
         }
     }
 
-    public struct PriorityRules
+    public struct TargetPriorityRule
     {
-        public int weight;
-        public Func<Unit, bool> condition;
+        public Func<WorldObject, bool> Rule;
+
+        public TargetPriorityRule(Func<WorldObject, bool> func)
+        {
+            Rule = (WorldObject target) => func(target);
+        }
+        public TargetPriorityRule(Func<Unit, bool> func)
+        {
+            Rule = (WorldObject target) => target.IsUnit() && func(target.ToUnit());
+        }
+        public TargetPriorityRule(Func<Player, bool> func)
+        {
+            Rule = (WorldObject target) => target.IsPlayer() && func(target.ToPlayer());
+        }
     }
 
     public class AuraScript : SpellScriptBase
