@@ -175,8 +175,7 @@ namespace Scripts.Pets.Generic
 
             Unit owner = GetUnitOwner();
 
-            List<TempSummon> minionList = new();
-            owner.GetAllMinionsByEntry(minionList, NpcLichPet);
+            List<TempSummon> minionList = owner.GetAllMinionsByEntry(NpcLichPet);
             foreach (TempSummon minion in minionList)
                 owner.CastSpell(minion, SpellLichPetAuraOnkill, true);
         }
