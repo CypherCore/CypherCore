@@ -1183,11 +1183,11 @@ namespace Scripts.World.NpcsSpecial
                 case TournamentPennantIds.NpcArgentWarhorse:
                 {
                     if (player.HasAchieved(TournamentPennantIds.AchievementChapionAlliance) || player.HasAchieved(TournamentPennantIds.AchievementChapionHorde))
-                        return player.GetClass() == Class.Deathknight ? TournamentPennantIds.SpellEbonBladeChapion : TournamentPennantIds.SpellArgentCrusadeChapion;
+                        return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeChapion : TournamentPennantIds.SpellArgentCrusadeChapion;
                     else if (player.HasAchieved(TournamentPennantIds.AchievementArgentValor))
-                        return player.GetClass() == Class.Deathknight ? TournamentPennantIds.SpellEbonBladeValiant : TournamentPennantIds.SpellArgentCrusadeValiant;
+                        return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeValiant : TournamentPennantIds.SpellArgentCrusadeValiant;
                     else
-                        return player.GetClass() == Class.Deathknight ? TournamentPennantIds.SpellEbonBladeAspirant : TournamentPennantIds.SpellArgentCrusadeAspirant;
+                        return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeAspirant : TournamentPennantIds.SpellArgentCrusadeAspirant;
                 }
                 default:
                     return 0;

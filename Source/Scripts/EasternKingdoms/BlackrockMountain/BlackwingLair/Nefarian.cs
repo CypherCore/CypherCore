@@ -536,7 +536,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackwingLair.VictorNefarius
                                     Talk(TextIds.SayRogue);
                                     DoCast(me, SpellIds.Rogue);
                                     break;
-                                case Class.Deathknight:
+                                case Class.DeathKnight:
                                     Talk(TextIds.SayDeathKnight);
                                     DoCast(me, SpellIds.DeathKnight);
                                     break;
