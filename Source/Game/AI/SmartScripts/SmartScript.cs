@@ -1129,6 +1129,8 @@ namespace Game.AI
                 {
                     SmartActionSummonCreatureFlags flags = (SmartActionSummonCreatureFlags)e.Action.summonCreature.flags;
                     bool preferUnit = flags.HasAnyFlag(SmartActionSummonCreatureFlags.PreferUnit);
+                    bool attackInvoker = flags.HasFlag(SmartActionSummonCreatureFlags.AttackInvoker);
+
                     WorldObject summoner = preferUnit ? unit : GetBaseObjectOrUnitInvoker(unit);
                     if (summoner == null)
                         break;
@@ -1138,6 +1140,44 @@ namespace Game.AI
                         privateObjectOwner = summoner.IsPrivateObject() ? summoner.GetPrivateObjectOwner() : summoner.GetGUID();
                     uint spawnsCount = Math.Max(e.Action.summonCreature.count, 1u);
 
+                    if (e.Action.summonCreature.storedTargetId != 0)
+                        ClearTargetList(e.Action.summonCreature.storedTargetId);
+
+                    SummonPropertiesRecord summonProperties()
+                    {
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.summonCreature.createdBySpell, Difficulty.None);
+                        if (spellInfo != null)
+                        {
+                            foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
+                            {
+                                if (spellEffectInfo.IsEffect(SpellEffectName.Summon))
+                                {
+                                    var summonProps = CliDB.SummonPropertiesStorage.LookupByKey(spellEffectInfo.MiscValueB);
+                                    if (summonProps != null)
+                                        return summonProps;
+                                }
+                            }
+                        }
+
+                        return null;
+                    }
+
+                    void DoSummon(float x, float y, float z, float o, Unit attackTarget)
+                    {
+                        for (uint counter = 0; counter < spawnsCount; counter++)
+                        {
+                            TempSummon summon = summoner.GetMap().SummonCreature(e.Action.summonCreature.creature, new Position(x, y, z, o), summonProperties(), TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), summoner, e.Action.summonCreature.createdBySpell, 0, privateObjectOwner);
+                            if (summon != null)
+                            {
+                                summon.SetTempSummonType((TempSummonType)e.Action.summonCreature.type);
+                                if (e.Action.summonCreature.storedTargetId != 0)
+                                    AddToStoredTargetList([summon], e.Action.summonCreature.storedTargetId);
+                                if (attackInvoker && attackTarget != null)
+                                    summon.GetAI().AttackStart(attackTarget);
+                            }
+                        }
+                    }
+
                     float x, y, z, o;
                     foreach (var target in targets)
                     {
@@ -1146,25 +1186,13 @@ namespace Game.AI
                         y += e.Target.y;
                         z += e.Target.z;
                         o += e.Target.o;
-                        for (uint counter = 0; counter < spawnsCount; counter++)
-                        {
-                            Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, x, y, z, o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
-                            if (summon != null)
-                                if (e.Action.summonCreature.attackInvoker != 0)
-                                    summon.GetAI().AttackStart(target.ToUnit());
-                        }
+                        DoSummon(x, y, z, o, target.ToUnit());
                     }
 
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
-                    for (uint counter = 0; counter < spawnsCount; counter++)
-                    {
-                        Creature summon = summoner.SummonCreature(e.Action.summonCreature.creature, e.Target.x, e.Target.y, e.Target.z, e.Target.o, (TempSummonType)e.Action.summonCreature.type, TimeSpan.FromMilliseconds(e.Action.summonCreature.duration), privateObjectOwner);
-                        if (summon != null)
-                            if (unit != null && e.Action.summonCreature.attackInvoker != 0)
-                                summon.GetAI().AttackStart(unit);
-                    }
+                    DoSummon(e.Target.x, e.Target.y, e.Target.z, e.Target.o, unit);
                     break;
                 }
                 case SmartActions.SummonGo:
@@ -1173,18 +1201,25 @@ namespace Game.AI
                     if (summoner == null)
                         break;
 
+                    if (e.Action.summonGO.storedTargetId != 0)
+                        ClearTargetList(e.Action.summonGO.storedTargetId);
+
                     foreach (var target in targets)
                     {
                         Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
                         Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
-                        summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
+                        GameObject summon = summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
+                        if (e.Action.summonGO.storedTargetId != 0 && summon != null)
+                            AddToStoredTargetList([summon], e.Action.summonGO.storedTargetId);
                     }
 
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
-                    Quaternion _rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
-                    summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
+                    Quaternion rot1 = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
+                    GameObject summon1 = summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), rot1, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
+                    if (e.Action.summonGO.storedTargetId != 0 && summon1 != null)
+                        AddToStoredTargetList([summon1], e.Action.summonGO.storedTargetId);
                     break;
                 }
                 case SmartActions.KillUnit:
@@ -1946,7 +1981,7 @@ namespace Game.AI
                         {
                             SmartAI ai = (SmartAI)creatureTarget.GetAI();
                             if (ai != null)
-                                ai.GetScript().StoreTargetList(new List<WorldObject>(storedTargets), e.Action.sendTargetToTarget.id);   // store a copy of target list
+                                ai.GetScript().StoreTargetList(storedTargets, e.Action.sendTargetToTarget.id);   // store a copy of target list
                             else
                                 Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SEND_TARGET_TO_TARGET is not using SmartAI, skipping");
                         }
@@ -1957,7 +1992,7 @@ namespace Game.AI
                             {
                                 SmartGameObjectAI ai = (SmartGameObjectAI)gameObject.GetAI();
                                 if (ai != null)
-                                    ai.GetScript().StoreTargetList(new List<WorldObject>(storedTargets), e.Action.sendTargetToTarget.id);   // store a copy of target list
+                                    ai.GetScript().StoreTargetList(storedTargets, e.Action.sendTargetToTarget.id);   // store a copy of target list
                                 else
                                     Log.outError(LogFilter.Sql, "SmartScript: Action target for SMART_ACTION_SEND_TARGET_TO_TARGET is not using SmartGameObjectAI, skipping");
                             }
@@ -2052,6 +2087,9 @@ namespace Game.AI
                     foreach (var summon in summonList)
                         if (unit == null && e.Action.creatureGroup.attackInvoker != 0)
                             summon.GetAI().AttackStart(unit);
+
+                    if (e.Action.creatureGroup.storedTargetId != 0)
+                        StoreTargetList(summonList.Cast<WorldObject>().ToList(), e.Action.creatureGroup.storedTargetId);
                     break;
                 }
                 case SmartActions.SetPower:
@@ -4440,6 +4478,11 @@ namespace Game.AI
                 return IsSmart(_go, silent);
 
             return false;
+        }
+
+        void ClearTargetList(uint id)
+        {
+            _storedTargets.Remove(id);
         }
 
         void StoreTargetList(List<WorldObject> targets, uint id)

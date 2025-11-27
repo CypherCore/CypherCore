@@ -1633,7 +1633,22 @@ namespace Game.AI
                         return false;
                     }
 
-                    TC_SAI_IS_BOOLEAN_VALID(e, e.Action.summonCreature.attackInvoker);
+                    if (e.Action.summonCreature.createdBySpell != 0)
+                    {
+                        if (!IsSpellValid(e, e.Action.summonCreature.createdBySpell))
+                            return false;
+
+                        bool propertiesFound = Global.SpellMgr.GetSpellInfo(e.Action.summonCreature.createdBySpell, Difficulty.None).GetEffects().Any(spellEffectInfo =>
+                        {
+                            return spellEffectInfo.IsEffect(SpellEffectName.Summon) && CliDB.SummonPropertiesStorage.HasRecord((uint)spellEffectInfo.MiscValueB);
+                        });
+
+                        if (!propertiesFound)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Spell {e.Action.summonCreature.createdBySpell} is not a summon creature spell.");
+                            return false;
+                        }
+                    }
                     break;
                 case SmartActions.CallKilledmonster:
                     if (!IsCreatureValid(e, e.Action.killedMonster.creature))
@@ -3376,10 +3391,10 @@ namespace Game.AI
             public uint creature;
             public uint type;
             public uint duration;
-            public uint storageID;
-            public uint attackInvoker;
+            public uint storedTargetId;
             public uint flags; // SmartActionSummonCreatureFlags
             public uint count;
+            public uint createdBySpell;
         }
         public struct ThreatPCT
         {
@@ -3512,6 +3527,7 @@ namespace Game.AI
             public uint entry;
             public uint despawnTime;
             public uint summonType;
+            public uint storedTargetId;
         }
         public struct Active
         {
@@ -3686,6 +3702,7 @@ namespace Game.AI
         {
             public uint group;
             public uint attackInvoker;
+            public uint storedTargetId;
         }
         public struct Power
         {

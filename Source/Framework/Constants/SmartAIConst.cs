@@ -136,8 +136,9 @@ namespace Framework.Constants
         None = 0,
         PersonalSpawn = 1,
         PreferUnit = 2,
+        AttackInvoker = 4,
 
-        All = PersonalSpawn | PreferUnit,
+        All = PersonalSpawn | PreferUnit | AttackInvoker,
     }
 
     public enum SmartEvents
@@ -249,7 +250,7 @@ namespace Framework.Constants
         ActivateGobject = 9,      //
         RandomEmote = 10,     // Emoteid1, Emoteid2, Emoteid3...
         Cast = 11,     // Spellid, Castflags, TriggeredFlags
-        SummonCreature = 12,     // Creatureid, Summontype, Duration In Ms, Storageid, Attackinvoker, flags(SmartActionSummonCreatureFlags)
+        SummonCreature = 12,     // reatureID, summonType, duration in ms, stored target id, flags(SmartActionSummonCreatureFlags), count, createdBySpell
         ThreatSinglePct = 13,     // Threat%
         ThreatAllPct = 14,     // Threat%
         CallAreaexploredoreventhappens = 15,     // UNUSED, DO NOT REUSE
@@ -287,7 +288,7 @@ namespace Framework.Constants
         SetVisibility = 47,     // On/Off
         SetActive = 48,     // No Params
         AttackStart = 49,     //
-        SummonGo = 50,     // Gameobjectid, Despawntime In Ms,
+        SummonGo = 50,     // GameObjectID, DespawnTime in s, summon type, stored target id
         KillUnit = 51,     //
         ActivateTaxi = 52,     // Taxiid
         WpStart = 53,     // Run/Walk, Pathid, Canrepeat, Quest, Despawntime
@@ -344,7 +345,7 @@ namespace Framework.Constants
         SetGoFlag = 104,    // UNUSED, DO NOT REUSE
         AddGoFlag = 105,    // UNUSED, DO NOT REUSE
         RemoveGoFlag = 106,    // UNUSED, DO NOT REUSE
-        SummonCreatureGroup = 107,    // Group, Attackinvoker
+        SummonCreatureGroup = 107,    // Group, attackInvoker, stored target id
         SetPower = 108,    // PowerType, newPower
         AddPower = 109,    // PowerType, newPower
         RemovePower = 110,    // PowerType, newPower
