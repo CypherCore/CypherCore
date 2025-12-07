@@ -91,19 +91,6 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerScaleCurvePointsTemplate
-    {
-        public CurveInterpolationMode Mode = CurveInterpolationMode.Linear;
-        public Vector2[] Points = new Vector2[2];
-    }
-
-    public class AreaTriggerScaleCurveTemplate
-    {
-        public uint StartTimeOffset;
-        public float Curve = 1.0f;
-        public AreaTriggerScaleCurvePointsTemplate CurveTemplate;
-    }
-
     public struct AreaTriggerId
     {
         public uint Id;
@@ -232,9 +219,6 @@ namespace Game.Entities
 
         public uint TimeToTargetScale;
 
-        public AreaTriggerScaleCurveTemplate OverrideScale;
-        public AreaTriggerScaleCurveTemplate ExtraScale;
-
         public AreaTriggerShapeInfo Shape = new();
 
         public float Speed = 1.0f;
@@ -246,10 +230,7 @@ namespace Game.Entities
         public AreaTriggerCreateProperties()
         {
             Id = new(0, false);
-            ExtraScale = new();
         }
-
-        public bool HasSplines() { return SplinePoints.Count >= 2; }
     }
 
     public class AreaTriggerSpawn : SpawnData

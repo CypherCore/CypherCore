@@ -157,7 +157,7 @@ namespace Game.DataStorage
 
                     uint ValidateAndSetCurve(uint value)
                     {
-                        if (value != 0 && !CliDB.CurveStorage.ContainsKey(value))
+                        if (value != 0 && !CliDB.CurveStorage.HasRecord(value))
                         {
                             Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed AreaTrigger (Id: {areaTriggerId.Id}, IsCustom: {areaTriggerId.IsCustom}) for AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid Curve ({value}), set to 0!");
                             return 0;
@@ -215,7 +215,9 @@ namespace Game.DataStorage
                         createProperties.Shape.PolygonVerticesTarget.Clear();
                     }
 
-                    createProperties.SplinePoints = splinesByCreateProperties[createProperties.Id];
+                    var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
+                    if (spline != null)
+                        createProperties.SplinePoints = spline;
 
                     _areaTriggerCreateProperties[createProperties.Id] = createProperties;
                 }
@@ -255,7 +257,6 @@ namespace Game.DataStorage
 
                         return value;
                     }
-
 
                     orbitInfo.Radius = ValidateAndSetFloat(circularMovementInfos.Read<float>(3));
                     orbitInfo.BlendFromRadius = circularMovementInfos.Read<float>(4);
@@ -327,7 +328,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    if (createProperties.HasSplines())
+                    if (createProperties.SplinePoints != null)
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with splines");
                         continue;

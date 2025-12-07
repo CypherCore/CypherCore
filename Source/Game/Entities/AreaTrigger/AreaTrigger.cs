@@ -149,8 +149,7 @@ namespace Game.Entities
             if (IsServerSide())
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24u); // Blue decal, for .debug areatrigger visibility
 
-            AreaTriggerScaleCurveTemplate extraScaleCurve = IsStaticSpawn() ? new AreaTriggerScaleCurveTemplate() : GetCreateProperties().ExtraScale;
-            SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), extraScaleCurve);
+            SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), 1.0f);
 
             if (caster != null)
             {
@@ -162,7 +161,7 @@ namespace Game.Entities
                     modOwner.GetSpellModValues(spellInfo, SpellModOp.Radius, spell, (float)m_areaTriggerData.BoundsRadius2D, ref flat, ref multiplier);
                     if (multiplier != 1.0f)
                     {
-                        AreaTriggerScaleCurveTemplate overrideScale = new();
+                        ScaleCurveData overrideScale = new();
                         overrideScale.Curve = multiplier;
                         SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
                     }
@@ -521,20 +520,17 @@ namespace Game.Entities
 
         void SetScaleCurve(ScaleCurve scaleCurve, float constantValue)
         {
-            AreaTriggerScaleCurveTemplate curveTemplate = new();
+            ScaleCurveData curveTemplate = new();
             curveTemplate.Curve = constantValue;
             SetScaleCurve(scaleCurve, curveTemplate);
         }
 
         void SetScaleCurve(ScaleCurve scaleCurve, Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            AreaTriggerScaleCurvePointsTemplate curve = new();
-            curve.Mode = interpolation;
-            curve.Points = points;
-
-            AreaTriggerScaleCurveTemplate curveTemplate = new();
+            ScaleCurveData curveTemplate = new();
             curveTemplate.StartTimeOffset = startTimeOffset.GetValueOrDefault(GetTimeSinceCreated());
-            curveTemplate.CurveTemplate = curve;
+            curveTemplate.Mode = interpolation;
+            curveTemplate.CurvePoints = points;
 
             SetScaleCurve(scaleCurve, curveTemplate);
         }
@@ -544,7 +540,7 @@ namespace Game.Entities
             SetScaleCurve(scaleCurve, null);
         }
 
-        void SetScaleCurve(ScaleCurve scaleCurve, AreaTriggerScaleCurveTemplate curve)
+        void SetScaleCurve(ScaleCurve scaleCurve, ScaleCurveData curve)
         {
             if (curve == null)
             {
@@ -573,11 +569,11 @@ namespace Game.Entities
             }
             else
             {
-                var curvePoints = curve.CurveTemplate;
+                var curvePoints = curve.CurvePoints;
                 if (curvePoints != null)
                 {
-                    CurveInterpolationMode mode = curvePoints.Mode;
-                    if (curvePoints.Points[1].X < curvePoints.Points[0].X)
+                    CurveInterpolationMode mode = curve.Mode;
+                    if (curvePoints[1].X < curvePoints[0].X)
                         mode = CurveInterpolationMode.Constant;
 
                     switch (mode)
@@ -603,9 +599,9 @@ namespace Game.Entities
                     uint packedCurve = ((uint)mode << 1) | (pointCount << 24);
                     SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.ParameterCurve), packedCurve);
 
-                    for (var i = 0; i < curvePoints.Points.Length; ++i)
+                    for (var i = 0; i < curvePoints.Length; ++i)
                     {
-                        point.Relocate(curvePoints.Points[i].X, curvePoints.Points[i].Y);
+                        point.Relocate(curvePoints[i].X, curvePoints[i].Y);
                         SetUpdateFieldValue(ref scaleCurve.ModifyValue(scaleCurve.Points, i), point);
                     }
                 }
@@ -895,7 +891,6 @@ namespace Game.Entities
 
             UpdateHasPlayersFlag();
         }
-
 
         public AreaTriggerTemplate GetTemplate()
         {
@@ -1424,7 +1419,6 @@ namespace Game.Entities
             GetMap().AreaTriggerRelocation(this, x, y, z, orientation);
         }
 
-
         void AI_Initialize()
         {
             AI_Destroy();
@@ -1634,6 +1628,15 @@ namespace Game.Entities
             }
 
             public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
+        }
+
+        class ScaleCurveData
+        {
+            public uint StartTimeOffset;
+            public CurveInterpolationMode Mode;
+
+            public Vector2[] CurvePoints;
+            public float Curve;
         }
     }
 }
