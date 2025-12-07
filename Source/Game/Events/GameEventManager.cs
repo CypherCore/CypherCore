@@ -1551,9 +1551,9 @@ namespace Game
             byte stageIndex = (byte)(gameEvent.holidayStage - 1);
             gameEvent.length = (uint)(holiday.Duration[stageIndex] * Time.Hour / Time.Minute);
 
-            long stageOffset = 0;
+            TimeSpan stageOffset = TimeSpan.Zero;
             for (int i = 0; i < stageIndex; ++i)
-                stageOffset += holiday.Duration[i] * Time.Hour;
+                stageOffset += TimeSpan.FromHours(holiday.Duration[i]);
 
             switch (holiday.CalendarFilterType)
             {
@@ -1576,31 +1576,24 @@ namespace Game
                     gameEvent.occurence += (uint)(holiday.Duration[i] * Time.Hour / Time.Minute);
             }
 
-            bool singleDate = ((holiday.Date[0] >> 24) & 0x1F) == 31; // Events with fixed date within year have - 1
-
-            long curTime = GameTime.GetGameTime();
+            WowTime curTime = GameTime.GetWowTime();
             for (int i = 0; i < SharedConst.MaxHolidayDates && holiday.Date[i] != 0; ++i)
             {
-                uint date = holiday.Date[i];
-
-                int year;
+                WowTime date = new();
+                date.SetPackedTime(holiday.Date[i]);
+                bool singleDate = date.GetYear() == -1;
                 if (singleDate)
-                    year = Time.UnixTimeToDateTime(curTime).ToLocalTime().Year - 1; // First try last year (event active through New Year)
-                else
-                    year = (int)((date >> 24) & 0x1F) + 100 + 1900;
+                    date.SetYear(GameTime.GetWowTime().GetYear() - 1); // First try last year (event active through New Year)
 
-                var timeInfo = new DateTime(year, (int)((date >> 20) & 0xF) + 1, (int)((date >> 14) & 0x3F) + 1, (int)((date >> 6) & 0x1F), (int)(date & 0x3F), 0);
-
-                long startTime = Time.DateTimeToUnixTime(timeInfo);
-                if (curTime < startTime + gameEvent.length * Time.Minute)
+                if (curTime < date + TimeSpan.FromMinutes(gameEvent.length))
                 {
-                    gameEvent.start = startTime + stageOffset;
+                    gameEvent.start = (date + stageOffset).GetUnixTimeFromUtcTime();
                     break;
                 }
                 else if (singleDate)
                 {
-                    var tmCopy = timeInfo.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year); // This year
-                    gameEvent.start = Time.DateTimeToUnixTime(tmCopy) + stageOffset;
+                    date.SetYear(date.GetYear() + 1); // This year
+                    gameEvent.start = (date + stageOffset).GetUnixTimeFromUtcTime();
                     break;
                 }
                 else
@@ -1625,7 +1618,7 @@ namespace Game
             TimeSpan durationSinceLastStart = TimeSpan.FromTicks((now - eventInitialStart).Ticks % occurence.Ticks);
             return Time.DateTimeToUnixTime(now - durationSinceLastStart);
         }
-        
+
         public bool IsHolidayActive(HolidayIds id)
         {
             if (id == HolidayIds.None)
