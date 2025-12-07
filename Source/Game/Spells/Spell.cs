@@ -3939,7 +3939,7 @@ namespace Game.Spells
             if (schoolImmunityMask != 0 || mechanicImmunityMask != 0)
                 castFlags |= SpellCastFlags.Immunity;
 
-            if ((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null)
+            if ((!m_fromClient && _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IsTriggeredMask) && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null)
                 castFlags |= SpellCastFlags.Pending;
 
             if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
@@ -4038,7 +4038,7 @@ namespace Game.Spells
             SpellCastFlags castFlags = SpellCastFlags.Unk9;
 
             // triggered spells with spell visual != 0
-            if ((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null)
+            if ((!m_fromClient && _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IsTriggeredMask) && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null)
                 castFlags |= SpellCastFlags.Pending;
 
             if (m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
