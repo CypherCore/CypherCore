@@ -232,6 +232,8 @@ namespace Framework.Constants
         OnDespawn = 86,      // NONE
         SendEventTrigger = 87, // NONE
         AreatriggerExit = 88,      // None
+        OnAuraApplied = 89,      // SpellID, CooldownMin, CooldownMax
+        OnAuraRemoved = 90,      // SpellID, CooldownMin, CooldownMax
 
         End
     }

@@ -1486,6 +1486,19 @@ namespace Game.Spells
                     }
                     break;
             }
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+            {
+                var ai = creature.GetAI();
+                if (ai != null)
+                {
+                    if (apply)
+                        ai.OnAuraApplied(aurApp);
+                    else
+                        ai.OnAuraRemoved(aurApp);
+                }
+            }
         }
 
         bool CanBeAppliedOn(Unit target)

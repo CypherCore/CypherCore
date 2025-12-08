@@ -642,6 +642,16 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.OnSpellStart, null, 0, 0, false, spellInfo);
         }
 
+        public override void OnAuraApplied(AuraApplication aurApp)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.OnAuraApplied, null, 0, 0, false, aurApp.GetBase().GetSpellInfo());
+        }
+
+        public override void OnAuraRemoved(AuraApplication aurApp)
+        {
+            GetScript().ProcessEventsFor(SmartEvents.OnAuraRemoved, null, 0, 0, false, aurApp.GetBase().GetSpellInfo());
+        }
+
         public override void DamageTaken(Unit attacker, ref uint damage, DamageEffectType damageType, SpellInfo spellInfo = null)
         {
             GetScript().ProcessEventsFor(SmartEvents.Damaged, attacker, damage);

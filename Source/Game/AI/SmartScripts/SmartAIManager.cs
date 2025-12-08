@@ -628,6 +628,8 @@ namespace Game.AI
                 SmartEvents.OnSpellCast => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellFailed => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnSpellStart => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnAuraApplied => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
+                SmartEvents.OnAuraRemoved => Marshal.SizeOf(typeof(SmartEvent.SpellCast)),
                 SmartEvents.OnDespawn => 0,
                 SmartEvents.SendEventTrigger => 0,
                 SmartEvents.AreatriggerExit => 0,
@@ -1056,6 +1058,8 @@ namespace Game.AI
                     case SmartEvents.OnSpellCast:
                     case SmartEvents.OnSpellFailed:
                     case SmartEvents.OnSpellStart:
+                    case SmartEvents.OnAuraApplied:
+                    case SmartEvents.OnAuraRemoved:
                     {
                         if (!IsSpellValid(e, e.Event.spellCast.spell))
                             return false;
@@ -2587,6 +2591,8 @@ namespace Game.AI
                 SmartEvents.OnDespawn => SmartScriptTypeMaskId.Creature,
                 SmartEvents.SendEventTrigger => SmartScriptTypeMaskId.Event,
                 SmartEvents.AreatriggerExit => SmartScriptTypeMaskId.Areatrigger + SmartScriptTypeMaskId.AreatrigggerEntity,
+                SmartEvents.OnAuraApplied => SmartScriptTypeMaskId.Creature,
+                SmartEvents.OnAuraRemoved => SmartScriptTypeMaskId.Creature,
                 _ => 0,
             };
 

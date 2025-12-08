@@ -297,7 +297,7 @@ namespace Game.AI
 
             if (!me.IsTapListNotClearedOnEvade())
                 me.SetTappedBy(null);
-            
+
             me.ResetPlayerDamageReq();
             me.SetLastDamagedTime(0);
             me.SetCannotReachTarget(false);
@@ -493,6 +493,12 @@ namespace Game.AI
 
         // Called when a channeled spell finishes
         public virtual void OnChannelFinished(SpellInfo spell) { }
+
+        // Called when aura is applied
+        public virtual void OnAuraApplied(AuraApplication aurApp) { }
+
+        // Called when aura is removed
+        public virtual void OnAuraRemoved(AuraApplication aurApp) { }
 
         // Should return true if the NPC is currently being escorted
         public virtual bool IsEscorted() { return false; }

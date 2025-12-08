@@ -3500,6 +3500,8 @@ namespace Game.AI
                 case SmartEvents.OnSpellCast:
                 case SmartEvents.OnSpellFailed:
                 case SmartEvents.OnSpellStart:
+                case SmartEvents.OnAuraApplied:
+                case SmartEvents.OnAuraRemoved:
                 {
                     if (spell == null)
                         return;
