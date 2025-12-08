@@ -5464,17 +5464,24 @@ namespace Game
             {
                 ++count;
 
-                uint Trigger_ID = result.Read<uint>(0);
-                uint PortLocID = result.Read<uint>(1);
+                uint triggerId = result.Read<uint>(0);
+                uint portLocId = result.Read<uint>(1);
 
-                WorldSafeLocsEntry portLoc = GetWorldSafeLoc(PortLocID);
-                if (portLoc == null)
+                var atEntry = CliDB.AreaTriggerStorage.LookupByKey(triggerId);
+                if (atEntry == null)
                 {
-                    Log.outError(LogFilter.Sql, "Area Trigger (ID: {0}) has a non-existing Port Loc (ID: {1}) in WorldSafeLocs.dbc, skipped", Trigger_ID, PortLocID);
+                    Log.outError(LogFilter.Sql, $"Area Trigger (ID: {triggerId}) does not exist in AreaTrigger.dbc.");
                     continue;
                 }
 
-                AreaTriggerStruct at = new();
+                WorldSafeLocsEntry portLoc = GetWorldSafeLoc(portLocId);
+                if (portLoc == null)
+                {
+                    Log.outError(LogFilter.Sql, "Area Trigger (ID: {0}) has a non-existing Port Loc (ID: {1}) in WorldSafeLocs.dbc, skipped", triggerId, portLocId);
+                    continue;
+                }
+
+                AreaTriggerTeleport at = new();
                 at.target_mapId = portLoc.Loc.GetMapId();
                 at.target_X = portLoc.Loc.GetPositionX();
                 at.target_Y = portLoc.Loc.GetPositionY();
@@ -5482,14 +5489,7 @@ namespace Game
                 at.target_Orientation = portLoc.Loc.GetOrientation();
                 at.PortLocId = portLoc.Id;
 
-                AreaTriggerRecord atEntry = CliDB.AreaTriggerStorage.LookupByKey(Trigger_ID);
-                if (atEntry == null)
-                {
-                    Log.outError(LogFilter.Sql, "Area trigger (ID: {0}) does not exist in `AreaTrigger.dbc`.", Trigger_ID);
-                    continue;
-                }
-
-                _areaTriggerStorage[Trigger_ID] = at;
+                _areaTriggerStorage[triggerId] = at;
 
             } while (result.NextRow());
 
@@ -11277,7 +11277,7 @@ namespace Game
             return mountModel.CreatureDisplayID;
         }
 
-        public AreaTriggerStruct GetAreaTrigger(uint trigger)
+        public AreaTriggerTeleport GetAreaTrigger(uint trigger)
         {
             return _areaTriggerStorage.LookupByKey(trigger);
         }
@@ -11292,7 +11292,7 @@ namespace Game
             return _tavernAreaTriggerStorage.Contains(Trigger_ID);
         }
 
-        public AreaTriggerStruct GetGoBackTrigger(uint Map)
+        public AreaTriggerTeleport GetGoBackTrigger(uint Map)
         {
             uint? parentId = null;
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(Map);
@@ -11319,7 +11319,7 @@ namespace Game
             return null;
         }
 
-        public AreaTriggerStruct GetMapEntranceTrigger(uint Map)
+        public AreaTriggerTeleport GetMapEntranceTrigger(uint Map)
         {
             foreach (var pair in _areaTriggerStorage)
             {
@@ -11783,7 +11783,7 @@ namespace Game
         Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new();
 
         List<uint> _tavernAreaTriggerStorage = new();
-        Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new();
+        Dictionary<uint, AreaTriggerTeleport> _areaTriggerStorage = new();
         Dictionary<ulong, AccessRequirement> _accessRequirementStorage = new();
         Dictionary<uint, WorldSafeLocsEntry> _worldSafeLocs = new();
 
@@ -12312,7 +12312,7 @@ namespace Game
         }
     }
 
-    public class AreaTriggerStruct
+    public class AreaTriggerTeleport
     {
         public uint target_mapId;
         public float target_X;

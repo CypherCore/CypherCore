@@ -249,7 +249,7 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             // try going to entrance
-            AreaTriggerStruct exit = Global.ObjectMgr.GetGoBackTrigger(mapId);
+            AreaTriggerTeleport exit = Global.ObjectMgr.GetGoBackTrigger(mapId);
             if (exit != null)
             {
                 if (player.TeleportTo(exit.target_mapId, exit.target_X, exit.target_Y, exit.target_Z, exit.target_Orientation + MathF.PI))
@@ -268,7 +268,7 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.CommandInstanceNoExit, mapName, mapId);
 
             // try going to start
-            AreaTriggerStruct entrance = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
+            AreaTriggerTeleport entrance = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
             if (entrance != null)
             {
                 if (player.TeleportTo(entrance.target_mapId, entrance.target_X, entrance.target_Y, entrance.target_Z, entrance.target_Orientation))

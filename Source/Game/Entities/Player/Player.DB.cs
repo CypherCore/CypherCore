@@ -3390,7 +3390,7 @@ namespace Game.Entities
             if (map == null)
                 map = Global.MapMgr.CreateMap(mapId, this);
 
-            AreaTriggerStruct areaTrigger = null;
+            AreaTriggerTeleport areaTrigger = null;
             bool check = false;
 
             if (map == null)

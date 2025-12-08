@@ -288,7 +288,7 @@ namespace Game
             if (!packet.Entered)
                 return;
 
-            AreaTriggerStruct at = Global.ObjectMgr.GetAreaTrigger(packet.AreaTriggerID);
+            AreaTriggerTeleport at = Global.ObjectMgr.GetAreaTrigger(packet.AreaTriggerID);
             if (at == null)
                 return;
 

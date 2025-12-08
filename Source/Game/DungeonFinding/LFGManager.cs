@@ -216,7 +216,7 @@ namespace Game.DungeonFinding
                 // No teleport coords in database, load from areatriggers
                 if (dungeon.type != LfgType.Random && dungeon.x == 0.0f && dungeon.y == 0.0f && dungeon.z == 0.0f)
                 {
-                    AreaTriggerStruct at = Global.ObjectMgr.GetMapEntranceTrigger(dungeon.map);
+                    AreaTriggerTeleport at = Global.ObjectMgr.GetMapEntranceTrigger(dungeon.map);
                     if (at == null)
                     {
                         Log.outError(LogFilter.Lfg, "LoadLFGDungeons: Failed to load dungeon {0} (Id: {1}), cant find areatrigger for map {2}", dungeon.name, dungeon.id, dungeon.map);
