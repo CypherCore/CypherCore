@@ -72,7 +72,7 @@ namespace Game.DataStorage
             {
                 do
                 {
-                    AreaTriggerId createPropertiesId = new (vertices.Read<uint>(0), vertices.Read<bool>(1));
+                    AreaTriggerId createPropertiesId = new(vertices.Read<uint>(0), vertices.Read<bool>(1));
 
                     verticesByCreateProperties.Add(createPropertiesId, new Vector2(vertices.Read<float>(3), vertices.Read<float>(4)));
 
@@ -149,7 +149,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    if (shape >= AreaTriggerShapeType.Max)
+                    if (shape == AreaTriggerShapeType.Unk || shape >= AreaTriggerShapeType.Max)
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid shape {shape}.");
                         continue;
@@ -188,32 +188,54 @@ namespace Game.DataStorage
                     createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(13);
                     createProperties.Speed = areatriggerCreateProperties.Read<float>(14);
 
-                    createProperties.Shape.TriggerType = shape;
-                    unsafe
+                    float[] shapeData = new float[SharedConst.MaxAreatriggerEntityData];
+                    for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
+                        shapeData[i] = areatriggerCreateProperties.Read<float>(16 + i);
+                        
+                    switch (shape)
                     {
-                        for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                            createProperties.Shape.DefaultDatas.Data[i] = areatriggerCreateProperties.Read<float>(16 + i);
+                        case AreaTriggerShapeType.Sphere:
+                            createProperties.Shape.Data = new AreaTriggerShapeInfo.Sphere(shapeData);
+                            break;
+                        case AreaTriggerShapeType.Box:
+                            createProperties.Shape.Data = new AreaTriggerShapeInfo.Box(shapeData);
+                            break;
+                        case AreaTriggerShapeType.Polygon:
+                            AreaTriggerShapeInfo.Polygon  polygon = new AreaTriggerShapeInfo.Polygon(shapeData);
+                            if (polygon.Height <= 0.0f)
+                            {
+                                polygon.Height = 1.0f;
+                                if (polygon.HeightTarget <= 0.0f)
+                                    polygon.HeightTarget = 1.0f;
+                            }
+                            var vertices1 = verticesByCreateProperties.LookupByKey(createProperties.Id);
+                            if (vertices1 != null)
+                                polygon.PolygonVertices = vertices1;
+                            vertices1 = verticesTargetByCreateProperties.LookupByKey(createProperties.Id);
+                            if (vertices != null)
+                                polygon.PolygonVerticesTarget = vertices1;
+                            if (!polygon.PolygonVerticesTarget.Empty() && polygon.PolygonVertices.Count != polygon.PolygonVerticesTarget.Count)
+                            {
+                                Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has invalid target vertices, either all or none vertices must have a corresponding target vertex (AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom})).");
+                                polygon.PolygonVerticesTarget.Clear();
+                            }
+
+                            createProperties.Shape.Data = polygon;
+                            break;
+                        case AreaTriggerShapeType.Cylinder:
+                            createProperties.Shape.Data = new AreaTriggerShapeInfo.Cylinder(shapeData);
+                            break;
+                        case AreaTriggerShapeType.Disk:
+                            createProperties.Shape.Data = new AreaTriggerShapeInfo.Disk(shapeData);
+                            break;
+                        case AreaTriggerShapeType.BoundedPlane:
+                            createProperties.Shape.Data = new AreaTriggerShapeInfo.BoundedPlane(shapeData);
+                            break;
+                        default:
+                            break;
                     }
 
                     createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(24));
-
-                    if (shape == AreaTriggerShapeType.Polygon)
-                    {
-                        if (createProperties.Shape.PolygonDatas.Height <= 0.0f)
-                        {
-                            createProperties.Shape.PolygonDatas.Height = 1.0f;
-                            if (createProperties.Shape.PolygonDatas.HeightTarget <= 0.0f)
-                                createProperties.Shape.PolygonDatas.HeightTarget = 1.0f;
-                        }
-                    }
-
-                    createProperties.Shape.PolygonVertices = verticesByCreateProperties[createProperties.Id];
-                    createProperties.Shape.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
-                    if (!createProperties.Shape.PolygonVerticesTarget.Empty() && createProperties.Shape.PolygonVertices.Count != createProperties.Shape.PolygonVerticesTarget.Count)
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has invalid target vertices, either all or none vertices must have a corresponding target vertex (AreaTriggerCreatePropertiesId: (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom})).");
-                        createProperties.Shape.PolygonVerticesTarget.Clear();
-                    }
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
                     if (spline != null)
@@ -384,7 +406,7 @@ namespace Game.DataStorage
 
         public AreaTriggerTemplate GetAreaTriggerTemplate(AreaTriggerId areaTriggerId)
         {
-           return _areaTriggerTemplateStore.LookupByKey(areaTriggerId);
+            return _areaTriggerTemplateStore.LookupByKey(areaTriggerId);
         }
 
         public AreaTriggerCreateProperties GetAreaTriggerCreateProperties(AreaTriggerId areaTriggerCreatePropertiesId)

@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.25.2" />
     <PackageReference Include="MySqlConnector" Version="2.3.5" />
+    <PackageReference Include="OneOf" Version="3.0.271" />
   </ItemGroup>
 
 </Project>

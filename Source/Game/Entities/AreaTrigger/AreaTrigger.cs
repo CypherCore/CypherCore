@@ -229,7 +229,7 @@ namespace Game.Entities
 
                 InitOrbit(orbit, GetCreateProperties().Speed);
             }
-            else if (GetCreateProperties().HasSplines())
+            else if (GetCreateProperties().SplinePoints != null)
             {
                 InitSplineOffsets(GetCreateProperties().SplinePoints);
             }
@@ -933,81 +933,73 @@ namespace Game.Entities
             return 0;
         }
 
-        unsafe void SetShape(AreaTriggerShapeInfo shape)
+        void SetShape(AreaTriggerShapeInfo shape)
         {
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
 
-            switch (shape.TriggerType)
-            {
-                case AreaTriggerShapeType.Sphere:
+            shape.Data.Switch
+            (
+                sphereInfo =>
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)0);
                     var sphere = areaTriggerData.ModifyValue<AreaTriggerSphere>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(sphere.ModifyValue(sphere.Radius), shape.SphereDatas.Radius);
-                    SetUpdateFieldValue(sphere.ModifyValue(sphere.RadiusTarget), shape.SphereDatas.RadiusTarget);
-                    break;
-                }
-                case AreaTriggerShapeType.Box:
+                    SetUpdateFieldValue(sphere.ModifyValue(sphere.Radius), sphereInfo.Radius);
+                    SetUpdateFieldValue(sphere.ModifyValue(sphere.RadiusTarget), sphereInfo.RadiusTarget);
+                },
+                boxInfo =>
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)1);
                     var box = areaTriggerData.ModifyValue<AreaTriggerBox>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(box.ModifyValue(box.Extents), new Vector3(shape.BoxDatas.Extents[0], shape.BoxDatas.Extents[1], shape.BoxDatas.Extents[2]));
-                    SetUpdateFieldValue(box.ModifyValue(box.ExtentsTarget), new Vector3(shape.BoxDatas.ExtentsTarget[0], shape.BoxDatas.ExtentsTarget[1], shape.BoxDatas.ExtentsTarget[2]));
-                    break;
-                }
-                case AreaTriggerShapeType.Polygon:
+                    SetUpdateFieldValue(box.ModifyValue(box.Extents), boxInfo.Extents);
+                    SetUpdateFieldValue(box.ModifyValue(box.ExtentsTarget), boxInfo.ExtentsTarget);
+                },
+                polygonInfo => 
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)3);
                     var polygon = areaTriggerData.ModifyValue<AreaTriggerPolygon>(m_areaTriggerData.ShapeData);
                     var vertices = polygon.ModifyValue(polygon.Vertices);
                     ClearDynamicUpdateFieldValues(vertices);
-                    foreach (Vector2 vertex in shape.PolygonVertices)
+                    foreach (Vector2 vertex in polygonInfo.PolygonVertices)
                         AddDynamicUpdateFieldValue(vertices, vertex);
                     var verticesTarget = polygon.ModifyValue(polygon.VerticesTarget);
                     ClearDynamicUpdateFieldValues(verticesTarget);
-                    foreach (Vector2 vertex in shape.PolygonVerticesTarget)
+                    foreach (Vector2 vertex in polygonInfo.PolygonVerticesTarget)
                         AddDynamicUpdateFieldValue(verticesTarget, vertex);
-                    SetUpdateFieldValue(polygon.ModifyValue(polygon.Height), shape.PolygonDatas.Height);
-                    SetUpdateFieldValue(polygon.ModifyValue(polygon.HeightTarget), shape.PolygonDatas.HeightTarget);
-                    break;
-                }
-                case AreaTriggerShapeType.Cylinder:
+                    SetUpdateFieldValue(polygon.ModifyValue(polygon.Height), polygonInfo.Height);
+                    SetUpdateFieldValue(polygon.ModifyValue(polygon.HeightTarget), polygonInfo.HeightTarget);
+                },
+                cylinderInfo => 
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)4);
                     var cylinder = areaTriggerData.ModifyValue<AreaTriggerCylinder>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.Radius), shape.CylinderDatas.Radius);
-                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.RadiusTarget), shape.CylinderDatas.RadiusTarget);
-                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.Height), shape.CylinderDatas.Height);
-                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.HeightTarget), shape.CylinderDatas.HeightTarget);
-                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.LocationZOffset), shape.CylinderDatas.LocationZOffset);
-                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.LocationZOffsetTarget), shape.CylinderDatas.LocationZOffsetTarget);
-                    break;
-                }
-                case AreaTriggerShapeType.Disk:
+                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.Radius), cylinderInfo.Radius);
+                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.RadiusTarget), cylinderInfo.RadiusTarget);
+                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.Height), cylinderInfo.Height);
+                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.HeightTarget), cylinderInfo.HeightTarget);
+                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.LocationZOffset), cylinderInfo.LocationZOffset);
+                    SetUpdateFieldValue(cylinder.ModifyValue(cylinder.LocationZOffsetTarget), cylinderInfo.LocationZOffsetTarget);
+                },
+                diskInfo => 
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)7);
                     var disk = areaTriggerData.ModifyValue<AreaTriggerDisk>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.InnerRadius), shape.DiskDatas.InnerRadius);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.InnerRadiusTarget), shape.DiskDatas.InnerRadiusTarget);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.OuterRadius), shape.DiskDatas.OuterRadius);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.OuterRadiusTarget), shape.DiskDatas.OuterRadiusTarget);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.Height), shape.DiskDatas.Height);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.HeightTarget), shape.DiskDatas.HeightTarget);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.LocationZOffset), shape.DiskDatas.LocationZOffset);
-                    SetUpdateFieldValue(disk.ModifyValue(disk.LocationZOffsetTarget), shape.DiskDatas.LocationZOffsetTarget);
-                    break;
-                }
-                case AreaTriggerShapeType.BoundedPlane:
+                    SetUpdateFieldValue(disk.ModifyValue(disk.InnerRadius), diskInfo.InnerRadius);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.InnerRadiusTarget), diskInfo.InnerRadiusTarget);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.OuterRadius), diskInfo.OuterRadius);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.OuterRadiusTarget), diskInfo.OuterRadiusTarget);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.Height), diskInfo.Height);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.HeightTarget), diskInfo.HeightTarget);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.LocationZOffset), diskInfo.LocationZOffset);
+                    SetUpdateFieldValue(disk.ModifyValue(disk.LocationZOffsetTarget), diskInfo.LocationZOffsetTarget);
+                },
+                boundedPlaneInfo =>
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)8);
                     var boundedPlane = areaTriggerData.ModifyValue<AreaTriggerBoundedPlane>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.Extents), new Vector2(shape.BoundedPlaneDatas.Extents[0], shape.BoundedPlaneDatas.Extents[1]));
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTarget), new Vector2(shape.BoundedPlaneDatas.ExtentsTarget[0], shape.BoundedPlaneDatas.ExtentsTarget[1]));
-                    break;
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.Extents), boundedPlaneInfo.Extents);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTarget), boundedPlaneInfo.ExtentsTarget);
                 }
-                default:
-                    break;
-            }
+            );
         }
 
         public float GetMaxSearchRadius()
