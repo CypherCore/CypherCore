@@ -124,9 +124,9 @@ namespace Game.DataStorage
 
             //                                                              0   1         2              3                    4
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
-                //5            6             7             8              9       10         11                 12               13                 14
-                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTargetScale, Speed, " +
-                //15     16          17          18          19          20          21          22          23          24
+                //5            6             7             8              9       10         11                 12               13                 14     15
+                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTargetScale, Speed, SpeedIsTime, " +
+                //16     17          18          19          20          21          22          23          24          25
                 "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
             {
@@ -141,7 +141,7 @@ namespace Game.DataStorage
 
                     createProperties.Flags = (AreaTriggerCreatePropertiesFlag)areatriggerCreateProperties.Read<uint>(4);
 
-                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(15);
+                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(16);
 
                     if (areaTriggerId.Id != 0 && createProperties.Template == null)
                     {
@@ -187,10 +187,11 @@ namespace Game.DataStorage
 
                     createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(13);
                     createProperties.Speed = areatriggerCreateProperties.Read<float>(14);
+                    createProperties.SpeedIsTime = areatriggerCreateProperties.Read<bool>(15);
 
                     float[] shapeData = new float[SharedConst.MaxAreatriggerEntityData];
                     for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                        shapeData[i] = areatriggerCreateProperties.Read<float>(16 + i);
+                        shapeData[i] = areatriggerCreateProperties.Read<float>(17 + i);
 
                     switch (shape)
                     {
@@ -235,7 +236,7 @@ namespace Game.DataStorage
                             break;
                     }
 
-                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(24));
+                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(25));
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
                     if (spline != null)

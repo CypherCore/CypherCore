@@ -248,6 +248,7 @@ namespace Game.Entities
         public AreaTriggerShapeInfo Shape = new();
 
         public float Speed = 1.0f;
+        public bool SpeedIsTime;
         public OneOf<EmptyStruct, List<Vector3>, AreaTriggerOrbitInfo> Movement;
 
         public uint ScriptId;

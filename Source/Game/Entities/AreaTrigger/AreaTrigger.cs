@@ -222,7 +222,7 @@ namespace Game.Entities
 
             GetCreateProperties().Movement.Switch(
                 _ => SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (byte)AreaTriggerPathType.None),
-                splineInfo => InitSplineOffsets(splineInfo),
+                splineInfo => InitSplineOffsets(splineInfo, null, GetCreateProperties().SpeedIsTime),
                 orbitInfo =>
                 {
                     AreaTriggerOrbitInfo orbit = orbitInfo;
@@ -231,7 +231,7 @@ namespace Game.Entities
                     else
                         orbit.Center = pos;
 
-                    InitOrbit(orbit);
+                    InitOrbit(orbit, null, GetCreateProperties().SpeedIsTime);
                 });
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Facing), _stationaryPosition.GetOrientation());
@@ -1160,7 +1160,7 @@ namespace Game.Entities
             }
         }
 
-        void InitSplineOffsets(List<Vector3> offsets, float? overrideSpeed = null)
+        void InitSplineOffsets(List<Vector3> offsets, float? overrideSpeed = null, bool speedIsTimeInSeconds = false)
         {
             float angleSin = (float)Math.Sin(GetOrientation());
             float angleCos = (float)Math.Cos(GetOrientation());
@@ -1179,10 +1179,10 @@ namespace Game.Entities
                 rotatedPoints.Add(new Vector3(x, y, z));
             }
 
-            InitSplines(rotatedPoints.ToArray(), overrideSpeed);
+            InitSplines(rotatedPoints.ToArray(), overrideSpeed, speedIsTimeInSeconds);
         }
 
-        public void InitSplines(Vector3[] splinePoints, float? overrideSpeed = null)
+        public void InitSplines(Vector3[] splinePoints, float? overrideSpeed = null, bool speedIsTimeInSeconds = false)
         {
             if (splinePoints.Length < 2)
                 return;
@@ -1195,7 +1195,7 @@ namespace Game.Entities
             if (speed <= 0.0f)
                 speed = 1.0f;
 
-            uint timeToTarget = _spline.Length() / speed * (float)Time.InMilliseconds;
+            uint timeToTarget = (speedIsTimeInSeconds ? speed : _spline.Length() / speed) * Time.InMilliseconds;
 
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
@@ -1220,7 +1220,7 @@ namespace Game.Entities
             return 0;
         }
 
-        void InitOrbit(AreaTriggerOrbitInfo orbit, float? overrideSpeed = null)
+        void InitOrbit(AreaTriggerOrbitInfo orbit, float? overrideSpeed = null, bool speedIsTimeInSeconds = false)
         {
             // Circular movement requires either a center position or an attached unit
             Cypher.Assert(orbit.Center.HasValue || orbit.PathTarget.HasValue);
@@ -1229,7 +1229,7 @@ namespace Game.Entities
             if (speed <= 0.0f)
                 speed = 1.0f;
 
-            uint timeToTarget = (uint)(orbit.Radius * 2.0f * MathF.PI * (float)Time.InMilliseconds / speed);
+            uint timeToTarget = (uint)(speedIsTimeInSeconds ? speed : (uint)(orbit.Radius * 2.0f * MathF.PI / speed)) * Time.InMilliseconds;
 
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
