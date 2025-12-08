@@ -222,7 +222,7 @@ namespace Game.Networking.Packets
         public int[] BlacklistMap = new int[2];
     }
 
-    class BattlemasterJoinArena : ClientPacket
+    public class BattlemasterJoinArena : ClientPacket
     {
         public BattlemasterJoinArena(WorldPacket packet) : base(packet) { }
 

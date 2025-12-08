@@ -51,9 +51,19 @@ namespace Game.Chat
         }
 
         [Command("arena", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugArenaCommand(CommandHandler handler)
+        static bool HandleDebugArenaCommand(CommandHandler handler, uint battlemasterListId)
         {
-            Global.BattlegroundMgr.ToggleArenaTesting();
+            bool successful = Global.BattlegroundMgr.ToggleArenaTesting(battlemasterListId);
+            if (!successful)
+            {
+                handler.SendSysMessage("BattlemasterListId %u does not exist or is not an arena.", battlemasterListId);
+                return true;
+            }
+
+            if (battlemasterListId == 0 || handler == null || handler.GetSession() == null)
+                return true;
+
+            BattlegroundManager.QueuePlayerForArena(handler.GetSession().GetPlayer(), 0, (byte)LfgRoles.Damage);
             return true;
         }
 

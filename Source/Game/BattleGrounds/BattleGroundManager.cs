@@ -244,6 +244,15 @@ namespace Game.BattleGrounds
             return _battlegroundScriptTemplates.LookupByKey((mapId, BattlegroundTypeId.None));
         }
 
+        public static void QueuePlayerForArena(Player player, byte teamSize, byte roles)
+        {
+            BattlemasterJoinArena packet = new(new Networking.WorldPacket(ClientOpcodes.BattlemasterJoinArena));
+            packet.TeamSizeIndex = teamSize;
+            packet.Roles = roles;
+
+            player.GetSession().HandleBattlemasterJoinArena(packet);
+        }
+
         uint CreateClientVisibleInstanceId(BattlegroundTypeId bgTypeId, BattlegroundBracketId bracket_id)
         {
             if (IsArenaType(bgTypeId))
@@ -448,10 +457,24 @@ namespace Game.BattleGrounds
             Global.WorldMgr.SendWorldText(m_Testing ? CypherStrings.DebugBgOn : CypherStrings.DebugBgOff);
         }
 
-        public void ToggleArenaTesting()
+        // Return whether toggling was successful. In case of a non-existing battlemasterListId, or this battlemasterListId is not an arena, this would return false.
+        public bool ToggleArenaTesting(uint battlemasterListId)
         {
-            m_ArenaTesting = !m_ArenaTesting;
-            Global.WorldMgr.SendWorldText(m_ArenaTesting ? CypherStrings.DebugArenaOn : CypherStrings.DebugArenaOff);
+            if (battlemasterListId != 0)
+            {
+                BattlegroundTemplate bgTemplate = GetBattlegroundTemplateByTypeId((BattlegroundTypeId)battlemasterListId);
+                if (bgTemplate == null)
+                    return false;
+
+                if (!bgTemplate.IsArena())
+                    return false;
+            }
+
+            if (m_ArenaTesting != battlemasterListId)
+                Global.WorldMgr.SendWorldText((battlemasterListId != 0) ? CypherStrings.DebugArenaOn : CypherStrings.DebugArenaOff);
+
+            m_ArenaTesting = battlemasterListId;
+            return true;
         }
 
         public bool IsValidQueueId(BattlegroundQueueTypeId bgQueueTypeId)
@@ -642,6 +665,9 @@ namespace Game.BattleGrounds
             BattlegroundTemplate bgTemplate = GetBattlegroundTemplateByTypeId(bgTypeId);
             if (bgTemplate != null)
             {
+                if (bgTemplate.IsArena() && IsArenaTesting())
+                    return (BattlegroundTypeId)m_ArenaTesting;
+
                 List<BattlegroundTemplate> ids = new();
                 foreach (var mapId in bgTemplate.MapIDs)
                 {
@@ -698,7 +724,7 @@ namespace Game.BattleGrounds
             return m_BattlegroundQueues[bgQueueTypeId];
         }
 
-        public bool IsArenaTesting() { return m_ArenaTesting; }
+        public bool IsArenaTesting() { return m_ArenaTesting != 0; }
         public bool IsTesting() { return m_Testing; }
 
         public BattlegroundTypeId GetBattleMasterBG(uint entry)
@@ -760,7 +786,7 @@ namespace Game.BattleGrounds
         List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new();
         uint m_NextRatedArenaUpdate;
         uint m_UpdateTimer;
-        bool m_ArenaTesting;
+        uint m_ArenaTesting;
         bool m_Testing;
     }
 

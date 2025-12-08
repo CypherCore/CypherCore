@@ -479,7 +479,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.BattlemasterJoinArena)]
-        void HandleBattlemasterJoinArena(BattlemasterJoinArena packet)
+        public void HandleBattlemasterJoinArena(BattlemasterJoinArena packet)
         {
             // ignore if we already in BG or BG queue
             if (GetPlayer().InBattleground())
@@ -508,9 +508,16 @@ namespace Game
                 return;
 
             Group group = GetPlayer().GetGroup();
+            if (group == null)
+            {
+                group = new Group();
+                group.Create(_player);
+            }
+
             // no group found, error
             if (group == null)
                 return;
+
             if (group.GetLeaderGUID() != GetPlayer().GetGUID())
                 return;
 
@@ -534,7 +541,9 @@ namespace Game
             GroupQueueInfo ginfo = null;
 
             ObjectGuid errorGuid;
-            var err = group.CanJoinBattlegroundQueue(bgTemplate, bgQueueTypeId, (uint)arenatype, (uint)arenatype, true, packet.TeamSizeIndex, out errorGuid);
+            GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult.None;
+            if (!Global.BattlegroundMgr.IsArenaTesting())
+                err = group.CanJoinBattlegroundQueue(bgTemplate, bgQueueTypeId, (uint)arenatype, (uint)arenatype, true, packet.TeamSizeIndex, out errorGuid);
             if (err == 0)
             {
                 Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);

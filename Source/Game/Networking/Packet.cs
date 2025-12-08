@@ -104,6 +104,11 @@ namespace Game.Networking
             this.opcode = (uint)opcode;
         }
 
+        public WorldPacket(ClientOpcodes opcode)
+        {
+            this.opcode = (uint)opcode;
+        }
+
         public WorldPacket(byte[] data) : base(data)
         {
             opcode = ReadUInt32();
