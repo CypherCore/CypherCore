@@ -498,7 +498,7 @@ namespace Framework.Constants
         DisableGravity = 488,
         ModAlternativeDefaultLanguage = 489, // NYI
         Unk490 = 490,
-        Unk491 = 491,
+        ModHonorGainPct = 491,
         Unk492 = 492,
         Unk493 = 493,
         SetPowerPointCharge = 494, // NYI
