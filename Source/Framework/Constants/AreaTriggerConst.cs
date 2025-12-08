@@ -70,4 +70,10 @@ namespace Framework.Constants
         None = 2,
         MovementScript = 3
     }
+
+    public enum AreaTriggerExitReason
+    {
+        NotInside = 0, // Unit leave areatrigger
+        ByExpire = 1  // On areatrigger despawn
+    }
 }

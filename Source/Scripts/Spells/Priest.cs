@@ -1054,7 +1054,7 @@ class areatrigger_pri_divine_star(AreaTrigger areaTrigger) : AreaTriggerAI(areaT
         HandleUnitEnterExit(unit);
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         // Note: this ensures any unit receives a second hit if they happen to be inside the At when Divine Star starts its return path.
         HandleUnitEnterExit(unit);

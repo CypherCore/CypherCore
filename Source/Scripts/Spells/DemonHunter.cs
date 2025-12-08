@@ -736,7 +736,7 @@ class areatrigger_dh_darkness : AreaTriggerAI
         });
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         unit.RemoveAura(SpellIds.DarknessAbsorb, at.GetCasterGUID());
     }

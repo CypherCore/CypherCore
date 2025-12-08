@@ -1376,7 +1376,7 @@ class at_dk_death_and_decay(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger
             unit.CastSpell(unit, SpellIds.SanguineGround);
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         if (unit.GetGUID() != at.GetCasterGUID())
             return;

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
 
@@ -34,7 +35,7 @@ namespace Game.AI
         public virtual void OnUnitEnter(Unit unit) { }
 
         // Called when an unit exit the AreaTrigger, or when the AreaTrigger is removed
-        public virtual void OnUnitExit(Unit unit) { }
+        public virtual void OnUnitExit(Unit unit, AreaTriggerExitReason reason) { }
 
         // Called when the AreaTrigger is removed
         public virtual void OnRemove() { }

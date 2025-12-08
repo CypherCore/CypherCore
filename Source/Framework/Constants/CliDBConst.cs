@@ -967,7 +967,7 @@ namespace Framework.Constants
         SuppressConditionError = 0x40, // NYI
         NotTriggeredbyCaster = 0x80,
         CreatorsPartyOnly = 0x100,
-        DontRunOnLeaveWhenExpiring = 0x200, // NYI
+        DontRunOnLeaveWhenExpiring = 0x200,
         CanAffectUninteractible = 0x400,
         DontDespawnWithCreator = 0x800, // NYI
         CanAffectBeastmaster = 0x1000, // Can affect GMs

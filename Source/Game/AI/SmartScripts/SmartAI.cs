@@ -1200,7 +1200,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AreatriggerEnter, unit);
         }
 
-        public override void OnUnitExit(Unit unit)
+        public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
         {
             GetScript().ProcessEventsFor(SmartEvents.AreatriggerExit, unit);
         }

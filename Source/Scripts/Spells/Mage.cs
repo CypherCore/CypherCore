@@ -1501,7 +1501,7 @@ class at_mage_meteor_burn(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
                 caster.CastSpell(unit, SpellIds.MeteorBurnDamage, TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         unit.RemoveAurasDueToSpell(SpellIds.MeteorBurnDamage, at.GetCasterGUID());
     }

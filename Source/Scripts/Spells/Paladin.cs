@@ -248,7 +248,7 @@ class areatrigger_pal_ashen_hallow(AreaTrigger areaTrigger) : AreaTriggerAI(area
             unit.CastSpell(unit, SpellIds.AshenHallowAllowHammer, true);
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         if (unit.GetGUID() == at.GetCasterGUID())
             unit.RemoveAura(SpellIds.AshenHallowAllowHammer);
@@ -429,7 +429,7 @@ class areatrigger_pal_consecration(AreaTrigger areaTrigger) : AreaTriggerAI(area
         }
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         if (at.GetCasterGUID() == unit.GetGUID())
             unit.RemoveAurasDueToSpell(SpellIds.ConsecrationProtectionAura, at.GetCasterGUID());

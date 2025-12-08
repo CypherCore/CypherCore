@@ -263,7 +263,7 @@ class at_hun_binding_shot(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
         }
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         unit.RemoveAurasDueToSpell(SpellIds.BindingShotMarker, at.GetCasterGUID());
 
@@ -1322,7 +1322,7 @@ class areatrigger_hun_tar_trap(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrig
         }
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         unit.RemoveAurasDueToSpell(SpellIds.TarTrapSlow, at.GetCasterGUID());
     }

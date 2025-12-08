@@ -3428,7 +3428,7 @@ class areatrigger_sha_arctic_snowstorm(AreaTrigger areaTrigger) : AreaTriggerAI(
         }
     }
 
-    public override void OnUnitExit(Unit unit)
+    public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
     {
         unit.RemoveAurasDueToSpell(SpellIds.ArcticSnowstormSlow, at.GetCasterGUID());
     }

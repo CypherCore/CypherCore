@@ -67,7 +67,7 @@ namespace Game.Entities
                 _ai.OnRemove();
 
                 // Handle removal of all units, calling OnUnitExit & deleting auras if needed
-                HandleUnitEnterExit(new List<Unit>());
+                HandleUnitEnterExit(new List<Unit>(), AreaTriggerExitReason.ByExpire);
 
                 base.RemoveFromWorld();
                 if (IsStaticSpawn())
@@ -809,7 +809,7 @@ namespace Game.Entities
             }
         }
 
-        void HandleUnitEnterExit(List<Unit> newTargetList)
+        void HandleUnitEnterExit(List<Unit> newTargetList, AreaTriggerExitReason exitMode = AreaTriggerExitReason.NotInside)
         {
             List<ObjectGuid> exitUnits = _insideUnits;
             _insideUnits.Clear();
@@ -832,7 +832,7 @@ namespace Game.Entities
             {
                 Unit leavingUnit = Global.ObjAccessor.GetUnit(this, exitUnitGuid);
                 if (leavingUnit != null)
-                    HandleUnitExitInternal(leavingUnit);
+                    HandleUnitExitInternal(leavingUnit, exitMode);
             }
 
             UpdateHasPlayersFlag();
@@ -861,23 +861,30 @@ namespace Game.Entities
             unit.EnterAreaTrigger(this);
         }
 
-        void HandleUnitExitInternal(Unit unit)
+        void HandleUnitExitInternal(Unit unit, AreaTriggerExitReason exitMode = AreaTriggerExitReason.NotInside)
         {
+            bool canTriggerOnExit = exitMode != AreaTriggerExitReason.ByExpire || !HasActionSetFlag(AreaTriggerActionSetFlag.DontRunOnLeaveWhenExpiring);
+
             Player player = unit.ToPlayer();
             if (player != null)
             {
                 if (player.IsDebugAreaTriggers)
                     player.SendSysMessage(CypherStrings.DebugAreatriggerEntityLeft, GetEntry(), IsCustom(), IsStaticSpawn(), _spawnId);
 
-                player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
+                if (canTriggerOnExit)
+                {
+                    player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
 
-                if (GetTemplate().ActionSetId != 0)
-                    player.UpdateCriteria(CriteriaType.LeaveAreaTriggerWithActionSet, GetTemplate().ActionSetId);
+                    if (GetTemplate().ActionSetId != 0)
+                        player.UpdateCriteria(CriteriaType.LeaveAreaTriggerWithActionSet, GetTemplate().ActionSetId);
+                }
             }
 
             UndoActions(unit);
 
-            _ai.OnUnitExit(unit);
+            if (canTriggerOnExit)
+                _ai.OnUnitExit(unit, exitMode);
+
             unit.ExitAreaTrigger(this);
         }
 
