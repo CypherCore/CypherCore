@@ -8257,6 +8257,16 @@ namespace Game.Spells
             return true;
         }
 
+        public Script GetScript<Script>() where Script : SpellScript
+        {
+            return GetScriptByType(typeof(Script)) as Script;
+        }
+
+        public SpellScript GetScriptByType(Type type)
+        {
+            return m_loadedScripts.Find(script => script.GetType() == type);
+        }
+
         public bool CanExecuteTriggersOnHit(Unit unit, SpellInfo triggeredByAura = null)
         {
             bool onlyOnTarget = triggeredByAura != null && triggeredByAura.HasAttribute(SpellAttr4.ClassTriggerOnlyOnTarget);
