@@ -151,7 +151,7 @@ namespace Game.Entities
 
             SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), 1.0f);
 
-            if (caster != null)
+            if (caster != null && spellInfo != null)
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
