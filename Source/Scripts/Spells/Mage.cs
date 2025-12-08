@@ -73,6 +73,7 @@ struct SpellIds
     public const uint PhoenixFlames = 257541;
     public const uint PhoenixFlamesDamage = 257542;
     public const uint Pyroblast = 11366;
+    public const uint Pyrotechnics = 157644;
     public const uint RadiantSparkProcBlocker = 376105;
     public const uint RayOfFrostBonus = 208141;
     public const uint RayOfFrostFingersOfFrost = 269748;
@@ -973,8 +974,8 @@ class spell_mage_hot_streak : AuraScript
 
     public override void Register()
     {
-        DoCheckProc.Add(new (CheckProc));
-        OnProc.Add(new (HandleProc));
+        DoCheckProc.Add(new(CheckProc));
+        OnProc.Add(new(HandleProc));
     }
 }
 
@@ -992,7 +993,7 @@ class spell_mage_hot_streak_ignite_marker : SpellScript
         return castTime;
     }
 
-    public override void Register()    {    }
+    public override void Register() { }
 
     bool _affectedByHotStreak = false;
 
@@ -1523,6 +1524,29 @@ class spell_mage_prismatic_barrier : AuraScript
     public override void Register()
     {
         DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.SchoolAbsorb));
+    }
+}
+
+[Script] // 157642 - Pyrotechnics
+class spell_mage_pyrotechnics : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.Pyrotechnics);
+    }
+
+    void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
+    {
+        if (procInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Critical))
+        {
+            PreventDefaultAction();
+            procInfo.GetActor().RemoveAurasDueToSpell(SpellIds.Pyrotechnics);
+        }
+    }
+
+    public override void Register()
+    {
+        OnEffectProc.Add(new(HandleProc, 0, AuraType.ProcTriggerSpell));
     }
 }
 
