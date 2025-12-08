@@ -16,6 +16,7 @@ namespace Scripts.Spells.Mage;
 
 struct SpellIds
 {
+    public const uint AlexstraszasFury = 235870;
     public const uint AlterTimeAura = 110909;
     public const uint AlterTimeVisual = 347402;
     public const uint ArcaneAlterTimeAura = 342246;
@@ -36,6 +37,7 @@ struct SpellIds
     public const uint ConeOfColdSlow = 212792;
     public const uint ConjureRefreshment = 116136;
     public const uint ConjureRefreshmentTable = 167145;
+    public const uint DragonsBreath = 31661;
     public const uint DragonhawkForm = 32818;
     public const uint EtherealBlink = 410939;
     public const uint EverwarmSocks = 320913;
@@ -44,6 +46,7 @@ struct SpellIds
     public const uint FingersOfFrost = 44544;
     public const uint FireBlast = 108853;
     public const uint Firestarter = 205026;
+    public const uint Flamestrike = 2120;
     public const uint FlamePatchAreatrigger = 205470;
     public const uint FlamePatchDamage = 205472;
     public const uint FlamePatchTalent = 205037;
@@ -51,6 +54,8 @@ struct SpellIds
     public const uint FreneticSpeed = 236060;
     public const uint FrostNova = 122;
     public const uint GiraffeForm = 32816;
+    public const uint HeatingUp = 48107;
+    public const uint HotStreak = 48108;
     public const uint IceBarrier = 11426;
     public const uint IceBlock = 45438;
     public const uint Ignite = 12654;
@@ -66,6 +71,8 @@ struct SpellIds
     public const uint MeteorMissile = 153564;
     public const uint MoltenFury = 458910;
     public const uint PhoenixFlames = 257541;
+    public const uint PhoenixFlamesDamage = 257542;
+    public const uint Pyroblast = 11366;
     public const uint RadiantSparkProcBlocker = 376105;
     public const uint RayOfFrostBonus = 208141;
     public const uint RayOfFrostFingersOfFrost = 269748;
@@ -914,6 +921,90 @@ class spell_mage_frostbolt : SpellScript
     }
 }
 
+[Script] // 44448 - Pyroblast Clearcasting Driver
+class spell_mage_hot_streak : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.DragonsBreath, SpellIds.AlexstraszasFury, SpellIds.HotStreak, SpellIds.HeatingUp, SpellIds.PhoenixFlamesDamage);
+    }
+
+    bool CheckProc(ProcEventInfo procEvent)
+    {
+        Unit caster = GetTarget();
+        switch (procEvent.GetSpellInfo().Id)
+        {
+            case SpellIds.DragonsBreath:
+                // talent requirement
+                if (!caster.HasAura(SpellIds.AlexstraszasFury))
+                    return false;
+                break;
+            case SpellIds.PhoenixFlamesDamage:
+                // primary target only
+                if (procEvent.GetActionTarget().GetGUID() != procEvent.GetProcSpell().m_targets.GetObjectTargetGUID())
+                    return false;
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    void HandleProc(ProcEventInfo eventInfo)
+    {
+        Unit caster = GetTarget();
+
+        if (eventInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Critical))
+        {
+            CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
+
+            if (!caster.HasAura(SpellIds.HeatingUp))
+                caster.CastSpell(caster, SpellIds.HeatingUp, args);
+            else
+            {
+                caster.RemoveAura(SpellIds.HeatingUp);
+                caster.CastSpell(caster, SpellIds.HotStreak, args);
+            }
+        }
+        else
+            caster.RemoveAura(SpellIds.HeatingUp);
+    }
+
+    public override void Register()
+    {
+        DoCheckProc.Add(new (CheckProc));
+        OnProc.Add(new (HandleProc));
+    }
+}
+
+[Script] // 48108 - Hot Streak! (attached to 11366 - Pyroblast and 2120 - Flamestrike)
+class spell_mage_hot_streak_ignite_marker : SpellScript
+{
+    public override bool Validate(SpellInfo spell)
+    {
+        return ValidateSpellInfo(SpellIds.HotStreak);
+    }
+
+    public override int CalcCastTime(int castTime)
+    {
+        _affectedByHotStreak = GetSpell().m_appliedMods.Contains(GetCaster().GetAura(SpellIds.HotStreak));
+        return castTime;
+    }
+
+    public override void Register()    {    }
+
+    bool _affectedByHotStreak = false;
+
+    public static bool IsActive(Spell spell)
+    {
+        spell_mage_hot_streak_ignite_marker script = spell.GetScript<spell_mage_hot_streak_ignite_marker>();
+        if (script != null)
+            return script._affectedByHotStreak;
+        return false;
+    }
+}
+
 [Script] // 386737 - Hyper Impact
 class spell_mage_hyper_impact : AuraScript
 {
@@ -1073,7 +1164,7 @@ class spell_mage_ignite : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Ignite);
+        return ValidateSpellInfo(SpellIds.Ignite, SpellIds.HotStreak, SpellIds.Pyroblast, SpellIds.Flamestrike);
     }
 
     bool CheckProc(ProcEventInfo eventInfo)
@@ -1089,6 +1180,9 @@ class spell_mage_ignite : AuraScript
         int pct = aurEff.GetAmount();
 
         Cypher.Assert(igniteDot.GetMaxTicks() > 0);
+        if (spell_mage_hot_streak_ignite_marker.IsActive(eventInfo.GetProcSpell()))
+            pct *= 2;
+
         int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
 
         CastSpellExtraArgs args = new(aurEff);
