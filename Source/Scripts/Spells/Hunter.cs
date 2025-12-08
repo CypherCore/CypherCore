@@ -610,6 +610,35 @@ class spell_hun_latent_poison_injectors_trigger : SpellScript
     }
 }
 
+[Script] // 194595 - Lock and Load
+class spell_hun_lock_and_load : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.LockAndLoad);
+    }
+
+    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    {
+        return RandomHelper.randChance(aurEff.GetAmount());
+    }
+
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    {
+        Unit caster = eventInfo.GetActor();
+        caster.CastSpell(caster, SpellIds.LockAndLoad, new CastSpellExtraArgs()
+        {
+            TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError
+        });
+    }
+
+    public override void Register()
+    {
+        DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.Dummy));
+        OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+    }
+}
+
 [Script] // 1217788 - Manhunter
 class spell_hun_manhunter : AuraScript
 {
