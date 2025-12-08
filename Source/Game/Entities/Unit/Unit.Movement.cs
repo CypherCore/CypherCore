@@ -1551,22 +1551,19 @@ namespace Game.Entities
             }
         }
 
-        public void SetRooted(bool apply, bool packetOnly = false)
+        public void SetRooted(bool apply)
         {
-            if (!packetOnly)
+            if (apply)
             {
-                if (apply)
-                {
-                    // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
-                    // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
-                    // setting MOVEMENTFLAG_ROOT
-                    RemoveUnitMovementFlag(MovementFlag.MaskMoving);
-                    AddUnitMovementFlag(MovementFlag.Root);
-                    StopMoving();
-                }
-                else
-                    RemoveUnitMovementFlag(MovementFlag.Root);
+                // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
+                // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
+                // setting MOVEMENTFLAG_ROOT
+                RemoveUnitMovementFlag(MovementFlag.MaskMoving);
+                AddUnitMovementFlag(MovementFlag.Root);
+                StopMoving();
             }
+            else
+                RemoveUnitMovementFlag(MovementFlag.Root);
 
             Player playerMover = GetUnitBeingMoved()?.ToPlayer();// unit controlled by a player.
             if (playerMover != null)
