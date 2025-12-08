@@ -89,6 +89,7 @@ struct SpellIds
     public const uint ChainReactionDummy = 278309;
     public const uint ChainReaction = 278310;
     public const uint TouchOfTheMagiExplode = 210833;
+    public const uint WildfireTalent = 383489;
     public const uint WintersChill = 228358;
 }
 
@@ -976,6 +977,8 @@ class spell_mage_ice_block : SpellScript
 [Script] // Ice Lance - 30455
 class spell_mage_ice_lance : SpellScript
 {
+    List<ObjectGuid> _orderedTargets = new();
+
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellInfo(SpellIds.IceLanceTrigger, SpellIds.ThermalVoid, SpellIds.IcyVeins, SpellIds.ChainReactionDummy, SpellIds.ChainReaction, SpellIds.FingersOfFrost);
@@ -1022,8 +1025,6 @@ class spell_mage_ice_lance : SpellScript
         OnEffectLaunchTarget.Add(new(IndexTarget, 0, SpellEffectName.ScriptEffect));
         OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.ScriptEffect));
     }
-
-    List<ObjectGuid> _orderedTargets;
 }
 
 [Script] // 228598 - Ice Lance
@@ -1794,5 +1795,61 @@ class spell_mage_water_elemental_freeze : SpellScript
     public override void Register()
     {
         AfterHit.Add(new(HandleImprovedFreeze));
+    }
+}
+
+[Script] // 383493 - Wildfire
+class spell_mage_wildfire_area_crit : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellEffect((SpellIds.WildfireTalent, 3));
+    }
+
+    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    {
+        Unit caster = GetCaster();
+        if (caster == null)
+            return;
+
+        AuraEffect wildfireCritEffect = caster.GetAuraEffect(SpellIds.WildfireTalent, 3);
+        if (wildfireCritEffect == null)
+            return;
+
+        canBeRecalculated = false;
+        amount = wildfireCritEffect.GetAmount();
+    }
+
+    public override void Register()
+    {
+        DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.ModCritPct));
+    }
+}
+
+[Script] // 383492 - Wildfire
+class spell_mage_wildfire_caster_crit : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellEffect((SpellIds.WildfireTalent, 2));
+    }
+
+    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    {
+        Unit caster = GetCaster();
+        if (caster == null)
+            return;
+
+        AuraEffect wildfireCritEffect = caster.GetAuraEffect(SpellIds.WildfireTalent, 2);
+        if (wildfireCritEffect == null)
+            return;
+
+        canBeRecalculated = false;
+        amount = wildfireCritEffect.GetAmount();
+    }
+
+    public override void Register()
+    {
+        DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.AddPctModifier));
     }
 }
