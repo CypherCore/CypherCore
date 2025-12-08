@@ -702,6 +702,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Quest Pooling Data...");
             Global.QuestPoolMgr.LoadFromDB();                                // must be after quest templates
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading World State templates...");
+            Global.WorldStateMgr.LoadFromDB();                                          // must be loaded before battleground, outdoor PvP, game events and conditions
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Game Event Data...");               // must be after loading pools fully
             Global.GameEventMgr.LoadFromDB();
 
@@ -890,7 +893,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Guilds...");
             Global.GuildMgr.LoadGuilds();
 
-
             Log.outInfo(LogFilter.ServerLoading, "Loading ArenaTeams...");
             Global.ArenaTeamMgr.LoadArenaTeams();
 
@@ -935,9 +937,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Formations...");
             FormationMgr.LoadCreatureFormations();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading World State templates...");
-            Global.WorldStateMgr.LoadFromDB();                                          // must be loaded before battleground, outdoor PvP and conditions
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Persistend World Variables...");              // must be loaded before Battleground, outdoor PvP and conditions
             LoadPersistentWorldVariables();
