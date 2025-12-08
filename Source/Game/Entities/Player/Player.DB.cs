@@ -1886,17 +1886,15 @@ namespace Game.Entities
         }
         void _SaveSkills(SQLTransaction trans)
         {
-            PreparedStatement stmt;// = null;
-
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
+            PreparedStatement stmt;
 
             foreach (var pair in mSkillStatus.ToList())
             {
                 if (pair.Value.State == SkillState.Unchanged)
                     continue;
 
-                ushort value = skillInfoField.SkillRank[pair.Value.Pos];
-                ushort max = skillInfoField.SkillMaxRank[pair.Value.Pos];
+                ushort value = GetSkillRankByPos(pair.Value.Pos);
+                ushort max = GetSkillMaxRankByPos(pair.Value.Pos);
                 sbyte professionSlot = (sbyte)GetProfessionSlotFor(pair.Key);
 
                 switch (pair.Value.State)

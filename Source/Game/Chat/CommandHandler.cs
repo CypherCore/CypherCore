@@ -222,9 +222,6 @@ namespace Game.Chat
                             return player.GetGUID().GetCounter();
 
                         ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
-                        if (guid.IsEmpty())
-                            return 0;
-
                         return guid.GetCounter();
                     }
                 case 1:

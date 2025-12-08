@@ -190,7 +190,7 @@ namespace Game.Groups
             m_raidDifficulty = Player.CheckLoadedRaidDifficultyID((Difficulty)field.Read<byte>(14));
             m_legacyRaidDifficulty = Player.CheckLoadedLegacyRaidDifficultyID((Difficulty)field.Read<byte>(15));
 
-            m_masterLooterGuid = ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(16));
+            m_masterLooterGuid = field.Read<ulong>(16) != 0 ? ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(16)) : ObjectGuid.Empty;
 
             m_pingRestriction = (RestrictPingsTo)field.Read<sbyte>(18);
 

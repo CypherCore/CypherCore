@@ -19,11 +19,10 @@ namespace Game.Entities
         {
             Race race = GetRace();
             ushort maxSkill = GetMaxSkillValueForLevel();
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
 
             foreach (var pair in mSkillStatus)
             {
-                if (pair.Value.State == SkillState.Deleted || skillInfoField.SkillRank[pair.Value.Pos] == 0)
+                if (pair.Value.State == SkillState.Deleted || GetSkillRankByPos(pair.Value.Pos) == 0)
                     continue;
 
                 uint pskill = pair.Key;
@@ -42,7 +41,7 @@ namespace Game.Entities
                 }
 
                 // Update level dependent skillline spells
-                LearnSkillRewardedSpells(rcEntry.SkillID, skillInfoField.SkillRank[pair.Value.Pos], race);
+                LearnSkillRewardedSpells(rcEntry.SkillID, GetSkillRankByPos(pair.Value.Pos), race);
             }
         }
 
@@ -56,15 +55,13 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            int result = skillInfo.SkillRank[skillStatusData.Pos];
-            result += skillInfo.SkillTempBonus[skillStatusData.Pos];
-            result += skillInfo.SkillPermBonus[skillStatusData.Pos];
+            int result = GetSkillRankByPos(skillStatusData.Pos);
+            result += GetSkillTempBonusByPos(skillStatusData.Pos);
+            result += GetSkillPermBonusByPos(skillStatusData.Pos);
             return (ushort)(result < 0 ? 0 : result);
         }
 
@@ -78,15 +75,13 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            int result = skillInfo.SkillMaxRank[skillStatusData.Pos];
-            result += skillInfo.SkillTempBonus[skillStatusData.Pos];
-            result += skillInfo.SkillPermBonus[skillStatusData.Pos];
+            int result = GetSkillMaxRankByPos(skillStatusData.Pos);
+            result += GetSkillTempBonusByPos(skillStatusData.Pos);
+            result += GetSkillPermBonusByPos(skillStatusData.Pos);
             return (ushort)(result < 0 ? 0 : result);
         }
 
@@ -100,13 +95,11 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            return skillInfo.SkillRank[skillStatusData.Pos];
+            return GetSkillRankByPos(skillStatusData.Pos);
         }
 
         public ushort GetSkillStep(SkillType skill)
@@ -119,13 +112,11 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            return skillInfo.SkillStep[skillStatusData.Pos];
+            return GetSkillStepByPos(skillStatusData.Pos);
         }
 
         public ushort GetPureMaxSkillValue(SkillType skill)
@@ -133,13 +124,11 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            return skillInfo.SkillMaxRank[skillStatusData.Pos];
+            return GetSkillMaxRankByPos(skillStatusData.Pos);
         }
 
         public ushort GetBaseSkillValue(SkillType skill)
@@ -147,14 +136,12 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            int result = skillInfo.SkillRank[skillStatusData.Pos];
-            result += skillInfo.SkillPermBonus[skillStatusData.Pos];
+            int result = GetSkillRankByPos(skillStatusData.Pos);
+            result += GetSkillPermBonusByPos(skillStatusData.Pos);
             return (ushort)(result < 0 ? 0 : result);
         }
 
@@ -163,13 +150,11 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            return skillInfo.SkillPermBonus[skillStatusData.Pos];
+            return GetSkillPermBonusByPos(skillStatusData.Pos);
         }
 
         public ushort GetSkillTempBonusValue(uint skill)
@@ -177,13 +162,11 @@ namespace Game.Entities
             if (skill == 0)
                 return 0;
 
-            SkillInfo skillInfo = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfo.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return 0;
 
-            return skillInfo.SkillTempBonus[skillStatusData.Pos];
+            return GetSkillTempBonusByPos(skillStatusData.Pos);
         }
 
         void InitializeSelfResurrectionSpells()
@@ -414,10 +397,8 @@ namespace Game.Entities
             if (skillStatusData == null || skillStatusData.State == SkillState.Deleted)
                 return false;
 
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
-
-            ushort value = skillInfoField.SkillRank[skillStatusData.Pos];
-            ushort max = skillInfoField.SkillMaxRank[skillStatusData.Pos];
+            ushort value = GetSkillRankByPos(skillStatusData.Pos);
+            ushort max = GetSkillMaxRankByPos(skillStatusData.Pos);
 
             if (max == 0 || value == 0 || value >= max)
                 return false;
@@ -859,16 +840,14 @@ namespace Game.Entities
 
         public void ModifySkillBonus(uint skillid, int val, bool talent)
         {
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skillid);
-            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || skillInfoField.SkillRank[skillStatusData.Pos] == 0)
+            if (skillStatusData == null || skillStatusData.State == SkillState.Deleted || GetSkillRankByPos(skillStatusData.Pos) == 0)
                 return;
 
             if (talent)
-                SetSkillPermBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillPermBonus[skillStatusData.Pos] + val));
+                SetSkillPermBonus(skillStatusData.Pos, (ushort)(GetSkillPermBonusByPos(skillStatusData.Pos) + val));
             else
-                SetSkillTempBonus(skillStatusData.Pos, (ushort)(skillInfoField.SkillTempBonus[skillStatusData.Pos] + val));
+                SetSkillTempBonus(skillStatusData.Pos, (ushort)(GetSkillTempBonusByPos(skillStatusData.Pos) + val));
 
             // Apply/Remove bonus to child skill lines
             var childSkillLines = Global.DB2Mgr.GetSkillLinesForParentSkill(skillid);
@@ -1051,10 +1030,8 @@ namespace Game.Entities
             if (skill == 0)
                 return false;
 
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
-
             var skillStatusData = mSkillStatus.LookupByKey(skill);
-            return skillStatusData != null && skillStatusData.State != SkillState.Deleted && skillInfoField.SkillRank[skillStatusData.Pos] != 0;
+            return skillStatusData != null && skillStatusData.State != SkillState.Deleted && GetSkillRankByPos(skillStatusData.Pos) != 0;
         }
         public void SetSkill(SkillType skill, uint step, uint newVal, uint maxVal)
         {
@@ -1071,7 +1048,6 @@ namespace Game.Entities
 
             ushort currVal;
             var skillStatusData = mSkillStatus.LookupByKey(id);
-            SkillInfo skillInfoField = m_activePlayerData.Skill;
 
             void refreshSkillBonusAuras()
             {
@@ -1093,7 +1069,7 @@ namespace Game.Entities
             // Handle already stored skills
             if (skillStatusData != null)
             {
-                currVal = skillInfoField.SkillRank[skillStatusData.Pos];
+                currVal = GetSkillRankByPos(skillStatusData.Pos);
 
                 // Activate and update skill line
                 if (newVal != 0)
@@ -1220,7 +1196,7 @@ namespace Game.Entities
                 // Find a free skill slot
                 for (int i = 0; i < SkillConst.MaxPlayerSkills; ++i)
                 {
-                    if (((SkillInfo)m_activePlayerData.Skill).SkillLineID[i] == 0)
+                    if (GetSkillLineIdByPos(i) == 0)
                     {
                         skillSlot = (byte)i;
                         break;
@@ -3697,36 +3673,49 @@ namespace Game.Entities
 
         public void SetPetSpellPower(uint spellPower) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.PetSpellPower), spellPower); }
 
+        public ushort GetSkillLineIdByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillLineID[(int)pos]; }
         public void SetSkillLineId(uint pos, ushort skillLineId)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillLineID, (int)pos), skillLineId);
         }
+
+        public ushort GetSkillStepByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillStep[(int)pos]; }
         public void SetSkillStep(uint pos, ushort step)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillStep, (int)pos), step);
         }
+
+        public ushort GetSkillRankByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillRank[(int)pos]; }
         public void SetSkillRank(uint pos, ushort rank)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillRank, (int)pos), rank);
         }
+
+        public ushort GetSkillStartingRankByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillStartingRank[(int)pos]; }
         public void SetSkillStartingRank(uint pos, ushort starting)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillStartingRank, (int)pos), starting);
         }
+
+        public ushort GetSkillMaxRankByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillMaxRank[(int)pos]; }
         public void SetSkillMaxRank(uint pos, ushort max)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillMaxRank, (int)pos), max);
         }
+
+        public ushort GetSkillTempBonusByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillTempBonus[(int)pos]; }
         public void SetSkillTempBonus(uint pos, ushort bonus)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);
             SetUpdateFieldValue(ref skillInfo.ModifyValue(skillInfo.SkillTempBonus, (int)pos), bonus);
         }
+
+        public ushort GetSkillPermBonusByPos(uint pos) { return m_activePlayerData.Skill.GetValue().SkillPermBonus[(int)pos]; }
         public void SetSkillPermBonus(uint pos, ushort bonus)
         {
             SkillInfo skillInfo = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Skill);

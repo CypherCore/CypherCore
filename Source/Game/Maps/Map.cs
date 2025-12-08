@@ -4199,7 +4199,7 @@ namespace Game.Maps
                 {
                     switch (step.sourceGUID.GetHigh())
                     {
-                        case HighGuid.Item: // as well as HIGHGUID_CONTAINER
+                        case HighGuid.Item:
                             Player player = GetPlayer(step.ownerGUID);
                             if (player != null)
                                 source = player.GetItemByGuid(step.sourceGUID);
