@@ -662,20 +662,28 @@ namespace Game.Entities
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
 
-            _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyTransmog, 1);
+            owner.UpdateCriteria(CriteriaType.LearnAnyTransmog, 1);
 
             ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
             if (item != null)
             {
                 int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
                 if (transmogSlot >= 0)
-                    _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyTransmogInSlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
+                    owner.UpdateCriteria(CriteriaType.LearnAnyTransmogInSlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
             }
 
             var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
             foreach (TransmogSetRecord set in sets)
+            {
                 if (IsSetCompleted(set.Id))
-                    _owner.GetPlayer().UpdateCriteria(CriteriaType.CollectTransmogSetFromGroup, set.TransmogSetGroupID);
+                {
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)set.TrackingQuestID);
+                    if (quest != null)
+                        owner.RewardQuest(quest, LootItemType.Item, 0, owner, false);
+
+                    owner.UpdateCriteria(CriteriaType.CollectTransmogSetFromGroup, set.TransmogSetGroupID);
+                }
+            }
         }
 
         void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)
