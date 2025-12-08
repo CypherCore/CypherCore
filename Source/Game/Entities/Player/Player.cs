@@ -264,7 +264,10 @@ namespace Game.Entities
             // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
             UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
             SetFullHealth();
-            SetFullPower(PowerType.Mana);
+
+            foreach (var (_, powerType) in CliDB.PowerTypeStorage)
+                if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnInitialLogIn))
+                    SetFullPower(powerType.PowerTypeEnum);
 
             // original spells
             LearnDefaultSkills();
