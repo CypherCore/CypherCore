@@ -653,9 +653,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetGuildMaster)]
         void HandleGuildSetGuildMaster(GuildSetGuildMaster packet)
         {
-            Guild guild = GetPlayer().GetGuild();
-            if (guild != null)
-                guild.HandleSetNewGuildMaster(this, packet.NewMasterName, false);
+            if (ObjectManager.NormalizePlayerName(ref packet.NewMasterName))
+            {
+                Guild guild = GetPlayer().GetGuild();
+                if (guild != null)
+                    guild.HandleSetNewGuildMaster(this, packet.NewMasterName, false);
+            }
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildSetAchievementTracking)]

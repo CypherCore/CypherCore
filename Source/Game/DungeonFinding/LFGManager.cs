@@ -153,7 +153,7 @@ namespace Game.DungeonFinding
             return LfgDungeonStore.LookupByKey(id);
         }
 
-        public void LoadLFGDungeons(bool reload = false)
+        public void LoadLFGDungeons()
         {
             uint oldMSTime = Time.GetMSTime();
 
@@ -191,7 +191,7 @@ namespace Game.DungeonFinding
                 uint dungeonId = result.Read<uint>(0);
                 if (!LfgDungeonStore.ContainsKey(dungeonId))
                 {
-                    Log.outError(LogFilter.Sql, "table `lfg_entrances` contains coordinates for wrong dungeon {0}", dungeonId);
+                    Log.outError(LogFilter.Sql, "table `lfg_dungeon_template` contains coordinates for wrong dungeon {0}", dungeonId);
                     continue;
                 }
 
@@ -207,6 +207,8 @@ namespace Game.DungeonFinding
             while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} lfg dungeon templates in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+
+            CachedDungeonMapStore.Clear();
 
             // Fill all other teleport coords from areatriggers
             foreach (var pair in LfgDungeonStore)
@@ -234,9 +236,6 @@ namespace Game.DungeonFinding
                     CachedDungeonMapStore.Add((byte)dungeon.group, dungeon.id);
                 CachedDungeonMapStore.Add(0, dungeon.id);
             }
-
-            if (reload)
-                CachedDungeonMapStore.Clear();
         }
 
         public void Update(uint diff)
