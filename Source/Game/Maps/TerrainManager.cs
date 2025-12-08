@@ -346,11 +346,22 @@ namespace Game.Maps
             if (!Global.DisableMgr.IsPathfindingEnabled(GetId()))
                 return;
 
-            bool mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
-            if (mmapLoadResult)
-                Log.outDebug(LogFilter.Maps, $"MMAP loaded name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
-            else
-                Log.outWarn(LogFilter.Maps, $"Could not load MMAP name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
+            LoadResult mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
+            switch (mmapLoadResult)
+            {
+                case LoadResult.Success:
+                    Log.outDebug(LogFilter.Maps, $"MMAP loaded name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
+                    break;
+                case LoadResult.AlreadyLoaded:
+                    break;
+                case LoadResult.FileNotFound:
+                    if (_parentTerrain != null)
+                        break; // don't log tile not found errors for child maps
+                    goto default;
+                default:
+                    Log.outWarn(LogFilter.Maps, $"Could not load MMAP name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy}) result: {mmapLoadResult}");
+                    break;
+            }
         }
 
         public void UnloadMap(int gx, int gy)
@@ -703,18 +714,18 @@ namespace Game.Maps
             {
                 if (hasDynamicAreaInfo && ddata.floorZ > vdata.floorZ)
                 {
-                    check_z = ddata.floorZ; 
-                    groupId = ddata.areaInfo.GroupId; 
-                    adtId = ddata.areaInfo.AdtId; 
-                    rootId = ddata.areaInfo.RootId; 
+                    check_z = ddata.floorZ;
+                    groupId = ddata.areaInfo.GroupId;
+                    adtId = ddata.areaInfo.AdtId;
+                    rootId = ddata.areaInfo.RootId;
                     mogpflags = ddata.areaInfo.MogpFlags;
                 }
                 else
                 {
-                    check_z = vdata.floorZ; 
-                    groupId = vdata.areaInfo.GroupId; 
-                    adtId = vdata.areaInfo.AdtId; 
-                    rootId = vdata.areaInfo.RootId; 
+                    check_z = vdata.floorZ;
+                    groupId = vdata.areaInfo.GroupId;
+                    adtId = vdata.areaInfo.AdtId;
+                    rootId = vdata.areaInfo.RootId;
                     mogpflags = vdata.areaInfo.MogpFlags;
                 }
             }

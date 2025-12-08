@@ -90,11 +90,12 @@ namespace Game.Chat
             float x, y, z;
             player.GetPosition(out x, out y, out z);
 
-            handler.SendSysMessage("{0:D4}{1:D2}{2:D2}.mmtile", player.GetMapId(), gy, gx);
-            handler.SendSysMessage("tileloc [{0}, {1}]", gx, gy);
-
             // calculate navmesh tile location
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), x, y);
+
+            handler.SendSysMessage($"{terrainMapId:D4}{gx:D2}{gy:D2}.mmtile");
+            handler.SendSysMessage($"tileloc [{gy}, {gx}]");
+
             Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
             Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, player.GetMapId(), player.GetInstanceId());
             if (navmesh == null || navmeshquery == null)
