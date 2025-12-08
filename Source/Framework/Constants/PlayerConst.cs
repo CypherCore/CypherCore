@@ -1005,4 +1005,20 @@ namespace Framework.Constants
         CharacterContentpushIndex = 8,
         CharacterQuestCompletedIndex = 9,
     }
+
+    public enum HonorGainSource
+    {
+        Kill = 0,
+        Quest = 1,
+        ArenaCompletion = 2,
+        BGCompletion = 3,
+        LFG = 4,
+        TeamContribution = 5,
+        RankedBGCompletion = 6,
+        RatedArenaCompletion = 7,
+        ArenaSkirmishCompletion = 8,
+        RandomBGCompletion = 9,
+        HolidayBGCompletion = 10,
+        Spell = 11,
+    }
 }

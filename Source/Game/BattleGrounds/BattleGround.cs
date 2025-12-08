@@ -525,7 +525,7 @@ namespace Game.BattleGrounds
             {
                 Player player = _GetPlayerForTeam(team, pair, "RewardHonorToTeam");
                 if (player != null)
-                    UpdatePlayerScore(player, ScoreType.BonusHonor, Honor);
+                    UpdatePlayerScore(player, ScoreType.BonusHonor, Honor, true, HonorGainSource.TeamContribution);
             }
         }
 
@@ -683,7 +683,11 @@ namespace Game.BattleGrounds
                         if (Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId)
                             || Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId))
                         {
-                            UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(winnerKills));
+                            HonorGainSource source = HonorGainSource.BGCompletion;
+                            if (!player.GetRandomWinner())
+                                source = Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId) ? HonorGainSource.RandomBGCompletion : HonorGainSource.HolidayBGCompletion;
+
+                            UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(winnerKills), true, source);
                             if (!player.GetRandomWinner())
                             {
                                 player.SetRandomWinner(true);
@@ -716,7 +720,7 @@ namespace Game.BattleGrounds
                     {
                         if (Global.BattlegroundMgr.IsRandomBattleground((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId)
                             || Global.BattlegroundMgr.IsBGWeekend((BattlegroundTypeId)bgPlayer.queueTypeId.BattlemasterListId))
-                            UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(loserKills));
+                            UpdatePlayerScore(player, ScoreType.BonusHonor, GetBonusHonorFromKill(loserKills), true, HonorGainSource.BGCompletion);
                     }
                 }
 
@@ -1233,14 +1237,14 @@ namespace Game.BattleGrounds
             return PlayerScores.LookupByKey(player.GetGUID());
         }
 
-        public bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
+        public bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true, HonorGainSource? source = null)
         {
             var bgScore = PlayerScores.LookupByKey(player.GetGUID());
             if (bgScore == null)  // player not found...
                 return false;
 
             if (type == ScoreType.BonusHonor && doAddHonor && IsBattleground())
-                player.RewardHonor(null, 1, (int)value);
+                player.RewardHonor(null, 1, (int)value, source.GetValueOrDefault(HonorGainSource.Kill));
             else
                 bgScore.UpdateScore(type, value);
 

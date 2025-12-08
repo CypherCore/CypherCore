@@ -1118,7 +1118,7 @@ namespace Game.Entities
             // honor reward
             uint honor = quest.CalculateHonorGain(GetLevel());
             if (honor != 0)
-                RewardHonor(null, 0, (int)honor);
+                RewardHonor(null, 0, (int)honor, HonorGainSource.Quest);
 
             // title reward
             if (quest.RewardTitleId != 0)

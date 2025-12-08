@@ -45,7 +45,7 @@ namespace Game.Chat.Commands
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                target.RewardHonor(null, 1, amount);
+                target.RewardHonor(null, 1, amount, HonorGainSource.Spell);
                 return true;
             }
 
@@ -65,7 +65,7 @@ namespace Game.Chat.Commands
                     if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
                         return false;
 
-                handler.GetPlayer().RewardHonor(target, 1);
+                handler.GetPlayer().RewardHonor(target, 1, -1, HonorGainSource.Kill);
                 return true;
             }
         }

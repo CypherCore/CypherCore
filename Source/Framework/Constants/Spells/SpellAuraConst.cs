@@ -219,7 +219,7 @@ namespace Framework.Constants
         ModMountedFlightSpeedAlways = 209,
         ModVehicleSpeedAlways = 210,
         ModFlightSpeedNotStack = 211,
-        ModHonorGainPct = 212,
+        ModHonorGainPctFromSource = 212,
         ModRageFromDamageDealt = 213,
         Unk214 = 214,
         ArenaPreparation = 215,

@@ -147,7 +147,7 @@ namespace Game.Entities
         {
             // Rewarded player must be alive.
             if (player.IsAlive())
-                player.RewardHonor(_victim, _count, -1, true);
+                player.RewardHonor(_victim, _count, -1, HonorGainSource.Kill);
         }
 
         void _RewardXP(Player player, float rate)

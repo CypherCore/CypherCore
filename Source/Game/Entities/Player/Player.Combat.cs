@@ -478,7 +478,7 @@ namespace Game.Entities
                     // Honor points after duel (the winner) - ImpConfig
                     int amount = WorldConfig.GetIntValue(WorldCfg.HonorAfterDuel);
                     if (amount != 0)
-                        opponent.RewardHonor(null, 1, amount);
+                        opponent.RewardHonor(null, 1, amount, HonorGainSource.Kill);
 
                     break;
                 default:
