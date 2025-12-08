@@ -886,9 +886,9 @@ namespace Game
 
                 // unique limit type item
                 int limit_newcount = 0;
-                if (iGemProto.GetItemLimitCategory() != 0)
+                if (gems[i].GetItemLimitCategory() != 0)
                 {
-                    ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(iGemProto.GetItemLimitCategory());
+                    ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(gems[i].GetItemLimitCategory());
                     if (limitEntry != null)
                     {
                         // NOTE: limitEntry.mode is not checked because if item has limit then it is applied in equip case
@@ -897,7 +897,7 @@ namespace Game
                             if (gems[j] != null)
                             {
                                 // new gem
-                                if (iGemProto.GetItemLimitCategory() == gems[j].GetTemplate().GetItemLimitCategory())
+                                if (gems[i].GetItemLimitCategory() == gems[j].GetTemplate().GetItemLimitCategory())
                                     ++limit_newcount;
                             }
                             else if (oldGemData[j] != null)
@@ -905,8 +905,15 @@ namespace Game
                                 // existing gem
                                 ItemTemplate jProto = Global.ObjectMgr.GetItemTemplate(oldGemData[j].ItemId);
                                 if (jProto != null)
-                                    if (iGemProto.GetItemLimitCategory() == jProto.GetItemLimitCategory())
+                                {
+                                    BonusData oldGemBonus = new(jProto);
+
+                                    foreach (ushort bonusListID in oldGemData[j].BonusListIDs)
+                                        oldGemBonus.AddBonusList(bonusListID);
+
+                                    if (gems[i].GetItemLimitCategory() == oldGemBonus.LimitCategory)
                                         ++limit_newcount;
+                                }
                             }
                         }
 

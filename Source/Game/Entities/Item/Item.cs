@@ -1215,7 +1215,12 @@ namespace Game.Entities
                 if (gemProto == null)
                     return false;
 
-                return gemProto.GetItemLimitCategory() == limitCategory;
+                BonusData gemBonus = new(gemProto);
+
+                foreach (ushort bonusListID in gemData.BonusListIDs)
+                    gemBonus.AddBonusList(bonusListID);
+
+                return gemBonus.LimitCategory == limitCategory;
             });
         }
 
@@ -1846,7 +1851,13 @@ namespace Game.Entities
             uint itemLevelBeforeUpgrades = itemLevel;
 
             if (pvpBonus)
+            {
+                if (bonusData.PvpItemLevel != 0)
+                    itemLevel = bonusData.PvpItemLevel;
+
+                itemLevel += (uint)bonusData.PvpItemLevelBonus;
                 itemLevel += Global.DB2Mgr.GetPvpItemLevelBonus(itemTemplate.GetId());
+            }
 
             if (itemTemplate.GetInventoryType() != InventoryType.NonEquip)
             {
@@ -2726,6 +2737,7 @@ namespace Game.Entities
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
 
         public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
+        public uint GetItemLimitCategory() { return _bonusData.LimitCategory; }
 
         public override Loot GetLootForPlayer(Player player) { return loot; }
 
@@ -2937,6 +2949,8 @@ namespace Game.Entities
             for (int i = EffectCount; i < Effects.Length; ++i)
                 Effects[i] = null;
 
+            LimitCategory = proto.GetItemLimitCategory();
+
             CanDisenchant = !proto.HasFlag(ItemFlags.NoDisenchant);
             CanScrap = proto.HasFlag(ItemFlags4.Scrapable);
 
@@ -2946,7 +2960,8 @@ namespace Game.Entities
             _state.ScalingStatDistributionPriority = int.MaxValue;
             _state.AzeriteTierUnlockSetPriority = int.MaxValue;
             _state.RequiredLevelCurvePriority = int.MaxValue;
-            _state.HasQualityBonus = false;
+            _state.PvpItemLevelPriority = int.MaxValue;
+            _state.BondingPriority = int.MaxValue;
         }
 
         public BonusData(ItemInstance itemInstance) : this(Global.ObjectMgr.GetItemTemplate(itemInstance.ItemID))
@@ -3080,6 +3095,30 @@ namespace Game.Entities
                             ContentTuningId = (uint)values[1];
                     }
                     break;
+                case ItemBonusType.ItemLimitCategory:
+                    if (!_state.HasItemLimitCategory)
+                    {
+                        LimitCategory = (uint)values[0];
+                        _state.HasItemLimitCategory = true;
+                    }
+                    break;
+                case ItemBonusType.PvpItemLevelIncrement:
+                    PvpItemLevelBonus += (short)values[0];
+                    break;
+                case ItemBonusType.PvpItemLevelBase:
+                    if (values[1] < _state.PvpItemLevelPriority)
+                    {
+                        PvpItemLevel = (ushort)values[0];
+                        _state.PvpItemLevelPriority = values[1];
+                    }
+                    break;
+                case ItemBonusType.BondingWithPriority:
+                    if (values[1] < _state.BondingPriority)
+                    {
+                        Bonding = (ItemBondingType)values[0];
+                        _state.BondingPriority = values[1];
+                    }
+                    break;
             }
         }
 
@@ -3104,8 +3143,11 @@ namespace Game.Entities
         public uint AzeriteTierUnlockSetId;
         public uint Suffix;
         public uint RequiredLevelCurve;
+        public ushort PvpItemLevel;
+        public short PvpItemLevelBonus;
         public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
         public int EffectCount;
+        public uint LimitCategory;
         public bool CanDisenchant;
         public bool CanScrap;
         public bool HasFixedLevel;
@@ -3119,7 +3161,10 @@ namespace Game.Entities
             public int ScalingStatDistributionPriority;
             public int AzeriteTierUnlockSetPriority;
             public int RequiredLevelCurvePriority;
+            public int PvpItemLevelPriority;
+            public int BondingPriority;
             public bool HasQualityBonus;
+            public bool HasItemLimitCategory;
         }
     }
 

@@ -464,8 +464,11 @@ namespace Framework.Constants
         OverrideName = 31,             // Itemnamedescription Id
         ItemBonusListGroup = 34,
         ItemLimitCategory = 35,
+        PvpItemLevelIncrement = 36,
         ItemConversion = 37,
         ItemHistorySlot = 38,
+        PvpItemLevelBase = 43,
+        BondingWithPriority = 47,
     }
 
     public enum ItemCollectionType : byte

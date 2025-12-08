@@ -1268,8 +1268,10 @@ namespace Game.Entities
             if (pItem != null && pItem.m_lootGenerated)
                 return InventoryResult.LootGone;
 
+            uint limitCategory = pItem != null ? pItem.GetItemLimitCategory() : pProto.GetItemLimitCategory();
+
             // no maximum
-            if ((pProto.GetMaxCount() <= 0 && pProto.GetItemLimitCategory() == 0) || pProto.GetMaxCount() == 2147483647)
+            if ((pProto.GetMaxCount() <= 0 && limitCategory == 0) || pProto.GetMaxCount() == 2147483647)
                 return InventoryResult.Ok;
 
             if (pProto.GetMaxCount() > 0)
@@ -1283,9 +1285,9 @@ namespace Game.Entities
             }
 
             // check unique-equipped limit
-            if (pProto.GetItemLimitCategory() != 0)
+            if (limitCategory != 0)
             {
-                ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(pProto.GetItemLimitCategory());
+                ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(limitCategory);
                 if (limitEntry == null)
                 {
                     no_space_count = count;
@@ -1295,7 +1297,7 @@ namespace Game.Entities
                 if (limitEntry.Flags == 0)
                 {
                     byte limitQuantity = GetItemLimitCategoryQuantity(limitEntry);
-                    uint curcount = GetItemCountWithLimitCategory(pProto.GetItemLimitCategory(), pItem);
+                    uint curcount = GetItemCountWithLimitCategory(limitCategory, pItem);
                     if (curcount + count > limitQuantity)
                     {
                         no_space_count = count + curcount - limitQuantity;
@@ -1730,8 +1732,14 @@ namespace Game.Entities
                     case InventoryResult.ItemMaxLimitCategorySocketedExceededIs:
                     case InventoryResult.ItemMaxLimitCategoryEquippedExceededIs:
                     {
-                        ItemTemplate proto = item1 != null ? item1.GetTemplate() : Global.ObjectMgr.GetItemTemplate(itemId);
-                        failure.LimitCategory = (int)(proto != null ? proto.GetItemLimitCategory() : 0u);
+                        if (item1 != null)
+                            failure.LimitCategory = (int)item1.GetItemLimitCategory();
+                        else
+                        {
+                            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemId);
+                            if (proto != null)
+                                failure.LimitCategory = (int)proto.GetItemLimitCategory();
+                        }
                         break;
                     }
                     default:
@@ -2776,12 +2784,8 @@ namespace Game.Entities
             ForEachItem(ItemSearchLocation.Everywhere, item =>
             {
                 if (item != skipItem)
-                {
-                    ItemTemplate pProto = item.GetTemplate();
-                    if (pProto != null)
-                        if (pProto.GetItemLimitCategory() == limitCategory)
-                            count += item.GetCount();
-                }
+                    if (item.GetItemLimitCategory() == limitCategory)
+                        count += item.GetCount();
                 return true;
             });
 
@@ -5055,7 +5059,7 @@ namespace Game.Entities
             ItemTemplate pProto = pItem.GetTemplate();
 
             // proto based limitations
-            InventoryResult res = CanEquipUniqueItem(pProto, eslot, limit_count);
+            InventoryResult res = CanEquipUniqueItem(pProto, pItem.GetBonus(), eslot, limit_count);
             if (res != InventoryResult.Ok)
                 return res;
 
@@ -5066,17 +5070,22 @@ namespace Game.Entities
                 if (pGem == null)
                     continue;
 
-                // include for check equip another gems with same limit category for not equipped item (and then not counted)
-                uint gem_limit_count = (uint)(!pItem.IsEquipped() && pGem.GetItemLimitCategory() != 0 ? pItem.GetGemCountWithLimitCategory(pGem.GetItemLimitCategory()) : 1);
+                BonusData gemBonus = new(pGem);
 
-                InventoryResult ress = CanEquipUniqueItem(pGem, eslot, gem_limit_count);
+                foreach (ushort bonusListID in gemData.BonusListIDs)
+                    gemBonus.AddBonusList(bonusListID);
+
+                // include for check equip another gems with same limit category for not equipped item (and then not counted)
+                uint gem_limit_count = (uint)(!pItem.IsEquipped() && gemBonus.LimitCategory != 0 ? pItem.GetGemCountWithLimitCategory(gemBonus.LimitCategory) : 1);
+
+                InventoryResult ress = CanEquipUniqueItem(pGem, gemBonus, eslot, gem_limit_count);
                 if (ress != InventoryResult.Ok)
                     return ress;
             }
 
             return InventoryResult.Ok;
         }
-        public InventoryResult CanEquipUniqueItem(ItemTemplate itemProto, byte except_slot = ItemConst.NullSlot, uint limit_count = 1)
+        public InventoryResult CanEquipUniqueItem(ItemTemplate itemProto, BonusData itemBonus, byte except_slot = ItemConst.NullSlot, uint limit_count = 1)
         {
             // check unique-equipped on item
             if (itemProto.HasFlag(ItemFlags.UniqueEquippable))
@@ -5087,9 +5096,9 @@ namespace Game.Entities
             }
 
             // check unique-equipped limit
-            if (itemProto.GetItemLimitCategory() != 0)
+            if (itemBonus.LimitCategory != 0)
             {
-                ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(itemProto.GetItemLimitCategory());
+                ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(itemBonus.LimitCategory);
                 if (limitEntry == null)
                     return InventoryResult.NotEquippable;
 
@@ -5100,9 +5109,9 @@ namespace Game.Entities
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
 
                 // there is an equip limit on this item
-                if (HasItemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitQuantity - limit_count + 1, except_slot))
+                if (HasItemWithLimitCategoryEquipped(itemBonus.LimitCategory, limitQuantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxLimitCategoryEquippedExceededIs;
-                else if (HasGemWithLimitCategoryEquipped(itemProto.GetItemLimitCategory(), limitQuantity - limit_count + 1, except_slot))
+                else if (HasGemWithLimitCategoryEquipped(itemBonus.LimitCategory, limitQuantity - limit_count + 1, except_slot))
                     return InventoryResult.ItemMaxCountEquippedSocketed;
             }
 
@@ -5403,7 +5412,7 @@ namespace Game.Entities
                 if (pItem.GetSlot() == except_slot)
                     return true;
 
-                if (pItem.GetTemplate().GetItemLimitCategory() != limitCategory)
+                if (pItem.GetItemLimitCategory() != limitCategory)
                     return true;
 
                 tempcount += pItem.GetCount();
