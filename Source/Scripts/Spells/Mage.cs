@@ -1798,12 +1798,14 @@ class spell_mage_water_elemental_freeze : SpellScript
     }
 }
 
-[Script] // 383493 - Wildfire
-class spell_mage_wildfire_area_crit : AuraScript
+// 383492 - Wildfire
+[Script("spell_mage_wildfire_area_crit", AuraType.ModCritPct, 3)] 
+[Script("spell_mage_wildfire_caster_crit", AuraType.AddPctModifier, 2)]
+class spell_mage_wildfire_crit(AuraType auraType, uint effIndex) : AuraScript()
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellEffect((SpellIds.WildfireTalent, 3));
+        return ValidateSpellEffect((SpellIds.WildfireTalent, effIndex));
     }
 
     void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -1812,7 +1814,7 @@ class spell_mage_wildfire_area_crit : AuraScript
         if (caster == null)
             return;
 
-        AuraEffect wildfireCritEffect = caster.GetAuraEffect(SpellIds.WildfireTalent, 3);
+        AuraEffect wildfireCritEffect = caster.GetAuraEffect(SpellIds.WildfireTalent, effIndex);
         if (wildfireCritEffect == null)
             return;
 
@@ -1822,34 +1824,6 @@ class spell_mage_wildfire_area_crit : AuraScript
 
     public override void Register()
     {
-        DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.ModCritPct));
-    }
-}
-
-[Script] // 383492 - Wildfire
-class spell_mage_wildfire_caster_crit : AuraScript
-{
-    public override bool Validate(SpellInfo spellInfo)
-    {
-        return ValidateSpellEffect((SpellIds.WildfireTalent, 2));
-    }
-
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
-    {
-        Unit caster = GetCaster();
-        if (caster == null)
-            return;
-
-        AuraEffect wildfireCritEffect = caster.GetAuraEffect(SpellIds.WildfireTalent, 2);
-        if (wildfireCritEffect == null)
-            return;
-
-        canBeRecalculated = false;
-        amount = wildfireCritEffect.GetAmount();
-    }
-
-    public override void Register()
-    {
-        DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.AddPctModifier));
+        DoEffectCalcAmount.Add(new(CalculateAmount, 0, auraType));
     }
 }
