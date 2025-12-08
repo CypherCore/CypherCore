@@ -329,7 +329,7 @@ namespace Framework.Constants
         ModMeleeHaste3 = 319,
         Unk320 = 320,
         ModNoActions = 321,
-        InterfereTargetting = 322,
+        InterfereEnemyTargeting = 322,
         Unk323 = 323,  // Not Used In 4.3.4
         OverrideUnlockedAzeriteEssenceRank = 324,  // testing aura
         LearnPvpTalent = 325,  // NYI
@@ -493,7 +493,7 @@ namespace Framework.Constants
         SuppressTransforms = 483, // NYI
         AllowInterruptSpell = 484, // NYI
         ModMovementForceMagnitude = 485,
-        Unk486 = 486,
+        InterfereAllTargeting = 486,
         CosmeticMounted = 487,
         DisableGravity = 488,
         ModAlternativeDefaultLanguage = 489, // NYI

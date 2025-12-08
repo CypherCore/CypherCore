@@ -5239,18 +5239,26 @@ namespace Game.Spells
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
 
-                // If it's not a melee spell, check if vision is obscured by SPELL_AURA_INTERFERE_TARGETTING
+                // If it's not a melee spell, check if vision is obscured by SPELL_AURA_INTERFERE_ENEMY_TARGETING
                 if (m_spellInfo.DmgClass != SpellDmgClass.Melee)
                 {
                     Unit unitCaster1 = m_caster.ToUnit();
                     if (unitCaster1 != null)
                     {
-                        foreach (var auraEffect in unitCaster1.GetAuraEffectsByType(AuraType.InterfereTargetting))
+                        foreach (var auraEffect in unitCaster1.GetAuraEffectsByType(AuraType.InterfereEnemyTargeting))
                             if (!unitCaster1.IsFriendlyTo(auraEffect.GetCaster()) && !unitTarget.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID()))
                                 return SpellCastResult.VisionObscured;
 
-                        foreach (var auraEffect in unitTarget.GetAuraEffectsByType(AuraType.InterfereTargetting))
-                            if (!unitCaster1.IsFriendlyTo(auraEffect.GetCaster()) && (!unitTarget.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID()) || !unitCaster1.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID())))
+                        foreach (AuraEffect auraEff in unitTarget.GetAuraEffectsByType(AuraType.InterfereEnemyTargeting))
+                            if (!unitCaster.IsFriendlyTo(auraEff.GetCaster()) && !unitCaster.HasAura(auraEff.GetId(), auraEff.GetCasterGUID()))
+                                return SpellCastResult.VisionObscured;
+
+                        foreach (AuraEffect auraEff in unitCaster.GetAuraEffectsByType(AuraType.InterfereAllTargeting))
+                            if (!unitTarget.HasAura(auraEff.GetId(), auraEff.GetCasterGUID()))
+                                return SpellCastResult.VisionObscured;
+
+                        foreach (AuraEffect auraEff in unitTarget.GetAuraEffectsByType(AuraType.InterfereAllTargeting))
+                            if (!unitCaster.HasAura(auraEff.GetId(), auraEff.GetCasterGUID()))
                                 return SpellCastResult.VisionObscured;
                     }
                 }
