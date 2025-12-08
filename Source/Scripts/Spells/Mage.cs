@@ -54,11 +54,13 @@ struct SpellIds
     public const uint FreneticSpeed = 236060;
     public const uint FrostNova = 122;
     public const uint GiraffeForm = 32816;
+    public const uint HeatShimmer = 458964;
     public const uint HeatingUp = 48107;
     public const uint HotStreak = 48108;
     public const uint IceBarrier = 11426;
     public const uint IceBlock = 45438;
     public const uint Ignite = 12654;
+    public const uint IgnitionBurst = 1217359;
     public const uint ImprovedCombustion = 383967;
     public const uint ImprovedScorch = 383608;
     public const uint IncantersFlow = 116267;
@@ -922,6 +924,44 @@ class spell_mage_frostbolt : SpellScript
     }
 }
 
+[Script] // 457735 - Heat Shimmer
+class spell_mage_heat_shimmer : AuraScript
+{
+    public override bool Validate(SpellInfo spell)
+    {
+        return ValidateSpellInfo(SpellIds.HeatShimmer);
+    }
+
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    {
+        eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.HeatShimmer);
+    }
+
+    public override void Register()
+    {
+        OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+    }
+}
+
+[Script] // 2948 - Scorch
+class spell_mage_heat_shimmer_remove : SpellScript
+{
+    public override bool Validate(SpellInfo spell)
+    {
+        return ValidateSpellInfo(SpellIds.HeatShimmer);
+    }
+
+    void HandleHit()
+    {
+        GetCaster().RemoveAurasDueToSpell(SpellIds.HeatShimmer);
+    }
+
+    public override void Register()
+    {
+        AfterHit.Add(new(HandleHit));
+    }
+}
+
 [Script] // 44448 - Pyroblast Clearcasting Driver
 class spell_mage_hot_streak : AuraScript
 {
@@ -1198,6 +1238,30 @@ class spell_mage_ignite : AuraScript
     }
 }
 
+[Script] // 1217359 - Ignition Burst (attached to 458964 - Heat Shimmer)
+class spell_mage_ignition_burst : SpellScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.IgnitionBurst);
+    }
+
+    public override bool Load()
+    {
+        return !GetCaster().HasAura(SpellIds.IgnitionBurst);
+    }
+
+    void PreventAura(ref WorldObject target)
+    {
+        target = null;
+    }
+
+    public override void Register()
+    {
+        OnObjectTargetSelect.Add(new(PreventAura, 1, Targets.UnitCaster));
+    }
+}
+
 // 37447 - Improved Mana Gems
 [Script] // 61062 - Improved Mana Gems
 class spell_mage_imp_mana_gems : AuraScript
@@ -1256,12 +1320,12 @@ class spell_mage_improved_scorch : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.ImprovedScorch);
+        return ValidateSpellInfo(SpellIds.ImprovedScorch, SpellIds.HeatShimmer);
     }
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget().HealthBelowPct(aurEff.GetAmount());
+        return eventInfo.GetProcTarget().HealthBelowPct(aurEff.GetAmount()) || eventInfo.GetActor().HasAura(SpellIds.HeatShimmer);
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1745,7 +1809,7 @@ class spell_mage_scald : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Scald)
+        return ValidateSpellInfo(SpellIds.Scald, SpellIds.HeatShimmer)
             && ValidateSpellEffect((spellInfo.Id, 1));
     }
 
@@ -1756,10 +1820,11 @@ class spell_mage_scald : SpellScript
 
     void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
     {
-        if (!victim.HealthBelowPct(GetEffectInfo(1).CalcValue(GetCaster())))
+        Unit caster = GetCaster();
+        if (!victim.HealthBelowPct(GetEffectInfo(1).CalcValue(caster)) || !caster.HasAura(SpellIds.HeatShimmer))
             return;
 
-        AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.Scald, 0);
+        AuraEffect aurEff = caster.GetAuraEffect(SpellIds.Scald, 0);
         if (aurEff != null)
             MathFunctions.AddPct(ref pctMod, aurEff.GetAmount());
     }
@@ -1775,19 +1840,19 @@ class spell_mage_scorch : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.FreneticSpeed);
+        return ValidateSpellInfo(SpellIds.FreneticSpeed, SpellIds.HeatShimmer);
     }
 
     void CalcCritChance(Unit victim, ref float critChance)
     {
-        if (victim.GetHealthPct() < GetEffectInfo(1).CalcValue(GetCaster()))
+        if (victim.GetHealthPct() < GetEffectInfo(1).CalcValue(GetCaster()) || GetCaster().HasAura(SpellIds.HeatShimmer))
             critChance = 100.0f;
     }
 
     void HandleFreneticSpeed(uint effIndex)
     {
         Unit caster = GetCaster();
-        if (GetHitUnit().GetHealthPct() < GetEffectInfo(1).CalcValue(GetCaster()))
+        if (GetHitUnit().GetHealthPct() < GetEffectInfo(1).CalcValue(GetCaster()) || GetCaster().HasAura(SpellIds.HeatShimmer))
             caster.CastSpell(caster, SpellIds.FreneticSpeed, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
