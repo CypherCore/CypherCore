@@ -460,14 +460,22 @@ namespace Framework.Constants
         ItemEffectId = 23,
         ModifiedCraftingStat = 25,
         RequiredLevelCurve = 27,
+        IconFileDataID = 28,
         DescriptionText = 30,             // Item Description
         OverrideName = 31,             // Itemnamedescription Id
+        UpgradeSequenceValue = 33,
         ItemBonusListGroup = 34,
         ItemLimitCategory = 35,
         PvpItemLevelIncrement = 36,
         ItemConversion = 37,
         ItemHistorySlot = 38,
+        OverrideCanSalvage = 39,
+        OverrideCanRecraft = 41,
+        ItemLevelBase = 42,
         PvpItemLevelBase = 43,
+        CosmeticStat = 44,
+        OverrideDescriptionColor = 45,             // Overrides color of item description and upgrade track if TimeEvent from value[1] has passed
+        OverrideCannotTradeBop = 46,
         BondingWithPriority = 47,
     }
 

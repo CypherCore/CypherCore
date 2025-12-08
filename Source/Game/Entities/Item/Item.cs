@@ -1122,7 +1122,7 @@ namespace Game.Entities
                         foreach (var bonusListId in gem.BonusListIDs)
                             gemBonus.AddBonusList(bonusListId);
 
-                        uint gemBaseItemLevel = gemTemplate.GetBaseItemLevel();
+                        uint gemBaseItemLevel = gemBonus.ItemLevel;
                         if (gemBonus.PlayerLevelToItemLevelCurveId != 0)
                         {
                             uint scaledIlvl = (uint)Global.DB2Mgr.GetCurveValueAt(gemBonus.PlayerLevelToItemLevelCurveId, gemScalingLevel);
@@ -1824,7 +1824,7 @@ namespace Game.Entities
             if (itemTemplate == null)
                 return 1;
 
-            uint itemLevel = itemTemplate.GetBaseItemLevel();
+            uint itemLevel = bonusData.ItemLevel;
             AzeriteLevelInfoRecord azeriteLevelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(azeriteLevel);
             if (azeriteLevelInfo != null)
                 itemLevel = azeriteLevelInfo.ItemLevel;
@@ -2904,12 +2904,48 @@ namespace Game.Entities
 
     public class BonusData
     {
+        public ItemQuality Quality;
+        public uint ItemLevel;
+        public int ItemLevelBonus;
+        public int RequiredLevel;
+        public int[] ItemStatType = new int[ItemConst.MaxStats];
+        public int[] StatPercentEditor = new int[ItemConst.MaxStats];
+        public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
+        public uint[] socketColor = new uint[ItemConst.MaxGemSockets];
+        public ItemBondingType Bonding;
+        public uint AppearanceModID;
+        public float RepairCostMultiplier;
+        public uint ContentTuningId;
+        public uint PlayerLevelToItemLevelCurveId;
+        public uint DisenchantLootId;
+        public uint[] GemItemLevelBonus = new uint[ItemConst.MaxGemSockets];
+        public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
+        public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
+        public int RelicType;
+        public int RequiredLevelOverride;
+        public uint AzeriteTierUnlockSetId;
+        public uint Suffix;
+        public uint RequiredLevelCurve;
+        public ushort PvpItemLevel;
+        public short PvpItemLevelBonus;
+        public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
+        public int EffectCount;
+        public uint LimitCategory;
+        public bool CanDisenchant;
+        public bool CanScrap;
+        public bool CanSalvage;
+        public bool CanRecraft;
+        public bool HasFixedLevel;
+        public bool CannotTradeBindOnPickup;
+        State _state;
+
         public BonusData(ItemTemplate proto)
         {
             if (proto == null)
                 return;
 
             Quality = proto.GetQuality();
+            ItemLevel = proto.GetBaseItemLevel();
             ItemLevelBonus = 0;
             RequiredLevel = proto.GetBaseRequiredLevel();
             for (uint i = 0; i < ItemConst.MaxStats; ++i)
@@ -2953,6 +2989,9 @@ namespace Game.Entities
 
             CanDisenchant = !proto.HasFlag(ItemFlags.NoDisenchant);
             CanScrap = proto.HasFlag(ItemFlags4.Scrapable);
+            CanSalvage = !proto.HasFlag(ItemFlags4.NoSalvage);
+            CanRecraft = proto.HasFlag(ItemFlags4.Recraftable);
+            CannotTradeBindOnPickup = proto.HasFlag(ItemFlags2.NoTradeBindOnAcquire);
 
             _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;
@@ -2960,6 +2999,7 @@ namespace Game.Entities
             _state.ScalingStatDistributionPriority = int.MaxValue;
             _state.AzeriteTierUnlockSetPriority = int.MaxValue;
             _state.RequiredLevelCurvePriority = int.MaxValue;
+            _state.ItemLevelPriority = int.MaxValue;
             _state.PvpItemLevelPriority = int.MaxValue;
             _state.BondingPriority = int.MaxValue;
         }
@@ -3105,12 +3145,28 @@ namespace Game.Entities
                 case ItemBonusType.PvpItemLevelIncrement:
                     PvpItemLevelBonus += (short)values[0];
                     break;
+                case ItemBonusType.OverrideCanSalvage:
+                    CanSalvage = values[0] != 0;
+                    break;
+                case ItemBonusType.OverrideCanRecraft:
+                    CanRecraft = values[0] != 0;
+                    break;
+                case ItemBonusType.ItemLevelBase:
+                    if (values[1] < _state.ItemLevelPriority)
+                    {
+                        ItemLevel = (uint)values[0];
+                        _state.ItemLevelPriority = values[1];
+                    }
+                    break;
                 case ItemBonusType.PvpItemLevelBase:
                     if (values[1] < _state.PvpItemLevelPriority)
                     {
                         PvpItemLevel = (ushort)values[0];
                         _state.PvpItemLevelPriority = values[1];
                     }
+                    break;
+                case ItemBonusType.OverrideCannotTradeBop:
+                    CannotTradeBindOnPickup = values[0] != 0;
                     break;
                 case ItemBonusType.BondingWithPriority:
                     if (values[1] < _state.BondingPriority)
@@ -3122,37 +3178,6 @@ namespace Game.Entities
             }
         }
 
-        public ItemQuality Quality;
-        public int ItemLevelBonus;
-        public int RequiredLevel;
-        public int[] ItemStatType = new int[ItemConst.MaxStats];
-        public int[] StatPercentEditor = new int[ItemConst.MaxStats];
-        public float[] ItemStatSocketCostMultiplier = new float[ItemConst.MaxStats];
-        public uint[] socketColor = new uint[ItemConst.MaxGemSockets];
-        public ItemBondingType Bonding;
-        public uint AppearanceModID;
-        public float RepairCostMultiplier;
-        public uint ContentTuningId;
-        public uint PlayerLevelToItemLevelCurveId;
-        public uint DisenchantLootId;
-        public uint[] GemItemLevelBonus = new uint[ItemConst.MaxGemSockets];
-        public int[] GemRelicType = new int[ItemConst.MaxGemSockets];
-        public ushort[] GemRelicRankBonus = new ushort[ItemConst.MaxGemSockets];
-        public int RelicType;
-        public int RequiredLevelOverride;
-        public uint AzeriteTierUnlockSetId;
-        public uint Suffix;
-        public uint RequiredLevelCurve;
-        public ushort PvpItemLevel;
-        public short PvpItemLevelBonus;
-        public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
-        public int EffectCount;
-        public uint LimitCategory;
-        public bool CanDisenchant;
-        public bool CanScrap;
-        public bool HasFixedLevel;
-        State _state;
-
         struct State
         {
             public int SuffixPriority;
@@ -3161,6 +3186,7 @@ namespace Game.Entities
             public int ScalingStatDistributionPriority;
             public int AzeriteTierUnlockSetPriority;
             public int RequiredLevelCurvePriority;
+            public int ItemLevelPriority;
             public int PvpItemLevelPriority;
             public int BondingPriority;
             public bool HasQualityBonus;
