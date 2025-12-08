@@ -40,6 +40,7 @@ struct SpellIds
     public const uint EtherealBlink = 410939;
     public const uint EverwarmSocks = 320913;
     public const uint FeelTheBurn = 383391;
+    public const uint FieryRushAura = 383637;
     public const uint FingersOfFrost = 44544;
     public const uint FireBlast = 108853;
     public const uint Firestarter = 205026;
@@ -647,6 +648,25 @@ class spell_mage_feel_the_burn : AuraScript
     public override void Register()
     {
         DoEffectCalcAmount.Add(new(CalcAmount, 0, AuraType.Mastery));
+    }
+}
+
+[Script] // 383637 - Fiery Rush (attached to 190319 - Combustion)
+class spell_mage_fiery_rush_aura : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.FieryRushAura);
+    }
+
+    void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+    {
+        GetTarget().RemoveAurasDueToSpell(SpellIds.FieryRushAura);
+    }
+
+    public override void Register()
+    {
+        AfterEffectRemove.Add(new(AfterRemove, 2, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
     }
 }
 
@@ -1799,7 +1819,7 @@ class spell_mage_water_elemental_freeze : SpellScript
 }
 
 // 383492 - Wildfire
-[Script("spell_mage_wildfire_area_crit", AuraType.ModCritPct, 3)] 
+[Script("spell_mage_wildfire_area_crit", AuraType.ModCritPct, 3)]
 [Script("spell_mage_wildfire_caster_crit", AuraType.AddPctModifier, 2)]
 class spell_mage_wildfire_crit(AuraType auraType, uint effIndex) : AuraScript()
 {
