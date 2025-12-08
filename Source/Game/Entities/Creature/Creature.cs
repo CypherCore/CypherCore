@@ -1500,8 +1500,10 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, data.SpawnDifficulties.Empty() ? "" : string.Join(',', data.SpawnDifficulties));
+            stmt.AddValue(index++, (byte)data.PhaseUseFlags);
             stmt.AddValue(index++, data.PhaseId);
             stmt.AddValue(index++, data.PhaseGroup);
+            stmt.AddValue(index++, data.terrainSwapMap);
             stmt.AddValue(index++, displayId);
             stmt.AddValue(index++, GetCurrentEquipmentId());
             stmt.AddValue(index++, GetPositionX());
@@ -1532,6 +1534,14 @@ namespace Game.Entities
                 stmt.AddValue(index++, unitFlags3.Value);
             else
                 stmt.AddNull(index++);
+
+            stmt.AddValue(index++, Global.ObjectMgr.GetScriptName(data.ScriptId));
+            var stringId = GetStringId(StringIdType.Spawn);
+            if (!stringId.IsEmpty())
+                stmt.AddValue(index++, stringId);
+            else
+                stmt.AddNull(index++);
+
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);
@@ -2877,9 +2887,9 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
+            double baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
 
-            return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0f);
+            return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)

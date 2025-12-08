@@ -1085,8 +1085,10 @@ namespace Game.Entities
             stmt.AddValue(index++, GetEntry());
             stmt.AddValue(index++, mapid);
             stmt.AddValue(index++, data.SpawnDifficulties.Empty() ? "" : string.Join(",", data.SpawnDifficulties));
+            stmt.AddValue(index++, (byte)data.PhaseUseFlags);
             stmt.AddValue(index++, data.PhaseId);
             stmt.AddValue(index++, data.PhaseGroup);
+            stmt.AddValue(index++, data.terrainSwapMap);
             stmt.AddValue(index++, GetPositionX());
             stmt.AddValue(index++, GetPositionY());
             stmt.AddValue(index++, GetPositionZ());
@@ -1098,6 +1100,13 @@ namespace Game.Entities
             stmt.AddValue(index++, m_respawnDelayTime);
             stmt.AddValue(index++, GetGoAnimProgress());
             stmt.AddValue(index++, (byte)GetGoState());
+            stmt.AddValue(index++, Global.ObjectMgr.GetScriptName(data.ScriptId));
+            var stringId = GetStringId(StringIdType.Spawn);
+            if (!stringId.IsEmpty())
+                stmt.AddValue(index++, stringId);
+            else
+                stmt.AddNull(index++);
+
             DB.World.Execute(stmt);
         }
 
