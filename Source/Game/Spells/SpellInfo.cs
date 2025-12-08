@@ -3089,6 +3089,12 @@ namespace Game.Spells
                             ppm *= 1.0f + mod.Coeff;
                         break;
                     }
+                    case SpellProcsPerMinuteModType.Battleground:
+                    {
+                        if (caster.HasAura(mod.Param))
+                            ppm *= 1.0f + mod.Coeff;
+                        break;
+                    }
                     default:
                         break;
                 }

@@ -2199,7 +2199,8 @@ namespace Framework.Constants
         Spec = 4,
         Race = 5,
         ItemLevel = 6,
-        Battleground = 7
+        Battleground = 7,
+        Aura = 8
     }
 
     public enum SpellShapeshiftFormFlags
