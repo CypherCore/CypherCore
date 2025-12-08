@@ -540,7 +540,7 @@ namespace Game
             uint avgTime = 0;
             GroupQueueInfo ginfo = null;
 
-            ObjectGuid errorGuid;
+            ObjectGuid errorGuid = ObjectGuid.Empty;
             GroupJoinBattlegroundResult err = GroupJoinBattlegroundResult.None;
             if (!Global.BattlegroundMgr.IsArenaTesting())
                 err = group.CanJoinBattlegroundQueue(bgTemplate, bgQueueTypeId, (uint)arenatype, (uint)arenatype, true, packet.TeamSizeIndex, out errorGuid);

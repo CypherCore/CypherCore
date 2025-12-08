@@ -346,15 +346,15 @@ namespace Game.Maps
             if (!Global.DisableMgr.IsPathfindingEnabled(GetId()))
                 return;
 
-            LoadResult mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
+            MMapLoadResult mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
             switch (mmapLoadResult)
             {
-                case LoadResult.Success:
+                case MMapLoadResult.Success:
                     Log.outDebug(LogFilter.Maps, $"MMAP loaded name:{GetMapName()}, id:{GetId()}, x:{gx}, y:{gy} (mmap rep.: x:{gx}, y:{gy})");
                     break;
-                case LoadResult.AlreadyLoaded:
+                case MMapLoadResult.AlreadyLoaded:
                     break;
-                case LoadResult.FileNotFound:
+                case MMapLoadResult.FileNotFound:
                     if (_parentTerrain != null)
                         break; // don't log tile not found errors for child maps
                     goto default;

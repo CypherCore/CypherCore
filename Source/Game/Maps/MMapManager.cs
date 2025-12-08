@@ -27,18 +27,18 @@ namespace Game
             return loadedMMaps.LookupByKey(mapId);
         }
 
-        LoadResult LoadMapData(string basePath, uint mapId)
+        MMapLoadResult LoadMapData(string basePath, uint mapId)
         {
             // we already have this map loaded?
             if (loadedMMaps.ContainsKey(mapId) && loadedMMaps[mapId] != null)
-                return LoadResult.AlreadyLoaded;
+                return MMapLoadResult.AlreadyLoaded;
 
             // load and init dtNavMesh - read parameters from file
             string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
             if (!File.Exists(filename))
             {
                 Log.outError(LogFilter.Maps, $"Could not open mmap file {filename}");
-                return LoadResult.FileNotFound;
+                return MMapLoadResult.FileNotFound;
             }
 
             using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8);
@@ -56,14 +56,14 @@ namespace Game
             if (Detour.dtStatusFailed(mesh.init(Params)))
             {
                 Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
-                return LoadResult.LibraryError;
+                return MMapLoadResult.LibraryError;
             }
 
             Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
 
             // store inside our map list
             loadedMMaps[mapId] = new MMapData(mesh);
-            return LoadResult.Success;
+            return MMapLoadResult.Success;
         }
 
         uint PackTileID(int x, int y)
@@ -71,14 +71,14 @@ namespace Game
             return (uint)(x << 16 | y);
         }
 
-        public LoadResult LoadMap(string basePath, uint mapId, int x, int y)
+        public MMapLoadResult LoadMap(string basePath, uint mapId, int x, int y)
         {
             // make sure the mmap is loaded and ready to load tiles
-            LoadResult mapResult = LoadMapData(basePath, mapId);
+            MMapLoadResult mapResult = LoadMapData(basePath, mapId);
             switch (mapResult)
             {
-                case LoadResult.Success:
-                case LoadResult.AlreadyLoaded:
+                case MMapLoadResult.Success:
+                case MMapLoadResult.AlreadyLoaded:
                     break;
                 default:
                     return mapResult;
@@ -91,7 +91,7 @@ namespace Game
             // check if we already have this tile loaded
             uint packedGridPos = PackTileID(x, y);
             if (mmap.loadedTileRefs.ContainsKey(packedGridPos))
-                return LoadResult.AlreadyLoaded;
+                return MMapLoadResult.AlreadyLoaded;
 
             // load this tile . mmaps/MMMXXYY.mmtile
             string fileName = string.Format(TILE_FILE_NAME_FORMAT, basePath, mapId, x, y);
@@ -104,7 +104,7 @@ namespace Game
             if (!File.Exists(fileName))
             {
                 Log.outDebug(LogFilter.Maps, "MMAP:loadMap: Could not open mmtile file '{0}'", fileName);
-                return LoadResult.FileNotFound;
+                return MMapLoadResult.FileNotFound;
             }
 
             using BinaryReader reader = new(new FileStream(fileName, FileMode.Open, FileAccess.Read));
@@ -112,13 +112,13 @@ namespace Game
             if (fileHeader.mmapMagic != MapConst.mmapMagic)
             {
                 Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
-                return LoadResult.VersionMismatch;
+                return MMapLoadResult.VersionMismatch;
             }
             if (fileHeader.mmapVersion != MapConst.mmapVersion)
             {
                 Log.outError(LogFilter.Maps, "MMAP:loadMap: {0:D4}{1:D2}{2:D2}.mmtile was built with generator v{3}, expected v{4}",
                     mapId, x, y, fileHeader.mmapVersion, MapConst.mmapVersion);
-                return LoadResult.VersionMismatch;
+                return MMapLoadResult.VersionMismatch;
             }
 
             var bytes = reader.ReadBytes((int)fileHeader.size);
@@ -132,19 +132,19 @@ namespace Game
                 mmap.loadedTileRefs.Add(packedGridPos, tileRef);
                 ++loadedTiles;
                 Log.outInfo(LogFilter.Maps, "MMAP:loadMap: Loaded mmtile {0:D4}[{1:D2}, {2:D2}]", mapId, x, y);
-                return LoadResult.Success;
+                return MMapLoadResult.Success;
             }
 
             Log.outError(LogFilter.Maps, "MMAP:loadMap: Could not load {0:D4}{1:D2}{2:D2}.mmtile into navmesh", mapId, x, y);
-            return LoadResult.LibraryError;
+            return MMapLoadResult.LibraryError;
         }
 
         public bool LoadMapInstance(string basePath, uint meshMapId, uint instanceMapId, uint instanceId)
         {
             switch (LoadMapData(basePath, meshMapId))
             {
-                case LoadResult.Success:
-                case LoadResult.AlreadyLoaded:
+                case MMapLoadResult.Success:
+                case MMapLoadResult.AlreadyLoaded:
                     break;
                 default:
                     return false;
@@ -311,7 +311,7 @@ namespace Game
         public byte usesLiquids;
     }
 
-    enum LoadResult
+    public enum MMapLoadResult
     {
         Success,
         AlreadyLoaded,
