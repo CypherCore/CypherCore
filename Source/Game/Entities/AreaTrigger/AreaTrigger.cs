@@ -219,22 +219,20 @@ namespace Game.Entities
 
             UpdateShape();
 
-            if (GetCreateProperties().OrbitInfo != null)
-            {
-                AreaTriggerOrbitInfo orbit = GetCreateProperties().OrbitInfo;
-                if (target != null && HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
-                    orbit.PathTarget = target.GetGUID();
-                else
-                    orbit.Center = new(pos.posX, pos.posY, pos.posZ);
 
-                InitOrbit(orbit, GetCreateProperties().Speed);
-            }
-            else if (GetCreateProperties().SplinePoints != null)
-            {
-                InitSplineOffsets(GetCreateProperties().SplinePoints);
-            }
-            else
-                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (byte)AreaTriggerPathType.None);
+            GetCreateProperties().Movement.Switch(
+                _ => SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (byte)AreaTriggerPathType.None),
+                splineInfo => InitSplineOffsets(splineInfo),
+                orbitInfo =>
+                {
+                    AreaTriggerOrbitInfo orbit = orbitInfo;
+                    if (target != null && HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
+                        orbit.PathTarget = target.GetGUID();
+                    else
+                        orbit.Center = pos;
+
+                    InitOrbit(orbit);
+                });
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Facing), _stationaryPosition.GetOrientation());
 
@@ -953,7 +951,7 @@ namespace Game.Entities
                     SetUpdateFieldValue(box.ModifyValue(box.Extents), boxInfo.Extents);
                     SetUpdateFieldValue(box.ModifyValue(box.ExtentsTarget), boxInfo.ExtentsTarget);
                 },
-                polygonInfo => 
+                polygonInfo =>
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)3);
                     var polygon = areaTriggerData.ModifyValue<AreaTriggerPolygon>(m_areaTriggerData.ShapeData);
@@ -968,7 +966,7 @@ namespace Game.Entities
                     SetUpdateFieldValue(polygon.ModifyValue(polygon.Height), polygonInfo.Height);
                     SetUpdateFieldValue(polygon.ModifyValue(polygon.HeightTarget), polygonInfo.HeightTarget);
                 },
-                cylinderInfo => 
+                cylinderInfo =>
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)4);
                     var cylinder = areaTriggerData.ModifyValue<AreaTriggerCylinder>(m_areaTriggerData.ShapeData);
@@ -979,7 +977,7 @@ namespace Game.Entities
                     SetUpdateFieldValue(cylinder.ModifyValue(cylinder.LocationZOffset), cylinderInfo.LocationZOffset);
                     SetUpdateFieldValue(cylinder.ModifyValue(cylinder.LocationZOffsetTarget), cylinderInfo.LocationZOffsetTarget);
                 },
-                diskInfo => 
+                diskInfo =>
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)7);
                     var disk = areaTriggerData.ModifyValue<AreaTriggerDisk>(m_areaTriggerData.ShapeData);

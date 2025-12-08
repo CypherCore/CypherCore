@@ -248,8 +248,7 @@ namespace Game.Entities
         public AreaTriggerShapeInfo Shape = new();
 
         public float Speed = 1.0f;
-        public List<Vector3> SplinePoints = new();
-        public AreaTriggerOrbitInfo OrbitInfo;
+        public OneOf<EmptyStruct, List<Vector3>, AreaTriggerOrbitInfo> Movement;
 
         public uint ScriptId;
 
@@ -258,6 +257,8 @@ namespace Game.Entities
             Id = new(0, false);
         }
     }
+
+    public struct EmptyStruct { }
 
     public class AreaTriggerSpawn : SpawnData
     {

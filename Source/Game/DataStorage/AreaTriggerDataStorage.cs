@@ -191,7 +191,7 @@ namespace Game.DataStorage
                     float[] shapeData = new float[SharedConst.MaxAreatriggerEntityData];
                     for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
                         shapeData[i] = areatriggerCreateProperties.Read<float>(16 + i);
-                        
+
                     switch (shape)
                     {
                         case AreaTriggerShapeType.Sphere:
@@ -201,7 +201,7 @@ namespace Game.DataStorage
                             createProperties.Shape.Data = new AreaTriggerShapeInfo.Box(shapeData);
                             break;
                         case AreaTriggerShapeType.Polygon:
-                            AreaTriggerShapeInfo.Polygon  polygon = new AreaTriggerShapeInfo.Polygon(shapeData);
+                            AreaTriggerShapeInfo.Polygon polygon = new AreaTriggerShapeInfo.Polygon(shapeData);
                             if (polygon.Height <= 0.0f)
                             {
                                 polygon.Height = 1.0f;
@@ -239,7 +239,7 @@ namespace Game.DataStorage
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
                     if (spline != null)
-                        createProperties.SplinePoints = spline;
+                        createProperties.Movement = spline;
 
                     _areaTriggerCreateProperties[createProperties.Id] = createProperties;
                 }
@@ -288,7 +288,7 @@ namespace Game.DataStorage
                     orbitInfo.CounterClockwise = circularMovementInfos.Read<bool>(7);
                     orbitInfo.CanLoop = circularMovementInfos.Read<bool>(8);
 
-                    createProperties.OrbitInfo = orbitInfo;
+                    createProperties.Movement = orbitInfo;
                 }
                 while (circularMovementInfos.NextRow());
             }
@@ -344,15 +344,15 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    if (createProperties.OrbitInfo != null)
+                    if (!createProperties.Movement.IsT0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with orbit info");
-                        continue;
-                    }
+                        string movementType = createProperties.Movement.Match(
+                            _ => "",
+                            splineInfo => "spline",
+                            OrbitInfo => "orbit"
+                        );
 
-                    if (createProperties.SplinePoints != null)
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with splines");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with {movementType}");
                         continue;
                     }
 
