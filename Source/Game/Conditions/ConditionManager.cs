@@ -2999,7 +2999,7 @@ namespace Game
         public ConditionTypeInfo[] StaticConditionTypeData =
         {
             new ConditionTypeInfo("None",                 false, false, false, false),
-            new ConditionTypeInfo("Aura",                 true, true,  true, false),
+            new ConditionTypeInfo("Aura",                 true, true,  false, false),
             new ConditionTypeInfo("Item Stored",          true, true,  true, false),
             new ConditionTypeInfo("Item Equipped",        true, false, false, false),
             new ConditionTypeInfo("Zone",                 true, false, false, false),
