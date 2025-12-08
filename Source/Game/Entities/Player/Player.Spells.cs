@@ -1194,7 +1194,7 @@ namespace Game.Entities
                 byte skillSlot = 0;
 
                 // Find a free skill slot
-                for (int i = 0; i < SkillConst.MaxPlayerSkills; ++i)
+                for (uint i = 0; i < SkillConst.MaxPlayerSkills; ++i)
                 {
                     if (GetSkillLineIdByPos(i) == 0)
                     {
