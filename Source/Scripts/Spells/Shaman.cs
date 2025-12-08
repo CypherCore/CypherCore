@@ -1932,6 +1932,8 @@ class spell_sha_lava_lash : SpellScript
 [Script] // 77756 - Lava Surge
 class spell_sha_lava_surge : AuraScript
 {
+    float _normalizedTicks = 0.0f;
+
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellInfo(SpellIds.LavaSurge, SpellIds.IgneousPotential);
@@ -1939,16 +1941,41 @@ class spell_sha_lava_surge : AuraScript
 
     bool CheckProcChance(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        int procChance = aurEff.GetAmount();
+        Unit caster = GetTarget();
+        float flameShocks = 0.0f;
+        var shaman = caster.GetGUID();
+        void work(Unit target)
+        {
+            if (target.HasAuraEffect(SpellIds.FlameShock, 1, shaman))
+                flameShocks += 1.0f;
+        }
+
+        UnitWorker worker = new(caster, work);
+        Cell.VisitAllObjects(caster, worker, 100.0f);
+
+        // Proc uptime is not supposed to scale with the number of applied flame shocks
+        _normalizedTicks += 1.0f / flameShocks;
+
+        // first 6 ticks after last proc fail to prevent overwriting
+        if (_normalizedTicks < 6.0f)
+            return false;
+
+        float procChance = aurEff.GetAmount();
         AuraEffect igneousPotential = GetTarget().GetAuraEffect(SpellIds.IgneousPotential, 0);
         if (igneousPotential != null)
             procChance += igneousPotential.GetAmount();
+
+        float missChance = MathF.Max(100 - procChance, 0.0f) / 100.0f;
+
+        procChance = (1.0f - MathF.Pow(missChance, _normalizedTicks)) * 100.0f;
 
         return RandomHelper.randChance(procChance);
     }
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
+        _normalizedTicks = 0.0f;
+
         PreventDefaultAction();
         GetTarget().CastSpell(GetTarget(), SpellIds.LavaSurge, new CastSpellExtraArgs() { TriggerFlags = TriggerCastFlags.FullMask });
     }
