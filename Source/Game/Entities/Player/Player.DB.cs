@@ -3287,31 +3287,26 @@ namespace Game.Entities
 
                 if (transport != null)
                 {
-                    float x = trans_x;
-                    float y = trans_y;
-                    float z = trans_z;
-                    float o = trans_o;
+                    m_movementInfo.transport.pos.Relocate(trans_x, trans_y, trans_z, trans_o);
+                    Position globalPosition = transport.GetPositionWithOffset(m_movementInfo.transport.pos);
 
-                    m_movementInfo.transport.pos = new Position(x, y, z, o);
-                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-
-                    if (!GridDefines.IsValidMapCoord(x, y, z, o) ||
+                    if (!globalPosition.IsPositionValid() ||
                         // transport size limited
                         Math.Abs(m_movementInfo.transport.pos.posX) > 250.0f ||
                         Math.Abs(m_movementInfo.transport.pos.posY) > 250.0f ||
                         Math.Abs(m_movementInfo.transport.pos.posZ) > 250.0f)
                     {
-                        Log.outError(LogFilter.Player, "Player (guidlow {0}) have invalid transport coordinates (X: {1} Y: {2} Z: {3} O: {4}). Teleport to bind location.", guid.ToString(), x, y, z, o);
+                        Log.outError(LogFilter.Player, $"Player ({guid}) have invalid transport coordinates ({globalPosition}). Teleport to bind location.");
 
                         m_movementInfo.transport.Reset();
                         RelocateToHomebind();
                     }
                     else
                     {
-                        Relocate(x, y, z, o);
+                        Relocate(globalPosition);
                         mapId = transport.GetMapId();
 
-                        transport.AddPassenger(this);
+                        transport.AddPassenger(this, m_movementInfo.transport.pos);
                     }
                 }
                 else

@@ -244,13 +244,8 @@ namespace Game.Entities
 
                 if (transport != null)
                 {
-                    float x, y, z, o;
-                    pos.GetPosition(out x, out y, out z, out o);
-                    transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-                    m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
                     // This object must be added to transport before adding to map for the client to properly display it
-                    transport.AddPassenger(this);
+                    transport.AddPassenger(this, transport.GetPositionOffsetTo(pos));
                 }
             }
 

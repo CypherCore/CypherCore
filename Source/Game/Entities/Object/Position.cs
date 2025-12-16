@@ -99,9 +99,9 @@ namespace Game.Entities
         }
         public void RelocateOffset(Position offset)
         {
-            posX = (float)(posX + (offset.posX * Math.Cos(Orientation) + offset.posY * Math.Sin(Orientation + MathFunctions.PI)));
-            posY = (float)(posY + (offset.posY * Math.Cos(Orientation) + offset.posX * Math.Sin(Orientation)));
-            posZ += offset.posZ;
+            posX += offset.GetPositionX() * MathF.Cos(GetOrientation()) - offset.GetPositionY() * MathF.Sin(GetOrientation());
+            posY += offset.GetPositionY() * MathF.Cos(GetOrientation()) + offset.GetPositionX() * MathF.Sin(GetOrientation());
+            posZ += offset.GetPositionZ();
             SetOrientation(Orientation + offset.Orientation);
         }
 
@@ -144,20 +144,20 @@ namespace Game.Entities
         {
             return this;
         }
-        public void GetPositionOffsetTo(Position endPos, out Position retOffset)
-        {
-            retOffset = new Position();
 
+        public virtual Position GetPositionOffsetTo(Position endPos)
+        {
             float dx = endPos.GetPositionX() - GetPositionX();
             float dy = endPos.GetPositionY() - GetPositionY();
 
-            retOffset.posX = (dx + dy * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation()));
-            retOffset.posY = (dy - dx * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation()));
-            retOffset.posZ = endPos.GetPositionZ() - GetPositionZ();
-            retOffset.SetOrientation(endPos.GetOrientation() - GetOrientation());
+            return new Position(
+                (dx + dy * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation())),
+                (dy - dx * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation())),
+                endPos.GetPositionZ() - GetPositionZ(),
+                endPos.GetOrientation() - GetOrientation());
         }
 
-        public Position GetPositionWithOffset(Position offset)
+        public virtual Position GetPositionWithOffset(Position offset)
         {
             Position ret = this;
             ret.RelocateOffset(offset);

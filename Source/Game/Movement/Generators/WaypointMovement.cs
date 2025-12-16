@@ -393,8 +393,7 @@ namespace Game.Movement
                         {
                             o -= trans.GetTransportOrientation();
                             owner.SetTransportHomePosition(x, y, z, o);
-                            trans.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                            owner.SetHomePosition(x, y, z, o);
+                            owner.SetHomePosition(trans.GetPositionWithOffset(owner.GetTransportHomePosition()));
                         }
                         // else if (vehicle != null) - this should never happen, vehicle offsets are const
                     }

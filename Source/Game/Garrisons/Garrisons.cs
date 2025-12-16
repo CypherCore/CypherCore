@@ -821,20 +821,16 @@ namespace Game.Garrisons
                 if (!spawn.LoadFromDB(spawnId, map, false, false))
                     return null;
 
-                float x = spawn.GetPositionX();
-                float y = spawn.GetPositionY();
-                float z = spawn.GetPositionZ();
-                float o = spawn.GetOrientation();
-                ITransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o, building.GetPositionX(), building.GetPositionY(), building.GetPositionZ(), building.GetOrientation());
+                Position globalPosition = building.GetPositionWithOffset(spawn.GetPosition());
 
-                spawn.Relocate(x, y, z, o);
+                spawn.Relocate(globalPosition);
                 switch (spawn.GetTypeId())
                 {
                     case TypeId.Unit:
-                        spawn.ToCreature().SetHomePosition(x, y, z, o);
+                        spawn.ToCreature().SetHomePosition(globalPosition);
                         break;
                     case TypeId.GameObject:
-                        spawn.ToGameObject().RelocateStationaryPosition(x, y, z, o);
+                        spawn.ToGameObject().RelocateStationaryPosition(globalPosition);
                         break;
                 }
 

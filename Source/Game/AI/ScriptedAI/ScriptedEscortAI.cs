@@ -184,10 +184,7 @@ namespace Game.AI
                                 Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: reached end of waypoints, despawning at end ({me.GetGUID()})");
                                 if (_returnToStart)
                                 {
-                                    Position respawnPosition = new();
-                                    float orientation;
-                                    me.GetRespawnPosition(out respawnPosition.posX, out respawnPosition.posY, out respawnPosition.posZ, out orientation);
-                                    respawnPosition.SetOrientation(orientation);
+                                    Position respawnPosition = me.GetRespawnPosition();
                                     me.GetMotionMaster().MovePoint(EscortPointIds.Home, respawnPosition);
                                     Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: returning to spawn location: {respawnPosition} ({me.GetGUID()})");
                                 }

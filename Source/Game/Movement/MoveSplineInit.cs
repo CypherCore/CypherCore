@@ -361,7 +361,7 @@ namespace Game.Movement
         {
             float o = 0;
             if (_transport != null)
-                _transport.CalculatePassengerOffset(ref input.X, ref input.Y, ref input.Z, ref o);
+                _transport.GetPositionOffsetTo(new Position(input.X, input.Y, input.Z)).GetPosition(out input.X, out input.Y, out input.Z);
 
             return input;
         }

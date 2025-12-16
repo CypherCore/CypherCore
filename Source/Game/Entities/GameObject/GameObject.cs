@@ -3370,12 +3370,12 @@ namespace Game.Entities
             m_transportPathProgress = progress;
         }
 
-        public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
+        public Position GetRespawnPosition()
         {
             if (m_goData != null)
-                m_goData.SpawnPoint.GetPosition(out x, out y, out z, out ori);
-            else
-                GetPosition(out x, out y, out z, out ori);
+                return m_goData.SpawnPoint;
+
+            return GetPosition();
         }
 
         public ITransport ToTransportBase()
@@ -4406,11 +4406,7 @@ namespace Game.Entities
             public void UpdatePassengerPositions()
             {
                 foreach (WorldObject passenger in _passengers)
-                {
-                    passenger.m_movementInfo.transport.pos.GetPosition(out float x, out float y, out float z, out float o);
-                    CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                    ITransport.UpdatePassengerPosition(this, _owner.GetMap(), passenger, x, y, z, o, true);
-                }
+                    ITransport.UpdatePassengerPosition(this, _owner.GetMap(), passenger, _owner.GetPositionWithOffset(passenger.m_movementInfo.transport.pos), true);
             }
 
             public uint GetTransportPeriod()
@@ -4430,7 +4426,7 @@ namespace Game.Entities
 
             public float GetTransportOrientation() { return _owner.GetOrientation(); }
 
-            public void AddPassenger(WorldObject passenger)
+            public void AddPassenger(WorldObject passenger, Position offset)
             {
                 if (!_owner.IsInWorld)
                     return;
@@ -4440,6 +4436,7 @@ namespace Game.Entities
                     _passengers.Add(passenger);
                     passenger.SetTransport(this);
                     passenger.m_movementInfo.transport.guid = GetTransportGUID();
+                    passenger.m_movementInfo.transport.pos = offset;
                     Log.outDebug(LogFilter.Transport, $"Object {passenger.GetName()} boarded transport {_owner.GetName()}.");
                 }
             }
@@ -4460,14 +4457,14 @@ namespace Game.Entities
                 return this;
             }
 
-            public void CalculatePassengerPosition(ref float x, ref float y, ref float z, ref float o)
+            public Position GetPositionWithOffset(Position offset)
             {
-                ITransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o, _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), _owner.GetOrientation());
+                return _owner.GetPositionWithOffset(offset);
             }
 
-            public void CalculatePassengerOffset(ref float x, ref float y, ref float z, ref float o)
+            public Position GetPositionOffsetTo(Position endPos)
             {
-                ITransport.CalculatePassengerOffset(ref x, ref y, ref z, ref o, _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), _owner.GetOrientation());
+                return _owner.GetPositionOffsetTo(endPos);
             }
 
             public int GetMapIdForSpawning()

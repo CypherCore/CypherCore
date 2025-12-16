@@ -197,11 +197,8 @@ namespace Game.Entities
                 Transport transport = ObjectAccessor.GetTransport(this, ObjectGuid.Create(HighGuid.Transport, position.TransportGuid.Value));
                 if (transport != null)
                 {
-                    transport.AddPassenger(this);
-                    m_movementInfo.transport.pos.Relocate(position.Loc);
-                    position.Loc.GetPosition(out float x, out float y, out float z, out float o);
-                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                    Relocate(x, y, z, o);
+                    transport.AddPassenger(this, position.Loc);
+                    Relocate(transport.GetPositionWithOffset(position.Loc));
                 }
             }
 

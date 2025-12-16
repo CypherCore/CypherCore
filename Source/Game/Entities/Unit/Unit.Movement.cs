@@ -2073,7 +2073,7 @@ namespace Game.Entities
 
                 ITransport transport = GetDirectTransport();
                 if (transport != null)
-                    transport.CalculatePassengerPosition(ref loc.X, ref loc.Y, ref loc.Z, ref loc.W);
+                    transport.GetPositionWithOffset(pos).GetPosition(out loc.X, out loc.Y, out loc.Z, out loc.W);
                 else
                     return;
             }
@@ -2161,9 +2161,7 @@ namespace Game.Entities
                     if (transport == null)
                         return;
 
-                    teleportLocation.Location.GetPosition(out float x, out float y, out float z, out float o);
-                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                    moveUpdateTeleport.Status.Pos.Relocate(x, y, z, o);
+                    moveUpdateTeleport.Status.Pos.Relocate(transport.GetPositionWithOffset(teleportLocation.Location));
                     moveUpdateTeleport.Status.transport.pos.Relocate(teleportLocation.Location);
                 }
                 else

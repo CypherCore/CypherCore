@@ -320,7 +320,7 @@ namespace Game.Entities
                 float o = 0;
                 ITransport transport = _unit.GetDirectTransport();
                 if (transport != null)
-                    transport.CalculatePassengerPosition(ref stayPos.X, ref stayPos.Y, ref stayPos.Z, ref o);
+                    transport.GetPositionWithOffset(new Position(stayPos.X, stayPos.Y, stayPos.Z)).GetPosition(out stayPos.X, out stayPos.Y, out stayPos.Z);
             }
 
             _stayX = stayPos.X;

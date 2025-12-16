@@ -164,26 +164,21 @@ namespace Game.Entities
                 if (IsFalling())
                     StopMoving();
 
-                float x, y, z, o;
-                GetRespawnPosition(out x, out y, out z, out o);
+                Position respawnPosition = GetRespawnPosition();
 
                 // We were spawned on transport, calculate real position
                 if (IsSpawnedOnTransport())
                 {
-                    Position pos = m_movementInfo.transport.pos;
-                    pos.posX = x;
-                    pos.posY = y;
-                    pos.posZ = z;
-                    pos.SetOrientation(o);
+                    m_movementInfo.transport.pos = respawnPosition;
 
                     ITransport transport = GetDirectTransport();
                     if (transport != null)
-                        transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                        respawnPosition = transport.GetPositionWithOffset(respawnPosition);
                 }
 
-                UpdateAllowedPositionZ(x, y, ref z);
-                SetHomePosition(x, y, z, o);
-                GetMap().CreatureRelocation(this, x, y, z, o);
+                UpdateAllowedPositionZ(respawnPosition.GetPositionX(), respawnPosition.GetPositionY(), ref respawnPosition.posZ);
+                SetHomePosition(respawnPosition);
+                GetMap().CreatureRelocation(this, respawnPosition.GetPositionX(), respawnPosition.GetPositionY(), respawnPosition.GetPositionZ(), respawnPosition.GetOrientation());
             }
             else
             {
@@ -2714,26 +2709,22 @@ namespace Game.Entities
                 return now;
         }
 
-        public void GetRespawnPosition(out float x, out float y, out float z)
+        public Position GetRespawnPosition()
         {
-            GetRespawnPosition(out x, out y, out z, out _, out _);
+            return GetRespawnPosition(out float unused);
         }
-        public void GetRespawnPosition(out float x, out float y, out float z, out float ori)
-        {
-            GetRespawnPosition(out x, out y, out z, out ori, out _);
-        }
-        public void GetRespawnPosition(out float x, out float y, out float z, out float ori, out float dist)
+
+        public Position GetRespawnPosition(out float dist)
         {
             if (m_creatureData != null)
             {
-                m_creatureData.SpawnPoint.GetPosition(out x, out y, out z, out ori);
                 dist = m_creatureData.WanderDistance;
+                return m_creatureData.SpawnPoint;
             }
             else
             {
-                Position homePos = GetHomePosition();
-                homePos.GetPosition(out x, out y, out z, out ori);
                 dist = 0;
+                return GetHomePosition();
             }
         }
 

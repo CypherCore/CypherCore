@@ -1390,9 +1390,8 @@ namespace Game.Maps
 
         public bool CreatureRespawnRelocation(Creature c, bool diffGridOnly)
         {
-            float resp_x, resp_y, resp_z, resp_o;
-            c.GetRespawnPosition(out resp_x, out resp_y, out resp_z, out resp_o);
-            var resp_cell = new Cell(resp_x, resp_y);
+            Position resp = c.GetRespawnPosition();
+            Cell resp_cell = new(resp.GetPositionX(), resp.GetPositionY());
 
             //creature will be unloaded with grid
             if (diffGridOnly && !c.GetCurrentCell().DiffGrid(resp_cell))
@@ -1404,7 +1403,7 @@ namespace Game.Maps
             // teleport it to respawn point (like normal respawn if player see)
             if (CreatureCellRelocation(c, resp_cell))
             {
-                c.Relocate(resp_x, resp_y, resp_z, resp_o);
+                c.Relocate(resp);
                 c.GetMotionMaster().Initialize(); // prevent possible problems with default move generators
                 c.UpdatePositionData();
                 c.UpdateObjectVisibility(false);
@@ -1416,9 +1415,8 @@ namespace Game.Maps
 
         public bool GameObjectRespawnRelocation(GameObject go, bool diffGridOnly)
         {
-            float resp_x, resp_y, resp_z, resp_o;
-            go.GetRespawnPosition(out resp_x, out resp_y, out resp_z, out resp_o);
-            var resp_cell = new Cell(resp_x, resp_y);
+            Position resp = go.GetRespawnPosition();
+            Cell resp_cell = new(resp.GetPositionX(), resp.GetPositionY());
 
             //GameObject will be unloaded with grid
             if (diffGridOnly && !go.GetCurrentCell().DiffGrid(resp_cell))
@@ -1432,7 +1430,7 @@ namespace Game.Maps
             // teleport it to respawn point (like normal respawn if player see)
             if (GameObjectCellRelocation(go, resp_cell))
             {
-                go.Relocate(resp_x, resp_y, resp_z, resp_o);
+                go.Relocate(resp);
                 go.UpdatePositionData();
                 go.UpdateObjectVisibility(false);
                 return true;
@@ -2649,18 +2647,12 @@ namespace Game.Maps
                 case TypeId.Unit:
                     Creature creature = obj.ToCreature();
                     if (creature != null && !creature.IsPet() && creature.GetSpawnId() != 0)
-                    {
-                        respawnLocation = new();
-                        creature.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ);
-                    }
+                        respawnLocation = creature.GetRespawnPosition();
                     break;
                 case TypeId.GameObject:
                     GameObject gameObject = obj.ToGameObject();
                     if (gameObject != null && gameObject.GetSpawnId() != 0)
-                    {
-                        respawnLocation = new();
-                        gameObject.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ, out _);
-                    }
+                        respawnLocation = gameObject.GetRespawnPosition();
                     break;
                 default:
                     break;
@@ -2694,18 +2686,12 @@ namespace Game.Maps
                 case TypeId.Unit:
                     Creature creature = obj.ToCreature();
                     if (creature != null && !creature.IsPet() && creature.GetSpawnId() != 0)
-                    {
-                        respawnLocation = new();
-                        creature.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ);
-                    }
+                        respawnLocation = creature.GetRespawnPosition();
                     break;
                 case TypeId.GameObject:
                     GameObject gameObject = obj.ToGameObject();
                     if (gameObject != null && gameObject.GetSpawnId() != 0)
-                    {
-                        respawnLocation = new();
-                        gameObject.GetRespawnPosition(out respawnLocation.posX, out respawnLocation.posY, out respawnLocation.posZ, out _);
-                    }
+                        respawnLocation = gameObject.GetRespawnPosition();
                     break;
                 default:
                     break;
@@ -3778,12 +3764,8 @@ namespace Game.Maps
             ITransport transport = summoner != null ? summoner.GetTransport() : null;
             if (transport != null)
             {
-                pos.GetPosition(out float x, out float y, out float z, out float o);
-                transport.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
-                summon.m_movementInfo.transport.pos.Relocate(x, y, z, o);
-
                 // This object must be added to transport before adding to map for the client to properly display it
-                transport.AddPassenger(summon);
+                transport.AddPassenger(summon, transport.GetPositionOffsetTo(pos));
             }
 
             // Set the summon to the summoner's phase

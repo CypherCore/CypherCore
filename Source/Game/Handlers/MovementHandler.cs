@@ -104,7 +104,7 @@ namespace Game
                         {
                             ITransport transport = go.ToTransportBase();
                             if (transport != null)
-                                transport.AddPassenger(plrMover);
+                                transport.AddPassenger(plrMover, movementInfo.transport.pos);
                         }
                     }
                     else if (plrMover.GetTransport().GetTransportGUID() != movementInfo.transport.guid)
@@ -115,7 +115,7 @@ namespace Game
                         {
                             ITransport transport = go.ToTransportBase();
                             if (transport != null)
-                                transport.AddPassenger(plrMover);
+                                transport.AddPassenger(plrMover, movementInfo.transport.pos);
                             else
                                 movementInfo.ResetTransport();
                         }
@@ -305,14 +305,15 @@ namespace Game
 
             if (loc.TransportGuid.HasValue)
             {
-                Transport newTransport = newMap.GetTransport(loc.TransportGuid.Value);
-                if (newTransport != null)
+                GameObject go = player.GetMap().GetGameObject(loc.TransportGuid.Value);
+                if (go != null)
                 {
-                    newTransport.AddPassenger(player);
-                    player.m_movementInfo.transport.pos.Relocate(loc.Location);
-                    loc.Location.GetPosition(out float x, out float y, out float z, out float o);
-                    newTransport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                    player.Relocate(x, y, z, o);
+                    ITransport newTransport = go.ToTransport();
+                    if (newTransport != null)
+                    {
+                        newTransport.AddPassenger(player, loc.Location);
+                        player.Relocate(newTransport.GetPositionWithOffset(loc.Location));
+                    }
                 }
             }
             else
@@ -492,14 +493,15 @@ namespace Game
 
             if (dest.TransportGuid.HasValue)
             {
-                Transport transport = plMover.GetMap().GetTransport(dest.TransportGuid.Value);
-                if (transport != null)
+                GameObject go = plMover.GetMap().GetGameObject(dest.TransportGuid.Value);
+                if (go != null)
                 {
-                    transport.AddPassenger(plMover);
-                    plMover.m_movementInfo.transport.pos.Relocate(destLocation);
-                    dest.Location.GetPosition(out float x, out float y, out float z, out float o);
-                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                    destLocation.Relocate(x, y, z, o);
+                    ITransport transport = go.ToTransportBase();
+                    if (transport != null)
+                    {
+                        transport.AddPassenger(plMover, destLocation);
+                        destLocation.Relocate(transport.GetPositionWithOffset(plMover.m_movementInfo.transport.pos));
+                    }
                 }
             }
 

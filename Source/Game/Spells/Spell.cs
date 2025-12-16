@@ -8808,11 +8808,8 @@ namespace Game.Spells
         public void Relocate(Position pos)
         {
             if (!TransportGUID.IsEmpty())
-            {
-                Position offset;
-                Position.GetPositionOffsetTo(pos, out offset);
-                TransportOffset.RelocateOffset(offset);
-            }
+                TransportOffset.RelocateOffset(Position.GetPositionOffsetTo(pos));
+
             Position.Relocate(pos);
         }
 
