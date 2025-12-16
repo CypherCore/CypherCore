@@ -355,8 +355,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(GossipOptionID);
-            data.WriteInt32(OptionFlags);
-            data.WriteUInt8((byte)OptionNPC);
+            data.WriteUInt32((uint)OptionNPC);
+            data.WriteInt8((sbyte)OptionFlags);
             data.WriteUInt64(OptionCost);
             data.WriteUInt32(OptionLanguage);
             data.WriteInt32((int)Flags);
