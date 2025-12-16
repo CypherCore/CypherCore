@@ -814,7 +814,7 @@ namespace Framework.Database
                 " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // ItemOffsetCurve.db2
-            PrepareStatement(HotfixStatements.SEL_ITEM_OFFSET_CURVE, "SELECT ID, CurveID, Offset FROM item_offset_curve WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_ITEM_OFFSET_CURVE, "SELECT ID, CurveID, `Offset` FROM item_offset_curve WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemPriceBase.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_PRICE_BASE, "SELECT ID, ItemLevel, Armor, Weapon FROM item_price_base WHERE (`VerifiedBuild` > 0) = ?");
