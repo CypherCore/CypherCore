@@ -151,8 +151,8 @@ namespace Game.Entities
             float dx = endPos.GetPositionX() - GetPositionX();
             float dy = endPos.GetPositionY() - GetPositionY();
 
-            retOffset.posX = (float)(dx * Math.Cos(GetOrientation()) + dy * Math.Sin(GetOrientation()));
-            retOffset.posY = (float)(dy * Math.Cos(GetOrientation()) - dx * Math.Sin(GetOrientation()));
+            retOffset.posX = (dx + dy * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation()));
+            retOffset.posY = (dy - dx * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation()));
             retOffset.posZ = endPos.GetPositionZ() - GetPositionZ();
             retOffset.SetOrientation(endPos.GetOrientation() - GetOrientation());
         }
