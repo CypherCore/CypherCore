@@ -488,20 +488,22 @@ namespace Game
             uint old_zone = plMover.GetZoneId();
 
             var dest = plMover.GetTeleportDest();
+            WorldLocation destLocation = new(dest.Location);
 
-            dest.Location.GetPosition(out float x, out float y, out float z, out float o);
             if (dest.TransportGuid.HasValue)
             {
                 Transport transport = plMover.GetMap().GetTransport(dest.TransportGuid.Value);
                 if (transport != null)
                 {
                     transport.AddPassenger(plMover);
-                    plMover.m_movementInfo.transport.pos.Relocate(dest.Location.GetPosition());
+                    plMover.m_movementInfo.transport.pos.Relocate(destLocation);
+                    dest.Location.GetPosition(out float x, out float y, out float z, out float o);
                     transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                    destLocation.Relocate(x, y, z, o);
                 }
             }
 
-            plMover.UpdatePosition(dest.Location, true);
+            plMover.UpdatePosition(destLocation, true);
             plMover.SetFallInformation(0, GetPlayer().GetPositionZ());
 
             uint newzone, newarea;
