@@ -43,8 +43,8 @@ namespace Game.DataStorage
     public sealed class SceneScriptRecord
     {
         public uint Id;
-        public ushort FirstSceneScriptID;
-        public ushort NextSceneScriptID;
+        public uint FirstSceneScriptID;
+        public uint NextSceneScriptID;
         public int Unknown915;
     }
 
@@ -244,10 +244,10 @@ namespace Game.DataStorage
         public uint Id;
         public byte DifficultyID;
         public ushort Category;
-        public sbyte DefenseType;
+        public int DefenseType;
         public sbyte DispelType;
         public sbyte Mechanic;
-        public sbyte PreventionType;
+        public int PreventionType;
         public ushort StartRecoveryCategory;
         public ushort ChargeCategory;
         public uint SpellID;
@@ -361,7 +361,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte DifficultyID;
-        public short InterruptFlags;
+        public int InterruptFlags;
         public int[] AuraInterruptFlags = new int[2];
         public int[] ChannelInterruptFlags = new int[2];
         public uint SpellID;

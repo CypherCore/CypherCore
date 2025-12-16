@@ -2609,7 +2609,8 @@ namespace Framework.Constants
     {
         Gold = 0,
         CurrencyTypesBased = 1,
-        TraitSourced = 2
+        TraitSourced = 2,
+        TraitSourcedPlayerDataElement = 3,
     }
 
     public enum TraitEdgeType
@@ -2633,7 +2634,8 @@ namespace Framework.Constants
         SpendDiamond = 6,
         ProfPath = 7,
         ProfPerk = 8,
-        ProfPathUnlock = 9
+        ProfPathUnlock = 9,
+        SpendInfinite = 10
     }
 
     [Flags]
@@ -2656,6 +2658,12 @@ namespace Framework.Constants
         None = -1,
         Set = 0,
         Multiply = 1
+    }
+
+    public enum TraitSystemVariationType
+    {
+        None = 0,
+        Spec = 1
     }
 
     [Flags]

@@ -40,6 +40,7 @@ namespace Game.DataStorage
         public int AreaID;
         public int WmoDoodadPlacementID;
         public int WmoGroupID;
+        public int Unknown1125;
     }
 
     public sealed class UiMapLinkRecord

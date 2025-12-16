@@ -5935,13 +5935,29 @@ namespace Game.Spells
                 return;
 
             newConfig.TraitSystemID = CliDB.TraitTreeStorage.LookupByKey(effectInfo.MiscValue).TraitSystemID;
-            int existingConfigForSystem = target.m_activePlayerData.TraitConfigs.FindIndexIf(config =>
+            TraitSystemRecord traitSystem = CliDB.TraitSystemStorage.LookupByKey(newConfig.TraitSystemID);
+            if (traitSystem == null)
+                return;
+
+            switch (traitSystem.GetVariationType())
+            {
+                case TraitSystemVariationType.None:
+                    newConfig.VariationID = 0;
+                    break;
+                case TraitSystemVariationType.Spec:
+                    newConfig.VariationID = (int)target.GetPrimarySpecialization();
+                    break;
+                default:
+                    return;
+            }
+
+            int existingConfigIdForSystem = target.m_activePlayerData.TraitConfigs.FindIf(config =>
             {
                 return config.Type == (int)TraitConfigType.Generic
                     && config.TraitSystemID == newConfig.TraitSystemID;
-            });
+            }).Item1;
 
-            if (existingConfigForSystem < 0)
+            if (existingConfigIdForSystem == 0)
                 target.CreateTraitConfig(newConfig);
         }
 

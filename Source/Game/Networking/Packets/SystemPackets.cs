@@ -46,6 +46,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(AddonChatThrottle.MaxTries);
             _worldPacket.WriteInt32(AddonChatThrottle.TriesRestoredPerSecond);
             _worldPacket.WriteInt32(AddonChatThrottle.UsedTriesPerMessage);
+            _worldPacket.WriteInt32(GuildChatThrottle.UsedTriesPerMessage);
+            _worldPacket.WriteInt32(GuildChatThrottle.TriesRestoredPerSecond);
+            _worldPacket.WriteInt32(GroupChatThrottle.UsedTriesPerMessage);
+            _worldPacket.WriteInt32(GroupChatThrottle.TriesRestoredPerSecond);
 
             _worldPacket.WriteFloat(AddonPerformanceMsgWarning);
             _worldPacket.WriteFloat(AddonPerformanceMsgError);
@@ -202,7 +206,9 @@ namespace Game.Networking.Packets
         public int ActiveTimerunningSeasonID;
         public int RemainingTimerunningSeasonSeconds;
         public string Unknown1027;                          // related to movement lua functions used by keybinds
-        public AddonChatThrottleParams AddonChatThrottle;
+        public ChatThrottleParams AddonChatThrottle;
+        public ChatThrottleParams GuildChatThrottle;
+        public ChatThrottleParams GroupChatThrottle;
         public uint RealmPvpTypeOverride;       ///< Use Cfg_Configs value = 0, ForceEnabled = 1, ForceDisabled = 2
         public float AddonPerformanceMsgWarning;
         public float AddonPerformanceMsgError;
@@ -288,7 +294,7 @@ namespace Game.Networking.Packets
             public uint RewardsVersion;
         }
 
-        public struct AddonChatThrottleParams
+        public struct ChatThrottleParams
         {
             public int MaxTries;
             public int TriesRestoredPerSecond;
@@ -362,6 +368,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(GameRules.Count);
             _worldPacket.WriteInt32(ActiveTimerunningSeasonID);
             _worldPacket.WriteInt32(RemainingTimerunningSeasonSeconds);
+            _worldPacket.WriteInt32((int)TimerunningConversionMinCharacterAge.TotalSeconds);
+            _worldPacket.WriteInt32(TimerunningConversionMaxSeasonID);
             _worldPacket.WriteInt16(MaxPlayerGuidLookupsPerRequest);
             _worldPacket.WriteInt16(NameLookupTelemetryInterval);
             _worldPacket.WriteUInt32((uint)NotFoundCacheTimeSeconds.TotalSeconds);
@@ -429,6 +437,8 @@ namespace Game.Networking.Packets
         public List<GameRuleValuePair> GameRules = new();
         public int ActiveTimerunningSeasonID;
         public int RemainingTimerunningSeasonSeconds;
+        public TimeSpan TimerunningConversionMinCharacterAge = TimeSpan.FromDays(1);
+        public int TimerunningConversionMaxSeasonID = -1;
         public short MaxPlayerGuidLookupsPerRequest = 50;
         public short NameLookupTelemetryInterval = 600;
         public TimeSpan NotFoundCacheTimeSeconds = TimeSpan.FromSeconds(10);
@@ -437,6 +447,18 @@ namespace Game.Networking.Packets
         public int MostRecentTimeEventID;
         public uint EventRealmQueues;
         public string RealmHiddenAlert;
+    }
+
+    class MirrorVars() : ServerPacket(ServerOpcodes.MirrorVars)
+    {
+        public MirrorVarSingle[] Variables;
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(Variables.Length);
+            foreach (MirrorVarSingle variable in Variables)
+                variable.Write(_worldPacket);
+        }
     }
 
     public class SetTimeZoneInformation : ServerPacket
@@ -522,6 +544,31 @@ namespace Game.Networking.Packets
             data.FlushBits();
 
             data.WriteString(Text);
+        }
+    }
+
+    public struct MirrorVarSingle
+    {
+        public string Name;
+        public string Value;
+        public int UpdateType;
+
+        public MirrorVarSingle(string name, string value, int updateType = 0)
+        {
+            Name = name;
+            Value = value;
+            UpdateType = updateType;
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits(UpdateType, 1);
+            data.WriteBits(Name.GetByteCount(), 24);
+            data.WriteBits(Value.GetByteCount(), 24);
+            data.FlushBits();
+
+            data.WriteCString(Name);
+            data.WriteCString(Value);
         }
     }
 }

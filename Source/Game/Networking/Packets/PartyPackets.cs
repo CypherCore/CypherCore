@@ -1195,7 +1195,7 @@ namespace Game.Networking.Packets
             for (byte i = 0; i < 2; i++)
                 data.WriteUInt8(PartyType[i]);
 
-            data.WriteInt16((short)Status);
+            data.WriteUInt32((uint)Status);
             data.WriteUInt8(PowerType);
             data.WriteInt16((short)PowerDisplayID);
             data.WriteInt32(CurrentHealth);
@@ -1387,6 +1387,7 @@ namespace Game.Networking.Packets
         public long Unknown_1120_4;
         public ObjectGuid KeystoneOwnerGUID;
         public ObjectGuid LeaverGUID;
+        public long InstanceAbandonVoteCooldown;
         public bool IsActive;
         public bool HasRestrictions;
         public bool CanVoteAbandon;
@@ -1399,6 +1400,7 @@ namespace Game.Networking.Packets
             data.WriteInt64(Unknown_1120_4);
             data.WritePackedGuid(KeystoneOwnerGUID);
             data.WritePackedGuid(LeaverGUID);
+            data.WriteInt64(InstanceAbandonVoteCooldown);
             data.WriteBit(IsActive);
             data.WriteBit(HasRestrictions);
             data.WriteBit(CanVoteAbandon);

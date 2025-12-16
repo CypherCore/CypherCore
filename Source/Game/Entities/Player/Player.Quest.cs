@@ -2337,7 +2337,7 @@ namespace Game.Entities
         {
             var questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
-            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), 0u);
+            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), (ushort)0);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.ObjectiveFlags), 0u);
 
@@ -2358,13 +2358,13 @@ namespace Game.Entities
         public void SetQuestSlotState(ushort slot, QuestSlotStateMask state)
         {
             QuestLog questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
-            SetUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
+            SetUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (ushort)state);
         }
 
         public void RemoveQuestSlotState(ushort slot, QuestSlotStateMask state)
         {
             QuestLog questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
-            RemoveUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
+            RemoveUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (ushort)state);
         }
 
         public void SetQuestSlotEndTime(ushort slot, long endTime)

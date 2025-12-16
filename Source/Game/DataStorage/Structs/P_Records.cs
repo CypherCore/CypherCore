@@ -146,7 +146,7 @@ namespace Game.DataStorage
         public uint[] Time = new uint[2];
         public uint[] AuraSpellID = new uint[4];
         public byte[] AuraStacks = new byte[4];
-        public ushort[] Achievement = new ushort[4];
+        public uint[] Achievement = new uint[4];
         public ushort[] AreaID = new ushort[4];
         public byte[] LfgStatus = new byte[4];
         public byte[] LfgCompare = new byte[4];
@@ -165,6 +165,7 @@ namespace Game.DataStorage
         public uint Id;
         public int StorageIndex;
         public int Type;
+        public int Unknown1125;
 
         public PlayerDataElementType GetElementType() { return (PlayerDataElementType)Type; }
     }
@@ -174,6 +175,7 @@ namespace Game.DataStorage
         public uint Id;
         public int StorageIndex;
         public int Type;
+        public int Unknown1125;
 
         public PlayerDataElementType GetElementType() { return (PlayerDataElementType)Type; }
     }
@@ -183,6 +185,7 @@ namespace Game.DataStorage
         public uint Id;
         public int StorageIndex;
         public int Unknown1107;
+        public int Unknown1125;
     }
 
     public sealed class PlayerDataFlagCharacterRecord
@@ -190,6 +193,7 @@ namespace Game.DataStorage
         public uint Id;
         public int StorageIndex;
         public int Unknown1107;
+        public int Unknown1125;
     }
 
     public sealed class PowerDisplayRecord

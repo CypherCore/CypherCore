@@ -130,6 +130,7 @@ namespace Game.Networking.Packets
             TraitNodeEntryID = ufEntry.TraitNodeEntryID;
             Rank = ufEntry.Rank;
             GrantedRanks = ufEntry.GrantedRanks;
+            BonusRanks = ufEntry.BonusRanks;
         }
 
         public void Read(WorldPacket data)
@@ -205,6 +206,7 @@ namespace Game.Networking.Packets
         public int LocalIdentifier;  // Local to specialization
         public uint SkillLineID;
         public uint TraitSystemID;
+        public int VariationID;
         public List<TraitEntryPacket> Entries = new();
         public List<TraitSubTreeCachePacket> SubTrees = new();
         public string Name = "";
@@ -220,6 +222,7 @@ namespace Game.Networking.Packets
             LocalIdentifier = ufConfig.LocalIdentifier;
             SkillLineID = (uint)(int)ufConfig.SkillLineID;
             TraitSystemID = ufConfig.TraitSystemID;
+            VariationID = ufConfig.VariationID;
             foreach (TraitEntry ufEntry in ufConfig.Entries)
                 Entries.Add(new TraitEntryPacket(ufEntry));
             foreach (var ufSubTree in ufConfig.SubTrees)
@@ -246,6 +249,7 @@ namespace Game.Networking.Packets
                     break;
                 case TraitConfigType.Generic:
                     TraitSystemID = data.ReadUInt32();
+                    VariationID = data.ReadInt32();
                     break;
                 default:
                     break;
@@ -289,6 +293,7 @@ namespace Game.Networking.Packets
                     break;
                 case TraitConfigType.Generic:
                     data.WriteUInt32(TraitSystemID);
+                    data.WriteInt32(VariationID);
                     break;
                 default:
                     break;

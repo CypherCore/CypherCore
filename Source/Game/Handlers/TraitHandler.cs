@@ -137,10 +137,10 @@ namespace Game
             if ((classTalentsRequestNewConfig.Config.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != (int)TraitCombatConfigFlags.None)
                 return;
 
-            long configCount = _player.m_activePlayerData.TraitConfigs._values.Count(traitConfig =>
+            long configCount = _player.m_activePlayerData.TraitConfigs.GetValues().Count(traitConfig =>
             {
-                return (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat
-                    && ((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None;
+                return (TraitConfigType)(int)traitConfig.Item1.Type == TraitConfigType.Combat
+                    && ((TraitCombatConfigFlags)(int)traitConfig.Item1.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None;
             });
             if (configCount >= TraitMgr.MAX_COMBAT_TRAIT_CONFIGS)
                 return;
@@ -148,12 +148,12 @@ namespace Game
             int findFreeLocalIdentifier()
             {
                 int index = 1;
-                while (_player.m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                while (_player.m_activePlayerData.TraitConfigs.FindIf(traitConfig =>
                 {
                     return (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat
                         && traitConfig.ChrSpecializationID == (int)_player.GetPrimarySpecialization()
                         && traitConfig.LocalIdentifier == index;
-                }) >= 0)
+                }).Item1 != 0)
                     ++index;
 
                 return index;
@@ -219,12 +219,12 @@ namespace Game
                 TraitConfigPacket newConfigState = new(traitConfig);
 
                 int freeLocalIdentifier = 1;
-                while (_player.m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                while (_player.m_activePlayerData.TraitConfigs.FindIf(traitConfig =>
                 {
                     return (TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat
                         && traitConfig.ChrSpecializationID == (int)_player.GetPrimarySpecialization()
                         && traitConfig.LocalIdentifier == freeLocalIdentifier;
-                }) >= 0)
+                }).Item1 != 0)
                     ++freeLocalIdentifier;
 
                 TraitMgr.InitializeStarterBuildTraitConfig(newConfigState, _player);

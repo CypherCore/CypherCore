@@ -294,7 +294,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(AllowedMinLevel);
             data.WriteInt32(AllowedMaxLevel);
             data.WriteInt32(NumChoices);
-            data.WriteInt32(StaticType);
+            data.WriteInt8(StaticType);
             data.WriteUInt32(Muid);
 
             data.WriteBits(Title.GetByteCount(), 8);
@@ -327,7 +327,7 @@ namespace Game.Networking.Packets
         public int AllowedMinLevel;
         public int AllowedMaxLevel;
         public int NumChoices;
-        public int StaticType;
+        public sbyte StaticType;
         public uint Muid = 0;
         public StringArray Choicetext = new(10);
     }

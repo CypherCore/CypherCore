@@ -365,8 +365,9 @@ namespace Framework.Database
 
             // ContentTuning.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING, "SELECT ID, Flags, ExpansionID, HealthItemLevelCurveID, DamageItemLevelCurveID, " +
-                "HealthPrimaryStatCurveID, DamagePrimaryStatCurveID, MinLevel, MaxLevel, MinLevelType, MaxLevelType, TargetLevelDelta, TargetLevelMaxDelta, " +
-                "TargetLevelMin, TargetLevelMax, MinItemLevel, QuestXpMultiplier FROM content_tuning WHERE (`VerifiedBuild` > 0) = ?");
+                "HealthPrimaryStatCurveID, DamagePrimaryStatCurveID, PrimaryStatScalingModPlayerDataElementCharacterID, " +
+                "PrimaryStatScalingModPlayerDataElementCharacterMultiplier, MinLevel, MaxLevel, MinLevelType, MaxLevelType, TargetLevelDelta, " +
+                "TargetLevelMaxDelta, TargetLevelMin, TargetLevelMax, MinItemLevel, QuestXpMultiplier FROM content_tuning WHERE (`VerifiedBuild` > 0) = ?");
 
             // ContentTuningXExpected.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING_X_EXPECTED, "SELECT ID, ExpectedStatModID, MinMythicPlusSeasonID, MaxMythicPlusSeasonID, " +
@@ -722,8 +723,8 @@ namespace Framework.Database
 
             // ItemBonusTreeNode.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_BONUS_TREE_NODE, "SELECT ID, ItemContext, ChildItemBonusTreeID, ChildItemBonusListID, ChildItemLevelSelectorID, " +
-                "ChildItemBonusListGroupID, IblGroupPointsModSetID, MinMythicPlusLevel, MaxMythicPlusLevel, ParentItemBonusTreeID FROM item_bonus_tree_node" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
+                "ChildItemBonusListGroupID, IblGroupPointsModSetID, MinMythicPlusLevel, MaxMythicPlusLevel, ItemCreationContextGroupID, Flags, " +
+                "ParentItemBonusTreeID FROM item_bonus_tree_node WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemChildEquipment.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CHILD_EQUIPMENT, "SELECT ID, ParentItemID, ChildItemID, ChildItemEquipSlot FROM item_child_equipment" +
@@ -736,6 +737,10 @@ namespace Framework.Database
             // ItemContextPickerEntry.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CONTEXT_PICKER_ENTRY, "SELECT ID, ItemCreationContext, OrderIndex, PVal, LabelID, Flags, PlayerConditionID, " +
                 "ItemContextPickerID FROM item_context_picker_entry WHERE (`VerifiedBuild` > 0) = ?");
+
+            // ItemCreationContext.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_CREATION_CONTEXT, "SELECT ID, ItemContext, ItemCreationContextGroupID FROM item_creation_context" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemCurrencyCost.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_CURRENCY_COST, "SELECT ID, ItemID FROM item_currency_cost WHERE (`VerifiedBuild` > 0) = ?");
@@ -808,8 +813,15 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE, "SELECT ID, Description_lang FROM item_name_description_locale" +
                 " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
+            // ItemOffsetCurve.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_OFFSET_CURVE, "SELECT ID, CurveID, Offset FROM item_offset_curve WHERE (`VerifiedBuild` > 0) = ?");
+
             // ItemPriceBase.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_PRICE_BASE, "SELECT ID, ItemLevel, Armor, Weapon FROM item_price_base WHERE (`VerifiedBuild` > 0) = ?");
+
+            // ItemScalingConfig.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_SCALING_CONFIG, "SELECT ID, ItemOffsetCurveID, ItemLevel, RequiredLevel, Unknown1125 FROM item_scaling_config" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemSearchName.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_SEARCH_NAME, "SELECT ID, AllowableRace, Display, OverallQualityID, ExpansionID, MinFactionID, MinReputation, " +
@@ -837,12 +849,12 @@ namespace Framework.Database
                 "StatPercentEditor10, StatModifierBonusStat1, StatModifierBonusStat2, StatModifierBonusStat3, StatModifierBonusStat4, StatModifierBonusStat5, " +
                 "StatModifierBonusStat6, StatModifierBonusStat7, StatModifierBonusStat8, StatModifierBonusStat9, StatModifierBonusStat10, Stackable, " +
                 "MaxCount, MinReputation, RequiredAbility, SellPrice, BuyPrice, VendorStackCount, PriceVariance, PriceRandomValue, Flags1, Flags2, Flags3, " +
-                "Flags4, Flags5, FactionRelated, ModifiedCraftingReagentItemID, ContentTuningID, PlayerLevelToItemLevelCurveID, ItemNameDescriptionID, " +
-                "RequiredTransmogHoliday, RequiredHoliday, GemProperties, SocketMatchEnchantmentId, TotemCategoryID, InstanceBound, ZoneBound1, ZoneBound2, " +
-                "ItemSet, LockID, PageID, ItemDelay, MinFactionID, RequiredSkillRank, RequiredSkill, ItemLevel, AllowableClass, ArtifactID, SpellWeight, " +
-                "SpellWeightCategory, SocketType1, SocketType2, SocketType3, SheatheType, Material, PageMaterialID, Bonding, DamageDamageType, " +
-                "ContainerSlots, RequiredPVPMedal, RequiredPVPRank, RequiredLevel, InventoryType, OverallQualityID FROM item_sparse" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
+                "Flags4, Flags5, FactionRelated, ModifiedCraftingReagentItemID, ContentTuningID, PlayerLevelToItemLevelCurveID, ItemLevelOffsetCurveID, " +
+                "ItemLevelOffsetItemLevel, ItemNameDescriptionID, RequiredTransmogHoliday, RequiredHoliday, GemProperties, SocketMatchEnchantmentId, " +
+                "TotemCategoryID, InstanceBound, ZoneBound1, ZoneBound2, ItemSet, LockID, PageID, ItemDelay, MinFactionID, RequiredSkillRank, RequiredSkill, " +
+                "ItemLevel, AllowableClass, ArtifactID, SpellWeight, SpellWeightCategory, SocketType1, SocketType2, SocketType3, SheatheType, Material, " +
+                "PageMaterialID, Bonding, DamageDamageType, ContainerSlots, RequiredPVPMedal, RequiredPVPRank, RequiredLevel, InventoryType, " +
+                "OverallQualityID FROM item_sparse WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_ITEM_SPARSE_LOCALE, "SELECT ID, Description_lang, Display3_lang, Display2_lang, Display1_lang, Display_lang" +
                 " FROM item_sparse_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
@@ -1068,19 +1080,19 @@ namespace Framework.Database
                 " AND locale = ?");
 
             // PlayerDataElementAccount.db2
-            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_ELEMENT_ACCOUNT, "SELECT ID, StorageIndex, Type FROM player_data_element_account" +
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_ELEMENT_ACCOUNT, "SELECT ID, StorageIndex, Type, Unknown1125 FROM player_data_element_account" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // PlayerDataElementCharacter.db2
-            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_ELEMENT_CHARACTER, "SELECT ID, StorageIndex, Type FROM player_data_element_character" +
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_ELEMENT_CHARACTER, "SELECT ID, StorageIndex, Type, Unknown1125 FROM player_data_element_character" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // PlayerDataFlagAccount.db2
-            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_FLAG_ACCOUNT, "SELECT ID, StorageIndex, Unknown1107 FROM player_data_flag_account" +
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_FLAG_ACCOUNT, "SELECT ID, StorageIndex, Unknown1107, Unknown1125 FROM player_data_flag_account" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // PlayerDataFlagCharacter.db2
-            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_FLAG_CHARACTER, "SELECT ID, StorageIndex, Unknown1107 FROM player_data_flag_character" +
+            PrepareStatement(HotfixStatements.SEL_PLAYER_DATA_FLAG_CHARACTER, "SELECT ID, StorageIndex, Unknown1107, Unknown1125 FROM player_data_flag_character" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // PowerDisplay.db2
@@ -1483,10 +1495,11 @@ namespace Framework.Database
                 "TraitCondAccountElementID FROM trait_cond WHERE (`VerifiedBuild` > 0) = ?");
 
             // TraitCost.db2
-            PrepareStatement(HotfixStatements.SEL_TRAIT_COST, "SELECT InternalName, ID, Amount, TraitCurrencyID FROM trait_cost WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_TRAIT_COST, "SELECT InternalName, ID, Amount, TraitCurrencyID, CurveID FROM trait_cost WHERE (`VerifiedBuild` > 0) = ?");
 
             // TraitCurrency.db2
-            PrepareStatement(HotfixStatements.SEL_TRAIT_CURRENCY, "SELECT ID, Type, CurrencyTypesID, Flags, Icon FROM trait_currency WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_TRAIT_CURRENCY, "SELECT ID, Type, CurrencyTypesID, Flags, Icon, PlayerDataElementAccountID, " +
+                "PlayerDataElementCharacterID FROM trait_currency WHERE (`VerifiedBuild` > 0) = ?");
 
             // TraitCurrencySource.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE, "SELECT Requirement, ID, TraitCurrencyID, Amount, QuestID, AchievementID, PlayerLevel, " +
@@ -1557,6 +1570,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_TRAIT_SUB_TREE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM trait_sub_tree_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
 
+            // TraitSystem.db2
+            PrepareStatement(HotfixStatements.SEL_TRAIT_SYSTEM, "SELECT ID, Flags, WidgetSetID, TraitChangeSpell, ItemID, VariationType FROM trait_system" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // TraitTree.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_TREE, "SELECT ID, TraitSystemID, Unused1000_1, FirstTraitNodeID, PlayerConditionID, Flags, Unused1000_2, " +
                 "Unused1000_3 FROM trait_tree WHERE (`VerifiedBuild` > 0) = ?");
@@ -1611,7 +1628,8 @@ namespace Framework.Database
 
             // UiMapAssignment.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP_ASSIGNMENT, "SELECT UiMinX, UiMinY, UiMaxX, UiMaxY, Region1X, Region1Y, Region1Z, Region2X, Region2Y, " +
-                "Region2Z, ID, UiMapID, OrderIndex, MapID, AreaID, WmoDoodadPlacementID, WmoGroupID FROM ui_map_assignment WHERE (`VerifiedBuild` > 0) = ?");
+                "Region2Z, ID, UiMapID, OrderIndex, MapID, AreaID, WmoDoodadPlacementID, WmoGroupID, Unknown1125 FROM ui_map_assignment" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
 
             // UiMapLink.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP_LINK, "SELECT UiMinX, UiMinY, UiMaxX, UiMaxY, ID, ParentUiMapID, OrderIndex, ChildUiMapID, PlayerConditionID, " +
@@ -2040,6 +2058,8 @@ namespace Framework.Database
 
         SEL_ITEM_CONTEXT_PICKER_ENTRY,
 
+        SEL_ITEM_CREATION_CONTEXT,
+
         SEL_ITEM_CURRENCY_COST,
 
         SEL_ITEM_DAMAGE_AMMO,
@@ -2076,7 +2096,11 @@ namespace Framework.Database
         SEL_ITEM_NAME_DESCRIPTION,
         SEL_ITEM_NAME_DESCRIPTION_LOCALE,
 
+        SEL_ITEM_OFFSET_CURVE,
+
         SEL_ITEM_PRICE_BASE,
+
+        SEL_ITEM_SCALING_CONFIG,
 
         SEL_ITEM_SEARCH_NAME,
         SEL_ITEM_SEARCH_NAME_LOCALE,
@@ -2440,6 +2464,8 @@ namespace Framework.Database
 
         SEL_TRAIT_SUB_TREE,
         SEL_TRAIT_SUB_TREE_LOCALE,
+
+        SEL_TRAIT_SYSTEM,
 
         SEL_TRAIT_TREE,
 

@@ -198,6 +198,7 @@ namespace Game.DataStorage
             ItemChildEquipmentStorage = ReadDB2<ItemChildEquipmentRecord>("ItemChildEquipment.db2", HotfixStatements.SEL_ITEM_CHILD_EQUIPMENT);
             ItemClassStorage = ReadDB2<ItemClassRecord>("ItemClass.db2", HotfixStatements.SEL_ITEM_CLASS, HotfixStatements.SEL_ITEM_CLASS_LOCALE);
             ItemContextPickerEntryStorage = ReadDB2<ItemContextPickerEntryRecord>("ItemContextPickerEntry.db2", HotfixStatements.SEL_ITEM_CONTEXT_PICKER_ENTRY);
+            ItemCreationContextStorage = ReadDB2<ItemCreationContextRecord>("ItemCreationContext.db2", HotfixStatements.SEL_ITEM_CREATION_CONTEXT);
             ItemCurrencyCostStorage = ReadDB2<ItemCurrencyCostRecord>("ItemCurrencyCost.db2", HotfixStatements.SEL_ITEM_CURRENCY_COST);
             ItemDamageAmmoStorage = ReadDB2<ItemDamageRecord>("ItemDamageAmmo.db2", HotfixStatements.SEL_ITEM_DAMAGE_AMMO);
             ItemDamageOneHandStorage = ReadDB2<ItemDamageRecord>("ItemDamageOneHand.db2", HotfixStatements.SEL_ITEM_DAMAGE_ONE_HAND);
@@ -216,7 +217,9 @@ namespace Game.DataStorage
             ItemModifiedAppearanceStorage = ReadDB2<ItemModifiedAppearanceRecord>("ItemModifiedAppearance.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE);
             ItemModifiedAppearanceExtraStorage = ReadDB2<ItemModifiedAppearanceExtraRecord>("ItemModifiedAppearanceExtra.db2", HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE_EXTRA);
             ItemNameDescriptionStorage = ReadDB2<ItemNameDescriptionRecord>("ItemNameDescription.db2", HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE);
+            ItemOffsetCurveStorage = ReadDB2<ItemOffsetCurveRecord>("ItemOffsetCurve.db2", HotfixStatements.SEL_ITEM_OFFSET_CURVE);
             ItemPriceBaseStorage = ReadDB2<ItemPriceBaseRecord>("ItemPriceBase.db2", HotfixStatements.SEL_ITEM_PRICE_BASE);
+            ItemScalingConfigStorage = ReadDB2<ItemScalingConfigRecord>("ItemScalingConfig.db2", HotfixStatements.SEL_ITEM_SCALING_CONFIG);
             ItemSearchNameStorage = ReadDB2<ItemSearchNameRecord>("ItemSearchName.db2", HotfixStatements.SEL_ITEM_SEARCH_NAME, HotfixStatements.SEL_ITEM_SEARCH_NAME_LOCALE);
             ItemSetStorage = ReadDB2<ItemSetRecord>("ItemSet.db2", HotfixStatements.SEL_ITEM_SET, HotfixStatements.SEL_ITEM_SET_LOCALE);
             ItemSetSpellStorage = ReadDB2<ItemSetSpellRecord>("ItemSetSpell.db2", HotfixStatements.SEL_ITEM_SET_SPELL);
@@ -376,6 +379,7 @@ namespace Game.DataStorage
             TraitNodeXTraitCostStorage = ReadDB2<TraitNodeXTraitCostRecord>("TraitNodeXTraitCost.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_COST);
             TraitNodeXTraitNodeEntryStorage = ReadDB2<TraitNodeXTraitNodeEntryRecord>("TraitNodeXTraitNodeEntry.db2", HotfixStatements.SEL_TRAIT_NODE_X_TRAIT_NODE_ENTRY);
             TraitSubTreeStorage = ReadDB2<TraitSubTreeRecord>("TraitSubTree.db2", HotfixStatements.SEL_TRAIT_SUB_TREE, HotfixStatements.SEL_TRAIT_SUB_TREE_LOCALE);
+            TraitSystemStorage = ReadDB2<TraitSystemRecord>("TraitSystem.db2", HotfixStatements.SEL_TRAIT_SYSTEM);
             TraitTreeStorage = ReadDB2<TraitTreeRecord>("TraitTree.db2", HotfixStatements.SEL_TRAIT_TREE);
             TraitTreeLoadoutStorage = ReadDB2<TraitTreeLoadoutRecord>("TraitTreeLoadout.db2", HotfixStatements.SEL_TRAIT_TREE_LOADOUT);
             TraitTreeLoadoutEntryStorage = ReadDB2<TraitTreeLoadoutEntryRecord>("TraitTreeLoadoutEntry.db2", HotfixStatements.SEL_TRAIT_TREE_LOADOUT_ENTRY);
@@ -604,6 +608,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemBonusTreeRecord> ItemBonusTreeStorage;
         public static DB6Storage<ItemBonusTreeNodeRecord> ItemBonusTreeNodeStorage;
         public static DB6Storage<ItemContextPickerEntryRecord> ItemContextPickerEntryStorage;
+        public static DB6Storage<ItemCreationContextRecord> ItemCreationContextStorage;
         public static DB6Storage<ItemClassRecord> ItemClassStorage;
         public static DB6Storage<ItemChildEquipmentRecord> ItemChildEquipmentStorage;
         public static DB6Storage<ItemCurrencyCostRecord> ItemCurrencyCostStorage;
@@ -624,7 +629,9 @@ namespace Game.DataStorage
         public static DB6Storage<ItemModifiedAppearanceRecord> ItemModifiedAppearanceStorage;
         public static DB6Storage<ItemModifiedAppearanceExtraRecord> ItemModifiedAppearanceExtraStorage;
         public static DB6Storage<ItemNameDescriptionRecord> ItemNameDescriptionStorage;
+        public static DB6Storage<ItemOffsetCurveRecord> ItemOffsetCurveStorage;
         public static DB6Storage<ItemPriceBaseRecord> ItemPriceBaseStorage;
+        public static DB6Storage<ItemScalingConfigRecord> ItemScalingConfigStorage;
         public static DB6Storage<ItemSearchNameRecord> ItemSearchNameStorage;
         public static DB6Storage<ItemSetRecord> ItemSetStorage;
         public static DB6Storage<ItemSetSpellRecord> ItemSetSpellStorage;
@@ -784,6 +791,7 @@ namespace Game.DataStorage
         public static DB6Storage<TraitNodeXTraitCostRecord> TraitNodeXTraitCostStorage;
         public static DB6Storage<TraitNodeXTraitNodeEntryRecord> TraitNodeXTraitNodeEntryStorage;
         public static DB6Storage<TraitSubTreeRecord> TraitSubTreeStorage;
+        public static DB6Storage<TraitSystemRecord> TraitSystemStorage;
         public static DB6Storage<TraitTreeRecord> TraitTreeStorage;
         public static DB6Storage<TraitTreeLoadoutRecord> TraitTreeLoadoutStorage;
         public static DB6Storage<TraitTreeLoadoutEntryRecord> TraitTreeLoadoutEntryStorage;

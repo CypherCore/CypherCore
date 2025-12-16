@@ -1175,8 +1175,8 @@ namespace Game.Entities
 
             if (!configsResult.IsEmpty())
             {
-                //                    0     1                    2                  3                4            5              6      7
-                // SELECT traitConfigId, type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, `name` FROM character_trait_config WHERE guid = ?
+                //         0              1     2                    3                  4                5            6              7             8
+                // SELECT traitConfigId, type, chrSpecializationId, combatConfigFlags, localIdentifier, skillLineId, traitSystemId, variationId, `name` FROM character_trait_config WHERE guid = ?
                 do
                 {
                     TraitConfigPacket traitConfig = new();
@@ -1194,12 +1194,13 @@ namespace Game.Entities
                             break;
                         case TraitConfigType.Generic:
                             traitConfig.TraitSystemID = configsResult.Read<uint>(6);
+                            traitConfig.VariationID = configsResult.Read<int>(7);
                             break;
                         default:
                             break;
                     }
 
-                    traitConfig.Name = configsResult.Read<string>(7);
+                    traitConfig.Name = configsResult.Read<string>(8);
 
                     foreach (var grantedEntry in TraitMgr.GetGrantedTraitEntriesForConfig(traitConfig, this))
                         traitConfig.Entries.Add(new TraitEntryPacket(grantedEntry));
@@ -1242,23 +1243,23 @@ namespace Game.Entities
 
             bool hasConfigForSpec(int specId)
             {
-                return m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                return m_activePlayerData.TraitConfigs.FindIf(traitConfig =>
                 {
                     return traitConfig.Type == (int)TraitConfigType.Combat
                         && traitConfig.ChrSpecializationID == specId
                         && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0;
-                }) >= 0;
+                }).Item1 != 0;
             }
 
             int findFreeLocalIdentifier(int specId)
             {
                 int index = 1;
-                while (m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                while (m_activePlayerData.TraitConfigs.FindIf(traitConfig =>
                 {
                     return traitConfig.Type == (int)TraitConfigType.Combat
                         && traitConfig.ChrSpecializationID == specId
                         && traitConfig.LocalIdentifier == index;
-                }) >= 0)
+                }).Item1 != 0)
                     ++index;
 
                 return index;
@@ -1283,23 +1284,22 @@ namespace Game.Entities
                 }
             }
 
-            int activeConfig = m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+            TraitConfig activeTraitConfig = m_activePlayerData.TraitConfigs.FindIf(traitConfig =>
             {
                 return traitConfig.Type == (int)TraitConfigType.Combat
                     && traitConfig.ChrSpecializationID == (int)GetPrimarySpecialization()
                     && (traitConfig.CombatConfigFlags & (int)TraitCombatConfigFlags.ActiveForSpec) != 0;
-            });
+            }).Item2;
 
-            if (activeConfig >= 0)
+            if (activeTraitConfig != null)
             {
-                TraitConfig activeTraitConfig = m_activePlayerData.TraitConfigs[activeConfig];
                 SetActiveCombatTraitConfigID(activeTraitConfig.ID);
                 int activeSubTree = activeTraitConfig.SubTrees.FindIndexIf(subTree => subTree.Active != 0);
                 if (activeSubTree >= 0)
                     SetCurrentCombatTraitConfigSubTreeID(activeTraitConfig.SubTrees[activeSubTree].TraitSubTreeID);
             }
 
-            foreach (TraitConfig traitConfig in m_activePlayerData.TraitConfigs)
+            foreach (var (id, (traitConfig, _)) in m_activePlayerData.TraitConfigs)
             {
                 switch ((TraitConfigType)(int)traitConfig.Type)
                 {
@@ -1315,7 +1315,7 @@ namespace Game.Entities
                         break;
                 }
 
-                ApplyTraitConfig(traitConfig.ID, true);
+                ApplyTraitConfig(id, true);
             }
         }
 
@@ -2138,16 +2138,16 @@ namespace Game.Entities
             TraitConfig traitConfig = GetTraitConfig((int)(uint)m_activePlayerData.ActiveCombatTraitConfigID);
             if (traitConfig != null)
             {
-                int usedSavedTraitConfigIndex = m_activePlayerData.TraitConfigs.FindIndexIf(savedConfig =>
+                int usedSavedTraitConfigId = m_activePlayerData.TraitConfigs.FindIf(savedConfig =>
                 {
                     return (TraitConfigType)(int)savedConfig.Type == TraitConfigType.Combat
                         && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None
                         && ((TraitCombatConfigFlags)(int)savedConfig.CombatConfigFlags & TraitCombatConfigFlags.SharedActionBars) == TraitCombatConfigFlags.None
                         && savedConfig.LocalIdentifier == traitConfig.LocalIdentifier;
-                });
+                }).Item1;
 
-                if (usedSavedTraitConfigIndex >= 0)
-                    traitConfigId = m_activePlayerData.TraitConfigs[usedSavedTraitConfigIndex].ID;
+                if (usedSavedTraitConfigId != 0)
+                    traitConfigId = usedSavedTraitConfigId;
             }
 
             PreparedStatement stmt;
@@ -2480,6 +2480,7 @@ namespace Game.Entities
                                     stmt.AddValue(5, traitConfig.LocalIdentifier);
                                     stmt.AddNull(6);
                                     stmt.AddNull(7);
+                                    stmt.AddNull(8);
                                     break;
                                 case TraitConfigType.Profession:
                                     stmt.AddNull(3);
@@ -2487,6 +2488,7 @@ namespace Game.Entities
                                     stmt.AddNull(5);
                                     stmt.AddValue(6, traitConfig.SkillLineID);
                                     stmt.AddNull(7);
+                                    stmt.AddNull(8);
                                     break;
                                 case TraitConfigType.Generic:
                                     stmt.AddNull(3);
@@ -2494,12 +2496,13 @@ namespace Game.Entities
                                     stmt.AddNull(5);
                                     stmt.AddNull(6);
                                     stmt.AddValue(7, traitConfig.TraitSystemID);
+                                    stmt.AddValue(8, traitConfig.VariationID);
                                     break;
                                 default:
                                     break;
                             }
 
-                            stmt.AddValue(8, traitConfig.Name);
+                            stmt.AddValue(9, traitConfig.Name);
                             trans.Append(stmt);
 
                             foreach (var traitEntry in traitConfig.Entries)

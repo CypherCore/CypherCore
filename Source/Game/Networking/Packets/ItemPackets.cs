@@ -133,14 +133,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(ItemGUID);
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt32(Result);
             _worldPacket.WriteBit(Contents != null);
             _worldPacket.FlushBits();
             if (Contents != null)
                 Contents.Write(_worldPacket);
         }
 
-        public byte Result;
+        public uint Result;
         public ObjectGuid ItemGUID;
         public ItemPurchaseContents Contents;
     }

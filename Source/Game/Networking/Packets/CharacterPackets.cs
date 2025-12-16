@@ -124,7 +124,7 @@ namespace Game.Networking.Packets
                 if (fields.Read<uint>(18) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(28)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(29)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -168,19 +168,20 @@ namespace Game.Networking.Packets
 
                 StringArray equipment = new(fields.Read<string>(17), ' ');
                 ListPosition = fields.Read<byte>(19);
-                LastActiveTime = fields.Read<long>(20);
+                CreateTime = fields.Read<long>(20);
+                LastActiveTime = fields.Read<long>(21);
 
-                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
+                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(22));
                 if (spec != null)
                     SpecID = (short)spec.Id;
 
-                LastLoginVersion = fields.Read<int>(22);
+                LastLoginVersion = fields.Read<int>(23);
 
-                PersonalTabard.EmblemStyle = fields.Read<int>(23);
-                PersonalTabard.EmblemColor = fields.Read<int>(24);
-                PersonalTabard.BorderStyle = fields.Read<int>(25);
-                PersonalTabard.BorderColor = fields.Read<int>(26);
-                PersonalTabard.BackgroundColor = fields.Read<int>(27);
+                PersonalTabard.EmblemStyle = fields.Read<int>(24);
+                PersonalTabard.EmblemColor = fields.Read<int>(25);
+                PersonalTabard.BorderStyle = fields.Read<int>(26);
+                PersonalTabard.BorderColor = fields.Read<int>(27);
+                PersonalTabard.BackgroundColor = fields.Read<int>(28);
 
                 int equipmentFieldsPerSlot = 5;
 
@@ -226,6 +227,7 @@ namespace Game.Networking.Packets
                     visualItem.Write(data);
 
                 data.WriteInt32(SaveVersion);
+                data.WriteInt64(CreateTime);
                 data.WriteInt64(LastActiveTime);
                 data.WriteInt32(LastLoginVersion);
                 PersonalTabard.Write(data);
@@ -272,6 +274,7 @@ namespace Game.Networking.Packets
             public CharacterFlags4 Flags4; // Character flag4 @see enum CharacterFlags4
             public bool FirstLogin;
             public byte CantLoginReason;
+            public long CreateTime;
             public long LastActiveTime;
             public short SpecID;
             public int SaveVersion;
@@ -520,7 +523,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Code);
+            _worldPacket.WriteUInt32((uint)Code);
             _worldPacket.WritePackedGuid(Guid);
         }
 
@@ -546,7 +549,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Code);
+            _worldPacket.WriteUInt32((uint)Code);
         }
 
         public ResponseCodes Code;
@@ -572,7 +575,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteBit(Guid.HasValue);
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.FlushBits();
@@ -658,7 +661,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WritePackedGuid(Guid);
             _worldPacket.WriteBit(Display != null);
             _worldPacket.FlushBits();
@@ -1173,11 +1176,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt8(Result);
+            _worldPacket.WriteUInt32(Result);
             _worldPacket.WritePackedGuid(CharGUID);
         }
 
-        public byte Result;
+        public uint Result;
         public ObjectGuid CharGUID;
     }
 

@@ -1520,27 +1520,13 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Flags);
+            data.WriteUInt8((byte)Face);
             data.WriteInt32(Elapsed);
             data.WriteUInt32(MoveTime);
             data.WriteUInt32(FadeObjectTime);
             data.WriteUInt8(Mode);
             data.WritePackedGuid(TransportGUID);
             data.WriteInt8(VehicleSeat);
-            data.WriteBits((byte)Face, 2);
-            data.WriteBits(Points.Count, 16);
-            data.WriteBit(VehicleExitVoluntary);
-            data.WriteBit(TaxiSmoothing);
-            data.WriteBits(PackedDeltas.Count, 16);
-            data.WriteBit(SplineFilter != null);
-            data.WriteBit(SpellEffectExtraData.HasValue);
-            data.WriteBit(JumpExtraData.HasValue);
-            data.WriteBit(TurnData != null);
-            data.WriteBit(AnimTierTransition.HasValue);
-            data.WriteBit(Unknown901 != null);
-            data.FlushBits();
-
-            if (SplineFilter != null)
-                SplineFilter.Write(data);
 
             switch (Face)
             {
@@ -1555,6 +1541,21 @@ namespace Game.Networking.Packets
                     data.WriteFloat(FaceDirection);
                     break;
             }
+
+            data.WriteBits(Points.Count, 16);
+            data.WriteBit(VehicleExitVoluntary);
+            data.WriteBit(TaxiSmoothing);
+            data.WriteBits(PackedDeltas.Count, 16);
+            data.WriteBit(SplineFilter != null);
+            data.WriteBit(SpellEffectExtraData.HasValue);
+            data.WriteBit(JumpExtraData.HasValue);
+            data.WriteBit(TurnData != null);
+            data.WriteBit(AnimTierTransition.HasValue);
+            data.WriteBit(Unknown901 != null);
+            data.FlushBits();
+
+            if (SplineFilter != null)
+                SplineFilter.Write(data);
 
             foreach (Vector3 pos in Points)
                 data.WriteVector3(pos);

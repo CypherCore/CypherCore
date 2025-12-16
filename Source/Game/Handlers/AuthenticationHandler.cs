@@ -120,6 +120,20 @@ namespace Game
             features.EuropaTicketSystemStatus = europaTicketConfig;
 
             SendPacket(features);
+
+            MirrorVarSingle[] vars =
+            {
+                new MirrorVarSingle("raidLockoutExtendEnabled", "1"),
+                new MirrorVarSingle("bypassItemLevelScalingCode", "0"),
+                new MirrorVarSingle("shop2Enabled", "0"),
+                new MirrorVarSingle("bpayStoreEnable", "0"),
+                new MirrorVarSingle("recentAlliesEnabledClient", "0"),
+                new MirrorVarSingle("browserEnabled", "0"),
+            };
+
+            MirrorVars variables = new();
+            variables.Variables = vars;
+            SendPacket(variables);
         }
     }
 }

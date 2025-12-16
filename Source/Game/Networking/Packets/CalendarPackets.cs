@@ -299,7 +299,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(InviteGuid);
             _worldPacket.WriteUInt64(EventID);
             Date.Write(_worldPacket);
-            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteUInt16((ushort)Flags);
             _worldPacket.WriteUInt8((byte)Status);
             ResponseTime.Write(_worldPacket);
 
@@ -324,7 +324,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(InviteGuid);
             _worldPacket.WriteUInt64(EventID);
-            _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt16(Flags);
 
             _worldPacket.WriteBit(ClearPending);
             _worldPacket.FlushBits();
@@ -332,7 +332,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid InviteGuid;
         public ulong EventID;
-        public uint Flags;
+        public ushort Flags;
         public bool ClearPending;
     }
 
@@ -364,7 +364,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt64(EventID);
             Date.Write(_worldPacket);
-            _worldPacket.WriteUInt32((uint)Flags);
+            _worldPacket.WriteUInt16((ushort)Flags);
             _worldPacket.WriteUInt8((byte)Status);
         }
 
@@ -653,12 +653,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt64(EventID);
             _worldPacket.WritePackedTime(Date);
-            _worldPacket.WriteUInt32(Flags);
+            _worldPacket.WriteUInt16(Flags);
             _worldPacket.WriteUInt8(Status);
         }
 
         public ulong EventID;
-        public uint Flags;
+        public ushort Flags;
         public long Date;
         public byte Status;
     }

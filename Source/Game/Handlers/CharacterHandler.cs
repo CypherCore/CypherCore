@@ -1145,7 +1145,7 @@ namespace Game
             // START OF DUMMY VALUES
             features.ComplaintStatus = (byte)ComplaintStatus.EnabledWithAutoIgnore;
             features.CfgRealmID = 2;
-            features.CfgRealmRecID = 0;
+            features.CfgRealmRecID = (int)Global.RealmMgr.GetCurrentRealmId().Index;
             features.CommercePricePollTimeSeconds = 300;
             features.VoiceEnabled = false;
 
@@ -1183,6 +1183,14 @@ namespace Game
 
                 features.GameRules.Add(rule);
             }
+
+            features.AddonChatThrottle.MaxTries = 10;
+            features.AddonChatThrottle.TriesRestoredPerSecond = 1;
+            features.AddonChatThrottle.UsedTriesPerMessage = 1;
+            features.GuildChatThrottle.UsedTriesPerMessage = 1;
+            features.GuildChatThrottle.TriesRestoredPerSecond = 20;
+            features.GroupChatThrottle.UsedTriesPerMessage = 1;
+            features.GroupChatThrottle.TriesRestoredPerSecond = 20;
 
             SendPacket(features);
         }

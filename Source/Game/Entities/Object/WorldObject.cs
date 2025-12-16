@@ -844,6 +844,12 @@ namespace Game.Entities
             updateField.RemoveValue(index);
         }
 
+        public void RemoveMapUpdateFieldValue<K, V>(MapUpdateField<K, V> setter, K key) where V : new()
+        {
+            AddToObjectUpdateIfNeeded();
+            setter.MarkKeyForRemoval(key);
+        }
+
         public void ClearDynamicUpdateFieldValues<T>(DynamicUpdateField<T> updateField) where T : new()
         {
             AddToObjectUpdateIfNeeded();

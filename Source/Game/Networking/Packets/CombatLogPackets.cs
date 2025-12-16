@@ -62,6 +62,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteInt32(Resisted);
             _worldPacket.WriteInt32(ShieldBlock);
+            _worldPacket.WriteInt32(Flags);
             _worldPacket.WriteInt32(WorldTextViewers.Count);
             _worldPacket.WriteInt32(Supporters.Count);
 
@@ -69,7 +70,6 @@ namespace Game.Networking.Packets
                 supportInfo.Write(_worldPacket);
 
             _worldPacket.WriteBit(Periodic);
-            _worldPacket.WriteBits(Flags, 7);
             _worldPacket.WriteBit(false); // Debug info
             WriteLogDataBit();
             _worldPacket.WriteBit(ContentTuning != null);
@@ -657,7 +657,7 @@ namespace Game.Networking.Packets
         public int OriginalHeal;
         public ContentTuningParams ContentTuning;
     }
-    
+
     //Structs
     public struct SpellLogEffectPowerDrainParams
     {

@@ -262,6 +262,9 @@ namespace Game.Spells
             else if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
                 auraData.CastUnit = aura.GetCasterGUID();
 
+            if (!aura.GetCastItemGUID().IsEmpty())
+                auraData.CastItem = aura.GetCastItemGUID();
+
             if (auraData.Flags.HasFlag(AuraFlags.Duration))
             {
                 auraData.Duration = aura.GetMaxDuration();

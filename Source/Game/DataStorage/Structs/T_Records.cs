@@ -143,6 +143,7 @@ namespace Game.DataStorage
         public uint Id;
         public int Amount;
         public int TraitCurrencyID;
+        public int CurveID;
     }
 
     public sealed class TraitCurrencyRecord
@@ -152,6 +153,8 @@ namespace Game.DataStorage
         public int CurrencyTypesID;
         public int Flags;
         public int Icon;
+        public int PlayerDataElementAccountID;
+        public int PlayerDataElementCharacterID;
 
         public TraitCurrencyType GetCurrencyType() { return (TraitCurrencyType)Type; }
     }
@@ -294,9 +297,21 @@ namespace Game.DataStorage
     {
         public LocalizedString Name;
         public LocalizedString Description;
-        public uint ID;
+        public uint Id;
         public int UiTextureAtlasElementID;
         public uint TraitTreeID;             // Parent tree
+    }
+
+    public sealed class TraitSystemRecord
+    {
+        public uint Id;
+        public int Flags;
+        public int WidgetSetID;
+        public int TraitChangeSpell;
+        public int ItemID;
+        public int VariationType;
+
+        public TraitSystemVariationType GetVariationType() { return (TraitSystemVariationType)VariationType; }
     }
 
     public sealed class TraitTreeRecord

@@ -186,10 +186,16 @@ namespace BNetServer.Networking
             if (!authed)
                 return BattlenetRpcErrorCode.Denied;
 
-            if (request.Program != 0x576F57)
+            switch (request.Program)
             {
-                Log.outDebug(LogFilter.Session, $"[Battlenet::HandleGenerateWebCredentials] {GetClientInfo()} attempted to generate web cretentials with game other than WoW (using {(request.Program >> 24) & 0xFF}{(request.Program >> 16) & 0xFF}{(request.Program >> 8) & 0xFF}{request.Program & 0xFF})!");
-                return BattlenetRpcErrorCode.BadProgram;
+                case 0x417070: // App
+                case 0x576F57: // WoW
+                    break;
+                default:
+                {
+                    Log.outDebug(LogFilter.Session, $"[Battlenet::HandleGenerateWebCredentials] {GetClientInfo()} attempted to generate web cretentials with game other than WoW (using {(request.Program >> 24) & 0xFF}{(request.Program >> 16) & 0xFF}{(request.Program >> 8) & 0xFF}{request.Program & 0xFF})!");
+                    return BattlenetRpcErrorCode.BadProgram;
+                }
             }
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_EXISTING_AUTHENTICATION_BY_ID);

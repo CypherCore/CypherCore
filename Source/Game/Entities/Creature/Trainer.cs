@@ -36,7 +36,7 @@ namespace Game.Entities
 
             TrainerList trainerList = new();
             trainerList.TrainerGUID = npc.GetGUID();
-            trainerList.TrainerType = (int)_type;
+            trainerList.TrainerType = (sbyte)_type;
             trainerList.TrainerID = (int)_id;
             trainerList.Greeting = GetGreeting(locale);
 

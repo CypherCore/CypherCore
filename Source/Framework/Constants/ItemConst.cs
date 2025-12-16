@@ -477,6 +477,9 @@ namespace Framework.Constants
         OverrideDescriptionColor = 45,             // Overrides color of item description and upgrade track if TimeEvent from value[1] has passed
         OverrideCannotTradeBop = 46,
         BondingWithPriority = 47,
+        ItemOffsetCurve = 48,
+        ScalingConfigAndReqLevel = 49,
+        ScalingConfig = 51,
     }
 
     public enum ItemCollectionType : byte
@@ -489,6 +492,10 @@ namespace Framework.Constants
         RuneforgeLegendaryAbility = 5,
         TransmogIllusion = 6,
         WarbandScene = 7,
+        Room = 8,
+        ExteriorFixture = 9,
+        RoomTheme = 10,
+        RoomMaterial = 11
     }
 
     public enum ItemContext : byte
@@ -658,6 +665,27 @@ namespace Framework.Constants
         TournamentRealm2 = 162,
         TournamentRealm3 = 163,
         TournamentRealm4 = 164,
+        Warbound1 = 165,
+        Warbound2 = 166,
+        Warbound3 = 167,
+        Warbound4 = 168,
+        Warbound5 = 169,
+        Warbound6 = 170,
+        Warbound7 = 171,
+        Warbound8 = 172,
+        Warbound9 = 173,
+        Warbound10 = 174,
+        Warbound11 = 175,
+        Warbound12 = 176,
+        Warbound13 = 177,
+        Warbound14 = 178,
+        Warbound15 = 179,
+        Warbound16 = 180,
+        Warbound17 = 181,
+        Warbound18 = 182,
+        Warbound19 = 183,
+        Warbound20 = 184,
+        Endeavors = 185,
 
         Max
     }

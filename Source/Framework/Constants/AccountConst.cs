@@ -22,12 +22,15 @@ namespace Framework.Constants
         PerCharacterEditModeCache = 14,
         GlobalFrontendChatSettings = 15,
         GlobalCharacterListOrder = 16,
+        GlobalCooldownManager = 17,
+        PerCharacterCooldownManager2 = 18,
+        GlobalShop2PendingOrders = 19,
 
-        Max = 17,
+        Max = 20,
 
-        AllAccountDataCacheMask = 0x0001FFFFu,
-        GlobalCacheMask = 0x0001A515u,
-        PerCharacterCacheMask = 0x00005AEAu
+        AllAccountDataCacheMask = 0x000FFFFFu,
+        GlobalCacheMask = 0x000BA515u,
+        PerCharacterCacheMask = 0x00045AEAu
     }
 
     public enum TutorialAction

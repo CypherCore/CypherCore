@@ -736,9 +736,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteVector3(TargetPosition);
             _worldPacket.WriteUInt32(SpellVisualID);
             _worldPacket.WriteFloat(TravelSpeed);
-            _worldPacket.WriteUInt16(HitReason);
-            _worldPacket.WriteUInt16(MissReason);
-            _worldPacket.WriteUInt16(ReflectStatus);
+            _worldPacket.WriteUInt8(HitReason);
+            _worldPacket.WriteUInt8(MissReason);
+            _worldPacket.WriteUInt8(ReflectStatus);
             _worldPacket.WriteFloat(LaunchDelay);
             _worldPacket.WriteFloat(MinDuration);
             _worldPacket.WriteBit(SpeedAsTime);
@@ -751,9 +751,9 @@ namespace Game.Networking.Packets
         public Vector3 TargetPosition; // Overrides missile destination for SpellVisual::SpellVisualMissileSetID
         public uint SpellVisualID;
         public float TravelSpeed;
-        public ushort HitReason;
-        public ushort MissReason;
-        public ushort ReflectStatus;
+        public byte HitReason;
+        public byte MissReason;
+        public byte ReflectStatus;
         public float LaunchDelay;
         public float MinDuration;
         public bool SpeedAsTime;
@@ -1686,6 +1686,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(ContentTuningID);
             data.WriteVector3(DstLocation);
             data.WriteBit(CastUnit.HasValue);
+            data.WriteBit(CastItem.HasValue);
             data.WriteBit(Duration.HasValue);
             data.WriteBit(Remaining.HasValue);
             data.WriteBit(TimeMod.HasValue);
@@ -1698,6 +1699,9 @@ namespace Game.Networking.Packets
 
             if (CastUnit.HasValue)
                 data.WritePackedGuid(CastUnit.Value);
+
+            if (CastItem.HasValue)
+                data.WritePackedGuid(CastItem.Value);
 
             if (Duration.HasValue)
                 data.WriteInt32(Duration.Value);
@@ -1725,6 +1729,7 @@ namespace Game.Networking.Packets
         public int ContentTuningID;
         ContentTuningParams ContentTuning;
         public ObjectGuid? CastUnit;
+        public ObjectGuid? CastItem;
         public int? Duration;
         public int? Remaining;
         float? TimeMod;
@@ -1776,8 +1781,10 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket data)
         {
-            data.ResetBitPos();
-            Flags = (SpellCastTargetFlags)data.ReadBits<uint>(28);
+            Flags = (SpellCastTargetFlags)data.ReadUInt32();
+            Unit = data.ReadPackedGuid();
+            Item = data.ReadPackedGuid();
+
             if (data.HasBit())
                 SrcLocation = new();
 
@@ -1788,9 +1795,6 @@ namespace Game.Networking.Packets
             bool hasMapId = data.HasBit();
 
             uint nameLength = data.ReadBits<uint>(7);
-
-            Unit = data.ReadPackedGuid();
-            Item = data.ReadPackedGuid();
 
             if (SrcLocation != null)
                 SrcLocation.Read(data);
@@ -1809,16 +1813,16 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits((uint)Flags, 28);
+            data.WriteUInt32((uint)Flags);
+            data.WritePackedGuid(Unit);
+            data.WritePackedGuid(Item);
+
             data.WriteBit(SrcLocation != null);
             data.WriteBit(DstLocation != null);
             data.WriteBit(Orientation.HasValue);
             data.WriteBit(MapID.HasValue);
             data.WriteBits(Name.GetByteCount(), 7);
             data.FlushBits();
-
-            data.WritePackedGuid(Unit);
-            data.WritePackedGuid(Item);
 
             if (SrcLocation != null)
                 SrcLocation.Write(data);
@@ -1914,6 +1918,7 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             CastID = data.ReadPackedGuid();
+            SendCastFlags = data.ReadUInt32();
             Misc[0] = data.ReadUInt32();
             Misc[1] = data.ReadUInt32();
             SpellID = data.ReadUInt32();
@@ -1931,18 +1936,18 @@ namespace Game.Networking.Packets
             for (var i = 0; i < optionalCurrenciesCount; ++i)
                 OptionalCurrencies[i].Read(data);
 
-            SendCastFlags = data.ReadBits<uint>(6);
+            Target.Read(data);
+
+            data.ResetBitPos();
             bool hasMoveUpdate = data.HasBit();
             var weightCount = data.ReadBits<uint>(2);
             bool hasCraftingOrderID = data.HasBit();
 
-            Target.Read(data);
+            for (var i = 0; i < optionalReagentsCount; ++i)
+                OptionalReagents[i].Read(data);
 
             if (hasCraftingOrderID)
                 CraftingOrderID = data.ReadUInt64();
-
-            for (var i = 0; i < optionalReagentsCount; ++i)
-                OptionalReagents[i].Read(data);
 
             for (var i = 0; i < removedModificationsCount; ++i)
                 RemovedModifications[i].Read(data);
@@ -2046,7 +2051,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Points);
-            data.WriteUInt8((byte)Type);
+            data.WriteUInt32((uint)Type);
             data.WritePackedGuid(BeaconGUID);
         }
     }

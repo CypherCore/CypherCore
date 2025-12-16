@@ -169,7 +169,7 @@ namespace Game.Entities
             }
 
             VisualAnim visualAnim = areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
-            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), GetCreateProperties().AnimId);
+            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), (ushort)GetCreateProperties().AnimId);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimKitID), GetCreateProperties().AnimKitId);
             if (GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.VisualAnimIsDecay))
                 SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.IsDecay), true);

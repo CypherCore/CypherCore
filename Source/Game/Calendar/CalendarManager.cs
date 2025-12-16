@@ -539,7 +539,7 @@ namespace Game
             CalendarInviteRemoved packet = new();
             packet.ClearPending = true; // FIXME
             packet.EventID = calendarEvent.EventId;
-            packet.Flags = flags;
+            packet.Flags = (ushort)flags;
             packet.InviteGuid = invite.InviteeGuid;
 
             SendPacketToAllEventRelatives(packet, calendarEvent);

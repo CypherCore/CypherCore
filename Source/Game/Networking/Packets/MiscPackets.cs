@@ -189,10 +189,8 @@ namespace Game.Networking.Packets
         public ObjectGuid Selection; // Target
     }
 
-    public class SetupCurrency : ServerPacket
+    public class SetupCurrency() : ServerPacket(ServerOpcodes.SetupCurrency, ConnectionType.Instance)
     {
-        public SetupCurrency() : base(ServerOpcodes.SetupCurrency, ConnectionType.Instance) { }
-
         public override void Write()
         {
             _worldPacket.WriteInt32(Data.Count);
@@ -201,6 +199,7 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteUInt32(data.Type);
                 _worldPacket.WriteUInt32(data.Quantity);
+                _worldPacket.WriteUInt8(data.Flags);
 
                 _worldPacket.WriteBit(data.WeeklyQuantity.HasValue);
                 _worldPacket.WriteBit(data.MaxWeeklyQuantity.HasValue);
@@ -209,7 +208,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(data.TotalEarned.HasValue);
                 _worldPacket.WriteBit(data.NextRechargeTime.HasValue);
                 _worldPacket.WriteBit(data.RechargeCycleStartTime.HasValue);
-                _worldPacket.WriteBits(data.Flags, 5);
                 _worldPacket.FlushBits();
 
                 if (data.WeeklyQuantity.HasValue)

@@ -32,8 +32,8 @@ namespace Game.Networking.Packets
             {
                 _worldPacket.WriteUInt64(auctionableTokenAuctionable.Id);
                 _worldPacket.WriteInt64(auctionableTokenAuctionable.LastUpdate);
-                _worldPacket.WriteUInt64(auctionableTokenAuctionable.Price);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.Status);
+                _worldPacket.WriteUInt64(auctionableTokenAuctionable.Price);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.DurationLeft);
             }
         }
@@ -70,15 +70,15 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(PriceGuarantee);
             _worldPacket.WriteUInt32(ClientToken);
             _worldPacket.WriteUInt32((uint)ServerToken);
+            _worldPacket.WriteUInt64(PriceGuarantee);
             _worldPacket.WriteUInt32(PriceLockDurationSeconds);
         }
 
-        public ulong PriceGuarantee;
         public uint ClientToken;
         public TokenResult ServerToken;
+        public ulong PriceGuarantee;
         public uint PriceLockDurationSeconds;
     }
 }

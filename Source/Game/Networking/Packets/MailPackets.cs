@@ -212,12 +212,10 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
-    public class MailQueryNextTimeResult : ServerPacket
+    public class MailQueryNextTimeResult() : ServerPacket(ServerOpcodes.MailQueryNextTimeResult)
     {
-        public MailQueryNextTimeResult() : base(ServerOpcodes.MailQueryNextTimeResult)
-        {
-            Next = new List<MailNextTimeEntry>();
-        }
+        public float NextMailTime;
+        public List<MailNextTimeEntry> Next = new();
 
         public override void Write()
         {
@@ -229,13 +227,10 @@ namespace Game.Networking.Packets
                 _worldPacket.WritePackedGuid(entry.SenderGuid);
                 _worldPacket.WriteFloat(entry.TimeLeft);
                 _worldPacket.WriteInt32(entry.AltSenderID);
-                _worldPacket.WriteInt8(entry.AltSenderType);
+                _worldPacket.WriteInt32(entry.AltSenderType);
                 _worldPacket.WriteInt32(entry.StationeryID);
             }
         }
-
-        public float NextMailTime;
-        public List<MailNextTimeEntry> Next;
 
         public class MailNextTimeEntry
         {
@@ -266,7 +261,7 @@ namespace Game.Networking.Packets
             public ObjectGuid SenderGuid;
             public float TimeLeft;
             public int AltSenderID;
-            public sbyte AltSenderType;
+            public int AltSenderType;
             public int StationeryID;
         }
     }

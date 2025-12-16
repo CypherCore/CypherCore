@@ -270,7 +270,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ObjectID);
             _worldPacket.WriteUInt16(Count);
             _worldPacket.WriteUInt16(Required);
-            _worldPacket.WriteUInt8(ObjectiveType);
+            _worldPacket.WriteUInt32(ObjectiveType);
         }
 
         public ObjectGuid VictimGUID;
@@ -278,7 +278,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
         public ushort Count;
         public ushort Required;
-        public byte ObjectiveType;
+        public uint ObjectiveType;
     }
 
     class QuestUpdateAddCreditSimple : ServerPacket
@@ -289,7 +289,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(QuestID);
             _worldPacket.WriteInt32(ObjectID);
-            _worldPacket.WriteUInt8((byte)ObjectiveType);
+            _worldPacket.WriteUInt32((uint)ObjectiveType);
         }
 
         public uint QuestID;
@@ -748,7 +748,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(SenderGUID);
-            _worldPacket.WriteUInt8((byte)Result);
+            _worldPacket.WriteUInt32((uint)Result);
 
             _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
             _worldPacket.FlushBits();
@@ -769,7 +769,7 @@ namespace Game.Networking.Packets
         {
             SenderGUID = _worldPacket.ReadPackedGuid();
             QuestID = _worldPacket.ReadUInt32();
-            Result = (QuestPushReason)_worldPacket.ReadUInt8();
+            Result = (QuestPushReason)_worldPacket.ReadUInt32();
         }
 
         public ObjectGuid SenderGUID;

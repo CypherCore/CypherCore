@@ -2400,7 +2400,7 @@ namespace Game
             {
                 var getTraitNodeEntryRank = ushort? (int traitNodeEntryId) =>
                 {
-                    foreach (var traitConfig in player.m_activePlayerData.TraitConfigs)
+                    foreach (var (_, (traitConfig, _)) in player.m_activePlayerData.TraitConfigs)
                     {
                         if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
                         {

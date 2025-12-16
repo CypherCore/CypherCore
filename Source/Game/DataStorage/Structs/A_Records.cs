@@ -123,7 +123,7 @@ namespace Game.DataStorage
         public byte FactionGroupMask;
         public float AmbientMultiplier;
         public int MountFlags;
-        public short PvpCombatWorldStateID;
+        public int PvpCombatWorldStateID;
         public byte WildBattlePetLevelMin;
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;

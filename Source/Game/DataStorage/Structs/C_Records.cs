@@ -334,13 +334,13 @@ namespace Game.DataStorage
         public byte OrderIndex;
         public sbyte PetTalentType;
         public sbyte Role;
-        public uint Flags;
+        public int Flags;
         public int SpellIconFileID;
         public sbyte PrimaryStatPriority;
         public int AnimReplacements;
         public uint[] MasterySpellID = new uint[PlayerConst.MaxMasterySpells];
 
-        public bool HasFlag(ChrSpecializationFlag chrSpecializationFlag) { return (Flags & (uint)chrSpecializationFlag) != 0; }
+        public bool HasFlag(ChrSpecializationFlag chrSpecializationFlag) { return (Flags & (int)chrSpecializationFlag) != 0; }
         public ChrSpecializationRole GetRole() { return (ChrSpecializationRole)Role; }
 
         public bool IsPetSpecialization()
@@ -394,6 +394,8 @@ namespace Game.DataStorage
         public int DamageItemLevelCurveID;
         public int HealthPrimaryStatCurveID;
         public int DamagePrimaryStatCurveID;
+        public int PrimaryStatScalingModPlayerDataElementCharacterID;
+        public float PrimaryStatScalingModPlayerDataElementCharacterMultiplier;
         public int MinLevel;
         public int MaxLevel;
         public int MinLevelType;
@@ -698,7 +700,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public byte Type;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class CurvePointRecord
@@ -707,6 +709,6 @@ namespace Game.DataStorage
         public Vector2 PreSLSquishPos;
         public uint Id;
         public uint CurveID;
-        public byte OrderIndex;
+        public uint OrderIndex;
     }
 }

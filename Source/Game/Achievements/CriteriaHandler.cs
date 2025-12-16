@@ -200,12 +200,12 @@ namespace Game.Achievements
                 case CriteriaType.SkillRaised:
                     uint skillvalue = referencePlayer.GetBaseSkillValue((SkillType)criteria.Entry.Asset);
                     if (skillvalue != 0)
-                SetCriteriaProgress(criteria, skillvalue, referencePlayer);
+                        SetCriteriaProgress(criteria, skillvalue, referencePlayer);
                     break;
                 case CriteriaType.AchieveSkillStep:
                     uint maxSkillvalue = referencePlayer.GetPureMaxSkillValue((SkillType)criteria.Entry.Asset);
                     if (maxSkillvalue != 0)
-                SetCriteriaProgress(criteria, maxSkillvalue, referencePlayer);
+                        SetCriteriaProgress(criteria, maxSkillvalue, referencePlayer);
                     break;
                 case CriteriaType.CompleteQuestsCount:
                     SetCriteriaProgress(criteria, (ulong)referencePlayer.GetRewardedQuestCount(), referencePlayer);
@@ -253,7 +253,7 @@ namespace Game.Achievements
                         var rewQuests = referencePlayer.GetRewardedQuests();
                         foreach (uint rewQuest in rewQuests)
                         {
-                            Quest  quest = Global.ObjectMgr.GetQuestTemplate(rewQuest);
+                            Quest quest = Global.ObjectMgr.GetQuestTemplate(rewQuest);
                             if (quest != null && quest.QuestSortID >= 0 && quest.QuestSortID == criteria.Entry.Asset)
                                 ++counter;
                         }
@@ -3605,19 +3605,12 @@ namespace Game.Achievements
                 {
                     bool hasTraitNodeEntry()
                     {
-                        foreach (var traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
-                        {
-                            if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
-                            {
-                                if (referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
-                                    || !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
-                                    continue;
-                            }
-
-                            foreach (var traitEntry in traitConfig.Entries)
+                        TraitConfig config = referencePlayer.GetTraitConfig((int)(uint)referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID);
+                        if (config != null && ((TraitCombatConfigFlags)(int)config.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                            foreach (TraitEntry traitEntry in config.Entries)
                                 if (traitEntry.TraitNodeEntryID == reqValue)
                                     return true;
-                        }
+
                         return false;
                     }
                     if (!hasTraitNodeEntry())
@@ -3626,21 +3619,14 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerHasTraitNodeEntryInActiveConfigRankGreaterOrEqualThan: // 341
                 {
-                    var traitNodeEntryRank = new Func<short?>(() =>
+                    int? traitNodeEntryRank = new Func<int?>(() =>
                     {
-                        foreach (var traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
-                        {
-                            if ((TraitConfigType)(int)traitConfig.Type == TraitConfigType.Combat)
-                            {
-                                if (referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
-                                    || !((TraitCombatConfigFlags)(int)traitConfig.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
-                                    continue;
-                            }
-
-                            foreach (var traitEntry in traitConfig.Entries)
+                        TraitConfig config = referencePlayer.GetTraitConfig((int)(uint)referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID);
+                        if (config != null && ((TraitCombatConfigFlags)(int)config.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                            foreach (TraitEntry traitEntry in config.Entries)
                                 if (traitEntry.TraitNodeEntryID == secondaryAsset)
-                                    return (short)traitEntry.Rank;
-                        }
+                                    return traitEntry.Rank;
+
                         return null;
                     })();
                     if (!traitNodeEntryRank.HasValue || traitNodeEntryRank < reqValue)
@@ -3673,7 +3659,7 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerHasAtLeastProfPathRanks: // 355
                 {
                     uint ranks = 0;
-                    foreach (TraitConfig traitConfig in referencePlayer.m_activePlayerData.TraitConfigs)
+                    foreach (var (_, (traitConfig, _)) in referencePlayer.m_activePlayerData.TraitConfigs)
                     {
                         if ((TraitConfigType)(int)traitConfig.Type != TraitConfigType.Profession)
                             continue;
@@ -3751,7 +3737,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerHasActiveTraitSubTree: // 385
                 {
-                    int traitConfigWithSubtree = referencePlayer.m_activePlayerData.TraitConfigs.FindIndexIf(traitConfig =>
+                    int traitConfigWithSubtree = referencePlayer.m_activePlayerData.TraitConfigs.FindIf(traitConfig =>
                     {
                         if (traitConfig.Type == (int)TraitConfigType.Combat
                             && (referencePlayer.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.ID
@@ -3762,7 +3748,7 @@ namespace Game.Achievements
                         {
                             return traitSubTree.TraitSubTreeID == reqValue && traitSubTree.Active != 0;
                         }) >= 0;
-                    });
+                    }).Item1;
                     if (traitConfigWithSubtree < 0)
                         return false;
                     break;
@@ -3784,7 +3770,7 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerDataElementAccountBetween: // 391
                 {
                     var value = referencePlayer.GetDataElementAccount(reqValue);
-                    return value >= secondaryAsset && value <= tertiaryAsset;             
+                    return value >= secondaryAsset && value <= tertiaryAsset;
                 }
                 case ModifierTreeType.PlayerHasCompletedQuestOrIsReadyToTurnIn: // 392
                 {
@@ -3823,336 +3809,336 @@ namespace Game.Achievements
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
-{
-    Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new();
-
-    Dictionary<uint, CriteriaTree> _criteriaTrees = new();
-    Dictionary<uint, Criteria> _criteria = new();
-    Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new();
-
-    MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
-
-    // store criterias by type to speed up lookup
-    MultiMap<CriteriaType, Criteria> _criteriasByType = new();
-    MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
-    MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
-    MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
-    MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
-
-    MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
-    MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
-
-    CriteriaManager()
     {
-        for (var i = 0; i < (int)CriteriaType.Count; ++i)
+        Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new();
+
+        Dictionary<uint, CriteriaTree> _criteriaTrees = new();
+        Dictionary<uint, Criteria> _criteria = new();
+        Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new();
+
+        MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
+
+        // store criterias by type to speed up lookup
+        MultiMap<CriteriaType, Criteria> _criteriasByType = new();
+        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
+        MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
+
+        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
+        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
+
+        CriteriaManager()
         {
-            _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
-            _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
-        }
-
-        for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
-            _criteriasByStartEvent[i] = new();
-
-        for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-            _criteriasByFailEvent[i] = new();
-
-    }
-
-    public void LoadCriteriaModifiersTree()
-    {
-        uint oldMSTime = Time.GetMSTime();
-
-        if (CliDB.ModifierTreeStorage.Empty())
-        {
-            Log.outInfo(LogFilter.ServerLoading, "Loaded 0 criteria modifiers.");
-            return;
-        }
-
-        // Load modifier tree nodes
-        foreach (var tree in CliDB.ModifierTreeStorage.Values)
-        {
-            ModifierTreeNode node = new();
-            node.Entry = tree;
-            _criteriaModifiers[node.Entry.Id] = node;
-        }
-
-        // Build tree
-        foreach (var treeNode in _criteriaModifiers.Values)
-        {
-            ModifierTreeNode parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
-            if (parentNode != null)
-                parentNode.Children.Add(treeNode);
-        }
-
-        Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
-    }
-
-    T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
-    {
-        CriteriaTreeRecord cur = tree;
-        var obj = map.LookupByKey(tree.Id);
-        while (obj == null)
-        {
-            if (cur.Parent == 0)
-                break;
-
-            cur = CliDB.CriteriaTreeStorage.LookupByKey(cur.Parent);
-            if (cur == null)
-                break;
-
-            obj = map.LookupByKey(cur.Id);
-        }
-
-        if (obj == null)
-            return default;
-
-        return obj;
-    }
-
-    public void LoadCriteriaList()
-    {
-        uint oldMSTime = Time.GetMSTime();
-
-        Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
-        foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
-            if (achievement.CriteriaTree != 0)
-                achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
-
-        Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new();
-        foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
-        {
-            if (scenarioStep.CriteriaTreeId != 0)
-                scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
-        }
-
-        Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new();
-        foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
-        {
-            foreach (QuestObjective objective in pair.Value.Objectives)
+            for (var i = 0; i < (int)CriteriaType.Count; ++i)
             {
-                if (objective.Type != QuestObjectiveType.CriteriaTree)
+                _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
+                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
+            }
+
+            for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
+                _criteriasByStartEvent[i] = new();
+
+            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
+                _criteriasByFailEvent[i] = new();
+
+        }
+
+        public void LoadCriteriaModifiersTree()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            if (CliDB.ModifierTreeStorage.Empty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 criteria modifiers.");
+                return;
+            }
+
+            // Load modifier tree nodes
+            foreach (var tree in CliDB.ModifierTreeStorage.Values)
+            {
+                ModifierTreeNode node = new();
+                node.Entry = tree;
+                _criteriaModifiers[node.Entry.Id] = node;
+            }
+
+            // Build tree
+            foreach (var treeNode in _criteriaModifiers.Values)
+            {
+                ModifierTreeNode parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
+                if (parentNode != null)
+                    parentNode.Children.Add(treeNode);
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} criteria modifiers in {1} ms", _criteriaModifiers.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+
+        T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
+        {
+            CriteriaTreeRecord cur = tree;
+            var obj = map.LookupByKey(tree.Id);
+            while (obj == null)
+            {
+                if (cur.Parent == 0)
+                    break;
+
+                cur = CliDB.CriteriaTreeStorage.LookupByKey(cur.Parent);
+                if (cur == null)
+                    break;
+
+                obj = map.LookupByKey(cur.Id);
+            }
+
+            if (obj == null)
+                return default;
+
+            return obj;
+        }
+
+        public void LoadCriteriaList()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
+            foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
+                if (achievement.CriteriaTree != 0)
+                    achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
+
+            Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new();
+            foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
+            {
+                if (scenarioStep.CriteriaTreeId != 0)
+                    scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
+            }
+
+            Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new();
+            foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
+            {
+                foreach (QuestObjective objective in pair.Value.Objectives)
+                {
+                    if (objective.Type != QuestObjectiveType.CriteriaTree)
+                        continue;
+
+                    if (objective.ObjectID != 0)
+                        questObjectiveCriteriaTreeIds[(uint)objective.ObjectID] = objective;
+                }
+            }
+
+            // Load criteria tree nodes
+            foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
+            {
+                // Find linked achievement
+                AchievementRecord achievement = GetEntry(achievementCriteriaTreeIds, tree);
+                ScenarioStepRecord scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
+                QuestObjective questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
+                if (achievement == null && scenarioStep == null && questObjective == null)
                     continue;
 
-                if (objective.ObjectID != 0)
-                    questObjectiveCriteriaTreeIds[(uint)objective.ObjectID] = objective;
-            }
-        }
+                CriteriaTree criteriaTree = new();
+                criteriaTree.Id = tree.Id;
+                criteriaTree.Achievement = achievement;
+                criteriaTree.ScenarioStep = scenarioStep;
+                criteriaTree.QuestObjective = questObjective;
+                criteriaTree.Entry = tree;
 
-        // Load criteria tree nodes
-        foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
-        {
-            // Find linked achievement
-            AchievementRecord achievement = GetEntry(achievementCriteriaTreeIds, tree);
-            ScenarioStepRecord scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
-            QuestObjective questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
-            if (achievement == null && scenarioStep == null && questObjective == null)
-                continue;
-
-            CriteriaTree criteriaTree = new();
-            criteriaTree.Id = tree.Id;
-            criteriaTree.Achievement = achievement;
-            criteriaTree.ScenarioStep = scenarioStep;
-            criteriaTree.QuestObjective = questObjective;
-            criteriaTree.Entry = tree;
-
-            _criteriaTrees[criteriaTree.Entry.Id] = criteriaTree;
-        }
-
-        // Build tree
-        foreach (var pair in _criteriaTrees)
-        {
-            CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
-            if (parent != null)
-                parent.Children.Add(pair.Value);
-
-            if (CliDB.CriteriaStorage.HasRecord(pair.Value.Entry.CriteriaID))
-                _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
-        }
-
-        for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-            _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
-
-        // Load criteria
-        uint criterias = 0;
-        uint guildCriterias = 0;
-        uint scenarioCriterias = 0;
-        uint questObjectiveCriterias = 0;
-        foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
-        {
-            Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
-            Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
-            Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
-
-            var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
-            if (treeList.Empty())
-                continue;
-
-            Criteria criteria = new();
-            criteria.Id = criteriaEntry.Id;
-            criteria.Entry = criteriaEntry;
-            criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
-
-            _criteria[criteria.Id] = criteria;
-
-            List<uint> scenarioIds = new();
-            foreach (CriteriaTree tree in treeList)
-            {
-                tree.Criteria = criteria;
-
-                AchievementRecord achievement = tree.Achievement;
-                if (achievement != null)
-                {
-                    if (achievement.Flags.HasAnyFlag(AchievementFlags.Guild))
-                        criteria.FlagsCu |= CriteriaFlagsCu.Guild;
-                    else if (achievement.Flags.HasAnyFlag(AchievementFlags.Account))
-                        criteria.FlagsCu |= CriteriaFlagsCu.Account;
-                    else
-                        criteria.FlagsCu |= CriteriaFlagsCu.Player;
-                }
-                else if (tree.ScenarioStep != null)
-                {
-                    criteria.FlagsCu |= CriteriaFlagsCu.Scenario;
-                    scenarioIds.Add(tree.ScenarioStep.ScenarioID);
-                }
-                else if (tree.QuestObjective != null)
-                    criteria.FlagsCu |= CriteriaFlagsCu.QuestObjective;
+                _criteriaTrees[criteriaTree.Entry.Id] = criteriaTree;
             }
 
-            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Player | CriteriaFlagsCu.Account))
+            // Build tree
+            foreach (var pair in _criteriaTrees)
             {
-                ++criterias;
-                _criteriasByType.Add(criteriaEntry.Type, criteria);
-                if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
+                CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
+                if (parent != null)
+                    parent.Children.Add(pair.Value);
+
+                if (CliDB.CriteriaStorage.HasRecord(pair.Value.Entry.CriteriaID))
+                    _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
+            }
+
+            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
+                _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
+
+            // Load criteria
+            uint criterias = 0;
+            uint guildCriterias = 0;
+            uint scenarioCriterias = 0;
+            uint questObjectiveCriterias = 0;
+            foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
+            {
+                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count, $"CriteriaType.Count must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
+                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Count, $"CriteriaStartEvent.Count must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Count}");
+                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Count, $"CriteriaFailEvent.Count must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Count}");
+
+                var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
+                if (treeList.Empty())
+                    continue;
+
+                Criteria criteria = new();
+                criteria.Id = criteriaEntry.Id;
+                criteria.Entry = criteriaEntry;
+                criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
+
+                _criteria[criteria.Id] = criteria;
+
+                List<uint> scenarioIds = new();
+                foreach (CriteriaTree tree in treeList)
                 {
-                    if (criteriaEntry.Type != CriteriaType.RevealWorldMapOverlay)
-                        _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
-                    else
+                    tree.Criteria = criteria;
+
+                    AchievementRecord achievement = tree.Achievement;
+                    if (achievement != null)
                     {
-                        var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteriaEntry.Asset);
-                        if (worldOverlayEntry == null)
-                            break;
+                        if (achievement.Flags.HasAnyFlag(AchievementFlags.Guild))
+                            criteria.FlagsCu |= CriteriaFlagsCu.Guild;
+                        else if (achievement.Flags.HasAnyFlag(AchievementFlags.Account))
+                            criteria.FlagsCu |= CriteriaFlagsCu.Account;
+                        else
+                            criteria.FlagsCu |= CriteriaFlagsCu.Player;
+                    }
+                    else if (tree.ScenarioStep != null)
+                    {
+                        criteria.FlagsCu |= CriteriaFlagsCu.Scenario;
+                        scenarioIds.Add(tree.ScenarioStep.ScenarioID);
+                    }
+                    else if (tree.QuestObjective != null)
+                        criteria.FlagsCu |= CriteriaFlagsCu.QuestObjective;
+                }
 
-                        for (byte j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
+                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Player | CriteriaFlagsCu.Account))
+                {
+                    ++criterias;
+                    _criteriasByType.Add(criteriaEntry.Type, criteria);
+                    if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
+                    {
+                        if (criteriaEntry.Type != CriteriaType.RevealWorldMapOverlay)
+                            _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
+                        else
                         {
-                            if (worldOverlayEntry.AreaID[j] != 0)
+                            var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteriaEntry.Asset);
+                            if (worldOverlayEntry == null)
+                                break;
+
+                            for (byte j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
                             {
-                                bool valid = true;
-                                for (byte i = 0; i < j; ++i)
-                                    if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
-                                        valid = false;
-                                if (valid)
-                                    _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
+                                if (worldOverlayEntry.AreaID[j] != 0)
+                                {
+                                    bool valid = true;
+                                    for (byte i = 0; i < j; ++i)
+                                        if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
+                                            valid = false;
+                                    if (valid)
+                                        _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
+                                }
                             }
                         }
                     }
                 }
+
+                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Guild))
+                {
+                    ++guildCriterias;
+                    _guildCriteriasByType.Add(criteriaEntry.Type, criteria);
+                }
+
+                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Scenario))
+                {
+                    ++scenarioCriterias;
+                    foreach (uint scenarioId in scenarioIds)
+                        _scenarioCriteriasByTypeAndScenarioId[(int)criteriaEntry.Type].Add(scenarioId, criteria);
+                }
+
+                if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
+                {
+                    ++questObjectiveCriterias;
+                    _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
+                }
+
+                if (criteriaEntry.StartEvent != 0)
+                    _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
+
+                if (criteriaEntry.FailEvent != 0)
+                    _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
             }
 
-            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Guild))
-            {
-                ++guildCriterias;
-                _guildCriteriasByType.Add(criteriaEntry.Type, criteria);
-            }
-
-            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Scenario))
-            {
-                ++scenarioCriterias;
-                foreach (uint scenarioId in scenarioIds)
-                    _scenarioCriteriasByTypeAndScenarioId[(int)criteriaEntry.Type].Add(scenarioId, criteria);
-            }
-
-            if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
-            {
-                ++questObjectiveCriterias;
-                _questObjectiveCriteriasByType.Add(criteriaEntry.Type, criteria);
-            }
-
-            if (criteriaEntry.StartEvent != 0)
-                _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
-
-            if (criteriaEntry.FailEvent != 0)
-                _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
         }
 
-        Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
-    }
-
-    public void LoadCriteriaData()
-    {
-        uint oldMSTime = Time.GetMSTime();
-
-        _criteriaDataMap.Clear();                              // need for reload case
-
-        SQLResult result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
-        if (result.IsEmpty())
+        public void LoadCriteriaData()
         {
-            Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
-            return;
+            uint oldMSTime = Time.GetMSTime();
+
+            _criteriaDataMap.Clear();                              // need for reload case
+
+            SQLResult result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                uint criteria_id = result.Read<uint>(0);
+
+                Criteria criteria = GetCriteria(criteria_id);
+                if (criteria == null)
+                {
+                    Log.outError(LogFilter.Sql, "Table `criteria_data` contains data for non-existing criteria (Entry: {0}). Ignored.", criteria_id);
+                    continue;
+                }
+
+                CriteriaDataType dataType = (CriteriaDataType)result.Read<byte>(1);
+                string scriptName = result.Read<string>(4);
+                uint scriptId = 0;
+                if (!scriptName.IsEmpty())
+                {
+                    if (dataType != CriteriaDataType.Script)
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data type (Entry: {0}, type {1}), useless data.", criteria_id, dataType);
+                    else
+                        scriptId = Global.ObjectMgr.GetScriptId(scriptName);
+                }
+
+                CriteriaData data = new(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
+
+                if (!data.IsValid(criteria))
+                    continue;
+
+                // this will allocate empty data set storage
+                CriteriaDataSet dataSet = new();
+                dataSet.SetCriteriaId(criteria_id);
+
+                // add real data only for not NONE data types
+                if (data.DataType != CriteriaDataType.None)
+                    dataSet.Add(data);
+
+                _criteriaDataMap[criteria_id] = dataSet;
+                // counting data by and data types
+                ++count;
+            }
+            while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} additional criteria data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        uint count = 0;
-        do
+        public CriteriaTree GetCriteriaTree(uint criteriaTreeId)
         {
-            uint criteria_id = result.Read<uint>(0);
-
-            Criteria criteria = GetCriteria(criteria_id);
-            if (criteria == null)
-            {
-                Log.outError(LogFilter.Sql, "Table `criteria_data` contains data for non-existing criteria (Entry: {0}). Ignored.", criteria_id);
-                continue;
-            }
-
-            CriteriaDataType dataType = (CriteriaDataType)result.Read<byte>(1);
-            string scriptName = result.Read<string>(4);
-            uint scriptId = 0;
-            if (!scriptName.IsEmpty())
-            {
-                if (dataType != CriteriaDataType.Script)
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` contains a ScriptName for non-scripted data type (Entry: {0}, type {1}), useless data.", criteria_id, dataType);
-                else
-                    scriptId = Global.ObjectMgr.GetScriptId(scriptName);
-            }
-
-            CriteriaData data = new(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
-
-            if (!data.IsValid(criteria))
-                continue;
-
-            // this will allocate empty data set storage
-            CriteriaDataSet dataSet = new();
-            dataSet.SetCriteriaId(criteria_id);
-
-            // add real data only for not NONE data types
-            if (data.DataType != CriteriaDataType.None)
-                dataSet.Add(data);
-
-            _criteriaDataMap[criteria_id] = dataSet;
-            // counting data by and data types
-            ++count;
+            return _criteriaTrees.LookupByKey(criteriaTreeId);
         }
-        while (result.NextRow());
 
-        Log.outInfo(LogFilter.ServerLoading, "Loaded {0} additional criteria data in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
-    }
+        public Criteria GetCriteria(uint criteriaId)
+        {
+            return _criteria.LookupByKey(criteriaId);
+        }
 
-    public CriteriaTree GetCriteriaTree(uint criteriaTreeId)
-    {
-        return _criteriaTrees.LookupByKey(criteriaTreeId);
-    }
+        public ModifierTreeNode GetModifierTree(uint modifierTreeId)
+        {
+            return _criteriaModifiers.LookupByKey(modifierTreeId);
+        }
 
-    public Criteria GetCriteria(uint criteriaId)
-    {
-        return _criteria.LookupByKey(criteriaId);
-    }
-
-    public ModifierTreeNode GetModifierTree(uint modifierTreeId)
-    {
-        return _criteriaModifiers.LookupByKey(modifierTreeId);
-    }
-
-    public static CriteriaType[] GetRetroactivelyUpdateableCriteriaTypes() =>
-    [
-        CriteriaType.CompleteResearchProject,
+        public static CriteriaType[] GetRetroactivelyUpdateableCriteriaTypes() =>
+        [
+            CriteriaType.CompleteResearchProject,
             CriteriaType.CompleteAnyResearchProject,
             CriteriaType.ReachLevel,
             CriteriaType.SkillRaised,
@@ -4204,760 +4190,760 @@ namespace Game.Achievements
             CriteriaType.EarnAchievementPoints,
             CriteriaType.BattlePetAchievementPointsEarned,
             CriteriaType.EarnAchievement // criteria possibly completed by retroactive scan, must be last
-    ];
+        ];
 
-    bool IsCriteriaTypeStoredByAsset(CriteriaType type)
-    {
-        switch (type)
+        bool IsCriteriaTypeStoredByAsset(CriteriaType type)
         {
-            case CriteriaType.KillCreature:
-            case CriteriaType.WinBattleground:
-            case CriteriaType.SkillRaised:
-            case CriteriaType.EarnAchievement:
-            case CriteriaType.CompleteQuestsInZone:
-            case CriteriaType.ParticipateInBattleground:
-            case CriteriaType.KilledByCreature:
-            case CriteriaType.CompleteQuest:
-            case CriteriaType.BeSpellTarget:
-            case CriteriaType.CastSpell:
-            case CriteriaType.TrackedWorldStateUIModified:
-            case CriteriaType.PVPKillInArea:
-            case CriteriaType.LearnOrKnowSpell:
-            case CriteriaType.AcquireItem:
-            case CriteriaType.AchieveSkillStep:
-            case CriteriaType.UseItem:
-            case CriteriaType.LootItem:
-            case CriteriaType.RevealWorldMapOverlay:
-            case CriteriaType.ReputationGained:
-            case CriteriaType.EquipItemInSlot:
-            case CriteriaType.DeliverKillingBlowToClass:
-            case CriteriaType.DeliverKillingBlowToRace:
-            case CriteriaType.DoEmote:
-            case CriteriaType.EquipItem:
-            case CriteriaType.UseGameobject:
-            case CriteriaType.GainAura:
-            case CriteriaType.CatchFishInFishingHole:
-            case CriteriaType.LearnSpellFromSkillLine:
-            case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
-            case CriteriaType.GetLootByType:
-            case CriteriaType.LandTargetedSpellOnTarget:
-            case CriteriaType.LearnTradeskillSkillLine:
-            case CriteriaType.DefeatDungeonEncounter:
-            case CriteriaType.LearnToy:
-            case CriteriaType.LearnAnyTransmog:
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
-    {
-        if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
-        {
-            if (_criteriasByAsset[(int)type].ContainsKey(asset))
-                return _criteriasByAsset[(int)type][asset];
-
-            return new List<Criteria>();
+            switch (type)
+            {
+                case CriteriaType.KillCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.SkillRaised:
+                case CriteriaType.EarnAchievement:
+                case CriteriaType.CompleteQuestsInZone:
+                case CriteriaType.ParticipateInBattleground:
+                case CriteriaType.KilledByCreature:
+                case CriteriaType.CompleteQuest:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.CastSpell:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.PVPKillInArea:
+                case CriteriaType.LearnOrKnowSpell:
+                case CriteriaType.AcquireItem:
+                case CriteriaType.AchieveSkillStep:
+                case CriteriaType.UseItem:
+                case CriteriaType.LootItem:
+                case CriteriaType.RevealWorldMapOverlay:
+                case CriteriaType.ReputationGained:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.DeliverKillingBlowToClass:
+                case CriteriaType.DeliverKillingBlowToRace:
+                case CriteriaType.DoEmote:
+                case CriteriaType.EquipItem:
+                case CriteriaType.UseGameobject:
+                case CriteriaType.GainAura:
+                case CriteriaType.CatchFishInFishingHole:
+                case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.LearnTradeskillSkillLine:
+                case CriteriaType.DefeatDungeonEncounter:
+                case CriteriaType.LearnToy:
+                case CriteriaType.LearnAnyTransmog:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
-        return _criteriasByType.LookupByKey(type);
-    }
-
-    public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
-    {
-        return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
-    }
-
-    public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
-    {
-        return _criteriasByStartEvent[(int)startEvent];
-    }
-
-    public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
-    {
-        return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
-    }
-
-    public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
-    {
-        return _criteriasByFailEvent[(int)failEvent];
-    }
-
-    public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
-    {
-        return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
-    }
-
-    public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
-    {
-        return _guildCriteriasByType.LookupByKey(type);
-    }
-
-    public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
-    {
-        return _questObjectiveCriteriasByType[type];
-    }
-
-    public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
-    {
-        return _criteriaTreeByCriteria.LookupByKey(criteriaId);
-    }
-
-    public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
-    {
-        return _criteriaDataMap.LookupByKey(criteria.Id);
-    }
-
-    public static bool IsGroupCriteriaType(CriteriaType type)
-    {
-        switch (type)
+        public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
         {
-            case CriteriaType.KillCreature:
-            case CriteriaType.WinBattleground:
-            case CriteriaType.BeSpellTarget:       // NYI
-            case CriteriaType.WinAnyRankedArena:
-            case CriteriaType.GainAura:            // NYI
-            case CriteriaType.WinAnyBattleground:  // NYI
-                return true;
-            default:
-                break;
+            if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
+            {
+                if (_criteriasByAsset[(int)type].ContainsKey(asset))
+                    return _criteriasByAsset[(int)type][asset];
+
+                return new List<Criteria>();
+            }
+
+            return _criteriasByType.LookupByKey(type);
         }
 
-        return false;
-    }
-
-    public static void WalkCriteriaTree(CriteriaTree tree, Action<CriteriaTree> func)
-    {
-        foreach (CriteriaTree node in tree.Children)
-            WalkCriteriaTree(node, func);
-
-        func(tree);
-    }
-}
-
-public class ModifierTreeNode
-{
-    public ModifierTreeRecord Entry;
-    public List<ModifierTreeNode> Children = new();
-}
-
-public class Criteria
-{
-    public uint Id;
-    public CriteriaRecord Entry;
-    public ModifierTreeNode Modifier;
-    public CriteriaFlagsCu FlagsCu;
-}
-
-public class CriteriaTree
-{
-    public uint Id;
-    public CriteriaTreeRecord Entry;
-    public AchievementRecord Achievement;
-    public ScenarioStepRecord ScenarioStep;
-    public QuestObjective QuestObjective;
-    public Criteria Criteria;
-    public List<CriteriaTree> Children = new();
-}
-
-public class CriteriaProgress
-{
-    public ulong Counter;
-    public long Date;                                            // latest update time.
-    public ObjectGuid PlayerGUID;                               // GUID of the player that completed this criteria (guild achievements)
-    public bool Changed;
-}
-
-[StructLayout(LayoutKind.Explicit)]
-public class CriteriaData
-{
-    [FieldOffset(0)]
-    public CriteriaDataType DataType;
-
-    [FieldOffset(4)]
-    public CreatureStruct Creature;
-
-    [FieldOffset(4)]
-    public ClassRaceStruct ClassRace;
-
-    [FieldOffset(4)]
-    public HealthStruct Health;
-
-    [FieldOffset(4)]
-    public AuraStruct Aura;
-
-    [FieldOffset(4)]
-    public ValueStruct Value;
-
-    [FieldOffset(4)]
-    public LevelStruct Level;
-
-    [FieldOffset(4)]
-    public GenderStruct Gender;
-
-    [FieldOffset(4)]
-    public MapPlayersStruct MapPlayers;
-
-    [FieldOffset(4)]
-    public TeamStruct TeamId;
-
-    [FieldOffset(4)]
-    public DrunkStruct Drunk;
-
-    [FieldOffset(4)]
-    public HolidayStruct Holiday;
-
-    [FieldOffset(4)]
-    public BgLossTeamScoreStruct BattlegroundScore;
-
-    [FieldOffset(4)]
-    public EquippedItemStruct EquippedItem;
-
-    [FieldOffset(4)]
-    public MapIdStruct MapId;
-
-    [FieldOffset(4)]
-    public KnownTitleStruct KnownTitle;
-
-    [FieldOffset(4)]
-    public GameEventStruct GameEvent;
-
-    [FieldOffset(4)]
-    public ItemQualityStruct itemQuality;
-
-    [FieldOffset(4)]
-    public RawStruct Raw;
-
-    [FieldOffset(12)]
-    public uint ScriptId;
-
-    public CriteriaData()
-    {
-        DataType = CriteriaDataType.None;
-
-        Raw.Value1 = 0;
-        Raw.Value2 = 0;
-        ScriptId = 0;
-    }
-
-    public CriteriaData(CriteriaDataType _dataType, uint _value1, uint _value2, uint _scriptId)
-    {
-        DataType = _dataType;
-
-        Raw.Value1 = _value1;
-        Raw.Value2 = _value2;
-        ScriptId = _scriptId;
-    }
-
-    public bool IsValid(Criteria criteria)
-    {
-        if (DataType >= CriteriaDataType.Max)
+        public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
         {
-            Log.outError(LogFilter.Sql, "Table `criteria_data` for criteria (Entry: {0}) has wrong data type ({1}), ignored.", criteria.Id, DataType);
+            return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
+        }
+
+        public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
+        {
+            return _criteriasByStartEvent[(int)startEvent];
+        }
+
+        public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
+        {
+            return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
+        }
+
+        public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
+        {
+            return _criteriasByFailEvent[(int)failEvent];
+        }
+
+        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
+        {
+            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+        }
+
+        public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
+        {
+            return _guildCriteriasByType.LookupByKey(type);
+        }
+
+        public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
+        {
+            return _questObjectiveCriteriasByType[type];
+        }
+
+        public List<CriteriaTree> GetCriteriaTreesByCriteria(uint criteriaId)
+        {
+            return _criteriaTreeByCriteria.LookupByKey(criteriaId);
+        }
+
+        public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
+        {
+            return _criteriaDataMap.LookupByKey(criteria.Id);
+        }
+
+        public static bool IsGroupCriteriaType(CriteriaType type)
+        {
+            switch (type)
+            {
+                case CriteriaType.KillCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.BeSpellTarget:       // NYI
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.GainAura:            // NYI
+                case CriteriaType.WinAnyBattleground:  // NYI
+                    return true;
+                default:
+                    break;
+            }
+
             return false;
         }
 
-        switch (criteria.Entry.Type)
+        public static void WalkCriteriaTree(CriteriaTree tree, Action<CriteriaTree> func)
         {
-            case CriteriaType.KillCreature:
-            case CriteriaType.KillAnyCreature:
-            case CriteriaType.WinBattleground:
-            case CriteriaType.MaxDistFallenWithoutDying:
-            case CriteriaType.CompleteQuest:          // only hardcoded list
-            case CriteriaType.CastSpell:
-            case CriteriaType.WinAnyRankedArena:
-            case CriteriaType.DoEmote:
-            case CriteriaType.KillPlayer:
-            case CriteriaType.WinDuel:
-            case CriteriaType.GetLootByType:
-            case CriteriaType.LandTargetedSpellOnTarget:
-            case CriteriaType.BeSpellTarget:
-            case CriteriaType.GainAura:
-            case CriteriaType.EquipItemInSlot:
-            case CriteriaType.RollNeed:
-            case CriteriaType.RollGreed:
-            case CriteriaType.TrackedWorldStateUIModified:
-            case CriteriaType.EarnHonorableKill:
-            case CriteriaType.CompleteDailyQuest:    // only Children's Week achievements
-            case CriteriaType.UseItem:                // only Children's Week achievements
-            case CriteriaType.DeliveredKillingBlow:
-            case CriteriaType.ReachLevel:
-            case CriteriaType.Login:
-            case CriteriaType.LootAnyItem:
-            case CriteriaType.ObtainAnyItem:
-                break;
-            default:
-                if (DataType != CriteriaDataType.Script)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaType)criteria.Entry.Type);
-                    return false;
-                }
-                break;
-        }
+            foreach (CriteriaTree node in tree.Children)
+                WalkCriteriaTree(node, func);
 
-        switch (DataType)
-        {
-            case CriteriaDataType.None:
-            case CriteriaDataType.InstanceScript:
-                return true;
-            case CriteriaDataType.TCreature:
-                if (Creature.Id == 0 || Global.ObjectMgr.GetCreatureTemplate(Creature.Id) == null)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_CREATURE ({2}) has non-existing creature id in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Creature.Id);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.TPlayerClassRace:
-                if (ClassRace.ClassId == 0 && ClassRace.RaceId == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType);
-                    return false;
-                }
-                if (ClassRace.ClassId != 0 && ((1 << (int)(ClassRace.ClassId - 1)) & (int)Class.ClassMaskAllPlayable) == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
-                    return false;
-                }
-                if (!RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.TPlayerLessHealth:
-                if (Health.Percent < 1 || Health.Percent > 100)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_PLAYER_LESS_HEALTH ({2}) has wrong percent value in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Health.Percent);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.SAura:
-            case CriteriaDataType.TAura:
-            {
-                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId, Difficulty.None);
-                if (spellEntry == null)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell id in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId);
-                    return false;
-                }
-                if (spellEntry.GetEffects().Count <= Aura.EffectIndex)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell effect index in value2 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Aura.EffectIndex);
-                    return false;
-                }
-                if (spellEntry.GetEffect(Aura.EffectIndex).ApplyAuraName == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has non-aura spell effect (ID: {3} Effect: {4}), ignores.",
-                        criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId, Aura.EffectIndex);
-                    return false;
-                }
-                return true;
-            }
-            case CriteriaDataType.Value:
-                if (Value.ComparisonType >= (int)ComparisionType.Max)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_VALUE ({2}) has wrong ComparisionType in value2 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Value.ComparisonType);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.TLevel:
-                if (Level.Min > SharedConst.GTMaxLevel)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_LEVEL ({2}) has wrong minlevel in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Level.Min);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.TGender:
-                if (Gender.Gender > (int)Framework.Constants.Gender.None)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_GENDER ({2}) has wrong gender in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Gender.Gender);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.Script:
-                if (ScriptId == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_SCRIPT ({2}) does not have ScriptName set, ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.MapPlayerCount:
-                if (MapPlayers.MaxCount <= 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT ({2}) has wrong max players count in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, MapPlayers.MaxCount);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.TTeam:
-                if (TeamId.Team != (int)Team.Alliance && TeamId.Team != (int)Team.Horde)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_TEAM ({2}) has unknown team in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, TeamId.Team);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.SDrunk:
-                if (Drunk.State >= 4)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_DRUNK ({2}) has unknown drunken state in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Drunk.State);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.Holiday:
-                if (!CliDB.HolidaysStorage.ContainsKey(Holiday.Id))
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data`(Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_HOLIDAY ({2}) has unknown holiday in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, Holiday.Id);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.GameEvent:
-            {
-                var events = Global.GameEventMgr.GetEventMap();
-                if (GameEvent.Id < 1 || GameEvent.Id >= events.Length)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_GAME_EVENT ({2}) has unknown game_event in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, GameEvent.Id);
-                    return false;
-                }
-                return true;
-            }
-            case CriteriaDataType.BgLossTeamScore:
-                return true;                                    // not check correctness node indexes
-            case CriteriaDataType.SEquippedItem:
-                if (EquippedItem.ItemQuality >= (uint)ItemQuality.Max)
-                {
-                    Log.outError(LogFilter.Sql, "Table `achievement_criteria_requirement` (Entry: {0} Type: {1}) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPED_ITEM ({2}) has unknown quality state in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, EquippedItem.ItemQuality);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.MapId:
-                if (!CliDB.MapStorage.ContainsKey(MapId.Id))
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_ID ({2}) contains an unknown map entry in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, MapId.Id);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.SPlayerClassRace:
-                if (ClassRace.ClassId == 0 && ClassRace.RaceId == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType);
-                    return false;
-                }
-                if (ClassRace.ClassId != 0 && ((1 << (int)(ClassRace.ClassId - 1)) & (int)Class.ClassMaskAllPlayable) == 0)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
-                    return false;
-                }
-                if (ClassRace.RaceId != 0 && !RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.SKnownTitle:
-                if (!CliDB.CharTitlesStorage.ContainsKey(KnownTitle.Id))
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_KNOWN_TITLE ({2}) contains an unknown title_id in value1 ({3}), ignore.",
-                        criteria.Id, criteria.Entry.Type, DataType, KnownTitle.Id);
-                    return false;
-                }
-                return true;
-            case CriteriaDataType.SItemQuality:
-                if (itemQuality.Quality >= (uint)ItemQuality.Max)
-                {
-                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_ITEM_QUALITY ({2}) contains an unknown quality state value in value1 ({3}), ignored.",
-                        criteria.Id, criteria.Entry.Type, DataType, itemQuality.Quality);
-                    return false;
-                }
-                return true;
-            default:
-                Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) contains data of a non-supported data type ({2}), ignored.", criteria.Id, criteria.Entry.Type, DataType);
-                return false;
+            func(tree);
         }
     }
 
-    public bool Meets(uint criteriaId, Player source, WorldObject target, uint miscValue1 = 0, uint miscValue2 = 0)
+    public class ModifierTreeNode
     {
-        switch (DataType)
+        public ModifierTreeRecord Entry;
+        public List<ModifierTreeNode> Children = new();
+    }
+
+    public class Criteria
+    {
+        public uint Id;
+        public CriteriaRecord Entry;
+        public ModifierTreeNode Modifier;
+        public CriteriaFlagsCu FlagsCu;
+    }
+
+    public class CriteriaTree
+    {
+        public uint Id;
+        public CriteriaTreeRecord Entry;
+        public AchievementRecord Achievement;
+        public ScenarioStepRecord ScenarioStep;
+        public QuestObjective QuestObjective;
+        public Criteria Criteria;
+        public List<CriteriaTree> Children = new();
+    }
+
+    public class CriteriaProgress
+    {
+        public ulong Counter;
+        public long Date;                                            // latest update time.
+        public ObjectGuid PlayerGUID;                               // GUID of the player that completed this criteria (guild achievements)
+        public bool Changed;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public class CriteriaData
+    {
+        [FieldOffset(0)]
+        public CriteriaDataType DataType;
+
+        [FieldOffset(4)]
+        public CreatureStruct Creature;
+
+        [FieldOffset(4)]
+        public ClassRaceStruct ClassRace;
+
+        [FieldOffset(4)]
+        public HealthStruct Health;
+
+        [FieldOffset(4)]
+        public AuraStruct Aura;
+
+        [FieldOffset(4)]
+        public ValueStruct Value;
+
+        [FieldOffset(4)]
+        public LevelStruct Level;
+
+        [FieldOffset(4)]
+        public GenderStruct Gender;
+
+        [FieldOffset(4)]
+        public MapPlayersStruct MapPlayers;
+
+        [FieldOffset(4)]
+        public TeamStruct TeamId;
+
+        [FieldOffset(4)]
+        public DrunkStruct Drunk;
+
+        [FieldOffset(4)]
+        public HolidayStruct Holiday;
+
+        [FieldOffset(4)]
+        public BgLossTeamScoreStruct BattlegroundScore;
+
+        [FieldOffset(4)]
+        public EquippedItemStruct EquippedItem;
+
+        [FieldOffset(4)]
+        public MapIdStruct MapId;
+
+        [FieldOffset(4)]
+        public KnownTitleStruct KnownTitle;
+
+        [FieldOffset(4)]
+        public GameEventStruct GameEvent;
+
+        [FieldOffset(4)]
+        public ItemQualityStruct itemQuality;
+
+        [FieldOffset(4)]
+        public RawStruct Raw;
+
+        [FieldOffset(12)]
+        public uint ScriptId;
+
+        public CriteriaData()
         {
-            case CriteriaDataType.None:
-                return true;
-            case CriteriaDataType.TCreature:
-                if (target == null || !target.IsTypeId(TypeId.Unit))
-                    return false;
-                return target.GetEntry() == Creature.Id;
-            case CriteriaDataType.TPlayerClassRace:
-                if (target == null || !target.IsTypeId(TypeId.Player))
-                    return false;
-                if (ClassRace.ClassId != 0 && ClassRace.ClassId != (uint)target.ToPlayer().GetClass())
-                    return false;
-                if (ClassRace.RaceId != 0 && ClassRace.RaceId != (uint)target.ToPlayer().GetRace())
-                    return false;
-                return true;
-            case CriteriaDataType.SPlayerClassRace:
-                if (source == null || !source.IsTypeId(TypeId.Player))
-                    return false;
-                if (ClassRace.ClassId != 0 && ClassRace.ClassId != (uint)source.ToPlayer().GetClass())
-                    return false;
-                if (ClassRace.RaceId != 0 && ClassRace.RaceId != (uint)source.ToPlayer().GetRace())
-                    return false;
-                return true;
-            case CriteriaDataType.TPlayerLessHealth:
-                if (target == null || !target.IsTypeId(TypeId.Player))
-                    return false;
-                return !target.ToPlayer().HealthAbovePct((int)Health.Percent);
-            case CriteriaDataType.SAura:
-                return source.HasAuraEffect(Aura.SpellId, (byte)Aura.EffectIndex);
-            case CriteriaDataType.TAura:
-            {
-                if (target == null)
-                    return false;
-                Unit unitTarget = target.ToUnit();
-                if (unitTarget == null)
-                    return false;
-                return unitTarget.HasAuraEffect(Aura.SpellId, Aura.EffectIndex);
-            }
-            case CriteriaDataType.Value:
-                return MathFunctions.CompareValues((ComparisionType)Value.ComparisonType, miscValue1, Value.Value);
-            case CriteriaDataType.TLevel:
-                if (target == null)
-                    return false;
-                return target.GetLevelForTarget(source) >= Level.Min;
-            case CriteriaDataType.TGender:
-            {
-                if (target == null)
-                    return false;
-                Unit unitTarget = target.ToUnit();
-                if (unitTarget == null)
-                    return false;
-                return unitTarget.GetGender() == (Gender)Gender.Gender;
-            }
-            case CriteriaDataType.Script:
-            {
-                Unit unitTarget = null;
-                if (target != null)
-                    unitTarget = target.ToUnit();
-                return Global.ScriptMgr.OnCriteriaCheck(ScriptId, source.ToPlayer(), unitTarget.ToUnit());
-            }
-            case CriteriaDataType.MapPlayerCount:
-                return source.GetMap().GetPlayersCountExceptGMs() <= MapPlayers.MaxCount;
-            case CriteriaDataType.TTeam:
-                if (target == null || !target.IsTypeId(TypeId.Player))
-                    return false;
-                return target.ToPlayer().GetTeam() == (Team)TeamId.Team;
-            case CriteriaDataType.SDrunk:
-                return Player.GetDrunkenstateByValue(source.GetDrunkValue()) >= (DrunkenState)Drunk.State;
-            case CriteriaDataType.Holiday:
-                return Global.GameEventMgr.IsHolidayActive((HolidayIds)Holiday.Id);
-            case CriteriaDataType.GameEvent:
-                return Global.GameEventMgr.IsEventActive((ushort)GameEvent.Id);
-            case CriteriaDataType.BgLossTeamScore:
-            {
-                Battleground bg = source.GetBattleground();
-                if (bg == null)
-                    return false;
+            DataType = CriteriaDataType.None;
 
-                int score = (int)bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
-                return score >= BattlegroundScore.Min && score <= BattlegroundScore.Max;
-            }
-            case CriteriaDataType.InstanceScript:
-            {
-                if (!source.IsInWorld)
-                    return false;
-                Map map = source.GetMap();
-                if (!map.IsDungeon())
-                {
-                    Log.outError(LogFilter.Achievement, "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for achievement criteria {1} for non-dungeon/non-raid map {2}",
-                        CriteriaDataType.InstanceScript, criteriaId, map.GetId());
-                    return false;
-                }
-                InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
-                if (instance == null)
-                {
-                    Log.outError(LogFilter.Achievement, "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for achievement criteria {1} for map {2} but map does not have a instance script",
-                        CriteriaDataType.InstanceScript, criteriaId, map.GetId());
-                    return false;
-                }
-
-                Unit unitTarget = null;
-                if (target != null)
-                    unitTarget = target.ToUnit();
-                return instance.CheckAchievementCriteriaMeet(criteriaId, source, unitTarget, miscValue1);
-            }
-            case CriteriaDataType.SEquippedItem:
-            {
-                Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
-
-                uint itemId = entry.Entry.Type == CriteriaType.EquipItemInSlot ? miscValue2 : miscValue1;
-                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
-                if (itemTemplate == null)
-                    return false;
-                return itemTemplate.GetBaseItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
-            }
-            case CriteriaDataType.MapId:
-                return source.GetMapId() == MapId.Id;
-            case CriteriaDataType.SKnownTitle:
-            {
-                CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(KnownTitle.Id);
-                if (titleInfo != null)
-                    return source != null && source.HasTitle(titleInfo.MaskID);
-
-                return false;
-            }
-            case CriteriaDataType.SItemQuality:
-            {
-                ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(miscValue1);
-                if (pProto == null)
-                    return false;
-                return (uint)pProto.GetQuality() == itemQuality.Quality;
-            }
-            default:
-                break;
+            Raw.Value1 = 0;
+            Raw.Value2 = 0;
+            ScriptId = 0;
         }
-        return false;
-    }
 
-    #region Structs
-    // criteria_data_TYPE_NONE              = 0 (no data)
-    // criteria_data_TYPE_T_CREATURE        = 1
-    public struct CreatureStruct
-    {
-        public uint Id;
-    }
-    // criteria_data_TYPE_T_PLAYER_CLASS_RACE = 2
-    // criteria_data_TYPE_S_PLAYER_CLASS_RACE = 21
-    public struct ClassRaceStruct
-    {
-        public uint ClassId;
-        public uint RaceId;
-    }
-    // criteria_data_TYPE_T_PLAYER_LESS_HEALTH = 3
-    public struct HealthStruct
-    {
-        public uint Percent;
-    }
-    // criteria_data_TYPE_S_AURA            = 5
-    // criteria_data_TYPE_T_AURA            = 7
-    public struct AuraStruct
-    {
-        public uint SpellId;
-        public uint EffectIndex;
-    }
-    // criteria_data_TYPE_VALUE             = 8
-    public struct ValueStruct
-    {
-        public uint Value;
-        public uint ComparisonType;
-    }
-    // criteria_data_TYPE_T_LEVEL           = 9
-    public struct LevelStruct
-    {
-        public uint Min;
-    }
-    // criteria_data_TYPE_T_GENDER          = 10
-    public struct GenderStruct
-    {
-        public uint Gender;
-    }
-    // criteria_data_TYPE_SCRIPT            = 11 (no data)
-    // criteria_data_TYPE_MAP_PLAYER_COUNT  = 13
-    public struct MapPlayersStruct
-    {
-        public uint MaxCount;
-    }
-    // criteria_data_TYPE_T_TEAM            = 14
-    public struct TeamStruct
-    {
-        public uint Team;
-    }
-    // criteria_data_TYPE_S_DRUNK           = 15
-    public struct DrunkStruct
-    {
-        public uint State;
-    }
-    // criteria_data_TYPE_HOLIDAY           = 16
-    public struct HolidayStruct
-    {
-        public uint Id;
-    }
-    // criteria_data_TYPE_BG_LOSS_TEAM_SCORE= 17
-    public struct BgLossTeamScoreStruct
-    {
-        public uint Min;
-        public uint Max;
-    }
-    // criteria_data_INSTANCE_SCRIPT        = 18 (no data)
-    // criteria_data_TYPE_S_EQUIPED_ITEM    = 19
-    public struct EquippedItemStruct
-    {
-        public uint ItemLevel;
-        public uint ItemQuality;
-    }
-    // criteria_data_TYPE_MAP_ID            = 20
-    public struct MapIdStruct
-    {
-        public uint Id;
-    }
-    // criteria_data_TYPE_KNOWN_TITLE       = 23
-    public struct KnownTitleStruct
-    {
-        public uint Id;
-    }
-    // CRITERIA_DATA_TYPE_S_ITEM_QUALITY    = 24
-    public struct ItemQualityStruct
-    {
-        public uint Quality;
-    }
-    // criteria_data_TYPE_GAME_EVENT           = 25
-    public struct GameEventStruct
-    {
-        public uint Id;
-    }
-    // raw
-    public struct RawStruct
-    {
-        public uint Value1;
-        public uint Value2;
-    }
-    #endregion
-}
+        public CriteriaData(CriteriaDataType _dataType, uint _value1, uint _value2, uint _scriptId)
+        {
+            DataType = _dataType;
 
-public class CriteriaDataSet
-{
-    uint _criteriaId;
-    List<CriteriaData> _storage = new();
+            Raw.Value1 = _value1;
+            Raw.Value2 = _value2;
+            ScriptId = _scriptId;
+        }
 
-    public void Add(CriteriaData data) { _storage.Add(data); }
-
-    public bool Meets(Player source, WorldObject target, uint miscValue = 0, uint miscValue2 = 0)
-    {
-        foreach (var data in _storage)
-            if (!data.Meets(_criteriaId, source, target, miscValue, miscValue2))
+        public bool IsValid(Criteria criteria)
+        {
+            if (DataType >= CriteriaDataType.Max)
+            {
+                Log.outError(LogFilter.Sql, "Table `criteria_data` for criteria (Entry: {0}) has wrong data type ({1}), ignored.", criteria.Id, DataType);
                 return false;
+            }
 
-        return true;
+            switch (criteria.Entry.Type)
+            {
+                case CriteriaType.KillCreature:
+                case CriteriaType.KillAnyCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.MaxDistFallenWithoutDying:
+                case CriteriaType.CompleteQuest:          // only hardcoded list
+                case CriteriaType.CastSpell:
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.DoEmote:
+                case CriteriaType.KillPlayer:
+                case CriteriaType.WinDuel:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.GainAura:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.RollNeed:
+                case CriteriaType.RollGreed:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.EarnHonorableKill:
+                case CriteriaType.CompleteDailyQuest:    // only Children's Week achievements
+                case CriteriaType.UseItem:                // only Children's Week achievements
+                case CriteriaType.DeliveredKillingBlow:
+                case CriteriaType.ReachLevel:
+                case CriteriaType.Login:
+                case CriteriaType.LootAnyItem:
+                case CriteriaType.ObtainAnyItem:
+                    break;
+                default:
+                    if (DataType != CriteriaDataType.Script)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaType)criteria.Entry.Type);
+                        return false;
+                    }
+                    break;
+            }
+
+            switch (DataType)
+            {
+                case CriteriaDataType.None:
+                case CriteriaDataType.InstanceScript:
+                    return true;
+                case CriteriaDataType.TCreature:
+                    if (Creature.Id == 0 || Global.ObjectMgr.GetCreatureTemplate(Creature.Id) == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_CREATURE ({2}) has non-existing creature id in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Creature.Id);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.TPlayerClassRace:
+                    if (ClassRace.ClassId == 0 && ClassRace.RaceId == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType);
+                        return false;
+                    }
+                    if (ClassRace.ClassId != 0 && ((1 << (int)(ClassRace.ClassId - 1)) & (int)Class.ClassMaskAllPlayable) == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
+                        return false;
+                    }
+                    if (!RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.TPlayerLessHealth:
+                    if (Health.Percent < 1 || Health.Percent > 100)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_PLAYER_LESS_HEALTH ({2}) has wrong percent value in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Health.Percent);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.SAura:
+                case CriteriaDataType.TAura:
+                {
+                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId, Difficulty.None);
+                    if (spellEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell id in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId);
+                        return false;
+                    }
+                    if (spellEntry.GetEffects().Count <= Aura.EffectIndex)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell effect index in value2 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Aura.EffectIndex);
+                        return false;
+                    }
+                    if (spellEntry.GetEffect(Aura.EffectIndex).ApplyAuraName == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has non-aura spell effect (ID: {3} Effect: {4}), ignores.",
+                            criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId, Aura.EffectIndex);
+                        return false;
+                    }
+                    return true;
+                }
+                case CriteriaDataType.Value:
+                    if (Value.ComparisonType >= (int)ComparisionType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_VALUE ({2}) has wrong ComparisionType in value2 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Value.ComparisonType);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.TLevel:
+                    if (Level.Min > SharedConst.GTMaxLevel)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_LEVEL ({2}) has wrong minlevel in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Level.Min);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.TGender:
+                    if (Gender.Gender > (int)Framework.Constants.Gender.None)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_GENDER ({2}) has wrong gender in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Gender.Gender);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.Script:
+                    if (ScriptId == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_SCRIPT ({2}) does not have ScriptName set, ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.MapPlayerCount:
+                    if (MapPlayers.MaxCount <= 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_PLAYER_COUNT ({2}) has wrong max players count in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, MapPlayers.MaxCount);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.TTeam:
+                    if (TeamId.Team != (int)Team.Alliance && TeamId.Team != (int)Team.Horde)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_T_TEAM ({2}) has unknown team in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, TeamId.Team);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.SDrunk:
+                    if (Drunk.State >= 4)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_DRUNK ({2}) has unknown drunken state in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Drunk.State);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.Holiday:
+                    if (!CliDB.HolidaysStorage.ContainsKey(Holiday.Id))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data`(Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_HOLIDAY ({2}) has unknown holiday in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, Holiday.Id);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.GameEvent:
+                {
+                    var events = Global.GameEventMgr.GetEventMap();
+                    if (GameEvent.Id < 1 || GameEvent.Id >= events.Length)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_GAME_EVENT ({2}) has unknown game_event in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, GameEvent.Id);
+                        return false;
+                    }
+                    return true;
+                }
+                case CriteriaDataType.BgLossTeamScore:
+                    return true;                                    // not check correctness node indexes
+                case CriteriaDataType.SEquippedItem:
+                    if (EquippedItem.ItemQuality >= (uint)ItemQuality.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `achievement_criteria_requirement` (Entry: {0} Type: {1}) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPED_ITEM ({2}) has unknown quality state in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, EquippedItem.ItemQuality);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.MapId:
+                    if (!CliDB.MapStorage.ContainsKey(MapId.Id))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_ID ({2}) contains an unknown map entry in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, MapId.Id);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.SPlayerClassRace:
+                    if (ClassRace.ClassId == 0 && ClassRace.RaceId == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) must not have 0 in either value field, ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType);
+                        return false;
+                    }
+                    if (ClassRace.ClassId != 0 && ((1 << (int)(ClassRace.ClassId - 1)) & (int)Class.ClassMaskAllPlayable) == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing class in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.ClassId);
+                        return false;
+                    }
+                    if (ClassRace.RaceId != 0 && !RaceMask.AllPlayable.HasRace((Race)ClassRace.RaceId))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_PLAYER_CLASS_RACE ({2}) has non-existing race in value2 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, ClassRace.RaceId);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.SKnownTitle:
+                    if (!CliDB.CharTitlesStorage.ContainsKey(KnownTitle.Id))
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_KNOWN_TITLE ({2}) contains an unknown title_id in value1 ({3}), ignore.",
+                            criteria.Id, criteria.Entry.Type, DataType, KnownTitle.Id);
+                        return false;
+                    }
+                    return true;
+                case CriteriaDataType.SItemQuality:
+                    if (itemQuality.Quality >= (uint)ItemQuality.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_S_ITEM_QUALITY ({2}) contains an unknown quality state value in value1 ({3}), ignored.",
+                            criteria.Id, criteria.Entry.Type, DataType, itemQuality.Quality);
+                        return false;
+                    }
+                    return true;
+                default:
+                    Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) contains data of a non-supported data type ({2}), ignored.", criteria.Id, criteria.Entry.Type, DataType);
+                    return false;
+            }
+        }
+
+        public bool Meets(uint criteriaId, Player source, WorldObject target, uint miscValue1 = 0, uint miscValue2 = 0)
+        {
+            switch (DataType)
+            {
+                case CriteriaDataType.None:
+                    return true;
+                case CriteriaDataType.TCreature:
+                    if (target == null || !target.IsTypeId(TypeId.Unit))
+                        return false;
+                    return target.GetEntry() == Creature.Id;
+                case CriteriaDataType.TPlayerClassRace:
+                    if (target == null || !target.IsTypeId(TypeId.Player))
+                        return false;
+                    if (ClassRace.ClassId != 0 && ClassRace.ClassId != (uint)target.ToPlayer().GetClass())
+                        return false;
+                    if (ClassRace.RaceId != 0 && ClassRace.RaceId != (uint)target.ToPlayer().GetRace())
+                        return false;
+                    return true;
+                case CriteriaDataType.SPlayerClassRace:
+                    if (source == null || !source.IsTypeId(TypeId.Player))
+                        return false;
+                    if (ClassRace.ClassId != 0 && ClassRace.ClassId != (uint)source.ToPlayer().GetClass())
+                        return false;
+                    if (ClassRace.RaceId != 0 && ClassRace.RaceId != (uint)source.ToPlayer().GetRace())
+                        return false;
+                    return true;
+                case CriteriaDataType.TPlayerLessHealth:
+                    if (target == null || !target.IsTypeId(TypeId.Player))
+                        return false;
+                    return !target.ToPlayer().HealthAbovePct((int)Health.Percent);
+                case CriteriaDataType.SAura:
+                    return source.HasAuraEffect(Aura.SpellId, (byte)Aura.EffectIndex);
+                case CriteriaDataType.TAura:
+                {
+                    if (target == null)
+                        return false;
+                    Unit unitTarget = target.ToUnit();
+                    if (unitTarget == null)
+                        return false;
+                    return unitTarget.HasAuraEffect(Aura.SpellId, Aura.EffectIndex);
+                }
+                case CriteriaDataType.Value:
+                    return MathFunctions.CompareValues((ComparisionType)Value.ComparisonType, miscValue1, Value.Value);
+                case CriteriaDataType.TLevel:
+                    if (target == null)
+                        return false;
+                    return target.GetLevelForTarget(source) >= Level.Min;
+                case CriteriaDataType.TGender:
+                {
+                    if (target == null)
+                        return false;
+                    Unit unitTarget = target.ToUnit();
+                    if (unitTarget == null)
+                        return false;
+                    return unitTarget.GetGender() == (Gender)Gender.Gender;
+                }
+                case CriteriaDataType.Script:
+                {
+                    Unit unitTarget = null;
+                    if (target != null)
+                        unitTarget = target.ToUnit();
+                    return Global.ScriptMgr.OnCriteriaCheck(ScriptId, source.ToPlayer(), unitTarget.ToUnit());
+                }
+                case CriteriaDataType.MapPlayerCount:
+                    return source.GetMap().GetPlayersCountExceptGMs() <= MapPlayers.MaxCount;
+                case CriteriaDataType.TTeam:
+                    if (target == null || !target.IsTypeId(TypeId.Player))
+                        return false;
+                    return target.ToPlayer().GetTeam() == (Team)TeamId.Team;
+                case CriteriaDataType.SDrunk:
+                    return Player.GetDrunkenstateByValue(source.GetDrunkValue()) >= (DrunkenState)Drunk.State;
+                case CriteriaDataType.Holiday:
+                    return Global.GameEventMgr.IsHolidayActive((HolidayIds)Holiday.Id);
+                case CriteriaDataType.GameEvent:
+                    return Global.GameEventMgr.IsEventActive((ushort)GameEvent.Id);
+                case CriteriaDataType.BgLossTeamScore:
+                {
+                    Battleground bg = source.GetBattleground();
+                    if (bg == null)
+                        return false;
+
+                    int score = (int)bg.GetTeamScore(bg.GetPlayerTeam(source.GetGUID()) == Team.Alliance ? BattleGroundTeamId.Horde : BattleGroundTeamId.Alliance);
+                    return score >= BattlegroundScore.Min && score <= BattlegroundScore.Max;
+                }
+                case CriteriaDataType.InstanceScript:
+                {
+                    if (!source.IsInWorld)
+                        return false;
+                    Map map = source.GetMap();
+                    if (!map.IsDungeon())
+                    {
+                        Log.outError(LogFilter.Achievement, "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for achievement criteria {1} for non-dungeon/non-raid map {2}",
+                            CriteriaDataType.InstanceScript, criteriaId, map.GetId());
+                        return false;
+                    }
+                    InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                    if (instance == null)
+                    {
+                        Log.outError(LogFilter.Achievement, "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for achievement criteria {1} for map {2} but map does not have a instance script",
+                            CriteriaDataType.InstanceScript, criteriaId, map.GetId());
+                        return false;
+                    }
+
+                    Unit unitTarget = null;
+                    if (target != null)
+                        unitTarget = target.ToUnit();
+                    return instance.CheckAchievementCriteriaMeet(criteriaId, source, unitTarget, miscValue1);
+                }
+                case CriteriaDataType.SEquippedItem:
+                {
+                    Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
+
+                    uint itemId = entry.Entry.Type == CriteriaType.EquipItemInSlot ? miscValue2 : miscValue1;
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+                    if (itemTemplate == null)
+                        return false;
+                    return itemTemplate.GetBaseItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
+                }
+                case CriteriaDataType.MapId:
+                    return source.GetMapId() == MapId.Id;
+                case CriteriaDataType.SKnownTitle:
+                {
+                    CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(KnownTitle.Id);
+                    if (titleInfo != null)
+                        return source != null && source.HasTitle(titleInfo.MaskID);
+
+                    return false;
+                }
+                case CriteriaDataType.SItemQuality:
+                {
+                    ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(miscValue1);
+                    if (pProto == null)
+                        return false;
+                    return (uint)pProto.GetQuality() == itemQuality.Quality;
+                }
+                default:
+                    break;
+            }
+            return false;
+        }
+
+        #region Structs
+        // criteria_data_TYPE_NONE              = 0 (no data)
+        // criteria_data_TYPE_T_CREATURE        = 1
+        public struct CreatureStruct
+        {
+            public uint Id;
+        }
+        // criteria_data_TYPE_T_PLAYER_CLASS_RACE = 2
+        // criteria_data_TYPE_S_PLAYER_CLASS_RACE = 21
+        public struct ClassRaceStruct
+        {
+            public uint ClassId;
+            public uint RaceId;
+        }
+        // criteria_data_TYPE_T_PLAYER_LESS_HEALTH = 3
+        public struct HealthStruct
+        {
+            public uint Percent;
+        }
+        // criteria_data_TYPE_S_AURA            = 5
+        // criteria_data_TYPE_T_AURA            = 7
+        public struct AuraStruct
+        {
+            public uint SpellId;
+            public uint EffectIndex;
+        }
+        // criteria_data_TYPE_VALUE             = 8
+        public struct ValueStruct
+        {
+            public uint Value;
+            public uint ComparisonType;
+        }
+        // criteria_data_TYPE_T_LEVEL           = 9
+        public struct LevelStruct
+        {
+            public uint Min;
+        }
+        // criteria_data_TYPE_T_GENDER          = 10
+        public struct GenderStruct
+        {
+            public uint Gender;
+        }
+        // criteria_data_TYPE_SCRIPT            = 11 (no data)
+        // criteria_data_TYPE_MAP_PLAYER_COUNT  = 13
+        public struct MapPlayersStruct
+        {
+            public uint MaxCount;
+        }
+        // criteria_data_TYPE_T_TEAM            = 14
+        public struct TeamStruct
+        {
+            public uint Team;
+        }
+        // criteria_data_TYPE_S_DRUNK           = 15
+        public struct DrunkStruct
+        {
+            public uint State;
+        }
+        // criteria_data_TYPE_HOLIDAY           = 16
+        public struct HolidayStruct
+        {
+            public uint Id;
+        }
+        // criteria_data_TYPE_BG_LOSS_TEAM_SCORE= 17
+        public struct BgLossTeamScoreStruct
+        {
+            public uint Min;
+            public uint Max;
+        }
+        // criteria_data_INSTANCE_SCRIPT        = 18 (no data)
+        // criteria_data_TYPE_S_EQUIPED_ITEM    = 19
+        public struct EquippedItemStruct
+        {
+            public uint ItemLevel;
+            public uint ItemQuality;
+        }
+        // criteria_data_TYPE_MAP_ID            = 20
+        public struct MapIdStruct
+        {
+            public uint Id;
+        }
+        // criteria_data_TYPE_KNOWN_TITLE       = 23
+        public struct KnownTitleStruct
+        {
+            public uint Id;
+        }
+        // CRITERIA_DATA_TYPE_S_ITEM_QUALITY    = 24
+        public struct ItemQualityStruct
+        {
+            public uint Quality;
+        }
+        // criteria_data_TYPE_GAME_EVENT           = 25
+        public struct GameEventStruct
+        {
+            public uint Id;
+        }
+        // raw
+        public struct RawStruct
+        {
+            public uint Value1;
+            public uint Value2;
+        }
+        #endregion
     }
 
-    public void SetCriteriaId(uint id) { _criteriaId = id; }
-}
+    public class CriteriaDataSet
+    {
+        uint _criteriaId;
+        List<CriteriaData> _storage = new();
+
+        public void Add(CriteriaData data) { _storage.Add(data); }
+
+        public bool Meets(Player source, WorldObject target, uint miscValue = 0, uint miscValue2 = 0)
+        {
+            foreach (var data in _storage)
+                if (!data.Meets(_criteriaId, source, target, miscValue, miscValue2))
+                    return false;
+
+            return true;
+        }
+
+        public void SetCriteriaId(uint id) { _criteriaId = id; }
+    }
 }

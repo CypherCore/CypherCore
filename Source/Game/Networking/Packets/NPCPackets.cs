@@ -164,7 +164,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(TrainerGUID);
-            _worldPacket.WriteInt32(TrainerType);
+            _worldPacket.WriteInt8(TrainerType);
             _worldPacket.WriteInt32(TrainerID);
 
             _worldPacket.WriteInt32(Spells.Count);
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid TrainerGUID;
-        public int TrainerType;
+        public sbyte TrainerType;
         public int TrainerID = 1;
         public List<TrainerListSpell> Spells = new();
         public string Greeting;
@@ -339,7 +339,7 @@ namespace Game.Networking.Packets
     {
         public int GossipOptionID;
         public GossipOptionNpc OptionNPC;
-        public byte OptionFlags;
+        public int OptionFlags;
         public ulong OptionCost;
         public uint OptionLanguage;
         public GossipOptionFlags Flags;
@@ -355,8 +355,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(GossipOptionID);
+            data.WriteInt32(OptionFlags);
             data.WriteUInt8((byte)OptionNPC);
-            data.WriteInt8((sbyte)OptionFlags);
             data.WriteUInt64(OptionCost);
             data.WriteUInt32(OptionLanguage);
             data.WriteInt32((int)Flags);

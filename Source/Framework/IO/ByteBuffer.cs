@@ -351,6 +351,29 @@ namespace Framework.IO
         {
             WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
         }
+
+        public void Write<T>(T value)
+        {
+            switch (value)
+            {
+                case sbyte v: WriteInt8(v); break;
+                case short v: WriteInt16(v); break;
+                case int v: WriteInt32(v); break;
+                case long v: WriteInt64(v); break;
+                case byte v: WriteUInt8(v); break;
+                case ushort v: WriteUInt16(v); break;
+                case uint v: WriteUInt32(v); break;
+                case ulong v: WriteUInt64(v); break;
+                case float v: WriteFloat(v); break;
+                case double v: WriteDouble(v); break;
+                case string v: WriteString(v); break;
+                case bool v: WriteBit(v); break;
+                case byte[] v: WriteBytes(v); break;
+                case Vector3 v: WriteVector3(v); break;
+                default:
+                    throw new InvalidOperationException($"Type {typeof(T)} is not supported for writing.");
+            }
+        }
         #endregion
 
         public bool HasUnfinishedBitPack()

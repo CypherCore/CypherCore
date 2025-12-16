@@ -226,7 +226,6 @@ namespace Game.Guilds
                 memberData.RaceID = (byte)member.GetRace();
 
                 memberData.Authenticated = false;
-                memberData.SorEligible = false;
 
                 memberData.Name = member.GetName();
                 memberData.Note = member.GetPublicNote();
@@ -3091,7 +3090,7 @@ namespace Game.Guilds
                 newsEvent.MemberGuid = GetPlayerGuid();
                 newsEvent.CompletedDate.SetUtcTimeFromUnixTime(GetTimestamp());
                 newsEvent.Flags = GetFlags();
-                newsEvent.Type = (int)GetNewsType();
+                newsEvent.Type = (sbyte)GetNewsType();
 
                 //for (public byte i = 0; i < 2; i++)
                 //    newsEvent.Data[i] =

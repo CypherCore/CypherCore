@@ -1247,7 +1247,7 @@ namespace Game.Entities
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.AbandonVehicle);
         }
 
-        public void SendPlaySpellVisual(Unit target, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
+        public void SendPlaySpellVisual(Unit target, uint spellVisualId, byte missReason, byte reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
@@ -1262,7 +1262,7 @@ namespace Game.Entities
             SendMessageToSet(playSpellVisual, true);
         }
 
-        public void SendPlaySpellVisual(Position targetPosition, uint spellVisualId, ushort missReason, ushort reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
+        public void SendPlaySpellVisual(Position targetPosition, uint spellVisualId, byte missReason, byte reflectStatus, float travelSpeed, bool speedAsTime = false, float launchDelay = 0f)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();

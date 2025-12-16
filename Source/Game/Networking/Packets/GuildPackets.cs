@@ -1619,12 +1619,12 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Gender);
             data.WriteUInt64(GuildClubMemberID);
             data.WriteUInt8(RaceID);
+            data.WriteInt32(TimerunningSeasonID);
 
             data.WriteBits(Name.GetByteCount(), 6);
             data.WriteBits(Note.GetByteCount(), 8);
             data.WriteBits(OfficerNote.GetByteCount(), 8);
             data.WriteBit(Authenticated);
-            data.WriteBit(SorEligible);
             data.FlushBits();
 
             DungeonScore.Write(data);
@@ -1653,8 +1653,8 @@ namespace Game.Networking.Packets
         public byte Gender;
         public ulong GuildClubMemberID;
         public byte RaceID;
+        public int TimerunningSeasonID;
         public bool Authenticated;
-        public bool SorEligible;
         public GuildRosterProfessionData[] Profession = new GuildRosterProfessionData[2];
         public DungeonScoreSummary DungeonScore = new();
     }
@@ -1758,7 +1758,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Id);
             CompletedDate.Write(data);
-            data.WriteInt32(Type);
+            data.WriteInt8(Type);
             data.WriteInt32(Flags);
 
             for (byte i = 0; i < 2; i++)
@@ -1779,7 +1779,7 @@ namespace Game.Networking.Packets
 
         public int Id;
         public WowTime CompletedDate;
-        public int Type;
+        public sbyte Type;
         public int Flags;
         public int[] Data = new int[2];
         public ObjectGuid MemberGuid;
