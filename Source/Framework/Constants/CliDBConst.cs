@@ -2009,6 +2009,24 @@ namespace Framework.Constants
         All = AlwaysVisible | Inverse
     }
 
+    [Flags]
+    public enum PlayerConditionFlags
+    {
+        ClientExecutable = 0x01,
+        CheckAchievementsOnAllChars = 0x02,
+        ComparePowerToMax = 0x04,
+        Invert = 0x0008,
+        IsAtMaxExpansionLevel = 0x10,
+        WithinOrAboveRecord = 0x20,
+        UseEffectiveLevel = 0x40,
+        InvertContentTuning = 0x80,
+        Disabled = 0x100,
+        InvertModifierTree = 0x200,
+        NotRecentlyTransferred = 0x400,
+        IncludeLevelDelta = 0x800,
+        CheckAccountCombinedQuests = 0x1000  // NYI - checks PLAYER_DATA_FLAG_ACCOUNT_COMBINED_QUESTS_INDEX
+    }
+
     public enum PlayerConditionLfgStatus
     {
         InLFGDungeon = 1,

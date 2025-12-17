@@ -158,6 +158,8 @@ namespace Game.DataStorage
         public int[] TraitNodeEntryID = new int[4];
         public ushort[] TraitNodeEntryMinRank = new ushort[4];
         public ushort[] TraitNodeEntryMaxRank = new ushort[4];
+
+        public bool HasFlag(PlayerConditionFlags conditionFlags) { return (Flags & (int)conditionFlags) != 0; }
     }
 
     public sealed class PlayerDataElementAccountRecord

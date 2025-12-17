@@ -11107,6 +11107,11 @@ namespace Game
             return 0;
         }
 
+        public uint GetMaxLevelForExpansion(uint expansion)
+        {
+            return GetMaxLevelForExpansion((Expansion)expansion);
+        }
+
         public uint GetMaxLevelForExpansion(Expansion expansion)
         {
             switch (expansion)
