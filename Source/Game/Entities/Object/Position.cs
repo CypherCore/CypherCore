@@ -145,19 +145,19 @@ namespace Game.Entities
             return this;
         }
 
-        public virtual Position GetPositionOffsetTo(Position endPos)
+        public Position GetPositionOffsetTo(Position endPos)
         {
             float dx = endPos.GetPositionX() - GetPositionX();
             float dy = endPos.GetPositionY() - GetPositionY();
 
             return new Position(
-                (dx + dy * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation())),
-                (dy - dx * MathF.Tan(GetOrientation())) / (MathF.Cos(GetOrientation()) + MathF.Sin(GetOrientation()) * MathF.Tan(GetOrientation())),
+                dx * MathF.Cos(GetOrientation()) + dy * MathF.Sin(GetOrientation()),
+                dy * MathF.Cos(GetOrientation()) - dx * MathF.Sin(GetOrientation()),
                 endPos.GetPositionZ() - GetPositionZ(),
                 endPos.GetOrientation() - GetOrientation());
         }
 
-        public virtual Position GetPositionWithOffset(Position offset)
+        public Position GetPositionWithOffset(Position offset)
         {
             Position ret = this;
             ret.RelocateOffset(offset);
