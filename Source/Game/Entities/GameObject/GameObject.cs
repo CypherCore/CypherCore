@@ -47,7 +47,6 @@ namespace Game.Entities
         public override void Dispose()
         {
             m_AI = null;
-            m_model = null;
 
             base.Dispose();
         }
@@ -2999,7 +2998,6 @@ namespace Game.Entities
                         m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint.GetMaxHealth();
                         SetGoAnimProgress(255);
                     }
-                    EnableCollision(true);
                     break;
                 case GameObjectDestructibleState.Damaged:
                 {
@@ -3051,7 +3049,6 @@ namespace Game.Entities
                         m_goValue.Building.Health = 0;
                         SetGoAnimProgress(0);
                     }
-                    EnableCollision(false);
                     break;
                 }
                 case GameObjectDestructibleState.Rebuilding:
@@ -3073,7 +3070,6 @@ namespace Game.Entities
                         m_goValue.Building.Health = m_goValue.Building.DestructibleHitpoint.GetMaxHealth();
                         SetGoAnimProgress(255);
                     }
-                    EnableCollision(true);
                     break;
                 }
             }
@@ -3260,16 +3256,26 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
+            bool modelCollisionEnabled;
             if (m_model != null)
+            {
+                modelCollisionEnabled = m_model.IsCollisionEnabled();
                 if (GetMap().ContainsGameObjectModel(m_model))
                     GetMap().RemoveGameObjectModel(m_model);
+            }
+            else
+                modelCollisionEnabled = GetGoType() == GameObjectTypes.Chest ? GetLootState() == LootState.Ready : (GetGoState() == GameObjectState.Ready || IsTransport());
 
             RemoveFlag(GameObjectFlags.MapObject);
-            m_model = null;
+
             CreateModel();
 
             if (m_model != null)
+            {
                 GetMap().InsertGameObjectModel(m_model);
+                if (modelCollisionEnabled)
+                    m_model.EnableCollision(modelCollisionEnabled);
+            }
         }
 
         public bool IsLootAllowedFor(Player player)
