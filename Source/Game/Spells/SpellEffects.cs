@@ -648,12 +648,12 @@ namespace Game.Spells
             }
 
             // Init dest coordinates
-            WorldLocation targetDest = new(destTarget);
-            if (targetDest.GetMapId() == 0xFFFFFFFF)
-                targetDest.SetMapId(unitTarget.GetMapId());
+            Game.Entities.TeleportLocation targetDest = new() { Location = destTarget };
+            if (targetDest.Location.GetMapId() == 0xFFFFFFFF)
+                targetDest.Location.SetMapId(unitTarget.GetMapId());
 
-            if (targetDest.GetOrientation() == 0 && m_targets.GetUnitTarget() != null)
-                targetDest.SetOrientation(m_targets.GetUnitTarget().GetOrientation());
+            if (targetDest.Location.GetOrientation() == 0 && m_targets.GetUnitTarget() != null)
+                targetDest.Location.SetOrientation(m_targets.GetUnitTarget().GetOrientation());
 
             Player player = unitTarget.ToPlayer();
             if (player != null)
@@ -661,15 +661,22 @@ namespace Game.Spells
                 // Custom loading screen
                 uint customLoadingScreenId = (uint)effectInfo.MiscValue;
                 if (customLoadingScreenId != 0)
-                    if (targetDest.GetMapId() != unitTarget.GetMapId() || !unitTarget.IsInDist2d(targetDest, PlayerConst.TeleportMinLoadScreenDistance))
+                    if (targetDest.Location.GetMapId() != unitTarget.GetMapId() || !unitTarget.IsInDist2d(targetDest.Location, PlayerConst.TeleportMinLoadScreenDistance))
                         player.SendPacket(new CustomLoadScreen(m_spellInfo.Id, customLoadingScreenId));
+
+                ObjectGuid transportGuid = m_destTargets[effectInfo.EffectIndex].TransportGUID;
+                if (!transportGuid.IsEmpty())
+                {
+                    targetDest.TransportGuid = transportGuid;
+                    targetDest.Location.Relocate(m_destTargets[effectInfo.EffectIndex].TransportOffset);
+                }
 
                 TeleportToOptions options = GetTeleportOptions(m_caster, unitTarget, m_destTargets[effectInfo.EffectIndex]);
 
-                player.TeleportTo(targetDest, options, null, m_spellInfo.Id);
+                player.TeleportTo(targetDest, options, m_spellInfo.Id);
             }
-            else if (targetDest.GetMapId() == unitTarget.GetMapId())
-                unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);
+            else if (targetDest.Location.GetMapId() == unitTarget.GetMapId())
+                unitTarget.NearTeleportTo(targetDest.Location, unitTarget == m_caster);
             else
                 Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - spellId {0} attempted to teleport creature to a different map.", m_spellInfo.Id);
         }
@@ -691,12 +698,19 @@ namespace Game.Spells
             }
 
             // Init dest coordinates
-            WorldLocation targetDest = new(destTarget);
-            if (targetDest.GetMapId() == 0xFFFFFFFF)
-                targetDest.SetMapId(unitTarget.GetMapId());
+            Entities.TeleportLocation targetDest = new() { Location = destTarget };
+            if (targetDest.Location.GetMapId() == 0xFFFFFFFF)
+                targetDest.Location.SetMapId(unitTarget.GetMapId());
 
-            if (targetDest.GetOrientation() == 0 && m_targets.GetUnitTarget() != null)
-                targetDest.SetOrientation(m_targets.GetUnitTarget().GetOrientation());
+            if (targetDest.Location.GetOrientation() == 0 && m_targets.GetUnitTarget() != null)
+                targetDest.Location.SetOrientation(m_targets.GetUnitTarget().GetOrientation());
+
+            ObjectGuid transportGuid = m_destTargets[effectInfo.EffectIndex].TransportGUID;
+            if (!transportGuid.IsEmpty())
+            {
+                targetDest.TransportGuid = transportGuid;
+                targetDest.Location.Relocate(m_destTargets[effectInfo.EffectIndex].TransportOffset);
+            }
 
             if (effectInfo.MiscValueB != 0)
             {
@@ -1969,8 +1983,21 @@ namespace Game.Spells
             if (unitTarget.IsInFlight())
                 return;
 
-            if (m_targets.HasDst())
-                unitTarget.NearTeleportTo(destTarget.GetPositionX(), destTarget.GetPositionY(), destTarget.GetPositionZ(), destTarget.GetAbsoluteAngle(m_caster), unitTarget == m_caster);
+            if (!m_targets.HasDst())
+                return;
+
+            Entities.TeleportLocation targetDest = new() { Location = destTarget };
+            ObjectGuid transportGuid = m_destTargets[effectInfo.EffectIndex].TransportGUID;
+            if (!transportGuid.IsEmpty())
+            {
+                targetDest.TransportGuid = transportGuid;
+                targetDest.Location.Relocate(m_destTargets[effectInfo.EffectIndex].TransportOffset);
+                targetDest.Location.SetOrientation(destTarget.GetAbsoluteAngle(m_caster) - targetDest.Location.GetOrientation());
+            }
+            else
+                targetDest.Location.SetOrientation(destTarget.GetAbsoluteAngle(m_caster));
+
+            unitTarget.NearTeleportTo(destTarget.GetPositionX(), destTarget.GetPositionY(), destTarget.GetPositionZ(), destTarget.GetAbsoluteAngle(m_caster), unitTarget == m_caster);
         }
 
         [SpellEffectHandler(SpellEffectName.SkillStep)]
@@ -3393,8 +3420,15 @@ namespace Game.Spells
             if (!m_targets.HasDst())
                 return;
 
-            Position pos = destTarget.GetPosition();
-            unitTarget.NearTeleportTo(pos.posX, pos.posY, pos.posZ, pos.Orientation, unitTarget == m_caster);
+            Entities.TeleportLocation targetDest = new() { Location = destTarget };
+            ObjectGuid transportGuid = m_destTargets[effectInfo.EffectIndex].TransportGUID;
+            if (!transportGuid.IsEmpty())
+            {
+                targetDest.TransportGuid = transportGuid;
+                targetDest.Location.Relocate(m_destTargets[effectInfo.EffectIndex].TransportOffset);
+            }
+
+            unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);
         }
 
         [SpellEffectHandler(SpellEffectName.Reputation)]
@@ -6111,11 +6145,11 @@ namespace Game.Spells
     class DelayedSpellTeleportEvent : BasicEvent
     {
         Unit _target;
-        WorldLocation _targetDest;
+        Entities.TeleportLocation _targetDest;
         TeleportToOptions _options;
         uint _spellId;
 
-        public DelayedSpellTeleportEvent(Unit target, WorldLocation targetDest, TeleportToOptions options, uint spellId)
+        public DelayedSpellTeleportEvent(Unit target, Entities.TeleportLocation targetDest, TeleportToOptions options, uint spellId)
         {
             _target = target;
             _targetDest = targetDest;
@@ -6129,8 +6163,8 @@ namespace Game.Spells
             Player player = _target.ToPlayer();
             if (player != null)
                 player.TeleportTo(_targetDest, _options);
-            else if (_targetDest.GetMapId() == _target.GetMapId())
-                _target.NearTeleportTo(_targetDest, (_options & TeleportToOptions.Spell) != TeleportToOptions.None);
+            else if (_targetDest.Location.GetMapId() == _target.GetMapId())
+                _target.NearTeleportTo(_targetDest.Location, (_options & TeleportToOptions.Spell) != TeleportToOptions.None);
             else
                 Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - spellId {_spellId} attempted to teleport creature to a different map.");
 

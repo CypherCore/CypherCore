@@ -1398,8 +1398,12 @@ namespace Game.Entities
 
         public void NearTeleportTo(Position pos, bool casting = false)
         {
+            NearTeleportTo(new TeleportLocation() { Location = new WorldLocation(GetMapId(), pos) }, casting);
+        }
+
+        public void NearTeleportTo(TeleportLocation target, bool casting = false)
+        {
             DisableSpline();
-            TeleportLocation target = new() { Location = new(GetMapId(), pos) };
             if (IsPlayer())
             {
                 ToPlayer().TeleportTo(target, (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0)));
@@ -1407,7 +1411,7 @@ namespace Game.Entities
             else
             {
                 SendTeleportPacket(target);
-                UpdatePosition(pos, true);
+                UpdatePosition(target.Location, true);
                 UpdateObjectVisibility();
             }
         }
@@ -2165,7 +2169,10 @@ namespace Game.Entities
                     moveUpdateTeleport.Status.transport.pos.Relocate(teleportLocation.Location);
                 }
                 else
+                {
                     moveUpdateTeleport.Status.Pos.Relocate(teleportLocation.Location);
+                    moveUpdateTeleport.Status.transport.Reset();
+                }
             }
 
             // Broadcast the packet to everyone except self.
