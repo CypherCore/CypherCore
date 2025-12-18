@@ -2889,8 +2889,6 @@ namespace Game.Entities
                 return 1.0f;
 
             uint levelForTarget = GetLevelForTarget(target);
-            if (GetLevel() < levelForTarget)
-                return 1.0f;
 
             return (float)GetMaxHealthByLevel(levelForTarget) / (float)GetCreateHealth();
         }
@@ -2935,12 +2933,6 @@ namespace Game.Entities
             Unit unitTarget = target.ToUnit();
             if (unitTarget != null)
             {
-                if (IsWorldBoss())
-                {
-                    int level = (int)(unitTarget.GetLevel() + WorldConfig.GetIntValue(WorldCfg.WorldBossLevelDiff));
-                    return (uint)MathFunctions.RoundToInterval(ref level, 1u, 255u);
-                }
-
                 // If this creature should scale level, adapt level depending of target level
                 // between UNIT_FIELD_SCALING_LEVEL_MIN and UNIT_FIELD_SCALING_LEVEL_MAX
                 if (HasScalableLevels())
@@ -2949,9 +2941,7 @@ namespace Game.Entities
                     int scalingLevelMax = m_unitData.ScalingLevelMax;
                     int scalingLevelDelta = m_unitData.ScalingLevelDelta;
                     byte scalingFactionGroup = m_unitData.ScalingFactionGroup;
-                    uint targetLevel = unitTarget.m_unitData.EffectiveLevel;
-                    if (targetLevel == 0)
-                        targetLevel = unitTarget.GetLevel();
+                    int targetLevel = unitTarget.GetEffectiveLevel();
 
                     uint targetLevelDelta = 0;
 
