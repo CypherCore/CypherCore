@@ -4760,7 +4760,7 @@ class spell_summon_battle_pet : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleSummon, 0, SpellEffectName.Summon));
+        OnEffectLaunch.Add(new(HandleSummon, 0, SpellEffectName.Summon));
     }
 }
 
