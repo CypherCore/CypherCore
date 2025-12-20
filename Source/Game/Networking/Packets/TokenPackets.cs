@@ -71,14 +71,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(ClientToken);
-            _worldPacket.WriteUInt32((uint)ServerToken);
-            _worldPacket.WriteUInt64(PriceGuarantee);
-            _worldPacket.WriteUInt32(PriceLockDurationSeconds);
+            _worldPacket.WriteUInt32((uint)Result);
+            _worldPacket.WriteUInt64(Price);
+            _worldPacket.WriteUInt32(ExpectedSecondsUntilSold);
         }
 
         public uint ClientToken;
-        public TokenResult ServerToken;
-        public ulong PriceGuarantee;
-        public uint PriceLockDurationSeconds;
+        public TokenResult Result;
+        public ulong Price;
+        public uint ExpectedSecondsUntilSold;
     }
 }

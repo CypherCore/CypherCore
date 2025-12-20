@@ -1483,7 +1483,10 @@ namespace Framework.Constants
         SuccessNo = 6,
         TransactionInProgress = 7,
         AuctionableTokenOwned = 8,
-        TrialRestricted = 9
+        TrialRestricted = 9,
+        BalanceNearCap = 9,
+        NotEnoughPurchasedGameTime = 10,
+        ThrottleTokens = 11
     }
 
     public enum BanMode
