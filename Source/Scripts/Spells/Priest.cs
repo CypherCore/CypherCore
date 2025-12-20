@@ -27,7 +27,6 @@ struct SpellIds
     public const uint AtonementEffect = 194384;
     public const uint AtonementHeal = 81751;
     public const uint Benediction = 193157;
-    public const uint Benevolence = 415416;
     public const uint BlazeOfLight = 215768;
     public const uint BlazeOfLightIncrease = 355851;
     public const uint BlazeOfLightDecrease = 356084;
@@ -135,7 +134,6 @@ struct SpellIds
     public const uint PurgeTheWicked = 204197;
     public const uint PurgeTheWickedDummy = 204215;
     public const uint PurgeTheWickedPeriodic = 204213;
-    public const uint Rapture = 47536;
     public const uint Renew = 139;
     public const uint RenewedHope = 197469;
     public const uint RenewedHopeEffect = 197470;
@@ -2102,8 +2100,8 @@ class spell_pri_power_word_shield : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.AtonementEffect, SpellIds.TrinityEffect, SpellIds.ShieldDiscipline, SpellIds.ShieldDisciplineEffect, SpellIds.PvpRulesEnabledHardcoded)
-            && ValidateSpellEffect((SpellIds.MasteryGrace, 0), (SpellIds.Rapture, 1), (SpellIds.Benevolence, 0), (SpellIds.DivineAegis, 1));
+        return ValidateSpellInfo(SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.AtonementEffect, SpellIds.ShieldDiscipline, SpellIds.ShieldDisciplineEffect, SpellIds.PvpRulesEnabledHardcoded)
+            && ValidateSpellEffect((SpellIds.MasteryGrace, 0));
     }
 
     void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
@@ -2113,7 +2111,7 @@ class spell_pri_power_word_shield : AuraScript
         Unit caster = GetCaster();
         if (caster != null)
         {
-            float modifiedAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 3.36f;
+            float modifiedAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 4.638f;
 
             Player player = caster.ToPlayer();
             if (player != null)
@@ -2123,7 +2121,7 @@ class spell_pri_power_word_shield : AuraScript
                 // Mastery: Grace (Tbd: move into DoEffectCalcDamageAndHealing hook with a new SpellScript and AuraScript).
                 AuraEffect masteryGraceEffect = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
                 if (masteryGraceEffect != null)
-                    if (GetUnitOwner().HasAura(SpellIds.AtonementEffect) || GetUnitOwner().HasAura(SpellIds.TrinityEffect))
+                    if (GetUnitOwner().HasAura(SpellIds.AtonementEffect))
                         MathFunctions.AddPct(ref modifiedAmount, masteryGraceEffect.GetAmount());
 
                 switch (player.GetPrimarySpecialization())
@@ -2145,24 +2143,7 @@ class spell_pri_power_word_shield : AuraScript
             float critChanceTaken = GetUnitOwner().SpellCritChanceTaken(caster, null, auraEffect, GetSpellInfo().GetSchoolMask(), critChanceDone, GetSpellInfo().GetAttackType());
 
             if (RandomHelper.randChance(critChanceTaken))
-            {
                 modifiedAmount *= 2;
-
-                // Divine Aegis
-                AuraEffect divineEff = caster.GetAuraEffect(SpellIds.DivineAegis, 1);
-                if (divineEff != null)
-                    MathFunctions.AddPct(ref modifiedAmount, divineEff.GetAmount());
-            }
-
-            // Rapture talent (Tbd: move into DoEffectCalcDamageAndHealing hook).
-            AuraEffect raptureEffect = caster.GetAuraEffect(SpellIds.Rapture, 1);
-            if (raptureEffect != null)
-                MathFunctions.AddPct(ref modifiedAmount, raptureEffect.GetAmount());
-
-            // Benevolence talent
-            AuraEffect benevolenceEffect = caster.GetAuraEffect(SpellIds.Benevolence, 0);
-            if (benevolenceEffect != null)
-                MathFunctions.AddPct(ref modifiedAmount, benevolenceEffect.GetAmount());
 
             amount = (int)modifiedAmount;
         }
