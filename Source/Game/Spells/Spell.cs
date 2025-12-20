@@ -9121,10 +9121,13 @@ namespace Game.Spells
                     }
 
                     // Failed Pickpocket, reveal rogue
-                    if (MissCondition == SpellMissInfo.Resist && spell.m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && spell.unitTarget.IsCreature())
+                    if (MissCondition == SpellMissInfo.Resist && spell.m_spellInfo.HasAttribute(SpellAttr1.FailureBreaksStealth) && spell.unitTarget.IsCreature())
                     {
                         Unit unitCaster = spell.GetCaster().ToUnit();
-                        unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+                        unitCaster.RemoveAppliedAuras(aurApp =>
+                        {
+                            return aurApp.GetBase().GetSpellInfo().Dispel == DispelType.Stealth;
+                        });
                         spell.unitTarget.ToCreature().EngageWithTarget(unitCaster);
                     }
                 }

@@ -136,7 +136,7 @@ namespace Game.Maps
         GridMap[][] _gridMap = new GridMap[MapConst.MaxGrids][];
         ushort[][] _referenceCountFromMap = new ushort[MapConst.MaxGrids][];
 
-        ulong[] _loadedGrids = new ulong[(MapConst.MaxGrids * MapConst.MaxGrids + 63) / 64];
+        ulong[] _loadedGrids = new ulong[MapConst.MaxGrids];
         BitSet _gridFileExists = new(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
 
         static TimeSpan CleanupInterval = TimeSpan.FromMinutes(1);
