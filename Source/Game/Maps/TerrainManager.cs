@@ -136,7 +136,7 @@ namespace Game.Maps
         GridMap[][] _gridMap = new GridMap[MapConst.MaxGrids][];
         ushort[][] _referenceCountFromMap = new ushort[MapConst.MaxGrids][];
 
-        BitSet _loadedGrids = new(MapConst.MaxGrids * MapConst.MaxGrids);
+        ulong[] _loadedGrids = new ulong[(MapConst.MaxGrids * MapConst.MaxGrids + 63) / 64];
         BitSet _gridFileExists = new(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
 
         static TimeSpan CleanupInterval = TimeSpan.FromMinutes(1);
@@ -287,7 +287,7 @@ namespace Game.Maps
             foreach (TerrainInfo childTerrain in _childTerrain)
                 childTerrain.LoadMapAndVMapImpl(gx, gy);
 
-            _loadedGrids[GetBitsetIndex(gx, gy)] = true;
+            _loadedGrids[gx] |= 1ul << gy;
         }
 
         void LoadMMapInstanceImpl(uint mapId, uint instanceId)
@@ -387,7 +387,7 @@ namespace Game.Maps
             foreach (var childTerrain in _childTerrain)
                 childTerrain.UnloadMapImpl(gx, gy);
 
-            _loadedGrids[GetBitsetIndex(gx, gy)] = false;
+            _loadedGrids[gx] &= ~(1ul << gy);
         }
 
         void UnloadMMapInstanceImpl(uint mapId, uint instanceId)
@@ -402,7 +402,7 @@ namespace Game.Maps
             int gy = (int)(MapConst.CenterGridId - y / MapConst.SizeofGrids);                   //grid y
 
             // ensure GridMap is loaded
-            if (!_loadedGrids[GetBitsetIndex(gx, gy)] && loadIfMissing)
+            if ((_loadedGrids[gx] & (1ul << gy)) == 0 && loadIfMissing)
             {
                 lock (_loadLock)
                     LoadMapAndVMapImpl(gx, gy);
@@ -427,9 +427,14 @@ namespace Game.Maps
 
             // delete those GridMap objects which have refcount = 0
             for (int x = 0; x < MapConst.MaxGrids; ++x)
-                for (int y = 0; y < MapConst.MaxGrids; ++y)
-                    if (_loadedGrids[GetBitsetIndex(x, y)] && _referenceCountFromMap[x][y] == 0)
-                        UnloadMapImpl(x, y);
+            {
+                if (_loadedGrids[x] != 0)
+                {
+                    for (int y = 0; y < MapConst.MaxGrids; ++y)
+                        if ((_loadedGrids[x] & (1ul << y)) != 0 && _referenceCountFromMap[x][y] == 0)
+                            UnloadMapImpl(x, y);
+                }
+            }
 
             _cleanupTimer.Reset(CleanupInterval);
         }
