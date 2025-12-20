@@ -79,22 +79,18 @@ namespace Game.Movement
 
         bool _checkPathLengths()
         {
-            float MIN_XY_OFFSET = -(1 << 11) / 4.0f;
-            float MIN_Z_OFFSET = -(1 << 10) / 4.0f;
-
-            // positive values have 1 less bit limit (if the highest bit was set, value would be sign extended into negative when decompressing)
             float MAX_XY_OFFSET = (1 << 10) / 4.0f;
             float MAX_Z_OFFSET = (1 << 9) / 4.0f;
 
-            var isValidPackedXYOffset = (float coord) => coord > MIN_XY_OFFSET && coord < MAX_XY_OFFSET;
-            var isValidPackedZOffset = (float coord) => coord > MIN_Z_OFFSET && coord < MAX_Z_OFFSET;
+            var isValidPackedXYOffset = (float coord) => coord > -MAX_XY_OFFSET && coord < MAX_XY_OFFSET;
+            var isValidPackedZOffset = (float coord) => coord > -MAX_Z_OFFSET && coord < MAX_Z_OFFSET;
 
             if (path.Count > 2)
             {
                 Vector3 middle = (path.First() + path.Last()) / 2;
                 for (int i = 1; i < path.Count - 1; ++i)
                 {
-                    if ((path[i + 1] - path[i]).Length() < 0.1f)
+                    if ((path[i + 1] - path[i]).LengthSquared() < 0.01f)
                         return false;
 
                     // when compression is enabled, each point coord is packed into 11 bits (10 for Z)
