@@ -398,6 +398,8 @@ namespace Framework.Constants
         EnterVehicle = 155,    // seat id
         BoardPassenger = 156,    // seat id
         ExitVehicle = 157,
+        ResumeMovement = 158,    // UNUSED
+        Fall = 159, // pointId
 
         End
     }

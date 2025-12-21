@@ -2765,6 +2765,16 @@ namespace Game.AI
                     Cell.VisitGridObjects(GetBaseObject(), worker, e.Action.destroyConversation.range);
                     break;
                 }
+                case SmartActions.Fall:
+                {
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit unitTarget = target.ToUnit();
+                        if (unitTarget != null)
+                            unitTarget.GetMotionMaster().MoveFall(e.Action.fall.pointId);
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;

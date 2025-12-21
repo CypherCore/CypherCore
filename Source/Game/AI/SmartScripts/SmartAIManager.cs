@@ -827,6 +827,7 @@ namespace Game.AI
                 SmartActions.EnterVehicle => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
                 SmartActions.BoardPassenger => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
                 SmartActions.ExitVehicle => 0,
+                SmartActions.Fall => Marshal.SizeOf(typeof(SmartAction.Fall)),
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
 
@@ -2202,6 +2203,7 @@ namespace Game.AI
                 case SmartActions.AddToStoredTargetList:
                 case SmartActions.DoAction:
                 case SmartActions.ExitVehicle:
+                case SmartActions.Fall:
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
                 {
@@ -3118,6 +3120,9 @@ namespace Game.AI
         public Taxi taxi;
 
         [FieldOffset(4)]
+        public Fall fall;
+
+        [FieldOffset(4)]
         public WpStart wpStart;
 
         [FieldOffset(4)]
@@ -3543,6 +3548,10 @@ namespace Game.AI
         {
             public uint id;
         }
+        public struct Fall
+        {
+            public uint pointId;
+        }        
         public struct WpStart
         {
             public uint run;
