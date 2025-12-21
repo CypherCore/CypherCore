@@ -484,7 +484,7 @@ class spell_pri_atonement_effect : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.TrinityEffect, SpellIds.PowerWordRadiance, SpellIds.PowerWordShield)
+        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.PowerWordRadiance, SpellIds.PowerWordShield)
             && ValidateSpellEffect((SpellIds.PowerWordRadiance, 3), (SpellIds.Indemnity, 0));
     }
 
@@ -493,15 +493,6 @@ class spell_pri_atonement_effect : SpellScript
         Unit caster = GetCaster();
         if (!caster.HasAura(SpellIds.Atonement))
             return false;
-
-        // only apply Trinity if the Priest has both Trinity and Atonement and the triggering spell is Power Word: Shield.
-        if (caster.HasAura(SpellIds.Trinity))
-        {
-            if (GetSpellInfo().Id != SpellIds.PowerWordShield)
-                return false;
-
-            _effectSpellId = SpellIds.TrinityEffect;
-        }
 
         return true;
     }
