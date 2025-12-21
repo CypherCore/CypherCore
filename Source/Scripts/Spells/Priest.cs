@@ -167,7 +167,7 @@ struct SpellIds
     public const uint ThePenitentAura = 200347;
     public const uint TrailOfLightHeal = 234946;
     public const uint Trinity = 214205;
-    public const uint TrinityEffect = 214206;
+    public const uint TrinityEffect = 290793;
     public const uint UltimatePenitence = 421453;
     public const uint UltimatePenitenceDamage = 421543;
     public const uint UltimatePenitenceHeal = 421544;
@@ -360,8 +360,8 @@ class spell_pri_atonement : AuraScript
 
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.AtonementHeal, SpellIds.SinsOfTheMany)
-            && ValidateSpellEffect((spellInfo.Id, 1), (SpellIds.SinsOfTheMany, 2));
+        return ValidateSpellInfo(SpellIds.AtonementHeal, SpellIds.SinsOfTheMany, SpellIds.TrinityEffect)
+            && ValidateSpellEffect((spellInfo.Id, 1), (SpellIds.SinsOfTheMany, 2), (SpellIds.TrinityEffect, 0));
     }
 
     bool CheckProc(ProcEventInfo eventInfo)
@@ -385,6 +385,7 @@ class spell_pri_atonement : AuraScript
         _appliedAtonements.Add(target);
 
         UpdateSinsOfTheManyValue();
+        UpdateTrinityEffect();
     }
 
     public void RemoveAtonementTarget(ObjectGuid target)
@@ -392,6 +393,7 @@ class spell_pri_atonement : AuraScript
         _appliedAtonements.Remove(target);
 
         UpdateSinsOfTheManyValue();
+        UpdateTrinityEffect();
     }
 
     public List<ObjectGuid> GetAtonementTargets()
@@ -448,6 +450,16 @@ class spell_pri_atonement : AuraScript
             if (sinOfTheMany != null)
                 sinOfTheMany.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, (byte)(damageByStack.Length - 1))]);
         }
+    }
+
+    void UpdateTrinityEffect()
+    {
+        Unit priest = GetUnitOwner();
+        AuraEffect trinity = priest.GetAuraEffect(SpellIds.TrinityEffect, 0);
+        if (trinity != null && _appliedAtonements.Count >= trinity.GetAmount())
+            priest.CastSpell(priest, SpellIds.TrinityEffect, new CastSpellExtraArgs() { TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError });
+        else
+            priest.RemoveAurasDueToSpell(SpellIds.TrinityEffect);
     }
 }
 
@@ -1181,7 +1193,7 @@ class spell_pri_evangelism : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Trinity, SpellIds.AtonementEffect, SpellIds.TrinityEffect);
+        return ValidateSpellInfo(SpellIds.AtonementEffect);
     }
 
     void HandleScriptEffect(uint effIndex)
@@ -1189,9 +1201,7 @@ class spell_pri_evangelism : SpellScript
         Unit caster = GetCaster();
         Unit target = GetHitUnit();
 
-        Aura atonementAura = caster.HasAura(SpellIds.Trinity)
-            ? target.GetAura(SpellIds.TrinityEffect, caster.GetGUID())
-            : target.GetAura(SpellIds.AtonementEffect, caster.GetGUID());
+        Aura atonementAura = target.GetAura(SpellIds.AtonementEffect, caster.GetGUID());
         if (atonementAura == null)
             return;
 
@@ -1782,12 +1792,12 @@ class spell_pri_pain_transformation : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.PainTransformation, SpellIds.PainTransformationHeal);
+        return ValidateSpellInfo(SpellIds.AtonementEffect, SpellIds.PainTransformation, SpellIds.PainTransformationHeal);
     }
 
     public override bool Load()
     {
-        return GetCaster().HasAura(SpellIds.PainTransformation) && !GetCaster().HasAura(SpellIds.Trinity);
+        return GetCaster().HasAura(SpellIds.PainTransformation);
     }
 
     void HandleHit(uint effIndex)
@@ -2956,7 +2966,7 @@ class spell_pri_shadow_mend : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal, SpellIds.ShadowMendPeriodicDummy);
+        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal, SpellIds.ShadowMendPeriodicDummy);
     }
 
     void HandleEffectHit()
