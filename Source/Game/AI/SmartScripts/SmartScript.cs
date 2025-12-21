@@ -2767,12 +2767,23 @@ namespace Game.AI
                 }
                 case SmartActions.Fall:
                 {
+                    MultiActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<MovementStopReason>>(e, targets.Count);
+
                     foreach (WorldObject target in targets)
                     {
                         Unit unitTarget = target.ToUnit();
                         if (unitTarget != null)
-                            unitTarget.GetMotionMaster().MoveFall(e.Action.fall.pointId);
+                        {
+                            ActionResultSetter<MovementStopReason> actionResultSetter = null;
+                            if (waitEvent != null)
+                                actionResultSetter = ActionResult<MovementStopReason>.GetResultSetter(waitEvent.CreateAndGetResult());
+
+                            unitTarget.GetMotionMaster().MoveFall(e.Action.fall.pointId, actionResultSetter);
+                        }
                     }
+
+                    if (waitEvent != null && !waitEvent.Results.Empty())
+                        mTimedActionWaitEvent = waitEvent;
                     break;
                 }
                 default:
@@ -4637,7 +4648,7 @@ namespace Game.AI
         }
 
         //template<typename Result, typename ConcreteActionImpl = Scripting::v2::ActionResult<Result>, typename...Args>
-        public static ActionResult<Result> CreateTimedActionListWaitEventFor<Result, ConcreteActionImpl>(SmartScriptHolder e, object[] args = null) where ConcreteActionImpl : ActionBase
+        public static ActionResult<Result> CreateTimedActionListWaitEventFor<Result, ConcreteActionImpl>(SmartScriptHolder e, params object[] args) where ConcreteActionImpl : ActionBase
         {
             if (e.GetScriptType() != SmartScriptType.TimedActionlist)
                 return null;
@@ -4648,7 +4659,7 @@ namespace Game.AI
             return (ActionResult<Result>)Activator.CreateInstance(typeof(ActionResult<Result>), args);
         }
 
-        public static ConcreteActionImpl CreateTimedActionListWaitEventFor<ConcreteActionImpl>(SmartScriptHolder e, object[] args = null) where ConcreteActionImpl : ActionBase
+        public static ConcreteActionImpl CreateTimedActionListWaitEventFor<ConcreteActionImpl>(SmartScriptHolder e, params object[] args) where ConcreteActionImpl : ActionBase
         {
             if (e.GetScriptType() != SmartScriptType.TimedActionlist)
                 return null;
