@@ -2175,10 +2175,14 @@ namespace Framework.Constants
 
     public enum SpellCategoryFlags : int
     {
-        CooldownScalesWithWeaponSpeed = 0x01, // unused
-        CooldownStartsOnEvent = 0x04,
-        CooldownExpiresAtDailyReset = 0x08,
-        IgnoreForModTimeRate = 0x40
+        CooldownModifiesItem = 0x01,      // NYI
+        CooldownIsGlobal = 0x02,      // NYI
+        CooldownEventOnLeaveCombat = 0x04,
+        CooldownInDays = 0x08,
+        ResetChargesUponEndingEncounter = 0x10,      // NYI
+        ResetCooldownUponEndingEncounter = 0x20,
+        IgnoreForModTimeRate = 0x40,
+        Unknown = 0x80       // NYI
     }
 
     [Flags]

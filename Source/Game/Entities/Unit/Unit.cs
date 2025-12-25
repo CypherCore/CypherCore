@@ -658,7 +658,13 @@ namespace Game.Entities
             GetSpellHistory().ResetCooldowns(cooldown =>
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cooldown.SpellId, Difficulty.None);
-                return spellInfo.HasAttribute(SpellAttr10.ResetCooldownOnEncounterEnd);
+                if (spellInfo.HasAttribute(SpellAttr10.ResetCooldownOnEncounterEnd))
+                    return true;
+                var category = CliDB.SpellCategoryStorage.LookupByKey(spellInfo.CategoryId);
+                if (category != null && category.HasFlag(SpellCategoryFlags.ResetCooldownUponEndingEncounter))
+                    return true;
+
+                return false;
             }, true);
         }
 
