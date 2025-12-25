@@ -489,7 +489,7 @@ namespace Game.Spells
                 return true;
 
             SpellCategoryRecord category = CliDB.SpellCategoryStorage.LookupByKey(CategoryId);
-            return category != null && category.HasFlag(SpellCategoryFlags.CooldownStartsOnEvent);
+            return category != null && category.HasFlag(SpellCategoryFlags.CooldownEventOnLeaveCombat);
         }
 
         public bool IsDeathPersistent()

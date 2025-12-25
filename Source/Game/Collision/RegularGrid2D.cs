@@ -11,8 +11,7 @@ namespace Game.Collision
     public class RegularGrid2D<T, Node> where T : IModel where Node : BIHWrap<T>, new()
     {
         public const int CELL_NUMBER = 64;
-        public const float HGRID_MAP_SIZE = (533.33333f * 64.0f);    // shouldn't be changed
-        public const float CELL_SIZE = HGRID_MAP_SIZE / CELL_NUMBER;
+        public const float CELL_SIZE = 533.33333f;
 
         public RegularGrid2D()
         {

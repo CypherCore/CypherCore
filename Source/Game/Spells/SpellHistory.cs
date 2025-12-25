@@ -441,7 +441,7 @@ namespace Game.Spells
                         }
 
                         SpellCategoryRecord categoryEntry = CliDB.SpellCategoryStorage.LookupByKey(categoryId);
-                        if (categoryEntry.HasFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
+                        if (categoryEntry.HasFlag(SpellCategoryFlags.CooldownInDays))
                             categoryCooldown = Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetSystemTime();
                     }
                 }
@@ -1023,7 +1023,7 @@ namespace Game.Spells
 
             if (TimeSpan.FromMilliseconds(chargeCategoryEntry.ChargeRecoveryTime) <= TimeSpan.FromHours(1)
                 && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.IgnoreForModTimeRate)
-                && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
+                && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.CooldownInDays))
                 recoveryTimeF *= _owner.m_unitData.ModTimeRate;
 
             return (int)Math.Floor(recoveryTimeF);
