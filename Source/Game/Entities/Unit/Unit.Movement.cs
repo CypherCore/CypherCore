@@ -928,7 +928,7 @@ namespace Game.Entities
                     SetPlayHoverAnim(false, false);
             }
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
+            if (IsCreature() && updateAnimTier && !HasUnitState(UnitState.Root))
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);
@@ -1335,7 +1335,7 @@ namespace Game.Entities
             else if (IsPlayer()) // To update player who dies while flying/hovering
                 SetPlayHoverAnim(false, false);
 
-            if (IsCreature() && updateAnimTier && IsAlive() && !HasUnitState(UnitState.Root))
+            if (IsCreature() && updateAnimTier && !HasUnitState(UnitState.Root))
             {
                 if (IsGravityDisabled())
                     SetAnimTier(AnimTier.Fly);
