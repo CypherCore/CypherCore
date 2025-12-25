@@ -127,7 +127,7 @@ namespace Game.Entities
                 }
             }
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer(); // unit controlled by a player.
+            Player playerMover = GetPlayerMovingMe(); // unit controlled by a player.
             if (playerMover != null)
             {
                 // Send notification to self
@@ -216,7 +216,7 @@ namespace Game.Entities
             if (!clientUpdate)
                 return;
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 SetAdvFlyingSpeed selfpacket = new(opcode);
@@ -269,7 +269,7 @@ namespace Game.Entities
             if (!clientUpdate)
                 return;
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 SetAdvFlyingSpeedRange selfpacket = new(opcode);
@@ -458,7 +458,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag(MovementFlag.DisableCollision);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
@@ -494,7 +494,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
 
             ServerOpcodes[] fullSpeedTurningOpcodeTable = [ServerOpcodes.MoveDisableFullSpeedTurning, ServerOpcodes.MoveEnableFullSpeedTurning];
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(fullSpeedTurningOpcodeTable[enable ? 1 : 0]);
@@ -523,7 +523,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.CanSwimToFlyTrans);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableTransitionBetweenSwimAndFly : ServerOpcodes.MoveDisableTransitionBetweenSwimAndFly);
@@ -550,7 +550,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanTurnWhileFalling : ServerOpcodes.MoveUnsetCanTurnWhileFalling);
@@ -576,7 +576,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.CanDoubleJump);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableDoubleJump : ServerOpcodes.MoveDisableDoubleJump);
@@ -602,7 +602,7 @@ namespace Game.Entities
             else
                 RemoveExtraUnitMovementFlag2(MovementFlags3.DisableInertia);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableInertia : ServerOpcodes.MoveEnableInertia);
@@ -896,7 +896,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag(MovementFlag.DisableGravity);
 
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableGravity : ServerOpcodes.MoveEnableGravity);
@@ -1192,7 +1192,7 @@ namespace Game.Entities
             if (!enable && IsTypeId(TypeId.Player))
                 ToPlayer().SetFallInformation(0, GetPositionZ());
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanFly : ServerOpcodes.MoveUnsetCanFly);
@@ -1225,7 +1225,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag(MovementFlag.WaterWalk);
 
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetWaterWalk : ServerOpcodes.MoveSetLandWalk);
@@ -1258,7 +1258,7 @@ namespace Game.Entities
                 RemoveUnitMovementFlag(MovementFlag.FallingSlow);
 
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetFeatherFall : ServerOpcodes.MoveSetNormalFall);
@@ -1306,7 +1306,7 @@ namespace Game.Entities
                 }
             }
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetHovering : ServerOpcodes.MoveUnsetHovering);
@@ -1569,7 +1569,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag(MovementFlag.Root);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();// unit controlled by a player.
+            Player playerMover = GetPlayerMovingMe();// unit controlled by a player.
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(apply ? ServerOpcodes.MoveRoot : ServerOpcodes.MoveUnroot);
@@ -1769,7 +1769,7 @@ namespace Game.Entities
             else
                 RemoveExtraUnitMovementFlag2(MovementFlags3.CanAdvFly | MovementFlags3.AdvFlying);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanAdvFly : ServerOpcodes.MoveUnsetCanAdvFly);
@@ -1795,7 +1795,7 @@ namespace Game.Entities
             else
                 RemoveExtraUnitMovementFlag2(MovementFlags3.CantSwim);
 
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveSetFlag packet = new(cantSwim ? ServerOpcodes.MoveSetCantSwim : ServerOpcodes.MoveUnsetCantSwim);
@@ -2139,7 +2139,7 @@ namespace Game.Entities
             Unit broadcastSource = this;
 
             // should this really be the unit _being_ moved? not the unit doing the moving?
-            Player playerMover = GetUnitBeingMoved()?.ToPlayer();
+            Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
                 MoveTeleport moveTeleport = new();
