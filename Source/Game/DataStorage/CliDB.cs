@@ -409,19 +409,13 @@ namespace Game.DataStorage
             WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
             // Check loaded DB2 files proper version
-            if (!AreaTableStorage.ContainsKey(16579) ||               // last area added in 11.2.0 (62213)
-                !CharTitlesStorage.ContainsKey(937) ||                // last char title added in 11.2.0 (62213)
-                !FlightCapabilityStorage.ContainsKey(1) ||            // default flight capability (required)
-                !GemPropertiesStorage.ContainsKey(4287) ||            // last gem property added in 11.2.0 (62213)
-                !ItemStorage.ContainsKey(252009) ||                   // last item added in 11.2.0 (62213)
-                !ItemSparseStorage.ContainsKey(208392) ||
-                !ItemSparseStorage.ContainsKey(242709) ||
-                !ItemExtendedCostStorage.ContainsKey(10637) ||        // last item extended cost added in 11.2.0 (62213)
-                !MapStorage.ContainsKey(2951) ||                      // last map added in 11.2.0 (62213)
-                !SpellNameStorage.ContainsKey(1254022))               // last spell added in 11.2.0 (62213)
+            foreach (uint criticalItemId in new uint[208392, 242709])
             {
-                Log.outFatal(LogFilter.ServerLoading, "You have _outdated_ DB2 files. Please extract correct versions from current using client.");
-                Environment.Exit(1);
+                if (!ItemSparseStorage.ContainsKey(criticalItemId))
+                {
+                    Log.outFatal(LogFilter.ServerLoading, $"Missing required item {criticalItemId} from ItemSparse.db2 (or its hotfix table)");
+                    Environment.Exit(1);
+                }
             }
 
             Log.outInfo(LogFilter.ServerLoading, $"Initialized {loadedFileCount} DB2 data storages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
