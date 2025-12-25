@@ -1049,7 +1049,7 @@ namespace Game.Networking.Packets
             SenderGUID = _worldPacket.ReadPackedGuid();
             MapID = _worldPacket.ReadUInt32();
             Point = _worldPacket.ReadVector3();
-            Type = (PingSubjectType)_worldPacket.ReadUInt32();
+            Type = (PingSubjectType)_worldPacket.ReadInt8();
             PinFrameID = _worldPacket.ReadUInt32();
             Transport = _worldPacket.ReadPackedGuid();
             PingDuration = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
