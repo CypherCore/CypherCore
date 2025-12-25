@@ -231,7 +231,7 @@ namespace Framework.Constants
         ModDetaunt = 221,
         RemoveTransmogCost = 222,
         RemoveBarberShopCost = 223,
-        LearnTalent = 224, // NYI
+        ModTraitNodeEntryRank = 224, // NYI; Amount = ranks, MiscValue[0] = TraitNodeEntryID, MiscValue[1] = TraitNodeID (there are leftover deprecated spells that still have data referring to its old implementation, SPELL_AURA_LEARN_TALENT)
         ModVisibilityRange = 225,
         PeriodicDummy = 226,
         PeriodicTriggerSpellWithValue = 227,
