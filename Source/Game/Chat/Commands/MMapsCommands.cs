@@ -93,7 +93,7 @@ namespace Game.Chat
             // calculate navmesh tile location
             uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMapId(), player.GetMap().GetTerrain(), x, y);
 
-            handler.SendSysMessage($"{terrainMapId:D4}{gx:D2}{gy:D2}.mmtile");
+            handler.SendSysMessage($"{terrainMapId:D4}_{gx:D2}_{gy:D2}.mmtile");
             handler.SendSysMessage($"tileloc [{gy}, {gx}]");
 
             Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);

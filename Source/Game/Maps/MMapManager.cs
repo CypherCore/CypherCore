@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Movement;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ namespace Game
         MMapManager() { }
 
         const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
-        const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}{2:D2}{3:D2}.mmtile";
+        const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}_{2:D2}_{3:D2}.mmtile";
 
         public void Initialize(MultiMap<uint, uint> mapData)
         {
@@ -34,15 +35,49 @@ namespace Game
                 return MMapLoadResult.AlreadyLoaded;
 
             // load and init dtNavMesh - read parameters from file
-            string filename = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
-            if (!File.Exists(filename))
+            MMapLoadResult paramsResult = parseNavMeshParamsFile(basePath, mapId, out Detour.dtNavMeshParams Params);
+            if (paramsResult != MMapLoadResult.Success)
+                return paramsResult;
+
+            Detour.dtNavMesh mesh = new();
+            if (Detour.dtStatusFailed(mesh.init(Params)))
             {
-                Log.outError(LogFilter.Maps, $"Could not open mmap file {filename}");
+                Log.outError(LogFilter.Maps, $"MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {mapId:D4}");
+                return MMapLoadResult.LibraryError;
+            }
+
+            Log.outDebug(LogFilter.Maps, $"MMAP:loadMapData: Loaded {mapId:04}.mmap");
+
+            // store inside our map list
+            loadedMMaps[mapId] = new MMapData(mesh);
+            return MMapLoadResult.Success;
+        }
+
+        MMapLoadResult parseNavMeshParamsFile(string basePath, uint mapId, out Detour.dtNavMeshParams Params, List<OffMeshData> offmeshConnections = null)
+        {
+            Params = new();
+
+            string fileName = string.Format(MAP_FILE_NAME_FORMAT, basePath, mapId);
+            if (!File.Exists(fileName))
+            {
+                Log.outError(LogFilter.Maps, $"Could not open mmap file {fileName}");
                 return MMapLoadResult.FileNotFound;
             }
 
-            using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8);
-            Detour.dtNavMeshParams Params = new();
+            using BinaryReader reader = new(new FileStream(fileName, FileMode.Open, FileAccess.Read), Encoding.UTF8);
+            if (reader.ReadUInt32() != MapConst.mmapMagic)
+            {
+                Log.outError(LogFilter.Maps, $"MMAP:loadMap: Bad header in mmap {mapId:04}.mmap");
+                return MMapLoadResult.VersionMismatch;
+            }
+
+            uint mmapVersion = reader.ReadUInt32();
+            if (mmapVersion != MapConst.mmapVersion)
+            {
+                Log.outError(LogFilter.Maps, $"MMAP:loadMap: {mapId:04}.mmap was built with generator v{mmapVersion}, expected v{MapConst.mmapVersion}");
+                return MMapLoadResult.VersionMismatch;
+            }
+
             Params.orig[0] = reader.ReadSingle();
             Params.orig[1] = reader.ReadSingle();
             Params.orig[2] = reader.ReadSingle();
@@ -52,17 +87,34 @@ namespace Game
             Params.maxTiles = reader.ReadInt32();
             Params.maxPolys = reader.ReadInt32();
 
-            Detour.dtNavMesh mesh = new();
-            if (Detour.dtStatusFailed(mesh.init(Params)))
+            if (offmeshConnections != null)
             {
-                Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
-                return MMapLoadResult.LibraryError;
+                var offmeshConnectionCount = reader.ReadUInt32();
+                for (var i = 0; i < offmeshConnectionCount; ++i)
+                {
+                    var offMeshData = new OffMeshData
+                    {
+                        MapId = reader.ReadUInt32(),
+                        TileX = reader.ReadUInt32(),
+                        TileY = reader.ReadUInt32(),
+                        From = reader.ReadArray<float>(3),
+                        To = reader.ReadArray<float>(3),
+                        Radius = reader.ReadSingle(),
+                        ConnectionFlags = (OffMeshConnectionFlag)reader.ReadByte(),
+                        AreaId = reader.ReadByte(),
+                        Flags = (NavTerrainFlag)reader.ReadUInt16()
+                    };
+                    offmeshConnections.Add(new OffMeshData());
+                }
+
+                if (offmeshConnectionCount != offmeshConnections.Count)
+                {
+                    offmeshConnections.Clear();
+                   Log.outDebug(LogFilter.Maps, $"MMAP:loadMapData: Error: Could not read offmesh connections from file '{fileName}'");
+                    return MMapLoadResult.ReadFromFileFailed;
+                }
             }
 
-            Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
-
-            // store inside our map list
-            loadedMMaps[mapId] = new MMapData(mesh);
             return MMapLoadResult.Success;
         }
 
@@ -93,7 +145,7 @@ namespace Game
             if (mmap.loadedTileRefs.ContainsKey(packedGridPos))
                 return MMapLoadResult.AlreadyLoaded;
 
-            // load this tile . mmaps/MMMXXYY.mmtile
+            // load this tile . mmaps/MMM_XX_YY.mmtile
             string fileName = string.Format(TILE_FILE_NAME_FORMAT, basePath, mapId, x, y);
             if (!File.Exists(fileName))
             {
@@ -111,12 +163,12 @@ namespace Game
             MmapTileHeader fileHeader = reader.Read<MmapTileHeader>();
             if (fileHeader.mmapMagic != MapConst.mmapMagic)
             {
-                Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
+                Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}_{1:D2}_{2:D2}.mmtile", mapId, x, y);
                 return MMapLoadResult.VersionMismatch;
             }
             if (fileHeader.mmapVersion != MapConst.mmapVersion)
             {
-                Log.outError(LogFilter.Maps, "MMAP:loadMap: {0:D4}{1:D2}{2:D2}.mmtile was built with generator v{3}, expected v{4}",
+                Log.outError(LogFilter.Maps, "MMAP:loadMap: {0:D4}_{1:D2}_{2:D2}.mmtile was built with generator v{3}, expected v{4}",
                     mapId, x, y, fileHeader.mmapVersion, MapConst.mmapVersion);
                 return MMapLoadResult.VersionMismatch;
             }
@@ -135,7 +187,7 @@ namespace Game
                 return MMapLoadResult.Success;
             }
 
-            Log.outError(LogFilter.Maps, "MMAP:loadMap: Could not load {0:D4}{1:D2}{2:D2}.mmtile into navmesh", mapId, x, y);
+            Log.outError(LogFilter.Maps, "MMAP:loadMap: Could not load {0:D4}_{1:D2}_{2:D2}.mmtile into navmesh", mapId, x, y);
             return MMapLoadResult.LibraryError;
         }
 
@@ -174,7 +226,7 @@ namespace Game
             if (mmap == null)
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh map. {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
+                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh map. {0:D4}_{1:D2}_{2:D2}.mmtile", mapId, x, y);
                 return false;
             }
 
@@ -183,7 +235,7 @@ namespace Game
             if (!mmap.loadedTileRefs.ContainsKey(packedGridPos))
             {
                 // file may not exist, therefore not loaded
-                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh tile. {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
+                Log.outDebug(LogFilter.Maps, "MMAP:unloadMap: Asked to unload not loaded navmesh tile. {0:D4}_{1:D2}_{2:D2}.mmtile", mapId, x, y);
                 return false;
             }
 
@@ -195,7 +247,7 @@ namespace Game
                 // this is technically a memory leak
                 // if the grid is later reloaded, dtNavMesh.addTile will return error but no extra memory is used
                 // we cannot recover from this error - assert out
-                Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
+                Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}_{1:D2}_{2:D2}.mmtile from navmesh", mapId, x, y);
                 Cypher.Assert(false);
             }
             else
@@ -225,7 +277,7 @@ namespace Game
                 uint x = (i.Key >> 16);
                 uint y = (i.Key & 0x0000FFFF);
                 if (Detour.dtStatusFailed(mmap.navMesh.removeTile(i.Value, out _)))
-                    Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
+                    Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}_{1:D2}_{2:D2}.mmtile from navmesh", mapId, x, y);
                 else
                 {
                     --loadedTiles;
@@ -311,6 +363,19 @@ namespace Game
         public byte usesLiquids;
     }
 
+    public class OffMeshData
+    {
+        public uint MapId;
+        public uint TileX;
+        public uint TileY;
+        public float[] From = new float[3];
+        public float[] To = new float[3];
+        public float Radius;
+        public OffMeshConnectionFlag ConnectionFlags;
+        public byte AreaId;
+        public NavTerrainFlag Flags;
+    }
+
     public enum MMapLoadResult
     {
         Success,
@@ -319,5 +384,10 @@ namespace Game
         VersionMismatch,
         ReadFromFileFailed,
         LibraryError
+    }
+
+    public enum OffMeshConnectionFlag : byte
+    {
+        OFFMESH_CONNECTION_FLAG_BIDIRECTIONAL = 0x01
     }
 }

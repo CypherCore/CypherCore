@@ -1103,7 +1103,7 @@ namespace Game.Movement
         // ground is the highest value to make recast choose ground over water when merging surfaces very close to each other (shallow water would be walkable) 
     }
 
-    public enum NavTerrainFlag
+    public enum NavTerrainFlag : ushort
     {
         Empty = 0x00,
         Ground = 1 << (NavArea.MaxValue - NavArea.Ground),
