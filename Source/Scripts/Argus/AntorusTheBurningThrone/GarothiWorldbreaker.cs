@@ -475,7 +475,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
                 annihilation.RemoveAurasDueToSpell(SpellIds.AnnihilationWarning);
         }
 
-        public override void OnUnitExit(Unit unit)
+        public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
         {
             if (!unit.IsPlayer())
                 return;

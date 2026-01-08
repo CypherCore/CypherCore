@@ -377,7 +377,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
             unit.ApplyMovementForce(at.GetGUID(), at.GetPosition(), -20.0f, MovementForceType.Gravity);
         }
 
-        public override void OnUnitExit(Unit unit)
+        public override void OnUnitExit(Unit unit, AreaTriggerExitReason reason)
         {
             if (!unit.IsPlayer())
                 return;
