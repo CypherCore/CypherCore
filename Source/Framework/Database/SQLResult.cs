@@ -3,83 +3,120 @@
 
 using MySqlConnector;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Framework.Database
 {
-    public class SQLResult
+    public sealed class SQLResult
     {
-        MySqlDataReader _reader;
+        private readonly object[][] _rows;
+        private readonly Type[] _fieldTypes;
+        private int _rowIndex = 0;
 
-        public SQLResult() { }
+        public SQLResult()
+        {
+            _rows = Array.Empty<object[]>();
+            _fieldTypes = Array.Empty<Type>();
+        }
 
         public SQLResult(MySqlDataReader reader)
         {
-            _reader = reader;
-            NextRow();
+            int fieldCount = reader.FieldCount;
+            _fieldTypes = new Type[fieldCount];
+
+            for (int i = 0; i < fieldCount; i++)
+                _fieldTypes[i] = reader.GetFieldType(i);
+
+            var rows = new List<object[]>();
+
+            while (reader.Read())
+            {
+                var values = new object[fieldCount];
+                reader.GetValues(values);
+                rows.Add(values);
+            }
+
+            _rows = rows.ToArray();
         }
+
+        public bool NextRow()
+        {
+            if (_rowIndex + 1 >= _rows.Length)
+                return false;
+
+            _rowIndex++;
+            return true;
+        }
+
+        public bool IsEmpty() => _rows.Length == 0;
+
+        public int GetFieldCount() => _fieldTypes.Length;
+
+        public bool IsNull(int column) => _rows[_rowIndex][column] is DBNull;
 
         public T Read<T>(int column)
         {
-            if (_reader.IsDBNull(column))
+            var value = _rows[_rowIndex][column];
+            if (value is DBNull || value == null)
                 return default;
 
-            var columnType = _reader.GetFieldType(column);
-            if (columnType == typeof(T))
-                return _reader.GetFieldValue<T>(column);
+            if (value is T t)
+                return t;
 
+            var columnType = value.GetType();
             switch (Type.GetTypeCode(columnType))
             {
                 case TypeCode.SByte:
-                {
-                    var value = _reader.GetSByte(column);
-                    return Unsafe.As<sbyte, T>(ref value);
-                }
+                    {
+                        var val = (sbyte)value;
+                        return Unsafe.As<sbyte, T>(ref val);
+                    }
                 case TypeCode.Byte:
-                {
-                    var value = _reader.GetByte(column);
-                    return Unsafe.As<byte, T>(ref value);
-                }
+                    {
+                        var val = (byte)value;
+                        return Unsafe.As<byte, T>(ref val);
+                    }
                 case TypeCode.Int16:
-                {
-                    var value = _reader.GetInt16(column);
-                    return Unsafe.As<short, T>(ref value);
-                }
+                    {
+                        var val = (short)value;
+                        return Unsafe.As<short, T>(ref val);
+                    }
                 case TypeCode.UInt16:
-                {
-                    var value = _reader.GetUInt16(column);
-                    return Unsafe.As<ushort, T>(ref value);
-                }
+                    {
+                        var val = (ushort)value;
+                        return Unsafe.As<ushort, T>(ref val);
+                    }
                 case TypeCode.Int32:
-                {
-                    var value = _reader.GetInt32(column);
-                    return Unsafe.As<int, T>(ref value);
-                }
+                    {
+                        var val = (int)value;
+                        return Unsafe.As<int, T>(ref val);
+                    }
                 case TypeCode.UInt32:
-                {
-                    var value = _reader.GetUInt32(column);
-                    return Unsafe.As<uint, T>(ref value);
-                }
+                    {
+                        var val = (uint)value;
+                        return Unsafe.As<uint, T>(ref val);
+                    }
                 case TypeCode.Int64:
-                {
-                    var value = _reader.GetInt64(column);
-                    return Unsafe.As<long, T>(ref value);
-                }
+                    {
+                        var val = (long)value;
+                        return Unsafe.As<long, T>(ref val);
+                    }
                 case TypeCode.UInt64:
-                {
-                    var value = _reader.GetUInt64(column);
-                    return Unsafe.As<ulong, T>(ref value);
-                }
+                    {
+                        var val = (ulong)value;
+                        return Unsafe.As<ulong, T>(ref val);
+                    }
                 case TypeCode.Single:
-                {
-                    var value = _reader.GetFloat(column);
-                    return Unsafe.As<float, T>(ref value);
-                }
+                    {
+                        var val = (float)value;
+                        return Unsafe.As<float, T>(ref val);
+                    }
                 case TypeCode.Double:
-                {
-                    var value = _reader.GetDouble(column);
-                    return Unsafe.As<double, T>(ref value);
-                }
+                    {
+                        var val = (double)value;
+                        return Unsafe.As<double, T>(ref val);
+                    }
             }
 
             return default;
@@ -87,48 +124,14 @@ namespace Framework.Database
 
         public T[] ReadValues<T>(int startIndex, int numColumns)
         {
-            T[] values = new T[numColumns];
-            for (var c = 0; c < numColumns; ++c)
-                values[c] = Read<T>(startIndex + c);
+            var values = new T[numColumns];
+            for (int i = 0; i < numColumns; i++)
+                values[i] = Read<T>(startIndex + i);
 
             return values;
         }
 
-        public bool IsNull(int column)
-        {
-            return _reader.IsDBNull(column);
-        }
-
-        public int GetFieldCount() { return _reader.FieldCount; }
-
-        public bool IsEmpty()
-        {
-            if (_reader == null)
-                return true;
-            
-            return _reader.IsClosed || !_reader.HasRows;
-        }
-
-        public SQLFields GetFields()
-        {
-            object[] values = new object[_reader.FieldCount];
-            _reader.GetValues(values);
-            return new SQLFields(values);
-        }
-
-        public bool NextRow()
-        {
-            if (_reader == null)
-                return false;
-
-            if (_reader.Read())
-                return true;
-
-            _reader.Close();
-            _reader = null;
-
-            return false;
-        }
+        public SQLFields GetFields() => new SQLFields(_rows[_rowIndex]);
     }
 
     public class SQLFields
