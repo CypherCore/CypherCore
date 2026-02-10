@@ -18,7 +18,7 @@ namespace Framework.Database
     {
         public MySqlConnection GetConnection()
         {
-            return new MySqlConnection($"Server={Host};Port={PortOrSocket};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;ConnectionIdleTimeout=1800;Command Timeout=0");
+            return new MySqlConnection($"Server={Host};Port={PortOrSocket};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;Max Pool Size=20;Min Pool Size=0;ConnectionIdleTimeout=60;Command Timeout=10");
         }
 
         public string Host;
@@ -169,15 +169,16 @@ namespace Framework.Database
         {
             try
             {
-                MySqlConnection Connection = _connectionInfo.GetConnection();
+                using MySqlConnection Connection = _connectionInfo.GetConnection();
                 Connection.Open();
 
-                MySqlCommand cmd = Connection.CreateCommand();
+                using MySqlCommand cmd = Connection.CreateCommand();
                 cmd.CommandText = stmt.CommandText;
                 foreach (var parameter in stmt.Parameters)
                     cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
-                return new SQLResult(cmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection));
+                using MySqlDataReader reader = cmd.ExecuteReader(System.Data.CommandBehavior.CloseConnection);
+                return new SQLResult(reader);
             }
             catch (MySqlException ex)
             {
