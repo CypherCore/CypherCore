@@ -32,6 +32,14 @@ namespace Game.Entities
             }
         }
 
+        private UpdateMask(UpdateMask other)
+        {
+            _blockCount = other._blockCount;
+            _blocksMaskCount = other._blocksMaskCount;
+            _blocks = (uint[])other._blocks.Clone();
+            _blocksMask = (uint[])other._blocksMask.Clone();
+        }
+
         public uint GetBlocksMask(uint index)
         {
             return _blocksMask[index];
@@ -115,14 +123,14 @@ namespace Game.Entities
 
         public static UpdateMask operator &(UpdateMask left, UpdateMask right)
         {
-            UpdateMask result = left;
+            UpdateMask result = new UpdateMask(left); // make a copy
             result.AND(right);
             return result;
         }
 
         public static UpdateMask operator |(UpdateMask left, UpdateMask right)
         {
-            UpdateMask result = left;
+            UpdateMask result = new UpdateMask(left); // make a copy
             result.OR(right);
             return result;
         }
