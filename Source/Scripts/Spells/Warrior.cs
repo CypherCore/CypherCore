@@ -112,12 +112,12 @@ namespace Scripts.Spells.Warrior
     [Script] // 152278 - Anger Management
     class spell_warr_anger_management_proc : AuraScript
     {
-        static TimeSpan CooldownReduction = TimeSpan.FromSeconds(1);
-        static uint[] ArmsSpellIds = [SpellIds.ColossusSmash, SpellIds.Warbreaker, SpellIds.Bladestorm, SpellIds.Ravager];
-        static uint[] FurySpellIds = [SpellIds.Recklessness, SpellIds.Bladestorm, SpellIds.Ravager];
-        static uint[] ProtectionSpellIds = [SpellIds.Avatar, SpellIds.ShieldWall];
+        static readonly TimeSpan CooldownReduction = TimeSpan.FromSeconds(1);
+        static readonly uint[] ArmsSpellIds = [SpellIds.ColossusSmash, SpellIds.Warbreaker, SpellIds.Bladestorm, SpellIds.Ravager];
+        static readonly uint[] FurySpellIds = [SpellIds.Recklessness, SpellIds.Bladestorm, SpellIds.Ravager];
+        static readonly uint[] ProtectionSpellIds = [SpellIds.Avatar, SpellIds.ShieldWall];
 
-        bool ValidateProc(AuraEffect aurEff, ProcEventInfo eventInfo, ChrSpecialization spec)
+        static bool ValidateProc(AuraEffect aurEff, ProcEventInfo eventInfo, ChrSpecialization spec)
         {
             if (aurEff.GetAmount() == 0)
                 return false;
@@ -277,8 +277,7 @@ namespace Scripts.Spells.Warrior
                 return;
 
             AuraEffect ignorePainAura = GetTarget().GetAuraEffect(SpellIds.IgnorePain, 0);
-            if (ignorePainAura != null)
-                ignorePainAura.ChangeAmount((int)(ignorePainAura.GetAmount() + _damageAmount));
+            ignorePainAura?.ChangeAmount((int)(ignorePainAura.GetAmount() + _damageAmount));
 
             _damageAmount = 0;
         }
@@ -356,7 +355,7 @@ namespace Scripts.Spells.Warrior
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
 
-            CastSpellExtraArgs args = new CastSpellExtraArgs()
+            CastSpellExtraArgs args = new()
             {
                 TriggerFlags = TriggerCastFlags.FullMask & ~TriggerCastFlags.CastDirectly,
                 TriggeringSpell = GetSpell()
@@ -556,7 +555,7 @@ namespace Scripts.Spells.Warrior
             return true;
         }
 
-        bool IsBloodthirst(SpellInfo spellInfo)
+        static bool IsBloodthirst(SpellInfo spellInfo)
         {
             // Bloodthirst/Bloodbath
             return spellInfo.IsAffected(SpellFamilyNames.Warrior, new FlagArray128(0x0, 0x400));
@@ -981,7 +980,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleRoot(uint effIndex)
         {
-            CastSpellExtraArgs args = new CastSpellExtraArgs()
+            CastSpellExtraArgs args = new()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringSpell = GetSpell()

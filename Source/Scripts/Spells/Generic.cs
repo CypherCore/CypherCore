@@ -483,8 +483,8 @@ struct MiscConst
         // Note: if caster is not in a raid setting, is in PvP or while in arena combat with 5 or less allied players.
         if (!unit.GetMap().IsRaid() || !unit.GetMap().IsBattleground())
         {
-            uint bonusSpellId = 0;
-            uint effIndex = 0;
+            uint bonusSpellId;
+            uint effIndex;
             switch (spellId)
             {
                 case SpellIds.DruidTranquilityHeal:
@@ -581,7 +581,7 @@ class spell_gen_adaptive_warding : AuraScript
     {
         PreventDefaultAction();
 
-        uint spellId = 0;
+        uint spellId;
         switch (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()))
         {
             case SpellSchools.Fire:
@@ -647,8 +647,7 @@ class spell_gen_animal_blood : AuraScript
     void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         Unit owner = GetUnitOwner();
-        if (owner != null)
-            owner.CastSpell(owner, SpellIds.SpawnBloodPool, true);
+        owner?.CastSpell(owner, SpellIds.SpawnBloodPool, true);
     }
 
     public override void Register()
@@ -665,8 +664,7 @@ class spell_spawn_blood_pool : SpellScript
     {
         Unit caster = GetCaster();
         Position summonPos = caster.GetPosition();
-        LiquidData liquidStatus;
-        if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), out liquidStatus, null, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
+        if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), out LiquidData liquidStatus, null, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
             summonPos.posZ = liquidStatus.level;
         dest.Relocate(summonPos);
     }
@@ -805,24 +803,13 @@ class spell_gen_av_drekthar_presence : AuraScript
 {
     bool CheckAreaTarget(Unit target)
     {
-        switch (target.GetEntry())
+        return target.GetEntry() switch
         {
             // alliance
-            case 14762: // Dun Baldar North Marshal
-            case 14763: // Dun Baldar South Marshal
-            case 14764: // Icewing Marshal
-            case 14765: // Stonehearth Marshal
-            case 11948: // Vandar Stormspike
-            // horde
-            case 14772: // East Frostwolf Warmaster
-            case 14776: // Tower Point Warmaster
-            case 14773: // Iceblood Warmaster
-            case 14777: // West Frostwolf Warmaster
-            case 11946: // Drek'thar
-                return true;
-            default:
-                return false;
-        }
+            // Dun Baldar North Marshal
+            14762 or 14763 or 14764 or 14765 or 11948 or 14772 or 14776 or 14773 or 14777 or 11946 => true,
+            _ => false,
+        };
     }
 
     public override void Register()
@@ -867,7 +854,7 @@ class spell_gen_bandage : SpellScript
 [Script] // 193970 - Mercenary Shapeshift
 class spell_gen_battleground_mercenary_shapeshift : AuraScript
 {
-    static Dictionary<Race, uint[]> RaceDisplayIds = new()
+    static readonly Dictionary<Race, uint[]> RaceDisplayIds = new()
     {
         [Race.Human] = [55239, 55238],
         [Race.Orc] = [55257, 55256],
@@ -896,7 +883,7 @@ class spell_gen_battleground_mercenary_shapeshift : AuraScript
         [Race.MechaGnome] = [94998, 95000]
     };
 
-    List<uint> RacialSkills = new();
+    readonly List<uint> RacialSkills = [];
 
     static Race GetReplacementRace(Race nativeRace, Class playerClass)
     {
@@ -1073,54 +1060,53 @@ class spell_gen_break_shield : SpellScript
         switch (effIndex)
         {
             case 0: // On spells wich trigger the damaging spell (and also the visual)
-            {
-                uint spellId;
-
-                switch (GetSpellInfo().Id)
                 {
-                    case SpellIds.BreakShieldTriggerUnk:
-                    case SpellIds.BreakShieldTriggerCampaingWarhorse:
-                        spellId = SpellIds.BreakShieldDamage10K;
-                        break;
-                    case SpellIds.BreakShieldTriggerFactionMounts:
-                        spellId = SpellIds.BreakShieldDamage2K;
-                        break;
-                    default:
-                        return;
-                }
+                    uint spellId;
 
-                Unit rider = GetCaster().GetCharmer();
-                if (rider != null)
-                    rider.CastSpell(target, spellId, false);
-                else
-                    GetCaster().CastSpell(target, spellId, false);
-                break;
-            }
-            case 1: // On damaging spells, for removing a defend layer
-            {
-                var auras = target.GetAppliedAuras();
-                foreach (var itr in auras)
-                {
-                    Aura aura = itr.Value.GetBase();
-                    if (aura != null)
+                    switch (GetSpellInfo().Id)
                     {
-                        if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
-                        {
-                            aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                            // Remove dummys from rider (Necessary for updating visual shields)
-                            Unit rider = target.GetCharmer();
-                            if (rider != null)
-                            {
-                                Aura defend = rider.GetAura(aura.GetId());
-                                if (defend != null)
-                                    defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                            }
+                        case SpellIds.BreakShieldTriggerUnk:
+                        case SpellIds.BreakShieldTriggerCampaingWarhorse:
+                            spellId = SpellIds.BreakShieldDamage10K;
                             break;
+                        case SpellIds.BreakShieldTriggerFactionMounts:
+                            spellId = SpellIds.BreakShieldDamage2K;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    Unit rider = GetCaster().GetCharmer();
+                    if (rider != null)
+                        rider.CastSpell(target, spellId, false);
+                    else
+                        GetCaster().CastSpell(target, spellId, false);
+                    break;
+                }
+            case 1: // On damaging spells, for removing a defend layer
+                {
+                    var auras = target.GetAppliedAuras();
+                    foreach (var itr in auras)
+                    {
+                        Aura aura = itr.Value.GetBase();
+                        if (aura != null)
+                        {
+                            if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
+                            {
+                                aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                // Remove dummys from rider (Necessary for updating visual shields)
+                                Unit rider = target.GetCharmer();
+                                if (rider != null)
+                                {
+                                    Aura defend = rider.GetAura(aura.GetId());
+                                    defend?.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                }
+                                break;
+                            }
                         }
                     }
+                    break;
                 }
-                break;
-            }
             default:
                 break;
         }
@@ -1144,8 +1130,7 @@ class spell_gen_burning_depths_necrolyte_image : AuraScript
     void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         Unit caster = GetCaster();
-        if (caster != null)
-            caster.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValue());
+        caster?.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValue());
     }
 
     void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1318,51 +1303,51 @@ class spell_gen_clone_weapon_aura : AuraScript
             case SpellIds.CopyWeaponAura:
             case SpellIds.CopyWeapon2Aura:
             case SpellIds.CopyWeapon3Aura:
-            {
-                prevItem = target.GetVirtualItemId(0);
-
-                Player player = caster.ToPlayer();
-                if (player != null)
                 {
-                    Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                    if (mainItem != null)
-                        target.SetVirtualItem(0, mainItem.GetEntry());
+                    prevItem = target.GetVirtualItemId(0);
+
+                    Player player = caster.ToPlayer();
+                    if (player != null)
+                    {
+                        Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                        if (mainItem != null)
+                            target.SetVirtualItem(0, mainItem.GetEntry());
+                    }
+                    else
+                        target.SetVirtualItem(0, caster.GetVirtualItemId(0));
+                    break;
                 }
-                else
-                    target.SetVirtualItem(0, caster.GetVirtualItemId(0));
-                break;
-            }
             case SpellIds.CopyOffhandAura:
             case SpellIds.CopyOffhand2Aura:
-            {
-                prevItem = target.GetVirtualItemId(1);
-
-                Player player = caster.ToPlayer();
-                if (player != null)
                 {
-                    Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                    if (offItem != null)
-                        target.SetVirtualItem(1, offItem.GetEntry());
+                    prevItem = target.GetVirtualItemId(1);
+
+                    Player player = caster.ToPlayer();
+                    if (player != null)
+                    {
+                        Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                        if (offItem != null)
+                            target.SetVirtualItem(1, offItem.GetEntry());
+                    }
+                    else
+                        target.SetVirtualItem(1, caster.GetVirtualItemId(1));
+                    break;
                 }
-                else
-                    target.SetVirtualItem(1, caster.GetVirtualItemId(1));
-                break;
-            }
             case SpellIds.CopyRangedAura:
-            {
-                prevItem = target.GetVirtualItemId(2);
-
-                Player player = caster.ToPlayer();
-                if (player != null)
                 {
-                    Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                    if (rangedItem != null)
-                        target.SetVirtualItem(2, rangedItem.GetEntry());
+                    prevItem = target.GetVirtualItemId(2);
+
+                    Player player = caster.ToPlayer();
+                    if (player != null)
+                    {
+                        Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                        if (rangedItem != null)
+                            target.SetVirtualItem(2, rangedItem.GetEntry());
+                    }
+                    else
+                        target.SetVirtualItem(2, caster.GetVirtualItemId(2));
+                    break;
                 }
-                else
-                    target.SetVirtualItem(2, caster.GetVirtualItemId(2));
-                break;
-            }
             default:
                 break;
         }
@@ -1516,8 +1501,7 @@ class spell_gen_decay_over_time_spell : SpellScript
     void ModAuraStack()
     {
         Aura aur = GetHitAura();
-        if (aur != null)
-            aur.SetStackAmount((byte)GetSpellInfo().StackAmount);
+        aur?.SetStackAmount((byte)GetSpellInfo().StackAmount);
     }
 
     public override void Register()
@@ -1620,8 +1604,7 @@ class spell_gen_defend : AuraScript
             if (vehicle != null)
             {
                 Unit rider = vehicle.GetSummonerUnit();
-                if (rider != null)
-                    rider.RemoveAurasDueToSpell(GetId());
+                rider?.RemoveAurasDueToSpell(GetId());
             }
         }
     }
@@ -1660,8 +1643,7 @@ class spell_gen_despawn_aura : AuraScript
     void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         Creature target = GetTarget().ToCreature();
-        if (target != null)
-            target.DespawnOrUnsummon();
+        target?.DespawnOrUnsummon();
     }
 
     public override void Register()
@@ -1698,8 +1680,7 @@ class spell_gen_despawn_target : SpellScript
         if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
         {
             Creature target = GetHitCreature();
-            if (target != null)
-                target.DespawnOrUnsummon();
+            target?.DespawnOrUnsummon();
         }
     }
 
@@ -1840,8 +1821,7 @@ class spell_steal_essence_visual : AuraScript
         {
             caster.CastSpell(caster, SpellIds.CreateToken, true);
             Creature soulTrader = caster.ToCreature();
-            if (soulTrader != null)
-                soulTrader.GetAI().Talk(MiscConst.SayCreateToken);
+            soulTrader?.GetAI().Talk(MiscConst.SayCreateToken);
         }
     }
 
@@ -2118,8 +2098,7 @@ class spell_gen_5000_gold : SpellScript
     void HandleScript(uint effIndex)
     {
         Player target = GetHitPlayer();
-        if (target != null)
-            target.ModifyMoney(5000 * MoneyConstants.Gold);
+        target?.ModifyMoney(5000 * MoneyConstants.Gold);
     }
 
     public override void Register()
@@ -2416,58 +2395,57 @@ class spell_gen_mounted_charge : SpellScript
         switch (effIndex)
         {
             case 0: // On spells wich trigger the damaging spell (and also the visual)
-            {
-                uint spellId;
-
-                switch (GetSpellInfo().Id)
                 {
-                    case SpellIds.ChargeTriggerTrialChampion:
-                        spellId = SpellIds.ChargeCharging20K1;
-                        break;
-                    case SpellIds.ChargeTriggerFactionMounts:
-                        spellId = SpellIds.ChargeChargingEffect8K5;
-                        break;
-                    default:
-                        return;
+                    uint spellId;
+
+                    switch (GetSpellInfo().Id)
+                    {
+                        case SpellIds.ChargeTriggerTrialChampion:
+                            spellId = SpellIds.ChargeCharging20K1;
+                            break;
+                        case SpellIds.ChargeTriggerFactionMounts:
+                            spellId = SpellIds.ChargeChargingEffect8K5;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    // If target isn't a training dummy there's a chance of failing the charge
+                    if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
+                        spellId = SpellIds.ChargeMissEffect;
+
+                    Unit vehicle = GetCaster().GetVehicleBase();
+                    if (vehicle != null)
+                        vehicle.CastSpell(target, spellId, false);
+                    else
+                        GetCaster().CastSpell(target, spellId, false);
+                    break;
                 }
-
-                // If target isn't a training dummy there's a chance of failing the charge
-                if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
-                    spellId = SpellIds.ChargeMissEffect;
-
-                Unit vehicle = GetCaster().GetVehicleBase();
-                if (vehicle != null)
-                    vehicle.CastSpell(target, spellId, false);
-                else
-                    GetCaster().CastSpell(target, spellId, false);
-                break;
-            }
             case 1: // On damaging spells, for removing a defend layer
             case 2:
-            {
-                var auras = target.GetAppliedAuras();
-                foreach (var itr in auras)
                 {
-                    Aura aura = itr.Value.GetBase();
-                    if (aura != null)
+                    var auras = target.GetAppliedAuras();
+                    foreach (var itr in auras)
                     {
-                        if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
+                        Aura aura = itr.Value.GetBase();
+                        if (aura != null)
                         {
-                            aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                            // Remove dummys from rider (Necessary for updating visual shields)
-                            Unit rider = target.GetCharmer();
-                            if (rider != null)
+                            if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
                             {
-                                Aura defend = rider.GetAura(aura.GetId());
-                                if (defend != null)
-                                    defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                // Remove dummys from rider (Necessary for updating visual shields)
+                                Unit rider = target.GetCharmer();
+                                if (rider != null)
+                                {
+                                    Aura defend = rider.GetAura(aura.GetId());
+                                    defend?.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
+                    break;
                 }
-                break;
-            }
             default:
                 break;
         }
@@ -2645,7 +2623,7 @@ class spell_gen_obsidian_armor : AuraScript
     {
         PreventDefaultAction();
 
-        uint spellId = 0;
+        uint spellId;
         switch (SharedConst.GetFirstSchoolInMask(eventInfo.GetSchoolMask()))
         {
             case SpellSchools.Holy:
@@ -2800,8 +2778,7 @@ class spell_gen_player_say : SpellScript
     {
         // Note: target here is always player; caster here is gameobject, creature or player (self cast)
         Unit target = GetHitUnit();
-        if (target != null)
-            target.Say((uint)GetEffectValue(), target);
+        target?.Say((uint)GetEffectValue(), target);
     }
 
     public override void Register()
@@ -2890,7 +2867,7 @@ class spell_gen_pet_summoned : SpellScript
         if (player.GetLastPetNumber() != 0)
         {
             PetType newPetType = (player.GetClass() == Class.Hunter) ? PetType.Hunter : PetType.Summon;
-            Pet newPet = new Pet(player, newPetType);
+            Pet newPet = new(player, newPetType);
             if (newPet.LoadPetFromDB(player, 0, player.GetLastPetNumber(), true))
             {
                 // revive the pet if it is dead
@@ -3154,7 +3131,7 @@ class spell_gen_remove_on_full_health_pct : AuraScript
 
 class ReplenishmentCheck
 {
-    public bool Invoke(WorldObject obj)
+    public static bool Invoke(WorldObject obj)
     {
         Unit target = obj.ToUnit();
         if (target != null)
@@ -3181,7 +3158,7 @@ class spell_gen_replenishment : SpellScript
             }
         }
 
-        targets.RemoveAll(new ReplenishmentCheck().Invoke);
+        targets.RemoveAll(ReplenishmentCheck.Invoke);
 
         byte maxTargets = 10;
 
@@ -3360,7 +3337,7 @@ class spell_gen_seaforium_blast : SpellScript
 [Script]
 class spell_gen_spectator_cheer_trigger : SpellScript
 {
-    static Emote[] EmoteArray = [Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud];
+    static readonly Emote[] EmoteArray = [Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud];
 
     void HandleDummy(uint effIndex)
     {
@@ -3388,10 +3365,12 @@ class spell_gen_spirit_healer_res : SpellScript
         Unit target = GetHitUnit();
         if (target != null)
         {
-            NPCInteractionOpenResult spiritHealerConfirm = new();
-            spiritHealerConfirm.Npc = target.GetGUID();
-            spiritHealerConfirm.InteractionType = PlayerInteractionType.SpiritHealer;
-            spiritHealerConfirm.Success = true;
+            NPCInteractionOpenResult spiritHealerConfirm = new()
+            {
+                Npc = target.GetGUID(),
+                InteractionType = PlayerInteractionType.SpiritHealer,
+                Success = true
+            };
             originalCaster.SendPacket(spiritHealerConfirm);
         }
     }
@@ -3605,7 +3584,7 @@ class spell_pvp_trinket_wotf_shared_cd(uint triggeredSpellId) : SpellScript()
 [Script]
 class spell_gen_turkey_marker : AuraScript
 {
-    List<uint> _applyTimes = new();
+    readonly List<uint> _applyTimes = [];
 
     void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
@@ -3644,7 +3623,7 @@ class spell_gen_turkey_marker : AuraScript
 [Script]
 class spell_gen_upper_deck_create_foam_sword : SpellScript
 {
-    static uint[] itemId = [MiscConst.ItemFoamSwordGreen, MiscConst.ItemFoamSwordPink, MiscConst.ItemFoamSwordBlue, MiscConst.ItemFoamSwordRed, MiscConst.ItemFoamSwordYellow];
+    static readonly uint[] itemId = [MiscConst.ItemFoamSwordGreen, MiscConst.ItemFoamSwordPink, MiscConst.ItemFoamSwordBlue, MiscConst.ItemFoamSwordRed, MiscConst.ItemFoamSwordYellow];
 
     void HandleScript(uint effIndex)
     {
@@ -3855,8 +3834,7 @@ class spell_gen_eject_all_passengers : SpellScript
     void RemoveVehicleAuras()
     {
         Vehicle vehicle = GetHitUnit().GetVehicleKit();
-        if (vehicle != null)
-            vehicle.RemoveAllPassengers();
+        vehicle?.RemoveAllPassengers();
     }
 
     public override void Register()
@@ -3883,8 +3861,7 @@ class spell_gen_eject_passenger : SpellScript
         if (vehicle != null)
         {
             Unit passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
-            if (passenger != null)
-                passenger.ExitVehicle();
+            passenger?.ExitVehicle();
         }
     }
 
@@ -3904,8 +3881,7 @@ class spell_gen_eject_passenger_with_seatId(sbyte seatId) : SpellScript()
         if (vehicle != null)
         {
             Unit passenger = vehicle.GetPassenger(seatId);
-            if (passenger != null)
-                passenger.ExitVehicle();
+            passenger?.ExitVehicle();
         }
     }
 
@@ -4218,14 +4194,11 @@ class spell_gen_clear_debuffs : SpellScript
     void HandleScript(uint effIndex)
     {
         Unit target = GetHitUnit();
-        if (target != null)
+        target?.RemoveOwnedAuras(aura =>
         {
-            target.RemoveOwnedAuras(aura =>
-            {
-                SpellInfo spellInfo = aura.GetSpellInfo();
-                return !spellInfo.IsPositive() && !spellInfo.IsPassive();
-            });
-        }
+            SpellInfo spellInfo = aura.GetSpellInfo();
+            return !spellInfo.IsPositive() && !spellInfo.IsPassive();
+        });
     }
 
     public override void Register()
@@ -4291,7 +4264,7 @@ class spell_corrupting_plague_aura : AuraScript
     {
         Unit owner = GetTarget();
 
-        List<Creature> targets = new();
+        List<Creature> targets = [];
         CorruptingPlagueSearcher creature_check = new(owner, 15.0f);
         CreatureListSearcher creature_searcher = new(owner, targets, creature_check);
         Cell.VisitGridObjects(owner, creature_searcher, 15.0f);
@@ -4334,7 +4307,7 @@ class spell_stasis_field_aura : AuraScript
     {
         Unit owner = GetTarget();
 
-        List<Creature> targets = new();
+        List<Creature> targets = [];
         StasisFieldSearcher creature_check = new(owner, 15.0f);
         CreatureListSearcher creature_searcher = new(owner, targets, creature_check);
         Cell.VisitGridObjects(owner, creature_searcher, 15.0f);
@@ -4376,7 +4349,7 @@ class spell_freezing_circle : SpellScript
     void HandleDamage(uint effIndex)
     {
         Unit caster = GetCaster();
-        uint spellId = 0;
+        uint spellId;
         Map map = caster.GetMap();
 
         if (map.IsDungeon())
@@ -4404,9 +4377,11 @@ class spell_gen_charmed_unit_spell_cooldown : SpellScript
         Player owner = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
         if (owner != null)
         {
-            SpellCooldownPkt spellCooldown = new();
-            spellCooldown.Caster = owner.GetGUID();
-            spellCooldown.Flags = SpellCooldownFlags.None;
+            SpellCooldownPkt spellCooldown = new()
+            {
+                Caster = owner.GetGUID(),
+                Flags = SpellCooldownFlags.None
+            };
             spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(GetSpellInfo().Id, GetSpellInfo().RecoveryTime));
             owner.SendPacket(spellCooldown);
         }
@@ -4447,8 +4422,7 @@ class spell_gen_submerged : SpellScript
     void HandleScript(uint effIndex)
     {
         Creature target = GetHitCreature();
-        if (target != null)
-            target.SetStandState(UnitStandStateType.Submerged);
+        target?.SetStandState(UnitStandStateType.Submerged);
     }
 
     public override void Register()
@@ -4463,8 +4437,7 @@ class spell_gen_decimatus_transformation_sickness : SpellScript
     void HandleScript(uint effIndex)
     {
         Unit target = GetHitUnit();
-        if (target != null)
-            target.SetHealth(target.CountPctFromMaxHealth(25));
+        target?.SetHealth(target.CountPctFromMaxHealth(25));
     }
 
     public override void Register()
@@ -4489,7 +4462,7 @@ class spell_gen_anetheron_summon_towering_infernal : SpellScript
 
 class MarkTargetHellfireFilter
 {
-    public bool Invoke(WorldObject target)
+    public static bool Invoke(WorldObject target)
     {
         Unit unit = target.ToUnit();
         if (unit != null)
@@ -4503,7 +4476,7 @@ class spell_gen_mark_of_kazrogal_hellfire : SpellScript
 {
     void FilterTargets(List<WorldObject> targets)
     {
-        targets.RemoveAll(new MarkTargetHellfireFilter().Invoke);
+        targets.RemoveAll(MarkTargetHellfireFilter.Invoke);
     }
 
     public override void Register()
@@ -4594,8 +4567,8 @@ class spell_gen_impatient_mind : AuraScript
 [Script] // 209352 - Boost 2.0 [Paladin+Priest] - Watch for Shield
 class spell_gen_boost_2_0_paladin_priest_watch_for_shield : AuraScript
 {
-    static uint SpellPowerWordShield = 17;
-    static uint SpellDivineShield = 642;
+    static readonly uint SpellPowerWordShield = 17;
+    static readonly uint SpellDivineShield = 642;
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -4694,16 +4667,10 @@ class spell_defender_of_azeroth_death_gate_selector : SpellScript
         OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
     }
 
-    struct BindLocation
+    struct BindLocation(uint mapId, float x, float y, float z, float orientation, uint areaId)
     {
-        public WorldLocation Loc;
-        public uint AreaId;
-
-        public BindLocation(uint mapId, float x, float y, float z, float orientation, uint areaId)
-        {
-            Loc = new(mapId, x, y, z, orientation);
-            AreaId = areaId;
-        }
+        public WorldLocation Loc = new(mapId, x, y, z, orientation);
+        public uint AreaId = areaId;
     }
 }
 
@@ -4719,14 +4686,11 @@ class spell_defender_of_azeroth_speak_with_mograine : SpellScript
         if (player == null)
             return;
         Creature nazgrim = GetHitUnit().FindNearestCreature(CreatureIds.Nazgrim, 10.0f);
-        if (nazgrim != null)
-            nazgrim.HandleEmoteCommand(Emote.OneshotPoint, player);
+        nazgrim?.HandleEmoteCommand(Emote.OneshotPoint, player);
         Creature trollbane = GetHitUnit().FindNearestCreature(CreatureIds.Trollbane, 10.0f);
-        if (trollbane != null)
-            trollbane.HandleEmoteCommand(Emote.OneshotPoint, player);
+        trollbane?.HandleEmoteCommand(Emote.OneshotPoint, player);
         Creature whitemane = GetHitUnit().FindNearestCreature(CreatureIds.Whitemane, 10.0f);
-        if (whitemane != null)
-            whitemane.HandleEmoteCommand(Emote.OneshotPoint, player);
+        whitemane?.HandleEmoteCommand(Emote.OneshotPoint, player);
 
         // @Todo: spawntracking - show death gate for casting player
     }
@@ -4752,9 +4716,8 @@ class spell_summon_battle_pet : SpellScript
             TimeSpan duration = TimeSpan.FromSeconds(GetSpellInfo().CalcDuration(caster));
             Position pos = GetHitDest().GetPosition();
 
-            Creature summon = caster.GetMap().SummonCreature(creatureId, pos, properties, duration, caster, GetSpellInfo().Id);
-            if (summon != null)
-                summon.SetImmuneToAll(true);
+            TempSummon summon = caster.GetMap().SummonCreature(creatureId, pos, properties, duration, caster, GetSpellInfo().Id);
+            summon?.SetImmuneToAll(true);
         }
     }
 
@@ -4810,8 +4773,7 @@ class spell_gen_anchor_here : SpellScript
     void HandleScript(uint effIndex)
     {
         Creature creature = GetHitCreature();
-        if (creature != null)
-            creature.SetHomePosition(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ(), creature.GetOrientation());
+        creature?.SetHomePosition(creature.GetPositionX(), creature.GetPositionY(), creature.GetPositionZ(), creature.GetOrientation());
     }
 
     public override void Register()
@@ -4861,7 +4823,7 @@ class spell_gen_mount_check_aura : AuraScript
 [Script] // 274738 - Ancestral Call (Mag'har Orc Racial)
 class spell_gen_ancestral_call : SpellScript
 {
-    uint[] AncestralCallBuffs = [SpellIds.RictusOfTheLaughingSkull, SpellIds.ZealOfTheBurningBlade, SpellIds.FerocityOfTheFrostwolf, SpellIds.MightOfTheBlackrock];
+    readonly uint[] AncestralCallBuffs = [SpellIds.RictusOfTheLaughingSkull, SpellIds.ZealOfTheBurningBlade, SpellIds.FerocityOfTheFrostwolf, SpellIds.MightOfTheBlackrock];
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -4894,8 +4856,7 @@ class spell_gen_eject_passengers_3_8 : SpellScript
         for (sbyte i = 2; i < 8; i++)
         {
             Unit passenger = vehicle.GetPassenger(i);
-            if (passenger != null)
-                passenger.ExitVehicle();
+            passenger?.ExitVehicle();
         }
     }
 
@@ -5076,7 +5037,7 @@ class spell_gen_spirit_heal_aoe : SpellScript
 [Script] // 156758 - Spirit Heal
 class spell_gen_spirit_heal_personal : AuraScript
 {
-    uint SpellSpiritHealEffect = 156763;
+    readonly uint SpellSpiritHealEffect = 156763;
 
     void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
@@ -5354,7 +5315,7 @@ class spell_gen_comfortable_riders_barding : AuraScript
 [Script] // 297091 - Parachute
 class spell_gen_saddlechute : AuraScript
 {
-    static uint SpellParachute = 297092;
+    static readonly uint SpellParachute = 297092;
 
     public override bool Validate(SpellInfo spellInfo)
     {

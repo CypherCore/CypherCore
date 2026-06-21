@@ -99,7 +99,7 @@ namespace BNetServer
             {
                 var response = (IMessage)Activator.CreateInstance(responseType);
                 status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response);
-                Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Returned: {2} Status: {3}.", session.GetClientInfo(), request, response, status);
+                Log.outDebug(LogFilter.ServiceProtobuf, $"{session.GetClientInfo()} Client called server Method: {nameof(request)} -> {request}) Returned: {nameof(response)} -> {response} Status: {status}.");
                 if (status == 0)
                     session.SendResponse(token, response);
                 else
@@ -108,7 +108,7 @@ namespace BNetServer
             else
             {
                 status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request);
-                Log.outDebug(LogFilter.ServiceProtobuf, "{0} Client called server Method: {1}) Status: {2}.", session.GetClientInfo(), request, status);
+                Log.outDebug(LogFilter.ServiceProtobuf, $"{session.GetClientInfo()} Client called server Method:{nameof(request)} -> {request}) Status: {status}.");
                 if (status != 0)
                     session.SendResponse(token, status);
             }

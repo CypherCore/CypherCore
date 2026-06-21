@@ -162,8 +162,7 @@ class spell_warl_banish : SpellScript
         {
             // Casting Banish on a banished target will remove applied aura
             Aura banishAura = target.GetAura(GetSpellInfo().Id, GetCaster().GetGUID());
-            if (banishAura != null)
-                banishAura.Remove();
+            banishAura?.Remove();
         }
     }
 
@@ -209,7 +208,7 @@ class BilescourgeBombersEvent(Unit caster, Position srcPos, Position destPos) : 
 [Script] // 15141 - Bilescourge Bombers
 class at_warl_bilescourge_bombers(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 {
-    static byte MaxTicks = 12;
+    static readonly byte MaxTicks = 12;
 
     public override void OnCreate(Spell creatingSpell)
     {
@@ -307,8 +306,7 @@ class spell_warl_channel_demonfire_activator : AuraScript
     void ApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         Unit caster = GetCaster();
-        if (caster != null)
-            caster.CastSpell(caster, SpellIds.ChannelDemonfireActivator, new CastSpellExtraArgs()
+        caster?.CastSpell(caster, SpellIds.ChannelDemonfireActivator, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 SpellValueOverrides = { new(SpellValueMod.Duration, GetDuration()) }
@@ -347,14 +345,11 @@ class spell_warl_channel_demonfire_periodic : AuraScript
     void HandleEffectPeriodic(AuraEffect aurEff)
     {
         Unit caster = GetCaster();
-        if (caster != null)
-        {
-            caster.CastSpell(caster, SpellIds.ChannelDemonfireSelector, new CastSpellExtraArgs()
+        caster?.CastSpell(caster, SpellIds.ChannelDemonfireSelector, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringAura = aurEff
             });
-        }
     }
 
     public override void Register()
@@ -699,8 +694,10 @@ class spell_warl_devour_magic : SpellScript
     void OnSuccessfulDispel(uint effIndex)
     {
         Unit caster = GetCaster();
-        CastSpellExtraArgs args = new();
-        args.TriggerFlags = TriggerCastFlags.FullMask;
+        CastSpellExtraArgs args = new()
+        {
+            TriggerFlags = TriggerCastFlags.FullMask
+        };
         args.AddSpellMod(SpellValueMod.BasePoint0, GetEffectInfo(1).CalcValue(caster));
 
         caster.CastSpell(caster, SpellIds.DevourMagicHeal, args);
@@ -729,8 +726,7 @@ class spell_warl_doom : AuraScript
     void HandleEffectPeriodic(AuraEffect aurEff)
     {
         Unit caster = GetCaster();
-        if (caster != null)
-            caster.CastSpell(caster, SpellIds.DoomEnergize, true);
+        caster?.CastSpell(caster, SpellIds.DoomEnergize, true);
     }
 
     public override void Register()
@@ -754,8 +750,7 @@ class spell_warl_drain_soul : AuraScript
             return;
 
         Unit caster = GetCaster();
-        if (caster != null)
-            caster.CastSpell(caster, SpellIds.DrainSoulEnergize, true);
+        caster?.CastSpell(caster, SpellIds.DrainSoulEnergize, true);
     }
 
     void CalculateDamage(AuraEffect aurEff, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
@@ -779,8 +774,7 @@ class spell_warl_haunt : AuraScript
         if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Death)
         {
             Unit caster = GetCaster();
-            if (caster != null)
-                caster.GetSpellHistory().ResetCooldown(GetId(), true);
+            caster?.GetSpellHistory().ResetCooldown(GetId(), true);
         }
     }
 
@@ -822,12 +816,13 @@ class spell_warl_health_funnel : AuraScript
         uint damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
 
         Player modOwner = caster.GetSpellModOwner();
-        if (modOwner != null)
-            modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
+        modOwner?.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
 
-        SpellNonMeleeDamage damageInfo = new(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId());
-        damageInfo.periodicLog = true;
-        damageInfo.damage = damage;
+        SpellNonMeleeDamage damageInfo = new(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId())
+        {
+            periodicLog = true,
+            damage = damage
+        };
         caster.DealSpellDamage(damageInfo, false);
         caster.SendSpellNonMeleeDamageLog(damageInfo);
     }
@@ -939,7 +934,7 @@ class spell_warl_rain_of_fire : AuraScript
     void HandleDummyTick(AuraEffect aurEff)
     {
         List<AreaTrigger> rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(SpellIds.RainOfFire);
-        List<ObjectGuid> targetsInRainOfFire = new();
+        List<ObjectGuid> targetsInRainOfFire = [];
 
         foreach (AreaTrigger rainOfFireAreaTrigger in rainOfFireAreaTriggers)
         {
@@ -1041,12 +1036,9 @@ class spell_warl_sayaad_precast_disorientation : SpellScript
             return;
 
         Pet pet = player.GetPet();
-        if (pet != null)
-        {
-            pet.CastSpell(pet, SharedConst.SpellPetSummoningDisorientation, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+        pet?.CastSpell(pet, SharedConst.SpellPetSummoningDisorientation, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
                 .SetOriginalCaster(pet.GetGUID())
                 .SetTriggeringSpell(GetSpell()));
-        }
     }
 
     public override void Register()
@@ -1151,8 +1143,7 @@ class spell_warl_seed_of_corruption_dummy_aura : AuraScript
     void OnPeriodic(AuraEffect aurEff)
     {
         Unit caster = GetCaster();
-        if (caster != null)
-            caster.CastSpell(GetTarget(), SpellIds.SeedOfCorruptionDamage, aurEff);
+        caster?.CastSpell(GetTarget(), SpellIds.SeedOfCorruptionDamage, aurEff);
     }
 
     void CalculateBuffer(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
@@ -1435,7 +1426,7 @@ class spell_warl_soul_swap : SpellScript
 [Script] // 86211 - Soul Swap Override - Also acts as a dot container
 class spell_warl_soul_swap_override : AuraScript
 {
-    List<uint> _dotList = new();
+    readonly List<uint> _dotList = [];
     Unit _swapCaster;
 
     //! Forced to, pure virtual functions must have a body when linking
@@ -1517,7 +1508,7 @@ class spell_warl_soul_swap_exhale : SpellScript
         GetCaster().CastSpell(GetCaster(), SpellIds.SoulSwapModCost, true);
         bool hasGlyph = GetCaster().HasAura(SpellIds.GlyphOfSoulSwap);
 
-        List<uint> dotList = new();
+        List<uint> dotList = [];
         Unit swapSource = null;
         Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
         if (swapOverride != null)
