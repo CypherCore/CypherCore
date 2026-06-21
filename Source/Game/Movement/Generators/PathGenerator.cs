@@ -29,7 +29,7 @@ namespace Game.Movement
             if (Global.DisableMgr.IsPathfindingEnabled(_source.GetMapId()))
             {
                 _navMeshQuery = Global.MMapMgr.GetNavMeshQuery(mapId, _source.GetMapId(), _source.GetInstanceId());
-                _navMesh = _navMeshQuery?.getAttachedNavMesh() ?? Global.MMapMgr.GetNavMesh(mapId);
+                _navMesh = _navMeshQuery?.getAttachedNavMesh() ?? Global.MMapMgr.GetNavMesh(mapId, _source.GetInstanceId());
             }
             CreateFilter();
         }

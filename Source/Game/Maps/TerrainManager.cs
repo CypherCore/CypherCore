@@ -278,11 +278,18 @@ namespace Game.Maps
                 childTerrain.LoadMMapInstanceImpl(mapId, instanceId);
         }
 
+        public void LoadMMap(uint instanceId, int gx, int gy)
+        {
+            LoadMMapImpl(instanceId, gx, gy);
+
+            foreach (var childTerrain in _childTerrain)
+                childTerrain.LoadMMapImpl(instanceId, gx, gy);
+        }
+
         public void LoadMapAndVMapImpl(int gx, int gy)
         {
             LoadMap(gx, gy);
             LoadVMap(gx, gy);
-            LoadMMap(gx, gy);
 
             foreach (TerrainInfo childTerrain in _childTerrain)
                 childTerrain.LoadMapAndVMapImpl(gx, gy);
@@ -341,12 +348,12 @@ namespace Game.Maps
             }
         }
 
-        public void LoadMMap(int gx, int gy)
+        public void LoadMMapImpl(uint instanceId, int gx, int gy)
         {
             if (!Global.DisableMgr.IsPathfindingEnabled(GetId()))
                 return;
 
-            MMapLoadResult mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
+            MMapLoadResult mmapLoadResult = Global.MMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), instanceId, gx, gy);
             switch (mmapLoadResult)
             {
                 case MMapLoadResult.Success:

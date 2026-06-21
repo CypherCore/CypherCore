@@ -217,6 +217,7 @@ namespace Game.Maps
                 int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
 
                 m_terrain.LoadMapAndVMap(gx, gy);
+                m_terrain.LoadMMap(GetInstanceId(), gx, gy);
             }
         }
 

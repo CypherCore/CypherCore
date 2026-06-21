@@ -518,7 +518,7 @@ namespace Game.Chat
 
             bool haveMap = TerrainInfo.ExistMap(mapId, gridX, gridY);
             bool haveVMap = TerrainInfo.ExistVMap(mapId, gridX, gridY);
-            bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
+            bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(obj.GetMapId(), obj.GetInstanceId()) != null);
 
             if (haveVMap)
             {
