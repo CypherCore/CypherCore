@@ -386,7 +386,7 @@ namespace Game.Networking.Packets
         public string CustomName = "";
     }
 
-    class GarrisonEncounter
+    public class GarrisonEncounter
     {
         public int GarrEncounterID;
         public List<int> Mechanics = new();
@@ -411,7 +411,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonMissionReward
+    public struct GarrisonMissionReward
     {
         public void Write(WorldPacket data)
         {
@@ -439,7 +439,7 @@ namespace Game.Networking.Packets
         public ItemInstance ItemInstance;
     }
 
-    class GarrisonMission
+    public class GarrisonMission
     {
         public ulong DbID;
         public int MissionRecID;
@@ -486,7 +486,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonMissionBonusAbility
+    public struct GarrisonMissionBonusAbility
     {
         public void Write(WorldPacket data)
         {
@@ -498,7 +498,7 @@ namespace Game.Networking.Packets
         public long StartTime;
     }
 
-    struct GarrisonTalentSocketData
+    public struct GarrisonTalentSocketData
     {
         public int SoulbindConduitID;
         public int SoulbindConduitRank;
@@ -510,7 +510,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonTalent
+    public struct GarrisonTalent
     {
         public void Write(WorldPacket data)
         {
@@ -532,7 +532,7 @@ namespace Game.Networking.Packets
         public GarrisonTalentSocketData? Socket;
     }
 
-    struct GarrisonCollectionEntry
+    public struct GarrisonCollectionEntry
     {
         public int EntryID;
         public int Rank;
@@ -544,7 +544,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class GarrisonCollection
+    public class GarrisonCollection
     {
         public int Type;
         public List<GarrisonCollectionEntry> Entries = new();
@@ -558,7 +558,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonEventEntry
+    public struct GarrisonEventEntry
     {
         public int EntryID;
         public long EventValue;
@@ -570,7 +570,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class GarrisonEventList
+    public class GarrisonEventList
     {
         public int Type;
         public List<GarrisonEventEntry> Events = new();
@@ -584,7 +584,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    struct GarrisonSpecGroup
+    public struct GarrisonSpecGroup
     {
         public int ChrSpecializationID;
         public int SoulbindID;
@@ -596,7 +596,7 @@ namespace Game.Networking.Packets
         }
     }
 
-    class GarrisonInfo
+    public class GarrisonInfo
     {
         public void Write(WorldPacket data)
         {

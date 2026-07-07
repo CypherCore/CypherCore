@@ -13,9 +13,18 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GetGarrisonInfo)]
         void HandleGetGarrisonInfo(GetGarrisonInfo getGarrisonInfo)
         {
+            GetGarrisonInfoResult garrisonInfoResult = new();
+            garrisonInfoResult.FactionIndex = (sbyte)Garrison.GetFaction(_player.GetTeam());
+
             Garrison garrison = _player.GetGarrison();
             if (garrison != null)
-                garrison.SendInfo();
+            {
+                var garrisonInfo = new GarrisonInfo();
+                garrison.BuildInfoPacket(garrisonInfo);
+                garrisonInfoResult.Garrisons.Add(garrisonInfo);
+            }
+
+            SendPacket(garrisonInfoResult);
         }
 
         [WorldPacketHandler(ClientOpcodes.GarrisonPurchaseBuilding)]

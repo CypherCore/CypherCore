@@ -278,9 +278,11 @@ namespace Game.Garrisons
                 _owner.TeleportTo(new WorldLocation((uint)map.ParentMapID, _owner), TeleportToOptions.Seamless);
         }
 
+        public static uint GetFaction(Team team) { return team == Team.Horde ? GarrisonFactionIndex.Horde : GarrisonFactionIndex.Alliance; }
+
         public uint GetFaction()
         {
-            return _owner.GetTeam() == Team.Horde ? GarrisonFactionIndex.Horde : GarrisonFactionIndex.Alliance;
+            return GetFaction(_owner.GetTeam());
         }
 
         public GarrisonType GetGarrisonType() { return GarrisonType.Garrison; }
@@ -513,12 +515,8 @@ namespace Game.Garrisons
             return count;
         }
 
-        public void SendInfo()
+        public void BuildInfoPacket(GarrisonInfo garrison)
         {
-            GetGarrisonInfoResult garrisonInfo = new();
-            garrisonInfo.FactionIndex = (sbyte)GetFaction();
-
-            GarrisonInfo garrison = new();
             garrison.GarrTypeID = GetGarrisonType();
             garrison.GarrSiteID = _siteLevel.GarrSiteID;
             garrison.GarrSiteLevelID = _siteLevel.Id;
@@ -532,10 +530,6 @@ namespace Game.Garrisons
 
             foreach (var follower in _followers.Values)
                 garrison.Followers.Add(follower.PacketInfo);
-
-            garrisonInfo.Garrisons.Add(garrison);
-
-            _owner.SendPacket(garrisonInfo);
         }
 
         public void SendRemoteInfo()
