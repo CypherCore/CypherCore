@@ -47,6 +47,7 @@ struct SpellIds
     public const uint FireBlast = 108853;
     public const uint Firestarter = 205026;
     public const uint Flamestrike = 2120;
+    public const uint FlameAccelerant = 453283;
     public const uint FlamePatchAreatrigger = 205470;
     public const uint FlamePatchDamage = 205472;
     public const uint FlamePatchTalent = 205037;
@@ -770,6 +771,26 @@ class spell_mage_fire_blast : SpellScript
     public override void Register()
     {
         OnCalcCritChance.Add(new(CalcCritChance));
+    }
+}
+
+[Script] // 453282 - Flame Accelerant
+class spell_mage_flame_accelerant : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.FlameAccelerant);
+    }
+
+    void HandlePeriodicTick(AuraEffect aurEff)
+    {
+        Unit target = GetTarget();
+        target.CastSpell(target, SpellIds.FlameAccelerant, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
+    }
+
+    public override void Register()
+    {
+        OnEffectPeriodic.Add(new(HandlePeriodicTick, 0, AuraType.PeriodicDummy));
     }
 }
 
