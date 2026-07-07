@@ -3753,6 +3753,10 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
+                case ModifierTreeType.PlayerIsInTimerunningSeason: // 386
+                    if (referencePlayer.m_activePlayerData.TimerunningSeasonID != reqValue)
+                        return false;
+                    break;
                 case ModifierTreeType.TargetCreatureClassificationEqual: // 389
                 {
                     Creature targetCreature = refe?.ToCreature();
