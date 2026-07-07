@@ -584,15 +584,12 @@ namespace Scripts.Battlegrounds.StrandOfTheAncients
                     ITransport transport = boat.ToTransportBase();
                     if (transport != null)
                     {
-                        player.Relocate(Misc.SpawnPositionOnTransport[_attackers]);
-                        transport.AddPassenger(player);
-                        player.m_movementInfo.transport.pos.Relocate(Misc.SpawnPositionOnTransport[_attackers]);
-                        Misc.SpawnPositionOnTransport[_attackers].GetPosition(out float x, out float y, out float z, out float o);
-                        transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                        player.Relocate(x, y, z, o);
+                        transport.AddPassenger(player, Misc.SpawnPositionOnTransport[_attackers]);
+                        Position position = transport.GetPositionWithOffset(player.m_movementInfo.transport.pos);
+                        player.Relocate(position);
 
                         if (player.IsInWorld)
-                            player.NearTeleportTo(x, y, z, o);
+                            player.NearTeleportTo(position);
                     }
                 }
             }

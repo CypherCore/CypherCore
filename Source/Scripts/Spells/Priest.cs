@@ -27,6 +27,7 @@ struct SpellIds
     public const uint AtonementEffect = 194384;
     public const uint AtonementHeal = 81751;
     public const uint Benediction = 193157;
+    public const uint Benevolence = 415416;
     public const uint BlazeOfLight = 215768;
     public const uint BlazeOfLightIncrease = 355851;
     public const uint BlazeOfLightDecrease = 356084;
@@ -134,6 +135,7 @@ struct SpellIds
     public const uint PurgeTheWicked = 204197;
     public const uint PurgeTheWickedDummy = 204215;
     public const uint PurgeTheWickedPeriodic = 204213;
+    public const uint Rapture = 47536;
     public const uint Renew = 139;
     public const uint RenewedHope = 197469;
     public const uint RenewedHopeEffect = 197470;
@@ -167,7 +169,7 @@ struct SpellIds
     public const uint ThePenitentAura = 200347;
     public const uint TrailOfLightHeal = 234946;
     public const uint Trinity = 214205;
-    public const uint TrinityEffect = 290793;
+    public const uint TrinityEffect = 214206;
     public const uint UltimatePenitence = 421453;
     public const uint UltimatePenitenceDamage = 421543;
     public const uint UltimatePenitenceHeal = 421544;
@@ -360,8 +362,8 @@ class spell_pri_atonement : AuraScript
 
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.AtonementHeal, SpellIds.SinsOfTheMany, SpellIds.TrinityEffect)
-            && ValidateSpellEffect((spellInfo.Id, 1), (SpellIds.SinsOfTheMany, 2), (SpellIds.TrinityEffect, 0));
+        return ValidateSpellInfo(SpellIds.AtonementHeal, SpellIds.SinsOfTheMany)
+            && ValidateSpellEffect((spellInfo.Id, 1), (SpellIds.SinsOfTheMany, 2));
     }
 
     bool CheckProc(ProcEventInfo eventInfo)
@@ -385,7 +387,6 @@ class spell_pri_atonement : AuraScript
         _appliedAtonements.Add(target);
 
         UpdateSinsOfTheManyValue();
-        UpdateTrinityEffect();
     }
 
     public void RemoveAtonementTarget(ObjectGuid target)
@@ -393,7 +394,6 @@ class spell_pri_atonement : AuraScript
         _appliedAtonements.Remove(target);
 
         UpdateSinsOfTheManyValue();
-        UpdateTrinityEffect();
     }
 
     public List<ObjectGuid> GetAtonementTargets()
@@ -451,16 +451,6 @@ class spell_pri_atonement : AuraScript
                 sinOfTheMany.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, (byte)(damageByStack.Length - 1))]);
         }
     }
-
-    void UpdateTrinityEffect()
-    {
-        Unit priest = GetUnitOwner();
-        AuraEffect trinity = priest.GetAuraEffect(SpellIds.TrinityEffect, 0);
-        if (trinity != null && _appliedAtonements.Count >= trinity.GetAmount())
-            priest.CastSpell(priest, SpellIds.TrinityEffect, new CastSpellExtraArgs() { TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError });
-        else
-            priest.RemoveAurasDueToSpell(SpellIds.TrinityEffect);
-    }
 }
 
 [Script] // 81751 - Atonement (Heal)
@@ -496,7 +486,7 @@ class spell_pri_atonement_effect : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.PowerWordRadiance, SpellIds.PowerWordShield)
+        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.TrinityEffect, SpellIds.PowerWordRadiance, SpellIds.PowerWordShield)
             && ValidateSpellEffect((SpellIds.PowerWordRadiance, 3), (SpellIds.Indemnity, 0));
     }
 
@@ -505,6 +495,15 @@ class spell_pri_atonement_effect : SpellScript
         Unit caster = GetCaster();
         if (!caster.HasAura(SpellIds.Atonement))
             return false;
+
+        // only apply Trinity if the Priest has both Trinity and Atonement and the triggering spell is Power Word: Shield.
+        if (caster.HasAura(SpellIds.Trinity))
+        {
+            if (GetSpellInfo().Id != SpellIds.PowerWordShield)
+                return false;
+
+            _effectSpellId = SpellIds.TrinityEffect;
+        }
 
         return true;
     }
@@ -1193,7 +1192,7 @@ class spell_pri_evangelism : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.AtonementEffect);
+        return ValidateSpellInfo(SpellIds.Trinity, SpellIds.AtonementEffect, SpellIds.TrinityEffect);
     }
 
     void HandleScriptEffect(uint effIndex)
@@ -1201,7 +1200,9 @@ class spell_pri_evangelism : SpellScript
         Unit caster = GetCaster();
         Unit target = GetHitUnit();
 
-        Aura atonementAura = target.GetAura(SpellIds.AtonementEffect, caster.GetGUID());
+        Aura atonementAura = caster.HasAura(SpellIds.Trinity)
+            ? target.GetAura(SpellIds.TrinityEffect, caster.GetGUID())
+            : target.GetAura(SpellIds.AtonementEffect, caster.GetGUID());
         if (atonementAura == null)
             return;
 
@@ -1792,12 +1793,12 @@ class spell_pri_pain_transformation : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.AtonementEffect, SpellIds.PainTransformation, SpellIds.PainTransformationHeal);
+        return ValidateSpellInfo(SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.PainTransformation, SpellIds.PainTransformationHeal);
     }
 
     public override bool Load()
     {
-        return GetCaster().HasAura(SpellIds.PainTransformation);
+        return GetCaster().HasAura(SpellIds.PainTransformation) && !GetCaster().HasAura(SpellIds.Trinity);
     }
 
     void HandleHit(uint effIndex)
@@ -2101,8 +2102,8 @@ class spell_pri_power_word_shield : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.AtonementEffect, SpellIds.ShieldDiscipline, SpellIds.ShieldDisciplineEffect, SpellIds.PvpRulesEnabledHardcoded)
-            && ValidateSpellEffect((SpellIds.MasteryGrace, 0));
+        return ValidateSpellInfo(SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.AtonementEffect, SpellIds.TrinityEffect, SpellIds.ShieldDiscipline, SpellIds.ShieldDisciplineEffect, SpellIds.PvpRulesEnabledHardcoded)
+            && ValidateSpellEffect((SpellIds.MasteryGrace, 0), (SpellIds.Rapture, 1), (SpellIds.Benevolence, 0), (SpellIds.DivineAegis, 1));
     }
 
     void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
@@ -2112,7 +2113,7 @@ class spell_pri_power_word_shield : AuraScript
         Unit caster = GetCaster();
         if (caster != null)
         {
-            float modifiedAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 4.638f;
+            float modifiedAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 3.36f;
 
             Player player = caster.ToPlayer();
             if (player != null)
@@ -2122,7 +2123,7 @@ class spell_pri_power_word_shield : AuraScript
                 // Mastery: Grace (Tbd: move into DoEffectCalcDamageAndHealing hook with a new SpellScript and AuraScript).
                 AuraEffect masteryGraceEffect = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
                 if (masteryGraceEffect != null)
-                    if (GetUnitOwner().HasAura(SpellIds.AtonementEffect))
+                    if (GetUnitOwner().HasAura(SpellIds.AtonementEffect) || GetUnitOwner().HasAura(SpellIds.TrinityEffect))
                         MathFunctions.AddPct(ref modifiedAmount, masteryGraceEffect.GetAmount());
 
                 switch (player.GetPrimarySpecialization())
@@ -2144,7 +2145,24 @@ class spell_pri_power_word_shield : AuraScript
             float critChanceTaken = GetUnitOwner().SpellCritChanceTaken(caster, null, auraEffect, GetSpellInfo().GetSchoolMask(), critChanceDone, GetSpellInfo().GetAttackType());
 
             if (RandomHelper.randChance(critChanceTaken))
+            {
                 modifiedAmount *= 2;
+
+                // Divine Aegis
+                AuraEffect divineEff = caster.GetAuraEffect(SpellIds.DivineAegis, 1);
+                if (divineEff != null)
+                    MathFunctions.AddPct(ref modifiedAmount, divineEff.GetAmount());
+            }
+
+            // Rapture talent (Tbd: move into DoEffectCalcDamageAndHealing hook).
+            AuraEffect raptureEffect = caster.GetAuraEffect(SpellIds.Rapture, 1);
+            if (raptureEffect != null)
+                MathFunctions.AddPct(ref modifiedAmount, raptureEffect.GetAmount());
+
+            // Benevolence talent
+            AuraEffect benevolenceEffect = caster.GetAuraEffect(SpellIds.Benevolence, 0);
+            if (benevolenceEffect != null)
+                MathFunctions.AddPct(ref modifiedAmount, benevolenceEffect.GetAmount());
 
             amount = (int)modifiedAmount;
         }
@@ -2966,7 +2984,7 @@ class spell_pri_shadow_mend : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal, SpellIds.ShadowMendPeriodicDummy);
+        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect, SpellIds.Trinity, SpellIds.MasochismTalent, SpellIds.MasochismPeriodicHeal, SpellIds.ShadowMendPeriodicDummy);
     }
 
     void HandleEffectHit()
