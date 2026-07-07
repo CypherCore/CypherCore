@@ -70,7 +70,7 @@ namespace Game.Chat
             if (!player.IsGameMaster())
                 handler.SendSysMessage("Enable GM mode to see the path points.");
 
-            for (uint i = 0; i < pointPath.Length; ++i)
+            for (int i = 0; i < pointPath.Length; ++i)
                 player.SummonCreature(1, pointPath[i].X, pointPath[i].Y, pointPath[i].Z, 0, TempSummonType.TimedDespawn, TimeSpan.FromSeconds(9));
 
             return true;

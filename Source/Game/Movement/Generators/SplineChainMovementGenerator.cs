@@ -171,7 +171,7 @@ namespace Game.Movement
 
             MoveSplineInit init = new(owner);
             if (nodeCount > 2)
-                init.MovebyPath(path.ToArray());
+                init.MovebyPath(path);
             else
                 init.MoveTo(path[1], false, true);
 

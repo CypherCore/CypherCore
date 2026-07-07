@@ -1193,7 +1193,7 @@ namespace Game.Entities
             InitSplines(rotatedPoints.ToArray(), overrideSpeed, speedIsTimeInSeconds);
         }
 
-        public void InitSplines(Vector3[] splinePoints, float? overrideSpeed = null, bool? speedIsTimeInSeconds = null)
+        public void InitSplines(Span<Vector3> splinePoints, float? overrideSpeed = null, bool? speedIsTimeInSeconds = null)
         {
             if (splinePoints.Length < 2)
                 return;

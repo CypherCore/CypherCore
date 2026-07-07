@@ -282,7 +282,7 @@ namespace Game.Movement
 
         public void SetUnlimitedSpeed() { args.flags.SetUnsetFlag(MoveSplineFlagEnum.UnlimitedSpeed, true); }
 
-        public void MovebyPath(Vector3[] path, int pointId = 0)
+        public void MovebyPath(Span<Vector3> path, int pointId = 0)
         {
             args.path_Idx_offset = pointId;
             TransportPathTransform transform = new(unit, args.TransformForTransport);
@@ -302,6 +302,7 @@ namespace Game.Movement
             args.parabolic_amplitude = amplitude;
             args.vertical_acceleration = 0.0f;
             args.flags.EnableParabolic();
+            args.animTier = null;
         }
 
         public void SetParabolicVerticalAcceleration(float vertical_acceleration, int start_point)
@@ -310,14 +311,17 @@ namespace Game.Movement
             args.parabolic_amplitude = 0.0f;
             args.vertical_acceleration = vertical_acceleration;
             args.flags.EnableParabolic();
+            args.animTier = null;
         }
 
         public void SetAnimation(AnimTier anim, uint tierTransitionId = 0, int transitionStartPoint = 0)
         {
             args.effect_start_point = transitionStartPoint;
-            args.animTier = new();
-            args.animTier.TierTransitionId = tierTransitionId;
-            args.animTier.AnimTier = (byte)anim;
+            args.animTier = new()
+            {
+                TierTransitionId = tierTransitionId,
+                AnimTier = (byte)anim
+            };
             if (tierTransitionId == 0)
                 args.flags.EnableAnimation();
         }

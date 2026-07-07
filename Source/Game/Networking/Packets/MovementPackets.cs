@@ -1467,7 +1467,7 @@ namespace Game.Networking.Packets
     {
         public int TierTransitionID;
         public uint StartTime;
-        public uint EndTime;
+        public uint ExtraDuration;
         public byte AnimTier;
 
         public void Write(WorldPacket data)
@@ -1475,7 +1475,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(TierTransitionID);
             data.WriteUInt8(AnimTier);
             data.WriteUInt32(StartTime);
-            data.WriteUInt32(EndTime);
+            data.WriteUInt32(ExtraDuration);
         }
     }
 

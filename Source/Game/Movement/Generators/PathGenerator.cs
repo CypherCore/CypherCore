@@ -1039,7 +1039,7 @@ namespace Game.Movement
         public Vector3 GetEndPosition() { return _endPosition; }
         public Vector3 GetActualEndPosition() { return _actualEndPosition; }
 
-        public Vector3[] GetPath()
+        public Span<Vector3> GetPath()
         {
             return _pathPoints;
         }
