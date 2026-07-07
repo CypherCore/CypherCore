@@ -18,7 +18,7 @@ namespace Game.Movement
             path_Idx_offset = 0;
             velocity = 0.0f;
             parabolic_amplitude = 0.0f;
-            effect_start_time_percent = 0.0f;
+            effect_start_point = 0;
             splineId = 0;
             initialOrientation = 0.0f;
             HasVelocity = false;
@@ -32,8 +32,7 @@ namespace Game.Movement
         public float velocity;
         public float parabolic_amplitude;
         public float vertical_acceleration;
-        public float effect_start_time_percent; // fraction of total spline duration
-        public TimeSpan effect_start_time;  // absolute value
+        public int effect_start_point;
         public uint splineId;
         public float initialOrientation;
         public SpellEffectExtraData spellEffectExtra;
@@ -63,7 +62,7 @@ namespace Game.Movement
                 return false;
             if (!CHECK(velocity >= 0.01f, unit.GetDebugInfo()))
                 return false;
-            if (!CHECK(effect_start_time_percent >= 0.0f && effect_start_time_percent <= 1.0f, unit.GetDebugInfo()))
+            if (!CHECK(effect_start_point < path.Count, unit.GetDebugInfo()))
                 return false;
             if (!CHECK(_checkPathLengths(), unit.GetGUID().ToString()))
                 return false;

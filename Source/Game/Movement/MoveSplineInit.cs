@@ -296,26 +296,25 @@ namespace Game.Movement
             MoveTo(new Vector3(x, y, z), generatePath, forceDest);
         }
 
-        public void SetParabolic(float amplitude, float start_time)
+        public void SetParabolic(float amplitude, int start_point)
         {
-            args.effect_start_time_percent = start_time;
+            args.effect_start_point = start_point;
             args.parabolic_amplitude = amplitude;
             args.vertical_acceleration = 0.0f;
             args.flags.EnableParabolic();
         }
 
-        public void SetParabolicVerticalAcceleration(float vertical_acceleration, float start_time)
+        public void SetParabolicVerticalAcceleration(float vertical_acceleration, int start_point)
         {
-            args.effect_start_time_percent = start_time;
+            args.effect_start_point = start_point;
             args.parabolic_amplitude = 0.0f;
             args.vertical_acceleration = vertical_acceleration;
             args.flags.EnableParabolic();
         }
 
-        public void SetAnimation(AnimTier anim, uint tierTransitionId = 0, TimeSpan transitionStartTime = default)
+        public void SetAnimation(AnimTier anim, uint tierTransitionId = 0, int transitionStartPoint = 0)
         {
-            args.effect_start_time_percent = 0.0f;
-            args.effect_start_time = transitionStartTime;
+            args.effect_start_point = transitionStartPoint;
             args.animTier = new();
             args.animTier.TierTransitionId = tierTransitionId;
             args.animTier.AnimTier = (byte)anim;
