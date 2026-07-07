@@ -96,6 +96,18 @@ namespace System.Collections.Generic
             }
         }
 
+        public static void Resize<T>(this List<T> list, uint size, T value)
+        {
+            int cur = list.Count;
+            if (size < cur)
+                list.RemoveRange((int)size, cur - (int)size);
+            else
+            {
+                for (var i = list.Count; i < size; ++i)
+                    list.Add(value);
+            }
+        }
+
         public static void RandomResize<T>(this IList<T> list, uint size)
         {
             int listSize = list.Count;

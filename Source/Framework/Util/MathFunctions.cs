@@ -345,13 +345,10 @@ public static class MathFunctions
         return true;
     }
 
-    public static Matrix4x4 ToMatrix(this Quaternion _q)
+    public static Matrix4x4 ToRotationMatrix(this Quaternion _q)
     {
-        // Implementation from Watt and Watt, pg 362
-        // See also http://www.flipcode.com/documents/matrfaq.html#Q54
         Quaternion q = _q;
         q *= 1.0f / MathF.Sqrt((q.X * q.X) + (q.Y * q.Y) + (q.Z * q.Z) + (q.W * q.W));
-
         float xx = 2.0f * q.X * q.X;
         float xy = 2.0f * q.X * q.Y;
         float xz = 2.0f * q.X * q.Z;

@@ -407,6 +407,7 @@ public enum LogFilter
     Instance,
     Lfg,
     Loot,
+    MapGen,
     MapsScript,
     Maps,
     Misc,

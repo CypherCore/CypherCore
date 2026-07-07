@@ -260,7 +260,7 @@ namespace System
             //        cy*sz           cx*cz+sx*sy*sz -cz*sx+cx*sy*sz
             //       -sy              cy*sx           cx*cy
 
-            var matrix = quaternion.ToMatrix();
+            var matrix = quaternion.ToRotationMatrix();
             if (matrix.M31 < 1.0)
             {
                 if (matrix.M31 > -1.0)
@@ -523,6 +523,17 @@ namespace System
             byte[] result = reader.ReadBytes(Unsafe.SizeOf<T>());
 
             return Unsafe.ReadUnaligned<T>(ref result[0]);
+        }
+
+        public static void Write<T>(this BinaryWriter writer, T value) where T : struct
+        {
+            byte[] buffer = new byte[Unsafe.SizeOf<T>()];
+
+            ref byte destRef = ref buffer[0];
+
+            Unsafe.WriteUnaligned(ref destRef, value);
+
+            writer.Write(buffer);
         }
         #endregion
     }

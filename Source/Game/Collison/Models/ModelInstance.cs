@@ -94,8 +94,7 @@ namespace Game.Collision
 
             iModel = model;
 
-            Extensions.fromEulerAnglesZYX(MathFunctions.PI * spawn.iRot.Y / 180.0f, MathFunctions.PI * spawn.iRot.X / 180.0f, MathFunctions.PI * spawn.iRot.Z / 180.0f).Inverse(out iInvRot);
-
+            iInvRot = Extensions.fromEulerAnglesZYX(MathFunctions.PI * spawn.iRot.Y / 180.0f, MathFunctions.PI * spawn.iRot.X / 180.0f, MathFunctions.PI * spawn.iRot.Z / 180.0f).Inverse();
             iInvScale = 1.0f / iScale;
         }
 
@@ -176,6 +175,8 @@ namespace Game.Collision
         }
 
         public void SetUnloaded() { iModel = null; }
+
+        public Matrix4x4 GetInvRot() { return iInvRot; }
 
         public WorldModel GetWorldModel() { return iModel; }
 

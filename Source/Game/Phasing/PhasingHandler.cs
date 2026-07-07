@@ -535,8 +535,8 @@ namespace Game
                 return phaseShift.VisibleMapIds.First().Key;
 
             GridCoord gridCoord = GridDefines.ComputeGridCoord(x, y);
-            int gx = (int)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
-            int gy = (int)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
+            uint gx = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
+            uint gy = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
 
             foreach (var visibleMap in phaseShift.VisibleMapIds)
                 if (terrain.HasChildTerrainGridFile(visibleMap.Key, gx, gy))

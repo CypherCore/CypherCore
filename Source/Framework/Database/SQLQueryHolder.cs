@@ -62,7 +62,7 @@ namespace Framework.Database
         public Task<SQLQueryHolder<R>> GetFuture() { return m_result.Task; }
     }
 
-    public class SQLQueryHolderCallback<R> : ISqlCallback
+    public class SQLQueryHolderCallback<R> : IAsyncCallback
     {
         Task<SQLQueryHolder<R>> m_future;
         Action<SQLQueryHolder<R>> m_callback;
@@ -77,7 +77,7 @@ namespace Framework.Database
             m_callback = callback;
         }
 
-        public bool InvokeIfReady()
+        public bool InvokeAsyncCallbackIfReady()
         {
             if (m_future != null && m_future.Wait(0))
             {

@@ -110,7 +110,7 @@ namespace Framework.Database
         TaskCompletionSource<bool> m_result = new();
     }
 
-    public class TransactionCallback : ISqlCallback
+    public class TransactionCallback : IAsyncCallback
     {
         public TransactionCallback(Task<bool> future)
         {
@@ -122,7 +122,7 @@ namespace Framework.Database
             m_callback = callback;
         }
 
-        public bool InvokeIfReady()
+        public bool InvokeAsyncCallbackIfReady()
         {
             if (m_future != null && m_future.Wait(0))
             {

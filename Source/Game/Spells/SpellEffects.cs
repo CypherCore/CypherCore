@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Game.BattleGrounds;
 using Game.BattlePets;
 using Game.Combat;
 using Game.DataStorage;

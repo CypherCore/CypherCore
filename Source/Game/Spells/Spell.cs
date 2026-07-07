@@ -6,6 +6,7 @@ using Framework.Dynamic;
 using Game.AI;
 using Game.BattleFields;
 using Game.BattleGrounds;
+using Game.Collision;
 using Game.Combat;
 using Game.Conditions;
 using Game.DataStorage;

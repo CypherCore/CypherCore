@@ -118,8 +118,8 @@ namespace Game.Maps
         {
             GridCoord p = GridDefines.ComputeGridCoord(x, y);
 
-            int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
-            int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
+            uint gx = ((MapConst.MaxGrids - 1) - p.X_coord);
+            uint gy = ((MapConst.MaxGrids - 1) - p.Y_coord);
 
             return TerrainInfo.ExistMap(mapid, gx, gy) && TerrainInfo.ExistVMap(mapid, gx, gy);
         }
@@ -175,20 +175,20 @@ namespace Game.Maps
                     var build = reader.ReadUInt32();
                     byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
                     Array.Reverse(tilesData);
-                    for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
-                        for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
+                    for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
+                        for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
                             _gridFileExists[GetBitsetIndex(gx, gy)] = tilesData[GetBitsetIndex(gx, gy)] == 49; // char of 1
 
                     return;
                 }
             }
 
-            for (int gx = 0; gx < MapConst.MaxGrids; ++gx)
-                for (int gy = 0; gy < MapConst.MaxGrids; ++gy)
+            for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
+                for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
                     _gridFileExists[GetBitsetIndex(gx, gy)] = ExistMap(GetId(), gx, gy, false);
         }
 
-        public static bool ExistMap(uint mapid, int gx, int gy, bool log = true)
+        public static bool ExistMap(uint mapid, uint gx, uint gy, bool log = true)
         {
             string fileName = $"{Global.WorldMgr.GetDataPath()}/maps/{mapid:D4}_{gx:D2}_{gy:D2}.map";
 
@@ -217,11 +217,11 @@ namespace Game.Maps
             return ret;
         }
 
-        public static bool ExistVMap(uint mapid, int gx, int gy)
+        public static bool ExistVMap(uint mapid, uint gx, uint gy)
         {
             if (Global.VMapMgr.IsMapLoadingEnabled())
             {
-                LoadResult result = Global.VMapMgr.ExistsMap(mapid, gx, gy);
+                LoadResult result = Global.VMapMgr.ExistsMap(Global.WorldMgr.GetDataPath(), mapid, gx, gy);
                 string name = VMapManager.GetMapFileName(mapid);//, gx, gy);
                 switch (result)
                 {
@@ -249,7 +249,7 @@ namespace Game.Maps
             return true;
         }
 
-        public bool HasChildTerrainGridFile(uint mapId, int gx, int gy)
+        public bool HasChildTerrainGridFile(uint mapId, uint gx, uint gy)
         {
             var childMap = _childTerrain.Find(childTerrain => childTerrain.GetId() == mapId);
             return childMap != null && childMap._gridFileExists[GetBitsetIndex(gx, gy)];
@@ -261,7 +261,7 @@ namespace Game.Maps
             _childTerrain.Add(childTerrain);
         }
 
-        public void LoadMapAndVMap(int gx, int gy)
+        public void LoadMapAndVMap(uint gx, uint gy)
         {
             if (++_referenceCountFromMap[gx][gy] != 1)    // check if already loaded
                 return;
@@ -278,7 +278,7 @@ namespace Game.Maps
                 childTerrain.LoadMMapInstanceImpl(mapId, instanceId);
         }
 
-        public void LoadMMap(uint instanceId, int gx, int gy)
+        public void LoadMMap(uint instanceId, uint gx, uint gy)
         {
             LoadMMapImpl(instanceId, gx, gy);
 
@@ -286,7 +286,7 @@ namespace Game.Maps
                 childTerrain.LoadMMapImpl(instanceId, gx, gy);
         }
 
-        public void LoadMapAndVMapImpl(int gx, int gy)
+        public void LoadMapAndVMapImpl(uint gx, uint gy)
         {
             LoadMap(gx, gy);
             LoadVMap(gx, gy);
@@ -294,7 +294,7 @@ namespace Game.Maps
             foreach (TerrainInfo childTerrain in _childTerrain)
                 childTerrain.LoadMapAndVMapImpl(gx, gy);
 
-            _loadedGrids[gx] |= 1ul << gy;
+            _loadedGrids[gx] |= 1ul << (int)gy;
         }
 
         void LoadMMapInstanceImpl(uint mapId, uint instanceId)
@@ -302,7 +302,7 @@ namespace Game.Maps
             Global.MMapMgr.LoadMapInstance(Global.WorldMgr.GetDataPath(), _mapId, mapId, instanceId);
         }
 
-        public void LoadMap(int gx, int gy)
+        public void LoadMap(uint gx, uint gy)
         {
             if (_gridMap[gx][gy] != null)
                 return;
@@ -326,13 +326,13 @@ namespace Game.Maps
                 Log.outError(LogFilter.Maps, $"Error loading map file: {fileName}");
         }
 
-        public void LoadVMap(int gx, int gy)
+        public void LoadVMap(uint gx, uint gy)
         {
             if (!Global.VMapMgr.IsMapLoadingEnabled())
                 return;
 
             // x and y are swapped !!
-            LoadResult vmapLoadResult = Global.VMapMgr.LoadMap(GetId(), gx, gy);
+            LoadResult vmapLoadResult = Global.VMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
             switch (vmapLoadResult)
             {
                 case LoadResult.Success:
@@ -348,7 +348,7 @@ namespace Game.Maps
             }
         }
 
-        public void LoadMMapImpl(uint instanceId, int gx, int gy)
+        public void LoadMMapImpl(uint instanceId, uint gx, uint gy)
         {
             if (!Global.DisableMgr.IsPathfindingEnabled(GetId()))
                 return;
@@ -385,7 +385,7 @@ namespace Game.Maps
                 childTerrain.UnloadMMapInstanceImpl(mapId, instanceId);
         }
 
-        public void UnloadMapImpl(int gx, int gy)
+        public void UnloadMapImpl(uint gx, uint gy)
         {
             _gridMap[gx][gy] = null;
             Global.VMapMgr.UnloadMap(GetId(), gx, gy);
@@ -394,7 +394,7 @@ namespace Game.Maps
             foreach (var childTerrain in _childTerrain)
                 childTerrain.UnloadMapImpl(gx, gy);
 
-            _loadedGrids[gx] &= ~(1ul << gy);
+            _loadedGrids[gx] &= ~(1ul << (int)gy);
         }
 
         void UnloadMMapInstanceImpl(uint mapId, uint instanceId)
@@ -405,11 +405,11 @@ namespace Game.Maps
         public GridMap GetGrid(uint mapId, float x, float y, bool loadIfMissing = true)
         {
             // half opt method
-            int gx = (int)(MapConst.CenterGridId - x / MapConst.SizeofGrids);                   //grid x
-            int gy = (int)(MapConst.CenterGridId - y / MapConst.SizeofGrids);                   //grid y
+            uint gx = (uint)(MapConst.CenterGridId - x / MapConst.SizeofGrids);                   //grid x
+            uint gy = (uint)(MapConst.CenterGridId - y / MapConst.SizeofGrids);                   //grid y
 
             // ensure GridMap is loaded
-            if ((_loadedGrids[gx] & (1ul << gy)) == 0 && loadIfMissing)
+            if ((_loadedGrids[gx] & (1ul << (int)gy)) == 0 && loadIfMissing)
             {
                 lock (_loadLock)
                     LoadMapAndVMapImpl(gx, gy);
@@ -433,12 +433,12 @@ namespace Game.Maps
                 return;
 
             // delete those GridMap objects which have refcount = 0
-            for (int x = 0; x < MapConst.MaxGrids; ++x)
+            for (uint x = 0; x < MapConst.MaxGrids; ++x)
             {
                 if (_loadedGrids[x] != 0)
                 {
-                    for (int y = 0; y < MapConst.MaxGrids; ++y)
-                        if ((_loadedGrids[x] & (1ul << y)) != 0 && _referenceCountFromMap[x][y] == 0)
+                    for (uint y = 0; y < MapConst.MaxGrids; ++y)
+                        if ((_loadedGrids[x] & (1ul << (int)y)) != 0 && _referenceCountFromMap[x][y] == 0)
                             UnloadMapImpl(x, y);
                 }
             }
@@ -937,6 +937,6 @@ namespace Game.Maps
 
         public uint GetId() { return _mapId; }
 
-        static int GetBitsetIndex(int gx, int gy) { return gx * MapConst.MaxGrids + gy; }
+        static int GetBitsetIndex(uint gx, uint gy) { return (int)(gx * MapConst.MaxGrids + gy); }
     }
 }

@@ -124,6 +124,10 @@ namespace Game.Collision
             return true;
         }
 
+        public uint GetLiquidType() { return iType; }
+        public float[] GetHeightStorage() { return iHeight; }
+        public byte[] GetFlagsStorage() { return iFlags; }
+
         public static WmoLiquid ReadFromFile(BinaryReader reader)
         {
             WmoLiquid liquid = new();
@@ -150,7 +154,12 @@ namespace Game.Collision
             return liquid;
         }
 
-        public uint GetLiquidType() { return iType; }
+        public void GetPosInfo(out uint tilesX, out uint tilesY, out Vector3 corner)
+        {
+            tilesX = iTilesX;
+            tilesY = iTilesY;
+            corner = iCorner;
+        }
     }
 
     public class GroupModel : IModel
@@ -260,14 +269,6 @@ namespace Game.Collision
                 && point.Y <= bounds.Hi.Y;
         }
 
-        public enum InsideResult
-        {
-            Inside = 0,
-            MaybeInside = 1,
-            Above = 2,
-            OutOfBounds = -1
-        }
-
         public InsideResult IsInsideObject(Ray ray, out float z_dist)
         {
             z_dist = 0;
@@ -318,11 +319,21 @@ namespace Game.Collision
             return 0;
         }
 
-        public override AxisAlignedBox GetBounds() { return iBound; }
-
+        public override AxisAlignedBox GetBound() { return iBound; }
+        public AxisAlignedBox GetMeshTreeBound() { return meshTree.bound(); }
         public uint GetMogpFlags() { return iMogpFlags; }
-
         public uint GetWmoID() { return iGroupWMOID; }
+        public List<Vector3> GetVertices() { return vertices; }
+        public List<MeshTriangle> GetTriangles() { return triangles; }
+        public WmoLiquid GetLiquid() { return iLiquid; }
+
+        public enum InsideResult
+        {
+            Inside = 0,
+            MaybeInside = 1,
+            Above = 2,
+            OutOfBounds = -1
+        }
     }
 
     public class WorldModel : IModel
@@ -423,7 +434,8 @@ namespace Game.Collision
         }
 
         public bool IsM2() { return Flags.HasFlag(ModelFlags.IsM2); }
-    }
+        public List<GroupModel> GetGroupModels() { return groupModels; }
+}
 
     [Flags]
     enum ModelFlags

@@ -23,12 +23,13 @@ namespace Game.Collision
         public abstract bool IsInPhase(PhaseShift phaseShift);
         public abstract Vector3 GetPosition();
         public abstract Quaternion GetRotation();
+        public abstract long GetPackedRotation();
         public abstract float GetScale();
     }
 
     public class GameObjectModel : IModel
     {
-        bool Initialize(GameObjectModelOwnerBase modelOwner)
+        bool Initialize(GameObjectModelOwnerBase modelOwner, string dataPath)
         {
             var modelData = StaticModelList.models.LookupByKey(modelOwner.GetDisplayId());
             if (modelData == null)
@@ -42,7 +43,7 @@ namespace Game.Collision
                 return false;
             }
 
-            iModel = Global.VMapMgr.AcquireModelInstance(modelData.name);
+            iModel = Global.VMapMgr.AcquireModelInstance(dataPath + "vmaps/", modelData.name);
 
             if (iModel == null)
                 return false;
@@ -51,8 +52,8 @@ namespace Game.Collision
             iScale = modelOwner.GetScale();
             iInvScale = 1.0f / iScale;
 
-            Matrix4x4 iRotation = modelOwner.GetRotation().ToMatrix();
-            iRotation.Inverse(out iInvRot);
+            Matrix4x4 iRotation = modelOwner.GetRotation().ToRotationMatrix();
+            iInvRot = iRotation.Inverse();
             // transform bounding box:
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
             AxisAlignedBox rotated_bounds = new();
@@ -64,10 +65,10 @@ namespace Game.Collision
             return true;
         }
 
-        public static GameObjectModel Create(GameObjectModelOwnerBase modelOwner)
+        public static GameObjectModel Create(GameObjectModelOwnerBase modelOwner, string dataPath)
         {
             GameObjectModel mdl = new();
-            if (!mdl.Initialize(modelOwner))
+            if (!mdl.Initialize(modelOwner, dataPath))
                 return null;
 
             return mdl;
@@ -168,8 +169,8 @@ namespace Game.Collision
 
             iPos = owner.GetPosition();
 
-            Matrix4x4 iRotation = owner.GetRotation().ToMatrix();
-            iRotation.Inverse(out iInvRot);
+            Matrix4x4 iRotation = owner.GetRotation().ToRotationMatrix();
+            iInvRot = iRotation.Inverse();
             // transform bounding box:
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
             AxisAlignedBox rotated_bounds = new();
@@ -181,13 +182,22 @@ namespace Game.Collision
             return true;
         }
 
-        public override Vector3 GetPosition() { return iPos; }
-        public override AxisAlignedBox GetBounds() { return iBound; }
+        public AxisAlignedBox GetBounds() { return iBound; }
 
+        public uint GetDisplayId() { return owner.GetDisplayId(); }
+        public override Vector3 GetPosition() { return iPos; }
+        public Quaternion GetRotation() { return owner.GetRotation(); }
+        public Matrix4x4 GetInvRot() { return iInvRot; }
+        public long GetPackedRotation() { return owner.GetPackedRotation(); }
+        public float GetScale() { return iScale; }
+        public override AxisAlignedBox GetBound() { return iBound; }
+        public WorldModel GetWorldModel() { return iModel; }
         public void EnableCollision(bool enable) { iCollisionEnabled = enable; }
         public bool IsCollisionEnabled() { return iCollisionEnabled; }
         public void DisableLosBlocking(bool enable) { iLosBlockingDisabled = enable; }
         public bool IsLosBlockingDisabled() { return iLosBlockingDisabled; }
+        public void IncludeInNavMesh(bool enable) { iIncludeInNavMesh = enable; }
+        public bool IsIncludedInNavMesh() { return iIncludeInNavMesh; }
         public byte GetNameSetId() { return owner.GetNameSetId(); }
 
         public static bool LoadGameObjectModelList()
@@ -235,6 +245,7 @@ namespace Game.Collision
 
         bool iCollisionEnabled;     // Is model ignored in all checks
         bool iLosBlockingDisabled;  // Is model ignored during line of sight checks (but is always included in location/height checks)
+        bool iIncludeInNavMesh;     // Is model included when generating navigation mesh
         AxisAlignedBox iBound;
         Matrix4x4 iInvRot;
         Vector3 iPos;

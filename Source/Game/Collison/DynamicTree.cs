@@ -1,7 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
 using Framework.GameMath;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Game.Collision
@@ -136,6 +138,12 @@ namespace Game.Collision
             return false;
         }
 
+        public List<GameObjectModel> GetModelsInGrid(uint gx, uint gy)
+        {
+            // convert from map tile X/Y to RegularGrid internal representation
+            return impl.getObjects(63 - (int)gx, 63 - (int)gy);
+        }
+
         DynTreeImpl impl;
     }
 
@@ -181,5 +189,66 @@ namespace Game.Collision
 
         TimeTracker rebalance_timer;
         int unbalanced_times;
+    }
+
+    public class DynamicTreeIntersectionCallback : WorkerCallback
+    {
+        public DynamicTreeIntersectionCallback(PhaseShift phaseShift)
+        {
+            _didHit = false;
+            _phaseShift = phaseShift;
+        }
+
+        public override bool Invoke(Ray r, IModel obj, ref float distance)
+        {
+            _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift, ModelIgnoreFlags.Nothing);
+            return _didHit;
+        }
+
+        public bool DidHit() { return _didHit; }
+
+        bool _didHit;
+        PhaseShift _phaseShift;
+    }
+
+    class DynamicTreeLosCallback : WorkerCallback
+    {
+        bool _didHit;
+        PhaseShift _phaseShift;
+
+        public DynamicTreeLosCallback(PhaseShift phaseShift)
+        {
+            _phaseShift = phaseShift;
+        }
+
+        public override bool Invoke(Ray r, GameObjectModel obj, ref float distance)
+        {
+            if (!obj.IsLosBlockingDisabled())
+                _didHit = obj.IntersectRay(r, ref distance, true, _phaseShift, ModelIgnoreFlags.Nothing);
+            return _didHit;
+        }
+
+        public bool DidHit() { return _didHit; }
+    }
+
+    public class DynamicTreeLocationInfoCallback : WorkerCallback
+    {
+        public DynamicTreeLocationInfoCallback(PhaseShift phaseShift)
+        {
+            _phaseShift = phaseShift;
+        }
+
+        public override void Invoke(Vector3 p, GameObjectModel obj)
+        {
+            if (obj.GetLocationInfo(p, _locationInfo, _phaseShift))
+                _hitModel = obj;
+        }
+
+        public LocationInfo GetLocationInfo() { return _locationInfo; }
+        public GameObjectModel GetHitModel() { return _hitModel; }
+
+        PhaseShift _phaseShift;
+        LocationInfo _locationInfo = new();
+        GameObjectModel _hitModel = new();
     }
 }

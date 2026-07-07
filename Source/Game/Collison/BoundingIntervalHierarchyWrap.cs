@@ -51,6 +51,8 @@ namespace Game.Collision
             m_tree.IntersectPoint(point, callback);
         }
 
+        public List<T> GetObjects() { return m_objects; }
+
         BIH m_tree = new();
         List<T> m_objects = new();
         Dictionary<T, uint> m_obj2Idx = new();

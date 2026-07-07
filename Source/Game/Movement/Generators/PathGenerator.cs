@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Collision;
 using Game.Entities;
 using Game.Maps;
 using System;
@@ -1087,29 +1088,6 @@ namespace Game.Movement
         FarFromPolyStart = 0x40, // start position is far from the mmap poligon
         FarFromPolyEnd = 0x80, // end positions is far from the mmap poligon
         FarFromPoly = FarFromPolyStart | FarFromPolyEnd // start or end positions are far from the mmap poligon
-    }
-
-    public enum NavArea
-    {
-        Empty = 0,
-        MagmaSlime = 8, // don't need to differentiate between them
-        Water = 9,
-        GroundSteep = 10,
-        Ground = 11,
-        MaxValue = Ground,
-        MinValue = MagmaSlime,
-        AllMask = 0x3F // max allowed value
-        // areas 1-60 will be used for destructible areas (currently skipped in vmaps, WMO with flag 1)
-        // ground is the highest value to make recast choose ground over water when merging surfaces very close to each other (shallow water would be walkable) 
-    }
-
-    public enum NavTerrainFlag : ushort
-    {
-        Empty = 0x00,
-        Ground = 1 << (NavArea.MaxValue - NavArea.Ground),
-        GroundSteep = 1 << (NavArea.MaxValue - NavArea.GroundSteep),
-        Water = 1 << (NavArea.MaxValue - NavArea.Water),
-        MagmaSlime = 1 << (NavArea.MaxValue - NavArea.MagmaSlime)
     }
 
     public enum PolyFlag

@@ -2,7 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Movement;
+using Game.Collision;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -37,6 +37,11 @@ namespace Game
         MMapData GetMMapData(uint mapId)
         {
             return loadedMMaps.LookupByKey(mapId);
+        }
+
+        public static bool IsRebuildingTilesEnabledOnMap(uint mapId)
+        {
+            return MMapData.GetInstanceIdForMeshLookup(mapId, 1) != 0;
         }
 
         MMapLoadResult LoadMapData(string basePath, uint mapId, uint instanceId)
@@ -77,7 +82,7 @@ namespace Game
             return MMapLoadResult.Success;
         }
 
-        MMapLoadResult parseNavMeshParamsFile(string basePath, uint mapId, out Detour.dtNavMeshParams Params, List<OffMeshData> offmeshConnections = null)
+        public MMapLoadResult parseNavMeshParamsFile(string basePath, uint mapId, out Detour.dtNavMeshParams Params, List<OffMeshData> offmeshConnections = null)
         {
             Params = new();
 
@@ -142,12 +147,12 @@ namespace Game
             return MMapLoadResult.Success;
         }
 
-        uint PackTileID(int x, int y)
+        uint PackTileID(uint x, uint y)
         {
-            return (uint)(x << 16 | y);
+            return x << 16 | y;
         }
 
-        public MMapLoadResult LoadMap(string basePath, uint mapId, uint instanceId, int x, int y)
+        public MMapLoadResult LoadMap(string basePath, uint mapId, uint instanceId, uint x, uint y)
         {
             // make sure the mmap is loaded and ready to load tiles
             MMapLoadResult mapResult = LoadMapData(basePath, mapId, instanceId);
@@ -245,7 +250,7 @@ namespace Game
             return true;
         }
 
-        public void UnloadMap(uint mapId, int x, int y)
+        public void UnloadMap(uint mapId, uint x, uint y)
         {
             // check if we have this map loaded
             MMapData mmapData = GetMMapData(mapId);
@@ -395,8 +400,75 @@ namespace Game
         public Dictionary<uint, MMapMapData> meshData = [];
         public Dictionary<(uint, uint), Detour.dtNavMeshQuery> navMeshQueries = [];     // instanceId to query
 
-        public static uint GetInstanceIdForMeshLookup(uint _mapId, uint _instanceId)
+        public static uint GetInstanceIdForMeshLookup(uint mapId, uint instanceId)
         {
+            switch (mapId)
+            {
+                case 0:
+                case 1:
+                case 571:
+                case 603:
+                case 607:
+                case 609:
+                case 616:
+                case 628:
+                case 631:
+                case 644:
+                case 649:
+                case 720:
+                case 732:
+                case 754:
+                case 755:
+                case 861:
+                case 938:
+                case 940:
+                case 962:
+                case 967:
+                case 1064:
+                case 1076:
+                case 1098:
+                case 1122:
+                case 1126:
+                case 1182:
+                case 1205:
+                case 1220:
+                case 1265:
+                case 1492:
+                case 1523:
+                case 1530:
+                case 1579:
+                case 1676:
+                case 1704:
+                case 1705:
+                case 1706:
+                case 1707:
+                case 1734:
+                case 1756:
+                case 1943:
+                case 2076:
+                case 2118:
+                case 2160:
+                case 2161:
+                case 2187:
+                case 2212:
+                case 2235:
+                case 2237:
+                case 2264:
+                case 2450:
+                case 2512:
+                case 2586:
+                case 2601:
+                case 2654:
+                case 2657:
+                case 2660:
+                case 2669:
+                case 2819:
+                case 2828:
+                    return instanceId;
+                default:
+                    break;
+            }
+
             // for maps that won't have dynamic mesh, return 0 to reuse the same mesh across all instances
             return 0;
         }
@@ -415,42 +487,5 @@ namespace Game
             // for maps that won't have dynamic mesh, return 0 to reuse the same mesh across all instances
             return meshData.LookupByKey(GetInstanceIdForMeshLookup(mapId, instanceId));
         }
-    }
-
-    public struct MmapTileHeader
-    {
-        public uint mmapMagic;
-        public uint dtVersion;
-        public uint mmapVersion;
-        public uint size;
-        public byte usesLiquids;
-    }
-
-    public class OffMeshData
-    {
-        public uint MapId;
-        public uint TileX;
-        public uint TileY;
-        public float[] From = new float[3];
-        public float[] To = new float[3];
-        public float Radius;
-        public OffMeshConnectionFlag ConnectionFlags;
-        public byte AreaId;
-        public NavTerrainFlag Flags;
-    }
-
-    public enum MMapLoadResult
-    {
-        Success,
-        AlreadyLoaded,
-        FileNotFound,
-        VersionMismatch,
-        ReadFromFileFailed,
-        LibraryError
-    }
-
-    public enum OffMeshConnectionFlag : byte
-    {
-        OFFMESH_CONNECTION_FLAG_BIDIRECTIONAL = 0x01
     }
 }

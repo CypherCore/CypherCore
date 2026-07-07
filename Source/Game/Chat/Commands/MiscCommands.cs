@@ -5,6 +5,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
+using Game.Collision;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -513,8 +514,8 @@ namespace Game.Chat
             GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 
             // 63? WHY?
-            int gridX = (int)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
-            int gridY = (int)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
+            uint gridX = (uint)((MapConst.MaxGrids - 1) - gridCoord.X_coord);
+            uint gridY = (uint)((MapConst.MaxGrids - 1) - gridCoord.Y_coord);
 
             bool haveMap = TerrainInfo.ExistMap(mapId, gridX, gridY);
             bool haveVMap = TerrainInfo.ExistVMap(mapId, gridX, gridY);

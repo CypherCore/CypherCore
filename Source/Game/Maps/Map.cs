@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.Collision;
 using Game.DataStorage;
@@ -56,6 +57,9 @@ namespace Game.Maps
             Global.TransportMgr.CreateTransportsForMap(this);
 
             m_terrain.LoadMMapInstance(GetId(), GetInstanceId());
+
+            if (MMapManager.IsRebuildingTilesEnabledOnMap(GetId()))
+                m_mmapTileRebuilder = new DynamicTileBuilder(this, Global.MMapMgr.GetNavMesh(GetId(), GetInstanceId()));
 
             _worldStateValues = Global.WorldStateMgr.GetInitialWorldStatesForMap(this);
         }
@@ -213,8 +217,8 @@ namespace Game.Maps
                 SetGrid(grid, p.X_coord, p.Y_coord);
 
                 //z coord
-                int gx = (int)((MapConst.MaxGrids - 1) - p.X_coord);
-                int gy = (int)((MapConst.MaxGrids - 1) - p.Y_coord);
+                uint gx = (uint)((MapConst.MaxGrids - 1) - p.X_coord);
+                uint gy = (uint)((MapConst.MaxGrids - 1) - p.Y_coord);
 
                 m_terrain.LoadMapAndVMap(gx, gy);
                 m_terrain.LoadMMap(GetInstanceId(), gx, gy);
@@ -573,6 +577,8 @@ namespace Game.Maps
         public virtual void Update(uint diff)
         {
             _dynamicTree.Update(diff);
+            if (m_mmapTileRebuilder != null)
+                m_mmapTileRebuilder.Update(TimeSpan.FromMilliseconds(diff));
 
             // update worldsessions for existing players
             for (var i = 0; i < m_activePlayers.Count; ++i)
@@ -1681,6 +1687,28 @@ namespace Game.Maps
             return result;
         }
 
+        public void RequestRebuildNavMeshOnGameObjectModelChange(GameObjectModel model, PhaseShift phaseShift)
+        {
+            if (m_mmapTileRebuilder == null)
+                return;
+
+            uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, GetId(), m_terrain, model.GetPosition().X, model.GetPosition().Y);
+
+            AxisAlignedBox bounds = model.GetBounds();
+
+            GridCoord low = GridDefines.ComputeGridCoord(bounds.Hi.X, bounds.Hi.Y);
+            low.X_coord = (MapConst.MaxGrids - 1) - low.X_coord;
+            low.Y_coord = (MapConst.MaxGrids - 1) - low.Y_coord;
+
+            GridCoord high = GridDefines.ComputeGridCoord(bounds.Lo.X, bounds.Lo.Y);
+            high.X_coord = (MapConst.MaxGrids - 1) - high.X_coord;
+            high.Y_coord = (MapConst.MaxGrids - 1) - high.Y_coord;
+
+            for (uint x = low.X_coord; x <= high.X_coord; ++x)
+                for (uint y = low.Y_coord; y <= high.Y_coord; ++y)
+                    m_mmapTileRebuilder.AddTile(terrainMapId, x, y);
+        }
+
         public static TransferAbortParams PlayerCannotEnter(uint mapid, Player player)
         {
             var entry = CliDB.MapStorage.LookupByKey(mapid);
@@ -1890,25 +1918,25 @@ namespace Game.Maps
             switch (info.type)
             {
                 case SpawnObjectType.Creature:
-                {
-                    // escort check for creatures only (if the world config boolean is set)
-                    bool isEscort = WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
-
-                    var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
-                    foreach (var creature in range)
                     {
-                        if (creature.IsAlive())
-                            continue;
+                        // escort check for creatures only (if the world config boolean is set)
+                        bool isEscort = WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && data.spawnGroupData.flags.HasFlag(SpawnGroupFlags.EscortQuestNpc);
 
-                        // escort NPCs are allowed to respawn as long as all other instances are already escorting
-                        if (isEscort && creature.IsEscorted())
-                            continue;
+                        var range = _creatureBySpawnIdStore.LookupByKey(info.spawnId);
+                        foreach (var creature in range)
+                        {
+                            if (creature.IsAlive())
+                                continue;
 
-                        alreadyExists = true;
+                            // escort NPCs are allowed to respawn as long as all other instances are already escorting
+                            if (isEscort && creature.IsEscorted())
+                                continue;
+
+                            alreadyExists = true;
+                            break;
+                        }
                         break;
                     }
-                    break;
-                }
                 case SpawnObjectType.GameObject:
                     // gameobject check is simpler - they cannot be dead or escorting
                     if (_gameobjectBySpawnIdStore.ContainsKey(info.spawnId))
@@ -2121,19 +2149,19 @@ namespace Game.Maps
             switch (type)
             {
                 case SpawnObjectType.Creature:
-                {
-                    Creature obj = new();
-                    if (!obj.LoadFromDB(spawnId, this, true, true))
-                        obj.Dispose();
-                    break;
-                }
+                    {
+                        Creature obj = new();
+                        if (!obj.LoadFromDB(spawnId, this, true, true))
+                            obj.Dispose();
+                        break;
+                    }
                 case SpawnObjectType.GameObject:
-                {
-                    GameObject obj = new();
-                    if (!obj.LoadFromDB(spawnId, this, true))
-                        obj.Dispose();
-                    break;
-                }
+                    {
+                        GameObject obj = new();
+                        if (!obj.LoadFromDB(spawnId, this, true))
+                            obj.Dispose();
+                        break;
+                    }
                 default:
                     Cypher.Assert(false, $"Invalid spawn type {type} (spawnid {spawnId}) on map {GetId()}");
                     break;
@@ -2325,32 +2353,32 @@ namespace Game.Maps
                 switch (data.type)
                 {
                     case SpawnObjectType.Creature:
-                    {
-                        Creature creature = new();
-                        if (!creature.LoadFromDB(data.SpawnId, this, true, force))
-                            creature.Dispose();
-                        else if (spawnedObjects != null)
-                            spawnedObjects.Add(creature);
-                        break;
-                    }
+                        {
+                            Creature creature = new();
+                            if (!creature.LoadFromDB(data.SpawnId, this, true, force))
+                                creature.Dispose();
+                            else if (spawnedObjects != null)
+                                spawnedObjects.Add(creature);
+                            break;
+                        }
                     case SpawnObjectType.GameObject:
-                    {
-                        GameObject gameobject = new();
-                        if (!gameobject.LoadFromDB(data.SpawnId, this, true))
-                            gameobject.Dispose();
-                        else if (spawnedObjects != null)
-                            spawnedObjects.Add(gameobject);
-                        break;
-                    }
+                        {
+                            GameObject gameobject = new();
+                            if (!gameobject.LoadFromDB(data.SpawnId, this, true))
+                                gameobject.Dispose();
+                            else if (spawnedObjects != null)
+                                spawnedObjects.Add(gameobject);
+                            break;
+                        }
                     case SpawnObjectType.AreaTrigger:
-                    {
-                        AreaTrigger areaTrigger = new AreaTrigger();
-                        if (!areaTrigger.LoadFromDB(data.SpawnId, this, true, false))
-                            areaTrigger.Dispose();
-                        else if (spawnedObjects != null)
-                            spawnedObjects.Add(areaTrigger);
-                        break;
-                    }
+                        {
+                            AreaTrigger areaTrigger = new AreaTrigger();
+                            if (!areaTrigger.LoadFromDB(data.SpawnId, this, true, false))
+                                areaTrigger.Dispose();
+                            else if (spawnedObjects != null)
+                                spawnedObjects.Add(areaTrigger);
+                            break;
+                        }
                     default:
                         Cypher.Assert(false, $"Invalid spawn type {data.type} with spawnId {data.SpawnId}");
                         return false;
@@ -2548,14 +2576,14 @@ namespace Game.Maps
                 switch (obj.GetTypeId())
                 {
                     case TypeId.Corpse:
-                    {
-                        Corpse corpse = ObjectAccessor.GetCorpse(obj, obj.GetGUID());
-                        if (corpse == null)
-                            Log.outError(LogFilter.Maps, "Tried to delete corpse/bones {0} that is not in map.", obj.GetGUID().ToString());
-                        else
-                            RemoveFromMap(corpse, true);
-                        break;
-                    }
+                        {
+                            Corpse corpse = ObjectAccessor.GetCorpse(obj, obj.GetGUID());
+                            if (corpse == null)
+                                Log.outError(LogFilter.Maps, "Tried to delete corpse/bones {0} that is not in map.", obj.GetGUID().ToString());
+                            else
+                                RemoveFromMap(corpse, true);
+                            break;
+                        }
                     case TypeId.DynamicObject:
                         RemoveFromMap(obj, true);
                         break;
@@ -3044,7 +3072,7 @@ namespace Game.Maps
 
             foreach (var lightOverride in zoneInfo.LightOverrides)
             {
-                OverrideLight overrideLight = new();
+                Networking.Packets.OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = lightOverride.AreaLightId;
                 overrideLight.OverrideLightID = lightOverride.OverrideLightId;
                 overrideLight.TransitionMilliseconds = lightOverride.TransitionMilliseconds;
@@ -3178,7 +3206,7 @@ namespace Game.Maps
 
             if (!players.Empty())
             {
-                OverrideLight overrideLight = new();
+                Networking.Packets.OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = areaLightId;
                 overrideLight.OverrideLightID = overrideLightId;
                 overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
@@ -3505,6 +3533,8 @@ namespace Game.Maps
             return _dynamicTree.Contains(model);
         }
 
+        public List<GameObjectModel> GetGameObjectModelsInGrid(uint gx, uint gy) { return _dynamicTree.GetModelsInGrid(gx, gy); }
+
         public float GetGameObjectFloor(PhaseShift phaseShift, float x, float y, float z, float maxSearchDist = MapConst.DefaultHeightSearch)
         {
             return _dynamicTree.GetHeight(x, y, z, maxSearchDist, phaseShift);
@@ -3704,32 +3734,32 @@ namespace Game.Maps
                         break;
                     case SummonCategory.Wild:
                     case SummonCategory.Ally:
-                    {
-                        switch (properties.Title)
                         {
-                            case SummonTitle.Minion:
-                            case SummonTitle.Guardian:
-                            case SummonTitle.Runeblade:
-                                mask = UnitTypeMask.Guardian;
-                                break;
-                            case SummonTitle.Totem:
-                            case SummonTitle.LightWell:
-                                mask = UnitTypeMask.Totem;
-                                break;
-                            case SummonTitle.Vehicle:
-                            case SummonTitle.Mount:
-                                mask = UnitTypeMask.Summon;
-                                break;
-                            case SummonTitle.Companion:
-                                mask = UnitTypeMask.Minion;
-                                break;
-                            default:
-                                if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                            switch (properties.Title)
+                            {
+                                case SummonTitle.Minion:
+                                case SummonTitle.Guardian:
+                                case SummonTitle.Runeblade:
                                     mask = UnitTypeMask.Guardian;
-                                break;
+                                    break;
+                                case SummonTitle.Totem:
+                                case SummonTitle.LightWell:
+                                    mask = UnitTypeMask.Totem;
+                                    break;
+                                case SummonTitle.Vehicle:
+                                case SummonTitle.Mount:
+                                    mask = UnitTypeMask.Summon;
+                                    break;
+                                case SummonTitle.Companion:
+                                    mask = UnitTypeMask.Minion;
+                                    break;
+                                default:
+                                    if (properties.HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
+                                        mask = UnitTypeMask.Guardian;
+                                    break;
+                            }
+                            break;
                         }
-                        break;
-                    }
                     default:
                         return null;
                 }
@@ -4242,335 +4272,335 @@ namespace Game.Maps
                 switch (step.script.command)
                 {
                     case ScriptCommands.Talk:
-                    {
-                        if (step.script.Talk.ChatType > ChatMsg.Whisper && step.script.Talk.ChatType != ChatMsg.RaidBossWhisper)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} invalid chat type ({1}) specified, skipping.",
-                                step.script.GetDebugInfo(), step.script.Talk.ChatType);
-                            break;
-                        }
-
-                        if (step.script.Talk.Flags.HasAnyFlag(eScriptFlags.TalkUsePlayer))
-                            source = _GetScriptPlayerSourceOrTarget(source, target, step.script);
-                        else
-                            source = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-
-                        if (source != null)
-                        {
-                            Unit sourceUnit = source.ToUnit();
-                            if (sourceUnit == null)
+                            if (step.script.Talk.ChatType > ChatMsg.Whisper && step.script.Talk.ChatType != ChatMsg.RaidBossWhisper)
                             {
-                                Log.outError(LogFilter.Scripts, "{0} source object ({1}) is not an unit, skipping.", step.script.GetDebugInfo(), source.GetGUID().ToString());
+                                Log.outError(LogFilter.Scripts, "{0} invalid chat type ({1}) specified, skipping.",
+                                    step.script.GetDebugInfo(), step.script.Talk.ChatType);
                                 break;
                             }
 
-                            switch (step.script.Talk.ChatType)
+                            if (step.script.Talk.Flags.HasAnyFlag(eScriptFlags.TalkUsePlayer))
+                                source = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                            else
+                                source = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+
+                            if (source != null)
                             {
-                                case ChatMsg.Say:
-                                    sourceUnit.Say((uint)step.script.Talk.TextID, target);
-                                    break;
-                                case ChatMsg.Yell:
-                                    sourceUnit.Yell((uint)step.script.Talk.TextID, target);
-                                    break;
-                                case ChatMsg.Emote:
-                                case ChatMsg.RaidBossEmote:
-                                    sourceUnit.TextEmote((uint)step.script.Talk.TextID, target, step.script.Talk.ChatType == ChatMsg.RaidBossEmote);
-                                    break;
-                                case ChatMsg.Whisper:
-                                case ChatMsg.RaidBossWhisper:
+                                Unit sourceUnit = source.ToUnit();
+                                if (sourceUnit == null)
                                 {
-                                    Player receiver = target != null ? target.ToPlayer() : null;
-                                    if (receiver == null)
-                                        Log.outError(LogFilter.Scripts, "{0} attempt to whisper to non-player unit, skipping.", step.script.GetDebugInfo());
-                                    else
-                                        sourceUnit.Whisper((uint)step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
+                                    Log.outError(LogFilter.Scripts, "{0} source object ({1}) is not an unit, skipping.", step.script.GetDebugInfo(), source.GetGUID().ToString());
                                     break;
                                 }
-                                default:
-                                    break; // must be already checked at load
+
+                                switch (step.script.Talk.ChatType)
+                                {
+                                    case ChatMsg.Say:
+                                        sourceUnit.Say((uint)step.script.Talk.TextID, target);
+                                        break;
+                                    case ChatMsg.Yell:
+                                        sourceUnit.Yell((uint)step.script.Talk.TextID, target);
+                                        break;
+                                    case ChatMsg.Emote:
+                                    case ChatMsg.RaidBossEmote:
+                                        sourceUnit.TextEmote((uint)step.script.Talk.TextID, target, step.script.Talk.ChatType == ChatMsg.RaidBossEmote);
+                                        break;
+                                    case ChatMsg.Whisper:
+                                    case ChatMsg.RaidBossWhisper:
+                                        {
+                                            Player receiver = target != null ? target.ToPlayer() : null;
+                                            if (receiver == null)
+                                                Log.outError(LogFilter.Scripts, "{0} attempt to whisper to non-player unit, skipping.", step.script.GetDebugInfo());
+                                            else
+                                                sourceUnit.Whisper((uint)step.script.Talk.TextID, receiver, step.script.Talk.ChatType == ChatMsg.RaidBossWhisper);
+                                            break;
+                                        }
+                                    default:
+                                        break; // must be already checked at load
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
                     case ScriptCommands.Emote:
-                    {
-                        // Source or target must be Creature.
-                        Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                        if (cSource != null)
-                        {
-                            if (step.script.Emote.Flags.HasAnyFlag(eScriptFlags.EmoteUseState))
-                                cSource.SetEmoteState((Emote)step.script.Emote.EmoteID);
-                            else
-                                cSource.HandleEmoteCommand((Emote)step.script.Emote.EmoteID);
-                        }
-                        break;
-                    }
-                    case ScriptCommands.MoveTo:
-                    {
-                        // Source or target must be Creature.
-                        Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                        if (cSource != null)
-                        {
-                            Unit unit = cSource.ToUnit();
-                            if (step.script.MoveTo.TravelTime != 0)
-                            {
-                                float speed =
-                                    unit.GetDistance(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
-                                        step.script.MoveTo.DestZ) / (step.script.MoveTo.TravelTime * 0.001f);
-                                unit.MonsterMoveWithSpeed(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
-                                    step.script.MoveTo.DestZ, speed);
-                            }
-                            else
-                                unit.NearTeleportTo(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
-                                    step.script.MoveTo.DestZ, unit.GetOrientation());
-                        }
-                        break;
-                    }
-                    case ScriptCommands.TeleportTo:
-                    {
-                        if (step.script.TeleportTo.Flags.HasAnyFlag(eScriptFlags.TeleportUseCreature))
                         {
                             // Source or target must be Creature.
                             Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
                             if (cSource != null)
-                                cSource.NearTeleportTo(step.script.TeleportTo.DestX, step.script.TeleportTo.DestY,
-                                    step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
-                        }
-                        else
-                        {
-                            // Source or target must be Player.
-                            Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
-                            if (player != null)
-                                player.TeleportTo(step.script.TeleportTo.MapID, step.script.TeleportTo.DestX,
-                                    step.script.TeleportTo.DestY, step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
-                        }
-                        break;
-                    }
-                    case ScriptCommands.QuestExplored:
-                    {
-                        if (source == null)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} source object is NULL.", step.script.GetDebugInfo());
-                            break;
-                        }
-                        if (target == null)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
-                            break;
-                        }
-
-                        // when script called for item spell casting then target == (unit or GO) and source is player
-                        WorldObject worldObject;
-                        Player player = target.ToPlayer();
-                        if (player != null)
-                        {
-                            if (!source.IsTypeId(TypeId.Unit) && !source.IsTypeId(TypeId.GameObject) && !source.IsTypeId(TypeId.Player))
                             {
-                                Log.outError(LogFilter.Scripts, "{0} source is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.",
-                                    step.script.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
-                                break;
+                                if (step.script.Emote.Flags.HasAnyFlag(eScriptFlags.EmoteUseState))
+                                    cSource.SetEmoteState((Emote)step.script.Emote.EmoteID);
+                                else
+                                    cSource.HandleEmoteCommand((Emote)step.script.Emote.EmoteID);
                             }
-                            worldObject = source;
+                            break;
                         }
-                        else
+                    case ScriptCommands.MoveTo:
                         {
-                            player = source.ToPlayer();
-                            if (player != null)
+                            // Source or target must be Creature.
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                            if (cSource != null)
                             {
-                                if (!target.IsTypeId(TypeId.Unit) && !target.IsTypeId(TypeId.GameObject) && !target.IsTypeId(TypeId.Player))
+                                Unit unit = cSource.ToUnit();
+                                if (step.script.MoveTo.TravelTime != 0)
                                 {
-                                    Log.outError(LogFilter.Scripts,
-                                        "{0} target is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", step.script.GetDebugInfo(), target.GetTypeId(), target.GetEntry(), target.GetGUID().ToString());
-                                    break;
+                                    float speed =
+                                        unit.GetDistance(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
+                                            step.script.MoveTo.DestZ) / (step.script.MoveTo.TravelTime * 0.001f);
+                                    unit.MonsterMoveWithSpeed(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
+                                        step.script.MoveTo.DestZ, speed);
                                 }
-                                worldObject = target;
+                                else
+                                    unit.NearTeleportTo(step.script.MoveTo.DestX, step.script.MoveTo.DestY,
+                                        step.script.MoveTo.DestZ, unit.GetOrientation());
                             }
-                            else
-                            {
-                                Log.outError(LogFilter.Scripts, "{0} neither source nor target is player (Entry: {0}, GUID: {1}; target: Entry: {2}, GUID: {3}), skipping.",
-                                    step.script.GetDebugInfo(), source.GetEntry(), source.GetGUID().ToString(), target.GetEntry(), target.GetGUID().ToString());
-                                break;
-                            }
-                        }
-
-                        // quest id and flags checked at script loading
-                        if ((!worldObject.IsTypeId(TypeId.Unit) || worldObject.ToUnit().IsAlive()) &&
-                            (step.script.QuestExplored.Distance == 0 ||
-                             worldObject.IsWithinDistInMap(player, step.script.QuestExplored.Distance)))
-                            player.AreaExploredOrEventHappens(step.script.QuestExplored.QuestID);
-                        else
-                            player.FailQuest(step.script.QuestExplored.QuestID);
-
-                        break;
-                    }
-
-                    case ScriptCommands.KillCredit:
-                    {
-                        // Source or target must be Player.
-                        Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
-                        if (player != null)
-                        {
-                            if (step.script.KillCredit.Flags.HasAnyFlag(eScriptFlags.KillcreditRewardGroup))
-                                player.RewardPlayerAndGroupAtEvent(step.script.KillCredit.CreatureEntry, player);
-                            else
-                                player.KilledMonsterCredit(step.script.KillCredit.CreatureEntry, ObjectGuid.Empty);
-                        }
-                        break;
-                    }
-                    case ScriptCommands.RespawnGameobject:
-                    {
-                        if (step.script.RespawnGameObject.GOGuid == 0)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} gameobject guid (datalong) is not specified.", step.script.GetDebugInfo());
                             break;
                         }
-
-                        // Source or target must be WorldObject.
-                        WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
-                        if (pSummoner != null)
+                    case ScriptCommands.TeleportTo:
                         {
-                            GameObject pGO = _FindGameObject(pSummoner, step.script.RespawnGameObject.GOGuid);
-                            if (pGO == null)
+                            if (step.script.TeleportTo.Flags.HasAnyFlag(eScriptFlags.TeleportUseCreature))
                             {
-                                Log.outError(LogFilter.Scripts, "{0} gameobject was not found (guid: {1}).", step.script.GetDebugInfo(), step.script.RespawnGameObject.GOGuid);
-                                break;
+                                // Source or target must be Creature.
+                                Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                                if (cSource != null)
+                                    cSource.NearTeleportTo(step.script.TeleportTo.DestX, step.script.TeleportTo.DestY,
+                                        step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
                             }
-
-                            if (pGO.GetGoType() == GameObjectTypes.FishingNode ||
-                                pGO.GetGoType() == GameObjectTypes.Door || pGO.GetGoType() == GameObjectTypes.Button ||
-                                pGO.GetGoType() == GameObjectTypes.Trap)
-                            {
-                                Log.outError(LogFilter.Scripts,
-                                    "{0} can not be used with gameobject of type {1} (guid: {2}).", step.script.GetDebugInfo(), pGO.GetGoType(), step.script.RespawnGameObject.GOGuid);
-                                break;
-                            }
-
-                            // Check that GO is not spawned
-                            if (!pGO.IsSpawned())
-                            {
-                                int nTimeToDespawn = Math.Max(5, (int)step.script.RespawnGameObject.DespawnDelay);
-                                pGO.SetLootState(LootState.Ready);
-                                pGO.SetRespawnTime(nTimeToDespawn);
-
-                                pGO.GetMap().AddToMap(pGO);
-                            }
-                        }
-                        break;
-                    }
-                    case ScriptCommands.TempSummonCreature:
-                    {
-                        // Source must be WorldObject.
-                        WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
-                        if (pSummoner != null)
-                        {
-                            if (step.script.TempSummonCreature.CreatureEntry == 0)
-                                Log.outError(LogFilter.Scripts, "{0} creature entry (datalong) is not specified.", step.script.GetDebugInfo());
                             else
                             {
-                                float x = step.script.TempSummonCreature.PosX;
-                                float y = step.script.TempSummonCreature.PosY;
-                                float z = step.script.TempSummonCreature.PosZ;
-                                float o = step.script.TempSummonCreature.Orientation;
-
-                                if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
-                                    Log.outError(LogFilter.Scripts, "{0} creature was not spawned (entry: {1}).", step.script.GetDebugInfo(), step.script.TempSummonCreature.CreatureEntry);
+                                // Source or target must be Player.
+                                Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                                if (player != null)
+                                    player.TeleportTo(step.script.TeleportTo.MapID, step.script.TeleportTo.DestX,
+                                        step.script.TeleportTo.DestY, step.script.TeleportTo.DestZ, step.script.TeleportTo.Orientation);
                             }
+                            break;
                         }
-                        break;
-                    }
-
-                    case ScriptCommands.OpenDoor:
-                    case ScriptCommands.CloseDoor:
-                        _ScriptProcessDoor(source, target, step.script);
-                        break;
-                    case ScriptCommands.ActivateObject:
-                    {
-                        // Source must be Unit.
-                        Unit unit = _GetScriptUnit(source, true, step.script);
-                        if (unit != null)
+                    case ScriptCommands.QuestExplored:
                         {
-                            // Target must be GameObject.
+                            if (source == null)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} source object is NULL.", step.script.GetDebugInfo());
+                                break;
+                            }
                             if (target == null)
                             {
                                 Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
                                 break;
                             }
 
-                            if (!target.IsTypeId(TypeId.GameObject))
+                            // when script called for item spell casting then target == (unit or GO) and source is player
+                            WorldObject worldObject;
+                            Player player = target.ToPlayer();
+                            if (player != null)
                             {
-                                Log.outError(LogFilter.Scripts,
-                                    "{0} target object is not gameobject (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", step.script.GetDebugInfo(), target.GetTypeId(), target.GetEntry(),
-                                    target.GetGUID().ToString());
+                                if (!source.IsTypeId(TypeId.Unit) && !source.IsTypeId(TypeId.GameObject) && !source.IsTypeId(TypeId.Player))
+                                {
+                                    Log.outError(LogFilter.Scripts, "{0} source is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.",
+                                        step.script.GetDebugInfo(), source.GetTypeId(), source.GetEntry(), source.GetGUID().ToString());
+                                    break;
+                                }
+                                worldObject = source;
+                            }
+                            else
+                            {
+                                player = source.ToPlayer();
+                                if (player != null)
+                                {
+                                    if (!target.IsTypeId(TypeId.Unit) && !target.IsTypeId(TypeId.GameObject) && !target.IsTypeId(TypeId.Player))
+                                    {
+                                        Log.outError(LogFilter.Scripts,
+                                            "{0} target is not unit, gameobject or player (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", step.script.GetDebugInfo(), target.GetTypeId(), target.GetEntry(), target.GetGUID().ToString());
+                                        break;
+                                    }
+                                    worldObject = target;
+                                }
+                                else
+                                {
+                                    Log.outError(LogFilter.Scripts, "{0} neither source nor target is player (Entry: {0}, GUID: {1}; target: Entry: {2}, GUID: {3}), skipping.",
+                                        step.script.GetDebugInfo(), source.GetEntry(), source.GetGUID().ToString(), target.GetEntry(), target.GetGUID().ToString());
+                                    break;
+                                }
+                            }
+
+                            // quest id and flags checked at script loading
+                            if ((!worldObject.IsTypeId(TypeId.Unit) || worldObject.ToUnit().IsAlive()) &&
+                                (step.script.QuestExplored.Distance == 0 ||
+                                 worldObject.IsWithinDistInMap(player, step.script.QuestExplored.Distance)))
+                                player.AreaExploredOrEventHappens(step.script.QuestExplored.QuestID);
+                            else
+                                player.FailQuest(step.script.QuestExplored.QuestID);
+
+                            break;
+                        }
+
+                    case ScriptCommands.KillCredit:
+                        {
+                            // Source or target must be Player.
+                            Player player = _GetScriptPlayerSourceOrTarget(source, target, step.script);
+                            if (player != null)
+                            {
+                                if (step.script.KillCredit.Flags.HasAnyFlag(eScriptFlags.KillcreditRewardGroup))
+                                    player.RewardPlayerAndGroupAtEvent(step.script.KillCredit.CreatureEntry, player);
+                                else
+                                    player.KilledMonsterCredit(step.script.KillCredit.CreatureEntry, ObjectGuid.Empty);
+                            }
+                            break;
+                        }
+                    case ScriptCommands.RespawnGameobject:
+                        {
+                            if (step.script.RespawnGameObject.GOGuid == 0)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} gameobject guid (datalong) is not specified.", step.script.GetDebugInfo());
                                 break;
                             }
-                            GameObject pGO = target.ToGameObject();
-                            if (pGO != null)
-                                pGO.Use(unit);
+
+                            // Source or target must be WorldObject.
+                            WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
+                            if (pSummoner != null)
+                            {
+                                GameObject pGO = _FindGameObject(pSummoner, step.script.RespawnGameObject.GOGuid);
+                                if (pGO == null)
+                                {
+                                    Log.outError(LogFilter.Scripts, "{0} gameobject was not found (guid: {1}).", step.script.GetDebugInfo(), step.script.RespawnGameObject.GOGuid);
+                                    break;
+                                }
+
+                                if (pGO.GetGoType() == GameObjectTypes.FishingNode ||
+                                    pGO.GetGoType() == GameObjectTypes.Door || pGO.GetGoType() == GameObjectTypes.Button ||
+                                    pGO.GetGoType() == GameObjectTypes.Trap)
+                                {
+                                    Log.outError(LogFilter.Scripts,
+                                        "{0} can not be used with gameobject of type {1} (guid: {2}).", step.script.GetDebugInfo(), pGO.GetGoType(), step.script.RespawnGameObject.GOGuid);
+                                    break;
+                                }
+
+                                // Check that GO is not spawned
+                                if (!pGO.IsSpawned())
+                                {
+                                    int nTimeToDespawn = Math.Max(5, (int)step.script.RespawnGameObject.DespawnDelay);
+                                    pGO.SetLootState(LootState.Ready);
+                                    pGO.SetRespawnTime(nTimeToDespawn);
+
+                                    pGO.GetMap().AddToMap(pGO);
+                                }
+                            }
+                            break;
                         }
+                    case ScriptCommands.TempSummonCreature:
+                        {
+                            // Source must be WorldObject.
+                            WorldObject pSummoner = _GetScriptWorldObject(source, true, step.script);
+                            if (pSummoner != null)
+                            {
+                                if (step.script.TempSummonCreature.CreatureEntry == 0)
+                                    Log.outError(LogFilter.Scripts, "{0} creature entry (datalong) is not specified.", step.script.GetDebugInfo());
+                                else
+                                {
+                                    float x = step.script.TempSummonCreature.PosX;
+                                    float y = step.script.TempSummonCreature.PosY;
+                                    float z = step.script.TempSummonCreature.PosZ;
+                                    float o = step.script.TempSummonCreature.Orientation;
+
+                                    if (pSummoner.SummonCreature(step.script.TempSummonCreature.CreatureEntry, x, y, z, o, TempSummonType.TimedOrDeadDespawn, TimeSpan.FromMilliseconds(step.script.TempSummonCreature.DespawnDelay)) == null)
+                                        Log.outError(LogFilter.Scripts, "{0} creature was not spawned (entry: {1}).", step.script.GetDebugInfo(), step.script.TempSummonCreature.CreatureEntry);
+                                }
+                            }
+                            break;
+                        }
+
+                    case ScriptCommands.OpenDoor:
+                    case ScriptCommands.CloseDoor:
+                        _ScriptProcessDoor(source, target, step.script);
                         break;
-                    }
+                    case ScriptCommands.ActivateObject:
+                        {
+                            // Source must be Unit.
+                            Unit unit = _GetScriptUnit(source, true, step.script);
+                            if (unit != null)
+                            {
+                                // Target must be GameObject.
+                                if (target == null)
+                                {
+                                    Log.outError(LogFilter.Scripts, "{0} target object is NULL.", step.script.GetDebugInfo());
+                                    break;
+                                }
+
+                                if (!target.IsTypeId(TypeId.GameObject))
+                                {
+                                    Log.outError(LogFilter.Scripts,
+                                        "{0} target object is not gameobject (TypeId: {1}, Entry: {2}, GUID: {3}), skipping.", step.script.GetDebugInfo(), target.GetTypeId(), target.GetEntry(),
+                                        target.GetGUID().ToString());
+                                    break;
+                                }
+                                GameObject pGO = target.ToGameObject();
+                                if (pGO != null)
+                                    pGO.Use(unit);
+                            }
+                            break;
+                        }
                     case ScriptCommands.RemoveAura:
-                    {
-                        // Source (datalong2 != 0) or target (datalong2 == 0) must be Unit.
-                        bool bReverse = step.script.RemoveAura.Flags.HasAnyFlag(eScriptFlags.RemoveauraReverse);
-                        Unit unit = _GetScriptUnit(bReverse ? source : target, bReverse, step.script);
-                        if (unit != null)
-                            unit.RemoveAurasDueToSpell(step.script.RemoveAura.SpellID);
-                        break;
-                    }
+                        {
+                            // Source (datalong2 != 0) or target (datalong2 == 0) must be Unit.
+                            bool bReverse = step.script.RemoveAura.Flags.HasAnyFlag(eScriptFlags.RemoveauraReverse);
+                            Unit unit = _GetScriptUnit(bReverse ? source : target, bReverse, step.script);
+                            if (unit != null)
+                                unit.RemoveAurasDueToSpell(step.script.RemoveAura.SpellID);
+                            break;
+                        }
                     case ScriptCommands.CastSpell:
-                    {
-                        if (source == null && target == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} source and target objects are NULL.", step.script.GetDebugInfo());
+                            if (source == null && target == null)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} source and target objects are NULL.", step.script.GetDebugInfo());
+                                break;
+                            }
+
+                            WorldObject uSource = null;
+                            WorldObject uTarget = null;
+                            // source/target cast spell at target/source (script.datalong2: 0: s.t 1: s.s 2: t.t 3: t.s
+                            switch (step.script.CastSpell.Flags)
+                            {
+                                case eScriptFlags.CastspellSourceToTarget: // source . target
+                                    uSource = source;
+                                    uTarget = target;
+                                    break;
+                                case eScriptFlags.CastspellSourceToSource: // source . source
+                                    uSource = source;
+                                    uTarget = uSource;
+                                    break;
+                                case eScriptFlags.CastspellTargetToTarget: // target . target
+                                    uSource = target;
+                                    uTarget = uSource;
+                                    break;
+                                case eScriptFlags.CastspellTargetToSource: // target . source
+                                    uSource = target;
+                                    uTarget = source;
+                                    break;
+                                case eScriptFlags.CastspellSearchCreature: // source . creature with entry
+                                    uSource = source;
+                                    uTarget = uSource?.FindNearestCreature((uint)Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
+                                    break;
+                            }
+
+                            if (uSource == null)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} no source worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                                break;
+                            }
+
+                            if (uTarget == null)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} no target worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                                break;
+                            }
+
+                            bool triggered = ((int)step.script.CastSpell.Flags != 4)
+                                ? step.script.CastSpell.CreatureEntry.HasAnyFlag((int)eScriptFlags.CastspellTriggered)
+                                : step.script.CastSpell.CreatureEntry < 0;
+                            uSource.CastSpell(uTarget, step.script.CastSpell.SpellID, triggered);
                             break;
                         }
-
-                        WorldObject uSource = null;
-                        WorldObject uTarget = null;
-                        // source/target cast spell at target/source (script.datalong2: 0: s.t 1: s.s 2: t.t 3: t.s
-                        switch (step.script.CastSpell.Flags)
-                        {
-                            case eScriptFlags.CastspellSourceToTarget: // source . target
-                                uSource = source;
-                                uTarget = target;
-                                break;
-                            case eScriptFlags.CastspellSourceToSource: // source . source
-                                uSource = source;
-                                uTarget = uSource;
-                                break;
-                            case eScriptFlags.CastspellTargetToTarget: // target . target
-                                uSource = target;
-                                uTarget = uSource;
-                                break;
-                            case eScriptFlags.CastspellTargetToSource: // target . source
-                                uSource = target;
-                                uTarget = source;
-                                break;
-                            case eScriptFlags.CastspellSearchCreature: // source . creature with entry
-                                uSource = source;
-                                uTarget = uSource?.FindNearestCreature((uint)Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
-                                break;
-                        }
-
-                        if (uSource == null)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} no source worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
-                            break;
-                        }
-
-                        if (uTarget == null)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} no target worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
-                            break;
-                        }
-
-                        bool triggered = ((int)step.script.CastSpell.Flags != 4)
-                            ? step.script.CastSpell.CreatureEntry.HasAnyFlag((int)eScriptFlags.CastspellTriggered)
-                            : step.script.CastSpell.CreatureEntry < 0;
-                        uSource.CastSpell(uTarget, step.script.CastSpell.SpellID, triggered);
-                        break;
-                    }
 
                     case ScriptCommands.PlaySound:
                         // Source must be WorldObject.
@@ -4614,166 +4644,166 @@ namespace Game.Maps
                         break;
 
                     case ScriptCommands.DespawnSelf:
-                    {
-                        // First try with target or source creature, then with target or source gameobject
-                        Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true);
-                        if (cSource != null)
-                            cSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
-                        else
                         {
-                            GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.script, true);
-                            if (goSource != null)
-                                goSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
-                        }
-                        break;
-                    }
-                    case ScriptCommands.LoadPath:
-                    {
-                        // Source must be Unit.
-                        Unit unit = _GetScriptUnit(source, true, step.script);
-                        if (unit != null)
-                        {
-                            if (Global.WaypointMgr.GetPath(step.script.LoadPath.PathID) == null)
-                                Log.outError(LogFilter.Scripts, "{0} source object has an invalid path ({1}), skipping.", step.script.GetDebugInfo(), step.script.LoadPath.PathID);
+                            // First try with target or source creature, then with target or source gameobject
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true);
+                            if (cSource != null)
+                                cSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
                             else
-                                unit.GetMotionMaster().MovePath(step.script.LoadPath.PathID, step.script.LoadPath.IsRepeatable != 0);
+                            {
+                                GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.script, true);
+                                if (goSource != null)
+                                    goSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
+                            }
+                            break;
                         }
-                        break;
-                    }
+                    case ScriptCommands.LoadPath:
+                        {
+                            // Source must be Unit.
+                            Unit unit = _GetScriptUnit(source, true, step.script);
+                            if (unit != null)
+                            {
+                                if (Global.WaypointMgr.GetPath(step.script.LoadPath.PathID) == null)
+                                    Log.outError(LogFilter.Scripts, "{0} source object has an invalid path ({1}), skipping.", step.script.GetDebugInfo(), step.script.LoadPath.PathID);
+                                else
+                                    unit.GetMotionMaster().MovePath(step.script.LoadPath.PathID, step.script.LoadPath.IsRepeatable != 0);
+                            }
+                            break;
+                        }
                     case ScriptCommands.CallscriptToUnit:
-                    {
-                        if (step.script.CallScript.CreatureEntry == 0)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} creature entry is not specified, skipping.", step.script.GetDebugInfo());
+                            if (step.script.CallScript.CreatureEntry == 0)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} creature entry is not specified, skipping.", step.script.GetDebugInfo());
+                                break;
+                            }
+                            if (step.script.CallScript.ScriptID == 0)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} script id is not specified, skipping.", step.script.GetDebugInfo());
+                                break;
+                            }
+
+                            Creature cTarget = null;
+                            var creatureBounds = _creatureBySpawnIdStore.LookupByKey(step.script.CallScript.CreatureEntry);
+                            if (creatureBounds.Empty())
+                            {
+                                // Prefer alive (last respawned) creature
+                                var foundCreature = creatureBounds.Find(creature => creature.IsAlive());
+
+                                cTarget = foundCreature ?? creatureBounds[0];
+                            }
+
+                            if (cTarget == null)
+                            {
+                                Log.outError(LogFilter.Scripts, "{0} target was not found (entry: {1})", step.script.GetDebugInfo(), step.script.CallScript.CreatureEntry);
+                                break;
+                            }
+
+                            // Insert script into schedule but do not start it
+                            ScriptsStart((ScriptsType)step.script.CallScript.ScriptType, step.script.CallScript.ScriptID, cTarget, null);
                             break;
                         }
-                        if (step.script.CallScript.ScriptID == 0)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} script id is not specified, skipping.", step.script.GetDebugInfo());
-                            break;
-                        }
-
-                        Creature cTarget = null;
-                        var creatureBounds = _creatureBySpawnIdStore.LookupByKey(step.script.CallScript.CreatureEntry);
-                        if (creatureBounds.Empty())
-                        {
-                            // Prefer alive (last respawned) creature
-                            var foundCreature = creatureBounds.Find(creature => creature.IsAlive());
-
-                            cTarget = foundCreature ?? creatureBounds[0];
-                        }
-
-                        if (cTarget == null)
-                        {
-                            Log.outError(LogFilter.Scripts, "{0} target was not found (entry: {1})", step.script.GetDebugInfo(), step.script.CallScript.CreatureEntry);
-                            break;
-                        }
-
-                        // Insert script into schedule but do not start it
-                        ScriptsStart((ScriptsType)step.script.CallScript.ScriptType, step.script.CallScript.ScriptID, cTarget, null);
-                        break;
-                    }
 
                     case ScriptCommands.Kill:
-                    {
-                        // Source or target must be Creature.
-                        Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
-                        if (cSource != null)
                         {
-                            if (cSource.IsDead())
-                                Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
-                            else
+                            // Source or target must be Creature.
+                            Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script);
+                            if (cSource != null)
                             {
-                                cSource.SetDeathState(DeathState.JustDied);
-                                if (step.script.Kill.RemoveCorpse == 1)
-                                    cSource.RemoveCorpse();
+                                if (cSource.IsDead())
+                                    Log.outError(LogFilter.Scripts, "{0} creature is already dead (Entry: {1}, GUID: {2})", step.script.GetDebugInfo(), cSource.GetEntry(), cSource.GetGUID().ToString());
+                                else
+                                {
+                                    cSource.SetDeathState(DeathState.JustDied);
+                                    if (step.script.Kill.RemoveCorpse == 1)
+                                        cSource.RemoveCorpse();
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
                     case ScriptCommands.Orientation:
-                    {
-                        // Source must be Unit.
-                        Unit sourceUnit = _GetScriptUnit(source, true, step.script);
-                        if (sourceUnit != null)
                         {
-                            if (step.script.Orientation.Flags.HasAnyFlag(eScriptFlags.OrientationFaceTarget))
+                            // Source must be Unit.
+                            Unit sourceUnit = _GetScriptUnit(source, true, step.script);
+                            if (sourceUnit != null)
                             {
-                                // Target must be Unit.
-                                Unit targetUnit = _GetScriptUnit(target, false, step.script);
-                                if (targetUnit == null)
-                                    break;
+                                if (step.script.Orientation.Flags.HasAnyFlag(eScriptFlags.OrientationFaceTarget))
+                                {
+                                    // Target must be Unit.
+                                    Unit targetUnit = _GetScriptUnit(target, false, step.script);
+                                    if (targetUnit == null)
+                                        break;
 
-                                sourceUnit.SetFacingToObject(targetUnit);
+                                    sourceUnit.SetFacingToObject(targetUnit);
+                                }
+                                else
+                                    sourceUnit.SetFacingTo(step.script.Orientation._Orientation);
                             }
-                            else
-                                sourceUnit.SetFacingTo(step.script.Orientation._Orientation);
+                            break;
                         }
-                        break;
-                    }
                     case ScriptCommands.Equip:
-                    {
-                        // Source must be Creature.
-                        Creature cSource = _GetScriptCreature(source, target != null, step.script);
-                        if (cSource != null)
-                            cSource.LoadEquipment((int)step.script.Equip.EquipmentID);
-                        break;
-                    }
-                    case ScriptCommands.Model:
-                    {
-                        // Source must be Creature.
-                        Creature cSource = _GetScriptCreature(source, target != null, step.script);
-                        if (cSource != null)
-                            cSource.SetDisplayId(step.script.Model.ModelID);
-                        break;
-                    }
-                    case ScriptCommands.CloseGossip:
-                    {
-                        // Source must be Player.
-                        Player player = _GetScriptPlayer(source, true, step.script);
-                        if (player != null)
-                            player.PlayerTalkClass.SendCloseGossip();
-                        break;
-                    }
-                    case ScriptCommands.Playmovie:
-                    {
-                        // Source must be Player.
-                        Player player = _GetScriptPlayer(source, true, step.script);
-                        if (player != null)
-                            player.SendMovieStart(step.script.PlayMovie.MovieID);
-                        break;
-                    }
-                    case ScriptCommands.Movement:
-                    {
-                        // Source must be Creature.
-                        Creature cSource = _GetScriptCreature(source, true, step.script);
-                        if (cSource != null)
                         {
-                            if (!cSource.IsAlive())
-                                return;
-
-                            cSource.GetMotionMaster().MoveIdle();
-
-                            switch ((MovementGeneratorType)step.script.Movement.MovementType)
-                            {
-                                case MovementGeneratorType.Random:
-                                    cSource.GetMotionMaster().MoveRandom(step.script.Movement.MovementDistance);
-                                    break;
-                                case MovementGeneratorType.Waypoint:
-                                    cSource.GetMotionMaster().MovePath((uint)step.script.Movement.Path, false);
-                                    break;
-                            }
+                            // Source must be Creature.
+                            Creature cSource = _GetScriptCreature(source, target != null, step.script);
+                            if (cSource != null)
+                                cSource.LoadEquipment((int)step.script.Equip.EquipmentID);
+                            break;
                         }
-                        break;
-                    }
+                    case ScriptCommands.Model:
+                        {
+                            // Source must be Creature.
+                            Creature cSource = _GetScriptCreature(source, target != null, step.script);
+                            if (cSource != null)
+                                cSource.SetDisplayId(step.script.Model.ModelID);
+                            break;
+                        }
+                    case ScriptCommands.CloseGossip:
+                        {
+                            // Source must be Player.
+                            Player player = _GetScriptPlayer(source, true, step.script);
+                            if (player != null)
+                                player.PlayerTalkClass.SendCloseGossip();
+                            break;
+                        }
+                    case ScriptCommands.Playmovie:
+                        {
+                            // Source must be Player.
+                            Player player = _GetScriptPlayer(source, true, step.script);
+                            if (player != null)
+                                player.SendMovieStart(step.script.PlayMovie.MovieID);
+                            break;
+                        }
+                    case ScriptCommands.Movement:
+                        {
+                            // Source must be Creature.
+                            Creature cSource = _GetScriptCreature(source, true, step.script);
+                            if (cSource != null)
+                            {
+                                if (!cSource.IsAlive())
+                                    return;
+
+                                cSource.GetMotionMaster().MoveIdle();
+
+                                switch ((MovementGeneratorType)step.script.Movement.MovementType)
+                                {
+                                    case MovementGeneratorType.Random:
+                                        cSource.GetMotionMaster().MoveRandom(step.script.Movement.MovementDistance);
+                                        break;
+                                    case MovementGeneratorType.Waypoint:
+                                        cSource.GetMotionMaster().MovePath((uint)step.script.Movement.Path, false);
+                                        break;
+                                }
+                            }
+                            break;
+                        }
                     case ScriptCommands.PlayAnimkit:
-                    {
-                        // Source must be Creature.
-                        Creature cSource = _GetScriptCreature(source, true, step.script);
-                        if (cSource != null)
-                            cSource.PlayOneShotAnimKitId((ushort)step.script.PlayAnimKit.AnimKitID);
-                        break;
-                    }
+                        {
+                            // Source must be Creature.
+                            Creature cSource = _GetScriptCreature(source, true, step.script);
+                            if (cSource != null)
+                                cSource.PlayOneShotAnimKitId((ushort)step.script.PlayAnimKit.AnimKitID);
+                            break;
+                        }
                     default:
                         Log.outError(LogFilter.Scripts, "Unknown script command {0}.", step.script.GetDebugInfo());
                         break;
@@ -4802,6 +4832,8 @@ namespace Game.Maps
         List<AreaTrigger> _areaTriggersToMove = new();
 
         DynamicMapTree _dynamicTree = new();
+
+        DynamicTileBuilder m_mmapTileRebuilder;
 
         SortedSet<RespawnInfo> _respawnTimes = new(new CompareRespawnInfo());
         Dictionary<ulong, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
@@ -5084,35 +5116,35 @@ namespace Game.Maps
                         // no client notification
                         break;
                     case InstanceResetMethod.Expire:
-                    {
-                        RaidInstanceMessage raidInstanceMessage = new();
-                        raidInstanceMessage.Type = InstanceResetWarningType.Expired;
-                        raidInstanceMessage.MapID = GetId();
-                        raidInstanceMessage.DifficultyID = GetDifficultyID();
-                        raidInstanceMessage.Write();
-
-                        foreach (Player player in GetPlayers())
-                            player.SendPacket(raidInstanceMessage);
-
-                        if (i_data != null)
                         {
-                            PendingRaidLock pendingRaidLock = new();
-                            pendingRaidLock.TimeUntilLock = 60000;
-                            pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
-                            pendingRaidLock.Extending = true;
-                            pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
-                            pendingRaidLock.Write();
+                            RaidInstanceMessage raidInstanceMessage = new();
+                            raidInstanceMessage.Type = InstanceResetWarningType.Expired;
+                            raidInstanceMessage.MapID = GetId();
+                            raidInstanceMessage.DifficultyID = GetDifficultyID();
+                            raidInstanceMessage.Write();
 
                             foreach (Player player in GetPlayers())
-                            {
-                                player.SendPacket(pendingRaidLock);
+                                player.SendPacket(raidInstanceMessage);
 
-                                if (!pendingRaidLock.WarningOnly)
-                                    player.SetPendingBind(GetInstanceId(), 60000);
+                            if (i_data != null)
+                            {
+                                PendingRaidLock pendingRaidLock = new();
+                                pendingRaidLock.TimeUntilLock = 60000;
+                                pendingRaidLock.CompletedMask = i_instanceLock.GetData().CompletedEncountersMask;
+                                pendingRaidLock.Extending = true;
+                                pendingRaidLock.WarningOnly = GetEntry().IsFlexLocking();
+                                pendingRaidLock.Write();
+
+                                foreach (Player player in GetPlayers())
+                                {
+                                    player.SendPacket(pendingRaidLock);
+
+                                    if (!pendingRaidLock.WarningOnly)
+                                        player.SetPendingBind(GetInstanceId(), 60000);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
                     default:
                         break;
                 }

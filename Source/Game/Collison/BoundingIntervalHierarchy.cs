@@ -287,11 +287,11 @@ namespace Game.Collision
             dat.numPrims = (uint)primitives.Count;
             dat.indices = new uint[dat.numPrims];
             dat.primBound = new AxisAlignedBox[dat.numPrims];
-            bounds = primitives[0].GetBounds();
+            bounds = primitives[0].GetBound();
             for (int i = 0; i < dat.numPrims; ++i)
             {
                 dat.indices[i] = (uint)i;
-                dat.primBound[i] = primitives[i].GetBounds();
+                dat.primBound[i] = primitives[i].GetBound();
                 bounds.merge(dat.primBound[i]);
             }
             List<uint> tempTree = new();

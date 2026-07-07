@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace Framework.Database
 {
-    public interface ISqlCallback
+    public interface IAsyncCallback
     {
-        bool InvokeIfReady();
+        bool InvokeAsyncCallbackIfReady();
     }
 
-    public class AsyncCallbackProcessor<T> where T : ISqlCallback
-    {   
+    public class AsyncCallbackProcessor<T> where T : IAsyncCallback
+    {
         List<T> _callbacks = new();
 
         public T AddCallback(T query)
@@ -25,7 +25,17 @@ namespace Framework.Database
             if (_callbacks.Empty())
                 return;
 
-            _callbacks.RemoveAll(callback => callback.InvokeIfReady());
+            _callbacks.RemoveAll(callback => callback.InvokeAsyncCallbackIfReady());
+        }
+
+        public bool Empty()
+        {
+            return _callbacks.Empty();
+        }
+
+        public void CancelAll()
+        {
+            _callbacks.Clear();
         }
     }
 }

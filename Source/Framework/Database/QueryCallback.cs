@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Framework.Database
 {
-    public class QueryCallback : ISqlCallback
+    public class QueryCallback : IAsyncCallback
     {
         public QueryCallback(Task<SQLResult> result)
         {
@@ -40,7 +40,7 @@ namespace Framework.Database
             _result = next._result;
         }
 
-        public bool InvokeIfReady()
+        public bool InvokeAsyncCallbackIfReady()
         {
             QueryCallbackData callback = _callbacks.Peek();
 

@@ -1200,7 +1200,7 @@ namespace Game
 
         AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
-        AsyncCallbackProcessor<ISqlCallback> _queryHolderProcessor = new();
+        AsyncCallbackProcessor<IAsyncCallback> _queryHolderProcessor = new();
         #endregion
     }
 

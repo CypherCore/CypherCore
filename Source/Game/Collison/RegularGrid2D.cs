@@ -21,7 +21,7 @@ namespace Game.Collision
 
         public virtual void Insert(T value)
         {
-            AxisAlignedBox bounds = value.GetBounds();
+            AxisAlignedBox bounds = value.GetBound();
             Cell low = Cell.ComputeCell(bounds.Lo.X, bounds.Lo.Y);
             Cell high = Cell.ComputeCell(bounds.Hi.X, bounds.Hi.Y);
             for (int x = low.x; x <= high.x; ++x)
@@ -190,6 +190,14 @@ namespace Game.Collision
             Node node = nodes[cell.x][cell.y];
             if (node != null)
                 node.IntersectRay(ray, intersectCallback, ref max_dist);
+        }
+
+        public List<T> getObjects(int x, int y)
+        {
+            Node n = nodes[x][y];
+            if (n != null)
+                return n.GetObjects();
+            return null;
         }
 
         MultiMap<T, Node> memberTable = new();
