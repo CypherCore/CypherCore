@@ -102,6 +102,9 @@ namespace Game
             if (staticFlags.HasFlag(CreatureStaticFlags3.CannotTurn))
                 unitFlags2 |= (uint)UnitFlags2.CannotTurn;
 
+            if (staticFlags.HasFlag(CreatureStaticFlags4.PreventSwim))
+                unitFlags2 |= (uint)UnitFlags2.AiWillOnlySwimIfTargetSwims;
+
             if (staticFlags.HasFlag(CreatureStaticFlags5.InteractWhileHostile))
                 unitFlags2 |= (uint)UnitFlags2.InteractWhileHostile;
 
