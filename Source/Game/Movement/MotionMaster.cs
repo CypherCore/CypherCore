@@ -640,38 +640,46 @@ namespace Game.Movement
 
         public void MoveLand(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
-            var initializer = (MoveSplineInit init) =>
+            MoveTierTransition(id, pos, AnimTier.Ground, tierTransitionId, velocity, speedSelectionMode, scriptResult);
+        }
+
+        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason>? scriptResult = null)
+        {
+            MoveTierTransition(id, pos, AnimTier.Fly, tierTransitionId, velocity, speedSelectionMode, scriptResult);
+        }
+
+        public void MoveTierTransition(uint id, Position pos, AnimTier newAnimTier, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason>? scriptResult = null)
+        {
+            bool flyingTransition = newAnimTier == AnimTier.Fly || _owner.GetAnimTier() == AnimTier.Fly;
+            if (tierTransitionId == 0)
             {
-                init.MoveTo(pos, false);
-                init.SetAnimation(AnimTier.Ground, tierTransitionId.GetValueOrDefault(1));
-                init.SetFly(); // ensure smooth animation even if gravity is enabled before calling this function
-                init.SetSmooth();
-                switch (speedSelectionMode)
+                switch (newAnimTier)
                 {
-                    case MovementWalkRunSpeedSelectionMode.ForceRun:
-                        init.SetWalk(false);
+                    case AnimTier.Ground:
+                        tierTransitionId = 208;
                         break;
-                    case MovementWalkRunSpeedSelectionMode.ForceWalk:
-                        init.SetWalk(true);
+                    case AnimTier.Swim:
+                        tierTransitionId = 149;
                         break;
-                    case MovementWalkRunSpeedSelectionMode.Default:
+                    case AnimTier.Hover:
+                        tierTransitionId = 25;
+                        break;
+                    case AnimTier.Fly:
+                        tierTransitionId = 17;
+                        break;
                     default:
                         break;
                 }
-                if (velocity.HasValue)
-                    init.SetVelocity(velocity.Value);
-            };
 
-            Add(new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id, new() { ScriptResult = scriptResult }));
-        }
+            }
 
-        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
-        {
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(pos, false);
                 init.SetAnimation(AnimTier.Fly, tierTransitionId.GetValueOrDefault(2));
-                init.SetFly(); // ensure smooth animation even if gravity is disabled after calling this function
+                if (flyingTransition)
+                    init.SetFly(); // ensure smooth animation even if gravity is disabled after/enabled before calling this function
+                init.SetSmooth();
                 switch (speedSelectionMode)
                 {
                     case MovementWalkRunSpeedSelectionMode.ForceRun:
@@ -1215,9 +1223,9 @@ namespace Game.Movement
             */
 
             /*
- * NOTE: This mimics old behaviour: only one MOTION_SLOT_IDLE, MOTION_SLOT_ACTIVE, MOTION_SLOT_CONTROLLED
- * On future changes support for multiple will be added
- */
+        * NOTE: This mimics old behaviour: only one MOTION_SLOT_IDLE, MOTION_SLOT_ACTIVE, MOTION_SLOT_CONTROLLED
+        * On future changes support for multiple will be added
+        */
             switch (slot)
             {
                 case MovementSlot.Default:
