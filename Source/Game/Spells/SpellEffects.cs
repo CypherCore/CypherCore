@@ -3755,9 +3755,9 @@ namespace Game.Spells
                 return;
 
             float ratio = 0.1f;
-            float speedxy = effectInfo.MiscValue * ratio;
-            float speedz = damage * ratio;
-            if (speedxy < 0.01f && speedz < 0.01f)
+            float speedXY = effectInfo.MiscValue * ratio;
+            float speedZ = damage * ratio;
+            if (MathF.Abs(speedXY) < 0.01f && MathF.Abs(speedZ) < 0.01f)
                 return;
 
             Position origin;
@@ -3771,7 +3771,7 @@ namespace Game.Spells
             else //if (effectInfo.Effect == SPELL_EFFECT_KNOCK_BACK)
                 origin = new(m_caster.GetPosition());
 
-            unitTarget.KnockbackFrom(origin, speedxy, speedz);
+            unitTarget.KnockbackFrom(origin, speedXY, speedZ);
 
             Unit.ProcSkillsAndAuras(GetUnitCasterForEffectHandlers(), unitTarget, new ProcFlagsInit(ProcFlags.None), new ProcFlagsInit(ProcFlags.None, ProcFlags2.Knockback), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.None, null, null, null);
         }

@@ -738,23 +738,34 @@ namespace Game.Movement
             if (_owner.IsTypeId(TypeId.Player))
                 return;
 
-            if (speedXY < 0.01f)
+            if (MathF.Abs(speedXY) < 0.01f /* && std::abs(speedZ) < 0.01f */)
                 return;
 
             Position dest = _owner.GetPosition();
+            float o = dest == origin ? 0.0f : _owner.GetRelativeAngle(origin) + MathF.PI;
+            if (speedXY < 0)
+            {
+                speedXY = -speedXY;
+                o = o - MathF.PI;
+            }
+
+            if (speedZ < 0)
+                speedZ = -speedZ; // doesn't seem to be supported on official servers - packet sent for knockback with positive and negative speed has the same flags and JumpGravity
+
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
             // Use a mmap raycast to get a valid destination.
-            _owner.MovePositionToFirstCollision(dest, dist, _owner.GetRelativeAngle(origin) + MathF.PI);
+            _owner.MovePositionToFirstCollision(dest, dist, o);
 
             var initializer = (MoveSplineInit init) =>
             {
                 init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
                 init.SetParabolic(max_height, 0);
                 init.SetOrientationFixed(true);
-                init.SetVelocity(speedXY);
+                if (speedXY >= 0.01f)
+                    init.SetVelocity(speedXY);
                 if (spellEffectExtraData != null)
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };
