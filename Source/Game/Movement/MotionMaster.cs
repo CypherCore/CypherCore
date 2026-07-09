@@ -8,6 +8,7 @@ using Game.Entities;
 using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -738,7 +739,7 @@ namespace Game.Movement
             if (_owner.IsTypeId(TypeId.Player))
                 return;
 
-            if (MathF.Abs(speedXY) < 0.01f /* && std::abs(speedZ) < 0.01f */)
+            if (MathF.Abs(speedXY) < 0.01f && MathF.Abs(speedZ) < 0.01f)
                 return;
 
             Position dest = _owner.GetPosition();
@@ -756,16 +757,29 @@ namespace Game.Movement
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            // Use a mmap raycast to get a valid destination.
-            _owner.MovePositionToFirstCollision(dest, dist, o);
+            List<Vector3> path = [];
+            path.Add(dest);
+
+            if (dist > 0.01f)
+            {
+                // Use a mmap raycast to get a valid destination.
+                _owner.MovePositionToFirstCollision(dest, dist, o);
+                path.Add(dest);
+            }
+            else
+            {
+                // vertical knockbacks get a fake 0.5 higher additional point to avoid clientside spline length checks
+                // sniffs confirmed that it is always 0.5, no matter what the max height is
+                path.Add(dest.GetPositionWithOffset(new Position(0.0f, 0.0f, 0.5f)));
+                path.Add(dest);
+            }
 
             var initializer = (MoveSplineInit init) =>
             {
-                init.MoveTo(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false);
+                init.MovebyPath(path.ToArray());
                 init.SetParabolic(max_height, 0);
                 init.SetOrientationFixed(true);
-                if (speedXY >= 0.01f)
-                    init.SetVelocity(speedXY);
+                init.SetVelocity(speedXY);
                 if (spellEffectExtraData != null)
                     init.SetSpellEffectExtraData(spellEffectExtraData);
             };

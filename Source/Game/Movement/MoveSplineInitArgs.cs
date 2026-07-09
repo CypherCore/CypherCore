@@ -60,7 +60,7 @@ namespace Game.Movement
 
             if (!CHECK(path.Count > 1, unit.GetDebugInfo()))
                 return false;
-            if (!CHECK(velocity >= 0.01f, unit.GetDebugInfo()))
+            if (!CHECK(velocity >= 0.01f || (flags.HasFlag(MoveSplineFlagEnum.Parabolic) && parabolic_amplitude != 0.0f), unit.GetDebugInfo()))
                 return false;
             if (!CHECK(effect_start_point < path.Count, unit.GetDebugInfo()))
                 return false;

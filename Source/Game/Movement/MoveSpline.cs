@@ -95,12 +95,17 @@ namespace Game.Movement
             // init spline timestamps
             if (splineflags.HasFlag(MoveSplineFlagEnum.Falling))
             {
-                FallInitializer init = new(spline.GetPoint(spline.First()).Z);
+                FallInitializer init = new() { startElevation = spline.GetPoint(spline.First()).Z };
+                spline.InitLengths(init);
+            }
+            else if (splineflags.HasFlag(MoveSplineFlagEnum.Parabolic) && args.velocity < 0.01f)
+            {
+                ParabolicInPlaceInitializer init = new() { parabolicAmplitude = args.parabolic_amplitude };
                 spline.InitLengths(init);
             }
             else
             {
-                CommonInitializer init = new(args.velocity);
+                CommonInitializer init = new() { velocityInv = 1000.0f / args.velocity };
                 spline.InitLengths(init);
             }
 
@@ -382,15 +387,21 @@ namespace Game.Movement
         public AnimTierTransition anim_tier;
         #endregion
 
+        class ParabolicInPlaceInitializer : IInitializer<int>
+        {
+            public float parabolicAmplitude;
+            int time = 1;
+
+            public int Invoke(Spline<int> s, int i)
+            {
+                return time += (int)(MovementInfo.ComputeFallTime(parabolicAmplitude, false) * 1000.0f);
+            }
+        }
+
         public class CommonInitializer : IInitializer<int>
         {
-            public CommonInitializer(float _velocity)
-            {
-                velocityInv = 1000f / _velocity;
-                time = 1;
-            }
             public float velocityInv;
-            public int time;
+            public int time = 1;
 
             public int Invoke(Spline<int> s, int i)
             {
@@ -401,39 +412,11 @@ namespace Game.Movement
 
         public class FallInitializer : IInitializer<int>
         {
-            public FallInitializer(float startelevation)
-            {
-                startElevation = startelevation;
-            }
-            float startElevation;
+            public float startElevation;
 
             public int Invoke(Spline<int> s, int i)
             {
-                return (int)(ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
-            }
-
-            float ComputeFallTime(float path_length, bool isSafeFall)
-            {
-                if (path_length < 0.0f)
-                    return 0.0f;
-
-                float time;
-                if (isSafeFall)
-                {
-                    if (path_length >= SharedConst.terminal_safeFall_length)
-                        time = (path_length - SharedConst.terminal_safeFall_length) / SharedConst.terminalSafefallVelocity + SharedConst.terminal_safeFall_fallTime;
-                    else
-                        time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
-                }
-                else
-                {
-                    if (path_length >= SharedConst.terminal_length)
-                        time = (path_length - SharedConst.terminal_length) / SharedConst.terminalVelocity + SharedConst.terminal_fallTime;
-                    else
-                        time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
-                }
-
-                return time;
+                return (int)(MovementInfo.ComputeFallTime(startElevation - s.GetPoint(i + 1).Z, false) * 1000.0f);
             }
         }
         public enum UpdateResult

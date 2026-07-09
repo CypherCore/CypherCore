@@ -3951,6 +3951,30 @@ namespace Game.Entities
             public bool accelerating;
             public bool drifting;
         }
+
+        public static float ComputeFallTime(float path_length, bool isSafeFall)
+        {
+            if (path_length < 0.0f)
+                return 0.0f;
+
+            float time;
+            if (isSafeFall)
+            {
+                if (path_length >= SharedConst.terminal_safeFall_length)
+                    time = (path_length - SharedConst.terminal_safeFall_length) / SharedConst.terminalSafefallVelocity + SharedConst.terminal_safeFall_fallTime;
+                else
+                    time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
+            }
+            else
+            {
+                if (path_length >= SharedConst.terminal_length)
+                    time = (path_length - SharedConst.terminal_length) / SharedConst.terminalVelocity + SharedConst.terminal_fallTime;
+                else
+                    time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
+            }
+
+            return time;
+        }
     }
 
     public class MovementForce
