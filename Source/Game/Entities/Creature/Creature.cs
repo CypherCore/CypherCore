@@ -285,7 +285,6 @@ namespace Game.Entities
             // TODO: migrate these in DB
             _staticFlags.ApplyFlag(CreatureStaticFlags2.AllowMountedCombat, GetCreatureDifficulty().TypeFlags.HasFlag(CreatureTypeFlags.AllowMountedCombat));
             SetIgnoreFeignDeath(creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.IgnoreFeighDeath));
-            SetInteractionAllowedInCombat(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.AllowInteractionWhileInCombat));
             SetTreatAsRaidUnit(GetCreatureDifficulty().TypeFlags.HasAnyFlag(CreatureTypeFlags.TreatAsRaidUnit));
 
             return true;
