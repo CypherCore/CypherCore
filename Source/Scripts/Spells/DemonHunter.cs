@@ -73,6 +73,8 @@ struct SpellIds
     public const uint DemonicTrampleDmg = 208645;
     public const uint DemonicTrampleStun = 213491;
     public const uint DemonsBite = 162243;
+    public const uint ElysianDecree = 306830;
+    public const uint ElysianDecreeAoe = 307046;
     public const uint EssenceBreakDebuff = 320338;
     public const uint EyeBeam = 198013;
     public const uint EyeBeamDamage = 198030;
@@ -149,6 +151,7 @@ struct SpellIds
     public const uint RainOfChaos = 205628;
     public const uint RainOfChaosImpact = 232538;
     public const uint RazorSpikes = 210003;
+    public const uint RepeatDecreeConduit = 339895;
     public const uint RestlessHunterTalent = 390142;
     public const uint RestlessHunterBuff = 390212;
     public const uint Sever = 235964;
@@ -156,8 +159,8 @@ struct SpellIds
     public const uint ShatterSoul1 = 209981;
     public const uint ShatterSoul2 = 210038;
     public const uint ShatteredSoul = 226258;
-    public const uint ShatteredSoulLesserSoulFragment1 = 228533;
-    public const uint ShatteredSoulLesserSoulFragment2 = 237867;
+    public const uint ShatteredSoulLesserRight = 228533;
+    public const uint ShatteredSoulLesserLeft = 237867;
     public const uint Shear = 203782;
     public const uint SigilOfChainsAreaSelector = 204834;
     public const uint SigilOfChainsGrip = 208674;
@@ -174,6 +177,8 @@ struct SpellIds
     public const uint SigilOfMiseryAoe = 207685;
     public const uint SigilOfSilence = 204490;
     public const uint SigilOfSilenceAoe = 204490;
+    public const uint SigilOfSpite = 390163;
+    public const uint SigilOfSpiteAoe = 389860;
     public const uint SoulBarrier = 227225;
     public const uint SoulCleave = 228477;
     public const uint SoulCleaveDmg = 228478;
@@ -839,6 +844,46 @@ class spell_dh_demon_spikes : SpellScript
     }
 }
 
+// 307046 - Elysian Decree (Kyrian)
+// 389860 - Sigil of Spite
+[Script("spell_dh_elysian_decree", SpellIds.ElysianDecree)]
+[Script("spell_dh_sigil_of_spite", SpellIds.SigilOfSpite)]
+class spell_dh_elysian_decree(uint primarySpellId) : SpellScript
+{
+    int _maxFragmentsToCreate = 0;
+    int _fragmentsToCreate = 0;
+
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellEffect((primarySpellId, 2))
+            && Global.SpellMgr.GetSpellInfo(primarySpellId, Difficulty.None).GetEffect(2).IsEffect(SpellEffectName.Dummy);
+    }
+
+    public override bool Load()
+    {
+        _maxFragmentsToCreate = Global.SpellMgr.GetSpellInfo(primarySpellId, GetCastDifficulty()).GetEffect(2).CalcValue(GetCaster());
+        _fragmentsToCreate = _maxFragmentsToCreate;
+        return true;
+    }
+
+    void CreateLesserSoulFragments(uint effIndex)
+    {
+        // spawn more than 1 fragment per target if there are less than 3 total targets
+        int fragments = 1 + (int)Math.Max(_maxFragmentsToCreate - GetUnitTargetCountForEffect(effIndex), 0);
+        fragments = Math.Min(fragments, _fragmentsToCreate);
+
+        for (int i = 0; i < fragments; ++i)
+            GetHitUnit().CastSpell(GetCaster(), new uint[] { SpellIds.ShatteredSoulLesserRight, SpellIds.ShatteredSoulLesserLeft }.SelectRandom(), new CastSpellExtraArgs(TriggerCastFlags.DontReportCastError));
+
+        _fragmentsToCreate -= fragments;
+    }
+
+    public override void Register()
+    {
+        OnEffectHitTarget.Add(new(CreateLesserSoulFragments, 0, SpellEffectName.SchoolDamage));
+    }
+}
+
 [Script] // 258860 - Essence Break
 class spell_dh_essence_break : SpellScript
 {
@@ -1456,6 +1501,25 @@ class spell_dh_glide_timer : AuraScript
     }
 }
 
+[Script] // 339895 - Repeat Decree (attached to 307046 - Elysian Decree and 389860 - Sigil of Spite)
+class spell_dh_repeat_decree_conduit :  SpellScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.RepeatDecreeConduit);
+    }
+
+    public override bool Load()
+    {
+        return !GetCaster().HasAura(SpellIds.RepeatDecreeConduit);
+    }
+
+    public override void Register()
+    {
+        OnEffectLaunch.Add(new(PreventHitDefaultEffect, 1, SpellEffectName.TriggerSpell));
+    }
+}
+
 [Script] // Called by 162264 - Metamorphosis
 class spell_dh_restless_hunter : AuraScript
 {
@@ -1587,21 +1651,22 @@ class spell_dh_soul_furnace_conduit : AuraScript
 // 204596 - Sigil of Flame
 // 207684 - Sigil of Misery
 // 202137 - Sigil of Silence
-//template<uint TriggerSpellId, uint TriggerSpellId2 = 0 >
+// 390163 - Sigil of Spite
 [Script("areatrigger_dh_sigil_of_chains", SpellIds.SigilOfChainsTargetSelect, SpellIds.SigilOfChainsVisual)]
 [Script("areatrigger_dh_sigil_of_flame", SpellIds.SigilOfFlameAoe, SpellIds.SigilOfFlameVisual)]
 [Script("areatrigger_dh_sigil_of_silence", SpellIds.SigilOfSilenceAoe)]
 [Script("areatrigger_dh_sigil_of_misery", SpellIds.SigilOfMiseryAoe)]
-class areatrigger_dh_generic_sigil(AreaTrigger areaTrigger, uint triggerSpellId, uint triggerSpellId2 = 0): AreaTriggerAI(areaTrigger)
+[Script("areatrigger_dh_sigil_of_spite", SpellIds.SigilOfSpiteAoe)]
+class areatrigger_dh_generic_sigil(AreaTrigger areaTrigger, uint triggerSpellId, uint triggerSpellId2 = 0) : AreaTriggerAI(areaTrigger)
 {
     public override void OnRemove()
     {
         Unit caster = at.GetCaster();
         if (caster != null)
         {
-            caster.CastSpell(at.GetPosition(), triggerSpellId);
+            caster.CastSpell(at.GetPosition(), triggerSpellId, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
             if (triggerSpellId2 != 0)
-                caster.CastSpell(at.GetPosition(), triggerSpellId2);
+                caster.CastSpell(at.GetPosition(), triggerSpellId2, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
         }
     }
 }
