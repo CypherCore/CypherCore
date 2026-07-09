@@ -462,12 +462,12 @@ namespace Game.Entities
 
         public bool IsAutoResummoned()
         {
-            return !HasFlag(CreatureStaticFlags6.DoNotAutoResummon);
+            return !HasFlag(CreatureStaticFlags6.DoNotAutoResummonThisCompanionCreature);
         }
 
         public void SetDontAutoResummon(bool dontAutoResummon)
         {
-            _staticFlags.ApplyFlag(CreatureStaticFlags6.DoNotAutoResummon, dontAutoResummon);
+            _staticFlags.ApplyFlag(CreatureStaticFlags6.DoNotAutoResummonThisCompanionCreature, dontAutoResummon);
         }
 
         public SummonPropertiesRecord m_Properties;

@@ -1153,7 +1153,7 @@ namespace Game.Entities
 
         void ForcePartyMembersIntoCombat()
         {
-            if (!_staticFlags.HasFlag(CreatureStaticFlags2.ForcePartyMembersIntoCombat) || !IsEngaged())
+            if (!_staticFlags.HasFlag(CreatureStaticFlags2.ForceRaidCombat) || !IsEngaged())
                 return;
 
             List<Group> partiesToForceIntoCombat = new();
@@ -2758,7 +2758,7 @@ namespace Game.Entities
 
             // Some Amphibious creatures toggle swimming while engaged
             if (IsAmphibious() && !HasUnitFlag(UnitFlags.CantSwim) && !HasUnitFlag(UnitFlags.CanSwim) && IsEngaged())
-                if (!IsSwimPrevented() || (GetVictim() != null && !GetVictim().IsOnOceanFloor()))
+                if (!CanOnlySwimIfTargetSwims() || (GetVictim() != null && !GetVictim().IsOnOceanFloor()))
                     SetUnitFlag(UnitFlags.CanSwim);
 
             SetSwim(IsInWater() && CanSwim());
@@ -3246,12 +3246,12 @@ namespace Game.Entities
 
         public bool IsIgnoringChaseRange()
         {
-            return _staticFlags.HasFlag(CreatureStaticFlags6.AlwaysStandOnTopOfTarget);
+            return _staticFlags.HasFlag(CreatureStaticFlags6.AlwaysStandOnTarget);
         }
 
         public void SetIgnoreChaseRange(bool ignoreChaseRange)
         {
-            _staticFlags.ApplyFlag(CreatureStaticFlags6.AlwaysStandOnTopOfTarget, ignoreChaseRange);
+            _staticFlags.ApplyFlag(CreatureStaticFlags6.AlwaysStandOnTarget, ignoreChaseRange);
         }
 
         public void SetDefaultMount(uint? mountCreatureDisplayId)
@@ -3530,11 +3530,11 @@ namespace Game.Entities
         public bool CannotPenetrateWater() { return _staticFlags.HasFlag(CreatureStaticFlags3.CannotPenetrateWater); }
         public void SetCannotPenetrateWater(bool cannotPenetrateWater) { _staticFlags.ApplyFlag(CreatureStaticFlags3.CannotPenetrateWater, cannotPenetrateWater); }
 
-        // Returns true if CREATURE_STATIC_FLAG_3_CANNOT_SWIM is set which prevents 'Amphibious' creatures from swimming when engaged
-        public bool IsSwimDisabled() { return _staticFlags.HasFlag(CreatureStaticFlags3.CannotSwim); }
+        // Returns true if CREATURE_STATIC_FLAG_3_CANT_SWIM is set which prevents 'Amphibious' creatures from swimming when engaged
+        public bool IsSwimDisabled() { return _staticFlags.HasFlag(CreatureStaticFlags3.CantSwim); }
 
-        // Returns true if CREATURE_STATIC_FLAG_4_PREVENT_SWIM is set which prevents 'Amphibious' creatures from swimming when engaged until the victim is no longer on the ocean floor
-        public bool IsSwimPrevented() { return _staticFlags.HasFlag(CreatureStaticFlags4.PreventSwim); }
+        // Returns true if CREATURE_STATIC_FLAG_4_AI_WILL_ONLY_SWIM_IF_TARGET_SWIMS is set which prevents 'Amphibious' creatures from swimming when engaged until the victim is no longer on the ocean floor
+        public bool CanOnlySwimIfTargetSwims() { return _staticFlags.HasFlag(CreatureStaticFlags4.AiWillOnlySwimIfTargetSwims); }
 
         public override bool CanFly() { return IsFlying() || HasUnitMovementFlag(MovementFlag.CanFly); }
 
@@ -3566,8 +3566,8 @@ namespace Game.Entities
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }
 
-        public bool IsStateRestoredOnEvade() { return !HasFlag(CreatureStaticFlags5.NoLeavecombatStateRestore); }
-        public void SetRestoreStateOnEvade(bool restoreOnEvade) { _staticFlags.ApplyFlag(CreatureStaticFlags5.NoLeavecombatStateRestore, !restoreOnEvade); }
+        public bool IsStateRestoredOnEvade() { return !HasFlag(CreatureStaticFlags5.NoLeaveCombatStateRestore); }
+        public void SetRestoreStateOnEvade(bool restoreOnEvade) { _staticFlags.ApplyFlag(CreatureStaticFlags5.NoLeaveCombatStateRestore, !restoreOnEvade); }
 
         public override CreatureAI GetAI()
         {

@@ -95,14 +95,14 @@ namespace Game
             unitFlags = data != null && data.unit_flags.HasValue ? data.unit_flags.Value : (uint)cInfo.UnitFlags;
             if (staticFlags.HasFlag(CreatureStaticFlags.CanSwim))
                 unitFlags |= (uint)UnitFlags.CanSwim;
-            if (staticFlags.HasFlag(CreatureStaticFlags3.CannotSwim))
+            if (staticFlags.HasFlag(CreatureStaticFlags3.CantSwim))
                 unitFlags |= (uint)UnitFlags.CantSwim;
 
             unitFlags2 = data != null && data.unit_flags2.HasValue ? data.unit_flags2.Value : cInfo.UnitFlags2;
             if (staticFlags.HasFlag(CreatureStaticFlags3.CannotTurn))
                 unitFlags2 |= (uint)UnitFlags2.CannotTurn;
 
-            if (staticFlags.HasFlag(CreatureStaticFlags4.PreventSwim))
+            if (staticFlags.HasFlag(CreatureStaticFlags4.AiWillOnlySwimIfTargetSwims))
                 unitFlags2 |= (uint)UnitFlags2.AiWillOnlySwimIfTargetSwims;
 
             if (staticFlags.HasFlag(CreatureStaticFlags5.InteractWhileHostile))
