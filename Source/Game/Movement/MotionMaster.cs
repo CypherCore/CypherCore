@@ -801,17 +801,12 @@ namespace Game.Movement
             _owner.GetNearPoint2D(null, out float x, out float y, dist, _owner.GetOrientation() + angle);
             float z = _owner.GetPositionZ();
             _owner.UpdateAllowedPositionZ(x, y, ref z);
-            MoveJump(x, y, z, speedXY, speedZ);
+            MoveJump(new Position(x, y, z), speedXY, speedZ);
         }
 
         public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
-            MoveJump(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), speedXY, speedZ, id, facing, orientationFixed, arrivalCast, spellEffectExtraData, scriptResult);
-        }
-
-        public void MoveJump(float x, float y, float z, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
-        {
-            Log.outDebug(LogFilter.Server, "Unit ({0}) jump to point (X: {1} Y: {2} Z: {3})", _owner.GetGUID().ToString(), x, y, z);
+            Log.outDebug(LogFilter.Server, $"Unit ({_owner.GetGUID()}) jump to point Id: {id} ({pos})");
             if (speedXY < 0.01f)
             {
                 if (scriptResult != null)
@@ -824,7 +819,7 @@ namespace Game.Movement
 
             var initializer = (MoveSplineInit init) =>
             {
-                init.MoveTo(x, y, z, false);
+                init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
                 init.SetParabolic(max_height, 0);
                 init.SetVelocity(speedXY);
                 MoveSplineInitFacingVisitor(init, facing);
