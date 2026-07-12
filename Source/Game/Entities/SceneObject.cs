@@ -19,7 +19,6 @@ namespace Game.Entities
 
         public SceneObject() : base(false)
         {
-            ObjectTypeMask |= TypeMask.SceneObject;
             ObjectTypeId = TypeId.SceneObject;
 
             m_updateFlag.Stationary = true;

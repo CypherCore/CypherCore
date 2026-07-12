@@ -34,7 +34,6 @@ namespace Game.Entities
     {
         public Player(WorldSession session) : base(true)
         {
-            ObjectTypeMask |= TypeMask.Player;
             ObjectTypeId = TypeId.Player;
 
             m_playerData = new PlayerData();

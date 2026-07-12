@@ -21,7 +21,6 @@ namespace Game.Entities
     {
         public Item() : base(false)
         {
-            ObjectTypeMask |= TypeMask.Item;
             ObjectTypeId = TypeId.Item;
 
             m_entityFragments.Add(EntityFragment.Tag_Item, false);

@@ -13,7 +13,6 @@ namespace Game.Entities
     {
         public DynamicObject(bool isWorldObject) : base(isWorldObject)
         {
-            ObjectTypeMask |= TypeMask.DynamicObject;
             ObjectTypeId = TypeId.DynamicObject;
 
             m_updateFlag.Stationary = true;

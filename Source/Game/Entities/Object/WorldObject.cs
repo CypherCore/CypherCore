@@ -32,7 +32,6 @@ namespace Game.Entities
             m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 
             ObjectTypeId = TypeId.Object;
-            ObjectTypeMask = TypeMask.Object;
 
             m_values = new UpdateFieldHolder(this);
 
@@ -100,7 +99,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            if (!ObjectTypeMask.HasAnyFlag(TypeMask.Item | TypeMask.Container))
+            if (!IsTypeMask(TypeMask.Item | TypeMask.Container))
                 UpdateObjectVisibilityOnDestroy();
 
             IsInWorld = false;
@@ -3055,7 +3054,7 @@ namespace Game.Entities
 
         public TypeId GetTypeId() { return ObjectTypeId; }
         public bool IsTypeId(TypeId typeId) { return GetTypeId() == typeId; }
-        public bool IsTypeMask(TypeMask mask) { return Convert.ToBoolean(mask & ObjectTypeMask); }
+        public bool IsTypeMask(TypeMask mask) { return (ObjectTypeMask[(int)ObjectTypeId] & mask) != 0; }
 
         public virtual bool HasQuest(uint questId) { return false; }
         public virtual bool HasInvolvedQuest(uint questId) { return false; }
@@ -3775,7 +3774,6 @@ namespace Game.Entities
         }
 
         #region Fields
-        public TypeMask ObjectTypeMask { get; set; }
         protected TypeId ObjectTypeId { get; set; }
         protected CreateObjectBits m_updateFlag;
         public EntityFragmentsHolder m_entityFragments = new();
@@ -3833,6 +3831,24 @@ namespace Game.Entities
         public FlaggedArray32<ServerSideVisibilityType> m_serverSideVisibility = new(2);
         public FlaggedArray32<ServerSideVisibilityType> m_serverSideVisibilityDetect = new(2);
         #endregion
+
+        public TypeMask[] ObjectTypeMask =
+        {
+            TypeMask.Object,
+            TypeMask.Object | TypeMask.Item,
+            TypeMask.Object | TypeMask.Item | TypeMask.Container,
+            TypeMask.Object | TypeMask.Item | TypeMask.AzeriteEmpoweredItem,
+            TypeMask.Object | TypeMask.Item | TypeMask.AzeriteItem,
+            TypeMask.Object | TypeMask.Unit,
+            TypeMask.Object | TypeMask.Unit | TypeMask.Player,
+            TypeMask.Object | TypeMask.Unit | TypeMask.Player | TypeMask.ActivePlayer,
+            TypeMask.Object | TypeMask.GameObject,
+            TypeMask.Object | TypeMask.DynamicObject,
+            TypeMask.Object | TypeMask.Corpse,
+            TypeMask.Object | TypeMask.AreaTrigger,
+            TypeMask.Object | TypeMask.SceneObject,
+            TypeMask.Object | TypeMask.Conversation
+        };
     }
 
     public class MovementInfo

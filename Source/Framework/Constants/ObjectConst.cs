@@ -1,6 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Framework.Constants
 {
     public enum TypeId
@@ -22,27 +24,28 @@ namespace Framework.Constants
         Max = 14
     }
 
+    [Flags]
     public enum TypeMask
     {
-        Object = 0x01,
-        Item = 0x02,
-        Container = 0x04,
-        AzeriteEmpoweredItem = 0x08,
-        AzeriteItem = 0x10,
-        Unit = 0x20,
-        Player = 0x40,
-        ActivePlayer = 0x80,
-        GameObject = 0x100,
-        DynamicObject = 0x200,
-        Corpse = 0x400,
-        AreaTrigger = 0x800,
-        SceneObject = 0x1000,
-        Conversation = 0x2000,
+        Object = 1 << TypeId.Object,
+        Item = 1 << TypeId.Item,
+        Container = 1 << TypeId.Container,
+        AzeriteEmpoweredItem = 1 << TypeId.AzeriteEmpoweredItem,
+        AzeriteItem = 1 << TypeId.AzeriteItem,
+        Unit = 1 << TypeId.Unit,
+        Player = 1 << TypeId.Player,
+        ActivePlayer = 1 << TypeId.ActivePlayer,
+        GameObject = 1 << TypeId.GameObject,
+        DynamicObject = 1 << TypeId.DynamicObject,
+        Corpse = 1 << TypeId.Corpse,
+        AreaTrigger = 1 << TypeId.AreaTrigger,
+        SceneObject = 1 << TypeId.SceneObject,
+        Conversation = 1 << TypeId.Conversation,
 
         Seer = Unit | Player | DynamicObject,
         WorldObject = Unit | GameObject | DynamicObject | Corpse | AreaTrigger | SceneObject | Conversation
     }
-
+    
     public enum HighGuid
     {
         Null = 0,

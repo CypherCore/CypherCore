@@ -19,7 +19,6 @@ namespace Game.Entities
         {
             m_azeriteItemData = new AzeriteItemData();
 
-            ObjectTypeMask |= TypeMask.AzeriteItem;
             ObjectTypeId = TypeId.AzeriteItem;
 
             m_entityFragments.Add(EntityFragment.Tag_AzeriteItem, false);

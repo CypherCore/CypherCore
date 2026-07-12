@@ -25,7 +25,6 @@ namespace Game.Entities
     {
         public GameObject() : base(false)
         {
-            ObjectTypeMask |= TypeMask.GameObject;
             ObjectTypeId = TypeId.GameObject;
 
             m_updateFlag.Stationary = true;

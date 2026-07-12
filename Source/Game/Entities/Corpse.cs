@@ -20,7 +20,6 @@ namespace Game.Entities
         {
             m_type = type;
             ObjectTypeId = TypeId.Corpse;
-            ObjectTypeMask |= TypeMask.Corpse;
 
             m_updateFlag.Stationary = true;
 

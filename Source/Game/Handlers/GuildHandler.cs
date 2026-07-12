@@ -590,7 +590,7 @@ namespace Game
                 guild.HandleGuildRequestChallengeUpdate(this);
         }
 
-        [WorldPacketHandler(ClientOpcodes.DeclineGuildInvites)]
+        [WorldPacketHandler(ClientOpcodes.DeclineGuildInvites, Processing = PacketProcessing.Inplace)]
         void HandleDeclineGuildInvites(DeclineGuildInvites packet)
         {
             if (packet.Allow)

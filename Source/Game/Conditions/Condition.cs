@@ -254,7 +254,7 @@ namespace Game.Conditions
                     }
                     break;
                 case ConditionTypes.TypeMask:
-                    condMeets = Convert.ToBoolean((TypeMask)ConditionValue1 & obj.ObjectTypeMask);
+                    condMeets = obj.IsTypeMask((TypeMask)ConditionValue1);
                     break;
                 case ConditionTypes.RelationTo:
                 {

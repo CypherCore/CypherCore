@@ -19,7 +19,6 @@ namespace Game.Entities
 
         public AzeriteEmpoweredItem()
         {
-            ObjectTypeMask |= TypeMask.AzeriteEmpoweredItem;
             ObjectTypeId = TypeId.AzeriteEmpoweredItem;
 
             m_entityFragments.Add(EntityFragment.Tag_AzeriteEmpoweredItem, false);

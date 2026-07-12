@@ -32,7 +32,6 @@ namespace Game.Entities
             _spellHistory = new SpellHistory(this);
 
             ObjectTypeId = TypeId.Unit;
-            ObjectTypeMask |= TypeMask.Unit;
             m_updateFlag.MovementUpdate = true;
 
             m_entityFragments.Add(EntityFragment.Tag_Unit, false);

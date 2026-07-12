@@ -22,7 +22,6 @@ namespace Game.Entities
             _verticesUpdatePreviousOrientation = float.PositiveInfinity;
             _reachedDestination = true;
 
-            ObjectTypeMask |= TypeMask.AreaTrigger;
             ObjectTypeId = TypeId.AreaTrigger;
 
             m_updateFlag.Stationary = true;

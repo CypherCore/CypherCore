@@ -18,7 +18,6 @@ namespace Game.Entities
     {
         public Conversation() : base(false)
         {
-            ObjectTypeMask |= TypeMask.Conversation;
             ObjectTypeId = TypeId.Conversation;
 
             m_updateFlag.Stationary = true;

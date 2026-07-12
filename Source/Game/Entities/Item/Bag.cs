@@ -13,7 +13,6 @@ namespace Game.Entities
     {
         public Bag()
         {
-            ObjectTypeMask |= TypeMask.Container;
             ObjectTypeId = TypeId.Container;
 
             m_entityFragments.Add(EntityFragment.Tag_Container, false);
