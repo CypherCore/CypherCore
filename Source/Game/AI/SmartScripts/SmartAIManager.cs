@@ -3662,9 +3662,9 @@ namespace Game.AI
         public struct Jump
         {
             public uint SpeedXY;
-            public uint SpeedZ;
-            public uint Gravity;
-            public uint UseDefaultGravity;
+            public uint minHeight;
+            public uint maxHeight;
+            public uint unused;
             public uint PointId;
             public uint ContactDistance;
         }

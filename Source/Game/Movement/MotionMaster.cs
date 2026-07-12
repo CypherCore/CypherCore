@@ -790,45 +790,6 @@ namespace Game.Movement
             Add(movement);
         }
 
-        [Obsolete]
-        public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
-        {
-            Log.outDebug(LogFilter.Server, $"Unit ({_owner.GetGUID()}) jump to point Id: {id} ({pos})");
-            if (speedXY < 0.01f)
-            {
-                if (scriptResult != null)
-                    scriptResult.SetResult(MovementStopReason.Interrupted);
-                return;
-            }
-
-            float moveTimeHalf = (float)(speedZ / gravity);
-            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
-
-            var initializer = (MoveSplineInit init) =>
-            {
-                init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
-                init.SetParabolic(max_height, 0);
-                init.SetVelocity(speedXY);
-                MoveSplineInitFacingVisitor(init, facing);
-                init.SetJumpOrientationFixed(orientationFixed);
-                if (spellEffectExtraData != null)
-                    init.SetSpellEffectExtraData(spellEffectExtraData);
-            };
-
-            uint arrivalSpellId = 0;
-            ObjectGuid arrivalSpellTargetGuid = ObjectGuid.Empty;
-            if (arrivalCast != null)
-            {
-                arrivalSpellId = arrivalCast.SpellId;
-                arrivalSpellTargetGuid = arrivalCast.Target;
-            }
-
-            GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, id, new GenericMovementGeneratorArgs() { ArrivalSpellId = arrivalSpellId, ArrivalSpellTarget = arrivalSpellTargetGuid, ScriptResult = scriptResult });
-            movement.Priority = MovementGeneratorPriority.Highest;
-            movement.BaseUnitState = UnitState.Jumping;
-            Add(movement);
-        }
-
         public void MoveJump(uint id, Position pos, TimeSpan time, float? minHeight = null, float? maxHeight = null, object facing = null, bool orientationFixed = false, bool unlimitedSpeed = false, float? speedMultiplier = null,
             JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
@@ -898,45 +859,6 @@ namespace Game.Movement
                 Priority = MovementGeneratorPriority.Highest,
                 BaseUnitState = UnitState.Jumping
             };
-            Add(movement);
-        }
-
-        [Obsolete]
-        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
-        {
-            Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
-            if (speedXY < 0.01f)
-            {
-                if (scriptResult != null)
-                    scriptResult.SetResult(MovementStopReason.Interrupted);
-                return;
-            }
-
-            var initializer = (MoveSplineInit init) =>
-            {
-                init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
-                init.SetParabolicVerticalAcceleration(gravity, 0);
-                init.SetUncompressed();
-                init.SetVelocity(speedXY);
-                init.SetUnlimitedSpeed();
-                MoveSplineInitFacingVisitor(init, facing);
-                init.SetJumpOrientationFixed(orientationFixed);
-                if (spellEffectExtraData != null)
-                    init.SetSpellEffectExtraData(spellEffectExtraData);
-            };
-
-            uint arrivalSpellId = 0;
-            ObjectGuid arrivalSpellTargetGuid = default;
-            if (arrivalCast != null)
-            {
-                arrivalSpellId = arrivalCast.SpellId;
-                arrivalSpellTargetGuid = arrivalCast.Target;
-            }
-
-            GenericMovementGenerator movement = new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id, new GenericMovementGeneratorArgs() { ArrivalSpellId = arrivalSpellId, ArrivalSpellTarget = arrivalSpellTargetGuid, ScriptResult = scriptResult });
-            movement.Priority = MovementGeneratorPriority.Highest;
-            movement.BaseUnitState = UnitState.Jumping;
-            movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
         }
 
