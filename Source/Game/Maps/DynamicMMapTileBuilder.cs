@@ -220,11 +220,11 @@ namespace Game.Maps
 
     class TileCache
     {
-        public Mutex TilesMutex;
-        public Dictionary<TileCacheKey, Tile> Tiles;
+        public Mutex TilesMutex = new();
+        public Dictionary<TileCacheKey, Tile> Tiles = new();
 
         Timer _cacheCleanupTimer;
-        static TileCache tc;
+        static TileCache tc = new();
         public static TileCache Instance() { return tc; }
 
         public TileCache()

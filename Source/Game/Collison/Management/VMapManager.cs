@@ -9,27 +9,17 @@ using System.Numerics;
 
 namespace Game.Collision
 {
-    public class VMapManager : Singleton<VMapManager>
+    public class VMapManager() : Singleton<VMapManager>
     {
         bool _enableLineOfSightCalc;
         bool _enableHeightCalc;
-        bool thread_safe_environment;
+
         // Tree to check collision
         Dictionary<string, ManagedModel> iLoadedModelFiles = new();
         Dictionary<uint, StaticMapTree> iInstanceMapTrees = new();
         Dictionary<uint, uint> iParentMapData = new();
         // Mutex for iLoadedModelFiles
         object LoadedModelFilesLock = new();
-
-        public delegate uint GetLiquidFlagsFn(uint liquidType);
-        public GetLiquidFlagsFn GetLiquidFlagsPtr;
-
-        delegate bool IsVMAPDisabledForFn(uint entry, VmapDisableTypes flags);
-        IsVMAPDisabledForFn IsVMAPDisabledForPtr;
-
-        bool LoadPathOnlyModels;
-
-        VMapManager() { }
 
         public StaticMapTree GetMapTree(uint mapId)
         {
@@ -97,7 +87,7 @@ namespace Game.Collision
 
         public bool IsInLineOfSight(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, ModelIgnoreFlags ignoreFlags)
         {
-            if (!IsLineOfSightCalcEnabled() || IsVMAPDisabledForPtr(mapId, VmapDisableTypes.LOS))
+            if (!IsLineOfSightCalcEnabled() || Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLOS))
                 return true;
 
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
@@ -114,7 +104,7 @@ namespace Game.Collision
 
         public bool GetObjectHitPos(uint mapId, float x1, float y1, float z1, float x2, float y2, float z2, out float rx, out float ry, out float rz, float modifyDist)
         {
-            if (IsLineOfSightCalcEnabled() && !IsVMAPDisabledForPtr(mapId, VmapDisableTypes.LOS))
+            if (IsLineOfSightCalcEnabled() && !Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLOS))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
@@ -140,7 +130,7 @@ namespace Game.Collision
 
         public float GetHeight(uint mapId, float x, float y, float z, float maxSearchDist)
         {
-            if (IsHeightCalcEnabled() && !IsVMAPDisabledForPtr(mapId, VmapDisableTypes.Height))
+            if (IsHeightCalcEnabled() && !Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapHeight))
             {
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
@@ -170,16 +160,16 @@ namespace Game.Collision
                 {
                     data.floorZ = info.ground_Z;
 
-                    if (!IsVMAPDisabledForPtr(mapId, VmapDisableTypes.LiquidStatus))
+                    if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
                     {
                         uint liquidType = info.hitModel.GetLiquidType(); // entry from LiquidType.dbc
                         float liquidLevel = 0;
-                        if (!reqLiquidType.HasValue || (GetLiquidFlagsPtr(liquidType) & reqLiquidType.Value) != 0)
+                        if (!reqLiquidType.HasValue || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType.Value) != 0)
                             if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
                                 data.liquidInfo = new(liquidType, liquidLevel);
                     }
 
-                    if (!IsVMAPDisabledForPtr(mapId, VmapDisableTypes.LiquidStatus))
+                    if (!Global.DisableMgr.IsVMAPDisabledFor(mapId, DisableFlags.VmapLiquidStatus))
                         data.areaInfo = new((int)info.hitModel.GetWmoID(), info.hitInstance.adtId, info.rootId, info.hitModel.GetMogpFlags(), info.hitInstance.Id);
 
                     return true;

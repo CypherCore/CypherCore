@@ -660,7 +660,7 @@ namespace Game.MMaps
                     NavArea type = NavArea.Empty;
 
                     // convert liquid type to NavTerrain
-                    LiquidHeaderTypeFlags liquidFlags = (LiquidHeaderTypeFlags)vmapManager.GetLiquidFlagsPtr(liquid.GetLiquidType());
+                    LiquidHeaderTypeFlags liquidFlags = (LiquidHeaderTypeFlags)Global.DB2Mgr.GetLiquidFlags(liquid.GetLiquidType());
                     if (liquidFlags.HasFlag(LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean))
                         type = NavArea.Water;
                     else if (liquidFlags.HasFlag(LiquidHeaderTypeFlags.Magma | LiquidHeaderTypeFlags.Slime))

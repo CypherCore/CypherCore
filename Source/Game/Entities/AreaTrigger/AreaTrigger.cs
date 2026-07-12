@@ -1593,7 +1593,7 @@ namespace Game.Entities
         float _verticesUpdatePreviousOrientation;
         bool _isRemoved;
 
-        List<Position> _polygonVertices;
+        List<Position> _polygonVertices = new();
         Spline<float> _spline;
 
         bool _reachedDestination;

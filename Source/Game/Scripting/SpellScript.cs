@@ -13,12 +13,12 @@ namespace Game.Scripting
     // helper class from which SpellScript and SpellAura derive, use these classes instead
     public class SpellScriptBase
     {
+        public string m_scriptName { get; set; }
+        public uint m_scriptSpellId { get; set; }
+        public byte m_currentScriptState { get; set; }
+
         // internal use classes & functions
         // DO NOT OVERRIDE THESE IN SCRIPTS
-        public SpellScriptBase()
-        {
-            m_currentScriptState = (byte)SpellScriptState.None;
-        }
 
         public virtual bool _Validate(SpellInfo entry)
         {
@@ -137,10 +137,6 @@ namespace Game.Scripting
 
             uint _effIndex;
         }
-
-        public byte m_currentScriptState { get; set; }
-        public string m_scriptName { get; set; }
-        public uint m_scriptSpellId { get; set; }
 
         //
         // SpellScript/AuraScript interface base

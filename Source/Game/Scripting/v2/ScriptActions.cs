@@ -43,8 +43,7 @@ namespace Game.Scripting.v2
 
         public static ActionResultSetter<T> GetResultSetter(ActionResult<T> action)
         {
-            T resultPtr = action._result;
-            return new ActionResultSetter<T>(action, resultPtr);
+            return new ActionResultSetter<T>(action, action._result);
         }
     }
 

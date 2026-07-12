@@ -480,7 +480,7 @@ namespace Game.MMaps
         }
     }
 
-    struct Tile
+    class Tile
     {
         public rcCompactHeightfield chf;
         public rcHeightfield solid;
