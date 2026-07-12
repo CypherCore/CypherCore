@@ -300,16 +300,6 @@ namespace Game.Movement
         {
             args.effect_start_point = start_point;
             args.parabolic_amplitude = amplitude;
-            args.vertical_acceleration = 0.0f;
-            args.flags.EnableParabolic();
-            args.animTier = null;
-        }
-
-        public void SetParabolicVerticalAcceleration(float vertical_acceleration, int start_point)
-        {
-            args.effect_start_point = start_point;
-            args.parabolic_amplitude = 0.0f;
-            args.vertical_acceleration = vertical_acceleration;
             args.flags.EnableParabolic();
             args.animTier = null;
         }

@@ -69,10 +69,6 @@ namespace Game.Movement
                         float f_duration = MSToSec((uint)(spline_duration - effect_start_time));
                         vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
                     }
-                    else if (args.vertical_acceleration != 0.0f)
-                    {
-                        vertical_acceleration = args.vertical_acceleration;
-                    }
                 }
             }
         }
