@@ -901,6 +901,7 @@ namespace Game.Movement
             Add(movement);
         }
 
+        [Obsolete]
         public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
@@ -1395,11 +1396,13 @@ namespace Game.Movement
 
     public class JumpChargeParams
     {
-        public float Speed;
+        public float SpeedOrTime;
 
         public bool TreatSpeedAsMoveTimeSeconds;
+        public bool UnlimitedSpeed;
 
-        public float JumpGravity;
+        public float? MinHeight;
+        public float? MaxHeight;
 
         public uint? SpellVisualId;
         public uint? ProgressCurveId;

@@ -5681,9 +5681,11 @@ namespace Game.Spells
             if (jumpParams == null)
                 return;
 
-            float speed = jumpParams.Speed;
+            dynamic speedOrTime;
             if (jumpParams.TreatSpeedAsMoveTimeSeconds)
-                speed = unitCaster.GetExactDist(destTarget) / jumpParams.Speed;
+                speedOrTime = TimeSpan.FromSeconds(jumpParams.SpeedOrTime);
+            else
+                speedOrTime = jumpParams.SpeedOrTime;
 
             object facing = null;
             Unit target = m_targets.GetUnitTarget();
@@ -5693,9 +5695,11 @@ namespace Game.Spells
             JumpArrivalCastArgs arrivalCast = null;
             if (effectInfo.TriggerSpell != 0 || jumpParams.TriggerSpellId.HasValue)
             {
-                arrivalCast = new();
-                arrivalCast.SpellId = jumpParams.TriggerSpellId.HasValue ? jumpParams.TriggerSpellId.Value : effectInfo.TriggerSpell;
-                arrivalCast.Target = unitTarget != null ? unitTarget.GetGUID() : ObjectGuid.Empty;
+                arrivalCast = new()
+                {
+                    SpellId = jumpParams.TriggerSpellId.HasValue ? jumpParams.TriggerSpellId.Value : effectInfo.TriggerSpell,
+                    Target = unitTarget != null ? unitTarget.GetGUID() : ObjectGuid.Empty
+                };
             }
 
             SpellEffectExtraData effectExtra = null;
@@ -5712,7 +5716,7 @@ namespace Game.Spells
                     effectExtra.ParabolicCurveId = jumpParams.ParabolicCurveId.Value;
             }
 
-            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, facing, m_spellInfo.HasAttribute(SpellAttr9.JumpchargeNoFacingControl), arrivalCast, effectExtra);
+            unitCaster.GetMotionMaster().MoveJump(EventId.Jump, destTarget, speedOrTime, jumpParams.MinHeight, jumpParams.MaxHeight, facing, m_spellInfo.HasAttribute(SpellAttr9.JumpchargeNoFacingControl), jumpParams.UnlimitedSpeed, null, arrivalCast, effectExtra);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnTransmogSet)]

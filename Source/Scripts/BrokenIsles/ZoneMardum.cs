@@ -167,7 +167,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
                 me.SendPlaySpellVisualKit(TheInvasionBeginsConst.SpellVisualKitKaynWings, 4, 3000);
                 me.PlayObjectSound(SoundSpellDoubleJump, me.GetGUID(), summonerPlayer);
                 me.SendPlaySpellVisualKit(TheInvasionBeginsConst.SpellVisualKitKaynDoubleJump, 0, 0);
-                me.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.KaynDoubleJumpPosition, 24.0f, 0.9874f, TheInvasionBeginsConst.PointKaynMoveToDemon);
+                me.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointKaynMoveToDemon, TheInvasionBeginsConst.KaynDoubleJumpPosition, 24.0f, null, 1.5f);
             }
             else if (pointId == TheInvasionBeginsConst.PointKaynMoveToDemon)
             {
@@ -192,7 +192,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             if (pathId == TheInvasionBeginsConst.PathJayceInvasionBegins)
             {
                 me.CastSpell(null, TheInvasionBeginsConst.SpellDemonHunterGlideState, true);
-                me.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.JayceJumpPos, 12.0f, 15.2792f, TheInvasionBeginsConst.PointIllidariLandPos);
+                me.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointIllidariLandPos, TheInvasionBeginsConst.JayceJumpPos, 12.0f, null, 5.0f);
             }
             else if (pathId == TheInvasionBeginsConst.PathJayceJupinvasionBegins)
                 me.DespawnOrUnsummon();
@@ -221,7 +221,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             if (pathId == TheInvasionBeginsConst.PathAllariInvasionBegins)
             {
                 me.CastSpell(null, TheInvasionBeginsConst.SpellDemonHunterGlideState, true);
-                me.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.AllariJumpPos, 12.0f, 9.2722f, TheInvasionBeginsConst.PointIllidariLandPos);
+                me.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointIllidariLandPos, TheInvasionBeginsConst.AllariJumpPos, 12.0f, null, 5.0f);
             }
             else if (pathId == TheInvasionBeginsConst.PathAllariJupinvasionBegins)
                 me.DespawnOrUnsummon();
@@ -250,7 +250,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             if (pathId == TheInvasionBeginsConst.PathKorvasinvasionBegins)
             {
                 me.SendPlaySpellVisualKit(TheInvasionBeginsConst.SpellVisualKitKorvasJump, 4, 2000);
-                me.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.KorvasJumpPos, 24.0f, 19.2911f, TheInvasionBeginsConst.PointIllidariLandPos);
+                me.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointIllidariLandPos, TheInvasionBeginsConst.KorvasJumpPos, 24.0f, null, 5.0f);
             }
             else if (pathId == TheInvasionBeginsConst.PathKorvasJupinvasionBegins)
                 me.DespawnOrUnsummon();
@@ -279,7 +279,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             if (pathId == TheInvasionBeginsConst.PathSevisinvasionBegins)
             {
                 me.CastSpell(null, TheInvasionBeginsConst.SpellDemonHunterGlideState, true);
-                me.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.SevisJumpPos, 12.0f, 13.3033f, TheInvasionBeginsConst.PointIllidariLandPos);
+                me.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointIllidariLandPos, TheInvasionBeginsConst.SevisJumpPos, 12.0f, null, 5.0f);
             }
             else if (pathId == TheInvasionBeginsConst.PathSevisJupinvasionBegins)
                 me.DespawnOrUnsummon();
@@ -308,7 +308,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
             if (pathId == TheInvasionBeginsConst.PathCyanaInvasionBegins)
             {
                 me.CastSpell(null, TheInvasionBeginsConst.SpellDemonHunterGlideState, true);
-                me.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.CyanaJumpPos, 12.0f, 8.4555f, TheInvasionBeginsConst.PointIllidariLandPos);
+                me.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointIllidariLandPos, TheInvasionBeginsConst.CyanaJumpPos, 12.0f, null, 5.0f);
             }
             else if (pathId == TheInvasionBeginsConst.PathCyanaJupinvasionBegins)
                 me.DespawnOrUnsummon();
@@ -417,7 +417,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
                     kaynClone.PlayObjectSound(SoundMetalWeaponUnsheath, kaynClone.GetGUID(), player);
                     kaynClone.SendPlaySpellVisualKit(TheInvasionBeginsConst.SpellVisualKitKaynGlide, 4, 3000);
                     kaynClone.SendPlaySpellVisualKit(TheInvasionBeginsConst.SpellVisualKitKaynWings, 4, 4000);
-                    kaynClone.GetMotionMaster().MoveJumpWithGravity(TheInvasionBeginsConst.KaynJumpPos, 20.5f, 396.3535f, TheInvasionBeginsConst.PointKaynTriggerDoubleJump);
+                    kaynClone.GetMotionMaster().MoveJump(TheInvasionBeginsConst.PointKaynTriggerDoubleJump, TheInvasionBeginsConst.KaynJumpPos, 23.0f, 1.5f);
                     kaynClone.SetSheath(SheathState.Melee);
                     kaynClone.SetNpcFlag(NPCFlags.QuestGiver);
 
