@@ -2106,66 +2106,21 @@ class spell_pri_power_word_shield : AuraScript
             && ValidateSpellEffect((SpellIds.MasteryGrace, 0), (SpellIds.Rapture, 1), (SpellIds.Benevolence, 0), (SpellIds.DivineAegis, 1));
     }
 
-    void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
+    void CalculateAbsorb(AuraEffect aurEff, Unit victim, ref int absorb, ref int flatMod, ref float pctMod)
     {
-        canBeRecalculated = false;
-
         Unit caster = GetCaster();
-        if (caster != null)
-        {
-            float modifiedAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 3.36f;
 
-            Player player = caster.ToPlayer();
-            if (player != null)
-            {
-                MathFunctions.AddPct(ref modifiedAmount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
+        // Mastery: Grace (TBD: move into DoEffectCalcDamageAndHealing hook with a new SpellScript and AuraScript).
+        AuraEffect masteryGraceEffect = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
+        if (masteryGraceEffect != null)
+            if (GetUnitOwner().HasAura(SpellIds.AtonementEffect))
+                MathFunctions.AddPct(ref pctMod, masteryGraceEffect.GetAmount());
 
-                // Mastery: Grace (Tbd: move into DoEffectCalcDamageAndHealing hook with a new SpellScript and AuraScript).
-                AuraEffect masteryGraceEffect = caster.GetAuraEffect(SpellIds.MasteryGrace, 0);
-                if (masteryGraceEffect != null)
-                    if (GetUnitOwner().HasAura(SpellIds.AtonementEffect) || GetUnitOwner().HasAura(SpellIds.TrinityEffect))
-                        MathFunctions.AddPct(ref modifiedAmount, masteryGraceEffect.GetAmount());
+        float critChanceDone = caster.SpellCritChanceDone(null, aurEff, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
+        float critChanceTaken = GetUnitOwner().SpellCritChanceTaken(caster, null, aurEff, GetSpellInfo().GetSchoolMask(), critChanceDone, GetSpellInfo().GetAttackType());
 
-                switch (player.GetPrimarySpecialization())
-                {
-                    case ChrSpecialization.PriestDiscipline:
-                        modifiedAmount *= 1.37f;
-                        break;
-                    case ChrSpecialization.PriestShadow:
-                        modifiedAmount *= 1.25f;
-                        if (caster.HasAura(SpellIds.PvpRulesEnabledHardcoded))
-                            modifiedAmount *= 0.8f;
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            float critChanceDone = caster.SpellCritChanceDone(null, auraEffect, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
-            float critChanceTaken = GetUnitOwner().SpellCritChanceTaken(caster, null, auraEffect, GetSpellInfo().GetSchoolMask(), critChanceDone, GetSpellInfo().GetAttackType());
-
-            if (RandomHelper.randChance(critChanceTaken))
-            {
-                modifiedAmount *= 2;
-
-                // Divine Aegis
-                AuraEffect divineEff = caster.GetAuraEffect(SpellIds.DivineAegis, 1);
-                if (divineEff != null)
-                    MathFunctions.AddPct(ref modifiedAmount, divineEff.GetAmount());
-            }
-
-            // Rapture talent (Tbd: move into DoEffectCalcDamageAndHealing hook).
-            AuraEffect raptureEffect = caster.GetAuraEffect(SpellIds.Rapture, 1);
-            if (raptureEffect != null)
-                MathFunctions.AddPct(ref modifiedAmount, raptureEffect.GetAmount());
-
-            // Benevolence talent
-            AuraEffect benevolenceEffect = caster.GetAuraEffect(SpellIds.Benevolence, 0);
-            if (benevolenceEffect != null)
-                MathFunctions.AddPct(ref modifiedAmount, benevolenceEffect.GetAmount());
-
-            amount = (int)modifiedAmount;
-        }
+        if (RandomHelper.randChance(critChanceTaken))
+            pctMod *= 2;
     }
 
     void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -2192,7 +2147,7 @@ class spell_pri_power_word_shield : AuraScript
 
     public override void Register()
     {
-        DoEffectCalcAmount.Add(new(CalculateAmount, 0, AuraType.SchoolAbsorb));
+        DoEffectCalcDamageAndHealing.Add(new(CalculateAbsorb, 0, AuraType.SchoolAbsorb));
         AfterEffectApply.Add(new(HandleOnApply, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.RealOrReapplyMask));
         AfterEffectRemove.Add(new(HandleOnRemove, 0, AuraType.SchoolAbsorb, AuraEffectHandleModes.Real));
     }
