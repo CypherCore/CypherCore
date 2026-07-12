@@ -105,13 +105,13 @@ namespace Game.Entities
             // Check for table values
             if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
-                float ApCoeffMod = spellEffectInfo.BonusCoefficientFromAP;
+                float attackPowerCoeff = spellEffectInfo.BonusCoefficientFromAP;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
                 {
-                    ApCoeffMod *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref ApCoeffMod);
-                    ApCoeffMod /= 100.0f;
+                    attackPowerCoeff *= 100.0f;
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref attackPowerCoeff);
+                    attackPowerCoeff /= 100.0f;
                 }
 
                 WeaponAttackType attType = WeaponAttackType.BaseAttack;
@@ -121,9 +121,9 @@ namespace Game.Entities
                 if (spellProto.HasAttribute(SpellAttr3.RequiresOffHandWeapon) && !spellProto.HasAttribute(SpellAttr3.RequiresMainHandWeapon))
                     attType = WeaponAttackType.OffAttack;
 
-                float APbonus = (float)(victim.GetTotalAuraModifier(attType != WeaponAttackType.RangedAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus));
-                APbonus += GetTotalAttackPowerValue(attType);
-                DoneTotal += (int)(stack * ApCoeffMod * APbonus);
+                float attackPowerBonus = (float)(victim.GetTotalAuraModifier(attType != WeaponAttackType.RangedAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus));
+                attackPowerBonus += GetTotalAttackPowerValue(attType);
+                DoneTotal += (int)(stack * attackPowerCoeff * attackPowerBonus);
             }
 
             // Default calculation
@@ -407,6 +407,30 @@ namespace Game.Entities
             if (HasUnitTypeMask(UnitTypeMask.Guardian))
                 doneAdvertisedBenefit += (this as Guardian).GetBonusDamage();
 
+            if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
+            {
+                float attackPowerCoeff = spellEffectInfo.BonusCoefficientFromAP;
+                Player modOwner = GetSpellModOwner();
+                if (modOwner != null)
+                {
+                    attackPowerCoeff *= 100.0f;
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref attackPowerCoeff);
+                    attackPowerCoeff /= 100.0f;
+                }
+
+                WeaponAttackType attType = WeaponAttackType.BaseAttack;
+
+                if (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee)
+                    attType = WeaponAttackType.RangedAttack;
+
+                if (spellProto.HasAttribute(SpellAttr3.RequiresOffHandWeapon) && !spellProto.HasAttribute(SpellAttr3.RequiresMainHandWeapon))
+                    attType = WeaponAttackType.OffAttack;
+
+                float attackPowerBonus = (float)victim.GetTotalAuraModifier(attType != WeaponAttackType.RangedAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
+                attackPowerBonus += GetTotalAttackPowerValue(attType);
+                doneTotal += (int)(stack * attackPowerCoeff * attackPowerBonus);
+            }
+
             if (doneAdvertisedBenefit != 0)
             {
                 float coeff = spellEffectInfo.BonusCoefficient;
@@ -574,11 +598,25 @@ namespace Game.Entities
             // Check for table values
             if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
-                WeaponAttackType attType = (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
-                float APbonus = (float)victim.GetTotalAuraModifier(attType == WeaponAttackType.BaseAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
-                APbonus += GetTotalAttackPowerValue(attType);
+                float attackPowerCoeff = spellEffectInfo.BonusCoefficientFromAP;
+                Player modOwner = GetSpellModOwner();
+                if (modOwner != null)
+                {
+                    attackPowerCoeff *= 100.0f;
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref attackPowerCoeff);
+                    attackPowerCoeff /= 100.0f;
+                }
 
-                DoneTotal += (int)(spellEffectInfo.BonusCoefficientFromAP * stack * APbonus);
+                WeaponAttackType attType = WeaponAttackType.BaseAttack;
+                if ((spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee))
+                    attType = WeaponAttackType.RangedAttack;
+
+                if (spellProto.HasAttribute(SpellAttr3.RequiresOffHandWeapon) && !spellProto.HasAttribute(SpellAttr3.RequiresMainHandWeapon))
+                    attType = WeaponAttackType.OffAttack;
+
+                float attackPowerBonus = (float)victim.GetTotalAuraModifier(attType != WeaponAttackType.RangedAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
+                attackPowerBonus += GetTotalAttackPowerValue(attType);
+                DoneTotal += (int)(stack * attackPowerCoeff * attackPowerBonus);
             }
 
             // Default calculation
