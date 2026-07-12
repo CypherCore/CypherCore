@@ -733,7 +733,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        public void MoveKnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveKnockbackFrom(Position origin, float speedXY, float speedZ, float angle = MathF.PI, SpellEffectExtraData spellEffectExtraData = null)
         {
             //This function may make players fall below map
             if (_owner.IsTypeId(TypeId.Player))
@@ -743,7 +743,7 @@ namespace Game.Movement
                 return;
 
             Position dest = _owner.GetPosition();
-            float o = dest == origin ? 0.0f : _owner.GetRelativeAngle(origin) + MathF.PI;
+            float o = (dest == origin ? 0.0f : _owner.GetRelativeAngle(origin)) + angle;
             if (speedXY < 0)
             {
                 speedXY = -speedXY;
@@ -788,20 +788,6 @@ namespace Game.Movement
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.AddFlag(MovementGeneratorFlags.PersistOnDeath);
             Add(movement);
-        }
-
-        public void MoveJumpTo(float angle, float speedXY, float speedZ)
-        {
-            //This function may make players fall below map
-            if (_owner.IsTypeId(TypeId.Player))
-                return;
-
-            float moveTimeHalf = (float)(speedZ / gravity);
-            float dist = 2 * moveTimeHalf * speedXY;
-            _owner.GetNearPoint2D(null, out float x, out float y, dist, _owner.GetOrientation() + angle);
-            float z = _owner.GetPositionZ();
-            _owner.UpdateAllowedPositionZ(x, y, ref z);
-            MoveJump(new Position(x, y, z), speedXY, speedZ);
         }
 
         public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)

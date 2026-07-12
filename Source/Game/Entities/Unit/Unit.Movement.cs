@@ -405,7 +405,7 @@ namespace Game.Entities
             GetMotionMaster().LaunchMoveSpline(initializer, 0, MovementGeneratorPriority.Normal, MovementGeneratorType.Point);
         }
 
-        public void KnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
+        public void KnockbackFrom(Position origin, float speedXY, float speedZ, float angle = MathF.PI, SpellEffectExtraData spellEffectExtraData = null)
         {
             Player player = ToPlayer();
             if (player == null)
@@ -420,10 +420,10 @@ namespace Game.Entities
             }
 
             if (player == null)
-                GetMotionMaster().MoveKnockbackFrom(origin, speedXY, speedZ, spellEffectExtraData);
+                GetMotionMaster().MoveKnockbackFrom(origin, speedXY, speedZ, angle, spellEffectExtraData);
             else
             {
-                float o = GetPosition() == origin ? GetOrientation() + MathF.PI : origin.GetAbsoluteAngle(this);
+                float o = (GetPosition() == origin ? GetOrientation() : GetAbsoluteAngle(origin)) + angle;
                 if (speedXY < 0)
                 {
                     speedXY = -speedXY;
@@ -615,21 +615,6 @@ namespace Game.Entities
             }
 
             return true;
-        }
-
-        public void JumpTo(float speedXY, float speedZ, float angle, Position dest = null)
-        {
-            if (dest != null)
-                angle += GetRelativeAngle(dest);
-
-            if (IsTypeId(TypeId.Unit))
-                GetMotionMaster().MoveJumpTo(angle, speedXY, speedZ);
-            else
-            {
-                float vcos = (float)Math.Cos(angle + GetOrientation());
-                float vsin = (float)Math.Sin(angle + GetOrientation());
-                SendMoveKnockBack(ToPlayer(), speedXY, -speedZ, vcos, vsin);
-            }
         }
 
         public void UpdateSpeed(UnitMoveType mtype)
