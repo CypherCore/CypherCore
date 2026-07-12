@@ -1111,13 +1111,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Starting Battlefield System");
             Global.BattleFieldMgr.InitBattlefield();
 
-            // Initialize Warden
-            Log.outInfo(LogFilter.ServerLoading, "Loading Warden Checks...");
-            Global.WardenCheckMgr.LoadWardenChecks();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Warden Action Overrides...");
-            Global.WardenCheckMgr.LoadWardenOverrides();
-
             Log.outInfo(LogFilter.ServerLoading, "Deleting expired bans...");
             DB.Login.Execute("DELETE FROM ip_banned WHERE unbandate <= UNIX_TIMESTAMP() AND unbandate<>bandate");      // One-time query
 

@@ -582,16 +582,6 @@ namespace Game.Networking
                 return;
             }
 
-            // Must be done before WorldSession is created
-            bool wardenActive = WorldConfig.GetBoolValue(WorldCfg.WardenEnabled);
-            if (wardenActive && !ClientBuildHelper.IsValid(account.game.OS))
-            {
-                SendAuthResponseError(BattlenetRpcErrorCode.Denied);
-                Log.outError(LogFilter.Network, $"WorldSocket.HandleAuthSession: Client {address} attempted to log in using invalid client OS ({account.game.OS}).");
-                CloseSocket();
-                return;
-            }
-
             //Re-check ip locking (same check as in auth).
             if (account.battleNet.IsLockedToIP) // if ip is locked
             {
@@ -666,10 +656,6 @@ namespace Game.Networking
 
             _worldSession = new WorldSession(account.game.Id, joinTicket.GameAccount, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
                 mutetime, account.game.OS, account.game.TimezoneOffset, account.game.Build, buildVariant, account.game.Locale, account.game.Recruiter, account.game.IsRectuiter);
-
-            // Initialize Warden system only if it is enabled by config
-            //if (wardenActive)
-            //_worldSession.InitWarden(_sessionKey);
 
             _queryProcessor.AddCallback(_worldSession.LoadPermissionsAsync().WithCallback(LoadSessionPermissionsCallback));
             await AsyncRead();

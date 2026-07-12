@@ -442,5 +442,4 @@ public enum LogFilter
     Transport,
     Unit,
     Vehicle,
-    Warden,
 }

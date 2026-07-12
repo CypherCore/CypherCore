@@ -795,41 +795,5 @@ namespace Game
 
             GetPlayer().SetPendingBind(0, 0);
         }
-
-        [WorldPacketHandler(ClientOpcodes.Warden3Data)]
-        void HandleWarden3Data(WardenData packet)
-        {
-            if (_warden == null || packet.Data.GetSize() == 0)
-                return;
-
-            _warden.DecryptData(packet.Data.GetData());
-            WardenOpcodes opcode = (WardenOpcodes)packet.Data.ReadUInt8();
-
-            switch (opcode)
-            {
-                case WardenOpcodes.CmsgModuleMissing:
-                    _warden.SendModuleToClient();
-                    break;
-                case WardenOpcodes.CmsgModuleOk:
-                    _warden.RequestHash();
-                    break;
-                case WardenOpcodes.SmsgCheatChecksRequest:
-                    _warden.HandleData(packet.Data);
-                    break;
-                case WardenOpcodes.CmsgMemChecksResult:
-                    Log.outDebug(LogFilter.Warden, "NYI WARDEN_CMSG_MEM_CHECKS_RESULT received!");
-                    break;
-                case WardenOpcodes.CmsgHashResult:
-                    _warden.HandleHashResult(packet.Data);
-                    _warden.InitializeModule();
-                    break;
-                case WardenOpcodes.CmsgModuleFailed:
-                    Log.outDebug(LogFilter.Warden, "NYI WARDEN_CMSG_MODULE_FAILED received!");
-                    break;
-                default:
-                    Log.outDebug(LogFilter.Warden, "Got unknown warden opcode {0} of size {1}.", opcode, packet.Data.GetSize() - 1);
-                    break;
-            }
-        }
     }
 }

@@ -341,9 +341,6 @@ namespace Game
 
             if (updater.ProcessUnsafe())
             {
-                if (m_Socket[(int)ConnectionType.Realm] != null && m_Socket[(int)ConnectionType.Realm].IsOpen() && _warden != null)
-                    _warden.Update(diff);
-
                 // If necessary, log the player out
                 if (ShouldLogOut(currentTime) && m_playerLoading.IsEmpty())
                     LogoutPlayer(true);
@@ -352,9 +349,6 @@ namespace Game
                 if ((m_Socket[(int)ConnectionType.Realm] != null && !m_Socket[(int)ConnectionType.Realm].IsOpen()) ||
                     (m_Socket[(int)ConnectionType.Instance] != null && !m_Socket[(int)ConnectionType.Instance].IsOpen()))
                 {
-                    if (GetPlayer() != null && _warden != null)
-                        _warden.Update(diff);
-
                     expireTime -= expireTime > diff ? diff : expireTime;
                     if (expireTime < diff || forceExit || GetPlayer() == null)
                     {
@@ -833,14 +827,6 @@ namespace Game
             return ss.ToString();
         }
 
-        void HandleWardenData(WardenData packet)
-        {
-            if (_warden == null || packet.Data.GetSize() == 0)
-                return;
-
-            _warden.HandleData(packet.Data);
-        }
-
         public bool PlayerLoading() { return !m_playerLoading.IsEmpty(); }
         public bool PlayerLogout() { return m_playerLogout; }
         public bool PlayerLogoutWithSave() { return m_playerLogout && m_playerSave; }
@@ -907,23 +893,6 @@ namespace Game
         public bool CanAccessAlliedRaces()
         {
             return GetAccountExpansion() >= Expansion.BattleForAzeroth;
-        }
-
-        void InitWarden(BigInteger k)
-        {
-            if (_os == "Win")
-            {
-                _warden = new WardenWin();
-                _warden.Init(this, k);
-            }
-            else if (_os == "Wn64")
-            {
-                // Not implemented
-            }
-            else if (_os == "Mc64")
-            {
-                // Not implemented
-            }
         }
 
         public void LoadPermissions()
@@ -1149,7 +1118,6 @@ namespace Game
         bool forceExit;
 
         DosProtection AntiDOS;
-        Warden _warden;                                    // Remains NULL if Warden system is not enabled by config
 
         long _logoutTime;
         bool m_inQueue;

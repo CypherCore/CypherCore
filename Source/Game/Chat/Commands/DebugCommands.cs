@@ -1110,24 +1110,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("warden force", RBACPermissions.CommandDebug, true)]
-        static bool HandleDebugWardenForce(CommandHandler handler, ushort[] checkIds)
-        {
-            /*if (checkIds.Empty())
-                return false;
-
-            Warden  warden = handler.GetSession().GetWarden();
-            if (warden == null)
-            {
-                handler.SendSysMessage("Warden system is not enabled");
-                return true;
-            }
-
-            size_t const nQueued = warden->DEBUG_ForceSpecificChecks(checkIds);
-            handler->PSendSysMessage("%zu/%zu checks queued for your Warden, they should be sent over the next few minutes (depending on settings)", nQueued, checkIds.size());*/
-            return true;
-        }
-
         [Command("worldstate", RBACPermissions.CommandDebug)]
         static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, uint variable, uint value)
         {
@@ -1429,28 +1411,6 @@ namespace Game.Chat
                 castFailed.FailedArg2 = failArg2.GetValueOrDefault(-1);
                 handler.GetSession().SendPacket(castFailed);
 
-                return true;
-            }
-        }
-
-        [CommandGroup("warden")]
-        class DebugWardenCommands
-        {
-            [Command("force", RBACPermissions.CommandDebug, true)]
-            static bool HandleDebugWardenForce(CommandHandler handler, ushort[] checkIds)
-            {
-                /*if (checkIds.Empty())
-                    return false;
-
-                Warden  warden = handler.GetSession().GetWarden();
-                if (warden == null)
-                {
-                    handler.SendSysMessage("Warden system is not enabled");
-                    return true;
-                }
-
-                size_t const nQueued = warden->DEBUG_ForceSpecificChecks(checkIds);
-                handler->PSendSysMessage("%zu/%zu checks queued for your Warden, they should be sent over the next few minutes (depending on settings)", nQueued, checkIds.size());*/
                 return true;
             }
         }
