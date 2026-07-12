@@ -8,9 +8,9 @@ using Game.Entities;
 using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
+
 
 namespace Game.Movement
 {
@@ -790,6 +790,7 @@ namespace Game.Movement
             Add(movement);
         }
 
+        [Obsolete]
         public void MoveJump(Position pos, float speedXY, float speedZ, uint id = EventId.Jump, object facing = null, bool orientationFixed = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Server, $"Unit ({_owner.GetGUID()}) jump to point Id: {id} ({pos})");
@@ -825,6 +826,78 @@ namespace Game.Movement
             GenericMovementGenerator movement = new(initializer, MovementGeneratorType.Effect, id, new GenericMovementGeneratorArgs() { ArrivalSpellId = arrivalSpellId, ArrivalSpellTarget = arrivalSpellTargetGuid, ScriptResult = scriptResult });
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
+            Add(movement);
+        }
+
+        public void MoveJump(uint id, Position pos, TimeSpan time, float? minHeight = null, float? maxHeight = null, object facing = null, bool orientationFixed = false, bool unlimitedSpeed = false, float? speedMultiplier = null,
+            JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        {
+            MoveJump(id, pos, (_owner.GetExactDist(pos) / (float)time.TotalSeconds), minHeight, maxHeight, facing, orientationFixed, unlimitedSpeed, speedMultiplier, arrivalCast, spellEffectExtraData, scriptResult);
+        }
+
+        public void MoveJump(uint id, Position pos, float? speedOrTime = null, float? minHeight = null, float? maxHeight = null, object facing = null, bool orientationFixed = false, bool unlimitedSpeed = false, float? speedMultiplier = null,
+            JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        {
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveJump: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
+
+            float speedXY;
+            if (!speedOrTime.HasValue)
+            {
+
+                float baseSpeed = _owner.IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)UnitMoveType.Run] : SharedConst.baseMoveSpeed[(int)UnitMoveType.Run];
+                Creature creature = _owner.ToCreature();
+                if (creature != null)
+                    baseSpeed *= creature.GetCreatureTemplate().SpeedRun;
+
+                speedXY = baseSpeed * 3.0f * speedMultiplier.GetValueOrDefault(1.0f);
+            }
+            else
+            {
+                speedXY = speedOrTime.Value;
+            }
+
+            if (!unlimitedSpeed)
+                speedXY = Math.Min(speedXY, 50.0f);
+
+            if (speedXY < 0.01f)
+            {
+                if (scriptResult != null)
+                    scriptResult.SetResult(MovementStopReason.Interrupted);
+                return;
+            }
+
+            float duration = _owner.GetExactDist(pos) / speedXY;
+            float durationSqr = duration * duration;
+            float height = (float)Math.Clamp(gravity * durationSqr / 8, minHeight.GetValueOrDefault(0.5f), maxHeight.GetValueOrDefault(1000.0f));
+
+            var effect = spellEffectExtraData ?? new SpellEffectExtraData();
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
+                init.SetParabolic(height, 0);
+                init.SetVelocity(speedXY);
+                MoveSplineInitFacingVisitor(init, facing);
+                init.SetJumpOrientationFixed(orientationFixed);
+                if (unlimitedSpeed)
+                    init.SetUnlimitedSpeed();
+                if (effect != null)
+                    init.SetSpellEffectExtraData(effect);
+            };
+
+            uint arrivalSpellId = 0;
+            ObjectGuid arrivalSpellTargetGuid = ObjectGuid.Empty;
+            if (arrivalCast != null)
+            {
+                arrivalSpellId = arrivalCast.SpellId;
+                arrivalSpellTargetGuid = arrivalCast.Target;
+            }
+
+            GenericMovementGenerator movement = new GenericMovementGenerator(initializer, MovementGeneratorType.Effect, id,
+                new GenericMovementGeneratorArgs() { ArrivalSpellId = arrivalSpellId, ArrivalSpellTarget = arrivalSpellTargetGuid, ScriptResult = scriptResult })
+            {
+                Priority = MovementGeneratorPriority.Highest,
+                BaseUnitState = UnitState.Jumping
+            };
             Add(movement);
         }
 
@@ -1112,28 +1185,6 @@ namespace Game.Movement
             GenericMovementGenerator movement = new(initializer, type, id);
             movement.Priority = priority;
             Add(movement);
-        }
-
-        public void CalculateJumpSpeeds(float dist, UnitMoveType moveType, float speedMultiplier, float minHeight, float maxHeight, out float speedXY, out float speedZ)
-        {
-            float baseSpeed = _owner.IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)moveType] : SharedConst.baseMoveSpeed[(int)moveType];
-            Creature creature = _owner.ToCreature();
-            if (creature != null)
-                baseSpeed *= creature.GetCreatureTemplate().SpeedRun;
-
-            speedXY = Math.Min(baseSpeed * 3.0f * speedMultiplier, Math.Max(28.0f, _owner.GetSpeed(moveType) * 4.0f));
-
-            float duration = dist / speedXY;
-            float durationSqr = duration * duration;
-            float height;
-            if (durationSqr < minHeight * 8 / gravity)
-                height = minHeight;
-            else if (durationSqr > maxHeight * 8 / gravity)
-                height = maxHeight;
-            else
-                height = (float)(gravity * durationSqr / 8);
-
-            speedZ = (float)Math.Sqrt(2 * gravity * height);
         }
 
         void ResolveDelayedActions()

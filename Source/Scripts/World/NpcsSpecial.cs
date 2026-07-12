@@ -1619,7 +1619,7 @@ namespace Scripts.World.NpcsSpecial
                 {
                     GameObject target = VerifyTarget();
                     if (target != null)
-                        me.GetMotionMaster().MoveJump(target, 5.0f, 10.0f, MoveidJump);
+                        me.GetMotionMaster().MoveJump(MoveidJump, target, 3.0f, 1.0f);
                 });
             }
             else if (id == MoveidJump)

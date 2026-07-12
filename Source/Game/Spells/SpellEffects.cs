@@ -538,20 +538,6 @@ namespace Game.Spells
             m_caster.CastSpell((Unit)null, spellInfo.Id, new CastSpellExtraArgs().SetTriggeringSpell(this));
         }
 
-        void CalculateJumpSpeeds(SpellEffectInfo effInfo, float dist, out float speedXY, out float speedZ)
-        {
-            Unit unitCaster = GetUnitCasterForEffectHandlers();
-
-            float multiplier = effInfo.Amplitude;
-            if (multiplier <= 0.0f)
-                multiplier = 1.0f;
-
-            float minHeight = effInfo.MiscValue != 0 ? effInfo.MiscValue / 10.0f : 0.5f; // Lower bound is blizzlike
-            float maxHeight = effInfo.MiscValueB != 0 ? effInfo.MiscValueB / 10.0f : 1000.0f; // Upper bound is unknown
-
-            unitCaster.GetMotionMaster().CalculateJumpSpeeds(dist, UnitMoveType.Run, multiplier, minHeight, maxHeight, out speedXY, out speedZ);
-        }
-
         [SpellEffectHandler(SpellEffectName.Jump)]
         void EffectJump()
         {
@@ -568,18 +554,21 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            float speedXY, speedZ;
-            CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(unitTarget), out speedXY, out speedZ);
+            float? speedMultiplier = effectInfo.Amplitude > 0.0f ? effectInfo.Amplitude : null;
+            float? minHeight = effectInfo.MiscValue != 0 ? (effectInfo.MiscValue / 10.0f) : null;
+            float? maxHeight = effectInfo.MiscValueB != 0 ? (effectInfo.MiscValueB / 10.0f) : null;
 
             object facing = null;
             Unit target = m_targets.GetUnitTarget();
             if (target != null && m_spellInfo.HasAttribute(SpellAttr9.FaceUnitTargetUponCompletionOfJumpCharge))
                 facing = target;
 
-            JumpArrivalCastArgs arrivalCast = new();
-            arrivalCast.SpellId = effectInfo.TriggerSpell;
-            arrivalCast.Target = unitTarget.GetGUID();
-            unitCaster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, facing, m_spellInfo.HasAttribute(SpellAttr9.JumpchargeNoFacingControl), arrivalCast);
+            JumpArrivalCastArgs arrivalCast = new()
+            {
+                SpellId = effectInfo.TriggerSpell,
+                Target = unitTarget.GetGUID()
+            };
+            unitCaster.GetMotionMaster().MoveJump(EventId.Jump, unitTarget, null, minHeight, maxHeight, facing, m_spellInfo.HasAttribute(SpellAttr9.JumpchargeNoFacingControl), false, speedMultiplier, arrivalCast);
         }
 
         [SpellEffectHandler(SpellEffectName.JumpDest)]
@@ -598,8 +587,9 @@ namespace Game.Spells
             if (!m_targets.HasDst())
                 return;
 
-            float speedXY, speedZ;
-            CalculateJumpSpeeds(effectInfo, unitCaster.GetExactDist2d(destTarget), out speedXY, out speedZ);
+            float? speedMultiplier = effectInfo.Amplitude > 0.0f ? effectInfo.Amplitude : null;
+            float? minHeight = effectInfo.MiscValue != 0 ? (effectInfo.MiscValue / 10.0f) : null;
+            float? maxHeight = effectInfo.MiscValueB != 0 ? (effectInfo.MiscValueB / 10.0f) : null;
 
             object facing;
             Unit target = m_targets.GetUnitTarget();
@@ -610,7 +600,7 @@ namespace Game.Spells
 
             JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
-            unitCaster.GetMotionMaster().MoveJump(destTarget, speedXY, speedZ, EventId.Jump, facing, m_spellInfo.HasAttribute(SpellAttr9.JumpchargeNoFacingControl), arrivalCast);
+            unitCaster.GetMotionMaster().MoveJump(EventId.Jump, destTarget, null, minHeight, maxHeight, facing, m_spellInfo.HasAttribute(SpellAttr9.JumpchargeNoFacingControl), false, speedMultiplier, arrivalCast);
         }
 
         TeleportToOptions GetTeleportOptions(WorldObject caster, Unit unitTarget, SpellDestination targetDest)

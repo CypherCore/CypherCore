@@ -3,14 +3,6 @@
 
 namespace Framework.Constants
 {
-    public enum VmapDisableTypes : byte
-    {
-        AreaFlag = 0x1,
-        Height = 0x2,
-        LOS = 0x4,
-        LiquidStatus = 0x8
-    }
-
     public enum VMAPLoadResult
     {
         Error,
