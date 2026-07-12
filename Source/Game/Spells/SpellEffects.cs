@@ -3862,7 +3862,7 @@ namespace Game.Spells
 
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
             float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
-            float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+            float speedZ = (float)((2 * speedXY * speedXY * distZ + SharedConst.Gravity * distXY * distXY) / (2 * speedXY * distXY));
 
             if (!float.IsFinite(speedZ))
             {
@@ -3899,7 +3899,7 @@ namespace Game.Spells
             float distZ = pos.GetPositionZ() - unitTarget.GetPositionZ();
 
             float speedXY = effectInfo.MiscValue != 0 ? effectInfo.MiscValue / 10.0f : 30.0f;
-            float speedZ = (float)((2 * speedXY * speedXY * distZ + MotionMaster.gravity * distXY * distXY) / (2 * speedXY * distXY));
+            float speedZ = (float)((2 * speedXY * speedXY * distZ + SharedConst.Gravity * distXY * distXY) / (2 * speedXY * distXY));
 
             if (!float.IsFinite(speedZ))
             {

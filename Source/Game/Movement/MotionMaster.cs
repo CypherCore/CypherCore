@@ -73,7 +73,6 @@ namespace Game.Movement
 
     public class MotionMaster
     {
-        public const double gravity = 19.29110527038574;
         public const float SPEED_CHARGE = 42.0f;
         static IdleMovementGenerator staticIdleMovement = new();
         static uint splineId;
@@ -753,7 +752,7 @@ namespace Game.Movement
             if (speedZ < 0)
                 speedZ = -speedZ; // doesn't seem to be supported on official servers - packet sent for knockback with positive and negative speed has the same flags and JumpGravity
 
-            float moveTimeHalf = (float)(speedZ / gravity);
+            float moveTimeHalf = (float)(speedZ / SharedConst.Gravity);
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
@@ -829,7 +828,7 @@ namespace Game.Movement
 
             float duration = _owner.GetExactDist(pos) / speedXY;
             float durationSqr = duration * duration;
-            float height = (float)Math.Clamp(gravity * durationSqr / 8, minHeight.GetValueOrDefault(0.5f), maxHeight.GetValueOrDefault(1000.0f));
+            float height = (float)Math.Clamp(SharedConst.Gravity * durationSqr / 8, minHeight.GetValueOrDefault(0.5f), maxHeight.GetValueOrDefault(1000.0f));
 
             var effect = spellEffectExtraData ?? new SpellEffectExtraData();
             var initializer = (MoveSplineInit init) =>

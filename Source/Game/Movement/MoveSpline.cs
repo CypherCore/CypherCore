@@ -246,16 +246,16 @@ namespace Game.Movement
             if (start_velocity > termVel)
                 start_velocity = termVel;
 
-            float terminal_time = (float)((isSafeFall ? SharedConst.terminal_safeFall_fallTime : SharedConst.terminal_fallTime) - start_velocity / SharedConst.gravity); // the time that needed to reach terminalVelocity
+            float terminal_time = (float)((isSafeFall ? SharedConst.terminal_safeFall_fallTime : SharedConst.terminal_fallTime) - start_velocity / SharedConst.Gravity); // the time that needed to reach terminalVelocity
 
             if (t_passed > terminal_time)
             {
                 result = termVel * (t_passed - terminal_time) +
                     start_velocity * terminal_time +
-                    (float)SharedConst.gravity * terminal_time * terminal_time * 0.5f;
+                    (float)SharedConst.Gravity * terminal_time * terminal_time * 0.5f;
             }
             else
-                result = t_passed * (float)(start_velocity + t_passed * SharedConst.gravity * 0.5f);
+                result = t_passed * (float)(start_velocity + t_passed * SharedConst.Gravity * 0.5f);
 
             return result;
         }

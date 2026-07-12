@@ -3963,14 +3963,14 @@ namespace Game.Entities
                 if (path_length >= SharedConst.terminal_safeFall_length)
                     time = (path_length - SharedConst.terminal_safeFall_length) / SharedConst.terminalSafefallVelocity + SharedConst.terminal_safeFall_fallTime;
                 else
-                    time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
+                    time = (float)Math.Sqrt(2.0f * path_length / SharedConst.Gravity);
             }
             else
             {
                 if (path_length >= SharedConst.terminal_length)
                     time = (path_length - SharedConst.terminal_length) / SharedConst.terminalVelocity + SharedConst.terminal_fallTime;
                 else
-                    time = (float)Math.Sqrt(2.0f * path_length / SharedConst.gravity);
+                    time = (float)Math.Sqrt(2.0f * path_length / SharedConst.Gravity);
             }
 
             return time;
