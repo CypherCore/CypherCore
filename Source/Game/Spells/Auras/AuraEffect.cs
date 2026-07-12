@@ -79,6 +79,13 @@ namespace Game.Spells
                     amount = (int)unitOwner.CountPctFromMaxHealth(10);
                     break;
                 case AuraType.SchoolAbsorb:
+                    m_canBeRecalculated = false;
+                    if (caster == null || unitOwner == null)
+                        break;
+
+                    amount = caster.SpellAbsorbBonusDone(unitOwner, m_spellInfo, amount, _effectInfo, 1, this);
+                    amount = unitOwner.SpellAbsorbBonusTaken(caster, m_spellInfo, amount);
+                    break;
                 case AuraType.ManaShield:
                     m_canBeRecalculated = false;
                     break;
