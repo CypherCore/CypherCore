@@ -399,7 +399,7 @@ namespace Game.Entities
                 return absorbamount;
 
             int doneTotal = 0;
-            float doneTotalMod = 1.0f;
+            float doneTotalMod = SpellAbsorbPctDone(victim, spellProto);
 
             int doneAdvertisedBenefit = SpellBaseAbsorbBonusDone(spellProto.GetSchoolMask());
             doneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)spellProto.GetSchoolMask());
@@ -445,7 +445,8 @@ namespace Game.Entities
                 doneTotal += (int)(doneAdvertisedBenefit * coeff * stack);
             }
 
-            doneTotalMod = SpellAbsorbPctDone(victim, spellProto);
+            if (aurEff != null)
+                aurEff.GetBase().CallScriptCalcDamageAndHealingHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref absorbamount, ref doneTotal, ref doneTotalMod);
 
             float absorbAmount = (float)(absorbamount + doneTotal) * doneTotalMod;
 

@@ -1774,7 +1774,7 @@ namespace Game.Scripting
         // where function is: void function (AuraEffect const* aurEff, Unit* victim, float& critChance);
         public List<EffectCalcCritChanceHandler> DoEffectCalcCritChance = new();
 
-        // executed when aura effect calculates damage or healing for dots and hots
+        // executed when aura effect calculates damage or healing for dots and hots or initial absorb aura amount calculation
         // example: DoEffectCalcDamageAndHealing += AuraEffectCalcDamageFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // example: DoEffectCalcDamageAndHealing += AuraEffectCalcHealingFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void(AuraEffect aurEff, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod);
