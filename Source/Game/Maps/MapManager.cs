@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Game.Entities
 {
@@ -133,7 +134,7 @@ namespace Game.Entities
             if (entry == null)
                 return null;
 
-            lock (_mapsLock)
+            using (_mapsLock.EnterScope())
             {
                 Map map = null;
                 uint newInstanceId = 0;                       // instanceId of the resulting map
@@ -239,7 +240,7 @@ namespace Game.Entities
 
         public Map FindMap(uint mapId, uint instanceId)
         {
-            lock (_mapsLock)
+            using (_mapsLock.EnterScope())
                 return FindMap_i(mapId, instanceId);
         }
 
@@ -368,13 +369,13 @@ namespace Game.Entities
 
         public uint GetNumInstances()
         {
-            lock (_mapsLock)
+            using (_mapsLock.EnterScope())
                 return (uint)i_maps.Count(pair => pair.Value.IsDungeon());
         }
 
         public uint GetNumPlayersInInstances()
         {
-            lock (_mapsLock)
+            using (_mapsLock.EnterScope())
                 return (uint)i_maps.Sum(pair => pair.Value.IsDungeon() ? pair.Value.GetPlayers().Count : 0);
         }
 
@@ -473,7 +474,7 @@ namespace Game.Entities
 
         public void DoForAllMaps(Action<Map> worker)
         {
-            lock (_mapsLock)
+            using (_mapsLock.EnterScope())
             {
                 foreach (var (_, map) in i_maps)
                     worker(map);
@@ -482,7 +483,7 @@ namespace Game.Entities
 
         public void DoForAllMapsWithMapId(uint mapId, Action<Map> worker)
         {
-            lock (_mapsLock)
+            using (_mapsLock.EnterScope())
             {
                 var list = i_maps.Where(pair => pair.Key.mapId == mapId && pair.Key.instanceId >= 0);
                 foreach (var (_, map) in list)
@@ -504,7 +505,7 @@ namespace Game.Entities
 
         Dictionary<(uint mapId, uint instanceId), Map> i_maps = new();
         IntervalTimer i_timer = new();
-        object _mapsLock = new();
+        Lock _mapsLock = new();
         uint i_gridCleanUpDelay;
         BitSet _freeInstanceIds = new(1);
         uint _nextInstanceId;

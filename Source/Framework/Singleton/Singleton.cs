@@ -3,11 +3,12 @@
 
 using System;
 using System.Reflection;
+using System.Threading;
 
 public class Singleton<T> where T : class
 {
     private static volatile T instance;
-    private static object syncRoot = new();
+    private static Lock syncRoot = new();
 
     public static T Instance
     {
@@ -15,7 +16,7 @@ public class Singleton<T> where T : class
         {
             if (instance == null)
             {
-                lock (syncRoot)
+                using (syncRoot.EnterScope())
                 {
                     if (instance == null)
                     {

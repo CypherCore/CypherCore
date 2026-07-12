@@ -5,6 +5,7 @@ using MySqlConnector;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Framework.Database
 {
@@ -50,7 +51,7 @@ namespace Framework.Database
             if (errorCode == MySqlErrorCode.LockDeadlock)
             {
                 // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
-                lock (_deadlockLock)
+                using (_deadlockLock.EnterScope())
                 {
                     byte loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
                     for (byte i = 0; i < loopBreaker; ++i)
@@ -68,7 +69,7 @@ namespace Framework.Database
         }
 
         SQLTransaction m_trans;
-        public static object _deadlockLock = new();
+        public Lock _deadlockLock = new();
     }
 
     class TransactionWithResultTask : TransactionTask
@@ -87,7 +88,7 @@ namespace Framework.Database
             if (errorCode == MySqlErrorCode.LockDeadlock)
             {
                 // Make sure only 1 async thread retries a transaction so they don't keep dead-locking each other
-                lock (_deadlockLock)
+                using (_deadlockLock.EnterScope())
                 {
                     byte loopBreaker = 5;  // Handle MySQL Errno 1213 without extending deadlock to the core itself
                     for (byte i = 0; i < loopBreaker; ++i)

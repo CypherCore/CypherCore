@@ -242,7 +242,7 @@ namespace Game.Guilds
                 session.SendPacket(roster);
         }
 
-        public void SendQueryResponse(WorldSession session)
+        public void HandleQuery(WorldSession session)
         {
             QueryGuildInfoResponse response = new();
             response.GuildGUID = GetGUID();
@@ -384,7 +384,7 @@ namespace Game.Guilds
 
                 SendSaveEmblemResult(session, GuildEmblemError.Success); // "Guild Emblem saved."
 
-                SendQueryResponse(session);
+                HandleQuery(session);
             }
         }
 

@@ -20,6 +20,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
 
@@ -346,21 +347,18 @@ namespace Game
                     LogoutPlayer(true);
 
                 //- Cleanup socket if need
-                if ((m_Socket[(int)ConnectionType.Realm] != null && !m_Socket[(int)ConnectionType.Realm].IsOpen()) ||
-                    (m_Socket[(int)ConnectionType.Instance] != null && !m_Socket[(int)ConnectionType.Instance].IsOpen()))
+                if (m_Socket.Any(s => s != null && !s.IsOpen()))
                 {
                     expireTime -= expireTime > diff ? diff : expireTime;
                     if (expireTime < diff || forceExit || GetPlayer() == null)
                     {
-                        if (m_Socket[(int)ConnectionType.Realm] != null)
+                        for (var i = 0; i < m_Socket.Length; ++i)
                         {
-                            m_Socket[(int)ConnectionType.Realm].CloseSocket();
-                            m_Socket[(int)ConnectionType.Realm] = null;
-                        }
-                        if (m_Socket[(int)ConnectionType.Instance] != null)
-                        {
-                            m_Socket[(int)ConnectionType.Instance].CloseSocket();
-                            m_Socket[(int)ConnectionType.Instance] = null;
+                            if (m_Socket[i] != null)
+                            {
+                                m_Socket[i].CloseSocket();
+                                m_Socket[i] = null;
+                            }
                         }
                     }
                 }

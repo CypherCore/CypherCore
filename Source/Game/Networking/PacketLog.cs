@@ -7,10 +7,11 @@ using System;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading;
 
 public class PacketLog
 {
-    static object syncObj = new();
+    static Lock syncObj = new();
     static string FullPath;
 
     static PacketLog()
@@ -42,7 +43,7 @@ public class PacketLog
         if (!CanLog())
             return;
 
-        lock (syncObj)
+        using (syncObj.EnterScope())
         {
             using var writer = new BinaryWriter(File.Open(FullPath, FileMode.Append), Encoding.ASCII);
             writer.Write(isClientPacket ? 0x47534d43 : 0x47534d53);

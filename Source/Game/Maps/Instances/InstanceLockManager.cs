@@ -8,6 +8,7 @@ using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Game.Maps
 {
@@ -15,7 +16,7 @@ namespace Game.Maps
 
     public class InstanceLockManager : Singleton<InstanceLockManager>
     {
-        object _lockObject = new();
+        Lock _lockObject = new();
         Dictionary<ObjectGuid, Dictionary<InstanceLockKey, InstanceLock>> _temporaryInstanceLocksByPlayer = new(); // locks stored here before any boss gets killed
         Dictionary<ObjectGuid, Dictionary<InstanceLockKey, InstanceLock>> _instanceLocksByPlayer = new();
         Dictionary<uint, SharedInstanceLockData> _instanceLockDataById = new();
@@ -128,7 +129,7 @@ namespace Game.Maps
 
         public InstanceLock FindActiveInstanceLock(ObjectGuid playerGuid, MapDb2Entries entries)
         {
-            lock(_lockObject)
+            using (_lockObject.EnterScope())
                 return FindActiveInstanceLock(playerGuid, entries, false, true);
         }
 
@@ -190,7 +191,7 @@ namespace Game.Maps
             InstanceLock instanceLock = FindActiveInstanceLock(playerGuid, entries, true, true);
             if (instanceLock == null)
             {
-                lock (_lockObject)
+                using (_lockObject.EnterScope())
                 {
                     // Move lock from temporary storage if it exists there
                     // This is to avoid destroying expired locks before any boss is killed in a fresh lock
@@ -230,7 +231,7 @@ namespace Game.Maps
                     instanceLock = new InstanceLock(entries.MapDifficulty.MapID, (Difficulty)entries.MapDifficulty.DifficultyID,
                         GetNextResetTime(entries), updateEvent.InstanceId);
 
-                lock(_lockObject)
+                using (_lockObject.EnterScope())
                     _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
 
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
@@ -427,7 +428,7 @@ namespace Game.Maps
             statistics.PlayerCount = _instanceLocksByPlayer.Count;
             return statistics;
         }
-        
+
         public DateTime GetNextResetTime(MapDb2Entries entries)
         {
             DateTime dateTime = GameTime.GetDateAndTime();
@@ -438,24 +439,24 @@ namespace Game.Maps
             switch (entries.MapDifficulty.ResetInterval)
             {
                 case MapDifficultyResetInterval.Daily:
-                {
-                    if (dateTime.Hour >= resetHour)
-                        day++;
+                    {
+                        if (dateTime.Hour >= resetHour)
+                            day++;
 
-                    hour = resetHour;
-                    break;
-                }
+                        hour = resetHour;
+                        break;
+                    }
                 case MapDifficultyResetInterval.Weekly:
-                {
-                    int resetDay = WorldConfig.GetIntValue(WorldCfg.ResetScheduleWeekDay);
-                    int daysAdjust = resetDay - (int)dateTime.DayOfWeek;
-                    if (dateTime.Day > resetDay || (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
-                        daysAdjust += 7; // passed it for current week, grab time from next week
+                    {
+                        int resetDay = WorldConfig.GetIntValue(WorldCfg.ResetScheduleWeekDay);
+                        int daysAdjust = resetDay - (int)dateTime.DayOfWeek;
+                        if (dateTime.Day > resetDay || (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
+                            daysAdjust += 7; // passed it for current week, grab time from next week
 
-                    hour = resetHour;
-                    day += daysAdjust;
-                    break;
-                }
+                        hour = resetHour;
+                        day += daysAdjust;
+                        break;
+                    }
                 default:
                     break;
             }
@@ -563,7 +564,7 @@ namespace Game.Maps
 
         public SharedInstanceLock(uint mapId, Difficulty difficultyId, DateTime expiryTime, uint instanceId, SharedInstanceLockData sharedData) : base(mapId, difficultyId, expiryTime, instanceId)
         {
-            _sharedData = sharedData;            
+            _sharedData = sharedData;
         }
 
         public override InstanceLockData GetInstanceInitializationData() { return _sharedData; }

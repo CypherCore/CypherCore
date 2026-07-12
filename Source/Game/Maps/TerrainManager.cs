@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace Game.Maps
 {
@@ -132,7 +133,7 @@ namespace Game.Maps
         TerrainInfo _parentTerrain;
         List<TerrainInfo> _childTerrain = new();
 
-        object _loadLock = new();
+        Lock _loadLock = new();
         GridMap[][] _gridMap = new GridMap[MapConst.MaxGrids][];
         ushort[][] _referenceCountFromMap = new ushort[MapConst.MaxGrids][];
 
@@ -266,7 +267,7 @@ namespace Game.Maps
             if (++_referenceCountFromMap[gx][gy] != 1)    // check if already loaded
                 return;
 
-            lock (_loadLock)
+            using (_loadLock.EnterScope())
                 LoadMapAndVMapImpl(gx, gy);
         }
 
@@ -411,7 +412,7 @@ namespace Game.Maps
             // ensure GridMap is loaded
             if ((_loadedGrids[gx] & (1ul << (int)gy)) == 0 && loadIfMissing)
             {
-                lock (_loadLock)
+                using (_loadLock.EnterScope())
                     LoadMapAndVMapImpl(gx, gy);
             }
 

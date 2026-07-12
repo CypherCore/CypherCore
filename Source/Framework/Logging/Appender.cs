@@ -5,6 +5,7 @@ using Framework.Database;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 class ConsoleAppender : Appender
 {
@@ -62,7 +63,7 @@ class FileAppender : Appender, IDisposable
 
     public override void _write(LogMessage message)
     {
-        lock (locker)
+        using (locker.EnterScope())
         {
             var logBytes = Encoding.UTF8.GetBytes(message.prefix + message.text + "\r\n");
 
@@ -111,7 +112,7 @@ class FileAppender : Appender, IDisposable
     string _logDir;
     bool _dynamicName;
     FileStream _logStream;
-    object locker = new();
+    Lock locker = new();
 }
 
 class DBAppender : Appender

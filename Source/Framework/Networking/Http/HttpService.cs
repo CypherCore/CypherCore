@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 
 namespace Framework.Networking.Http
 {
@@ -112,7 +113,7 @@ namespace Framework.Networking.Http
             state.RemoteAddress = address;
 
             // Generate session id
-            lock (_sessionsMutex)
+            using (_sessionsMutex.EnterScope())
             {
                 while (state.Id == Guid.Empty || _sessions.ContainsKey(state.Id))
                     state.Id = new(new byte[0].GenerateRandomKey(16));
@@ -133,10 +134,10 @@ namespace Framework.Networking.Http
         {
             _inactiveSessionsKillTimer = null;
 
-            lock (_sessionsMutex)
+            using (_sessionsMutex.EnterScope())
                 _sessions.Clear();
 
-            lock (_inactiveSessionsMutex)
+            using (_inactiveSessionsMutex.EnterScope())
                 _inactiveSessions.Clear();
         }
 
@@ -144,7 +145,7 @@ namespace Framework.Networking.Http
         {
             SessionState state;
 
-            lock (_sessionsMutex)
+            using (_sessionsMutex.EnterScope())
             {
                 if (!_sessions.TryGetValue(Guid.Parse(id), out state))
                 {
@@ -159,7 +160,7 @@ namespace Framework.Networking.Http
                 return null;
             }
 
-            lock (_inactiveSessionsMutex)
+            using (_inactiveSessionsMutex.EnterScope())
             {
                 _inactiveSessions.Remove(state.Id);
             }
@@ -170,7 +171,7 @@ namespace Framework.Networking.Http
         public void MarkSessionInactive(Guid id)
         {
             bool wasActive = true;
-            lock (_inactiveSessionsMutex)
+            using (_inactiveSessionsMutex.EnterScope())
             {
                 wasActive = !_inactiveSessions.Contains(id);
                 if (wasActive)
@@ -179,7 +180,7 @@ namespace Framework.Networking.Http
 
             if (wasActive)
             {
-                lock (_sessionsMutex)
+                using (_sessionsMutex.EnterScope())
                 {
                     var itr = _sessions.LookupByKey(id);
                     if (itr != null)
@@ -193,7 +194,7 @@ namespace Framework.Networking.Http
 
         void KillInactiveSessions()
         {
-            lock (_inactiveSessionsMutex)
+            using (_inactiveSessionsMutex.EnterScope())
             {
                 List<Guid> inactiveSessions = new(_inactiveSessions);
                 _inactiveSessions.Clear();
@@ -202,7 +203,7 @@ namespace Framework.Networking.Http
                 DateTime now = DateTime.Now;
                 int inactiveSessionsCount = inactiveSessions.Count;
 
-                lock (_sessionsMutex)
+                using (_sessionsMutex.EnterScope())
                 {
                     foreach (var guid in inactiveSessions.ToList())
                     {
@@ -225,10 +226,10 @@ namespace Framework.Networking.Http
             }
         }
 
-        object _sessionsMutex = new();
+        Lock _sessionsMutex = new();
         Dictionary<Guid, SessionState> _sessions = new();
 
-        object _inactiveSessionsMutex = new();
+        Lock _inactiveSessionsMutex = new();
         List<Guid> _inactiveSessions = new();
         System.Timers.Timer _inactiveSessionsKillTimer;
 

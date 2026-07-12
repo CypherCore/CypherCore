@@ -12,6 +12,7 @@ using Game.Networking.Packets;
 using System;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Game.Networking
@@ -46,7 +47,7 @@ namespace Game.Networking
         long _LastPingTime;
         uint _OverSpeedPings;
 
-        object _worldSessionLock = new();
+        Lock _worldSessionLock = new();
         WorldSession _worldSession;
 
         ZLib.z_stream _compressionStream;
@@ -318,7 +319,7 @@ namespace Game.Networking
                     HandleEnterEncryptedModeAck();
                     break;
                 default:
-                    lock (_worldSessionLock)
+                    using (_worldSessionLock.EnterScope())
                     {
                         if (_worldSession == null)
                         {
@@ -398,7 +399,7 @@ namespace Game.Networking
 
         public void SetWorldSession(WorldSession session)
         {
-            lock (_worldSessionLock)
+            using (_worldSessionLock.EnterScope())
                 _worldSession = session;
         }
 
@@ -439,7 +440,7 @@ namespace Game.Networking
 
         public override void OnClose()
         {
-            lock (_worldSessionLock)
+            using (_worldSessionLock.EnterScope())
                 _worldSession = null;
 
             base.OnClose();
@@ -804,7 +805,7 @@ namespace Game.Networking
                     uint maxAllowed = WorldConfig.GetUIntValue(WorldCfg.MaxOverspeedPings);
                     if (maxAllowed != 0 && _OverSpeedPings > maxAllowed)
                     {
-                        lock (_worldSessionLock)
+                        using (_worldSessionLock.EnterScope())
                         {
                             if (_worldSession != null && !_worldSession.HasPermission(RBACPermissions.SkipCheckOverspeedPing))
                             {
@@ -818,7 +819,7 @@ namespace Game.Networking
                     _OverSpeedPings = 0;
             }
 
-            lock (_worldSessionLock)
+            using (_worldSessionLock.EnterScope())
             {
                 if (_worldSession != null)
                     _worldSession.SetLatency(ping.Latency);

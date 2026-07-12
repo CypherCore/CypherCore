@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 
 namespace Game.Collision
 {
@@ -19,7 +20,7 @@ namespace Game.Collision
         Dictionary<uint, StaticMapTree> iInstanceMapTrees = new();
         Dictionary<uint, uint> iParentMapData = new();
         // Mutex for iLoadedModelFiles
-        object LoadedModelFilesLock = new();
+        Lock LoadedModelFilesLock = new();
 
         public StaticMapTree GetMapTree(uint mapId)
         {
@@ -183,7 +184,7 @@ namespace Game.Collision
         {
             ManagedModel worldmodel; // this is intentionally declared before lock so that it is destroyed after it to prevent deadlocks in releaseModelInstance
 
-            lock (LoadedModelFilesLock)
+            using (LoadedModelFilesLock.EnterScope())
             {
                 if (iLoadedModelFiles.TryGetValue(filename, out worldmodel))
                     return worldmodel.Model;
@@ -204,7 +205,7 @@ namespace Game.Collision
 
         public void ReleaseModelInstance(string filename)
         {
-            lock (LoadedModelFilesLock)
+            using (LoadedModelFilesLock.EnterScope())
             {
                 filename = filename.TrimEnd('\0');
 

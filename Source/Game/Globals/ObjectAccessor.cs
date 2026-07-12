@@ -7,10 +7,11 @@ using Game.Entities;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 public class ObjectAccessor : Singleton<ObjectAccessor>
 {
-    object _lockObject = new();
+    Lock _lockObject = new();
 
     Dictionary<ObjectGuid, Player> _players = new();
 
@@ -201,7 +202,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     // this returns Player even if he is not in world, for example teleporting
     public Player FindConnectedPlayer(ObjectGuid guid)
     {
-        lock (_lockObject)
+        using (_lockObject.EnterScope())
             return _players.LookupByKey(guid);
     }
     public Player FindConnectedPlayerByName(string name)
@@ -211,7 +212,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
     public void SaveAllPlayers()
     {
-        lock (_lockObject)
+        using (_lockObject.EnterScope())
         {
             foreach (var pl in GetPlayers())
                 pl.SaveToDB();
@@ -220,13 +221,13 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
     public ICollection<Player> GetPlayers()
     {
-        lock (_lockObject)
+        using (_lockObject.EnterScope())
             return _players.Values;
     }
 
     public void AddObject(Player obj)
     {
-        lock (_lockObject)
+        using (_lockObject.EnterScope())
         {
             PlayerNameMapHolder.Insert(obj);
             _players[obj.GetGUID()] = obj;
@@ -235,7 +236,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
     public void RemoveObject(Player obj)
     {
-        lock (_lockObject)
+        using (_lockObject.EnterScope())
         {
             PlayerNameMapHolder.Remove(obj);
             _players.Remove(obj.GetGUID());

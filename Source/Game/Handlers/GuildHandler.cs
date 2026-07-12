@@ -17,7 +17,7 @@ namespace Game
             Guild guild = Global.GuildMgr.GetGuildByGuid(query.GuildGuid);
             if (guild != null)
             {
-                guild.SendQueryResponse(this);
+                guild.HandleQuery(this);
                 return;
             }
 

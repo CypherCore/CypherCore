@@ -21,6 +21,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace Game
 {
@@ -111,7 +112,7 @@ namespace Game
         public void TriggerGuidWarning()
         {
             // Lock this only to prevent multiple maps triggering at the same time
-            lock (_guidAlertLock)
+            using (_guidAlertLock.EnterScope())
             {
                 long gameTime = GameTime.GetGameTime();
                 long today = (gameTime / Time.Day) * Time.Day;
@@ -131,7 +132,7 @@ namespace Game
         public void TriggerGuidAlert()
         {
             // Lock this only to prevent multiple maps triggering at the same time
-            lock (_guidAlertLock)
+            using (_guidAlertLock.EnterScope())
             {
                 DoGuidAlertRestart();
                 _guidAlert = true;
@@ -2557,7 +2558,7 @@ namespace Game
         string _guidWarningMsg;
         string _alertRestartReason;
 
-        object _guidAlertLock = new();
+        Lock _guidAlertLock = new();
 
         bool _guidWarn;
         bool _guidAlert;

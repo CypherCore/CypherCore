@@ -90,9 +90,8 @@ namespace Game.Maps
             cacheKey.CachedHash = TileCacheKey.Compute(cacheKey);
 
             TileCache tileCache = TileCache.Instance();
-            lock (tileCache.TilesMutex)
+            using (tileCache.TilesMutex.EnterScope())
             {
-
                 TileCache.Tile tile = new();
                 var isNew = tileCache.Tiles.TryAdd(cacheKey, tile);
                 if (isNew)
@@ -220,7 +219,7 @@ namespace Game.Maps
 
     class TileCache
     {
-        public Mutex TilesMutex = new();
+        public Lock TilesMutex = new();
         public Dictionary<TileCacheKey, Tile> Tiles = new();
 
         Timer _cacheCleanupTimer;
@@ -260,7 +259,7 @@ namespace Game.Maps
 
         void RemoveOldCacheEntries(DateTime oldestPreservedEntryTimestamp)
         {
-            lock (TilesMutex)
+            using (TilesMutex.EnterScope())
                 Tiles.Remove(Tiles.First(kv => kv.Value.LastAccessed < oldestPreservedEntryTimestamp).Key);
         }
 
