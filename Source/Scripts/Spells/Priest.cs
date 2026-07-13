@@ -5,6 +5,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.AI;
 using Game.Entities;
+using Game.Maps;
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
@@ -46,6 +47,8 @@ struct SpellIds
     public const uint DarkReprimandDamage = 373130;
     public const uint DarkReprimandHealing = 400187;
     public const uint DazzlingLight = 196810;
+    public const uint DispersingLight = 1215265;
+    public const uint DispersingLightHeal = 1215266;
     public const uint DivineAegis = 47515;
     public const uint DivineAegisAbsorb = 47753;
     public const uint DivineBlessing = 40440;
@@ -777,6 +780,67 @@ class spell_pri_dark_indulgence : SpellScript
     public override void Register()
     {
         OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffectName.SchoolDamage));
+    }
+}
+
+[Script] // 1215265 - Dispersing Light
+class spell_pri_dispersing_light : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.DispersingLight)
+            && ValidateSpellEffect((spellInfo.Id, 1));
+    }
+
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    {
+        HealInfo healInfo = eventInfo.GetHealInfo();
+        if (healInfo == null || healInfo.GetHeal() == 0)
+            return;
+
+        Unit caster = eventInfo.GetActor();
+        Unit target = eventInfo.GetActionTarget();
+
+        caster.CastSpell(null, SpellIds.DispersingLightHeal, new CastSpellExtraArgs()
+        {
+            TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
+            TriggeringAura = aurEff,
+            SpellValueOverrides =
+            {
+                new CastSpellExtraArgsInit.SpellValueOverride(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount())),
+                new CastSpellExtraArgsInit.SpellValueOverride(SpellValueMod.MaxTargets, GetEffectInfo(1).CalcValue(caster))
+            },
+            CustomArg = new TriggerArgs() { TargetToExclude = target.GetGUID() }
+        });
+    }
+
+    public override void Register()
+    {
+        OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+    }
+
+
+    public class TriggerArgs
+    {
+        public ObjectGuid TargetToExclude;
+    }
+}
+
+// 1215266 - Dispersing Light (Heal)
+class spell_pri_dispersing_light_heal : SpellScript
+{
+    void FilterTargets(List<WorldObject> targets)
+    {
+        spell_pri_dispersing_light.TriggerArgs args = (GetSpell().m_customArg as spell_pri_dispersing_light.TriggerArgs);
+        if (args == null || args.TargetToExclude.IsEmpty())
+            return;
+
+        targets.RemoveAll(new ObjectGUIDCheck(args.TargetToExclude));
+    }
+
+    void Register()
+    {
+        OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaAlly));
     }
 }
 
