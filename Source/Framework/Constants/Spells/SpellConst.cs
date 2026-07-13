@@ -155,7 +155,7 @@ namespace Framework.Constants
         Swimming = 0x02,
         NotMoving = 0x04, // NYI
         Ground = 0x08,
-        Transform = 0x10, // NYI
+        Transform = 0x10,
         Jump = 0x20,
         ChangeSpec = 0x40,
         AbandonVehicle = 0x80, // Implemented in Unit::_ExitVehicle
