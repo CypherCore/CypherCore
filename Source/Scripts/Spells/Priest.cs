@@ -2188,6 +2188,68 @@ class spell_pri_divine_aegis : AuraScript
     }
 }
 
+[Script] // 472361 - Divine Procession
+class spell_pri_divine_procession : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementEffect)
+            && ValidateSpellEffect((SpellIds.AtonementEffect, 2));
+    }
+
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    {
+        Unit caster = GetTarget();
+
+        Aura atonementAura = caster.GetAura(SpellIds.Atonement);
+        if (atonementAura == null)
+            return;
+
+        spell_pri_atonement atonementScript = atonementAura.GetScript<spell_pri_atonement>();
+        if (atonementScript == null)
+            return;
+
+        var atonementTargets = atonementScript.GetAtonementTargets();
+        if (atonementTargets.Empty())
+            return;
+
+        // smallest Atonement duration should get increased
+        var it = atonementTargets.MinBy(guidA =>
+        {
+            Unit target = Global.ObjAccessor.GetUnit(caster, guidA);
+            if (target == null)
+                return int.MaxValue;
+
+            Aura atonementEffect = target.GetAura(SpellIds.AtonementEffect, caster.GetGUID());
+            if (atonementEffect == null)
+                return int.MaxValue;
+
+            return atonementEffect.GetDuration();
+        });
+
+        Unit target = Global.ObjAccessor.GetUnit(caster, it);
+        if (target != null)
+        {
+            Aura atonement = target.GetAura(SpellIds.AtonementEffect, caster.GetGUID());
+            if (atonement != null)
+            {
+                if (atonement.GetDuration() < 30 * Time.InMilliseconds)
+                {
+                    int newDuration = atonement.GetDuration() + aurEff.GetAmount();
+                    atonement.SetDuration(newDuration);
+                    atonement.SetMaxDuration(newDuration);
+                }
+            }
+        }
+    }
+
+    public override void Register()
+    {
+        OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+    }
+};
+
+
 [Script] // 129250 - Power Word: Solace
 class spell_pri_power_word_solace : SpellScript
 {
