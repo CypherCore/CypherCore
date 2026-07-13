@@ -1782,7 +1782,7 @@ namespace Game.Entities
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
-                MoveSetFlag packet = new(cantSwim ? ServerOpcodes.MoveSetCantSwim : ServerOpcodes.MoveUnsetCantSwim);
+                MoveSetFlag packet = new(cantSwim ? ServerOpcodes.MoveSetCannotSwim : ServerOpcodes.MoveUnsetCannotSwim);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);

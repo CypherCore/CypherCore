@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -332,6 +333,7 @@ namespace Game.DataStorage
         public int TraitTreeID;
         public int ProfessionID;
         public int Unknown_1002_14;
+        public int NeighborhoodMapID;
         public int SkillLineID;
     }
 

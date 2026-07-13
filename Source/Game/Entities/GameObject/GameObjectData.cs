@@ -5,6 +5,7 @@ using Framework.Collections;
 using Framework.Constants;
 using Game.Maps;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -42,9 +43,12 @@ namespace Game.Entities
         public uint ContentTuningId;
 
         [FieldOffset(56)]
+        public uint RequiredLevel;
+
+        [FieldOffset(60)]
         public string AIName;
 
-        [FieldOffset(64)]
+        [FieldOffset(68)]
         public uint ScriptId;
 
         [FieldOffset(72)]
@@ -845,6 +849,7 @@ namespace Game.Entities
             }
 
             stats.ContentTuningId = ContentTuningId;
+            stats.RequiredLevel = RequiredLevel;
 
             QueryData.Stats = stats;
         }

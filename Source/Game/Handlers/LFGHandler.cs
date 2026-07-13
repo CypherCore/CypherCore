@@ -10,6 +10,7 @@ using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Linq;
 using Game.DataStorage;
+using System;
 
 namespace Game
 {
@@ -130,7 +131,7 @@ namespace Game
         {
             // Get Random dungeons that can be done at a certain level and expansion
             uint level = GetPlayer().GetLevel();
-            uint contentTuningReplacementConditionMask = GetPlayer().m_playerData.CtrOptions.GetValue().ConditionalFlags;
+            List<uint> contentTuningReplacementConditionMask = GetPlayer().m_playerData.CtrOptions.GetValue().ConditionalFlags;
             var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion(), contentTuningReplacementConditionMask);
 
             LfgPlayerInfo lfgPlayerInfo = new();
@@ -141,22 +142,24 @@ namespace Game
 
             foreach (var slot in randomDungeons)
             {
-                var playerDungeonInfo = new LfgPlayerDungeonInfo();
-                playerDungeonInfo.Slot = slot;
-                playerDungeonInfo.CompletionQuantity = 1;
-                playerDungeonInfo.CompletionLimit = 1;
-                playerDungeonInfo.CompletionCurrencyID = 0;
-                playerDungeonInfo.SpecificQuantity = 0;
-                playerDungeonInfo.SpecificLimit = 1;
-                playerDungeonInfo.OverallQuantity = 0;
-                playerDungeonInfo.OverallLimit = 1;
-                playerDungeonInfo.PurseWeeklyQuantity = 0;
-                playerDungeonInfo.PurseWeeklyLimit = 0;
-                playerDungeonInfo.PurseQuantity = 0;
-                playerDungeonInfo.PurseLimit = 0;
-                playerDungeonInfo.Quantity = 1;
-                playerDungeonInfo.CompletedMask = 0;
-                playerDungeonInfo.EncounterMask = 0;
+                var playerDungeonInfo = new LfgPlayerDungeonInfo
+                {
+                    Slot = slot,
+                    CompletionQuantity = 1,
+                    CompletionLimit = 1,
+                    CompletionCurrencyID = 0,
+                    SpecificQuantity = 0,
+                    SpecificLimit = 1,
+                    OverallQuantity = 0,
+                    OverallLimit = 1,
+                    PurseWeeklyQuantity = 0,
+                    PurseWeeklyLimit = 0,
+                    PurseQuantity = 0,
+                    PurseLimit = 0,
+                    Quantity = 1,
+                    CompletedMask = 0,
+                    EncounterMask = 0
+                };
 
                 LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(slot, level);
                 if (reward != null)

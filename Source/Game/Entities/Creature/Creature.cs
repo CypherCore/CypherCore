@@ -269,6 +269,8 @@ namespace Game.Entities
 
             SetCanDualWield(creatureInfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.UseOffhandAttack));
 
+            UpdateCreatureType();
+
             // checked at loading
             DefaultMovementType = (MovementGeneratorType)(data != null ? data.movementType : creatureInfo.MovementType);
             if (m_wanderDistance == 0 && DefaultMovementType == MovementGeneratorType.Random)
@@ -2858,7 +2860,7 @@ namespace Game.Entities
         public void ApplyLevelScaling()
         {
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            var levels = Global.DB2Mgr.GetContentTuningData(creatureDifficulty.ContentTuningID, 0);
+            var levels = Global.DB2Mgr.GetContentTuningData(creatureDifficulty.ContentTuningID, []);
             if (levels.HasValue)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);

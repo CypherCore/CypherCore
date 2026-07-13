@@ -38,7 +38,7 @@ namespace Game.Entities
             m_movementInfo = new MovementInfo();
             m_updateFlag.Clear();
 
-            m_entityFragments.Add((int)EntityFragment.CGObject, false);
+            m_entityFragments.Add(EntityFragment.CGObject, false);
 
             m_objectData = new ObjectFieldData();
 
@@ -312,6 +312,9 @@ namespace Game.Entities
             data.WriteBit(flags.SceneObject);
             data.WriteBit(flags.ActivePlayer);
             data.WriteBit(flags.Conversation);
+            data.WriteBit(flags.Room);
+            data.WriteBit(flags.Decor);
+            data.WriteBit(flags.MeshObject);
             data.FlushBits();
 
             if (flags.MovementUpdate)
@@ -486,6 +489,21 @@ namespace Game.Entities
                 GameObject gameObject = ToGameObject();
                 data.WriteInt64(gameObject.GetPackedLocalRotation());                 // Rotation
             }
+
+            //if (flags.Room)
+            //    *data << ObjectGuid(HouseGUID);
+
+            //if (flags.Decor)
+            //    *data << ObjectGuid(RoomGUID);
+
+            //if (flags.MeshObject)
+            //{
+            //    *data << ObjectGuid(AttachParentGUID);
+            //    *data << TaggedPosition<Position::XYZ>(PositionLocalSpace);
+            //    *data << QuaternionData(RotationLocalSpace);
+            //    *data << float(ScaleLocalSpace);
+            //    *data << uint8(AttachmentFlags);
+            //}
 
             if (PauseTimes != null && !PauseTimes.Empty())
                 foreach (var stopFrame in PauseTimes)
@@ -3847,7 +3865,11 @@ namespace Game.Entities
             TypeMask.Object | TypeMask.Corpse,
             TypeMask.Object | TypeMask.AreaTrigger,
             TypeMask.Object | TypeMask.SceneObject,
-            TypeMask.Object | TypeMask.Conversation
+            TypeMask.Object | TypeMask.Conversation,
+            TypeMask.Object  | TypeMask.MeshObject,
+            TypeMask.Object  | TypeMask.AIGroup,
+            TypeMask.Object  | TypeMask.Scenario,
+            TypeMask.Object  | TypeMask.LootObject
         };
     }
 
@@ -4087,6 +4109,9 @@ namespace Game.Entities
         public bool SceneObject;
         public bool ActivePlayer;
         public bool Conversation;
+        public bool Room;
+        public bool Decor;
+        public bool MeshObject;
 
         public void Clear()
         {
@@ -4107,6 +4132,9 @@ namespace Game.Entities
             SceneObject = false;
             ActivePlayer = false;
             Conversation = false;
+            Room = false;
+            Decor = false;
+            MeshObject = false;
         }
     }
 

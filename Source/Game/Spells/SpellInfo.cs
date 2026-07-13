@@ -4908,6 +4908,13 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 343 SPELL_EFFECT_343
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 344 SPELL_EFFECT_344
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 345 SPELL_EFFECT_ASSIST_ACTION
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 346 SPELL_EFFECT_346
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 347 SPELL_EFFECT_EQUIP_TRANSMOG_OUTFIT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 348 SPELL_EFFECT_GIVE_HOUSE_LEVEL
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 349 SPELL_EFFECT_LEARN_HOUSE_ROOM
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 350 SPELL_EFFECT_LEARN_HOUSE_EXTERIOR_COMPONENT
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 351 SPELL_EFFECT_LEARN_HOUSE_THEME
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 352 SPELL_EFFECT_LEARN_HOUSE_ROOM_COMPONENT_TEXTURE
         };
 
         #region Fields

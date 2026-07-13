@@ -1834,7 +1834,7 @@ namespace Game.Entities
                     level = fixedLevel;
                 else
                 {
-                    var levels = Global.DB2Mgr.GetContentTuningData(bonusData.ContentTuningId, 0, true);
+                    var levels = Global.DB2Mgr.GetContentTuningData(bonusData.ContentTuningId, [], true);
                     if (levels.HasValue)
                         level = (uint)Math.Min(Math.Max((ushort)level, levels.Value.MinLevel), levels.Value.MaxLevel);
                 }
@@ -2414,7 +2414,7 @@ namespace Game.Entities
 
             if (_bonusData.PlayerLevelToItemLevelCurveId != 0)
             {
-                var levels = Global.DB2Mgr.GetContentTuningData(_bonusData.ContentTuningId, 0, true);
+                var levels = Global.DB2Mgr.GetContentTuningData(_bonusData.ContentTuningId, [], true);
                 if (levels.HasValue)
                     level = (uint)Math.Min(Math.Max((short)level, levels.Value.MinLevel), levels.Value.MaxLevel);
 

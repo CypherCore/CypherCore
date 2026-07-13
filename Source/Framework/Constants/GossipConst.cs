@@ -93,12 +93,14 @@ namespace Framework.Constants
         CharacterBanker = 56,
         AccountBanker = 57,
         ProfessionRespec = 58,
-        Placeholder1 = 59,
-        Placeholder2 = 60,
-        Placeholder3 = 61,
+        RenameNeighborhood = 59,
+        HousingCreateGuildNeighborhood = 60,
+        HousingGetNeighborhoodCharter = 61,
         GuildRename = 62,
-        Placeholder4 = 63,
+        HousingOpenCharterConfirmation = 63,
         ItemUpgrade = 64,
+        HouseFinder = 65,
+        Placeholder6 = 66,
 
         Max
     }

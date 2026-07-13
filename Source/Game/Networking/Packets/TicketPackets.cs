@@ -135,6 +135,7 @@ namespace Game.Networking.Packets
             bool hasVoiceChatInfo = _worldPacket.HasBit();
             bool hasClubFinderResult = _worldPacket.HasBit();
             bool hasArenaTeamInfo = _worldPacket.HasBit();
+            bool hasHouseInfo = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
 
@@ -197,6 +198,12 @@ namespace Game.Networking.Packets
                 ArenaTeamInfo = new();
                 ArenaTeamInfo.Value.Read(_worldPacket);
             }
+
+            if (hasHouseInfo)
+            {
+                HouseInfo = new();
+                HouseInfo.Value.Read(_worldPacket);
+            }
         }
 
         public SupportTicketHeader Header;
@@ -216,6 +223,7 @@ namespace Game.Networking.Packets
         public SupportTicketVoiceChatInfo? VoiceChatInfo;
         public SupportTicketClubFinderInfo? ClubFinderInfo;
         public SupportTicketArenaTeamInfo? ArenaTeamInfo;
+        public SupportTicketHouseInfo? HouseInfo;
 
         public struct SupportTicketChatLine
         {
@@ -582,5 +590,28 @@ namespace Game.Networking.Packets
         public Vector3 Position;
         public float Facing;
         public int Program;
+    }
+
+    public struct SupportTicketHouseInfo
+    {
+        public string NeighborhoodName;
+        public ObjectGuid Unknown_1127_1;
+        public ObjectGuid Unknown_1127_2;
+        public ObjectGuid Unknown_1127_3;
+        public byte Unknown_1127_4;
+
+        public void Read(WorldPacket data)
+        {
+            data.ResetBitPos();
+
+            var stringSize = data.ReadBits<uint>(8);
+
+            Unknown_1127_1 = data.ReadPackedGuid();
+            Unknown_1127_2 = data.ReadPackedGuid();
+            Unknown_1127_3 = data.ReadPackedGuid();
+            Unknown_1127_4 = data.ReadUInt8();
+
+            NeighborhoodName = data.ReadString(stringSize);
+        }
     }
 }

@@ -186,6 +186,14 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateLMMLobby(0, arg2, arg3, arg4, counter);
         }
 
+        public static ObjectGuid Create(HighGuid type, uint subType, uint arg1, uint arg2, ulong arg3) 
+        {
+            if (type != HighGuid.Housing)
+                return Empty;
+
+            return ObjectGuidFactory.CreateHousing(subType, arg1, arg2, arg3);
+        }
+
         public byte[] GetRawValue()
         {
             byte[] temp = new byte[16];
@@ -569,6 +577,35 @@ namespace Game.Entities
                 | ((ulong)(arg3 & 0xFF) << 18)
                 | ((ulong)(arg4 & 0xFF) << 10)),
                 counter);
+        }
+
+        public static ObjectGuid CreateHousing(uint subType, uint arg1, uint arg2, ulong arg3)
+        {
+            switch (subType)
+            {
+                case 1:
+                case 4:
+                    return new ObjectGuid((ulong)(((ulong)HighGuid.Housing << 58)
+                        | ((ulong)(subType & 0x1F) << 53)
+                        | ((ulong)(arg1 & 0xFFFF) << 32)
+                        | ((ulong)(arg2 & 0xFFFFFFFF))),
+                        arg3);
+                case 2:
+                    return new ObjectGuid((ulong)(((ulong)HighGuid.Housing << 58)
+                        | ((ulong)(subType & 0x1F) << 53)
+                        | ((ulong)(arg2 & 0xFFFFFFFF))),
+                        arg3);
+                case 3:
+                    return new ObjectGuid((ulong)(((ulong)HighGuid.Housing << 58)
+                        | ((ulong)(subType & 0x1F) << 53)
+                        | ((ulong)(arg1 & 0x3F) << 15)
+                        | ((ulong)(arg2 & 0x7FFF))),
+                        arg3);
+                default:
+                    break;
+            }
+
+            return ObjectGuid.Empty;
         }
 
         static uint GetRealmIdForObjectGuid(uint realmId)

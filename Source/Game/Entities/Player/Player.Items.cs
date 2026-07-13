@@ -4881,7 +4881,7 @@ namespace Game.Entities
                     ContentTuningLevels? requiredLevels = null;
                     // check allowed level (extend range to upper values if MaxLevel more or equal max player level, this let GM set high level with 1...max range items)
                     if (pItem.GetQuality() == ItemQuality.Heirloom)
-                        requiredLevels = Global.DB2Mgr.GetContentTuningData(pItem.GetScalingContentTuningId(), 0, true);
+                        requiredLevels = Global.DB2Mgr.GetContentTuningData(pItem.GetScalingContentTuningId(), [], true);
 
                     if (requiredLevels.HasValue && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxLevel && requiredLevels.Value.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
                         return InventoryResult.NotEquippable;

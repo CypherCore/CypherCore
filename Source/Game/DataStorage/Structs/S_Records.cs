@@ -614,6 +614,7 @@ namespace Game.DataStorage
         public uint Id;
         public float[] MissileCastOffset = new float[3];
         public float[] MissileImpactOffset = new float[3];
+        public int StateKit;
         public uint AnimEventSoundID;
         public int Flags;
         public sbyte MissileAttachment;

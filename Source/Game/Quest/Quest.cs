@@ -237,20 +237,25 @@ namespace Game
 
         public void LoadQuestObjective(SQLFields fields)
         {
-            QuestObjective obj = new();
-            obj.QuestID = fields.Read<uint>(0);
-            obj.Id = fields.Read<uint>(1);
-            obj.Type = (QuestObjectiveType)fields.Read<byte>(2);
-            obj.StorageIndex = fields.Read<sbyte>(3);
-            obj.ObjectID = fields.Read<int>(4);
-            obj.Amount = fields.Read<int>(5);
-            obj.Flags = (QuestObjectiveFlags)fields.Read<uint>(6);
-            obj.Flags2 = (QuestObjectiveFlags2)fields.Read<uint>(7);
-            obj.ProgressBarWeight = fields.Read<float>(8);
-            obj.Description = fields.Read<string>(9);
+            QuestObjective obj = new()
+            {
+                QuestID = fields.Read<uint>(0),
+                Id = fields.Read<uint>(1),
+                Type = (QuestObjectiveType)fields.Read<byte>(2),
+                StorageIndex = fields.Read<sbyte>(3),
+                ObjectID = fields.Read<int>(4),
+                Amount = fields.Read<int>(5),
+                SecondaryAmount = fields.Read<int>(6),
+                Flags = (QuestObjectiveFlags)fields.Read<uint>(7),
+                Flags2 = (QuestObjectiveFlags2)fields.Read<uint>(8),
+                ProgressBarWeight = fields.Read<float>(9),
+                ParentObjectiveID = fields.Read<int>(10),
+                Visible = fields.Read<bool>(11),
+                Description = fields.Read<string>(12)
+            };
 
             bool hasCompletionEffect = false;
-            for (var i = 10; i < 15; ++i)
+            for (var i = 13; i < 18; ++i)
             {
                 if (!fields.IsNull(i))
                 {
@@ -263,15 +268,15 @@ namespace Game
             {
                 obj.CompletionEffect = new QuestObjectiveAction();
                 if (!fields.IsNull(10))
-                    obj.CompletionEffect.GameEventId = fields.Read<uint>(10);
+                    obj.CompletionEffect.GameEventId = fields.Read<uint>(13);
                 if (!fields.IsNull(11))
-                    obj.CompletionEffect.SpellId = fields.Read<uint>(11);
+                    obj.CompletionEffect.SpellId = fields.Read<uint>(14);
                 if (!fields.IsNull(12))
-                    obj.CompletionEffect.ConversationId = fields.Read<uint>(12);
+                    obj.CompletionEffect.ConversationId = fields.Read<uint>(15);
                 if (!fields.IsNull(13))
-                    obj.CompletionEffect.UpdatePhaseShift = fields.Read<bool>(13);
+                    obj.CompletionEffect.UpdatePhaseShift = fields.Read<bool>(16);
                 if (!fields.IsNull(14))
-                    obj.CompletionEffect.UpdateZoneAuras = fields.Read<bool>(14);
+                    obj.CompletionEffect.UpdateZoneAuras = fields.Read<bool>(17);
             }
 
             Objectives.Add(obj);
@@ -403,6 +408,16 @@ namespace Game
             TreasurePickerID.Add(fields.Read<int>(1));
         }
 
+        public void LoadRewardHouseRoom(SQLFields fields)
+        {
+            RewardHouseRoomIDs.Add(fields.Read<int>(1));
+        }
+
+        public void LoadRewardHouseDecor(SQLFields fields)
+        {
+            RewardHouseDecorIDs.Add(fields.Read<int>(1));
+        }
+
         public uint XPValue(Player player)
         {
             return XPValue(player, ContentTuningId, RewardXPDifficulty, RewardXPMultiplier, Expansion);
@@ -466,7 +481,7 @@ namespace Game
         public uint MaxMoneyValue()
         {
             uint value = 0;
-            var questLevels = Global.DB2Mgr.GetContentTuningData(ContentTuningId, 0);
+            var questLevels = Global.DB2Mgr.GetContentTuningData(ContentTuningId, []);
             if (questLevels.HasValue)
             {
                 var money = CliDB.QuestMoneyRewardStorage.LookupByKey(questLevels.Value.MaxLevel);
@@ -775,6 +790,8 @@ namespace Game
             response.Info.ManagedWorldStateID = ManagedWorldStateID;
             response.Info.QuestSessionBonus = 0; //GetQuestSessionBonus(); // this is only sent while quest session is active
             response.Info.QuestGiverCreatureID = 0; // only sent during npc interaction
+            response.Info.RewardHouseRoomIDs = RewardHouseRoomIDs;
+            response.Info.RewardHouseDecorIDs = RewardHouseDecorIDs;
 
             foreach (QuestObjective questObjective in Objectives)
             {
@@ -914,7 +931,9 @@ namespace Game
         public int Expansion;
         public int ManagedWorldStateID;
         public int QuestSessionBonus;
-        public List<QuestObjective> Objectives = new();
+        public List<int> RewardHouseRoomIDs = [];
+        public List<int> RewardHouseDecorIDs = [];
+        public List<QuestObjective> Objectives = [];
         public string LogTitle = "";
         public string LogDescription = "";
         public string QuestDescription = "";
@@ -1085,9 +1104,12 @@ namespace Game
         public sbyte StorageIndex;
         public int ObjectID;
         public int Amount;
+        public int SecondaryAmount;
         public QuestObjectiveFlags Flags;
         public QuestObjectiveFlags2 Flags2;
         public float ProgressBarWeight;
+        public int ParentObjectiveID;
+        public bool Visible;
         public string Description;
         public int[] VisualEffects = Array.Empty<int>();
         public QuestObjectiveAction CompletionEffect;

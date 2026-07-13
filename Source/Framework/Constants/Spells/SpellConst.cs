@@ -2675,7 +2675,15 @@ namespace Framework.Constants
         Unk343 = 343,
         Unk344 = 344, // some kind of teleport
         AssistAction = 345, // MiscValue[0] = AssistActionType, MiscValue[1] = ID, depends on type
+        Unk346 = 346,
+        EquipTransmogOutfit = 347, // MiscValue[0] = TransmogOutfitEntry
+        GiveHouseLevel = 348,
+        LearnHouseRoom = 349, // MiscValue[0] = HouseRoom
+        LearnHouseExteriorComponent = 350, // MiscValue[0] = ExteriorComponent
+        LearnHouseTheme = 351, // MiscValue[0] = HouseTheme
+        LearnHouseRoomComponentTexture = 352, // MiscValue[0] = RoomComponentTexture
 
+        //                                              = 354, // MiscValue[0] = NeighborhoodInitiative
         TotalSpellEffects
     }
 

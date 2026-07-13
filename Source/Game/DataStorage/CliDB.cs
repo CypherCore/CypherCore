@@ -865,6 +865,8 @@ namespace Game.DataStorage
                     return row.Evoker;
                 case Class.Adventurer:
                     return row.Adventurer;
+                case Class.Traveler:
+                    return row.Traveler;
                 default:
                     break;
             }
@@ -904,6 +906,8 @@ namespace Game.DataStorage
                     return row.Evoker;
                 case (int)Class.Adventurer:
                     return row.Adventurer;
+                case (int)Class.Traveler:
+                    return row.Traveler;
                 case -1:
                 case -7:
                     return row.Item;

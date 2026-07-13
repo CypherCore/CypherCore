@@ -47,6 +47,7 @@ namespace Game.DataStorage
         public int ContentTuningID;
         public int ModifiedCraftingReagentItemID;
         public int CraftingQualityID;
+        public int Unknown1127;
     }
 
     public sealed class ItemAppearanceRecord
@@ -227,6 +228,7 @@ namespace Game.DataStorage
         public ushort SpellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
+        public int PlayerConditionID;
     }
 
     public sealed class ItemExtendedCostRecord
@@ -337,6 +339,7 @@ namespace Game.DataStorage
         public int ItemLevel;
         public int RequiredLevel;
         public int Unknown1125;
+        public int Flags;
     }
 
     public sealed class ItemSearchNameRecord
@@ -416,6 +419,7 @@ namespace Game.DataStorage
         public uint PlayerLevelToItemLevelCurveID;
         public int ItemLevelOffsetCurveID;
         public int ItemLevelOffsetItemLevel;
+        public int Unknown1127;
         public ushort ItemNameDescriptionID;
         public ushort RequiredTransmogHoliday;
         public ushort RequiredHoliday;

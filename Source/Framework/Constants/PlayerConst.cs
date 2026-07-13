@@ -384,7 +384,8 @@ namespace Framework.Constants
         InPvpCombat = 0x40,       // Forbids /Follow
         Mentor = 0x80,
         Newcomer = 0x100,
-        UnlockedAoeLoot = 0x200
+        UnlockedAoeLoot = 0x200,
+        AutoDeclineNeighborhood = 0x8000
     }
 
     public enum CharacterFlags

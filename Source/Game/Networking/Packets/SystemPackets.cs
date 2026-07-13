@@ -33,6 +33,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(ClubPresenceUnsubscribeDelay);
 
             _worldPacket.WriteInt32(ContentSetID);
+            _worldPacket.WriteInt32(DisabledGameModes.Count);
             _worldPacket.WriteInt32(GameRules.Count);
             _worldPacket.WriteInt32(ActiveTimerunningSeasonID);
             _worldPacket.WriteInt32(RemainingTimerunningSeasonSeconds);
@@ -54,6 +55,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteFloat(AddonPerformanceMsgWarning);
             _worldPacket.WriteFloat(AddonPerformanceMsgError);
             _worldPacket.WriteFloat(AddonPerformanceMsgOverall);
+
+            foreach (var disabledGameMode in DisabledGameModes)
+                disabledGameMode.Write(_worldPacket);
 
             foreach (GameRuleValuePair gameRuleValue in GameRules)
                 gameRuleValue.Write(_worldPacket);
@@ -202,7 +206,8 @@ namespace Game.Networking.Packets
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
         public RafSystemFeatureInfo RAFSystem;
-        public List<GameRuleValuePair> GameRules = new();
+        public List<DisabledGameModeData> DisabledGameModes = [];
+        public List<GameRuleValuePair> GameRules = [];
         public int ActiveTimerunningSeasonID;
         public int RemainingTimerunningSeasonSeconds;
         public string Unknown1027;                          // related to movement lua functions used by keybinds
@@ -365,7 +370,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MinimumExpansionLevel);
             _worldPacket.WriteInt32(MaximumExpansionLevel);
             _worldPacket.WriteInt32(ContentSetID);
+            _worldPacket.WriteInt32(DisabledGameModes.Count);
             _worldPacket.WriteInt32(GameRules.Count);
+            _worldPacket.WriteInt32(AvailableGameModeIDs.Count);
             _worldPacket.WriteInt32(ActiveTimerunningSeasonID);
             _worldPacket.WriteInt32(RemainingTimerunningSeasonSeconds);
             _worldPacket.WriteInt32((int)TimerunningConversionMinCharacterAge.TotalSeconds);
@@ -386,8 +393,14 @@ namespace Game.Networking.Packets
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
 
+            foreach (DisabledGameModeData disabledGameMode in DisabledGameModes)
+                disabledGameMode.Write(_worldPacket);
+
             foreach (GameRuleValuePair gameRuleValue in GameRules)
                 gameRuleValue.Write(_worldPacket);
+
+            if (!AvailableGameModeIDs.Empty())
+                AvailableGameModeIDs.ForEach(_worldPacket.WriteInt32);
 
             foreach (DebugTimeEventInfo debugTimeEventInfo in DebugTimeEvents)
                 debugTimeEventInfo.Write(_worldPacket);
@@ -434,7 +447,9 @@ namespace Game.Networking.Packets
         public int MaximumExpansionLevel;
         public uint KioskSessionDurationMinutes;
         public int ContentSetID; // Currently active Classic season
-        public List<GameRuleValuePair> GameRules = new();
+        public List<DisabledGameModeData> DisabledGameModes = [];
+        public List<GameRuleValuePair> GameRules = [];
+        public List<int> AvailableGameModeIDs = [];
         public int ActiveTimerunningSeasonID;
         public int RemainingTimerunningSeasonSeconds;
         public TimeSpan TimerunningConversionMinCharacterAge = TimeSpan.FromDays(1);
@@ -458,6 +473,25 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Variables.Length);
             foreach (MirrorVarSingle variable in Variables)
                 variable.Write(_worldPacket);
+        }
+    }
+
+    class MOTD() : ServerPacket(ServerOpcodes.Motd)
+    {
+        public List<string> Text = [];
+
+        public override void Write()
+        {
+            _worldPacket.WriteBits(Text.Count, 4);
+            _worldPacket.FlushBits();
+
+            foreach (var line in Text)
+            {
+                _worldPacket.WriteBits(line.GetByteCount(), 7);
+                _worldPacket.FlushBits();
+
+                _worldPacket.WriteString(line);
+            }
         }
     }
 
@@ -506,6 +540,7 @@ namespace Game.Networking.Packets
         public bool SuggestionsEnabled;
 
         public SavedThrottleObjectState ThrottleState;
+        public SavedThrottleObjectState Unused1127;
 
         public void Write(WorldPacket data)
         {
@@ -515,6 +550,7 @@ namespace Game.Networking.Packets
             data.WriteBit(SuggestionsEnabled);
 
             ThrottleState.Write(data);
+            Unused1127.Write(data);
         }
     }
 
@@ -569,6 +605,20 @@ namespace Game.Networking.Packets
 
             data.WriteCString(Name);
             data.WriteCString(Value);
+        }
+    }
+
+    public struct DisabledGameModeData
+    {
+        public byte GameMode;
+        public int Unused1127;
+        public int GameModeRecordID;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt8(GameMode);
+            data.WriteInt32(Unused1127);
+            data.WriteInt32(GameModeRecordID);
         }
     }
 }

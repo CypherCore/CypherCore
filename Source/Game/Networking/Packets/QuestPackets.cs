@@ -191,6 +191,9 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Info.ConditionalQuestDescription.Count);
                 _worldPacket.WriteInt32(Info.ConditionalQuestCompletionLog.Count);
 
+                _worldPacket.WriteInt32(Info.RewardHouseRoomIDs.Count);
+                _worldPacket.WriteInt32(Info.RewardHouseDecorIDs.Count);
+
                 foreach (QuestCompleteDisplaySpell rewardDisplaySpell in Info.RewardDisplaySpell)
                     rewardDisplaySpell.Write(_worldPacket);
 
@@ -201,6 +204,12 @@ namespace Game.Networking.Packets
                 if (!Info.TreasurePickerID2.Empty())
                     foreach (var id in Info.TreasurePickerID2)
                         _worldPacket.WriteInt32(id);
+
+                if (!Info.RewardHouseRoomIDs.Empty())
+                    Info.RewardHouseRoomIDs.ForEach(_worldPacket.WriteInt32);
+
+                if (!Info.RewardHouseDecorIDs.Empty())
+                    Info.RewardHouseDecorIDs.ForEach(_worldPacket.WriteInt32);
 
                 _worldPacket.WriteBits(Info.LogTitle.GetByteCount(), 9);
                 _worldPacket.WriteBits(Info.LogDescription.GetByteCount(), 12);
@@ -222,15 +231,19 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt8(questObjective.StorageIndex);
                     _worldPacket.WriteInt32(questObjective.ObjectID);
                     _worldPacket.WriteInt32(questObjective.Amount);
+                    _worldPacket.WriteInt32(questObjective.SecondaryAmount); // only objective type 22
                     _worldPacket.WriteUInt32((uint)questObjective.Flags);
                     _worldPacket.WriteUInt32((uint)questObjective.Flags2);
                     _worldPacket.WriteFloat(questObjective.ProgressBarWeight);
 
                     _worldPacket.WriteInt32(questObjective.VisualEffects.Length);
+                    _worldPacket.WriteInt32(questObjective.ParentObjectiveID); // related to new UF flags
+
                     foreach (var visualEffect in questObjective.VisualEffects)
                         _worldPacket.WriteInt32(visualEffect);
 
                     _worldPacket.WriteBits(questObjective.Description.GetByteCount(), 8);
+                    _worldPacket.WriteBit(questObjective.Visible);
                     _worldPacket.FlushBits();
 
                     _worldPacket.WriteString(questObjective.Description);
@@ -1183,6 +1196,8 @@ namespace Game.Networking.Packets
         public List<QuestObjective> Objectives = new();
         public List<ConditionalQuestText> ConditionalQuestDescription = new();
         public List<ConditionalQuestText> ConditionalQuestCompletionLog = new();
+        public List<int> RewardHouseRoomIDs = [];
+        public List<int> RewardHouseDecorIDs = [];
         public uint[] RewardItems = new uint[SharedConst.QuestRewardItemCount];
         public uint[] RewardAmount = new uint[SharedConst.QuestRewardItemCount];
         public int[] ItemDrop = new int[SharedConst.QuestItemDropCount];

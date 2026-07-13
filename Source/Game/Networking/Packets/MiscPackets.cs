@@ -370,6 +370,10 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WritePackedGuid(HouseGuid);
+            _worldPacket.WritePackedGuid(HouseOwnerBnetAccount);
+            _worldPacket.WritePackedGuid(HouseOwnerPlayer);
+            _worldPacket.WritePackedGuid(NeighborhoodGuid);
             _worldPacket.WriteBit(IsTournamentRealm);
             _worldPacket.WriteBit(XRealmPvpAlert);
             _worldPacket.WriteBit(BlockExitingLoadingScreen);
@@ -396,6 +400,11 @@ namespace Game.Networking.Packets
         public uint? RestrictedAccountMaxLevel;
         public ulong? RestrictedAccountMaxMoney;
         public uint? InstanceGroupSize;
+
+        ObjectGuid HouseGuid;
+        ObjectGuid HouseOwnerBnetAccount;
+        ObjectGuid HouseOwnerPlayer;
+        ObjectGuid NeighborhoodGuid;
     }
 
     public class SetDungeonDifficulty : ClientPacket
@@ -1189,7 +1198,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsFullUpdate);
             _worldPacket.FlushBits();
 
-            _worldPacket.WriteInt32(ItemCollectionType);
+            _worldPacket.WriteInt8(ItemCollectionType);
 
             // both lists have to have the same size
             _worldPacket.WriteInt32(Heirlooms.Count);
@@ -1204,7 +1213,7 @@ namespace Game.Networking.Packets
 
         public bool IsFullUpdate;
         public Dictionary<uint, HeirloomData> Heirlooms = new();
-        public int ItemCollectionType;
+        public sbyte ItemCollectionType;
     }
 
     class MountSpecial : ClientPacket

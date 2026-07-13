@@ -298,9 +298,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Serial);
             _worldPacket.WriteUInt8(Con);
             _worldPacket.WriteUInt64(Key);
+            _worldPacket.WriteUInt32(NativeRealmAddress);
+            _worldPacket.WriteUInt32(Key3);
         }
 
         public ulong Key;
+        public uint NativeRealmAddress;
+        public uint Key3;
         public ConnectToSerial Serial;
         public ConnectPayload Payload;
         public byte Con;
@@ -336,13 +340,17 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             DosResponse = _worldPacket.ReadUInt64();
-            Key = _worldPacket.ReadUInt64();
             LocalChallenge = _worldPacket.ReadBytes(32);
             Digest = _worldPacket.ReadBytes(24);
+            Key = _worldPacket.ReadUInt64();
+            NativeRealmAddress = _worldPacket.ReadUInt32();
+            Key3 = _worldPacket.ReadUInt32();
         }
 
         public ulong DosResponse;
         public ulong Key;
+        public uint NativeRealmAddress;
+        public uint Key3;
         public byte[] LocalChallenge = new byte[32];
         public byte[] Digest = new byte[24];
     }

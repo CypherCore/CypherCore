@@ -469,9 +469,15 @@ namespace Framework.Constants
 
         PlayerWeeklyCurrencyIsRelOpFromMax = 397, /*NYI*/ // Player weekly {CurrencyTypes} is {RelOp} {#Amount} from currency weekly limit
 
+        PlayerNeighborhoodCharterSignatureCountEqualOrGreaterThan = 400, /*NYI*/
+
         PlayerIsInGuild = 404, // Player is in a guild
 
         PlayerAvgItemLevelRelOp = 415, /*NYI*/ // Player average item level {AvgItemLevelCategory} is {RelOp} {#Amount}
+
+        PlayerMoneyIsRelOp = 417, // Player money is {RelOp} {#Amount}
+
+        PlayerHousesCountEqualOrGreaterThan = 419, /*NYI*/ // Player has at least {#Amount} houses
     }
 
     public enum CriteriaFailEvent : byte
@@ -777,7 +783,11 @@ namespace Framework.Constants
         BankTabPurchased = 260, // Bank Tab Purchased in {#BankType}
         ReachRenownLevel = 261,
         LearnTaxiNode = 262,
-        Count = 270
+        PlaceDecor = 270, /*NYI*/ // Place any decor
+        RemoveDecor = 271, /*NYI*/ // Remove any decor
+        CollectUniqueDecor = 272, /*NYI*/ // Collect Unique Decor
+
+        Count = 279
     }
 
     public enum CriteriaDataType

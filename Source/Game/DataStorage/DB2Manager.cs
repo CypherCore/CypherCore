@@ -1178,18 +1178,27 @@ namespace Game.DataStorage
             return GetChrSpecializationByIndex(class_, PlayerConst.InitialSpecializationIndex);
         }
 
-        public uint GetRedirectedContentTuningId(uint contentTuningId, uint redirectFlag)
+        public uint GetRedirectedContentTuningId(uint contentTuningId, List<uint> redirectFlag)
         {
             var conditionalContentTunings = _conditionalContentTuning.LookupByKey(contentTuningId);
             if (conditionalContentTunings != null)
+            {
                 foreach (var conditionalContentTuning in conditionalContentTunings)
-                    if ((conditionalContentTuning.RedirectFlag & redirectFlag) != 0)
+                {
+                    int block = conditionalContentTuning.RedirectEnum / 32;
+                    int flag = conditionalContentTuning.RedirectEnum % 32;
+                    if (block >= redirectFlag.Count)
+                        continue;
+
+                    if ((flag & redirectFlag[block]) != 0)
                         return (uint)conditionalContentTuning.RedirectContentTuningID;
+                }
+            }
 
             return contentTuningId;
         }
 
-        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, uint redirectFlag, bool forItem = false)
+        public ContentTuningLevels? GetContentTuningData(uint contentTuningId, List<uint> redirectFlag, bool forItem = false)
         {
             ContentTuningRecord contentTuning = ContentTuningStorage.LookupByKey(GetRedirectedContentTuningId(contentTuningId, redirectFlag));
             if (contentTuning == null)
@@ -2440,7 +2449,7 @@ namespace Game.DataStorage
         MultiMap<uint, uint> _glyphBindableSpells = new();
         MultiMap<uint, ChrSpecialization> _glyphRequiredSpecs = new();
         Dictionary<uint, ItemChildEquipmentRecord> _itemChildEquipment = new();
-        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[20];
+        ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[21];
         List<uint> _itemsWithCurrencyCost = new();
         MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
         Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();

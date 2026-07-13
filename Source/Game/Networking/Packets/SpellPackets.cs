@@ -1784,7 +1784,9 @@ namespace Game.Networking.Packets
             Flags = (SpellCastTargetFlags)data.ReadUInt32();
             Unit = data.ReadPackedGuid();
             Item = data.ReadPackedGuid();
+            Unknown1127_1 = data.ReadPackedGuid();
 
+            Unknown1127_2 = data.HasBit();
             if (data.HasBit())
                 SrcLocation = new();
 
@@ -1816,7 +1818,9 @@ namespace Game.Networking.Packets
             data.WriteUInt32((uint)Flags);
             data.WritePackedGuid(Unit);
             data.WritePackedGuid(Item);
+            data.WritePackedGuid(Unknown1127_1);
 
+            data.WriteBit(Unknown1127_2);
             data.WriteBit(SrcLocation != null);
             data.WriteBit(DstLocation != null);
             data.WriteBit(Orientation.HasValue);
@@ -1840,8 +1844,10 @@ namespace Game.Networking.Packets
         }
 
         public SpellCastTargetFlags Flags;
+        public bool Unknown1127_2;
         public ObjectGuid Unit;
         public ObjectGuid Item;
+        public ObjectGuid Unknown1127_1;
         public TargetLocation SrcLocation;
         public TargetLocation DstLocation;
         public float? Orientation;

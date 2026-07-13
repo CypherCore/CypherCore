@@ -118,6 +118,7 @@ namespace Game
             }
 
             features.EuropaTicketSystemStatus = europaTicketConfig;
+            features.AvailableGameModeIDs.Add(8); // GameMode.db2, standard
 
             SendPacket(features);
 
@@ -129,6 +130,13 @@ namespace Game
                 new MirrorVarSingle("bpayStoreEnable", "0"),
                 new MirrorVarSingle("recentAlliesEnabledClient", "0"),
                 new MirrorVarSingle("browserEnabled", "0"),
+                new MirrorVarSingle( "housingEnableCreateGuildNeighborhood", "0"),
+                new MirrorVarSingle("housingEnableDeleteHouse", "0"),
+                new MirrorVarSingle( "housingServiceEnabled", "0"),
+                new MirrorVarSingle( "housingEnableMoveHouse", "0"),
+                new MirrorVarSingle("housingEnableCreateCharterNeighborhood", "0"),
+                new MirrorVarSingle("housingEnableBuyHouse", "0"),
+                new MirrorVarSingle("housingMarketEnabled", "0"),
             };
 
             MirrorVars variables = new();

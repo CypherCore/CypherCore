@@ -35,6 +35,7 @@ namespace Game.DataStorage
         public float DemonHunter;
         public float Evoker;
         public float Adventurer;
+        public float Traveler;
     }
 
     public sealed class GtBattlePetXPRecord
@@ -123,6 +124,7 @@ namespace Game.DataStorage
         public float DemonHunter;
         public float Evoker;
         public float Adventurer;
+        public float Traveler;
         public float Item;
         public float Consumable;
         public float Gem1;

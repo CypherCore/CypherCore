@@ -283,6 +283,7 @@ namespace Game.Networking.Packets
                     statsData.WriteUInt32(questItem);
 
                 statsData.WriteUInt32(Stats.ContentTuningId);
+                statsData.WriteUInt32(Stats.RequiredLevel);
             }
 
             _worldPacket.WriteUInt32(statsData.GetSize());
@@ -702,12 +703,28 @@ namespace Game.Networking.Packets
         }
     }
 
+    public class HouseLookupData
+    {
+        public ObjectGuid Guid;
+        public string Name;
+
+        public void Write(WorldPacket data)
+        {
+            data.WritePackedGuid(Guid);
+            data.WriteBits(Name.GetByteCount(), 8);
+            data.FlushBits();
+
+            data.WriteString(Name);
+        }
+    }
+
     public struct NameCacheLookupResult
     {
         public ObjectGuid Player;
         public byte Result; // 0 - full packet, != 0 - only guid
         public PlayerGuidLookupData Data;
         public GuildGuidLookupData GuildData;
+        public HouseLookupData HouseData;
 
         public void Write(WorldPacket data)
         {
@@ -715,6 +732,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(Player);
             data.WriteBit(Data != null);
             data.WriteBit(GuildData != null);
+            data.WriteBit(HouseData != null);
             data.FlushBits();
 
             if (Data != null)
@@ -722,6 +740,9 @@ namespace Game.Networking.Packets
 
             if (GuildData != null)
                 GuildData.Write(data);
+
+            if (HouseData != null)
+                HouseData.Write(data);
         }
     }
 
@@ -790,6 +811,7 @@ namespace Game.Networking.Packets
         public float Size;
         public List<uint> QuestItems = new();
         public uint ContentTuningId;
+        public uint RequiredLevel;
     }
 
     class QuestCompletionNPC

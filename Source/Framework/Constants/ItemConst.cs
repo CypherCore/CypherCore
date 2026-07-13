@@ -324,7 +324,15 @@ namespace Framework.Constants
         AgiStrInt = 71,
         AgiStr = 72,
         AgiInt = 73,
-        StrInt = 74
+        StrInt = 74,
+        Inspiration = 75,
+        Resourcefulness = 76,
+        Finesse = 77,
+        Deftness = 78,
+        Perception = 79,
+        CraftingSpeed = 80,
+        Multicraft = 81,
+        Ingenuity = 82,
     }
 
     public enum ItemSpelltriggerType : sbyte
@@ -822,6 +830,7 @@ namespace Framework.Constants
         BattlePets = 17,
         WowToken = 18,
         Profession = 19,
+        Housing = 20,
         Max
     }
 
@@ -1097,6 +1106,18 @@ namespace Framework.Constants
         Jewelcrafting = 11,
         Inscription = 12,
         Archaeology = 13,
+        Max
+    }
+
+    public enum ItemSubclassHousing
+    {
+        Decor = 0,
+        Dye = 1,
+        Room = 2,
+        RoomCustomization = 3,
+        ExteriorCustomization = 4,
+        ServiceItem = 5,
+
         Max
     }
 

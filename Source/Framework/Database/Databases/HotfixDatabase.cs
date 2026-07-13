@@ -360,8 +360,8 @@ namespace Framework.Database
                 "ChrCustomizationCategoryID FROM conditional_chr_model WHERE (`VerifiedBuild` > 0) = ?");
 
             // ConditionalContentTuning.db2
-            PrepareStatement(HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING, "SELECT ID, OrderIndex, RedirectContentTuningID, RedirectFlag, ParentContentTuningID" +
-                " FROM conditional_content_tuning WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_CONDITIONAL_CONTENT_TUNING, "SELECT ID, OrderIndex, RedirectContentTuningID, RedirectFlag, RedirectEnum, " +
+                "ParentContentTuningID FROM conditional_content_tuning WHERE (`VerifiedBuild` > 0) = ?");
 
             // ContentTuning.db2
             PrepareStatement(HotfixStatements.SEL_CONTENT_TUNING, "SELECT ID, Flags, ExpansionID, HealthItemLevelCurveID, DamageItemLevelCurveID, " +
@@ -640,7 +640,7 @@ namespace Framework.Database
             // GossipNpcOption.db2
             PrepareStatement(HotfixStatements.SEL_GOSSIP_NPC_OPTION, "SELECT ID, GossipNpcOption, LFGDungeonsID, TrainerID, GarrFollowerTypeID, CharShipmentID, " +
                 "GarrTalentTreeID, UiMapID, UiItemInteractionID, Unknown_1000_8, Unknown_1000_9, CovenantID, GossipOptionID, TraitTreeID, ProfessionID, " +
-                "Unknown_1002_14, SkillLineID FROM gossip_npc_option WHERE (`VerifiedBuild` > 0) = ?");
+                "Unknown_1002_14, NeighborhoodMapID, SkillLineID FROM gossip_npc_option WHERE (`VerifiedBuild` > 0) = ?");
 
             // GuildColorBackground.db2
             PrepareStatement(HotfixStatements.SEL_GUILD_COLOR_BACKGROUND, "SELECT ID, Red, Blue, Green FROM guild_color_background WHERE (`VerifiedBuild` > 0) = ?");
@@ -684,7 +684,7 @@ namespace Framework.Database
 
             // Item.db2
             PrepareStatement(HotfixStatements.SEL_ITEM, "SELECT ID, ClassID, SubclassID, Material, InventoryType, SheatheType, SoundOverrideSubclassID, IconFileDataID, " +
-                "ItemGroupSoundsID, ContentTuningID, ModifiedCraftingReagentItemID, CraftingQualityID FROM item WHERE (`VerifiedBuild` > 0) = ?");
+                "ItemGroupSoundsID, ContentTuningID, ModifiedCraftingReagentItemID, CraftingQualityID, Unknown1127 FROM item WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemAppearance.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_APPEARANCE, "SELECT ID, DisplayType, ItemDisplayInfoID, DefaultIconFileDataID, UiOrder, PlayerConditionID" +
@@ -771,7 +771,7 @@ namespace Framework.Database
 
             // ItemEffect.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_EFFECT, "SELECT ID, LegacySlotIndex, TriggerType, Charges, CoolDownMSec, CategoryCoolDownMSec, SpellCategoryID, " +
-                "SpellID, ChrSpecializationID FROM item_effect WHERE (`VerifiedBuild` > 0) = ?");
+                "SpellID, ChrSpecializationID, PlayerConditionID FROM item_effect WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemExtendedCost.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_EXTENDED_COST, "SELECT ID, RequiredArenaRating, ArenaBracket, Flags, MinFactionID, MinReputation, " +
@@ -820,8 +820,8 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_PRICE_BASE, "SELECT ID, ItemLevel, Armor, Weapon FROM item_price_base WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemScalingConfig.db2
-            PrepareStatement(HotfixStatements.SEL_ITEM_SCALING_CONFIG, "SELECT ID, ItemOffsetCurveID, ItemLevel, RequiredLevel, Unknown1125 FROM item_scaling_config" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_ITEM_SCALING_CONFIG, "SELECT ID, ItemOffsetCurveID, ItemLevel, RequiredLevel, Unknown1125, Flags" +
+                " FROM item_scaling_config WHERE (`VerifiedBuild` > 0) = ?");
 
             // ItemSearchName.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_SEARCH_NAME, "SELECT ID, AllowableRace, Display, OverallQualityID, ExpansionID, MinFactionID, MinReputation, " +
@@ -850,11 +850,11 @@ namespace Framework.Database
                 "StatModifierBonusStat6, StatModifierBonusStat7, StatModifierBonusStat8, StatModifierBonusStat9, StatModifierBonusStat10, Stackable, " +
                 "MaxCount, MinReputation, RequiredAbility, SellPrice, BuyPrice, VendorStackCount, PriceVariance, PriceRandomValue, Flags1, Flags2, Flags3, " +
                 "Flags4, Flags5, FactionRelated, ModifiedCraftingReagentItemID, ContentTuningID, PlayerLevelToItemLevelCurveID, ItemLevelOffsetCurveID, " +
-                "ItemLevelOffsetItemLevel, ItemNameDescriptionID, RequiredTransmogHoliday, RequiredHoliday, GemProperties, SocketMatchEnchantmentId, " +
-                "TotemCategoryID, InstanceBound, ZoneBound1, ZoneBound2, ItemSet, LockID, PageID, ItemDelay, MinFactionID, RequiredSkillRank, RequiredSkill, " +
-                "ItemLevel, AllowableClass, ArtifactID, SpellWeight, SpellWeightCategory, SocketType1, SocketType2, SocketType3, SheatheType, Material, " +
-                "PageMaterialID, Bonding, DamageDamageType, ContainerSlots, RequiredPVPMedal, RequiredPVPRank, RequiredLevel, InventoryType, " +
-                "OverallQualityID FROM item_sparse WHERE (`VerifiedBuild` > 0) = ?");
+                "ItemLevelOffsetItemLevel, Unknown1127, ItemNameDescriptionID, RequiredTransmogHoliday, RequiredHoliday, GemProperties, " +
+                "SocketMatchEnchantmentId, TotemCategoryID, InstanceBound, ZoneBound1, ZoneBound2, ItemSet, LockID, PageID, ItemDelay, MinFactionID, " +
+                "RequiredSkillRank, RequiredSkill, ItemLevel, AllowableClass, ArtifactID, SpellWeight, SpellWeightCategory, SocketType1, SocketType2, " +
+                "SocketType3, SheatheType, Material, PageMaterialID, Bonding, DamageDamageType, ContainerSlots, RequiredPVPMedal, RequiredPVPRank, " +
+                "RequiredLevel, InventoryType, OverallQualityID FROM item_sparse WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_ITEM_SPARSE_LOCALE, "SELECT ID, Description_lang, Display3_lang, Display2_lang, Display1_lang, Display_lang" +
                 " FROM item_sparse_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
@@ -955,10 +955,10 @@ namespace Framework.Database
                 "PvpLongDescription_lang FROM map_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // MapChallengeMode.db2
-            PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, ExpansionLevel, RequiredWorldStateID, CriteriaCount1, " +
-                "CriteriaCount2, CriteriaCount3, FirstRewardQuestID1, FirstRewardQuestID2, FirstRewardQuestID3, FirstRewardQuestID4, FirstRewardQuestID5, " +
-                "FirstRewardQuestID6, RewardQuestID1, RewardQuestID2, RewardQuestID3, RewardQuestID4, RewardQuestID5, RewardQuestID6 FROM map_challenge_mode" +
-                " WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, MaxMedals, ExpansionLevel, RequiredWorldStateID, CriteriaCount1, " +
+                "CriteriaCount2, CriteriaCount3, CriteriaCount4, CriteriaCount5, FirstRewardQuestID1, FirstRewardQuestID2, FirstRewardQuestID3, " +
+                "FirstRewardQuestID4, FirstRewardQuestID5, FirstRewardQuestID6, RewardQuestID1, RewardQuestID2, RewardQuestID3, RewardQuestID4, " +
+                "RewardQuestID5, RewardQuestID6 FROM map_challenge_mode WHERE (`VerifiedBuild` > 0) = ?");
             PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE_LOCALE, "SELECT ID, Name_lang FROM map_challenge_mode_locale WHERE (`VerifiedBuild` > 0) = ?" +
                 " AND locale = ?");
 
@@ -1423,7 +1423,7 @@ namespace Framework.Database
 
             // SpellVisual.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_VISUAL, "SELECT ID, MissileCastOffset1, MissileCastOffset2, MissileCastOffset3, MissileImpactOffset1, " +
-                "MissileImpactOffset2, MissileImpactOffset3, AnimEventSoundID, Flags, MissileAttachment, MissileDestinationAttachment, " +
+                "MissileImpactOffset2, MissileImpactOffset3, StateKit, AnimEventSoundID, Flags, MissileAttachment, MissileDestinationAttachment, " +
                 "MissileCastPositionerID, MissileImpactPositionerID, MissileTargetingKit, HostileSpellVisualID, CasterSpellVisualID, SpellVisualMissileSetID, " +
                 "DamageNumberDelay, LowViolenceSpellVisualID, RaidSpellVisualMissileSetID, ReducedUnexpectedCameraMovementSpellVisualID FROM spell_visual" +
                 " WHERE (`VerifiedBuild` > 0) = ?");

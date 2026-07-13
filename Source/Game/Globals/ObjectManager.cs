@@ -4013,6 +4013,7 @@ namespace Game
                 }
 
                 go.ContentTuningId = 0;
+                go.RequiredLevel = 0;
                 go.ScriptId = 0;
 
                 _gameObjectTemplateStorage[db2go.Id] = go;
@@ -4024,8 +4025,8 @@ namespace Game
                 "Data0, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10, Data11, Data12, " +
                 //21      22      23      24      25      26      27      28      29      30      31      32      33      34      35      36
                 "Data13, Data14, Data15, Data16, Data17, Data18, Data19, Data20, Data21, Data22, Data23, Data24, Data25, Data26, Data27, Data28, " +
-                //37      38       39     40      41      42      43               44      45          46
-                "Data29, Data30, Data31, Data32, Data33, Data34, ContentTuningId, AIName, ScriptName, StringId FROM gameobject_template");
+                //37      38       39     40      41      42      43               44             45      46          47
+                "Data29, Data30, Data31, Data32, Data33, Data34, ContentTuningId, RequiredLevel, AIName, ScriptName, StringId FROM gameobject_template");
 
             if (result.IsEmpty())
             {
@@ -4055,9 +4056,10 @@ namespace Game
                     }
 
                     got.ContentTuningId = result.Read<uint>(43);
-                    got.AIName = result.Read<string>(44);
-                    got.ScriptId = GetScriptId(result.Read<string>(45));
-                    got.StringId = result.Read<string>(46);
+                    got.RequiredLevel = result.Read<uint>(44);
+                    got.AIName = result.Read<string>(45);
+                    got.ScriptId = GetScriptId(result.Read<string>(46));
+                    got.StringId = result.Read<string>(47);
 
                     switch (got.type)
                     {
@@ -7289,9 +7291,9 @@ namespace Game
             }
 
             // Load `quest_objectives`
-            //                                  0           1      2        3                4            5          6         7          8                     9
-            result = DB.World.Query("SELECT qo.QuestID, qo.ID, qo.Type, qo.StorageIndex, qo.ObjectID, qo.Amount, qo.Flags, qo.Flags2, qo.ProgressBarWeight, qo.Description, " +
-            //     10                11            12                   13                     14
+            //                                  0           1      2        3                4            5           6                   7         8          9                     10                    11          12
+            result = DB.World.Query("SELECT qo.QuestID, qo.ID, qo.Type, qo.StorageIndex, qo.ObjectID, qo.Amount,  qo.SecondaryAmount, qo.Flags, qo.Flags2, qo.ProgressBarWeight, qo.ParentObjectiveID, qo.Visible, qo.Description, " +
+            //     13                14            15                   16                     17
             "qoce.GameEventID, qoce.SpellID, qoce.ConversationID, qoce.UpdatePhaseShift, qoce.UpdateZoneAuras FROM quest_objectives qo LEFT JOIN quest_objectives_completion_effect qoce ON qo.ID = qoce.ObjectiveID ORDER BY `Order` ASC, StorageIndex ASC");
             if (result.IsEmpty())
             {
@@ -7408,6 +7410,44 @@ namespace Game
                         quest.LoadTreasurePickers(result.GetFields());
                     else
                         Log.outError(LogFilter.Sql, "Table `quest_objectives` has objective for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+            // Load `quest_reward_house_room`
+            result = DB.World.Query("SELECT QuestID, HouseRoomID FROM `quest_reward_house_room` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest house room rewards. DB table `quest_reward_house_room` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadRewardHouseRoom(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_reward_house_room` has data for quest {0} but such quest does not exist", questId);
+                } while (result.NextRow());
+            }
+
+            // Load `quest_reward_house_decor`
+            result = DB.World.Query("SELECT QuestID, HouseDecorID FROM `quest_reward_house_decor` ORDER BY OrderIndex");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 quest house decor rewards. DB table `quest_reward_house_decor` is empty.");
+            }
+            else
+            {
+                do
+                {
+                    uint questId = result.Read<uint>(0);
+                    var quest = _questTemplates.LookupByKey(questId);
+                    if (quest != null)
+                        quest.LoadRewardHouseDecor(result.GetFields());
+                    else
+                        Log.outError(LogFilter.Sql, "Table `quest_reward_house_decor` has data for quest {0} but such quest does not exist", questId);
                 } while (result.NextRow());
             }
 

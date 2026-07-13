@@ -828,8 +828,9 @@ namespace Game
 
             SendFeatureSystemStatus();
 
-            foreach (var motdLine in Global.WorldMgr.GetMotd())
-                Global.WorldMgr.SendServerMessage(ServerMessageType.String, motdLine, pCurrChar);
+            MOTD motd = new();
+            motd.Text = Global.WorldMgr.GetMotd();
+            SendPacket(motd);
 
             SendSetTimeZoneInformation();
 

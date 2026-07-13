@@ -3080,6 +3080,7 @@ namespace Game.Entities
             SetRace(race);
             SetClass(class_);
             SetGender(gender);
+            UpdateCreatureType();
 
             // check if race/class combination is valid
             PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());

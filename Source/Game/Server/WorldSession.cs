@@ -661,9 +661,12 @@ namespace Game
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
 
-            ConnectTo connectTo = new();
-            connectTo.Key = _instanceConnectKey.Raw;
-            connectTo.Serial = serial;
+            ConnectTo connectTo = new()
+            {
+                Key = _instanceConnectKey.Raw,
+                NativeRealmAddress = Global.WorldMgr.GetVirtualRealmAddress(),
+                Serial = serial
+            };
             connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortWorld);
             connectTo.Con = (byte)ConnectionType.Instance;
 

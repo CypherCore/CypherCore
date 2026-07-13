@@ -2701,7 +2701,7 @@ namespace Game
                 case UnitConditionVariable.Sex:
                     return (int)unit.GetGender();
                 case UnitConditionVariable.LevelWithinContentTuning:
-                    var levelRange = Global.DB2Mgr.GetContentTuningData((uint)value, 0);
+                    var levelRange = Global.DB2Mgr.GetContentTuningData((uint)value, []);
                     if (levelRange.HasValue)
                         return unit.GetLevel() >= levelRange.Value.MinLevel && unit.GetLevel() <= levelRange.Value.MaxLevel ? value : 0;
                     return 0;

@@ -21,7 +21,12 @@ namespace Framework.Constants
         AreaTrigger = 11,
         SceneObject = 12,
         Conversation = 13,
-        Max = 14
+        MeshObject = 14,
+        AIGroup = 15,
+        Scenario = 16,
+        LootObject = 17,
+
+        Max
     }
 
     [Flags]
@@ -41,6 +46,10 @@ namespace Framework.Constants
         AreaTrigger = 1 << TypeId.AreaTrigger,
         SceneObject = 1 << TypeId.SceneObject,
         Conversation = 1 << TypeId.Conversation,
+        MeshObject = 1 << TypeId.MeshObject,
+        AIGroup = 1 << TypeId.AIGroup,
+        Scenario = 1 << TypeId.Scenario,
+        LootObject = 1 << TypeId.LootObject,
 
         Seer = Unit | Player | DynamicObject,
         WorldObject = Unit | GameObject | DynamicObject | Corpse | AreaTrigger | SceneObject | Conversation
@@ -103,6 +112,9 @@ namespace Framework.Constants
         ArenaTeam = 52,
         LMMParty = 53,
         LMMLobby = 54,
+        Housing = 55,
+        MeshObject = 56,
+        Entity = 57,
 
         Count
     }

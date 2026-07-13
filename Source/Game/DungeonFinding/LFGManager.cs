@@ -2104,7 +2104,7 @@ namespace Game.DungeonFinding
             return 0;
         }
 
-        public List<uint> GetRandomAndSeasonalDungeons(uint level, uint expansion, uint contentTuningReplacementConditionMask)
+        public List<uint> GetRandomAndSeasonalDungeons(uint level, uint expansion, List<uint> contentTuningReplacementConditionMask)
         {
             List<uint> randomDungeons = new();
             foreach (var dungeon in LfgDungeonStore.Values)

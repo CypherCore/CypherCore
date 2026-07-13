@@ -672,7 +672,8 @@ namespace Framework.Constants
         DemonHunter = 12,
         Evoker = 13,
         Adventurer = 14,
-        Max = 15,
+        Traveler = 15,
+        Max = 16,
 
         ClassMaskAllPlayable = ((1 << (Warrior - 1)) | (1 << (Paladin - 1)) | (1 << (Hunter - 1)) |
             (1 << (Rogue - 1)) | (1 << (Priest - 1)) | (1 << (DeathKnight - 1)) | (1 << (Shaman - 1)) |
@@ -3148,7 +3149,28 @@ namespace Framework.Constants
         CurrencyTransferUnmetRequirements = 1199,
         CurrencyTransferTransactionInProgress = 1200,
         CurrencyTransferDisabled = 1201,
-        RecentAllyPinServerError = 1202,
+        NoOwnedHouseInThisNeighborhoodMap = 1202,
+        HousingResultNeighborhoodNotFound = 1203,
+        InvitedToNeighborhood = 1204,
+        NeighborhoodOwnerTransferredS = 1205,
+        NotWhileHouseEdit = 1206,
+        NewPartyNeighborhoodReservation = 1207,
+        HouseMoved = 1208,
+        CharterSignatureRequestSent = 1209,
+        CharterSignatureReceived = 1210,
+        CharterSignatureRequestFailedMissingExpansion = 1211,
+        CharterSignatureRequestFailedDuplicateSignature = 1212,
+        CharterSignatureRequestFailedGeneric = 1213,
+        CharterSystemRequestFailedGeneric = 1214,
+        HousingActionUnavailable = 1215,
+        HousingResultMissingExpansionAccess = 1216,
+        HousingResultPermissionDenied = 1217,
+        GuildNeighborhoodBuiltHouseS = 1218,
+        GuildNeighborhoodSoldHouseS = 1219,
+        GuildNeighborhoodNewSubdivision = 1220,
+        GuildNeighborhoodRenameS = 1221,
+        CharterNeighborhoodRename = 1222,
+        RecentAllyPinServerError = 1223,
     }
 
     public enum SceneFlags

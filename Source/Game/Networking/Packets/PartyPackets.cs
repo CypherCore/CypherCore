@@ -1176,15 +1176,18 @@ namespace Game.Networking.Packets
 
     public struct CTROptions
     {
-        public uint ConditionalFlags;
+        public List<uint> ConditionalFlags;
         public sbyte FactionGroup;
         public uint ChromieTimeExpansionMask;
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(ConditionalFlags);
+            data.WriteInt32(ConditionalFlags.Count);
             data.WriteInt8(FactionGroup);
             data.WriteUInt32(ChromieTimeExpansionMask);
+
+            if (!ConditionalFlags.Empty())
+                ConditionalFlags.ForEach(data.WriteUInt32);
         }
     }
 

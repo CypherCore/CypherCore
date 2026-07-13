@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
                     talent.Write(_worldPacket);
 
                 foreach (uint talent in talentGroupInfo.GlyphIDs)
-                    _worldPacket.WriteUInt16((ushort)talent);
+                    _worldPacket.WriteUInt32(talent);
             }
         }
 

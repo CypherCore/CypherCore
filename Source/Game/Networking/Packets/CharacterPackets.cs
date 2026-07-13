@@ -33,6 +33,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsRestrictedNewPlayer);
             _worldPacket.WriteBit(IsNewcomerChatCompleted);
             _worldPacket.WriteBit(IsRestrictedTrial);
+            _worldPacket.WriteBit(Unused1127);
             _worldPacket.WriteBit(ClassDisableMask.HasValue);
             _worldPacket.WriteBit(DontCreateCharacterDisplays);
             _worldPacket.WriteInt32(Characters.Count);
@@ -72,6 +73,7 @@ namespace Game.Networking.Packets
         public bool IsRestrictedNewPlayer; // forbids using level boost and class trials
         public bool IsNewcomerChatCompleted; // forbids hero classes and allied races
         public bool IsRestrictedTrial;
+        public bool Unused1127;
         public bool DontCreateCharacterDisplays;
 
         public int MaxCharacterLevel = 1;
@@ -327,16 +329,14 @@ namespace Game.Networking.Packets
             public uint RestrictionFlags;
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
-            public bool RpeResetAvailable;
-            public bool RpeResetQuestClearAvailable;
+            public bool RpeAvailable;
 
             public void Write(WorldPacket data)
             {
                 Cypher.Assert(MailSenders.Count == MailSenderTypes.Count);
 
                 data.WriteBit(BoostInProgress);
-                data.WriteBit(RpeResetAvailable);
-                data.WriteBit(RpeResetQuestClearAvailable);
+                data.WriteBit(RpeAvailable);
                 data.FlushBits();
 
                 data.WriteUInt32(RestrictionFlags);
@@ -438,12 +438,12 @@ namespace Game.Networking.Packets
         public struct RaceLimitDisableInfo
         {
             public sbyte RaceID;
-            public int Reason;
+            public sbyte Reason;
 
             public void Write(WorldPacket data)
             {
                 data.WriteInt8(RaceID);
-                data.WriteInt32(Reason);
+                data.WriteInt8(Reason);
             }
         }
     }
@@ -812,10 +812,12 @@ namespace Game.Networking.Packets
         {
             Guid = _worldPacket.ReadPackedGuid();
             FarClip = _worldPacket.ReadFloat();
+            RPE = _worldPacket.HasBit();
         }
 
         public ObjectGuid Guid;      // Guid of the player that is logging in
         public float FarClip; // Visibility distance (for terrain)
+        public bool RPE;
     }
 
     public class LoginVerifyWorld : ServerPacket
@@ -1335,12 +1337,14 @@ namespace Game.Networking.Packets
     {
         public uint WarbandScenePlacementID;
         public int Type;
+        public int ContentSetID;
         public ObjectGuid Guid;
 
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(WarbandScenePlacementID);
             data.WriteInt32(Type);
+            data.WriteInt32(ContentSetID);
             if (Type == 0)
                 data.WritePackedGuid(Guid);
         }
@@ -1352,6 +1356,7 @@ namespace Game.Networking.Packets
         public byte OrderIndex;
         public uint WarbandSceneID;
         public uint Flags;    ///< enum WarbandGroupFlags { Collapsed = 1 }
+        public int ContentSetID;
         public List<WarbandGroupMember> Members = new();
         public string Name = "";
 
@@ -1361,6 +1366,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(OrderIndex);
             data.WriteUInt32(WarbandSceneID);
             data.WriteUInt32(Flags);
+            data.WriteInt32(ContentSetID);
             data.WriteInt32(Members.Count);
 
             foreach (WarbandGroupMember member in Members)

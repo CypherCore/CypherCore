@@ -10,13 +10,11 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Maps;
 using Game.Movement;
-using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Game.Entities
 {
@@ -1476,11 +1474,11 @@ namespace Game.Entities
                 case 35200: // Roc Form
                     return 4877;
                 case 24858: // Moonkin Form
-                {
-                    if (HasAura(114301)) // Glyph of Stars
-                        return 0;
-                    break;
-                }
+                    {
+                        if (HasAura(114301)) // Glyph of Stars
+                            return 0;
+                        break;
+                    }
                 default:
                     break;
             }
@@ -1669,9 +1667,30 @@ namespace Game.Entities
             return false;
         }
 
+        public void UpdateCreatureType()
+        {
+            byte creatureType()
+            {
+                Creature creature = ToCreature();
+                if (creature != null)
+                    return (byte)creature.GetCreatureTemplate().CreatureType;
+
+                ShapeShiftForm form = GetShapeshiftForm();
+                SpellShapeshiftFormRecord ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
+                if (ssEntry != null && ssEntry.CreatureType > 0)
+                    return ssEntry.CreatureType;
+
+                ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(GetRace());
+                return raceEntry.CreatureType;
+            }
+
+            SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatureType), creatureType());
+        }
+
         public void SetShapeshiftForm(ShapeShiftForm form)
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ShapeshiftForm), (byte)form);
+            UpdateCreatureType();
         }
 
         void CancelTravelShapeshiftForm(AuraRemoveMode removeMode = AuraRemoveMode.Default, bool force = false) { CancelShapeshiftForm(true, removeMode, force); }
@@ -1815,31 +1834,31 @@ namespace Game.Entities
                     displayPower = PowerType.Mana;
                     break;
                 default:
-                {
-                    var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
-                    if (!powerTypeAuras.Empty())
                     {
-                        AuraEffect powerTypeAura = powerTypeAuras.First();
-                        displayPower = (PowerType)powerTypeAura.GetMiscValue();
-                    }
-                    else
-                    {
-                        ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
-                        if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
-                            displayPower = cEntry.DisplayPower;
-
-                        Vehicle vehicle = GetVehicleKit();
-                        if (vehicle != null)
+                        var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
+                        if (!powerTypeAuras.Empty())
                         {
-                            PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
-                            if (powerDisplay != null)
-                                displayPower = (PowerType)powerDisplay.ActualType;
+                            AuraEffect powerTypeAura = powerTypeAuras.First();
+                            displayPower = (PowerType)powerTypeAura.GetMiscValue();
                         }
-                        else if (IsHunterPet())
-                            displayPower = PowerType.Focus;
+                        else
+                        {
+                            ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+                            if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
+                                displayPower = cEntry.DisplayPower;
+
+                            Vehicle vehicle = GetVehicleKit();
+                            if (vehicle != null)
+                            {
+                                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
+                                if (powerDisplay != null)
+                                    displayPower = (PowerType)powerDisplay.ActualType;
+                            }
+                            else if (IsHunterPet())
+                                displayPower = PowerType.Focus;
+                        }
+                        break;
                     }
-                    break;
-                }
             }
 
             return displayPower;
