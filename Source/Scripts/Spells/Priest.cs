@@ -61,7 +61,7 @@ struct SpellIds
     public const uint DivineStarShadowDamage = 390845;
     public const uint DivineStarShadowHeal = 390981;
     public const uint DivineWrath = 40441;
-    public const uint EmpoweredRenewHeal = 391359;
+    public const uint EmpoweredRenew = 391359;
     public const uint Epiphany = 414553;
     public const uint EpiphanyHighlight = 414556;
     public const uint EssenceDevourer = 415479;
@@ -207,6 +207,14 @@ class RaidCheck(Unit caster)
             return !caster.IsInRaidWith(target);
 
         return true;
+    }
+}
+
+struct spell_pri_holy_words_base
+{
+    public static void ModifyCooldown(Unit priest, SpellInfo spellInfo, TimeSpan cooldownMod)
+    {
+        priest.GetSpellHistory().ModifyCooldown(spellInfo, cooldownMod, true);
     }
 }
 
@@ -1121,27 +1129,45 @@ class spell_pri_empowered_renew : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Renew, SpellIds.EmpoweredRenewHeal)
+        return ValidateSpellInfo(SpellIds.Renew, SpellIds.HolyWordSanctify)
             && ValidateSpellEffect((SpellIds.Renew, 0))
             && Global.SpellMgr.GetSpellInfo(SpellIds.Renew, Difficulty.None).GetEffect(0).IsAura(AuraType.PeriodicHeal);
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
-
-        SpellInfo renewSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Renew, GetCastDifficulty());
-        SpellEffectInfo renewEffect = renewSpellInfo.GetEffect(0);
-        int estimatedTotalHeal = (int)AuraEffect.CalculateEstimatedfTotalPeriodicAmount(caster, target, renewSpellInfo, renewEffect, renewEffect.CalcValue(caster), 1);
-        int healAmount = MathFunctions.CalculatePct(estimatedTotalHeal, aurEff.GetAmount());
-
-        caster.CastSpell(target, SpellIds.EmpoweredRenewHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+        spell_pri_holy_words_base.ModifyCooldown(eventInfo.GetActor(), Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, GetCastDifficulty()),
+           TimeSpan.FromMilliseconds(-aurEff.GetAmount()));
     }
 
     public override void Register()
     {
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
+    }
+}
+
+// 139 - Renew
+class spell_pri_empowered_renew_heal : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellEffect((SpellIds.EmpoweredRenew, 1));
+    }
+
+    void CalculateHealing(AuraEffect aurEff, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+    {
+        Unit caster = GetCaster();
+        if (caster != null)
+        {
+            AuraEffect empRenew = caster.GetAuraEffect(SpellIds.EmpoweredRenew, 1);
+            if (empRenew != null)
+                MathFunctions.AddPct(ref pctMod, empRenew.GetAmount());
+        }
+    }
+
+    public override void Register()
+    {
+        DoEffectCalcDamageAndHealing.Add(new(CalculateHealing, 0, AuraType.PeriodicHeal));
     }
 }
 
@@ -1444,7 +1470,7 @@ class spell_pri_holy_words : AuraScript
 
         SpellInfo targetSpellInfo = Global.SpellMgr.GetSpellInfo(targetSpellId, GetCastDifficulty());
         int cdReduction = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValue(GetTarget());
-        GetTarget().GetSpellHistory().ModifyCooldown(targetSpellInfo, TimeSpan.FromSeconds(-cdReduction), true);
+        spell_pri_holy_words_base.ModifyCooldown(GetTarget(), targetSpellInfo, TimeSpan.FromSeconds(-cdReduction));
     }
 
     public override void Register()
