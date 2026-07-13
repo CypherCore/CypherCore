@@ -18,20 +18,14 @@ namespace Game
         const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
         const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}_{2:D2}_{3:D2}.mmtile";
 
-        [ThreadStatic]
-        private static bool thread_safe_environment;
-
         public void Initialize(MultiMap<uint, uint> mapData)
         {
             foreach (var mapId in mapData.Keys)
             {
-                loadedMMaps[mapId] = new MMapData();
+                loadedMMaps.TryAdd(mapId, new MMapData());
                 foreach (uint childMapId in mapData[mapId])
                     parentMapData[childMapId] = mapId;
             }
-
-            // mark the loading main thread as safe
-            thread_safe_environment = true;
         }
 
         MMapData GetMMapData(uint mapId)
@@ -47,20 +41,8 @@ namespace Game
         MMapLoadResult LoadMapData(string basePath, uint mapId, uint instanceId)
         {
             // we already have this map loaded?
-            MMapData mMapData;
-            if (thread_safe_environment)
-            {
-                if (!loadedMMaps.TryGetValue(mapId, out mMapData))
-                {
-                    mMapData = new MMapData();
-                    loadedMMaps[mapId] = mMapData;
-                }
-            }
-            else
-            {
-                if (!loadedMMaps.TryGetValue(mapId, out mMapData))
-                    Cypher.Assert(false, $"Invalid mapId {mapId} passed to MMapManager after startup in thread unsafe environment");
-            }
+            var mMapData = loadedMMaps.LookupByKey(mapId);
+            Cypher.Assert(mMapData != null, $"Invalid mapId {mapId} passed to MMapManager after startup in thread unsafe environment");
 
             var (mapData, needsLoading) = mMapData.GetMeshData(mapId, instanceId);
             if (!needsLoading)
@@ -166,7 +148,7 @@ namespace Game
             }
 
             // get this mmap data
-            MMapData mmapData = loadedMMaps[mapId];
+            MMapData mmapData = loadedMMaps.LookupByKey(mapId);
             MMapMapData meshData = mmapData.FindMeshData(mapId, instanceId);
 
             // check if we already have this tile loaded
@@ -231,7 +213,7 @@ namespace Game
                     return false;
             }
 
-            MMapData mmap = loadedMMaps[meshMapId];
+            MMapData mmap = loadedMMaps.LookupByKey(meshMapId);
             if (mmap.navMeshQueries.ContainsKey((instanceMapId, instanceId)))
                 return true;
 
@@ -295,20 +277,22 @@ namespace Game
                 return;
             }
 
-            if (MMapData.GetInstanceIdForMeshLookup(mapId, uint.MaxValue) == 0)
+            if (!IsRebuildingTilesEnabledOnMap(mapId))
             {
-                // unload all tiles from given map
-                MMapMapData  mesh = mMapData.meshData[0];
-                foreach (var (tileId, tileRef) in mesh.loadedTileRefs)
+                var meshNode = mMapData.RemoveMeshData(mapId, 0);
+                if (meshNode != null)
                 {
-                    uint x = (tileId >> 16);
-                    uint y = (tileId & 0x0000FFFF);
-                    if (Detour.dtStatusFailed(mesh.navMesh.removeTile(tileRef, out _)))
-                        Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}_{1:D2}_{2:D2}.mmtile from navmesh", mapId, x, y);
-                    else
+                    foreach (var (tileId, tileRef) in meshNode.loadedTileRefs)
                     {
-                        --loadedTiles;
-                        Log.outInfo(LogFilter.Maps, "MMAP:unloadMap: Unloaded mmtile {0:D4} [{1:D2}, {2:D2}] from {3:D4}", mapId, x, y, mapId);
+                        uint x = (tileId >> 16);
+                        uint y = (tileId & 0x0000FFFF);
+                        if (Detour.dtStatusFailed(meshNode.navMesh.removeTile(tileRef, out _)))
+                            Log.outError(LogFilter.Maps, $"MMAP:unloadMap: Could not unload {mapId:04}_{x:02}_{y:02}.mmtile from navmesh");
+                        else
+                        {
+                            --loadedTiles;
+                            Log.outDebug(LogFilter.Maps, $"MMAP:unloadMap: Unloaded mmtile {mapId:04}[{x:02}, {y:02}] from {mapId:04}");
+                        }
                     }
                 }
             }
@@ -335,24 +319,25 @@ namespace Game
             if (!mmap.navMeshQueries.Remove((instanceMapId, instanceId)))
                 Log.outDebug(LogFilter.Maps, $"MMAP:unloadMapInstance: Asked to unload not loaded dtNavMeshQuery mapId {instanceMapId} instanceId {instanceId}");
 
-            var mapData = mmap.FindMeshData(meshMapId, instanceId);
-            if (mapData != null)
+            if (IsRebuildingTilesEnabledOnMap(meshMapId))
             {
-                // unload all tiles from given map
-                foreach (var (tileId, tileRef) in mapData.loadedTileRefs)
+                var meshNode = mmap.RemoveMeshData(meshMapId, instanceId);
+                if (meshNode != null)
                 {
-                    uint x = (tileId >> 16);
-                    uint y = (tileId & 0x0000FFFF);
-                    if (Detour.dtStatusFailed(mapData.navMesh.removeTile(tileRef, out _)))
-                        Log.outError(LogFilter.Maps, $"MMAP:unloadMap: Could not unload {meshMapId:04}_{x:02}_{y:02}.mmtile from navmesh");
-                    else
+                    // unload all tiles from given map
+                    foreach (var (tileId, tileRef) in meshNode.loadedTileRefs)
                     {
-                        --loadedTiles;
-                        Log.outDebug(LogFilter.Maps, $"MMAP:unloadMap: Unloaded mmtile {meshMapId:04}[{x:02}, {y:02}] from {meshMapId:04}");
+                        uint x = (tileId >> 16);
+                        uint y = (tileId & 0x0000FFFF);
+                        if (Detour.dtStatusFailed(meshNode.navMesh.removeTile(tileRef, out _)))
+                            Log.outError(LogFilter.Maps, $"MMAP:unloadMap: Could not unload {meshMapId:04}_{x:02}_{y:02}.mmtile from navmesh");
+                        else
+                        {
+                            --loadedTiles;
+                            Log.outDebug(LogFilter.Maps, $"MMAP:unloadMap: Unloaded mmtile {meshMapId:04}[{x:02}, {y:02}] from {meshMapId:04}");
+                        }
                     }
                 }
-
-                mmap.meshData.Remove(meshMapId);
             }
 
             Log.outInfo(LogFilter.Maps, $"MMAP:unloadMapInstance: Unloaded mapId {instanceMapId} instanceId {instanceId}");
@@ -475,7 +460,6 @@ namespace Game
 
         public (MMapMapData, bool) GetMeshData(uint mapId, uint instanceId)
         {
-            // for maps that won't have dynamic mesh, return 0 to reuse the same mesh across all instances
             var key = GetInstanceIdForMeshLookup(mapId, instanceId);
             bool added = meshData.TryAdd(key, new MMapMapData());
 
@@ -484,8 +468,14 @@ namespace Game
 
         public MMapMapData FindMeshData(uint mapId, uint instanceId)
         {
-            // for maps that won't have dynamic mesh, return 0 to reuse the same mesh across all instances
             return meshData.LookupByKey(GetInstanceIdForMeshLookup(mapId, instanceId));
+        }
+
+        public MMapMapData RemoveMeshData(uint mapId, uint instanceId)
+        {
+            var node = meshData.LookupByKey(GetInstanceIdForMeshLookup(mapId, instanceId));
+            meshData.Remove(GetInstanceIdForMeshLookup(mapId, instanceId));
+            return node;
         }
     }
 }
