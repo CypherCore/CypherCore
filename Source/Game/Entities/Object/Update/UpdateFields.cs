@@ -8821,13 +8821,13 @@ namespace Game.Entities
     public struct ForceSetAreaTriggerPositionAndRotation : IEquatable<ForceSetAreaTriggerPositionAndRotation>
     {
         public ObjectGuid TriggerGUID;
-        public Vector3 Position;
+        public Position Pos;
         public Quaternion Rotation;
 
         public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
         {
             data.WritePackedGuid(TriggerGUID);
-            data.WriteVector3(Position);
+            data.WriteVector3(Pos);
             data.WriteFloat(Rotation.X);
             data.WriteFloat(Rotation.Y);
             data.WriteFloat(Rotation.Z);
@@ -8837,7 +8837,7 @@ namespace Game.Entities
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
         {
             data.WritePackedGuid(TriggerGUID);
-            data.WriteVector3(Position);
+            data.WriteVector3(Pos);
             data.WriteFloat(Rotation.X);
             data.WriteFloat(Rotation.Y);
             data.WriteFloat(Rotation.Z);
@@ -8847,7 +8847,7 @@ namespace Game.Entities
         public bool Equals(ForceSetAreaTriggerPositionAndRotation right)
         {
             return TriggerGUID == right.TriggerGUID
-                && Position == right.Position
+                && Pos == right.Pos
                 && Rotation == right.Rotation;
         }
     }
@@ -10218,17 +10218,18 @@ namespace Game.Entities
         }
     }
 
-    class DecorStoragePersistedData() : HasChangesMask(4)
+    class DecorStoragePersistedData() : HasChangesMask(3)
     {
-        public UpdateField<ObjectGuid> HouseGUID = new(0, 1);
-        public OptionalUpdateField<DecorStoragePersistedDataDyes> Dyes = new(0, 2);
-        public UpdateField<byte> Field_20 = new(0, 3);
+        public UpdateField<ObjectGuid> HouseGUID = new(-1, 0);
+        public OptionalUpdateField<DecorStoragePersistedDataDyes> Dyes = new(-1, 1);
+        public UpdateField<byte> Field_20 = new(-1, 2);
 
         public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
         {
             data.WritePackedGuid(HouseGUID);
             data.WriteUInt8(Field_20);
             data.WriteBits(Dyes.HasValue(), 1);
+            data.FlushBits();
             if (Dyes.HasValue())
             {
                 Dyes.GetValue().WriteCreate(data, owner, receiver);
@@ -10241,27 +10242,23 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlock(0), 4);
+            data.WriteBits(changesMask.GetBlock(0), 3);
 
             data.FlushBits();
             if (changesMask[0])
             {
-                if (changesMask[1])
-                {
-                    data.WritePackedGuid(HouseGUID);
-                }
-                if (changesMask[3])
-                {
-                    data.WriteUInt8(Field_20);
-                }
-                data.WriteBits(Dyes.HasValue(), 1);
-                if (changesMask[2])
-                {
-                    if (Dyes.HasValue())
-                    {
-                        Dyes.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
-                    }
-                }
+                data.WritePackedGuid(HouseGUID);
+            }
+            if (changesMask[2])
+            {
+                data.WriteUInt8(Field_20);
+            }
+            data.WriteBits(Dyes.HasValue(), 1);
+            data.FlushBits();
+            if (changesMask[1])
+            {
+                if (Dyes.HasValue())
+                    Dyes.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
             }
         }
 
@@ -10280,27 +10277,28 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> AttachParentGUID = new(0, 2);
         public UpdateField<byte> Flags = new(0, 3);
         public OptionalUpdateField<DecorStoragePersistedData> PersistedData = new(0, 4);
-        public UpdateField<ObjectGuid> Field_68 = new(0, 5);
+        public UpdateField<ObjectGuid> TargetGameObjectGUID = new(0, 5);
 
-        void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
         {
             data.WritePackedGuid(DecorGUID);
             data.WritePackedGuid(AttachParentGUID);
             data.WriteUInt8(Flags);
-            data.WritePackedGuid(Field_68);
+            data.WritePackedGuid(TargetGameObjectGUID);
             data.WriteBits(PersistedData.HasValue(), 1);
+            data.FlushBits();
             if (PersistedData.HasValue())
             {
                 PersistedData.GetValue().WriteCreate(data, owner, receiver);
             }
         }
 
-        void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
         {
             WriteUpdate(data, _changesMask, false, owner, receiver);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlock(0), 6);
 
@@ -10321,9 +10319,10 @@ namespace Game.Entities
                 }
                 if (changesMask[5])
                 {
-                    data.WritePackedGuid(Field_68);
+                    data.WritePackedGuid(TargetGameObjectGUID);
                 }
                 data.WriteBits(PersistedData.HasValue(), 1);
+                data.FlushBits();
                 if (changesMask[4])
                 {
                     if (PersistedData.HasValue())
@@ -10340,7 +10339,7 @@ namespace Game.Entities
             ClearChangesMask(AttachParentGUID);
             ClearChangesMask(Flags);
             ClearChangesMask(PersistedData);
-            ClearChangesMask(Field_68);
+            ClearChangesMask(TargetGameObjectGUID);
             _changesMask.ResetAll();
         }
     }
