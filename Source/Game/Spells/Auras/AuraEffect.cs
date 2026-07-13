@@ -5428,7 +5428,7 @@ namespace Game.Spells
             if (caster == null || !caster.IsAlive() || !target.IsAlive())
                 return;
 
-            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToAuraPeriodicTick(caster, this))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5458,7 +5458,7 @@ namespace Game.Spells
             if (!target.IsAlive())
                 return;
 
-            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToAuraPeriodicTick(caster, this))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5518,7 +5518,7 @@ namespace Game.Spells
             if (caster == null || !caster.IsAlive() || !target.IsAlive() || target.GetPowerType() != powerType)
                 return;
 
-            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToAuraPeriodicTick(caster, this))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5578,7 +5578,7 @@ namespace Game.Spells
             if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
                 return;
 
-            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToAuraPeriodicTick(caster, this))
             {
                 SendTickImmune(target, caster);
                 return;
@@ -5615,7 +5615,7 @@ namespace Game.Spells
             if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
                 return;
 
-            if (target.IsImmunedToAuraPeriodicTick(caster, GetSpellInfo(), GetSpellEffectInfo()))
+            if (target.IsImmunedToAuraPeriodicTick(caster, this))
             {
                 SendTickImmune(target, caster);
                 return;

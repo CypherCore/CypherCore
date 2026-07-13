@@ -12,7 +12,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.Collections;
 using System.Numerics;
 
 namespace Game.Spells
@@ -2359,12 +2358,8 @@ namespace Game.Spells
                             return false;
                         if (!CanDispelAura(auraSpellInfo))
                             return false;
-                        if (!HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects))
-                        {
-                            WorldObject existingAuraCaster = aurApp.GetBase().GetWorldObjectCaster();
-                            if (existingAuraCaster != null && existingAuraCaster.IsFriendlyTo(target)) // Check spell vs aura possitivity
-                                return false;
-                        }
+                        if (aurApp.IsPositive() && !HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)) // Check spell vs aura possitivity
+                            return false;
                         return true;
                     });
                 }

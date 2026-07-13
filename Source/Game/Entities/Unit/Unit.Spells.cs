@@ -1555,23 +1555,23 @@ namespace Game.Entities
             {
                 uint schoolImmunityMask = 0;
                 var schoolList = m_spellImmune[(int)SpellImmunity.School];
-                foreach (var pair in schoolList)
+                foreach (var (auraSchoolImmunityMask, immunityAuraId) in schoolList)
                 {
-                    if ((pair.Key & schoolMask) == 0)
+                    if ((auraSchoolImmunityMask & schoolMask) == 0)
                         continue;
 
-                    SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Value, GetMap().GetDifficultyID());
+                    SpellInfo immuneSpellInfo = Global.SpellMgr.GetSpellInfo(immunityAuraId, GetMap().GetDifficultyID());
                     if (requireImmunityPurgesEffectAttribute)
                         if (immuneSpellInfo == null || !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                             continue;
 
-                    if (!(immuneSpellInfo != null && immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)) && caster != null && caster.IsFriendlyTo(this))
+                    if (spellInfo.IsPositive() && !(immuneSpellInfo != null && immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)))
                         continue;
 
                     if (spellInfo.CanPierceImmuneAura(immuneSpellInfo))
                         continue;
 
-                    schoolImmunityMask |= pair.Key;
+                    schoolImmunityMask |= auraSchoolImmunityMask;
                 }
 
                 if ((schoolImmunityMask & schoolMask) == schoolMask)
@@ -1658,7 +1658,7 @@ namespace Game.Entities
                     foreach (var (immunitySchoolMask, immunityAuraId) in container)
                     {
                         SpellInfo immuneAuraInfo = Global.SpellMgr.GetSpellInfo(immunityAuraId, GetMap().GetDifficultyID());
-                        if (immuneAuraInfo != null && !immuneAuraInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && caster != null && caster.IsFriendlyTo(this))
+                        if (spellInfo.IsPositive() && !(immuneAuraInfo != null && immuneAuraInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)))
                             continue;
 
                         if (immuneAuraInfo != null && spellInfo.CanPierceImmuneAura(immuneAuraInfo))
@@ -1741,7 +1741,10 @@ namespace Game.Entities
                         if ((immuneAuraApply.GetMiscValue() & (int)spellInfo.GetSchoolMask()) == 0)               // Check school
                             continue;
 
-                        if (immuneAuraApply.GetSpellInfo().HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) || (caster != null && !IsFriendlyTo(caster))) // Harmful
+                        if (!spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)) // Harmful
+                            return true;
+
+                        if (immuneAuraApply.GetSpellInfo().HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)) // Friendly
                             return true;
                     }
                 }
@@ -1750,27 +1753,26 @@ namespace Game.Entities
             return false;
         }
 
-        public bool IsImmunedToAuraPeriodicTick(WorldObject caster, SpellInfo spellInfo, SpellEffectInfo spellEffectInfo = null)
+        public bool IsImmunedToAuraPeriodicTick(WorldObject caster, AuraEffect auraEffect)
         {
-            if (spellInfo == null)
+            if (auraEffect.GetSpellInfo().HasAttribute(SpellAttr0.NoImmunities) || auraEffect.GetSpellInfo().HasAttribute(SpellAttr2.NoSchoolImmunities) /*only school immunities are checked in this function*/)
                 return false;
 
-            if (spellInfo.HasAttribute(SpellAttr0.NoImmunities) || spellInfo.HasAttribute(SpellAttr2.NoSchoolImmunities) /*only school immunities are checked in this function*/)
+            if (auraEffect.GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
                 return false;
 
-            if (spellEffectInfo != null && spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.NoImmunity))
-                return false;
 
-            uint schoolMask = (uint)spellInfo.GetSchoolMask();
+            uint schoolMask = (uint)auraEffect.GetSpellInfo().GetSchoolMask();
             if (schoolMask != 0)
             {
                 bool hasImmunity(MultiMap<uint, uint> container)
                 {
+                    bool isPositive = auraEffect.GetBase().GetApplicationOfTarget(GetGUID()).IsPositive();
                     uint schoolImmunityMask = 0;
                     foreach (var (immunitySchoolMask, immunityAuraId) in container)
                     {
                         SpellInfo immuneAuraInfo = Global.SpellMgr.GetSpellInfo(immunityAuraId, GetMap().GetDifficultyID());
-                        if (immuneAuraInfo != null && !immuneAuraInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects) && caster != null && caster.IsFriendlyTo(this))
+                        if (isPositive && !(immuneAuraInfo != null && immuneAuraInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)))
                             continue;
 
                         schoolImmunityMask |= immunitySchoolMask;
