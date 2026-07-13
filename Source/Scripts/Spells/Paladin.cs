@@ -49,6 +49,7 @@ struct SpellIds
     public const uint DivineStormDamage = 224239;
     public const uint EnduringLight = 40471;
     public const uint EnduringJudgement = 40472;
+    public const uint EternalFlame = 156322;
     public const uint ExecutionSentenceDamage = 387113;
     public const uint ExecutionSentence11_Seconds = 406919;
     public const uint ExecutionSentence8_Seconds = 386579;
@@ -644,6 +645,48 @@ class spell_pal_divine_storm : SpellScript
     public override void Register()
     {
         OnCast.Add(new(HandleOnCast));
+    }
+}
+
+[Script] // 156322 - Eternal Flame
+class spell_pal_eternal_flame : SpellScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellEffect((spellInfo.Id, 2));
+    }
+
+    void CalculateHealing(SpellEffectInfo effectInfo, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+    {
+        Unit caster = GetCaster();
+        if (victim == caster)
+            MathFunctions.AddPct(ref pctMod, GetEffectInfo(2).CalcValue(caster));
+    }
+
+    public override void Register()
+    {
+        CalcHealing.Add(new(CalculateHealing));
+    }
+}
+
+[Script]
+class spell_pal_eternal_flame_aura : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellEffect((spellInfo.Id, 2));
+    }
+
+    void CalculateHealing(AuraEffect aurEff, Unit victim, ref int healing, ref int flatMod, ref float pctMod)
+    {
+        Unit caster = GetCaster();
+        if (victim == caster)
+            MathFunctions.AddPct(ref pctMod, GetEffectInfo(2).CalcValue(caster));
+    }
+
+    public override void Register()
+    {
+        DoEffectCalcDamageAndHealing.Add(new(CalculateHealing, 0, AuraType.PeriodicHeal));
     }
 }
 
