@@ -169,7 +169,9 @@ struct SpellIds
     public const uint ThePenitentAura = 200347;
     public const uint TrailOfLightHeal = 234946;
     public const uint Trinity = 214205;
-    public const uint TrinityEffect = 214206;
+    public const uint TrinityEffect = 290793;
+    public const uint TwilightEquilibriumHoly = 390706;
+    public const uint TwilightEquilibriumShadow = 390707;
     public const uint UltimatePenitence = 421453;
     public const uint UltimatePenitenceDamage = 421543;
     public const uint UltimatePenitenceHeal = 421544;
@@ -3275,6 +3277,73 @@ class spell_pri_train_of_thought : AuraScript
         DoCheckEffectProc.Add(new(Check1, 1, AuraType.Dummy));
         OnEffectProc.Add(new(ReducePenanceCooldown, 1, AuraType.Dummy));
     }
+}
+
+[Script] // 390705 - Twilight Equilibrium
+class spell_pri_twilight_equilibrium : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.TwilightEquilibriumHoly, SpellIds.TwilightEquilibriumShadow);
+    }
+
+    void HandleProc(ProcEventInfo eventInfo)
+    {
+        uint spellId = 0;
+
+        if ((eventInfo.GetDamageInfo().GetSchoolMask() & SpellSchoolMask.Shadow) != 0)
+            spellId = SpellIds.TwilightEquilibriumHoly;
+        else if ((eventInfo.GetDamageInfo().GetSchoolMask() & SpellSchoolMask.Holy) != 0)
+            spellId = SpellIds.TwilightEquilibriumShadow;
+        else
+            return;
+
+        Unit caster = GetTarget();
+        caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
+    }
+
+    public override void Register()
+    {
+        OnProc.Add(new(HandleProc));
+    }
+}
+
+[Script] // ID - 390707 Twilight Equilibrium (attached to 589 - Shadow Word: Pain)
+class spell_pri_twilight_equilibrium_shadow_word_pain : AuraScript
+{
+    public override bool Validate(SpellInfo spellInfo)
+    {
+        return ValidateSpellInfo(SpellIds.TwilightEquilibriumShadow);
+    }
+
+    void OnApply(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    {
+        _damageMultiplier = 1.0f;
+        Unit caster = GetCaster();
+        if (caster != null)
+        {
+            AuraEffect twilightEquilibrium = caster.GetAuraEffect(SpellIds.TwilightEquilibriumShadow, 0);
+            if (twilightEquilibrium != null)
+            {
+                // snapshot Twilight Equilibrium value
+                MathFunctions.AddPct(ref _damageMultiplier, twilightEquilibrium.GetAmount());
+                twilightEquilibrium.GetBase().Remove();
+            }
+        }
+    }
+
+    void CalcDamage(AuraEffect aurEff, Unit victim, ref int damageOrHealing, ref int flatMod, ref float pctMod)
+    {
+        pctMod *= _damageMultiplier;
+    }
+
+    public override void Register()
+    {
+        DoEffectCalcAmount.Add(new(OnApply, 1, AuraType.PeriodicDamage));
+        DoEffectCalcDamageAndHealing.Add(new(CalcDamage, 1, AuraType.PeriodicDamage));
+    }
+
+    float _damageMultiplier = 1.0f;
 }
 
 // 109142 - Twist of Fate (Shadow)
