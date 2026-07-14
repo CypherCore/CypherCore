@@ -1968,7 +1968,9 @@ namespace Game.Spells
 
             // Calculate hit result
             WorldObject caster = m_originalCaster != null ? m_originalCaster : m_caster;
-            targetInfo.MissCondition = caster.SpellHitResult(target, m_spellInfo, m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)));
+            targetInfo.MissCondition = caster.SpellHitResult(target, m_spellInfo,
+                m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)),
+                false /*immunity will be checked after complete EffectMask is known*/);
 
             // Spell have speed - need calculate incoming time
             // Incoming time is zero for self casts. At least I think so.
@@ -2011,7 +2013,9 @@ namespace Game.Spells
             {
                 // Calculate reflected spell result on caster (shouldn't be able to reflect gameobject spells)
                 Unit unitCaster = m_caster.ToUnit();
-                targetInfo.ReflectResult = unitCaster.SpellHitResult(unitCaster, m_spellInfo, false); // can't reflect twice
+                targetInfo.ReflectResult = unitCaster.SpellHitResult(unitCaster, m_spellInfo,
+                    false /*can't reflect twice*/,
+                    false /*immunity will be checked after complete EffectMask is known*/);
 
                 // Proc spell reflect aura when missile hits the original target
                 target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(TimeSpan.FromMilliseconds(targetInfo.TimeDelay)));
@@ -2215,7 +2219,7 @@ namespace Game.Spells
                 return SpellMissInfo.Evade;
 
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
-            if (hitInfo.TimeDelay != 0 && unit.IsImmunedToSpell(m_spellInfo, m_caster))
+            if (hitInfo.TimeDelay != 0 && unit.IsImmunedToSpell(m_spellInfo, hitInfo.EffectMask, m_caster))
                 return SpellMissInfo.Immune;
 
             CallScriptBeforeHitHandlers(hitInfo.MissCondition);
@@ -7653,6 +7657,10 @@ namespace Game.Spells
             if (targetUnit == null)
                 return;
 
+            // Check immunity now that EffectMask is known
+            if (targetUnit.IsImmunedToSpell(GetSpellInfo(), targetInfo.EffectMask, m_caster))
+                targetInfo.MissCondition = SpellMissInfo.Immune;
+
             // This will only cause combat - the target will engage once the projectile hits (in Spell::TargetInfo::PreprocessTarget)
             if (m_originalCaster != null && targetInfo.MissCondition != SpellMissInfo.Evade && !m_originalCaster.IsFriendlyTo(targetUnit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || targetUnit.IsEngaged()))
                 m_originalCaster.SetInCombatWith(targetUnit, true);
@@ -7686,7 +7694,11 @@ namespace Game.Spells
                 unit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
             // In case spell reflect from target, do all effect on caster (if hit)
             else if (targetInfo.MissCondition == SpellMissInfo.Reflect && targetInfo.ReflectResult == SpellMissInfo.None)
+            {
                 unit = m_caster.ToUnit();
+                if (unit != null && unit.IsImmunedToSpell(GetSpellInfo(), targetInfo.EffectMask, unit))
+                    targetInfo.ReflectResult = SpellMissInfo.Immune;
+            }
 
             if (unit == null)
                 return;

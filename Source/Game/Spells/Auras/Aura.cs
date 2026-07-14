@@ -548,7 +548,7 @@ namespace Game.Spells
                 {
                     // needs readding - remove now, will be applied in next update cycle
                     // (dbcs do not have auras which apply on same type of targets but have different radius, so this is not really needed)
-                    if (app.Value.GetTarget().IsImmunedToSpell(GetSpellInfo(), caster, true) || !CanBeAppliedOn(app.Value.GetTarget()))
+                    if (app.Value.GetTarget().IsImmunedToSpell(GetSpellInfo(), existing, caster, true) || !CanBeAppliedOn(app.Value.GetTarget()))
                     {
                         targetsToRemove.Add(app.Value.GetTarget());
                         continue;
@@ -583,7 +583,7 @@ namespace Game.Spells
                         if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
                             targets[unit] &= ~(uint)(1 << (int)spellEffectInfo.EffectIndex);
 
-                    if (targets[unit] == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
+                    if (targets[unit] == 0 || unit.IsImmunedToSpell(GetSpellInfo(), targets[unit], caster) || !CanBeAppliedOn(unit))
                         addUnit = false;
                 }
 

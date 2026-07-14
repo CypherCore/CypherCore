@@ -825,28 +825,28 @@ namespace Game.Entities
             {
                 case SpellDmgClass.None:
                 case SpellDmgClass.Magic:
+                {
+                    var getPhysicalCritChance = float () =>
                     {
-                        var getPhysicalCritChance = float () =>
-                        {
-                            return GetUnitCriticalChanceDone(attackType);
-                        };
+                        return GetUnitCriticalChanceDone(attackType);
+                    };
 
-                        var getMagicCritChance = float () =>
-                        {
-                            Player thisPlayer = ToPlayer();
-                            if (thisPlayer != null)
-                                return thisPlayer.m_activePlayerData.SpellCritPercentage;
+                    var getMagicCritChance = float () =>
+                    {
+                        Player thisPlayer = ToPlayer();
+                        if (thisPlayer != null)
+                            return thisPlayer.m_activePlayerData.SpellCritPercentage;
 
-                            return BaseSpellCritChance;
-                        };
+                        return BaseSpellCritChance;
+                    };
 
-                        if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
-                            crit_chance = Math.Max(crit_chance, getPhysicalCritChance());
+                    if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
+                        crit_chance = Math.Max(crit_chance, getPhysicalCritChance());
 
-                        if (schoolMask.HasAnyFlag(~SpellSchoolMask.Normal))
-                            crit_chance = Math.Max(crit_chance, getMagicCritChance());
-                        break;
-                    }
+                    if (schoolMask.HasAnyFlag(~SpellSchoolMask.Normal))
+                        crit_chance = Math.Max(crit_chance, getMagicCritChance());
+                    break;
+                }
                 case SpellDmgClass.Melee:
                 case SpellDmgClass.Ranged:
                     crit_chance += GetUnitCriticalChanceDone(attackType);
@@ -874,64 +874,64 @@ namespace Game.Entities
             switch (spellInfo.DmgClass)
             {
                 case SpellDmgClass.Magic:
+                {
+                    // taken
+                    if (!spellInfo.IsPositive())
                     {
-                        // taken
-                        if (!spellInfo.IsPositive())
-                        {
-                            // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
-                            crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
-                        }
+                        // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+                        crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
+                    }
 
-                        if (caster != null)
+                    if (caster != null)
+                    {
+                        // scripted (increase crit chance ... against ... target by x%
+                        var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
+                        foreach (var eff in mOverrideClassScript)
                         {
-                            // scripted (increase crit chance ... against ... target by x%
-                            var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
-                            foreach (var eff in mOverrideClassScript)
-                            {
-                                if (!eff.IsAffectingSpell(spellInfo))
-                                    continue;
+                            if (!eff.IsAffectingSpell(spellInfo))
+                                continue;
 
-                                switch (eff.GetMiscValue())
-                                {
-                                    case 911: // Shatter
-                                        if (HasAuraState(AuraStateType.Frozen, spellInfo, this))
-                                        {
-                                            crit_chance *= 1.5f;
-                                            AuraEffect _eff = eff.GetBase().GetEffect(1);
-                                            if (_eff != null)
-                                                crit_chance += _eff.GetAmount();
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            // Custom crit by class
-                            switch (spellInfo.SpellFamilyName)
+                            switch (eff.GetMiscValue())
                             {
-                                case SpellFamilyNames.Rogue:
-                                    // Shiv-applied poisons can't crit
-                                    if (caster.FindCurrentSpellBySpellId(5938) != null)
-                                        crit_chance = 0.0f;
+                                case 911: // Shatter
+                                    if (HasAuraState(AuraStateType.Frozen, spellInfo, this))
+                                    {
+                                        crit_chance *= 1.5f;
+                                        AuraEffect _eff = eff.GetBase().GetEffect(1);
+                                        if (_eff != null)
+                                            crit_chance += _eff.GetAmount();
+                                    }
+                                    break;
+                                default:
                                     break;
                             }
-
-                            // Spell crit suppression
-                            if (IsCreature())
-                            {
-                                int levelDiff = (int)(GetLevelForTarget(this) - caster.GetLevel());
-                                crit_chance -= levelDiff * 1.0f;
-                            }
                         }
-                        break;
+                        // Custom crit by class
+                        switch (spellInfo.SpellFamilyName)
+                        {
+                            case SpellFamilyNames.Rogue:
+                                // Shiv-applied poisons can't crit
+                                if (caster.FindCurrentSpellBySpellId(5938) != null)
+                                    crit_chance = 0.0f;
+                                break;
+                        }
+
+                        // Spell crit suppression
+                        if (IsCreature())
+                        {
+                            int levelDiff = (int)(GetLevelForTarget(this) - caster.GetLevel());
+                            crit_chance -= levelDiff * 1.0f;
+                        }
                     }
+                    break;
+                }
                 case SpellDmgClass.Melee:
                 case SpellDmgClass.Ranged:
-                    {
-                        if (caster != null)
-                            crit_chance += GetUnitCriticalChanceTaken(caster, attackType, crit_chance);
-                        break;
-                    }
+                {
+                    if (caster != null)
+                        crit_chance += GetUnitCriticalChanceTaken(caster, attackType, crit_chance);
+                    break;
+                }
                 case SpellDmgClass.None:
                 default:
                     return 0f;
@@ -1483,7 +1483,7 @@ namespace Game.Entities
             }
         }
 
-        public bool IsImmunedToSpell(SpellInfo spellInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
+        public bool IsImmunedToSpell(SpellInfo spellInfo, uint effectMask, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
         {
             if (spellInfo == null)
                 return false;
@@ -1494,9 +1494,9 @@ namespace Game.Entities
                 if (!requireImmunityPurgesEffectAttribute)
                     return !range.Empty();
 
-                return range.Any(entry =>
+                return range.Any(immunitySpellId =>
                 {
-                    SpellInfo immunitySourceSpell = Global.SpellMgr.GetSpellInfo(entry, Difficulty.None);
+                    SpellInfo immunitySourceSpell = Global.SpellMgr.GetSpellInfo(immunitySpellId, Difficulty.None);
                     if (immunitySourceSpell != null && immunitySourceSpell.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                         return true;
 
@@ -1534,7 +1534,7 @@ namespace Game.Entities
             {
                 // State/effect immunities applied by aura expect full spell immunity
                 // Ignore effects with mechanic, they are supposed to be checked separately
-                if (!spellEffectInfo.IsEffect())
+                if (!spellEffectInfo.IsEffect() || !(effectMask != 0 & (1 << (int)spellEffectInfo.EffectIndex) != 0))
                     continue;
 
                 if (!IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute))
@@ -1565,7 +1565,7 @@ namespace Game.Entities
                         if (immuneSpellInfo == null || !immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                             continue;
 
-                    if (spellInfo.IsPositive() && !(immuneSpellInfo != null && immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)))
+                    if ((spellInfo.NegativeEffects.ToUInt() & effectMask) == 0 && !(immuneSpellInfo != null && immuneSpellInfo.HasAttribute(SpellAttr1.ImmunityToHostileAndFriendlyEffects)))
                         continue;
 
                     if (spellInfo.CanPierceImmuneAura(immuneSpellInfo))
@@ -1700,9 +1700,9 @@ namespace Game.Entities
                 if (!requireImmunityPurgesEffectAttribute)
                     return !range.Empty();
 
-                return range.Any(entry =>
+                return range.Any(immunitySpellId =>
                 {
-                    var immunitySourceSpell = Global.SpellMgr.GetSpellInfo(entry, Difficulty.None);
+                    var immunitySourceSpell = Global.SpellMgr.GetSpellInfo(immunitySpellId, Difficulty.None);
                     if (immunitySourceSpell != null)
                         if (immunitySourceSpell.HasAttribute(SpellAttr1.ImmunityPurgesEffect))
                             return true;
@@ -2032,54 +2032,54 @@ namespace Game.Entities
             switch (CSpellType)
             {
                 case CurrentSpellTypes.Generic:
+                {
+                    InterruptSpell(CurrentSpellTypes.Generic, false);
+
+                    // generic spells always break channeled not delayed spells
+                    if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel)
+                        && !pSpell.GetSpellInfo().HasAttribute(SpellAttr9.AllowCastWhileChanneling))
+                        InterruptSpell(CurrentSpellTypes.Channeled, false);
+
+                    // autorepeat breaking
+                    if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                     {
-                        InterruptSpell(CurrentSpellTypes.Generic, false);
-
-                        // generic spells always break channeled not delayed spells
-                        if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel)
-                            && !pSpell.GetSpellInfo().HasAttribute(SpellAttr9.AllowCastWhileChanneling))
-                            InterruptSpell(CurrentSpellTypes.Channeled, false);
-
-                        // autorepeat breaking
-                        if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
-                        {
-                            // break autorepeat if not Auto Shot
-                            if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
-                                InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                        }
-                        if (pSpell.m_spellInfo.CalcCastTime() > 0)
-                            AddUnitState(UnitState.Casting);
-
-                        break;
-                    }
-                case CurrentSpellTypes.Channeled:
-                    {
-                        // channel spells always break generic non-delayed and any channeled spells
-                        InterruptSpell(CurrentSpellTypes.Generic, false);
-                        InterruptSpell(CurrentSpellTypes.Channeled);
-
-                        // it also does break autorepeat if not Auto Shot
-                        if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-                            m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                        // break autorepeat if not Auto Shot
+                        if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    }
+                    if (pSpell.m_spellInfo.CalcCastTime() > 0)
                         AddUnitState(UnitState.Casting);
 
-                        break;
-                    }
-                case CurrentSpellTypes.AutoRepeat:
-                    {
-                        if (GetCurrentSpell(CSpellType) != null && GetCurrentSpell(CSpellType).GetState() == SpellState.Idle)
-                            GetCurrentSpell(CSpellType).SetState(SpellState.Finished);
+                    break;
+                }
+                case CurrentSpellTypes.Channeled:
+                {
+                    // channel spells always break generic non-delayed and any channeled spells
+                    InterruptSpell(CurrentSpellTypes.Generic, false);
+                    InterruptSpell(CurrentSpellTypes.Channeled);
 
-                        // only Auto Shoot does not break anything
-                        if (pSpell.m_spellInfo.Id != 75)
-                        {
-                            // generic autorepeats break generic non-delayed and channeled non-delayed spells
-                            InterruptSpell(CurrentSpellTypes.Generic, false);
-                            InterruptSpell(CurrentSpellTypes.Channeled, false);
-                        }
-                        break;
+                    // it also does break autorepeat if not Auto Shot
+                    if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
+                        m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
+                    AddUnitState(UnitState.Casting);
+
+                    break;
+                }
+                case CurrentSpellTypes.AutoRepeat:
+                {
+                    if (GetCurrentSpell(CSpellType) != null && GetCurrentSpell(CSpellType).GetState() == SpellState.Idle)
+                        GetCurrentSpell(CSpellType).SetState(SpellState.Finished);
+
+                    // only Auto Shoot does not break anything
+                    if (pSpell.m_spellInfo.Id != 75)
+                    {
+                        // generic autorepeats break generic non-delayed and channeled non-delayed spells
+                        InterruptSpell(CurrentSpellTypes.Generic, false);
+                        InterruptSpell(CurrentSpellTypes.Channeled, false);
                     }
+                    break;
+                }
                 default:
                     break; // other spell types don't break anything now
             }
@@ -2339,66 +2339,66 @@ namespace Game.Entities
                     // Melee and Ranged Spells
                     case SpellDmgClass.Ranged:
                     case SpellDmgClass.Melee:
+                    {
+                        if (crit)
                         {
-                            if (crit)
-                            {
-                                damageInfo.HitInfo |= HitInfo.CriticalHit;
+                            damageInfo.HitInfo |= HitInfo.CriticalHit;
 
-                                // Calculate crit bonus
-                                uint crit_bonus = (uint)damage;
-                                // Apply crit_damage bonus for melee spells
-                                Player modOwner = GetSpellModOwner();
-                                if (modOwner != null)
-                                    modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
-                                damage += (int)crit_bonus;
+                            // Calculate crit bonus
+                            uint crit_bonus = (uint)damage;
+                            // Apply crit_damage bonus for melee spells
+                            Player modOwner = GetSpellModOwner();
+                            if (modOwner != null)
+                                modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+                            damage += (int)crit_bonus;
 
-                                // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                                float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
+                            // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
+                            float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
 
-                                if (critPctDamageMod != 0)
-                                    MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
-                            }
-
-                            // Spell weapon based damage CAN BE crit & blocked at same time
-                            if (blocked)
-                            {
-                                // double blocked amount if block is critical
-                                float value = victim.GetBlockPercent(GetLevel());
-                                if (victim.IsBlockCritical())
-                                {
-                                    value *= 2; // double blocked percent
-                                    value *= GetTotalAuraMultiplier(AuraType.ModCriticalBlockAmount);
-                                }
-                                damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
-                                if (damage <= damageInfo.blocked)
-                                {
-                                    damageInfo.blocked = (uint)damage;
-                                    damageInfo.fullBlock = true;
-                                }
-                                damage -= (int)damageInfo.blocked;
-                            }
-
-                            if (CanApplyResilience())
-                                ApplyResilience(victim, ref damage);
-
-                            break;
+                            if (critPctDamageMod != 0)
+                                MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
                         }
+
+                        // Spell weapon based damage CAN BE crit & blocked at same time
+                        if (blocked)
+                        {
+                            // double blocked amount if block is critical
+                            float value = victim.GetBlockPercent(GetLevel());
+                            if (victim.IsBlockCritical())
+                            {
+                                value *= 2; // double blocked percent
+                                value *= GetTotalAuraMultiplier(AuraType.ModCriticalBlockAmount);
+                            }
+                            damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
+                            if (damage <= damageInfo.blocked)
+                            {
+                                damageInfo.blocked = (uint)damage;
+                                damageInfo.fullBlock = true;
+                            }
+                            damage -= (int)damageInfo.blocked;
+                        }
+
+                        if (CanApplyResilience())
+                            ApplyResilience(victim, ref damage);
+
+                        break;
+                    }
                     // Magical Attacks
                     case SpellDmgClass.None:
                     case SpellDmgClass.Magic:
+                    {
+                        // If crit add critical bonus
+                        if (crit)
                         {
-                            // If crit add critical bonus
-                            if (crit)
-                            {
-                                damageInfo.HitInfo |= HitInfo.CriticalHit;
-                                damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
-                            }
-
-                            if (CanApplyResilience())
-                                ApplyResilience(victim, ref damage);
-
-                            break;
+                            damageInfo.HitInfo |= HitInfo.CriticalHit;
+                            damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
                         }
+
+                        if (CanApplyResilience())
+                            ApplyResilience(victim, ref damage);
+
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2877,7 +2877,7 @@ namespace Game.Entities
             if (!target.IsAlive() && !spellInfo.IsPassive() && !spellInfo.HasAttribute(SpellAttr2.AllowDeadTarget))
                 return null;
 
-            if (target.IsImmunedToSpell(spellInfo, this))
+            if (target.IsImmunedToSpell(spellInfo, effMask, this))
                 return null;
 
             foreach (var spellEffectInfo in spellInfo.GetEffects())

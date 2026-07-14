@@ -1474,11 +1474,11 @@ namespace Game.Entities
                 case 35200: // Roc Form
                     return 4877;
                 case 24858: // Moonkin Form
-                    {
-                        if (HasAura(114301)) // Glyph of Stars
-                            return 0;
-                        break;
-                    }
+                {
+                    if (HasAura(114301)) // Glyph of Stars
+                        return 0;
+                    break;
+                }
                 default:
                     break;
             }
@@ -1834,31 +1834,31 @@ namespace Game.Entities
                     displayPower = PowerType.Mana;
                     break;
                 default:
+                {
+                    var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
+                    if (!powerTypeAuras.Empty())
                     {
-                        var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
-                        if (!powerTypeAuras.Empty())
-                        {
-                            AuraEffect powerTypeAura = powerTypeAuras.First();
-                            displayPower = (PowerType)powerTypeAura.GetMiscValue();
-                        }
-                        else
-                        {
-                            ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
-                            if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
-                                displayPower = cEntry.DisplayPower;
-
-                            Vehicle vehicle = GetVehicleKit();
-                            if (vehicle != null)
-                            {
-                                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
-                                if (powerDisplay != null)
-                                    displayPower = (PowerType)powerDisplay.ActualType;
-                            }
-                            else if (IsHunterPet())
-                                displayPower = PowerType.Focus;
-                        }
-                        break;
+                        AuraEffect powerTypeAura = powerTypeAuras.First();
+                        displayPower = (PowerType)powerTypeAura.GetMiscValue();
                     }
+                    else
+                    {
+                        ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+                        if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
+                            displayPower = cEntry.DisplayPower;
+
+                        Vehicle vehicle = GetVehicleKit();
+                        if (vehicle != null)
+                        {
+                            PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
+                            if (powerDisplay != null)
+                                displayPower = (PowerType)powerDisplay.ActualType;
+                        }
+                        else if (IsHunterPet())
+                            displayPower = PowerType.Focus;
+                    }
+                    break;
+                }
             }
 
             return displayPower;
@@ -3110,7 +3110,7 @@ namespace Game.Entities
                     SpellInfo spellInfo = dmgShield.GetSpellInfo();
 
                     // Damage shield can be resisted...
-                    var missInfo = victim.SpellHitResult(this, spellInfo, false);
+                    var missInfo = victim.SpellHitResult(this, spellInfo, false, true);
                     if (missInfo != SpellMissInfo.None)
                     {
                         victim.SendSpellMiss(this, spellInfo.Id, missInfo);

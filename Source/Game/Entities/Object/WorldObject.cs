@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Framework.IO;
 using Game.AI;
 using Game.BattleFields;
 using Game.DataStorage;
@@ -2140,10 +2139,10 @@ namespace Game.Entities
         //   Parry
         // For spells
         //   Resist
-        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spellInfo, bool canReflect = false)
+        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spellInfo, bool canReflect, bool canImmune)
         {
             // Check for immune
-            if (victim.IsImmunedToSpell(spellInfo, this))
+            if (canImmune && victim.IsImmunedToSpell(spellInfo, SpellConst.MaxEffectMask, this))
                 return SpellMissInfo.Immune;
 
             // Damage immunity is only checked if the spell has damage effects, this immunity must not prevent aura apply
