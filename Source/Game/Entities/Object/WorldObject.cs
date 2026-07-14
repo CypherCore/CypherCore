@@ -143,22 +143,8 @@ namespace Game.Entities
                 tempObjectType = TypeId.ActivePlayer;
             }
 
-            if (!flags.MovementUpdate && !m_movementInfo.transport.guid.IsEmpty())
-                flags.MovementTransport = true;
-
-            if (GetAIAnimKitId() != 0 || GetMovementAnimKitId() != 0 || GetMeleeAnimKitId() != 0)
-                flags.AnimKit = true;
-
             if (GetSmoothPhasing()?.GetInfoForSeer(target.GetGUID()) != null)
                 flags.SmoothPhasing = true;
-
-            Unit unit = ToUnit();
-            if (unit != null)
-            {
-                flags.PlayHoverAnim = unit.IsPlayingHoverAnim();
-                if (unit.GetVictim() != null)
-                    flags.CombatVictim = true;
-            }
 
             WorldPacket buffer = new();
             buffer.WriteUInt8((byte)updateType);
@@ -3133,7 +3119,6 @@ namespace Game.Entities
 
             return ObjectGuid.Empty;
         }
-        public void SetTransport(ITransport t) { m_transport = t; }
 
         public virtual Position GetStationaryPosition() { return this; }
 
@@ -3744,6 +3729,12 @@ namespace Game.Entities
                         pos.posZ = gridHeight + unit.GetHoverOffset();
                 }
             }
+        }
+
+        public void SetTransport(ITransport t)
+        {
+            m_transport = t;
+            m_updateFlag.MovementTransport = !m_updateFlag.MovementUpdate && t != null;
         }
 
         public float GetFloorZ()

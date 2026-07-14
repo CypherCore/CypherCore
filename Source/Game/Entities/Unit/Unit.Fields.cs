@@ -122,8 +122,6 @@ namespace Game.Entities
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
         bool _instantCast;
 
-        bool _playHoverAnim;
-
         ushort _aiAnimKitId;
         ushort _movementAnimKitId;
         ushort _meleeAnimKitId;
@@ -342,7 +340,7 @@ namespace Game.Entities
             m_resist += amount;
             m_damage -= amount;
             if (m_damage == 0)
-            { 
+            {
                 m_hitMask |= ProcFlagsHit.FullResist;
                 m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
             }
@@ -365,7 +363,7 @@ namespace Game.Entities
             m_damage -= amount;
             m_hitMask |= ProcFlagsHit.Block;
             if (m_damage == 0)
-            { 
+            {
                 m_hitMask |= ProcFlagsHit.FullBlock;
                 m_hitMask &= ~(ProcFlagsHit.Normal | ProcFlagsHit.Critical);
             }
@@ -579,7 +577,7 @@ namespace Game.Entities
             for (var i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 name[i] = uf.Name[i];
         }
-}
+    }
 
     struct PositionUpdateInfo
     {

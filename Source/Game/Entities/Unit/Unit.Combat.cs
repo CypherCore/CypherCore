@@ -346,6 +346,7 @@ namespace Game.Entities
 
             attacking = victim;
             attacking._addAttacker(this);
+            m_updateFlag.CombatVictim = true;
 
             // Set our target
             SetTarget(victim.GetGUID());
@@ -420,6 +421,7 @@ namespace Game.Entities
 
             Unit victim = attacking;
 
+            m_updateFlag.CombatVictim = false;
             attacking._removeAttacker(this);
             attacking = null;
 

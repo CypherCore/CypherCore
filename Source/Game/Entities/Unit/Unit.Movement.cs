@@ -1945,14 +1945,14 @@ namespace Game.Entities
             }
         }
 
-        public bool IsPlayingHoverAnim() { return _playHoverAnim; }
+        public bool IsPlayingHoverAnim() { return m_updateFlag.PlayHoverAnim; }
 
         void SetPlayHoverAnim(bool enable, bool sendUpdate = true)
         {
             if (IsPlayingHoverAnim() == enable)
                 return;
 
-            _playHoverAnim = enable;
+            m_updateFlag.PlayHoverAnim = enable;
 
             if (!sendUpdate)
                 return;

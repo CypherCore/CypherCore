@@ -211,7 +211,10 @@ namespace Game.Entities
             }
 
             if (target != null && HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
+            {
                 m_movementInfo.transport.guid = target.GetGUID();
+                m_updateFlag.MovementTransport = true;
+            }
 
             if (!IsStaticSpawn())
                 UpdatePositionData();

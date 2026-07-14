@@ -1923,6 +1923,7 @@ namespace Game.Entities
                 return;
 
             _aiAnimKitId = animKitId;
+            m_updateFlag.AnimKit = _aiAnimKitId != 0 || _movementAnimKitId != 0 || _meleeAnimKitId != 0;
 
             SetAIAnimKit data = new();
             data.Unit = GetGUID();
@@ -1941,6 +1942,7 @@ namespace Game.Entities
                 return;
 
             _movementAnimKitId = animKitId;
+            m_updateFlag.AnimKit = _aiAnimKitId != 0 || _movementAnimKitId != 0 || _meleeAnimKitId != 0;
 
             SetMovementAnimKit data = new();
             data.Unit = GetGUID();
@@ -1959,6 +1961,7 @@ namespace Game.Entities
                 return;
 
             _meleeAnimKitId = animKitId;
+            m_updateFlag.AnimKit = _aiAnimKitId != 0 || _movementAnimKitId != 0 || _meleeAnimKitId != 0;
 
             SetMeleeAnimKit data = new();
             data.Unit = GetGUID();
