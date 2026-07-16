@@ -17,7 +17,7 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_DynamicObject, false);
+            EntityFragments.Add(EntityFragment.Tag_DynamicObject, false);
 
             m_dynamicObjectData = new DynamicObjectData();
         }

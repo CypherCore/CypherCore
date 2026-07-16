@@ -7,7 +7,6 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
 using Game.Networking.Packets;
-using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;

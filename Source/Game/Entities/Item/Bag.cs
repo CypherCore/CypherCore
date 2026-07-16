@@ -15,7 +15,7 @@ namespace Game.Entities
         {
             ObjectTypeId = TypeId.Container;
 
-            m_entityFragments.Add(EntityFragment.Tag_Container, false);
+            EntityFragments.Add(EntityFragment.Tag_Container, false);
 
             m_containerData = new ContainerData();
         }

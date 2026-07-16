@@ -15,7 +15,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 namespace Game.BattleGrounds
 {
@@ -1350,7 +1349,7 @@ namespace Game.BattleGrounds
                 script.OnPlayerKilled(victim, killer);
         }
 
-        public virtual void HandleKillUnit(Creature victim, Unit killer) 
+        public virtual void HandleKillUnit(Creature victim, Unit killer)
         {
             BattlegroundScript script = GetBgMap().GetBattlegroundScript();
             if (script != null)

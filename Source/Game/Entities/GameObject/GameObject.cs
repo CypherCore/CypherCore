@@ -30,7 +30,7 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Rotation = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_GameObject, false);
+            EntityFragments.Add(EntityFragment.Tag_GameObject, false);
 
             m_respawnDelayTime = 300;
             m_despawnDelay = 0;

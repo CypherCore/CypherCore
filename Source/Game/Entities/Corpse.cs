@@ -23,7 +23,7 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_Corpse, false);
+            EntityFragments.Add(EntityFragment.Tag_Corpse, false);
 
             m_corpseData = new();
 

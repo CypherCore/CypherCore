@@ -7692,7 +7692,7 @@ namespace Game.Entities
         }
         public uint GetFreePrimaryProfessionPoints() { return m_activePlayerData.CharacterPoints; }
         void SetFreePrimaryProfessions(ushort profs) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.CharacterPoints), profs); }
-        public bool HaveAtClient(WorldObject u)
+        public bool HaveAtClient(BaseEntity u)
         {
             bool one = u.GetGUID() == GetGUID();
             bool two = m_clientGUIDs.Contains(u.GetGUID());

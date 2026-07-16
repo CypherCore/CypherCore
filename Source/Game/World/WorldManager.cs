@@ -5,7 +5,6 @@ using Framework.Collections;
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
-using Framework.Realm;
 using Game.BattlePets;
 using Game.Chat;
 using Game.Collision;
@@ -20,7 +19,6 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Game

@@ -26,7 +26,7 @@ namespace Game.Entities
 
             m_updateFlag.Stationary = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_AreaTrigger, false);
+            EntityFragments.Add(EntityFragment.Tag_AreaTrigger, false);
 
             m_areaTriggerData = new AreaTriggerFieldData();
 

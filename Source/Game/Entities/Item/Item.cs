@@ -23,7 +23,7 @@ namespace Game.Entities
         {
             ObjectTypeId = TypeId.Item;
 
-            m_entityFragments.Add(EntityFragment.Tag_Item, false);
+            EntityFragments.Add(EntityFragment.Tag_Item, false);
 
             m_itemData = new ItemData();
 

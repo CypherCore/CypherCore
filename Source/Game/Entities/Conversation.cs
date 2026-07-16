@@ -23,7 +23,7 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.Conversation = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_Conversation, false);
+            EntityFragments.Add(EntityFragment.Tag_Conversation, false);
 
             m_conversationData = new ConversationData();
         }

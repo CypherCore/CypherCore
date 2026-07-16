@@ -21,7 +21,7 @@ namespace Game.Entities
         {
             ObjectTypeId = TypeId.AzeriteEmpoweredItem;
 
-            m_entityFragments.Add(EntityFragment.Tag_AzeriteEmpoweredItem, false);
+            EntityFragments.Add(EntityFragment.Tag_AzeriteEmpoweredItem, false);
 
             m_azeriteEmpoweredItemData = new AzeriteEmpoweredItemData();
         }

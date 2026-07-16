@@ -2,8 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Database;
-using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Misc;

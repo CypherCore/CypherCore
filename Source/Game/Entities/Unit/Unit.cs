@@ -32,7 +32,7 @@ namespace Game.Entities
             ObjectTypeId = TypeId.Unit;
             m_updateFlag.MovementUpdate = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_Unit, false);
+            EntityFragments.Add(EntityFragment.Tag_Unit, false);
 
             m_modAttackSpeedPct = new float[] { 1.0f, 1.0f, 1.0f };
             m_deathState = DeathState.Alive;

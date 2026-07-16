@@ -24,7 +24,7 @@ namespace Game.Entities
             m_updateFlag.Stationary = true;
             m_updateFlag.SceneObject = true;
 
-            m_entityFragments.Add(EntityFragment.Tag_SceneObject, false);
+            EntityFragments.Add(EntityFragment.Tag_SceneObject, false);
 
             m_sceneObjectData = new();
             _stationaryPosition = new();

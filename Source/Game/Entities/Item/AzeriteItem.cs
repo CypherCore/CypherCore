@@ -21,7 +21,7 @@ namespace Game.Entities
 
             ObjectTypeId = TypeId.AzeriteItem;
 
-            m_entityFragments.Add(EntityFragment.Tag_AzeriteItem, false);
+            EntityFragments.Add(EntityFragment.Tag_AzeriteItem, false);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.DEBUGknowledgeWeek), -1);
         }

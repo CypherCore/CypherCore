@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.AI;
-using Game.Conditions;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Mails;

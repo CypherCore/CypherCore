@@ -3124,7 +3124,7 @@ namespace Game.Entities
             {
                 if (m_vendorData == null)
                 {
-                    m_entityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
+                    EntityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
                     m_vendorData = new();
                 }
 
@@ -3140,7 +3140,7 @@ namespace Game.Entities
                     m_values.ModifyValue(m_vendorData);
                     AddToObjectUpdateIfNeeded();
                     m_vendorData = null;
-                    m_entityFragments.Remove(EntityFragment.FVendor_C);
+                    EntityFragments.Remove(EntityFragment.FVendor_C);
                 }
             }
         }
@@ -3151,7 +3151,7 @@ namespace Game.Entities
             {
                 if (m_vendorData == null)
                 {
-                    m_entityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
+                    EntityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
                     m_vendorData = new();
                 }
 
@@ -3167,7 +3167,7 @@ namespace Game.Entities
                     m_values.ModifyValue(m_vendorData);
                     AddToObjectUpdateIfNeeded();
                     m_vendorData = null;
-                    m_entityFragments.Remove(EntityFragment.FVendor_C);
+                    EntityFragments.Remove(EntityFragment.FVendor_C);
                 }
             }
         }
@@ -3808,7 +3808,7 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            if ((m_entityFragments.ContentsChangedMask & m_entityFragments.GetUpdateMaskFor(EntityFragment.CGObject)) != 0)
+            if ((EntityFragments.ContentsChangedMask & EntityFragments.GetUpdateMaskFor(EntityFragment.CGObject)) != 0)
             {
                 data.WriteUInt32(m_values.GetChangedObjectTypeMask());
 
@@ -3819,7 +3819,7 @@ namespace Game.Entities
                     m_unitData.WriteUpdate(data, flags, this, target);
             }
 
-            if (m_vendorData != null && (m_entityFragments.ContentsChangedMask & m_entityFragments.GetUpdateMaskFor(EntityFragment.FVendor_C)) != 0)
+            if (m_vendorData != null && (EntityFragments.ContentsChangedMask & EntityFragments.GetUpdateMaskFor(EntityFragment.FVendor_C)) != 0)
                 m_vendorData.WriteUpdate(data, flags, this, target);
         }
 
