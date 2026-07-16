@@ -27,6 +27,9 @@ namespace Game.Entities
             _name = "";
             m_isStoredInWorldObjectGridContainer = isWorldObject;
 
+            if (!isWorldObject)
+                m_updateFlag.HasEntityPosition = true;
+
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
             m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive);
 

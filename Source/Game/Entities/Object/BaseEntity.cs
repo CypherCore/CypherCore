@@ -198,7 +198,7 @@ namespace Game.Entities
             if (IsGameObject())
                 PauseTimes = (this as GameObject).GetPauseTimes();
 
-            data.WriteBit(IsWorldObject()); // HasPositionFragment
+            data.WriteBit(flags.HasEntityPosition);
             data.WriteBit(flags.NoBirthAnim);
             data.WriteBit(flags.EnablePortals);
             data.WriteBit(flags.PlayHoverAnim);
@@ -885,9 +885,11 @@ namespace Game.Entities
 
     public struct CreateObjectBits
     {
+        public bool HasEntityPosition;
         public bool NoBirthAnim;
         public bool EnablePortals;
         public bool PlayHoverAnim;
+        public bool ThisIsYou;
         public bool MovementUpdate;
         public bool MovementTransport;
         public bool Stationary;
@@ -898,7 +900,6 @@ namespace Game.Entities
         public bool Rotation;
         public bool GameObject;
         public bool SmoothPhasing;
-        public bool ThisIsYou;
         public bool SceneObject;
         public bool ActivePlayer;
         public bool Conversation;
@@ -908,9 +909,11 @@ namespace Game.Entities
 
         public void Clear()
         {
+            HasEntityPosition = false;
             NoBirthAnim = false;
             EnablePortals = false;
             PlayHoverAnim = false;
+            ThisIsYou = false;
             MovementUpdate = false;
             MovementTransport = false;
             Stationary = false;
@@ -921,7 +924,6 @@ namespace Game.Entities
             Rotation = false;
             GameObject = false;
             SmoothPhasing = false;
-            ThisIsYou = false;
             SceneObject = false;
             ActivePlayer = false;
             Conversation = false;
