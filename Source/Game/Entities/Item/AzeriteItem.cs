@@ -525,7 +525,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), AzeriteItemMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ItemMask.GetChangesMask(), AzeriteItemMask.GetChangesMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

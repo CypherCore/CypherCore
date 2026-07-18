@@ -1316,6 +1316,8 @@ namespace Game.Entities
 
         public override void BuildUpdate(Dictionary<Player, UpdateData> data)
         {
+            BuildUpdateChangesMask();
+
             Player owner = GetOwner();
             if (owner != null)
                 BuildFieldsUpdate(owner, data);
@@ -2864,7 +2866,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ItemMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ItemMask.GetChangesMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

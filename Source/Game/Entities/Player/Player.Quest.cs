@@ -3566,8 +3566,8 @@ namespace Game.Entities
                             }
                         }
 
-                        if (objMask.GetUpdateMask().IsAnySet() || goMask.GetUpdateMask().IsAnySet())
-                            gameObject.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), this);
+                        if (objMask.GetChangesMask().IsAnySet() || goMask.GetChangesMask().IsAnySet())
+                            gameObject.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), this);
                     }
 
                 }
@@ -3598,8 +3598,8 @@ namespace Game.Entities
                             unitMask.MarkChanged(unitMask.StateWorldEffectsQuestObjectiveID);
                         }
 
-                        if (objMask.GetUpdateMask().IsAnySet() || unitMask.GetUpdateMask().IsAnySet())
-                            creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
+                        if (objMask.GetChangesMask().IsAnySet() || unitMask.GetChangesMask().IsAnySet())
+                            creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), unitMask.GetChangesMask(), this);
 
                         if (creature.IsQuestGiver())
                             giverStatusMultiple.QuestGiver.Add(new QuestGiverInfo(visibleObjectGuid, GetQuestDialogStatus(creature)));
@@ -3618,7 +3618,7 @@ namespace Game.Entities
                                 ObjectFieldData objMask = new();
                                 UnitData unitMask = new();
                                 unitMask.MarkChanged(m_unitData.NpcFlags); // NpcFlags has UNIT_NPC_FLAG_SPELLCLICK
-                                creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), unitMask.GetUpdateMask(), this);
+                                creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), unitMask.GetChangesMask(), this);
                                 break;
                             }
                         }

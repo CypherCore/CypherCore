@@ -1886,7 +1886,7 @@ namespace Game.Maps
 
             while (!_updateObjects.Empty())
             {
-                WorldObject obj = _updateObjects[0];
+                BaseEntity obj = _updateObjects[0];
                 Cypher.Assert(obj.IsInWorld);
                 _updateObjects.RemoveAt(0);
                 obj.BuildUpdate(update_players);
@@ -3901,12 +3901,12 @@ namespace Game.Maps
             return _guidGenerators[high];
         }
 
-        public void AddUpdateObject(WorldObject obj)
+        public void AddUpdateObject(BaseEntity obj)
         {
             _updateObjects.Add(obj);
         }
 
-        public void RemoveUpdateObject(WorldObject obj)
+        public void RemoveUpdateObject(BaseEntity obj)
         {
             _updateObjects.Remove(obj);
         }
@@ -4879,7 +4879,7 @@ namespace Game.Maps
         Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
         List<Corpse> _corpseBones = new();
 
-        List<WorldObject> _updateObjects = new();
+        List<BaseEntity> _updateObjects = new();
 
         public delegate void FarSpellCallback(Map map);
         Queue<FarSpellCallback> _farSpellCallbacks = new();

@@ -15,15 +15,16 @@ namespace Game.Entities
         T GetValue();
     }
 
-    public interface IsUpdateFieldStructureTag<T>
-    {
-        void WriteCreate(WorldPacket data, T owner, Player receiver);
-        void WriteUpdate(WorldPacket data, bool ignoreChangesMask, T owner, Player receiver);
-    }
     public interface IHasChangesMask
     {
         void ClearChangesMask();
-        UpdateMask GetUpdateMask();
+        UpdateMask GetChangesMask();
+    }
+
+    public interface IsUpdateFieldStructure<T>
+    {
+        void WriteCreate(WorldPacket data, T owner, Player receiver);
+        void WriteUpdate(WorldPacket data, bool ignoreChangesMask, T owner, Player receiver);
     }
 
     public class UpdateFieldString : IUpdateField<string>
@@ -287,7 +288,7 @@ namespace Game.Entities
         void MarkAllUpdateMaskFields(T value)
         {
             if (value is IHasChangesMask)
-                ((IHasChangesMask)value).GetUpdateMask().SetAll();
+                ((IHasChangesMask)value).GetChangesMask().SetAll();
         }
 
         public void Clear()
@@ -478,7 +479,7 @@ namespace Game.Entities
 
         public abstract void ClearChangesMask();
 
-        public UpdateMask GetUpdateMask()
+        public UpdateMask GetChangesMask()
         {
             return _changesMask;
         }
@@ -674,7 +675,8 @@ namespace Game.Entities
 
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
         {
-            _changesMask.Set(updateField.BlockBit);
+            if (updateField.BlockBit >= 0)
+                _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);
         }
 
@@ -688,13 +690,15 @@ namespace Game.Entities
 
         public void MarkChanged<U>(OptionalUpdateField<U> updateField) where U : new()
         {
-            _changesMask.Set(updateField.BlockBit);
+            if (updateField.BlockBit >= 0)
+                _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);
         }
 
         public void MarkChanged(UpdateFieldString updateField)
         {
-            _changesMask.Set(updateField.BlockBit);
+            if (updateField.BlockBit >= 0)
+                _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);
         }
 
@@ -739,13 +743,13 @@ namespace Game.Entities
             data.WriteInt32(map.Size());
             foreach (var (k, (v, _)) in map)
             {
-                if (typeof(IsUpdateFieldStructureTag<T>).IsAssignableFrom(typeof(K)))
-                    ((IsUpdateFieldStructureTag<T>)k).WriteCreate(data, owner, receiver);
+                if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(K)))
+                    ((IsUpdateFieldStructure<T>)k).WriteCreate(data, owner, receiver);
                 else
                     data.Write(k);
 
-                if (typeof(IsUpdateFieldStructureTag<T>).IsAssignableFrom(typeof(V)))
-                    ((IsUpdateFieldStructureTag<T>)v).WriteCreate(data, owner, receiver);
+                if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
+                    ((IsUpdateFieldStructure<T>)v).WriteCreate(data, owner, receiver);
                 else
                     data.Write(v);
             }
@@ -768,8 +772,8 @@ namespace Game.Entities
 
                     ++changesCount;
 
-                    if (typeof(IsUpdateFieldStructureTag<T>).IsAssignableFrom(typeof(K)))
-                        ((IsUpdateFieldStructureTag<T>)k).WriteUpdate(tempBuffer, true /*ignoreChangesMask*/, owner, receiver);
+                    if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(K)))
+                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(tempBuffer, true /*ignoreChangesMask*/, owner, receiver);
                     else
                         tempBuffer.Write(k);
 
@@ -777,8 +781,8 @@ namespace Game.Entities
                     if (state == MapUpdateFieldState.Deleted)
                         continue;
 
-                    if (typeof(IsUpdateFieldStructureTag<T>).IsAssignableFrom(typeof(V)))
-                        ((IsUpdateFieldStructureTag<T>)v).WriteUpdate(tempBuffer, true /*ignoreChangesMask*/, owner, receiver); // client bug replaces unchanged values with 0/default so send everything as if it changed
+                    if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
+                        ((IsUpdateFieldStructure<T>)v).WriteUpdate(tempBuffer, true /*ignoreChangesMask*/, owner, receiver); // client bug replaces unchanged values with 0/default so send everything as if it changed
                     else
                         tempBuffer.Write(v);
                 }

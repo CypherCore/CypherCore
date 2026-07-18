@@ -197,7 +197,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), SceneObjectMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), SceneObjectMask.GetChangesMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

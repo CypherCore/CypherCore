@@ -400,7 +400,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), ConversationMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ConversationMask.GetChangesMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

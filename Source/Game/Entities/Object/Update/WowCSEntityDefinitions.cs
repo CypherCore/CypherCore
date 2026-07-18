@@ -1,8 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Constants;
+using Game.Networking;
 using System;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -69,6 +70,9 @@ namespace Game.Entities
         public const byte CGObjectUpdateMask = CGObjectActiveMask | CGObjectChangedMask;
     }
 
+    public delegate void EntityFragmentSerializeFn(BaseEntity entity, WorldPacket data, UpdateFieldFlag flags, Player target);
+    public delegate bool EntityFragmentIsChangedFn(BaseEntity entity);
+
     public class EntityFragmentsHolder
     {
         EntityFragment[] Ids =
@@ -77,15 +81,14 @@ namespace Game.Entities
             EntityFragment.End, EntityFragment.End, EntityFragment.End, EntityFragment.End
         ];
 
-        public byte Count;
-        public bool IdsChanged;
+        public UpdateableFragments Updateable = new(4);
 
-        public EntityFragment[] UpdateableIds = [EntityFragment.End, EntityFragment.End, EntityFragment.End, EntityFragment.End];
-        public byte[] UpdateableMasks = new byte[4];
+        byte Count;
+        public bool IdsChanged;
         public byte UpdateableCount;
         public byte ContentsChangedMask;
 
-        public void Add(EntityFragment fragment, bool update)
+        public void Add(EntityFragment fragment, bool update, EntityFragmentSerializeFn serializeCreate, EntityFragmentSerializeFn serializeUpdate, EntityFragmentIsChangedFn isChanged)
         {
             Cypher.Assert(Count < Ids.Length);
 
@@ -108,26 +111,46 @@ namespace Game.Entities
 
             if (IsUpdateableFragment(fragment))
             {
-                Cypher.Assert(UpdateableCount < UpdateableIds.Length);
+                Cypher.Assert(UpdateableCount < Updateable.Ids.Length);
 
-                var index = insertSorted(ref UpdateableIds, ref UpdateableCount, fragment).Item1;
+                var index = insertSorted(ref Updateable.Ids, ref UpdateableCount, fragment).Item1;
                 byte maskLowPart = (byte)(ContentsChangedMask & ((1 << index) - 1));
                 byte maskHighPart = (byte)((ContentsChangedMask & ~((1 << index) - 1)) << (1 + (IsIndirectFragment(fragment) ? 1 : 0)));
                 ContentsChangedMask = (byte)(maskLowPart | maskHighPart);
                 for (byte i = 0, maskIndex = 0; i < UpdateableCount; ++i)
                 {
-                    UpdateableMasks[i] = (byte)(1 << maskIndex++);
-                    if (IsIndirectFragment(UpdateableIds[i]))
+                    Updateable.Masks[i] = (byte)(1 << maskIndex++);
+                    if (IsIndirectFragment(Updateable.Ids[i]))
                     {
-                        ContentsChangedMask |= UpdateableMasks[i]; // set the first bit to true to activate fragment
+                        ContentsChangedMask |= Updateable.Masks[i]; // set the first bit to true to activate fragment
                         ++maskIndex;
-                        UpdateableMasks[i] <<= 1;
+                        Updateable.Masks[i] <<= 1;
                     }
                 }
+
+                void insertAtIndex<T>(T[] arr, byte size, int i, T value)
+                {
+                    //todo fix me
+                    //std::ranges::move_backward(arr.begin() + i, arr.begin() + size - 1, arr.begin() + size);
+                    arr[i] = value;
+                }
+                ;
+
+                insertAtIndex(Updateable.SerializeCreate, UpdateableCount, index, serializeCreate);
+                insertAtIndex(Updateable.SerializeUpdate, UpdateableCount, index, serializeUpdate);
+                insertAtIndex(Updateable.IsChanged, UpdateableCount, index, isChanged);
             }
 
             if (update)
                 IdsChanged = true;
+        }
+
+        public void Add(EntityFragment fragment, bool update) { Add(fragment, update, null, null, null); }
+
+        public void Add(EntityFragment fragment, bool update, IHasChangesMask blah)
+        {
+            //todo fix me
+            //Add(fragment, update, blah.WriteCreate, blah.WriteUpdate, blah.GetChangesMask().IsAnySet());
         }
 
         public void Remove(EntityFragment fragment)
@@ -150,7 +173,7 @@ namespace Game.Entities
 
             if (IsUpdateableFragment(fragment))
             {
-                var (index, removed) = removeSorted(ref UpdateableIds, ref UpdateableCount, fragment);
+                var (index, removed) = removeSorted(ref Updateable.Ids, ref UpdateableCount, fragment);
                 if (removed)
                 {
                     byte maskLowPart = (byte)(ContentsChangedMask & ((1 << index) - 1));
@@ -158,13 +181,25 @@ namespace Game.Entities
                     ContentsChangedMask = (byte)(maskLowPart | maskHighPart);
                     for (byte i = 0, maskIndex = 0; i < UpdateableCount; ++i)
                     {
-                        UpdateableMasks[i] = (byte)(1 << maskIndex++);
-                        if (IsIndirectFragment(UpdateableIds[i]))
+                        Updateable.Masks[i] = (byte)(1 << maskIndex++);
+                        if (IsIndirectFragment(Updateable.Ids[i]))
                         {
                             ++maskIndex;
-                            UpdateableMasks[i] <<= 1;
+                            Updateable.Masks[i] <<= 1;
                         }
                     }
+
+                    void removeAtIndex<T>(T[] arr, int oldSize, int i, T value)
+                    {
+                        //todo fix me
+                        //std::ranges::move(arr.begin() + i + 1, arr.begin() + oldSize, arr.begin() + i) = value;
+                    }
+                    ;
+
+                    int oldSize = UpdateableCount + 1;
+                    removeAtIndex(Updateable.SerializeCreate, oldSize, index, null);
+                    removeAtIndex(Updateable.SerializeUpdate, oldSize, index, null);
+                    removeAtIndex(Updateable.IsChanged, oldSize, index, null);
                 }
             }
 
@@ -197,8 +232,7 @@ namespace Game.Entities
                 || frag == EntityFragment.PlayerHouseInfoComponent_C;
         }
 
-        public EntityFragment[] GetIds() { return Ids[..Count]; }
-        public EntityFragment[] GetUpdateableIds() { return UpdateableIds[..UpdateableCount]; }
+        public Span<EntityFragment> GetIds() { return Ids[..Count]; }
 
         public byte GetUpdateMaskFor(EntityFragment fragment)
         {
@@ -206,10 +240,19 @@ namespace Game.Entities
                 return EntityDefinitionsConst.CGObjectChangedMask;
 
             for (byte i = 1; i < UpdateableCount; ++i)
-                if (UpdateableIds[i] == fragment)
-                    return UpdateableMasks[i];
+                if (Updateable.Ids[i] == fragment)
+                    return Updateable.Masks[i];
 
             return 0;
+        }
+
+        public struct UpdateableFragments(int count)
+        {
+            public EntityFragment[] Ids = [EntityFragment.End, EntityFragment.End, EntityFragment.End, EntityFragment.End];
+            public byte[] Masks = new byte[count];
+            public EntityFragmentSerializeFn[] SerializeCreate = new EntityFragmentSerializeFn[count];
+            public EntityFragmentSerializeFn[] SerializeUpdate = new EntityFragmentSerializeFn[count];
+            public EntityFragmentIsChangedFn[] IsChanged = new EntityFragmentIsChangedFn[count];
         }
     }
 }

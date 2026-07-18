@@ -462,7 +462,7 @@ namespace Game.Entities
                             goMask.MarkChanged(m_gameObjectData.State);
 
                             UpdateData udata = new(GetMapId());
-                            BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), seer);
+                            BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), seer);
                             udata.BuildPacket(out UpdateObject packet);
                             seer.SendPacket(packet);
                         }
@@ -3145,7 +3145,7 @@ namespace Game.Entities
                     objMask.MarkChanged(objMask.DynamicFlags);
 
                     UpdateData udata = new(GetMapId());
-                    BuildValuesUpdateForPlayerWithMask(udata, objMask.GetUpdateMask(), goMask.GetUpdateMask(), looter);
+                    BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), looter);
                     udata.BuildPacket(out UpdateObject packet);
                     looter.SendPacket(packet);
                     break;
@@ -4047,7 +4047,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), GameObjectMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), GameObjectMask.GetChangesMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

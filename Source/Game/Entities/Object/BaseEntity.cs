@@ -102,8 +102,15 @@ namespace Game.Entities
             WorldPacket tempBuffer = new();
             tempBuffer.WriteUInt8((byte)fieldFlags);
             BuildEntityFragments(tempBuffer, EntityFragments.GetIds());
-            tempBuffer.WriteUInt8(1);  // IndirectFragmentActive: CGObject
-            BuildValuesCreate(tempBuffer, fieldFlags, target);
+
+            for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
+            {
+                EntityFragment fragmentId = EntityFragments.Updateable.Ids[i];
+                if (EntityFragmentsHolder.IsIndirectFragment(fragmentId))
+                    tempBuffer.WriteUInt8(1);  // IndirectFragmentActive
+
+                EntityFragments.Updateable.SerializeCreate[i](this, tempBuffer, fieldFlags, target);
+            }
 
             buffer.WriteUInt32(tempBuffer.GetSize());
             buffer.WriteBytes(tempBuffer);
@@ -144,18 +151,21 @@ namespace Game.Entities
             }
             tempBuffer.WriteUInt8(EntityFragments.ContentsChangedMask);
 
-            BuildValuesUpdate(tempBuffer, fieldFlags, target);
+            for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
+            {
+                if ((EntityFragments.ContentsChangedMask & EntityFragments.Updateable.Masks[i]) == 0)
+                    continue;
+
+                EntityFragments.Updateable.SerializeUpdate[i](this, tempBuffer, fieldFlags, target);
+            }
+
             buffer.WriteUInt32(tempBuffer.GetSize());
             buffer.WriteBytes(tempBuffer);
 
             data.AddUpdateBlock(buffer);
         }
 
-        public virtual void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
-
-        public virtual void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
-
-        void BuildEntityFragments(WorldPacket data, EntityFragment[] fragments)
+        void BuildEntityFragments(WorldPacket data, Span<EntityFragment> fragments)
         {
             foreach (var frag in fragments)
                 data.WriteUInt8((byte)frag);
@@ -643,6 +653,17 @@ namespace Game.Entities
             }
         }
 
+        public void BuildUpdateChangesMask()
+        {
+            for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
+            {
+                if (EntityFragments.Updateable.IsChanged[i](this))
+                    EntityFragments.ContentsChangedMask |= EntityFragments.Updateable.Masks[i];
+                else
+                    EntityFragments.ContentsChangedMask &= (byte)~EntityFragments.Updateable.Masks[i];
+            }
+        }
+
         public void BuildFieldsUpdate(Player player, Dictionary<Player, UpdateData> data_map)
         {
             if (!data_map.ContainsKey(player))
@@ -945,7 +966,6 @@ namespace Game.Entities
 
         public HasChangesMask ModifyValue(HasChangesMask updateData)
         {
-            _owner.EntityFragments.ContentsChangedMask |= _owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
                 _changesMask.Set(updateData.Bit);
             return updateData;
@@ -956,30 +976,16 @@ namespace Game.Entities
             if (updateData == null)
                 return;
 
-            _owner.EntityFragments.ContentsChangedMask &= (byte)~_owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
-            {
                 _changesMask.Reset(updateData.Bit);
-                if (!_changesMask.IsAnySet())
-                    _owner.EntityFragments.ContentsChangedMask &= (byte)~_owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
-            }
-            else
-                _owner.EntityFragments.ContentsChangedMask &= (byte)~_owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
 
             updateData.ClearChangesMask();
         }
 
         public void ClearChangesMask<U>(HasChangesMask updateData, ref UpdateField<U> updateField) where U : new()
         {
-            _owner.EntityFragments.ContentsChangedMask &= (byte)~_owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
-            {
                 _changesMask.Reset(updateData.Bit);
-                if (!_changesMask.IsAnySet())
-                    _owner.EntityFragments.ContentsChangedMask &= (byte)~_owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
-            }
-            else
-                _owner.EntityFragments.ContentsChangedMask &= (byte)~_owner.EntityFragments.GetUpdateMaskFor((EntityFragment)updateData._blockBit);
 
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
                 ((IHasChangesMask)updateField._value).ClearChangesMask();

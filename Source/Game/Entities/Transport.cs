@@ -690,6 +690,8 @@ namespace Game.Entities
 
         public override void BuildUpdate(Dictionary<Player, UpdateData> data_map)
         {
+            BuildUpdateChangesMask();
+
             var players = GetMap().GetPlayers();
             if (players.Empty())
                 return;

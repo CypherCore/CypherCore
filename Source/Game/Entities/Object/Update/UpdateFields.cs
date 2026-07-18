@@ -4716,7 +4716,7 @@ namespace Game.Entities
         }
     }
 
-    public class TraitConfig() : HasChangesMask(15), IsUpdateFieldStructureTag<Player>
+    public class TraitConfig() : HasChangesMask(15), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<TraitEntry> Entries = new(0, 1);
         public DynamicUpdateField<TraitSubTreeCache> SubTrees = new(0, 2);

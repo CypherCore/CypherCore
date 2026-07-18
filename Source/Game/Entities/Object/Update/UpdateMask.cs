@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -50,7 +49,14 @@ namespace Game.Entities
             }
         }
 
-        public bool IsAnySet() { return _blocksMask.Any(blockMask => blockMask != 0); }
+        public bool IsAnySet()
+        {
+            for (uint i = 0; i < _blocksMaskCount; ++i)
+                if (_blocksMask[i] != 0)
+                    return true;
+
+            return false;
+        }
 
         public void Reset(int index)
         {

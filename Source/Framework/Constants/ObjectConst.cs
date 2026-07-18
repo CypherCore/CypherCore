@@ -52,9 +52,9 @@ namespace Framework.Constants
         LootObject = 1 << TypeId.LootObject,
 
         Seer = Unit | Player | DynamicObject,
-        WorldObject = Unit | GameObject | DynamicObject | Corpse | AreaTrigger | SceneObject | Conversation
+        WorldObject = Unit | GameObject | DynamicObject | Corpse | AreaTrigger | SceneObject | Conversation | MeshObject
     }
-    
+
     public enum HighGuid
     {
         Null = 0,

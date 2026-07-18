@@ -36,9 +36,8 @@ namespace Game.Entities
             ObjectTypeId = TypeId.Object;
 
             m_movementInfo = new MovementInfo();
-            m_updateFlag.Clear();
 
-            EntityFragments.Add(EntityFragment.CGObject, false);
+            EntityFragments.Add(EntityFragment.CGObject, false, BuildObjectFragmentCreate, BuildObjectFragmentUpdate, IsObjectFragmentChanged);
 
             m_objectData = new ObjectFieldData();
 
@@ -126,10 +125,15 @@ namespace Game.Entities
 
         public void BuildEntityFragmentsForValuesUpdateForPlayerWithMask(WorldPacket data, UpdateFieldFlag flags)
         {
-            byte contentsChangedMask = EntityDefinitionsConst.CGObjectChangedMask;
-            foreach (var updateableFragmentId in EntityFragments.GetUpdateableIds())
-                if (EntityFragmentsHolder.IsIndirectFragment(updateableFragmentId))
-                    contentsChangedMask |= (byte)(EntityFragments.GetUpdateMaskFor(updateableFragmentId) >> 1);   // set the "fragment exists" bit
+            byte contentsChangedMask = 0;
+            for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
+            {
+                if (EntityFragmentsHolder.IsIndirectFragment(EntityFragments.Updateable.Ids[i]))
+                    contentsChangedMask |= (byte)(EntityFragments.Updateable.Masks[i] >> 1);   // set the "fragment exists" bit
+
+                if (EntityFragments.Updateable.Ids[i] == EntityFragment.CGObject)
+                    contentsChangedMask |= EntityFragments.Updateable.Masks[i];
+            }
 
             data.WriteUInt8((byte)(flags.HasFlag(UpdateFieldFlag.Owner) ? 1 : 0));
             data.WriteUInt8(0);                                  // m_entityFragments.IdsChanged
@@ -146,6 +150,21 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
+        static void BuildObjectFragmentCreate(BaseEntity entity, WorldPacket data, UpdateFieldFlag flags, Player target)
+        {
+            (entity as WorldObject).BuildValuesCreate(data, flags, target);
+        }
+
+        static void BuildObjectFragmentUpdate(BaseEntity entity, WorldPacket data, UpdateFieldFlag flags, Player target)
+        {
+            (entity as WorldObject).BuildValuesUpdate(data, flags, target);
+        }
+
+        static bool IsObjectFragmentChanged(BaseEntity entity)
+        {
+            return entity.m_values.GetChangedObjectTypeMask() != 0;
+        }
+
         public override string GetDebugInfo()
         {
             return $"{base.GetDebugInfo()}\n{GetGUID()} Entry: {GetEntry()}\nName: {GetName()}";
@@ -155,9 +174,9 @@ namespace Game.Entities
 
         public virtual SpawnTrackingStateData GetSpawnTrackingStateDataForPlayer(Player player) { return null; }
 
-        public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
+        public virtual void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
 
-        public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
+        public virtual void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target) { }
 
         public bool IsStoredInWorldObjectGridContainer()
         {
@@ -2239,6 +2258,18 @@ namespace Game.Entities
             WorldObjectClientDestroyWork destroyer = new() { obj = this };
             WorldObjectVisibleChangeVisitor visitor = new(destroyer);
             Cell.VisitWorldObjects(this, visitor, GetVisibilityRange());
+        }
+
+        public override void BuildUpdate(Dictionary<Player, UpdateData> data_map)
+        {
+            BuildUpdateChangesMask();
+
+            WorldObjectChangeAccumulator notifier = new(this, data_map);
+            WorldObjectVisibleChangeVisitor visitor = new(notifier);
+            //we must build packets for all visible players
+            Cell.VisitWorldObjects(this, visitor, GetVisibilityRange());
+
+            ClearUpdateMask(false);
         }
 
         public virtual void UpdateObjectVisibility(bool force = true)

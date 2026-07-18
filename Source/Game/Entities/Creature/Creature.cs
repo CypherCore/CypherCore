@@ -3124,7 +3124,7 @@ namespace Game.Entities
             {
                 if (m_vendorData == null)
                 {
-                    EntityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
+                    EntityFragments.Add(EntityFragment.FVendor_C, IsInWorld, m_vendorData);
                     m_vendorData = new();
                 }
 
@@ -3151,7 +3151,7 @@ namespace Game.Entities
             {
                 if (m_vendorData == null)
                 {
-                    EntityFragments.Add(EntityFragment.FVendor_C, IsInWorld);
+                    EntityFragments.Add(EntityFragment.FVendor_C, IsInWorld, m_vendorData);
                     m_vendorData = new();
                 }
 
@@ -3796,31 +3796,17 @@ namespace Game.Entities
         {
             m_objectData.WriteCreate(data, flags, this, target);
             m_unitData.WriteCreate(data, flags, this, target);
-
-            if (m_vendorData != null)
-            {
-                if (EntityFragmentsHolder.IsIndirectFragment(EntityFragment.FVendor_C))
-                    data.WriteUInt8(1);  // IndirectFragmentActive: FVendor_C
-
-                m_vendorData.WriteCreate(data, flags, this, target);
-            }
         }
 
         public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            if ((EntityFragments.ContentsChangedMask & EntityFragments.GetUpdateMaskFor(EntityFragment.CGObject)) != 0)
-            {
-                data.WriteUInt32(m_values.GetChangedObjectTypeMask());
+            data.WriteUInt32(m_values.GetChangedObjectTypeMask());
 
-                if (m_values.HasChanged(TypeId.Object))
-                    m_objectData.WriteUpdate(data, flags, this, target);
+            if (m_values.HasChanged(TypeId.Object))
+                m_objectData.WriteUpdate(data, flags, this, target);
 
-                if (m_values.HasChanged(TypeId.Unit))
-                    m_unitData.WriteUpdate(data, flags, this, target);
-            }
-
-            if (m_vendorData != null && (EntityFragments.ContentsChangedMask & EntityFragments.GetUpdateMaskFor(EntityFragment.FVendor_C)) != 0)
-                m_vendorData.WriteUpdate(data, flags, this, target);
+            if (m_values.HasChanged(TypeId.Unit))
+                m_unitData.WriteUpdate(data, flags, this, target);
         }
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
@@ -3887,7 +3873,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetUpdateMask(), UnitMask.GetUpdateMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), UnitMask.GetChangesMask(), player);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
