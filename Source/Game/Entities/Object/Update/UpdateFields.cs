@@ -11339,7 +11339,7 @@ namespace Game.Entities
         }
     }
 
-    class HousingStorageData() : HasChangesMask(3)
+    class HousingStorageData() : HasChangesMask((int)EntityFragment.FHousingStorage_C, TypeId.Object, 3)
     {
         public MapUpdateField<ObjectGuid, DecorStoragePersistedData> Decor = new(0, 1);
         public UpdateField<uint> DecorMaxOwnedCount = new(0, 2);

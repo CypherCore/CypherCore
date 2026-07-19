@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.ClientBuild;
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
@@ -29,7 +30,8 @@ namespace Game
         public static uint SPECIAL_INIT_ACTIVE_MOVER_TIME_SYNC_COUNTER = 0xFFFFFFFF;
         public static uint SPECIAL_RESUME_COMMS_TIME_SYNC_COUNTER = 0xFFFFFFFE;
 
-        public WorldSession(uint id, string name, uint battlenetAccountId, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset, uint build, Framework.ClientBuild.ClientBuildVariantId clientBuildVariant, Locale locale, uint recruiter, bool isARecruiter)
+        public WorldSession(uint id, string name, uint battlenetAccountId, string battlenetAccountEmail, WorldSocket sock, AccountTypes sec, Expansion expansion, long mute_time, string os, TimeSpan timezoneOffset,
+            uint build, ClientBuildVariantId clientBuildVariant, Locale locale, uint recruiter, bool isARecruiter)
         {
             m_muteTime = mute_time;
             AntiDOS = new DosProtection(this);
@@ -37,7 +39,7 @@ namespace Game
             _security = sec;
             _accountId = id;
             _accountName = name;
-            _battlenetAccountId = battlenetAccountId;
+            _battlenetAccount = new Account(this, ObjectGuid.Create(HighGuid.BNetAccount, battlenetAccountId), battlenetAccountEmail);
             m_accountExpansion = expansion;
             m_expansion = (Expansion)Math.Min((byte)expansion, WorldConfig.GetIntValue(WorldCfg.Expansion));
             _os = os;
@@ -800,6 +802,16 @@ namespace Game
             }
         }
 
+        public uint GetBattlenetAccountId()
+        {
+            return (uint)GetBattlenetAccountGUID().GetCounter();
+        }
+
+        public ObjectGuid GetBattlenetAccountGUID()
+        {
+            return _battlenetAccount.GetGUID();
+        }
+
         public void SetPlayer(Player pl)
         {
             _player = pl;
@@ -840,8 +852,7 @@ namespace Game
         public uint GetAccountId() { return _accountId; }
         public ObjectGuid GetAccountGUID() { return ObjectGuid.Create(HighGuid.WowAccount, GetAccountId()); }
         public string GetAccountName() { return _accountName; }
-        public uint GetBattlenetAccountId() { return _battlenetAccountId; }
-        public ObjectGuid GetBattlenetAccountGUID() { return ObjectGuid.Create(HighGuid.BNetAccount, GetBattlenetAccountId()); }
+        public Account GetBattlenetAccount() { return _battlenetAccount; }
 
         public Player GetPlayer() { return _player; }
 
@@ -1106,12 +1117,12 @@ namespace Game
         AccountTypes _security;
         uint _accountId;
         string _accountName;
-        uint _battlenetAccountId;
+        Account _battlenetAccount;
         Expansion m_accountExpansion;
         Expansion m_expansion;
         string _os;
         uint _clientBuild;
-        Framework.ClientBuild.ClientBuildVariantId _clientBuildVariant;
+        ClientBuildVariantId _clientBuildVariant;
 
         uint expireTime;
         bool forceExit;

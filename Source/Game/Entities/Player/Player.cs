@@ -620,6 +620,8 @@ namespace Game.Entities
             for (byte i = (int)PlayerSlots.Start; i < (int)PlayerSlots.End; ++i)
                 if (m_items[i] != null)
                     m_items[i].AddToWorld();
+
+            GetSession().GetBattlenetAccount().AddToWorld();
         }
         public override void RemoveFromWorld()
         {
@@ -637,6 +639,8 @@ namespace Game.Entities
                 OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
                 BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
             }
+
+            GetSession().GetBattlenetAccount().RemoveFromWorld();
 
             // Remove items from world before self - player must be found in Item.RemoveFromObjectUpdate
             for (byte i = (int)PlayerSlots.Start; i < (int)PlayerSlots.End; ++i)
@@ -8081,6 +8085,8 @@ namespace Game.Entities
             {
                 foreach (Item item in m_items)
                     item?.BuildCreateUpdateBlockForPlayer(data, target);
+
+                GetSession().GetBattlenetAccount().BuildCreateUpdateBlockForPlayer(data, target);
             }
 
             base.BuildCreateUpdateBlockForPlayer(data, target);

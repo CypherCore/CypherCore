@@ -655,7 +655,7 @@ namespace Game.Networking
             // At this point, we can safely hook a successful login
             Global.ScriptMgr.OnAccountLogin(account.game.Id);
 
-            _worldSession = new WorldSession(account.game.Id, joinTicket.GameAccount, account.battleNet.Id, this, account.game.Security, (Expansion)account.game.Expansion,
+            _worldSession = new WorldSession(account.game.Id, joinTicket.GameAccount, account.battleNet.Id, account.battleNet.Email, this, account.game.Security, (Expansion)account.game.Expansion,
                 mutetime, account.game.OS, account.game.TimezoneOffset, account.game.Build, buildVariant, account.game.Locale, account.game.Recruiter, account.game.IsRectuiter);
 
             _queryProcessor.AddCallback(_worldSession.LoadPermissionsAsync().WithCallback(LoadSessionPermissionsCallback));
@@ -839,13 +839,14 @@ namespace Game.Networking
     {
         public AccountInfo(SQLFields fields)
         {
-            //           0              1           2          3                4            5           6               7         8            9    10                 11     12                13
-            // SELECT a.id, a.session_key, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, a.client_build, a.locale, a.recruiter, a.os, a.timezone_offset, ba.id, aa.SecurityLevel,
-            //                                                              14                                                            15    16
-            // bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id
-            // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?)
-            // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
-            // WHERE a.username = ? AND LENGTH(a.session_key) = 40 ORDER BY aa.RealmID DESC LIMIT 1
+            //                 0            1                    2           3          4               5            6           7               8         9           10     11                        12                           13                     14
+            // SELECT a.id AS accountId, a.session_key_bnet, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, a.client_build, a.locale, a.recruiter, a.os, a.timezone_offset, ba.id AS bnet_account_id, ba.email as bnet_account_email, aa.SecurityLevel,
+            //                                                                     15                                                                              16                 17
+            // bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate AS is_bnet_banned, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate AS is_banned, r.id AS recruitId
+            // FROM account a LEFT JOIN account r ON a.id = r.recruiter LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id
+            // LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?) LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id AND ab.active = 1
+            // WHERE a.username = ? AND LENGTH(a.session_key_bnet) = 64 ORDER BY aa.RealmID DESC LIMIT 1
+
             game.Id = fields.Read<uint>(0);
             game.KeyData = fields.Read<byte[]>(1);
             battleNet.LastIP = fields.Read<string>(2);
@@ -859,10 +860,11 @@ namespace Game.Networking
             game.OS = fields.Read<string>(10);
             game.TimezoneOffset = TimeSpan.FromMinutes(fields.Read<short>(11));
             battleNet.Id = fields.Read<uint>(12);
-            game.Security = (AccountTypes)fields.Read<byte>(13);
-            battleNet.IsBanned = fields.Read<uint>(14) != 0;
-            game.IsBanned = fields.Read<uint>(15) != 0;
-            game.IsRectuiter = fields.Read<uint>(16) != 0;
+            battleNet.Email = fields.Read<string>(13);
+            game.Security = (AccountTypes)fields.Read<byte>(14);
+            battleNet.IsBanned = fields.Read<uint>(15) != 0;
+            game.IsBanned = fields.Read<uint>(16) != 0;
+            game.IsRectuiter = fields.Read<uint>(17) != 0;
 
             if (game.Locale >= Locale.Total)
                 game.Locale = Locale.enUS;
@@ -876,6 +878,7 @@ namespace Game.Networking
         public struct BattleNet
         {
             public uint Id;
+            public string Email;
             public bool IsLockedToIP;
             public string LastIP;
             public string LockCountry;
