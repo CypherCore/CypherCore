@@ -1342,25 +1342,8 @@ namespace Game.Entities
             if (_reachedDestination)
                 return;
 
-            if (GetElapsedTimeForMovement() >= GetTimeToTarget())
-            {
-                _reachedDestination = true;
-                _lastSplineIndex = _spline.Last();
-
-                Vector3 lastSplinePosition = _spline.GetPoint(_lastSplineIndex);
-                GetMap().AreaTriggerRelocation(this, lastSplinePosition.X, lastSplinePosition.Y, lastSplinePosition.Z, GetOrientation());
-
-                DebugVisualizePosition();
-
-                _ai.OnSplineIndexReached(_lastSplineIndex);
-                _ai.OnDestinationReached();
-                return;
-            }
-
-            float currentTimePercent = (float)GetElapsedTimeForMovement() / GetTimeToTarget();
-
-            if (currentTimePercent <= 0.0f)
-                return;
+            float currentTimePercent = Math.Clamp((float)GetElapsedTimeForMovement() / (float)GetTimeToTarget(), 0.0f, 1.0f);
+            _reachedDestination = currentTimePercent >= 1.0f;
 
             if (m_areaTriggerData.MoveCurveId != 0)
             {
@@ -1396,10 +1379,16 @@ namespace Game.Entities
 
             DebugVisualizePosition();
 
-            if (_lastSplineIndex != lastPositionIndex)
+            if (_lastSplineIndex != lastPositionIndex || _reachedDestination)
             {
                 _lastSplineIndex = lastPositionIndex;
-                _ai.OnSplineIndexReached(_lastSplineIndex);
+                _ai.OnSplineIndexReached(_lastSplineIndex - _spline.First() /*translate to index of the input array used for AreaTrigger::InitSplines*/);
+                if (_reachedDestination)
+                {
+                    _ai.OnDestinationReached();
+                    _spline = null;
+                    SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.None);
+                }
             }
         }
 
@@ -1580,6 +1569,8 @@ namespace Game.Entities
 
         bool HasOrbit() { return m_areaTriggerData.PathData.Is<AreaTriggerOrbit>(); }
         public AreaTriggerOrbit GetOrbit() { return m_areaTriggerData.PathData.Get<AreaTriggerOrbit>(); }
+
+        public void SetPathTarget(ObjectGuid pathTarget) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OrbitPathTarget), pathTarget); }
 
         public AreaTriggerFieldData m_areaTriggerData;
 
