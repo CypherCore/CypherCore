@@ -544,10 +544,11 @@ namespace Game.Movement
                 Add(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle), null));
         }
 
-        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null, MovementSlot slot = MovementSlot.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MoveRandom(float wanderDistance = 0.0f, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.ForceWalk,
+            MovementSlot slot = MovementSlot.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (_owner.IsTypeId(TypeId.Unit))
-                Add(new RandomMovementGenerator(wanderDistance, duration, scriptResult), slot);
+                Add(new RandomMovementGenerator(wanderDistance, duration, speed, speedSelectionMode, scriptResult), slot);
             else if (scriptResult != null)
                 scriptResult.SetResult(MovementStopReason.Interrupted);
         }

@@ -345,23 +345,30 @@ namespace Game.Entities
 
         public float GetSightRange(WorldObject target = null)
         {
-            if (IsPlayer() || IsCreature())
+            if (IsUnit())
             {
-                if (IsPlayer())
+                Player player = ToPlayer();
+                if (player != null)
                 {
-                    if (target != null && target.IsVisibilityOverridden() && !target.IsPlayer())
-                        return target.m_visibilityDistanceOverride.Value;
-                    else if (target != null && target.IsFarVisible() && !target.IsPlayer())
-                        return SharedConst.MaxVisibilityDistance;
-                    else if (ToPlayer().GetCinematicMgr().IsOnCinematic())
+                    if (target != null && !target.IsPlayer())
+                    {
+                        if (target.IsVisibilityOverridden())
+                            return target.m_visibilityDistanceOverride.Value;
+                        if (target.IsFarVisible())
+                            return SharedConst.MaxVisibilityDistance;
+                    }
+
+                    if (ToPlayer().GetCinematicMgr().IsOnCinematic())
                         return SharedConst.DefaultVisibilityInstance;
-                    else
-                        return GetMap().GetVisibilityRange();
+
+                    return GetMap().GetVisibilityRange();
                 }
-                else if (IsCreature())
-                    return ToCreature().m_SightDistance;
-                else
-                    return SharedConst.SightRangeUnit;
+
+                Creature creature = ToCreature();
+                if (creature != null)
+                    return creature.m_SightDistance;
+
+                return SharedConst.SightRangeUnit;
             }
 
             if (IsDynObject() && IsActiveObject())
@@ -975,8 +982,9 @@ namespace Game.Entities
         public ObjectGuid GetCharmerOrOwnerOrOwnGUID()
         {
             ObjectGuid guid = GetCharmerOrOwnerGUID();
-            if (!guid.IsEmpty())
-                return guid;
+            if (guid.IsEmpty())
+                guid = GetGUID();
+
             return GetGUID();
         }
 

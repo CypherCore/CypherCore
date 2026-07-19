@@ -338,7 +338,7 @@ namespace Game.Movement
                     _duration.Update(waitTime); // count the random movement time as part of waypoing movement action
 
                 if (_wanderDistanceAtPathEnds.HasValue)
-                    owner.GetMotionMaster().MoveRandom(_wanderDistanceAtPathEnds.Value, waitTime, MovementSlot.Active);
+                    owner.GetMotionMaster().MoveRandom(_wanderDistanceAtPathEnds.Value, waitTime, _speed, _speedSelectionMode, MovementSlot.Active);
                 else
                     _nextMoveTime.Reset(waitTime);
             }

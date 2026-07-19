@@ -5,7 +5,6 @@ using Framework.Constants;
 using Game.Entities;
 using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -14,15 +13,19 @@ namespace Game.Movement
         PathGenerator _path;
         TimeTracker _timer;
         TimeTracker _duration;
+        float? _speed;
+        MovementWalkRunSpeedSelectionMode _speedSelectionMode;
         Position _reference;
         float _wanderDistance;
         uint _wanderSteps;
 
-        public RandomMovementGenerator(float spawnDist = 0.0f, TimeSpan? duration = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public RandomMovementGenerator(float distance = 0.0f, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _timer = new TimeTracker();
+            _speed = speed;
+            _speedSelectionMode = speedSelectionMode;
             _reference = new();
-            _wanderDistance = spawnDist;
+            _wanderDistance = distance;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -39,14 +42,11 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.TimedPaused);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            if (owner == null || !owner.IsAlive())
+            if (!owner.IsAlive())
                 return;
 
             _reference = owner.GetPosition();
             owner.StopMoving();
-
-            if (_wanderDistance == 0f)
-                _wanderDistance = owner.GetWanderDistance();
 
             // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
             _wanderSteps = RandomHelper.URand(2, 10);
@@ -63,7 +63,7 @@ namespace Game.Movement
 
         public override bool DoUpdate(Creature owner, uint diff)
         {
-            if (owner == null || !owner.IsAlive())
+            if (!owner.IsAlive())
                 return true;
 
             if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
@@ -148,9 +148,6 @@ namespace Game.Movement
 
         void SetRandomLocation(Creature owner)
         {
-            if (owner == null)
-                return;
-
             if (owner.HasUnitState(UnitState.NotMove | UnitState.LostControl) || owner.IsMovementPreventedByCasting())
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
@@ -197,22 +194,26 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            bool walk = true;
-            switch (owner.GetMovementTemplate().GetRandom())
+            MoveSplineInit init = new(owner);
+            init.MovebyPath(_path.GetPath());
+
+            switch (_speedSelectionMode)
             {
-                case CreatureRandomMovementType.CanRun:
-                    walk = owner.IsWalking();
+                case MovementWalkRunSpeedSelectionMode.Default:
                     break;
-                case CreatureRandomMovementType.AlwaysRun:
-                    walk = false;
+                case MovementWalkRunSpeedSelectionMode.ForceRun:
+                    init.SetWalk(false);
+                    break;
+                case MovementWalkRunSpeedSelectionMode.ForceWalk:
+                    init.SetWalk(true);
                     break;
                 default:
                     break;
             }
 
-            MoveSplineInit init = new(owner);
-            init.MovebyPath(_path.GetPath());
-            init.SetWalk(walk);
+            if (_speed.HasValue)
+                init.SetVelocity(_speed.Value);
+
             uint splineDuration = (uint)init.Launch();
 
             --_wanderSteps;

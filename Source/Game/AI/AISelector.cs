@@ -88,9 +88,29 @@ namespace Game.AI
             if (creature != null && creature.GetPlayerMovingMe() == null)
                 type = creature.GetDefaultMovementType();
 
+
+            if (type == MovementGeneratorType.Random)
+            {
+                MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default;
+                switch (creature.GetMovementTemplate().GetRandom())
+                {
+                    case CreatureRandomMovementType.Walk:
+                        speedSelectionMode = MovementWalkRunSpeedSelectionMode.ForceWalk;
+                        break;
+                    case CreatureRandomMovementType.CanRun:
+                        break;
+                    case CreatureRandomMovementType.AlwaysRun:
+                        speedSelectionMode = MovementWalkRunSpeedSelectionMode.ForceRun;
+                        break;
+                    default:
+                        break;
+                }
+
+                return new RandomMovementGenerator(creature.GetWanderDistance(), null, null, speedSelectionMode);
+            }
+
             return type switch
             {
-                MovementGeneratorType.Random => new RandomMovementGenerator(),
                 MovementGeneratorType.Waypoint => new WaypointMovementGenerator(),
                 MovementGeneratorType.Idle => new IdleMovementGenerator(),
                 _ => null,
@@ -114,7 +134,7 @@ namespace Game.AI
         public static ConversationAI SelectConversationAI(Conversation conversation)
         {
             ConversationAI ai = Global.ScriptMgr.GetConversationAI(conversation);
-            if ( ai != null)
+            if (ai != null)
                 return ai;
 
             return new NullConversationAI(conversation, Global.ObjectMgr.GetScriptId("NullConversationAI", false));
