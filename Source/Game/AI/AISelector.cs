@@ -106,7 +106,7 @@ namespace Game.AI
                         break;
                 }
 
-                return new RandomMovementGenerator(creature.GetWanderDistance(), null, null, speedSelectionMode);
+                return new RandomMovementGenerator<Creature>(creature.GetWanderDistance(), null, null, speedSelectionMode);
             }
 
             return type switch

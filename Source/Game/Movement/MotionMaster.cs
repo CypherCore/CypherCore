@@ -548,9 +548,9 @@ namespace Game.Movement
             MovementSlot slot = MovementSlot.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (_owner.IsTypeId(TypeId.Unit))
-                Add(new RandomMovementGenerator(wanderDistance, duration, speed, speedSelectionMode, scriptResult), slot);
-            else if (scriptResult != null)
-                scriptResult.SetResult(MovementStopReason.Interrupted);
+                Add(new RandomMovementGenerator<Creature>(wanderDistance, duration, speed, speedSelectionMode, scriptResult), slot);
+            else
+                Add(new RandomMovementGenerator<Player>(wanderDistance, duration, speed, speedSelectionMode, scriptResult), slot);
         }
 
         public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, bool ignoreTargetWalk = false, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)

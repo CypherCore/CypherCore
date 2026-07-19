@@ -8,7 +8,7 @@ using System;
 
 namespace Game.Movement
 {
-    public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
+    public class RandomMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
         PathGenerator _path;
         TimeTracker _timer;
@@ -37,7 +37,7 @@ namespace Game.Movement
                 _duration = new TimeTracker(duration.Value);
         }
 
-        public override void DoInitialize(Creature owner)
+        public override void DoInitialize(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.TimedPaused);
             AddFlag(MovementGeneratorFlags.Initialized);
@@ -55,13 +55,13 @@ namespace Game.Movement
             _path = null;
         }
 
-        public override void DoReset(Creature owner)
+        public override void DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             DoInitialize(owner);
         }
 
-        public override bool DoUpdate(Creature owner, uint diff)
+        public override bool DoUpdate(T owner, uint diff)
         {
             if (!owner.IsAlive())
                 return true;
@@ -97,13 +97,13 @@ namespace Game.Movement
             return true;
         }
 
-        public override void DoDeactivate(Creature owner)
+        public override void DoDeactivate(T owner)
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
             owner.ClearUnitState(UnitState.RoamingMove);
         }
 
-        public override void DoFinalize(Creature owner, bool active, bool movementInform)
+        public override void DoFinalize(T owner, bool active, bool movementInform)
         {
             AddFlag(MovementGeneratorFlags.Finalized);
             if (active)
@@ -118,8 +118,8 @@ namespace Game.Movement
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
                 SetScriptResult(MovementStopReason.Finished);
-                if (owner.IsAIEnabled())
-                    owner.GetAI().MovementInform(MovementGeneratorType.Random, 0);
+                if (owner.IsCreature() && owner.IsAIEnabled())
+                    owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Random, 0);
             }
         }
 
@@ -146,7 +146,7 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.Paused);
         }
 
-        void SetRandomLocation(Creature owner)
+        void SetRandomLocation(T owner)
         {
             if (owner.HasUnitState(UnitState.NotMove | UnitState.LostControl) || owner.IsMovementPreventedByCasting())
             {
@@ -227,7 +227,8 @@ namespace Game.Movement
             }
 
             // Call for creature group update
-            owner.SignalFormationMovement();
+            if (owner.IsCreature())
+                owner.ToCreature().SignalFormationMovement();
         }
 
         public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
