@@ -312,9 +312,7 @@ namespace Game.AI
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new(id, x, y, z, orientation, waitTime);
-            waypoint.MoveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
-            _path.Nodes.Add(waypoint);
+            _path.Nodes.Add(new WaypointNode(id, x, y, z, orientation, waitTime, run ? WaypointMoveType.Run : WaypointMoveType.Walk));
         }
 
         void ResetPath()

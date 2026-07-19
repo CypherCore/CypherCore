@@ -320,8 +320,7 @@ namespace Game
 
     public class WaypointNode
     {
-        public WaypointNode() { MoveType = WaypointMoveType.Run; }
-        public WaypointNode(uint id, float x, float y, float z, float? orientation = null, TimeSpan delay = default)
+        public WaypointNode(uint id, float x, float y, float z, float? orientation = null, TimeSpan? delay = null, WaypointMoveType? moveType = null)
         {
             Id = id;
             X = x;
@@ -329,7 +328,7 @@ namespace Game
             Z = z;
             Orientation = orientation;
             Delay = delay;
-            MoveType = WaypointMoveType.Walk;
+            MoveType = moveType;
         }
 
         public uint Id;
@@ -337,8 +336,8 @@ namespace Game
         public float Y;
         public float Z;
         public float? Orientation;
-        public TimeSpan Delay;
-        public WaypointMoveType MoveType;
+        public TimeSpan? Delay;
+        public WaypointMoveType? MoveType;
     }
 
     public class WaypointPath
@@ -367,8 +366,8 @@ namespace Game
                 var g = ContinuousSegments[^1];
                 ++g.Last;
 
-                // split on delay
-                if (i + 1 != Nodes.Count && Nodes[i].Delay != TimeSpan.Zero)
+                // split on delay or different move type
+                if (i + 1 != Nodes.Count && (Nodes[i].Delay.HasValue || Nodes[i].MoveType != Nodes[i + 1].MoveType))
                     ContinuousSegments.Add(new WaypointSegment(i, 1));
             }
         }

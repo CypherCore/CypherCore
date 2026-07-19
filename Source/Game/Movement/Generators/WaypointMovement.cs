@@ -326,7 +326,7 @@ namespace Game.Movement
             if (waypoint.Delay != TimeSpan.Zero)
             {
                 owner.ClearUnitState(UnitState.RoamingMove);
-                _nextMoveTime.Reset(waypoint.Delay);
+                _nextMoveTime.Reset(waypoint.Delay.Value);
             }
 
             if (_waitTimeRangeAtPathEnd.HasValue && IsFollowingPathBackwardsFromEndToStart()
@@ -463,7 +463,7 @@ namespace Game.Movement
                 && (lastWaypointForSegment.Delay != TimeSpan.Zero || (_isReturningToStart ? _currentNode == 0 : _currentNode == _path.Nodes.Count - 1)))
                 init.SetFacing(lastWaypointForSegment.Orientation.Value);
 
-            switch (_path.MoveType)
+            switch (lastWaypointForSegment.MoveType.GetValueOrDefault(_path.MoveType))
             {
                 case WaypointMoveType.Land:
                     init.SetAnimation(AnimTier.Ground);
@@ -679,7 +679,8 @@ namespace Game.Movement
 
                     source.Relocate(node.X, node.Y, node.Z);
                 }
-            };
+            }
+            ;
 
             if (isCyclic)
             {
