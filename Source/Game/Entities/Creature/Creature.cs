@@ -2787,6 +2787,14 @@ namespace Game.Entities
 
         public override bool CanEnterWater() { return CanSwim() || IsAmphibious(); }
 
+        public override MovementGeneratorType GetDefaultMovementType()
+        {
+            if (GetPlayerMovingMe() == null)
+                return DefaultMovementType;
+
+            return MovementGeneratorType.Idle;
+        }
+
         public void AllLootRemovedFromCorpse()
         {
             long now = GameTime.GetGameTime();
@@ -3719,7 +3727,7 @@ namespace Game.Entities
         public bool IsIgnoringSanctuarySpellEffect() { return _staticFlags.HasFlag(CreatureStaticFlags2.IgnoreSanctuary); }
         public void SetIgnoreSanctuarySpellEffect(bool ignoreSanctuary) { _staticFlags.ApplyFlag(CreatureStaticFlags2.IgnoreSanctuary, ignoreSanctuary); }
 
-        public override MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
+
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 
         public CreatureClassifications GetCreatureClassification() { return GetCreatureTemplate().Classification; }

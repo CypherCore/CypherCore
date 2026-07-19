@@ -3,9 +3,7 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Entities;
-using Game.Maps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +104,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (pathId == 0)
+            if (pathId == 0 || Global.WaypointMgr.GetPath(pathId) == null)
             {
                 handler.SendSysMessage("|cffff33ffNo valid path number provided.|r");
                 return true;
@@ -321,7 +319,7 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage($"|cff00ff00Showing path with id {pathId}.|r");
                 return true;
             }
-            else            if (subCommand == "off")
+            else if (subCommand == "off")
             {
                 WaypointPath path = Global.WaypointMgr.GetPath(pathId.Value);
                 if (path == null)

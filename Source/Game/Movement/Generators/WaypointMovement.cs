@@ -12,9 +12,8 @@ using System.Numerics;
 
 namespace Game.Movement
 {
-    public class WaypointMovementGenerator : MovementGeneratorMedium<Creature>
+    public class WaypointMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
-        uint _pathId;
         WaypointPath _path = new();
         int _currentNode;
 
@@ -40,7 +39,7 @@ namespace Game.Movement
             (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
-            _pathId = pathId;
+            _path = Global.WaypointMgr.GetPath(pathId);
             _repeating = repeating;
             _speed = speed;
             _speedSelectionMode = speedSelectionMode;
@@ -58,8 +57,6 @@ namespace Game.Movement
 
             if (duration.HasValue)
                 _duration = new(duration.Value);
-
-            _path.BuildSegments();
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
@@ -84,6 +81,8 @@ namespace Game.Movement
 
             if (duration.HasValue)
                 _duration = new(duration.Value);
+
+            _path.BuildSegments();
         }
 
         public override void Pause(uint timer)
@@ -134,21 +133,13 @@ namespace Game.Movement
             return true;
         }
 
-        public override void DoInitialize(Creature owner)
+        public override void DoInitialize(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
-            if (IsLoadedFromDB())
-            {
-                if (_pathId == 0)
-                    _pathId = owner.GetWaypointPathId();
-
-                _path = Global.WaypointMgr.GetPath(_pathId);
-            }
-
             if (_path == null)
             {
-                Log.outError(LogFilter.Sql, $"WaypointMovementGenerator::DoInitialize: couldn't load path for creature ({owner.GetGUID()}) (_pathId: {_pathId})");
+                Log.outError(LogFilter.Sql, $"WaypointMovementGenerator::DoInitialize: couldn't load path for creature {owner.GetGUID()}");
                 return;
             }
 
@@ -160,7 +151,7 @@ namespace Game.Movement
             _nextMoveTime.Reset(1000);
         }
 
-        public override void DoReset(Creature owner)
+        public override void DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
@@ -170,9 +161,9 @@ namespace Game.Movement
                 _nextMoveTime.Reset(1); // Needed so that Update does not behave as if node was reached
         }
 
-        public override bool DoUpdate(Creature owner, uint diff)
+        public override bool DoUpdate(T owner, uint diff)
         {
-            if (owner == null || !owner.IsAlive())
+            if (!owner.IsAlive())
                 return true;
 
             if (HasFlag(MovementGeneratorFlags.Finalized | MovementGeneratorFlags.Paused))
@@ -186,10 +177,12 @@ namespace Game.Movement
                 _duration.Update(diff);
                 if (_duration.Passed())
                 {
+                    if (owner.IsCreature())
+                        owner.ToCreature().UpdateCurrentWaypointInfo(0, 0);
+
                     RemoveFlag(MovementGeneratorFlags.Transitory);
                     AddFlag(MovementGeneratorFlags.InformEnabled);
                     AddFlag(MovementGeneratorFlags.Finalized);
-                    owner.UpdateCurrentWaypointInfo(0, 0);
                     SetScriptResult(MovementStopReason.Finished);
                     return false;
                 }
@@ -227,8 +220,8 @@ namespace Game.Movement
             if (!UpdateMoveTimer(diff) && !owner.MoveSpline.Finalized())
             {
                 // set home position at place (every MotionMaster::UpdateMotion)
-                if (owner.GetTransGUID().IsEmpty())
-                    owner.SetHomePosition(owner.GetPosition());
+                if (owner.IsCreature() && owner.GetTransGUID().IsEmpty())
+                    owner.ToCreature().SetHomePosition(owner.GetPosition());
 
                 // handle switching points in continuous segments
                 if (IsExactSplinePath())
@@ -239,7 +232,7 @@ namespace Game.Movement
                         ++_waypointTransitionSplinePointsIndex;
                         if (ComputeNextNode())
                         {
-                            CreatureAI ai = owner.GetAI();
+                            CreatureAI ai = owner.ToCreature()?.GetAI();
                             if (ai != null)
                                 ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
                         }
@@ -283,13 +276,13 @@ namespace Game.Movement
             return true;
         }
 
-        public override void DoDeactivate(Creature owner)
+        public override void DoDeactivate(T owner)
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
             owner.ClearUnitState(UnitState.RoamingMove);
         }
 
-        public override void DoFinalize(Creature owner, bool active, bool movementInform)
+        public override void DoFinalize(T owner, bool active, bool movementInform)
         {
             AddFlag(MovementGeneratorFlags.Finalized);
             if (active)
@@ -297,17 +290,21 @@ namespace Game.Movement
                 owner.ClearUnitState(UnitState.RoamingMove);
 
                 // TODO: Research if this modification is needed, which most likely isnt
-                owner.SetWalk(false);
+                if (owner.IsCreature())
+                    owner.SetWalk(false);
             }
 
             if (movementInform)
                 SetScriptResult(MovementStopReason.Finished);
         }
 
-        public void MovementInform(Creature owner)
+        public void MovementInform(T owner)
         {
+            if (!owner.IsCreature())
+                return;
+
             WaypointNode waypoint = _path.Nodes.ElementAt(_currentNode);
-            CreatureAI ai = owner.GetAI();
+            CreatureAI ai = owner.ToCreature().GetAI();
             if (ai != null)
             {
                 ai.MovementInform(MovementGeneratorType.Waypoint, waypoint.Id);
@@ -315,7 +312,7 @@ namespace Game.Movement
             }
         }
 
-        void OnArrived(Creature owner)
+        void OnArrived(T owner)
         {
             if (_path == null || _path.Nodes.Empty())
                 return;
@@ -345,22 +342,32 @@ namespace Game.Movement
 
             MovementInform(owner);
 
-            owner.UpdateCurrentWaypointInfo(waypoint.Id, _path.Id);
+            if (owner.IsCreature())
+                owner.ToCreature().UpdateCurrentWaypointInfo(waypoint.Id, _path.Id);
         }
 
-        void StartMove(Creature owner, bool relaunch = false)
+        void StartMove(T owner, bool relaunch = false)
         {
             // sanity checks
-            if (owner == null || !owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) || (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
+            if (!owner.IsAlive() || HasFlag(MovementGeneratorFlags.Finalized) || (relaunch && (HasFlag(MovementGeneratorFlags.InformEnabled) || !HasFlag(MovementGeneratorFlags.Initialized))))
                 return;
 
             if (_path == null || _path.Nodes.Empty())
                 return;
 
-            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting() || (owner.IsFormationLeader() && !owner.IsFormationLeaderMoveAllowed())) // if cannot move OR cannot move because of formation
+            if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting()) // if cannot move
             {
                 _nextMoveTime.Reset(1000); // delay 1s
                 return;
+            }
+
+            if (owner.IsCreature())
+            {
+                if (owner.ToCreature().IsFormationLeader() && !owner.ToCreature().IsFormationLeaderMoveAllowed()) // if cannot move because of formation
+                {
+                    _nextMoveTime.Reset(1000); // delay 1s
+                    return;
+                }
             }
 
             bool transportPath = !owner.GetTransGUID().IsEmpty();
@@ -371,40 +378,46 @@ namespace Game.Movement
                 if (ComputeNextNode())
                 {
                     Cypher.Assert(_currentNode < _path.Nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.Id})");
-                    // inform AI
-                    CreatureAI ai = owner.GetAI();
+                    // inform AI                    
+                    CreatureAI ai = owner.ToCreature()?.GetAI();
                     if (ai != null)
                         ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
                 }
                 else
                 {
-                    WaypointNode currentWaypoint = _path.Nodes[_currentNode];
-                    float x = currentWaypoint.X;
-                    float y = currentWaypoint.Y;
-                    float z = currentWaypoint.Z;
-                    float o = owner.GetOrientation();
-
-                    if (!transportPath)
-                        owner.SetHomePosition(x, y, z, o);
-                    else
-                    {
-                        ITransport trans = owner.GetTransport();
-                        if (trans != null)
-                        {
-                            o -= trans.GetTransportOrientation();
-                            owner.SetTransportHomePosition(x, y, z, o);
-                            owner.SetHomePosition(trans.GetPositionWithOffset(owner.GetTransportHomePosition()));
-                        }
-                        // else if (vehicle != null) - this should never happen, vehicle offsets are const
-                    }
-
                     AddFlag(MovementGeneratorFlags.Finalized);
-                    owner.UpdateCurrentWaypointInfo(0, 0);
 
-                    // inform AI
-                    CreatureAI ai = owner.GetAI();
-                    if (ai != null)
-                        ai.WaypointPathEnded(currentWaypoint.Id, _path.Id);
+                    if (owner.IsCreature())
+                    {
+                        Creature creature = owner.ToCreature();
+                        creature.UpdateCurrentWaypointInfo(0, 0);
+
+
+                        WaypointNode currentWaypoint = _path.Nodes[_currentNode];
+                        float x = currentWaypoint.X;
+                        float y = currentWaypoint.Y;
+                        float z = currentWaypoint.Z;
+                        float o = creature.GetOrientation();
+
+                        if (!transportPath)
+                            creature.SetHomePosition(x, y, z, o);
+                        else
+                        {
+                            ITransport trans = creature.GetTransport();
+                            if (trans != null)
+                            {
+                                o -= trans.GetTransportOrientation();
+                                creature.SetTransportHomePosition(x, y, z, o);
+                                creature.SetHomePosition(trans.GetPositionWithOffset(creature.GetTransportHomePosition()));
+                            }
+                            // else if (vehicle != null) - this should never happen, vehicle offsets are const
+                        }
+
+                        // inform AI
+                        CreatureAI ai = creature.GetAI();
+                        if (ai != null)
+                            ai.WaypointPathEnded(currentWaypoint.Id, _path.Id);
+                    }
 
                     SetScriptResult(MovementStopReason.Finished);
                     return;
@@ -415,7 +428,7 @@ namespace Game.Movement
                 AddFlag(MovementGeneratorFlags.Initialized);
 
                 // inform AI
-                CreatureAI ai = owner.GetAI();
+                CreatureAI ai = owner.ToCreature()?.GetAI();
                 if (ai != null)
                     ai.WaypointStarted(_path.Nodes[_currentNode].Id, _path.Id);
             }
@@ -520,7 +533,7 @@ namespace Game.Movement
             _moveTimer.Reset(duration);
 
             // inform formation
-            owner.SignalFormationMovement();
+            owner.ToCreature()?.SignalFormationMovement();
         }
 
         bool ComputeNextNode()

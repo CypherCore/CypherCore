@@ -84,15 +84,11 @@ namespace Game.AI
         public static MovementGenerator SelectMovementGenerator(Unit unit)
         {
             MovementGeneratorType type = unit.GetDefaultMovementType();
-            Creature creature = unit.ToCreature();
-            if (creature != null && creature.GetPlayerMovingMe() == null)
-                type = creature.GetDefaultMovementType();
-
-
             if (type == MovementGeneratorType.Random)
             {
                 MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default;
-                switch (creature.GetMovementTemplate().GetRandom())
+                Creature owner = unit.ToCreature();
+                switch (owner.GetMovementTemplate().GetRandom())
                 {
                     case CreatureRandomMovementType.Walk:
                         speedSelectionMode = MovementWalkRunSpeedSelectionMode.ForceWalk;
@@ -106,12 +102,12 @@ namespace Game.AI
                         break;
                 }
 
-                return new RandomMovementGenerator<Creature>(creature.GetWanderDistance(), null, null, speedSelectionMode);
+                return new RandomMovementGenerator<Creature>(owner.GetWanderDistance(), null, null, speedSelectionMode);
             }
 
             return type switch
             {
-                MovementGeneratorType.Waypoint => new WaypointMovementGenerator(),
+                MovementGeneratorType.Waypoint => new WaypointMovementGenerator<Creature>(unit.ToCreature().GetWaypointPathId()),
                 MovementGeneratorType.Idle => new IdleMovementGenerator(),
                 _ => null,
             };
