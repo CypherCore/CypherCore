@@ -1173,7 +1173,8 @@ namespace Game
 
             _gameRules =
             [
-                new() { Item1 = GameRule.TransmogEnabled, Item2 = true }
+                new() { Item1 = GameRule.TransmogEnabled, Item2 = true },
+                new() { Item1 = GameRule.HousingEnabled, Item2 = true }
             ];
 
             if (reload)
