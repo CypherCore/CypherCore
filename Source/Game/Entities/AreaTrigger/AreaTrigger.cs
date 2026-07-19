@@ -142,7 +142,10 @@ namespace Game.Entities
             SetSpellVisual(spellVisual);
 
             if (!IsStaticSpawn())
+            {
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetPos), m_areaTriggerData.Duration);
+            }
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetCreateProperties().Shape.GetMaxSearchRadius());
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), GetCreateProperties().DecalPropertiesId);
             if (IsServerSide())
@@ -181,8 +184,6 @@ namespace Game.Entities
                     fieldFlags |= AreaTriggerFieldFlags.AbsoluteOrientation;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasDynamicShape))
                     fieldFlags |= AreaTriggerFieldFlags.DynamicShape;
-                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAttached))
-                    fieldFlags |= AreaTriggerFieldFlags.Attached;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir))
                     fieldFlags |= AreaTriggerFieldFlags.FaceMovementDir;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain))
@@ -210,8 +211,9 @@ namespace Game.Entities
                     PhasingHandler.InitDbPhaseShift(GetPhaseShift(), spawnData.PhaseUseFlags, spawnData.PhaseId, spawnData.PhaseGroup);
             }
 
-            if (target != null && HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
+            if (target != null && aurEff != null)
             {
+                SetAreaTriggerFlag(AreaTriggerFieldFlags.Attached);
                 m_movementInfo.transport.guid = target.GetGUID();
                 m_updateFlag.MovementTransport = true;
             }

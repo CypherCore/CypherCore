@@ -55,7 +55,7 @@ namespace Framework.Constants
         CanLoop = 0x0004,
         AbsoluteOrientation = 0x0008,
         DynamicShape = 0x0010,
-        Attached = 0x0020,
+        Attached = 0x0020, // DEPRECATED
         FaceMovementDir = 0x0040,
         FollowsTerrain = 0x0080,
         Unknown1025 = 0x0100,

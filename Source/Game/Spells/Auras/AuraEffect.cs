@@ -5952,7 +5952,8 @@ namespace Game.Spells
             if (apply)
             {
                 AreaTriggerId createPropertiesId = new((uint)GetMiscValue(), false);
-                AreaTrigger.CreateAreaTrigger(createPropertiesId, target, GetBase().GetDuration(), GetCaster(), target, GetBase().GetSpellVisual(), GetSpellInfo(), null, this);
+                Position pos = new(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ()); // drop orientation for attached areatrigger
+                AreaTrigger.CreateAreaTrigger(createPropertiesId, pos, GetBase().GetDuration(), GetCaster(), target, GetBase().GetSpellVisual(), GetSpellInfo(), null, this);
             }
             else
             {
