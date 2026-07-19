@@ -3244,7 +3244,7 @@ namespace Game.Entities
         public UpdateField<DungeonScoreSummary> DungeonScore = new(32, 42);
         public UpdateField<LeaverInfo> LeaverInfo = new(32, 43);
         public UpdateField<ObjectGuid> SpectateTarget = new(32, 44);
-        public UpdateField<int> Field_200 = new(32, 45);
+        public UpdateField<int> Favor = new(32, 45);
         public OptionalUpdateField<DeclinedNames> DeclinedNames = new(32, 46);
         public UpdateField<CustomTabardInfo> PersonalTabard = new(32, 47);
         public UpdateFieldArray<byte> PartyType = new(2, 48, 49);
@@ -3316,7 +3316,7 @@ namespace Game.Entities
             data.WriteInt32(CovenantID);
             data.WriteInt32(SoulbindID);
             data.WritePackedGuid(SpectateTarget);
-            data.WriteInt32(Field_200);
+            data.WriteInt32(Favor);
             data.WriteInt32(VisualItemReplacements.Size());
             for (int i = 0; i < 19; ++i)
             {
@@ -3657,7 +3657,7 @@ namespace Game.Entities
                 }
                 if (changesMask[45])
                 {
-                    data.WriteInt32(Field_200);
+                    data.WriteInt32(Favor);
                 }
                 if (changesMask[47])
                 {
@@ -3810,7 +3810,7 @@ namespace Game.Entities
             ClearChangesMask(DungeonScore);
             ClearChangesMask(LeaverInfo);
             ClearChangesMask(SpectateTarget);
-            ClearChangesMask(Field_200);
+            ClearChangesMask(Favor);
             ClearChangesMask(DeclinedNames);
             ClearChangesMask(PersonalTabard);
             ClearChangesMask(PartyType);
@@ -10063,30 +10063,6 @@ namespace Game.Entities
         }
     }
 
-    class AaBox : IEquatable<AaBox>
-    {
-        public Position Low;
-        public Position High;
-
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
-        {
-            data.WriteVector3(Low);
-            data.WriteVector3(High);
-        }
-
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
-        {
-            data.WriteVector3(Low);
-            data.WriteVector3(High);
-        }
-
-        public bool Equals(AaBox right)
-        {
-            return Low == right.Low
-                && High == right.High;
-        }
-    }
-
     class MeshObjectData() : HasChangesMask(5)
     {
         public UpdateField<bool> IsWMO = new(0, 1);
@@ -10602,7 +10578,7 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> BnetAccount = new(0, 1);
         public UpdateField<int> PlotIndex = new(0, 2);
         public UpdateField<uint> Level = new(0, 3);
-        public UpdateField<ulong> Field_20 = new(0, 4);
+        public UpdateField<ulong> Favor = new(0, 4);
         public UpdateField<uint> InteriorDecorPlacementBudget = new(0, 5);
         public UpdateField<uint> ExteriorDecorPlacementBudget = new(0, 6);
         public UpdateField<uint> ExteriorFixtureBudget = new(0, 7);
@@ -10614,7 +10590,7 @@ namespace Game.Entities
             data.WritePackedGuid(BnetAccount);
             data.WriteInt32(PlotIndex);
             data.WriteUInt32(Level);
-            data.WriteUInt64(Field_20);
+            data.WriteUInt64(Favor);
             data.WriteUInt32(InteriorDecorPlacementBudget);
             data.WriteUInt32(ExteriorDecorPlacementBudget);
             data.WriteUInt32(ExteriorFixtureBudget);
@@ -10648,7 +10624,7 @@ namespace Game.Entities
                 }
                 if (changesMask[4])
                 {
-                    data.WriteUInt64(Field_20);
+                    data.WriteUInt64(Favor);
                 }
                 if (changesMask[5])
                 {
@@ -10678,7 +10654,7 @@ namespace Game.Entities
             ClearChangesMask(BnetAccount);
             ClearChangesMask(PlotIndex);
             ClearChangesMask(Level);
-            ClearChangesMask(Field_20);
+            ClearChangesMask(Favor);
             ClearChangesMask(InteriorDecorPlacementBudget);
             ClearChangesMask(ExteriorDecorPlacementBudget);
             ClearChangesMask(ExteriorFixtureBudget);
@@ -10693,18 +10669,18 @@ namespace Game.Entities
         public UpdateField<ulong> Cost = new(0, 1);
         public UpdateField<int> PlotIndex = new(0, 2);
 
-        void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
+        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
         {
             data.WriteUInt64(Cost);
             data.WriteInt32(PlotIndex);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
         {
             WriteUpdate(data, _changesMask, false, owner, receiver);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, GameObject owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, GameObject owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlock(0), 3);
 
@@ -10732,25 +10708,25 @@ namespace Game.Entities
 
     class HousingPlotAreaTriggerData() : HasChangesMask(5)
     {
-        public UpdateField<uint> Field_0 = new(0, 1);
+        public UpdateField<uint> PlotID = new(0, 1);
         public UpdateField<ObjectGuid> HouseOwnerGUID = new(0, 2);
         public UpdateField<ObjectGuid> HouseGUID = new(0, 3);
         public UpdateField<ObjectGuid> HouseOwnerBnetAccountGUID = new(0, 4);
 
-        void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
         {
-            data.WriteUInt32(Field_0);
+            data.WriteUInt32(PlotID);
             data.WritePackedGuid(HouseOwnerGUID);
             data.WritePackedGuid(HouseGUID);
             data.WritePackedGuid(HouseOwnerBnetAccountGUID);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
         {
             WriteUpdate(data, _changesMask, false, owner, receiver);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AreaTrigger owner, Player receiver)
         {
             data.WriteBits(changesMask.GetBlock(0), 5);
 
@@ -10759,7 +10735,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(Field_0);
+                    data.WriteUInt32(PlotID);
                 }
                 if (changesMask[2])
                 {
@@ -10778,7 +10754,7 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Field_0);
+            ClearChangesMask(PlotID);
             ClearChangesMask(HouseOwnerGUID);
             ClearChangesMask(HouseGUID);
             ClearChangesMask(HouseOwnerBnetAccountGUID);
@@ -11044,7 +11020,7 @@ namespace Game.Entities
         public ObjectGuid Guid;
         public ObjectGuid NeighborhoodGUID;
         public uint Level;
-        public uint Favor;
+        public uint Field_200;
         public int Field_28;
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
@@ -11052,7 +11028,7 @@ namespace Game.Entities
             data.WritePackedGuid(Guid);
             data.WritePackedGuid(NeighborhoodGUID);
             data.WriteUInt32(Level);
-            data.WriteUInt32(Favor);
+            data.WriteUInt32(Field_200);
             data.WriteInt32(Field_28);
         }
 
@@ -11061,7 +11037,7 @@ namespace Game.Entities
             data.WritePackedGuid(Guid);
             data.WritePackedGuid(NeighborhoodGUID);
             data.WriteUInt32(Level);
-            data.WriteUInt32(Favor);
+            data.WriteUInt32(Field_200);
             data.WriteInt32(Field_28);
         }
 
@@ -11070,7 +11046,7 @@ namespace Game.Entities
             return Guid == right.Guid
                 && NeighborhoodGUID == right.NeighborhoodGUID
                 && Level == right.Level
-                && Favor == right.Favor
+                && Field_200 == right.Field_200
                 && Field_28 == right.Field_28;
         }
     }
