@@ -1646,6 +1646,7 @@ namespace Framework.Constants
         IgnoreEquippedItemRequirement = 0x80000, //! Will ignore equipped item requirements
         IgnoreTargetCheck = 0x100000, //! Will ignore most target checks (mostly DBC target checks)
         IgnoreCasterAurastate = 0x200000,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
+        SuppressCasterAnim = 0x400000,   //!< Will not play cast animations on caster
         FullDebugMask = 0xFFFFFFFF
     }
 
@@ -1708,7 +1709,7 @@ namespace Framework.Constants
     }
 
     [System.Flags]
-    public enum SpellCastFlagsEx
+    public enum SpellCastFlagsEx : uint
     {
         None = 0x0,
         TriggerCooldownOnSpellStart = 0x01,
@@ -1730,7 +1731,19 @@ namespace Framework.Constants
         Unknown17 = 0x10000,
         Unknown18 = 0x20000,
         Unknown19 = 0x40000,
-        Unknown20 = 0x80000
+        Unknown20 = 0x80000,
+        Unknown21 = 0x100000,
+        Unknown22 = 0x200000,
+        Unknown23 = 0x400000,
+        Unknown24 = 0x800000,
+        Unknown25 = 0x1000000,
+        Unknown26 = 0x2000000,
+        Unknown27 = 0x4000000,
+        Unknown28 = 0x8000000,
+        SuppressCasterAnim = 0x10000000,
+        Unknown30 = 0x20000000,
+        Unknown31 = 0x40000000,
+        Unknown32 = 0x80000000
     }
 
     #region Spell Attributes

@@ -952,7 +952,7 @@ class spell_dru_galactic_guardian : AuraScript
             Unit target = GetTarget();
 
             // free automatic moonfire on target
-            target.CastSpell(damageInfo.GetVictim(), SpellIds.MoonfireDamage, true);
+            target.CastSpell(damageInfo.GetVictim(), SpellIds.MoonfireDamage, new CastSpellExtraArgs(TriggerCastFlags.FullMask | TriggerCastFlags.SuppressCasterAnim));
 
             // Cast aura
             target.CastSpell(damageInfo.GetVictim(), SpellIds.GalacticGuardianAura, true);
