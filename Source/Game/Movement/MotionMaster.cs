@@ -550,7 +550,7 @@ namespace Game.Movement
             if (_owner.IsTypeId(TypeId.Unit))
                 Add(new RandomMovementGenerator<Creature>(wanderDistance, duration, speed, speedSelectionMode, scriptResult), slot);
             else
-                Add(new RandomMovementGenerator<Player>(wanderDistance, duration, speed, speedSelectionMode, scriptResult), slot);
+                Add(new RandomMovementGenerator<Player>(wanderDistance, duration, speed, speedSelectionMode, scriptResult));
         }
 
         public void MoveFollow(Unit target, float dist, float angle = 0.0f, TimeSpan? duration = null, bool ignoreTargetWalk = false, MovementSlot slot = MovementSlot.Active, ActionResultSetter<MovementStopReason> scriptResult = null)
@@ -1068,7 +1068,7 @@ namespace Game.Movement
                     wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
             else
                 Add(new WaypointMovementGenerator<Player>(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd,
-                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
+                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult));
         }
 
         public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
@@ -1081,7 +1081,7 @@ namespace Game.Movement
                     wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
             else
                 Add(new WaypointMovementGenerator<Player>(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd,
-                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
+                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult));
         }
 
         /// <summary>
