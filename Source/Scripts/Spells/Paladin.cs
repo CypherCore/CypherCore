@@ -1622,7 +1622,8 @@ class spell_pal_t8_2p_bonus : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.HolyMending);
+        return ValidateSpellEffect((SpellIds.HolyMending, 0))
+        && Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1636,11 +1637,10 @@ class spell_pal_t8_2p_bonus : AuraScript
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
 
-        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty());
+        SpellEffectInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty()).GetEffect(0);
         int amount = MathFunctions.CalculatePct((int)(healInfo.GetHeal()), aurEff.GetAmount());
 
-        Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-        amount /= (int)spellInfo.GetMaxTicks();
+        amount /= (int)spellInfo.GetPeriodicTickCount();
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueMod.BasePoint0, amount);
@@ -1658,7 +1658,8 @@ class spell_pal_t30_2p_protection_bonus : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.T30_2PHeartfireDamage);
+        return ValidateSpellEffect((SpellIds.T30_2PHeartfireDamage, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.T30_2PHeartfireDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
@@ -1666,7 +1667,7 @@ class spell_pal_t30_2p_protection_bonus : AuraScript
         PreventDefaultAction();
 
         Unit caster = procInfo.GetActor();
-        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.T30_2PHeartfireDamage, Difficulty.None).GetMaxTicks();
+        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.T30_2PHeartfireDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
         uint damage = MathFunctions.CalculatePct(procInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
 
         caster.CastSpell(procInfo.GetActionTarget(), SpellIds.T30_2PHeartfireDamage, new CastSpellExtraArgs(aurEff)

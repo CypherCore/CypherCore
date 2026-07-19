@@ -1470,14 +1470,15 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.TraumaEffect);
+            return ValidateSpellEffect((SpellIds.TraumaEffect, 0))
+                && Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             Unit target = eventInfo.GetActionTarget();
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks());
+            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetEffect(0).GetPeriodicTickCount());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, damage);
             GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);

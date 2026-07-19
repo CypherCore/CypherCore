@@ -2658,46 +2658,6 @@ namespace Game.Spells
             return (castTime > 0) ? castTime : 0;
         }
 
-        public uint GetMaxTicks()
-        {
-            uint totalTicks = 0;
-            int DotDuration = GetDuration();
-
-            foreach (var effectInfo in GetEffects())
-            {
-                if (!effectInfo.IsEffect(SpellEffectName.ApplyAura))
-                    continue;
-
-                switch (effectInfo.ApplyAuraName)
-                {
-                    case AuraType.PeriodicDamage:
-                    case AuraType.PeriodicDamagePercent:
-                    case AuraType.PeriodicHeal:
-                    case AuraType.ObsModHealth:
-                    case AuraType.ObsModPower:
-                    case AuraType.PeriodicTriggerSpellFromClient:
-                    case AuraType.PowerBurn:
-                    case AuraType.PeriodicLeech:
-                    case AuraType.PeriodicManaLeech:
-                    case AuraType.PeriodicEnergize:
-                    case AuraType.PeriodicDummy:
-                    case AuraType.PeriodicTriggerSpell:
-                    case AuraType.PeriodicTriggerSpellWithValue:
-                    case AuraType.PeriodicHealthFunnel:
-                        // skip infinite periodics
-                        if (effectInfo.ApplyAuraPeriod > 0 && DotDuration > 0)
-                        {
-                            totalTicks = (uint)DotDuration / effectInfo.ApplyAuraPeriod;
-                            if (HasAttribute(SpellAttr5.ExtraInitialPeriod))
-                                ++totalTicks;
-                        }
-                        break;
-                }
-            }
-
-            return totalTicks;
-        }
-
         public uint GetRecoveryTime()
         {
             return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
@@ -4090,6 +4050,23 @@ namespace Game.Spells
         public bool IsUnitOwnedAuraEffect()
         {
             return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura || Effect == SpellEffectName.ApplyAuraOnPet;
+        }
+
+        public uint GetPeriodicTickCount()
+        {
+            if (ApplyAuraPeriod == 0)
+                return 0;
+
+            int duration = _spellInfo.GetDuration();
+            // skip infinite periodics
+            if (duration <= 0)
+                return 0;
+
+            uint totalTicks = (uint)(duration / ApplyAuraPeriod);
+            if (_spellInfo.HasAttribute(SpellAttr5.ExtraInitialPeriod))
+                ++totalTicks;
+
+            return totalTicks;
         }
 
         public int CalcValue(WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)

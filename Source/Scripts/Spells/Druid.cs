@@ -205,7 +205,7 @@ class spell_dru_astral_smolder : AuraScript
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellEffect((SpellIds.AstralSmolderDamage, 0))
-            && Global.SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, Difficulty.None).GetMaxTicks() != 0;
+            && Global.SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount() != 0;
     }
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -217,10 +217,10 @@ class spell_dru_astral_smolder : AuraScript
     {
         PreventDefaultAction();
 
-        SpellInfo astralSmolderDmg = Global.SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, GetCastDifficulty());
+        SpellEffectInfo astralSmolderDmg = Global.SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, GetCastDifficulty()).GetEffect(0);
         int pct = aurEff.GetAmount();
 
-        int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / astralSmolderDmg.GetMaxTicks());
+        int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / astralSmolderDmg.GetPeriodicTickCount());
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueMod.BasePoint0, amount);
@@ -2005,7 +2005,8 @@ class spell_dru_t10_balance_4p_bonus : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Languish);
+        return ValidateSpellEffect((SpellIds.Languish, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.Languish, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0; ;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -2019,11 +2020,10 @@ class spell_dru_t10_balance_4p_bonus : AuraScript
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
 
-        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
+        SpellEffectInfo spellEffect = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty()).GetEffect(0);
         int amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
 
-        Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-        amount /= (int)spellInfo.GetMaxTicks();
+        amount /= (int)spellEffect.GetPeriodicTickCount();
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueMod.BasePoint0, amount);

@@ -4267,7 +4267,7 @@ namespace Game.Spells
                     {
                         case AuraType.PeriodicHeal:
                         case AuraType.ObsModHealth:
-                            points += (int)(unitCaster.SpellHealingBonusDone(target, spellInfo, spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell) * spellInfo.GetMaxTicks());
+                            points += (int)(unitCaster.SpellHealingBonusDone(target, spellInfo, spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell) * spellEffectInfo.GetPeriodicTickCount());
                             break;
                         case AuraType.PeriodicTriggerSpell:
                             SpellInfo triggered = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty);

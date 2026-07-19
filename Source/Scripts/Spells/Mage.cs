@@ -1226,7 +1226,9 @@ class spell_mage_ignite : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Ignite, SpellIds.HotStreak, SpellIds.Pyroblast, SpellIds.Flamestrike);
+        return ValidateSpellInfo(SpellIds.HotStreak, SpellIds.Pyroblast, SpellIds.Flamestrike)
+            && ValidateSpellEffect((SpellIds.Ignite, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     bool CheckProc(ProcEventInfo eventInfo)
@@ -1238,14 +1240,13 @@ class spell_mage_ignite : AuraScript
     {
         PreventDefaultAction();
 
-        SpellInfo igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, GetCastDifficulty());
+        SpellEffectInfo igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, GetCastDifficulty()).GetEffect(0);
         int pct = aurEff.GetAmount();
 
-        Cypher.Assert(igniteDot.GetMaxTicks() > 0);
         if (spell_mage_hot_streak_ignite_marker.IsActive(eventInfo.GetProcSpell()))
             pct *= 2;
 
-        int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
+        int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetPeriodicTickCount());
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueMod.BasePoint0, amount);

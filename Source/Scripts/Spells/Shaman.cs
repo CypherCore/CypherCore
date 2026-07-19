@@ -3064,7 +3064,8 @@ class spell_sha_t8_elemental_4p_bonus : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.Electrified);
+        return ValidateSpellEffect((SpellIds.Electrified, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3075,11 +3076,10 @@ class spell_sha_t8_elemental_4p_bonus : AuraScript
         if (damageInfo == null || damageInfo.GetDamage() == 0)
             return;
 
-        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, GetCastDifficulty());
+        SpellEffectInfo dotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, GetCastDifficulty()).GetEffect(0);
         int amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
 
-        Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-        amount /= (int)spellInfo.GetMaxTicks();
+        amount /= (int)dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
@@ -3103,7 +3103,8 @@ class spell_sha_t9_elemental_4p_bonus : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.LavaBurstBonusDamage);
+        return ValidateSpellEffect((SpellIds.LavaBurstBonusDamage, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3114,11 +3115,10 @@ class spell_sha_t9_elemental_4p_bonus : AuraScript
         if (damageInfo == null || damageInfo.GetDamage() == 0)
             return;
 
-        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, GetCastDifficulty());
+        SpellEffectInfo dotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, GetCastDifficulty()).GetEffect(0);
         int amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
 
-        Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-        amount /= (int)spellInfo.GetMaxTicks();
+        amount /= (int)dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
@@ -3174,7 +3174,8 @@ class spell_sha_t10_restoration_4p_bonus : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.ChainedHeal);
+        return ValidateSpellEffect((SpellIds.ChainedHeal, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -3185,11 +3186,10 @@ class spell_sha_t10_restoration_4p_bonus : AuraScript
         if (healInfo == null || healInfo.GetHeal() == 0)
             return;
 
-        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, GetCastDifficulty());
+        SpellEffectInfo dotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, GetCastDifficulty()).GetEffect(0);
         int amount = MathFunctions.CalculatePct((int)(healInfo.GetHeal()), aurEff.GetAmount());
 
-        Cypher.Assert(spellInfo.GetMaxTicks() > 0);
-        amount /= (int)spellInfo.GetMaxTicks();
+        amount /= (int)dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();

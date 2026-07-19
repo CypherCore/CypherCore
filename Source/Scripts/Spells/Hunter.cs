@@ -673,15 +673,13 @@ class spell_hun_master_marksman : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.MasterMarksman);
+        return ValidateSpellEffect((SpellIds.MasterMarksman, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.MasterMarksman, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.MasterMarksman, Difficulty.None).GetMaxTicks();
-        if (ticks == 0)
-            return;
-
+        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.MasterMarksman, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
         int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / ticks);
 
         eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.MasterMarksman, new CastSpellExtraArgs()
@@ -988,8 +986,8 @@ class spell_hun_rejuvenating_wind : AuraScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return ValidateSpellInfo(SpellIds.RejuvenatingWindHeal)
-            && Global.SpellMgr.GetSpellInfo(SpellIds.RejuvenatingWindHeal, Difficulty.None).GetMaxTicks() > 0;
+        return ValidateSpellEffect((SpellIds.RejuvenatingWindHeal, 0))
+            && Global.SpellMgr.GetSpellInfo(SpellIds.RejuvenatingWindHeal, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo procEvent)
@@ -998,7 +996,7 @@ class spell_hun_rejuvenating_wind : AuraScript
 
         Unit caster = GetTarget();
 
-        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.RejuvenatingWindHeal, Difficulty.None).GetMaxTicks();
+        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.RejuvenatingWindHeal, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
         int heal = (int)(MathFunctions.CalculatePct(caster.GetMaxHealth(), aurEff.GetAmount()) / ticks);
 
         caster.CastSpell(caster, SpellIds.RejuvenatingWindHeal, new CastSpellExtraArgs()
@@ -1390,7 +1388,7 @@ class spell_hun_t29_2p_marksmanship_bonus : AuraScript
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellEffect((SpellIds.T29_2PMarksmanshipDamage, 0))
-            && Global.SpellMgr.GetSpellInfo(SpellIds.T29_2PMarksmanshipDamage, Difficulty.None).GetMaxTicks() != 0;
+            && Global.SpellMgr.GetSpellInfo(SpellIds.T29_2PMarksmanshipDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount() != 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1398,7 +1396,7 @@ class spell_hun_t29_2p_marksmanship_bonus : AuraScript
         PreventDefaultAction();
 
         Unit caster = eventInfo.GetActor();
-        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.T29_2PMarksmanshipDamage, Difficulty.None).GetMaxTicks();
+        uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.T29_2PMarksmanshipDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
         uint damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
 
         caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.T29_2PMarksmanshipDamage, new CastSpellExtraArgs(aurEff)
