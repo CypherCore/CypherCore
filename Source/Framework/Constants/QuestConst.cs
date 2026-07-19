@@ -29,6 +29,8 @@ namespace Framework.Constants
         AreaTriggerEnter = 19,
         AreaTriggerExit = 20,
         KillWithLabel = 21,
+        Unk1127 = 22,
+
         Max
     }
 
