@@ -2763,8 +2763,6 @@ namespace Game.Spells
                     SendChannelUpdate(0, SpellCastResult.Interrupted);
                     SendInterrupted(0);
                     SendCastResult(SpellCastResult.Interrupted);
-
-                    m_appliedMods.Clear();
                     break;
                 default:
                     break;
