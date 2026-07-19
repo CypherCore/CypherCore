@@ -3387,7 +3387,7 @@ namespace Game.Entities
             if (map == null)
                 map = Global.MapMgr.CreateMap(mapId, this);
 
-            AreaTriggerTeleport areaTrigger = null;
+            WorldSafeLocsEntry areaTrigger = null;
             bool check = false;
 
             if (map == null)
@@ -3415,10 +3415,10 @@ namespace Game.Entities
             {
                 if (areaTrigger != null) // ... if we have an areatrigger, then relocate to new map/coordinates.
                 {
-                    Relocate(areaTrigger.target_X, areaTrigger.target_Y, areaTrigger.target_Z, GetOrientation());
-                    if (mapId != areaTrigger.target_mapId)
+                    Relocate(areaTrigger.Loc);
+                    if (mapId != areaTrigger.Loc.GetMapId())
                     {
-                        mapId = areaTrigger.target_mapId;
+                        mapId = areaTrigger.Loc.GetMapId();
                         map = Global.MapMgr.CreateMap(mapId, this);
                     }
                 }

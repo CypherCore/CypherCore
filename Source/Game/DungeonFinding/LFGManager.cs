@@ -218,18 +218,18 @@ namespace Game.DungeonFinding
                 // No teleport coords in database, load from areatriggers
                 if (dungeon.type != LfgType.Random && dungeon.x == 0.0f && dungeon.y == 0.0f && dungeon.z == 0.0f)
                 {
-                    AreaTriggerTeleport at = Global.ObjectMgr.GetMapEntranceTrigger(dungeon.map);
+                    WorldSafeLocsEntry at = Global.ObjectMgr.GetMapEntranceTrigger(dungeon.map);
                     if (at == null)
                     {
                         Log.outError(LogFilter.Lfg, "LoadLFGDungeons: Failed to load dungeon {0} (Id: {1}), cant find areatrigger for map {2}", dungeon.name, dungeon.id, dungeon.map);
                         continue;
                     }
 
-                    dungeon.map = at.target_mapId;
-                    dungeon.x = at.target_X;
-                    dungeon.y = at.target_Y;
-                    dungeon.z = at.target_Z;
-                    dungeon.o = at.target_Orientation;
+                    dungeon.map = at.Loc.GetMapId();
+                    dungeon.x = at.Loc.GetPositionX();
+                    dungeon.y = at.Loc.GetPositionY();
+                    dungeon.z = at.Loc.GetPositionZ();
+                    dungeon.o = at.Loc.GetOrientation();
                 }
 
                 if (dungeon.type != LfgType.Random)
@@ -1650,12 +1650,12 @@ namespace Game.DungeonFinding
                         lockStatus = LfgLockStatusType.QuestNotCompleted;
                     else
                         if (ar.item != 0)
-                    {
-                        if (!player.HasItemCount(ar.item) && (ar.item2 == 0 || !player.HasItemCount(ar.item2)))
+                        {
+                            if (!player.HasItemCount(ar.item) && (ar.item2 == 0 || !player.HasItemCount(ar.item2)))
+                                lockStatus = LfgLockStatusType.MissingItem;
+                        }
+                        else if (ar.item2 != 0 && !player.HasItemCount(ar.item2))
                             lockStatus = LfgLockStatusType.MissingItem;
-                    }
-                    else if (ar.item2 != 0 && !player.HasItemCount(ar.item2))
-                        lockStatus = LfgLockStatusType.MissingItem;
                 }
                 else
                 {

@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
@@ -249,17 +248,17 @@ namespace Game.Chat.Commands
                 player.SaveRecallPosition();
 
             // try going to entrance
-            AreaTriggerTeleport exit = Global.ObjectMgr.GetGoBackTrigger(mapId);
+            WorldSafeLocsEntry exit = Global.ObjectMgr.GetGoBackTrigger(mapId);
             if (exit != null)
             {
-                if (player.TeleportTo(exit.target_mapId, exit.target_X, exit.target_Y, exit.target_Z, exit.target_Orientation + MathF.PI))
+                if (player.TeleportTo(exit.Loc.GetMapId(), exit.Loc.GetPositionX(), exit.Loc.GetPositionY(), exit.Loc.GetPositionZ(), exit.Loc.GetOrientation() + MathF.PI))
                 {
                     handler.SendSysMessage(CypherStrings.CommandWentToInstanceGate, mapName, mapId);
                     return true;
                 }
                 else
                 {
-                    uint parentMapId = exit.target_mapId;
+                    uint parentMapId = exit.Loc.GetMapId();
                     string parentMapName = CliDB.MapStorage.LookupByKey(parentMapId).MapName[handler.GetSessionDbcLocale()];
                     handler.SendSysMessage(CypherStrings.CommandGoInstanceGateFailed, mapName, mapId, parentMapName, parentMapId);
                 }
@@ -268,10 +267,10 @@ namespace Game.Chat.Commands
                 handler.SendSysMessage(CypherStrings.CommandInstanceNoExit, mapName, mapId);
 
             // try going to start
-            AreaTriggerTeleport entrance = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
+            WorldSafeLocsEntry entrance = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
             if (entrance != null)
             {
-                if (player.TeleportTo(entrance.target_mapId, entrance.target_X, entrance.target_Y, entrance.target_Z, entrance.target_Orientation))
+                if (player.TeleportTo(entrance.Loc))
                 {
                     handler.SendSysMessage(CypherStrings.CommandWentToInstanceStart, mapName, mapId);
                     return true;

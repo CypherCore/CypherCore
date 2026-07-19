@@ -904,7 +904,7 @@ namespace Game
             {
                 var at = Global.ObjectMgr.GetGoBackTrigger(pCurrChar.GetMapId());
                 if (at != null)
-                    pCurrChar.TeleportTo(at.target_mapId, at.target_X, at.target_Y, at.target_Z, pCurrChar.Orientation);
+                    pCurrChar.TeleportTo(at.Loc);
                 else
                     pCurrChar.TeleportTo(pCurrChar.GetHomebind());
             }

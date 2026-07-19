@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.IO;
-using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -288,12 +287,12 @@ namespace Game
             if (!packet.Entered)
                 return;
 
-            AreaTriggerTeleport at = Global.ObjectMgr.GetAreaTrigger(packet.AreaTriggerID);
+            WorldSafeLocsEntry at = Global.ObjectMgr.GetAreaTrigger(packet.AreaTriggerID);
             if (at == null)
                 return;
 
             bool teleported = false;
-            if (player.GetMapId() != at.target_mapId)
+            if (player.GetMapId() != at.Loc.GetMapId())
             {
                 if (!player.IsAlive())
                 {
@@ -303,7 +302,7 @@ namespace Game
                         uint corpseMap = player.GetCorpseLocation().GetMapId();
                         do
                         {
-                            if (corpseMap == at.target_mapId)
+                            if (corpseMap == at.Loc.GetMapId())
                                 break;
 
                             InstanceTemplate corpseInstance = Global.ObjectMgr.GetInstanceTemplate(corpseMap);
@@ -316,52 +315,52 @@ namespace Game
                             return;
                         }
 
-                        Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' has corpse in instance {at.target_mapId} and can enter.");
+                        Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' has corpse in instance {at.Loc.GetMapId()} and can enter.");
                     }
                     else
                         Log.outDebug(LogFilter.Maps, $"Map::CanPlayerEnter - player '{player.GetName()}' is dead but does not have a corpse!");
                 }
 
-                TransferAbortParams denyReason = Map.PlayerCannotEnter(at.target_mapId, player);
+                TransferAbortParams denyReason = Map.PlayerCannotEnter(at.Loc.GetMapId(), player);
                 if (denyReason != null)
                 {
                     switch (denyReason.Reason)
                     {
                         case TransferAbortReason.MapNotAllowed:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter map with id {at.target_mapId} which has no entry");
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter map with id {at.Loc.GetMapId()} which has no entry");
                             break;
                         case TransferAbortReason.Difficulty:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter instance map {at.target_mapId} but the requested difficulty was not found");
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' attempted to enter instance map {at.Loc.GetMapId()} but the requested difficulty was not found");
                             break;
                         case TransferAbortReason.NeedGroup:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' must be in a raid group to enter map {at.target_mapId}");
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' must be in a raid group to enter map {at.Loc.GetMapId()}");
                             player.SendRaidGroupOnlyMessage(RaidGroupReason.Only, 0);
                             break;
                         case TransferAbortReason.LockedToDifferentInstance:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.Loc.GetMapId()} because their permanent bind is incompatible with their group's");
                             break;
                         case TransferAbortReason.AlreadyCompletedEncounter:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because their permanent bind is incompatible with their group's");
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.Loc.GetMapId()} because their permanent bind is incompatible with their group's");
                             break;
                         case TransferAbortReason.TooManyInstances:
-                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' cannot enter instance map {1} because he has exceeded the maximum number of instances per hour.", player.GetName(), at.target_mapId);
+                            Log.outDebug(LogFilter.Maps, "MAP: Player '{0}' cannot enter instance map {1} because he has exceeded the maximum number of instances per hour.", player.GetName(), at.Loc.GetMapId());
                             break;
                         case TransferAbortReason.MaxPlayers:
                         case TransferAbortReason.ZoneInCombat:
                             break;
                         case TransferAbortReason.NotFound:
-                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.target_mapId} because instance is resetting.");
+                            Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' cannot enter instance map {at.Loc.GetMapId()} because instance is resetting.");
                             break;
                         default:
                             break;
                     }
 
                     if (denyReason.Reason != TransferAbortReason.NeedGroup)
-                        player.SendTransferAborted(at.target_mapId, denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
+                        player.SendTransferAborted(at.Loc.GetMapId(), denyReason.Reason, denyReason.Arg, denyReason.MapDifficultyXConditionId);
 
                     if (!player.IsAlive() && player.HasCorpse())
                     {
-                        if (player.GetCorpseLocation().GetMapId() == at.target_mapId)
+                        if (player.GetCorpseLocation().GetMapId() == at.Loc.GetMapId())
                         {
                             player.ResurrectPlayer(0.5f);
                             player.SpawnCorpseBones();
@@ -379,11 +378,11 @@ namespace Game
 
             if (!teleported)
             {
-                WorldSafeLocsEntry entranceLocation = player.GetInstanceEntrance(at.target_mapId);
-                if (entranceLocation != null && player.GetMapId() != at.target_mapId)
+                WorldSafeLocsEntry entranceLocation = player.GetInstanceEntrance(at.Loc.GetMapId());
+                if (entranceLocation != null && player.GetMapId() != at.Loc.GetMapId())
                     player.TeleportTo(entranceLocation.Loc, TeleportToOptions.NotLeaveTransport);
                 else
-                    player.TeleportTo(at.target_mapId, at.target_X, at.target_Y, at.target_Z, at.target_Orientation, TeleportToOptions.NotLeaveTransport);
+                    player.TeleportTo(at.Loc, TeleportToOptions.NotLeaveTransport);
             }
         }
 
