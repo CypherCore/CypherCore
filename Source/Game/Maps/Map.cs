@@ -4967,6 +4967,10 @@ namespace Game.Maps
                     return new TransferAbortParams(lockError);
             }
 
+            Group owningGroup = GetOwningGroup();
+            if (owningGroup != null && !player.IsInGroup(owningGroup.GetGUID()))
+                return new TransferAbortParams(TransferAbortReason.MaxPlayers);
+
             return base.CannotEnter(player);
         }
 

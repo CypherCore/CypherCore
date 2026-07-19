@@ -3384,8 +3384,12 @@ namespace Game.Entities
 
             // NOW player must have valid map
             // load the player's map here if it's not already loaded
+            bool isNewMap = false;
             if (map == null)
+            {
                 map = Global.MapMgr.CreateMap(mapId, this);
+                isNewMap = true;
+            }
 
             WorldSafeLocsEntry areaTrigger = null;
             bool check = false;
@@ -3404,9 +3408,14 @@ namespace Game.Entities
                     areaTrigger = Global.ObjectMgr.GetGoBackTrigger(mapId);
                     check = true;
                 }
-                else if (instance_id != 0 && Global.InstanceLockMgr.FindActiveInstanceLock(guid, new MapDb2Entries(mapId, map.GetDifficultyID())) != null) // ... and instance is reseted then look for entrance.
+                else if (instance_id != 0 && isNewMap) // ... and instance is reseted then look for entrance.
                 {
-                    areaTrigger = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
+                    InstanceScript instanceScript = map.ToInstanceMap().GetInstanceScript();
+                    if (instanceScript != null)
+                        areaTrigger = Global.ObjectMgr.GetWorldSafeLoc(instanceScript.GetEntranceLocation());
+
+                    if (areaTrigger == null)
+                        areaTrigger = Global.ObjectMgr.GetMapEntranceTrigger(mapId);
                     check = true;
                 }
             }
