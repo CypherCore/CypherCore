@@ -104,55 +104,55 @@ namespace Game.Entities
                     // craft spell for crafting non-existed item (break client recipes list show)
                     case SpellEffectName.CreateItem:
                     case SpellEffectName.CreateLoot:
+                    {
+                        if (spellEffectInfo.ItemType == 0)
                         {
-                            if (spellEffectInfo.ItemType == 0)
-                            {
-                                // skip auto-loot crafting spells, its not need explicit item info (but have special fake items sometime)
-                                if (!spellInfo.IsLootCrafting())
-                                {
-                                    if (msg)
-                                    {
-                                        if (player != null)
-                                            player.SendSysMessage("Craft spell {0} not have create item entry.", spellInfo.Id);
-                                        else
-                                            Log.outError(LogFilter.Spells, "Craft spell {0} not have create item entry.", spellInfo.Id);
-                                    }
-                                    return false;
-                                }
-
-                            }
-                            // also possible IsLootCrafting case but fake item must exist anyway
-                            else if (Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType) == null)
+                            // skip auto-loot crafting spells, its not need explicit item info (but have special fake items sometime)
+                            if (!spellInfo.IsLootCrafting())
                             {
                                 if (msg)
                                 {
                                     if (player != null)
-                                        player.SendSysMessage("Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                        player.SendSysMessage("Craft spell {0} not have create item entry.", spellInfo.Id);
                                     else
-                                        Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                        Log.outError(LogFilter.Spells, "Craft spell {0} not have create item entry.", spellInfo.Id);
                                 }
                                 return false;
                             }
 
-                            needCheckReagents = true;
-                            break;
                         }
+                        // also possible IsLootCrafting case but fake item must exist anyway
+                        else if (Global.ObjectMgr.GetItemTemplate(spellEffectInfo.ItemType) == null)
+                        {
+                            if (msg)
+                            {
+                                if (player != null)
+                                    player.SendSysMessage("Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                                else
+                                    Log.outError(LogFilter.Spells, "Craft spell {0} create not-exist in DB item (Entry: {1}) and then...", spellInfo.Id, spellEffectInfo.ItemType);
+                            }
+                            return false;
+                        }
+
+                        needCheckReagents = true;
+                        break;
+                    }
                     case SpellEffectName.LearnSpell:
+                    {
+                        SpellInfo spellInfo2 = GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
+                        if (!IsSpellValid(spellInfo2, player, msg))
                         {
-                            SpellInfo spellInfo2 = GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
-                            if (!IsSpellValid(spellInfo2, player, msg))
+                            if (msg)
                             {
-                                if (msg)
-                                {
-                                    if (player != null)
-                                        player.SendSysMessage("Spell {0} learn to broken spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
-                                    else
-                                        Log.outError(LogFilter.Spells, "Spell {0} learn to invalid spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
-                                }
-                                return false;
+                                if (player != null)
+                                    player.SendSysMessage("Spell {0} learn to broken spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
+                                else
+                                    Log.outError(LogFilter.Spells, "Spell {0} learn to invalid spell {1}, and then...", spellInfo.Id, spellEffectInfo.TriggerSpell);
                             }
-                            break;
+                            return false;
                         }
+                        break;
+                    }
                 }
             }
 
@@ -2326,9 +2326,9 @@ namespace Game.Entities
                 visuals.Add(visual);
             }
 
-            // sorted with unconditional visuals being last
+            // sorted with unconditional visuals being last at each priority level
             foreach (var data in loadData)
-                data.Value.Visuals.Sort((left, right) => { return right.CasterPlayerConditionID.CompareTo(left.CasterPlayerConditionID); });
+                data.Value.Visuals = data.Value.Visuals.OrderBy(value => value.Priority).ThenBy(value => value.CasterPlayerConditionID).ToList();
 
             foreach (var (key, data) in loadData)
             {
@@ -2802,35 +2802,35 @@ namespace Game.Entities
                         case SpellEffectName.EnchantItemTemporary:
                         case SpellEffectName.EnchantItemPrismatic:
                         case SpellEffectName.EnchantHeldItem:
+                        {
+                            // only enchanting profession enchantments procs can stack
+                            if (IsPartOfSkillLine(SkillType.Enchanting, spellInfo.Id))
                             {
-                                // only enchanting profession enchantments procs can stack
-                                if (IsPartOfSkillLine(SkillType.Enchanting, spellInfo.Id))
-                                {
-                                    uint enchantId = (uint)spellEffectInfo.MiscValue;
-                                    var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
-                                    if (enchant == null)
-                                        break;
+                                uint enchantId = (uint)spellEffectInfo.MiscValue;
+                                var enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
+                                if (enchant == null)
+                                    break;
 
-                                    for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
+                                for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
+                                {
+                                    if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
+                                        continue;
+
+                                    foreach (SpellInfo procInfo in _GetSpellInfo(enchant.EffectArg[s]))
                                     {
-                                        if (enchant.Effect[s] != ItemEnchantmentType.CombatSpell)
+
+                                        // if proced directly from enchantment, not via proc aura
+                                        // NOTE: Enchant Weapon - Blade Ward also has proc aura spell and is proced directly
+                                        // however its not expected to stack so this check is good
+                                        if (procInfo.HasAura(AuraType.ProcTriggerSpell))
                                             continue;
 
-                                        foreach (SpellInfo procInfo in _GetSpellInfo(enchant.EffectArg[s]))
-                                        {
-
-                                            // if proced directly from enchantment, not via proc aura
-                                            // NOTE: Enchant Weapon - Blade Ward also has proc aura spell and is proced directly
-                                            // however its not expected to stack so this check is good
-                                            if (procInfo.HasAura(AuraType.ProcTriggerSpell))
-                                                continue;
-
-                                            procInfo.AttributesCu |= SpellCustomAttributes.EnchantProc;
-                                        }
+                                        procInfo.AttributesCu |= SpellCustomAttributes.EnchantProc;
                                     }
                                 }
-                                break;
                             }
+                            break;
+                        }
                     }
                 }
 
@@ -2863,42 +2863,42 @@ namespace Game.Entities
                                 case SpellEffectName.ApplyAuraOnPet:
                                 case SpellEffectName.ApplyAreaAuraSummons:
                                 case SpellEffectName.ApplyAreaAuraPartyNonrandom:
-                                    {
-                                        if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamagePercent ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicLeech ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicHealthFunnel ||
-                                            spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy)
-                                            break;
-
-                                        goto default;
-                                    }
-                                default:
-                                    {
-                                        // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
-                                        if (spellEffectInfo.CalcValue() == 0 && !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
-                                            break;
-
-                                        // Sindragosa Frost Breath
-                                        if (spellInfo.Id == 69649 || spellInfo.Id == 71056 || spellInfo.Id == 71057 || spellInfo.Id == 71058 || spellInfo.Id == 73061 || spellInfo.Id == 73062 || spellInfo.Id == 73063 || spellInfo.Id == 73064)
-                                            break;
-
-                                        // Frostbolt
-                                        if (spellInfo.SpellFamilyName == SpellFamilyNames.Mage && spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20u))
-                                            break;
-
-                                        // Frost Fever
-                                        if (spellInfo.Id == 55095)
-                                            break;
-
-                                        // Haunt
-                                        if (spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x40000u))
-                                            break;
-
-                                        setFlag = true;
+                                {
+                                    if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamagePercent ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicLeech ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicHealthFunnel ||
+                                        spellEffectInfo.ApplyAuraName == AuraType.PeriodicDummy)
                                         break;
-                                    }
+
+                                    goto default;
+                                }
+                                default:
+                                {
+                                    // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
+                                    if (spellEffectInfo.CalcValue() == 0 && !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
+                                        break;
+
+                                    // Sindragosa Frost Breath
+                                    if (spellInfo.Id == 69649 || spellInfo.Id == 71056 || spellInfo.Id == 71057 || spellInfo.Id == 71058 || spellInfo.Id == 73061 || spellInfo.Id == 73062 || spellInfo.Id == 73063 || spellInfo.Id == 73064)
+                                        break;
+
+                                    // Frostbolt
+                                    if (spellInfo.SpellFamilyName == SpellFamilyNames.Mage && spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x20u))
+                                        break;
+
+                                    // Frost Fever
+                                    if (spellInfo.Id == 55095)
+                                        break;
+
+                                    // Haunt
+                                    if (spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x40000u))
+                                        break;
+
+                                    setFlag = true;
+                                    break;
+                                }
                             }
 
                             if (setFlag)
@@ -5195,56 +5195,56 @@ namespace Game.Entities
             switch (spellId)
             {
                 case 91604: // No fly Zone - Wintergrasp
-                    {
-                        if (player == null)
-                            return false;
+                {
+                    if (player == null)
+                        return false;
 
-                        BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-                        if (Bf == null || Bf.CanFlyIn() || (!player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !player.HasAuraType(AuraType.Fly)))
-                            return false;
-                        break;
-                    }
+                    BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+                    if (Bf == null || Bf.CanFlyIn() || (!player.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) && !player.HasAuraType(AuraType.Fly)))
+                        return false;
+                    break;
+                }
                 case 56618: // Horde Controls Factory Phase Shift
                 case 56617: // Alliance Controls Factory Phase Shift
-                    {
-                        if (player == null)
-                            return false;
+                {
+                    if (player == null)
+                        return false;
 
-                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
 
-                        if (bf == null || bf.GetTypeId() != (int)BattleFieldTypes.WinterGrasp)
-                            return false;
+                    if (bf == null || bf.GetTypeId() != (int)BattleFieldTypes.WinterGrasp)
+                        return false;
 
-                        // team that controls the workshop in the specified area
-                        uint team = bf.GetData(newArea);
+                    // team that controls the workshop in the specified area
+                    uint team = bf.GetData(newArea);
 
-                        if (team == BattleGroundTeamId.Horde)
-                            return spellId == 56618;
-                        else if (team == BattleGroundTeamId.Alliance)
-                            return spellId == 56617;
-                        break;
-                    }
+                    if (team == BattleGroundTeamId.Horde)
+                        return spellId == 56618;
+                    else if (team == BattleGroundTeamId.Alliance)
+                        return spellId == 56617;
+                    break;
+                }
                 case 57940: // Essence of Wintergrasp - Northrend
                 case 58045: // Essence of Wintergrasp - Wintergrasp
-                    {
-                        if (player == null)
-                            return false;
+                {
+                    if (player == null)
+                        return false;
 
-                        BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
-                        if (battlefieldWG != null)
-                            return battlefieldWG.IsEnabled() && (player.GetTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
-                        break;
-                    }
+                    BattleField battlefieldWG = Global.BattleFieldMgr.GetBattlefieldByBattleId(player.GetMap(), 1);
+                    if (battlefieldWG != null)
+                        return battlefieldWG.IsEnabled() && (player.GetTeamId() == battlefieldWG.GetDefenderTeam()) && !battlefieldWG.IsWarTime();
+                    break;
+                }
                 case 74411: // Battleground- Dampening
-                    {
-                        if (player == null)
-                            return false;
+                {
+                    if (player == null)
+                        return false;
 
-                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
-                        if (bf != null)
-                            return bf.IsWarTime();
-                        break;
-                    }
+                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(player.GetMap(), player.GetZoneId());
+                    if (bf != null)
+                        return bf.IsWarTime();
+                    break;
+                }
             }
             return true;
         }

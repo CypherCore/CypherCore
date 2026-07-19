@@ -3161,18 +3161,38 @@ namespace Game.Spells
 
         public uint GetSpellXSpellVisualId(WorldObject caster = null, WorldObject viewer = null)
         {
-            foreach (SpellXSpellVisualRecord visual in _visuals)
+            bool canUseSpellVisual(SpellXSpellVisualRecord visual)
             {
                 if (visual.CasterPlayerConditionID != 0)
                     if (caster == null || !caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), visual.CasterPlayerConditionID))
-                        continue;
+                        return false;
 
                 var unitCondition = CliDB.UnitConditionStorage.LookupByKey(visual.CasterUnitConditionID);
                 if (unitCondition != null)
                     if (caster == null || !caster.IsUnit() || !ConditionManager.IsUnitMeetingCondition(caster.ToUnit(), viewer?.ToUnit(), unitCondition))
-                        continue;
+                        return false;
 
-                return visual.Id;
+                return true;
+            }
+
+            for (var i = 0; i < _visuals.Count; i++)
+            {
+                var record = _visuals[i];
+                if (!canUseSpellVisual(record))
+                    continue;
+
+                // match found, now select among all visuals with the same priority
+                List<SpellXSpellVisualRecord> visualCandidates = [];
+                visualCandidates.Add(record);
+
+                for (var c = i + 1; c != _visuals.Count && record.Priority == _visuals[c].Priority; ++c)
+                    if (canUseSpellVisual(record))
+                        visualCandidates.Add(record);
+
+                if (visualCandidates.Count == 1)
+                    return visualCandidates.First().Id;    // special case, ignores Probability
+
+                return visualCandidates.SelectRandomElementByWeight(visual => visual.Probability).Id;
             }
 
             return 0;
