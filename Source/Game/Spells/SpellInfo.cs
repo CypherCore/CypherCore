@@ -2323,9 +2323,9 @@ namespace Game.Spells
                     numNonDiminishedTargetsValueHolder = Global.SpellMgr.GetSpellInfo(numNonDiminishedTargetsValueHolderSpell.Value, Difficulty);
 
                 if (numNonDiminishedTargetsValueHolder == null)
-                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {maxTargetsValueHolderSpell} does not exist");
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {numNonDiminishedTargetsValueHolderSpell.Value} does not exist");
                 else if (numNonDiminishedTargetsValueHolderEffect >= numNonDiminishedTargetsValueHolder.GetEffects().Count)
-                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {numNonDiminishedTargetsValueHolder.Id} does not have effect {maxTargetsValueHolderEffect.Value}");
+                    Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {numNonDiminishedTargetsValueHolder.Id} does not have effect {numNonDiminishedTargetsValueHolderEffect.Value}");
                 else
                 {
                     SpellEffectInfo valueHolder = numNonDiminishedTargetsValueHolder.GetEffect(numNonDiminishedTargetsValueHolderEffect.Value);
