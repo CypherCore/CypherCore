@@ -359,6 +359,7 @@ namespace Game.DataStorage
             TotemCategoryStorage = ReadDB2<TotemCategoryRecord>("TotemCategory.db2", HotfixStatements.SEL_TOTEM_CATEGORY, HotfixStatements.SEL_TOTEM_CATEGORY_LOCALE);
             ToyStorage = ReadDB2<ToyRecord>("Toy.db2", HotfixStatements.SEL_TOY, HotfixStatements.SEL_TOY_LOCALE);
             TraitCondStorage = ReadDB2<TraitCondRecord>("TraitCond.db2", HotfixStatements.SEL_TRAIT_COND);
+            TraitCondAccountElementStorage = ReadDB2<TraitCondAccountElementRecord>("TraitCondAccountElement.db2", HotfixStatements.SEL_TRAIT_COND_ACCOUNT_ELEMENT);
             TraitCostStorage = ReadDB2<TraitCostRecord>("TraitCost.db2", HotfixStatements.SEL_TRAIT_COST);
             TraitCurrencyStorage = ReadDB2<TraitCurrencyRecord>("TraitCurrency.db2", HotfixStatements.SEL_TRAIT_CURRENCY);
             TraitCurrencySourceStorage = ReadDB2<TraitCurrencySourceRecord>("TraitCurrencySource.db2", HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE, HotfixStatements.SEL_TRAIT_CURRENCY_SOURCE_LOCALE);
@@ -765,6 +766,7 @@ namespace Game.DataStorage
         public static DB6Storage<TotemCategoryRecord> TotemCategoryStorage;
         public static DB6Storage<ToyRecord> ToyStorage;
         public static DB6Storage<TraitCondRecord> TraitCondStorage;
+        public static DB6Storage<TraitCondAccountElementRecord> TraitCondAccountElementStorage;
         public static DB6Storage<TraitCostRecord> TraitCostStorage;
         public static DB6Storage<TraitCurrencyRecord> TraitCurrencyStorage;
         public static DB6Storage<TraitCurrencySourceRecord> TraitCurrencySourceStorage;

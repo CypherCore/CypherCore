@@ -473,8 +473,8 @@ namespace Game
                         case TraitCurrencyType.TraitSourcedPlayerDataElement:
                             if (currency.PlayerDataElementAccountID != 0)
                                 currencies[currency.Id] += player.GetDataElementAccount((uint)currency.CurrencyTypesID);
-                    else if (currency.PlayerDataElementCharacterID != 0)
-                                currencies[currency.Id] +=  player.GetDataElementCharacter((uint)currency.CurrencyTypesID);
+                            else if (currency.PlayerDataElementCharacterID != 0)
+                                currencies[currency.Id] += player.GetDataElementCharacter((uint)currency.CurrencyTypesID);
                             break;
                         default:
                             break;
@@ -483,54 +483,76 @@ namespace Game
             }
         }
 
-        public static void AddSpentCurrenciesForEntry(TraitEntryPacket entry, Dictionary<int, int> cachedCurrencies, int multiplier)
+        public static List<TraitCondRecord> GetGateConditionsForNode(Node node)
         {
-            Node node = _traitNodes.LookupByKey(entry.TraitNodeID);
-            foreach (NodeGroup group in node.Groups)
-            {
-                foreach (TraitCostRecord cost in group.Costs)
-                {
-                    if (!cachedCurrencies.ContainsKey(cost.TraitCurrencyID))
-                        cachedCurrencies[cost.TraitCurrencyID] = 0;
+            List<TraitCondRecord> gateConditions = [];
 
-                    cachedCurrencies[cost.TraitCurrencyID] += cost.Amount * entry.Rank * multiplier;
+            void fillConditions(List<TraitCondRecord> conditions)
+            {
+                foreach (TraitCondRecord condition in conditions)
+                {
+                    if (!condition.HasFlag(TraitCondFlags.IsGate))
+                        continue;
+
+                    var cond = gateConditions.Find(p => p.TraitCurrencyID == condition.TraitCurrencyID);
+                    if (cond == null)
+                        gateConditions.Add(condition);
+                    else if (cond.SpentAmountRequired < condition.SpentAmountRequired)
+                        cond = condition;
                 }
             }
+
+            fillConditions(node.Conditions);
+
+            foreach (NodeGroup group in node.Groups)
+                fillConditions(group.Conditions);
+
+            return gateConditions;
+        }
+
+        public static void AddSpentCurrenciesForEntry(TraitEntryPacket entry, Dictionary<int, SpentCurrency> cachedCurrencies, int multiplier)
+        {
+            Node node = _traitNodes.LookupByKey(entry.TraitNodeID);
+            List<TraitCondRecord> gateConditions = GetGateConditionsForNode(node);
+
+            void addCurrencies(List<TraitCostRecord> costs)
+            {
+                foreach (TraitCostRecord cost in costs)
+                {
+                    int amount = cost.Amount * entry.Rank * multiplier;
+
+                    SpentCurrency cached = cachedCurrencies[cost.TraitCurrencyID];
+                    cached.Total += amount;
+
+                    int gate = 0;
+                    var gateCondition = gateConditions.Find(p => p.TraitCurrencyID == cost.TraitCurrencyID);
+                    if (gateCondition != null)
+                        gate = gateCondition.SpentAmountRequired;
+
+                    var gateCost = cached.ByGate.Find(p => p.Item1 == gate);
+                    if (gateCost.Item1 == 0)
+                        cached.ByGate.Add((gate, amount));
+                    else
+                        gateCost.Item2 += amount;
+                }
+            }
+
+            foreach (NodeGroup group in node.Groups)
+                addCurrencies(group.Costs);
 
             var nodeEntryItr = node.Entries.Find(nodeEntry => nodeEntry.Data.Id == entry.TraitNodeEntryID);
             if (nodeEntryItr != null)
-            {
-                foreach (TraitCostRecord cost in nodeEntryItr.Costs)
-                {
-                    if (!cachedCurrencies.ContainsKey(cost.TraitCurrencyID))
-                        cachedCurrencies[cost.TraitCurrencyID] = 0;
-
-                    cachedCurrencies[cost.TraitCurrencyID] += cost.Amount * entry.Rank * multiplier;
-                }
-            }
+                addCurrencies(nodeEntryItr.Costs);
 
             foreach (TraitCostRecord cost in node.Costs)
-            {
-                if (!cachedCurrencies.ContainsKey(cost.TraitCurrencyID))
-                    cachedCurrencies[cost.TraitCurrencyID] = 0;
-
-                cachedCurrencies[cost.TraitCurrencyID] += cost.Amount * entry.Rank * multiplier;
-            }
+                addCurrencies(node.Costs);
 
             Tree tree = _traitTrees.LookupByKey(node.Data.TraitTreeID);
             if (tree != null)
-            {
-                foreach (TraitCostRecord cost in tree.Costs)
-                {
-                    if (!cachedCurrencies.ContainsKey(cost.TraitCurrencyID))
-                        cachedCurrencies[cost.TraitCurrencyID] = 0;
-
-                    cachedCurrencies[cost.TraitCurrencyID] += cost.Amount * entry.Rank * multiplier;
-                }
-            }
+                addCurrencies(tree.Costs);
         }
 
-        public static void FillSpentCurrenciesMap(List<TraitEntryPacket> traitEntries, Dictionary<int, int> cachedCurrencies)
+        public static void FillSpentCurrenciesMap(List<TraitEntryPacket> traitEntries, Dictionary<int, SpentCurrency> cachedCurrencies)
         {
             foreach (TraitEntryPacket entry in traitEntries)
                 AddSpentCurrenciesForEntry(entry, cachedCurrencies, 1);
@@ -571,7 +593,7 @@ namespace Game
             return subTree.Currencies;
         }
 
-        public static bool MeetsTraitCondition(TraitConfigPacket traitConfig, Player player, TraitCondRecord condition, ref Dictionary<int, int> cachedCurrencies)
+        public static bool MeetsTraitCondition(TraitConfigPacket traitConfig, Player player, TraitCondRecord condition, Dictionary<int, SpentCurrency> cachedCurrencies)
         {
             if (condition.QuestID != 0 && !player.IsQuestRewarded(condition.QuestID))
                 return false;
@@ -591,86 +613,107 @@ namespace Game
 
             if (condition.TraitCurrencyID != 0 && condition.SpentAmountRequired != 0)
             {
-                if (cachedCurrencies == null)
-                {
-                    cachedCurrencies = new();
-                    FillSpentCurrenciesMap(traitConfig.Entries, cachedCurrencies);
-                }
+                int spentAmount = 0;
+                var itr = cachedCurrencies.Find(condition.TraitCurrencyID);
+                if (itr.Key != 0)
+                    foreach (var (gate, spentBeforeGate) in itr.Value.ByGate)
+                        if (gate < condition.SpentAmountRequired)
+                            spentAmount += spentBeforeGate;
 
-                if (condition.TraitNodeGroupID != 0 || condition.TraitNodeID != 0 || condition.TraitNodeEntryID != 0)
-                {
-                    cachedCurrencies.TryAdd(condition.TraitCurrencyID, 0);
-                    if (cachedCurrencies[condition.TraitCurrencyID] < condition.SpentAmountRequired)
-                        return false;
-                }
+                if (spentAmount < condition.SpentAmountRequired)
+                    return false;
             }
 
             if (condition.RequiredLevel != 0 && player.GetLevel() < condition.RequiredLevel)
                 return false;
 
+            TraitCondAccountElementRecord accountElementCond = CliDB.TraitCondAccountElementStorage.LookupByKey(condition.TraitCondAccountElementID);
+            if (accountElementCond != null)
+            {
+                long value = 0;
+                if (accountElementCond.PlayerDataElementAccountID != 0)
+                    value = player.GetDataElementAccount(accountElementCond.PlayerDataElementAccountID);
+                else if (accountElementCond.PlayerDataElementCharacterID != 0)
+                    value = player.GetDataElementCharacter((uint)accountElementCond.PlayerDataElementCharacterID);
+
+                switch (accountElementCond.Comparison)
+                {
+                    case 1: if (value != accountElementCond.ElementValueInt) return false; break;
+                    case 2: if (value == accountElementCond.ElementValueInt) return false; break;
+                    case 3: if (value >= accountElementCond.ElementValueInt) return false; break;
+                    case 4: if (value > accountElementCond.ElementValueInt) return false; break;
+                    case 5: if (value <= accountElementCond.ElementValueInt) return false; break;
+                    case 6: if (value < accountElementCond.ElementValueInt) return false; break;
+                    default:
+                        return false;
+                }
+            }
+
             return true;
         }
 
-        public static bool NodeMeetsTraitConditions(TraitConfigPacket traitConfig, Node node, uint traitNodeEntryId, Player player, Dictionary<int, int> spentCurrencies)
+        public static bool NodeMeetsTraitConditions(TraitConfigPacket traitConfig, Node node, uint traitNodeEntryId, Player player, Dictionary<int, SpentCurrency> spentCurrencies)
         {
-            var meetsConditions = (bool isSufficient, bool hasFailedConditions) (List<TraitCondRecord> conditions) =>
+            (bool isSufficient, bool hasFailedConditions) meetsConditions(List<TraitCondRecord> conditions, TraitConditionType conditionType)
             {
                 bool isSufficient = false;
                 bool hasFailedConditions = false;
 
                 foreach (var condition in conditions)
                 {
-                    if (condition.GetCondType() == TraitConditionType.Available || condition.GetCondType() == TraitConditionType.Visible)
-                    {
-                        if (MeetsTraitCondition(traitConfig, player, condition, ref spentCurrencies))
-                        {
-                            if (condition.HasFlag(TraitCondFlags.IsSufficient))
-                            {
-                                isSufficient = true;
-                                break;
-                            }
-                            continue;
-                        }
+                    if (condition.GetCondType() != conditionType)
+                        continue;
 
+                    if (!MeetsTraitCondition(traitConfig, player, condition, spentCurrencies))
+                    {
                         hasFailedConditions = true;
+                        continue;
+                    }
+
+                    if (condition.HasFlag(TraitCondFlags.IsSufficient))
+                    {
+                        isSufficient = true;
+                        break;
                     }
                 }
 
                 return (isSufficient, hasFailedConditions);
-            };
+            }
 
-            bool IsSufficient;
-            bool HasFailedConditions;
-
-            bool hasFailedConditions = false;
-            foreach (NodeEntry entry in node.Entries)
+            bool meetsConditionsOfType(TraitConditionType conditionType)
             {
-                if (entry.Data.Id == traitNodeEntryId)
+                bool hasFailedConditions = false;
+                var (IsSufficient, HasFailedConditions) = meetsConditions(node.Conditions, conditionType);
+                if (IsSufficient)
+                    return true;
+                else if (HasFailedConditions)
+                    hasFailedConditions = true;
+
+                foreach (NodeGroup entry in node.Groups)
                 {
-                    (IsSufficient, HasFailedConditions) = meetsConditions(entry.Conditions);
+                    (IsSufficient, HasFailedConditions) = meetsConditions(entry.Conditions, conditionType);
                     if (IsSufficient)
                         return true;
                     if (HasFailedConditions)
                         hasFailedConditions = true;
                 }
+
+                foreach (NodeEntry entry in node.Entries)
+                {
+                    if (entry.Data.Id == traitNodeEntryId)
+                    {
+                        (IsSufficient, HasFailedConditions) = meetsConditions(entry.Conditions, conditionType);
+                        if (IsSufficient)
+                            return true;
+                        if (HasFailedConditions)
+                            hasFailedConditions = true;
+                    }
+                }
+
+                return !hasFailedConditions;
             }
 
-            (IsSufficient, HasFailedConditions) = meetsConditions(node.Conditions);
-            if (IsSufficient)
-                return true;
-            else if (HasFailedConditions)
-                hasFailedConditions = true;
-
-            foreach (NodeGroup group in node.Groups)
-            {
-                (IsSufficient, HasFailedConditions) = meetsConditions(group.Conditions);
-                if (IsSufficient)
-                    return true;
-                if (HasFailedConditions)
-                    hasFailedConditions = true;
-            }
-
-            return !hasFailedConditions;
+            return meetsConditionsOfType(TraitConditionType.Visible) && meetsConditionsOfType(TraitConditionType.Available);
         }
 
         public static List<TraitEntry> GetGrantedTraitEntriesForConfig(TraitConfigPacket traitConfig, Player player)
@@ -697,7 +740,7 @@ namespace Game
                     foundTraitEntry.GrantedRanks = entry.Data.MaxRanks;
             }
 
-            Dictionary<int, int> cachedCurrencies = null;
+            Dictionary<int, SpentCurrency> cachedCurrencies = [];
 
             foreach (Tree tree in trees)
             {
@@ -705,17 +748,17 @@ namespace Game
                 {
                     foreach (NodeEntry entry in node.Entries)
                         foreach (TraitCondRecord condition in entry.Conditions)
-                            if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
+                            if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, cachedCurrencies))
                                 addGrantedRankToEntry(node.Data.Id, entry, condition.GrantedRanks);
 
                     foreach (TraitCondRecord condition in node.Conditions)
-                        if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
+                        if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, cachedCurrencies))
                             foreach (NodeEntry entry in node.Entries)
                                 addGrantedRankToEntry(node.Data.Id, entry, condition.GrantedRanks);
 
                     foreach (NodeGroup group in node.Groups)
                         foreach (TraitCondRecord condition in group.Conditions)
-                            if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, ref cachedCurrencies))
+                            if (condition.GetCondType() == TraitConditionType.Granted && MeetsTraitCondition(traitConfig, player, condition, cachedCurrencies))
                                 foreach (NodeEntry entry in node.Entries)
                                     addGrantedRankToEntry(node.Data.Id, entry, condition.GrantedRanks);
                 }
@@ -758,7 +801,8 @@ namespace Game
                 {
                     TraitEntryPacket traitEntry = getNodeEntry(node.Data.Id, nodeEntry.Data.Id);
                     return traitEntry != null && (traitEntry.Rank + traitEntry.GrantedRanks) == nodeEntry.Data.MaxRanks;
-                };
+                }
+                ;
 
                 if (node.Data.GetNodeType() == TraitNodeType.Selection)
                     return node.Entries.Any(nodeEntryMatches);
@@ -766,7 +810,7 @@ namespace Game
                 return node.Entries.All(nodeEntryMatches);
             }
 
-            Dictionary<int, int> spentCurrencies = new();
+            Dictionary<int, SpentCurrency> spentCurrencies = new();
             FillSpentCurrenciesMap(traitConfig.Entries, spentCurrencies);
 
             var isValidTraitEntry = TalentLearnResult (TraitEntryPacket traitEntry) =>
@@ -871,11 +915,11 @@ namespace Game
                 if (CliDB.TraitCurrencyStorage.LookupByKey(traitCurrencyId).GetCurrencyType() != TraitCurrencyType.TraitSourced)
                     continue;
 
-                if (spentAmount == 0)
+                if (spentAmount.Total == 0)
                     continue;
 
                 int grantedCount = grantedCurrencies.LookupByKey(traitCurrencyId);
-                if (grantedCount == 0 || grantedCount < spentAmount)
+                if (grantedCount == 0 || grantedCount < spentAmount.Total)
                     return TalentLearnResult.FailedNotEnoughTalentsInPrimaryTree;
 
             }
@@ -889,8 +933,8 @@ namespace Game
                     if (grantedAmount == 0)
                         continue;
 
-                    int spentAmount = spentCurrencies.LookupByKey(traitCurrencyId);
-                    if (spentAmount == 0 || spentAmount != grantedAmount)
+                    SpentCurrency spentAmount = spentCurrencies.LookupByKey(traitCurrencyId);
+                    if (spentAmount == null || spentAmount.Total != grantedAmount)
                         return TalentLearnResult.UnspentTalentPoints;
                 }
 
@@ -905,8 +949,8 @@ namespace Game
                         if (grantedAmount == 0)
                             continue;
 
-                        int spentAmount = spentCurrencies.LookupByKey(subTreeCurrency.Id);
-                        if (spentAmount == 0 || spentAmount != grantedAmount)
+                        SpentCurrency spentAmount = spentCurrencies.LookupByKey(subTreeCurrency.Id);
+                        if (spentAmount == null || spentAmount.Total != grantedAmount)
                             return TalentLearnResult.UnspentTalentPoints;
                     }
                 }
@@ -1041,5 +1085,11 @@ namespace Game
     {
         public List<TraitEntryPacket> Entries = new();
         public bool IsSelected;
+    }
+
+    public class SpentCurrency
+    {
+        public int Total;
+        public List<(int, int)> ByGate = [];
     }
 }

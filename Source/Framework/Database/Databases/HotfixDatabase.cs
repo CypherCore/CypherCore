@@ -1502,6 +1502,10 @@ namespace Framework.Database
                 "TraitNodeID, TraitNodeEntryID, TraitCurrencyID, SpentAmountRequired, Flags, RequiredLevel, FreeSharedStringID, SpendMoreSharedStringID, " +
                 "TraitCondAccountElementID FROM trait_cond WHERE (`VerifiedBuild` > 0) = ?");
 
+            // TraitCondAccountElement.db2
+            PrepareStatement(HotfixStatements.SEL_TRAIT_COND_ACCOUNT_ELEMENT, "SELECT ElementValueInt, ID, PlayerDataElementAccountID, Comparison, Unused1110, " +
+                "PlayerDataElementCharacterID FROM trait_cond_account_element WHERE (`VerifiedBuild` > 0) = ?");
+
             // TraitCost.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_COST, "SELECT InternalName, ID, Amount, TraitCurrencyID, CurveID FROM trait_cost WHERE (`VerifiedBuild` > 0) = ?");
 
@@ -2435,6 +2439,8 @@ namespace Framework.Database
         SEL_TRANSMOG_HOLIDAY,
 
         SEL_TRAIT_COND,
+
+        SEL_TRAIT_COND_ACCOUNT_ELEMENT,
 
         SEL_TRAIT_COST,
 

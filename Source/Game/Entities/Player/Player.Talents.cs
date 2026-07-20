@@ -1031,11 +1031,13 @@ namespace Game.Entities
                     if (consumeCurrencies)
                         costEntries.Add(newEntry);
 
-                    TraitEntry newUfEntry = new();
-                    newUfEntry.TraitNodeID = newEntry.TraitNodeID;
-                    newUfEntry.TraitNodeEntryID = newEntry.TraitNodeEntryID;
-                    newUfEntry.Rank = newEntry.Rank;
-                    newUfEntry.GrantedRanks = newEntry.GrantedRanks;
+                    TraitEntry newUfEntry = new()
+                    {
+                        TraitNodeID = newEntry.TraitNodeID,
+                        TraitNodeEntryID = newEntry.TraitNodeEntryID,
+                        Rank = newEntry.Rank,
+                        GrantedRanks = newEntry.GrantedRanks
+                    };
 
                     AddDynamicUpdateFieldValue(configSetter.ModifyValue(configSetter.Entries), newUfEntry);
 
@@ -1066,7 +1068,7 @@ namespace Game.Entities
 
             if (consumeCurrencies)
             {
-                Dictionary<int, int> currencies = new();
+                Dictionary<int, SpentCurrency> currencies = new();
                 TraitMgr.FillSpentCurrenciesMap(costEntries, currencies);
 
                 foreach (var (traitCurrencyId, amount) in currencies)
@@ -1078,10 +1080,10 @@ namespace Game.Entities
                     switch (traitCurrency.GetCurrencyType())
                     {
                         case TraitCurrencyType.Gold:
-                            ModifyMoney(-amount);
+                            ModifyMoney(-amount.Total);
                             break;
                         case TraitCurrencyType.CurrencyTypesBased:
-                            RemoveCurrency((uint)traitCurrency.CurrencyTypesID, amount /* TODO: CurrencyDestroyReason */);
+                            RemoveCurrency((uint)traitCurrency.CurrencyTypesID, amount.Total /* TODO: CurrencyDestroyReason */);
                             break;
                         default:
                             break;

@@ -137,6 +137,17 @@ namespace Game.DataStorage
         public bool HasFlag(TraitCondFlags flag) => Flags.HasAnyFlag((int)flag);
     }
 
+    public sealed class TraitCondAccountElementRecord
+    {
+        public long ElementValueInt;
+        public uint ID;
+        public uint PlayerDataElementAccountID;
+        public byte Comparison;
+        public int Unused1110;
+        public int PlayerDataElementCharacterID;
+    }
+
+
     public sealed class TraitCostRecord
     {
         public string InternalName;
