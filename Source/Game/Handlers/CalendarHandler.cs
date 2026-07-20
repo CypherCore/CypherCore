@@ -60,7 +60,7 @@ namespace Game
             {
                 CalendarSendCalendarRaidLockoutInfo lockoutInfo = new();
                 lockoutInfo.MapID = (int)instanceLock.GetMapId();
-                lockoutInfo.DifficultyID = (uint)instanceLock.GetDifficultyId();
+                lockoutInfo.DifficultyID = (short)instanceLock.GetDifficultyId();
                 lockoutInfo.ExpireTime = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - GameTime.GetSystemTime()).TotalSeconds, 0);
                 lockoutInfo.InstanceID = instanceLock.GetInstanceId();
 
