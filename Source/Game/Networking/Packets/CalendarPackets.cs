@@ -837,20 +837,21 @@ namespace Game.Networking.Packets
         public byte InviteType;
         public bool IgnoreFriendAndGuildRestriction;
     }
+
     struct CalendarSendCalendarRaidLockoutInfo
     {
+        public int MapID;
+        public short DifficultyID;
+        public int ExpireTime;
+        public ulong InstanceID;
+
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(InstanceID);
             data.WriteInt32(MapID);
-            data.WriteUInt32(DifficultyID);
+            data.WriteInt16(DifficultyID);
             data.WriteInt32(ExpireTime);
+            data.WriteUInt64(InstanceID);
         }
-
-        public ulong InstanceID;
-        public int MapID;
-        public uint DifficultyID;
-        public int ExpireTime;
     }
 
     struct CalendarSendCalendarEventInfo

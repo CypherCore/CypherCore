@@ -13,7 +13,8 @@ namespace Game.Networking.Packets
         public ObjectGuid ScenarioGUID;
         public int ScenarioID;
         public int CurrentStep = -1;
-        public uint DifficultyID;
+        public bool ScenarioComplete;
+        public short DifficultyID;
         public uint WaveCurrent;
         public uint WaveMax;
         public uint TimerDuration;
@@ -22,7 +23,6 @@ namespace Game.Networking.Packets
         public List<uint> PickedSteps = new();
         public List<ScenarioSpellUpdate> Spells = new();
         public ObjectGuid PlayerGUID;
-        public bool ScenarioComplete;
 
         public ScenarioState() : base(ServerOpcodes.ScenarioState, ConnectionType.Instance) { }
 
@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(ScenarioGUID);
             _worldPacket.WriteInt32(ScenarioID);
             _worldPacket.WriteInt32(CurrentStep);
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteInt16(DifficultyID);
             _worldPacket.WriteUInt32(WaveCurrent);
             _worldPacket.WriteUInt32(WaveMax);
             _worldPacket.WriteUInt32(TimerDuration);
