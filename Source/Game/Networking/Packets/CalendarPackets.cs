@@ -5,7 +5,6 @@ using Framework.Constants;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
@@ -578,11 +577,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(InstanceID);
             ServerTime.Write(_worldPacket);
             _worldPacket.WriteInt32(MapID);
-            _worldPacket.WriteUInt32((uint)DifficultyID);
+            _worldPacket.WriteInt16((short)DifficultyID);
             _worldPacket.WriteInt32(TimeRemaining);
+            _worldPacket.WriteUInt64(InstanceID);
         }
 
         public ulong InstanceID;
@@ -598,9 +597,9 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt64(InstanceID);
             _worldPacket.WriteInt32(MapID);
-            _worldPacket.WriteUInt32((uint)DifficultyID);
+            _worldPacket.WriteInt16((short)DifficultyID);
+            _worldPacket.WriteUInt64(InstanceID);
         }
 
         public ulong InstanceID;
@@ -616,14 +615,14 @@ namespace Game.Networking.Packets
         {
             ServerTime.Write(_worldPacket);
             _worldPacket.WriteInt32(MapID);
-            _worldPacket.WriteUInt32(DifficultyID);
+            _worldPacket.WriteInt16(DifficultyID);
             _worldPacket.WriteInt32(OldTimeRemaining);
             _worldPacket.WriteInt32(NewTimeRemaining);
         }
 
         public WowTime ServerTime;
         public int MapID;
-        public uint DifficultyID;
+        public short DifficultyID;
         public int NewTimeRemaining;
         public int OldTimeRemaining;
     }

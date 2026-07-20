@@ -10,6 +10,6 @@ namespace Game.DataStorage
         public uint Id;
         public uint[] Spells = new uint[SharedConst.MaxOverrideSpell];
         public uint PlayerActionBarFileDataID;
-        public byte Flags;
+        public int Flags;
     }
 }

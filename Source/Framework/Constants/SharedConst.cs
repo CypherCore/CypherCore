@@ -802,7 +802,9 @@ namespace Framework.Constants
         Agility = 1,
         Stamina = 2,
         Intellect = 3,
-        Max = 4
+        Spirit = 4,
+
+        Max
     }
 
     public enum TrainerType
@@ -918,7 +920,7 @@ namespace Framework.Constants
         Constant = 6,
     }
 
-    public enum Difficulty : byte
+    public enum Difficulty : short
     {
         None = 0,
         Normal = 1,
@@ -3163,14 +3165,26 @@ namespace Framework.Constants
         CharterSignatureRequestFailedGeneric = 1213,
         CharterSystemRequestFailedGeneric = 1214,
         HousingActionUnavailable = 1215,
-        HousingResultMissingExpansionAccess = 1216,
-        HousingResultPermissionDenied = 1217,
-        GuildNeighborhoodBuiltHouseS = 1218,
-        GuildNeighborhoodSoldHouseS = 1219,
-        GuildNeighborhoodNewSubdivision = 1220,
-        GuildNeighborhoodRenameS = 1221,
-        CharterNeighborhoodRename = 1222,
-        RecentAllyPinServerError = 1223,
+        HousingExteriorFailsafeReset = 1216,
+        HousingResultMissingExpansionAccess = 1217,
+        HousingResultPermissionDenied = 1218,
+        GuildNeighborhoodBuiltHouseS = 1219,
+        GuildNeighborhoodSoldHouseS = 1220,
+        GuildNeighborhoodNewSubdivision = 1221,
+        GuildNeighborhoodRenameS = 1222,
+        CharterNeighborhoodRename = 1223,
+        CharterSignatureRemoved = 1224,
+        EndeavorRewardAvailable = 1225,
+        HousingResultCosmeticOwnerNotInGuild = 1226,
+        HousingResultPlotNotVacant = 1227,
+        HousingResultPlotReserved = 1228,
+        HousingResultMissingPrivateNeighborhoodInvite = 1229,
+        CharterNeighborhoodOwnershipTransferSuccess = 1230,
+        CharterNeighborhoodRenameNotificationS = 1231,
+        RecentAllyPinServerError = 1232,
+        PvpTrainingGroundsDisabled = 1233,
+        SoloJoinTrainingGround = 1234,
+        LfgJoinedTrainingGroundsQueue = 1235,
     }
 
     public enum SceneFlags

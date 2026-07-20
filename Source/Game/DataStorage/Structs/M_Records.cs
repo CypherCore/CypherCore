@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -129,7 +128,7 @@ namespace Game.DataStorage
     {
         public LocalizedString Message;                               // m_message_lang (text showed when transfer to map failed)
         public uint Id;
-        public uint DifficultyID;
+        public short DifficultyID;
         public int LockID;
         public MapDifficultyResetInterval ResetInterval;
         public uint MaxPlayers;

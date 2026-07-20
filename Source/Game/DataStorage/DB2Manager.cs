@@ -350,14 +350,12 @@ namespace Game.DataStorage
             foreach (MapDifficultyRecord entry in MapDifficultyStorage.Values)
             {
                 if (!_mapDifficulties.ContainsKey(entry.MapID))
-                    _mapDifficulties[entry.MapID] = new Dictionary<uint, MapDifficultyRecord>();
+                    _mapDifficulties[entry.MapID] = new Dictionary<int, MapDifficultyRecord>();
 
                 _mapDifficulties[entry.MapID][entry.DifficultyID] = entry;
             }
 
-            List<MapDifficultyXConditionRecord> mapDifficultyConditions = new();
-            foreach (var mapDifficultyCondition in MapDifficultyXConditionStorage.Values)
-                mapDifficultyConditions.Add(mapDifficultyCondition);
+            List<MapDifficultyXConditionRecord> mapDifficultyConditions = [.. MapDifficultyXConditionStorage.Values];
 
             mapDifficultyConditions = mapDifficultyConditions.OrderBy(p => p.OrderIndex).ToList();
 
@@ -470,9 +468,6 @@ namespace Game.DataStorage
 
                 _powerTypes[powerType.PowerTypeEnum] = powerType;
             }
-
-            foreach (PvpItemRecord pvpItem in PvpItemStorage.Values)
-                _pvpItemBonus[pvpItem.ItemID] = pvpItem.ItemLevelDelta;
 
             foreach (PvpTalentSlotUnlockRecord talentUnlock in PvpTalentSlotUnlockStorage.Values)
             {
@@ -1984,11 +1979,6 @@ namespace Game.DataStorage
             return null;
         }
 
-        public byte GetPvpItemLevelBonus(uint itemId)
-        {
-            return _pvpItemBonus.LookupByKey(itemId);
-        }
-
         public List<RewardPackXCurrencyTypeRecord> GetRewardPackCurrencyTypesByRewardID(uint rewardPackID)
         {
             return _rewardPackCurrencyTypes.LookupByKey(rewardPackID);
@@ -2398,7 +2388,7 @@ namespace Game.DataStorage
 
         public bool HasItemCurrencyCost(uint itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
-        public Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
+        public Dictionary<uint, Dictionary<int, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
 
         public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
         {
@@ -2456,7 +2446,7 @@ namespace Game.DataStorage
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
-        Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> _mapDifficulties = new();
+        Dictionary<uint, Dictionary<int, MapDifficultyRecord>> _mapDifficulties = new();
         MultiMap<uint, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
         Dictionary<uint, MountRecord> _mountsBySpellId = new();
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();
@@ -2467,7 +2457,6 @@ namespace Game.DataStorage
         Dictionary<uint, PathDb2> _paths = new();
         MultiMap<uint, uint> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
-        Dictionary<uint, byte> _pvpItemBonus = new();
         PvpTalentSlotUnlockRecord[] _pvpTalentSlotUnlock = new PvpTalentSlotUnlockRecord[PlayerConst.MaxPvpTalentSlots];
         MultiMap<uint, QuestLineXQuestRecord> _questsByQuestLine = new();
         Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new();

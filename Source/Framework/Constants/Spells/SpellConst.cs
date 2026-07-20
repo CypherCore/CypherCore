@@ -388,8 +388,23 @@ namespace Framework.Constants
         MaxAuraStacks = 37,
         ProcCooldown = 38,
         PowerCost2 = 39, // Used when SpellPowerEntry::PowerIndex == 2
+        MaxTargets = 40,
 
-        Max = 40
+        Max
+    }
+
+    public enum SpellPvpModifier
+    {
+        HealingAndDamage = 0,
+        PeriodicHealingAndDamage = 1,
+        BonusCoefficient = 2,
+
+        Points = 4,
+        PointsIndex0 = 5,
+        PointsIndex1 = 6,
+        PointsIndex2 = 7,
+        PointsIndex3 = 8,
+        PointsIndex4 = 9,
     }
 
     public enum SpellModType
@@ -776,7 +791,8 @@ namespace Framework.Constants
         ItemModAppearanceGroupAlreadyKnown = 320,
         ItemCreationDisabledForEvent = 321,
         WarbandSceneAlreadyKnown = 322,
-        Unknown = 323,
+        TransmogOutfitAlreadyKnown = 323,
+        Unknown = 324,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -2307,6 +2323,41 @@ namespace Framework.Constants
         Unk30 = 0x40000000, // 30
         Unk31 = 0x80000000  // 31
     }
+    public enum SpellAttr16 : uint
+    {
+        Unk0 = 0x00000001, // 0
+        Unk1 = 0x00000002, // 1
+        Unk2 = 0x00000004, // 2
+        Unk3 = 0x00000008, // 3
+        Unk4 = 0x00000010, // 4
+        Unk5 = 0x00000020, // 5
+        Unk6 = 0x00000040, // 6
+        Unk7 = 0x00000080, // 7
+        Unk8 = 0x00000100, // 8
+        Unk9 = 0x00000200, // 9
+        Unk10 = 0x00000400, // 10
+        Unk11 = 0x00000800, // 11
+        Unk12 = 0x00001000, // 12
+        Unk13 = 0x00002000, // 13
+        Unk14 = 0x00004000, // 14
+        Unk15 = 0x00008000, // 15
+        Unk16 = 0x00010000, // 16
+        Unk17 = 0x00020000, // 17
+        Unk18 = 0x00040000, // 18
+        Unk19 = 0x00080000, // 19
+        Unk20 = 0x00100000, // 20
+        Unk21 = 0x00200000, // 21
+        Unk22 = 0x00400000, // 22
+        Unk23 = 0x00800000, // 23
+        Unk24 = 0x01000000, // 24
+        Unk25 = 0x02000000, // 25
+        Unk26 = 0x04000000, // 26
+        Unk27 = 0x08000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
+    }
     public enum SpellCustomAttributes
     {
         EnchantProc = 0x01,
@@ -2696,7 +2747,8 @@ namespace Framework.Constants
         LearnHouseTheme = 351, // MiscValue[0] = HouseTheme
         LearnHouseRoomComponentTexture = 352, // MiscValue[0] = RoomComponentTexture
 
-        //                                              = 354, // MiscValue[0] = NeighborhoodInitiative
+        CreateAreatrigger2 = 353,
+        SetNeighorhoodInitiative = 354, // MiscValue[0] = NeighborhoodInitiative
         TotalSpellEffects
     }
 

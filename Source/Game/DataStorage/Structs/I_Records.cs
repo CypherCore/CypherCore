@@ -46,8 +46,11 @@ namespace Game.DataStorage
         public uint ItemGroupSoundsID;
         public int ContentTuningID;
         public int ModifiedCraftingReagentItemID;
+        public byte Unknown1200;
         public int CraftingQualityID;
-        public int Unknown1127;
+        public int ItemSquishEraID;
+        public float RecraftReagentCountPercentage;
+        public byte OrderSource;
     }
 
     public sealed class ItemAppearanceRecord
@@ -152,7 +155,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint ParentItemID;
         public uint ChildItemID;
-        public byte ChildItemEquipSlot;
+        public int ChildItemEquipSlot;
     }
 
     public sealed class ItemClassRecord
@@ -171,7 +174,7 @@ namespace Game.DataStorage
         public byte OrderIndex;
         public int PVal;
         public int LabelID;
-        public uint Flags;
+        public int Flags;
         public uint PlayerConditionID;
         public uint ItemContextPickerID;
     }
@@ -278,7 +281,7 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public byte Quantity;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class ItemLimitCategoryConditionRecord
@@ -338,7 +341,7 @@ namespace Game.DataStorage
         public int ItemOffsetCurveID;
         public int ItemLevel;
         public int RequiredLevel;
-        public int Unknown1125;
+        public int ItemSquishEraID;
         public int Flags;
     }
 
@@ -419,7 +422,7 @@ namespace Game.DataStorage
         public uint PlayerLevelToItemLevelCurveID;
         public int ItemLevelOffsetCurveID;
         public int ItemLevelOffsetItemLevel;
-        public int Unknown1127;
+        public int ItemSquishEraID;
         public ushort ItemNameDescriptionID;
         public ushort RequiredTransmogHoliday;
         public ushort RequiredHoliday;
@@ -470,6 +473,14 @@ namespace Game.DataStorage
         public uint Id;
         public ushort SpecID;
         public uint ItemID;
+    }
+
+    public sealed class ItemSquishEraRecord
+    {
+        public uint Id;
+        public int Patch;
+        public int CurveID;
+        public int Flags;
     }
 
     public sealed class ItemXBonusTreeRecord

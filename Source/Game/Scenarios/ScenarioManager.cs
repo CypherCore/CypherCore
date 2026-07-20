@@ -65,7 +65,7 @@ namespace Game.Scenarios
             do
             {
                 uint mapId = result.Read<uint>(0);
-                byte difficulty = result.Read<byte>(1);
+                Difficulty difficulty = (Difficulty)result.Read<int>(1);
 
                 uint scenarioAllianceId = result.Read<uint>(2);
                 if (scenarioAllianceId > 0 && !_scenarioData.ContainsKey(scenarioAllianceId))
@@ -84,11 +84,13 @@ namespace Game.Scenarios
                 if (scenarioHordeId == 0)
                     scenarioHordeId = scenarioAllianceId;
 
-                ScenarioDBData data = new();
-                data.MapID = mapId;
-                data.DifficultyID = difficulty;
-                data.Scenario_A = scenarioAllianceId;
-                data.Scenario_H = scenarioHordeId;
+                ScenarioDBData data = new()
+                {
+                    MapID = mapId,
+                    DifficultyID = difficulty,
+                    Scenario_A = scenarioAllianceId,
+                    Scenario_H = scenarioHordeId
+                };
                 _scenarioDBData[Tuple.Create(mapId, difficulty)] = data;
             }
             while (result.NextRow());
@@ -215,7 +217,7 @@ namespace Game.Scenarios
 
         Dictionary<uint, ScenarioData> _scenarioData = new();
         MultiMap<uint, ScenarioPOI> _scenarioPOIStore = new();
-        Dictionary<Tuple<uint, byte>, ScenarioDBData> _scenarioDBData = new();
+        Dictionary<Tuple<uint, Difficulty>, ScenarioDBData> _scenarioDBData = new();
     }
 
     public class ScenarioData
@@ -227,7 +229,7 @@ namespace Game.Scenarios
     class ScenarioDBData
     {
         public uint MapID;
-        public byte DifficultyID;
+        public Difficulty DifficultyID;
         public uint Scenario_A;
         public uint Scenario_H;
     }

@@ -5872,7 +5872,7 @@ namespace Game.Entities
             worldServerInfo.IsTournamentRealm = false;             // @todo
             worldServerInfo.RestrictedAccountMaxLevel = null; // @todo
             worldServerInfo.RestrictedAccountMaxMoney = null; // @todo
-            worldServerInfo.DifficultyID = (uint)GetMap().GetDifficultyID();
+            worldServerInfo.DifficultyID = (short)GetMap().GetDifficultyID();
             // worldServerInfo.XRealmPvpAlert;  // @todo
             SendPacket(worldServerInfo);
 

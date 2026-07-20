@@ -201,7 +201,7 @@ namespace Game.DataStorage
         public int VisualStyle;
         public uint LeftTraitNodeID;
         public int RightTraitNodeID;
-        public int Type;
+        public byte Type;
     }
 
     public sealed class TraitNodeRecord

@@ -31,7 +31,7 @@ namespace Game.Entities
                 case HighGuid.Uniq:
                     return ObjectGuidFactory.CreateUniq(dbId);
                 case HighGuid.Player:
-                    return ObjectGuidFactory.CreatePlayer(0, dbId);
+                    return ObjectGuidFactory.CreatePlayer(0, 0, 0, dbId);
                 case HighGuid.Item:
                     return ObjectGuidFactory.CreateItem(0, dbId);
                 case HighGuid.StaticDoor:
@@ -153,7 +153,7 @@ namespace Game.Entities
                 case HighGuid.AILockTicket:
                     return ObjectGuidFactory.CreateWorldObject(type, 0, 0, (ushort)mapId, 0, entry, counter);
                 case HighGuid.ToolsClient:
-                    return ObjectGuidFactory.CreateToolsClient(mapId, entry, counter); 
+                    return ObjectGuidFactory.CreateToolsClient(mapId, entry, counter);
                 default:
                     return Empty;
             }
@@ -174,7 +174,7 @@ namespace Game.Entities
         {
             if (type != HighGuid.WorldLayer)
                 return Empty;
-            
+
             return ObjectGuidFactory.CreateWorldLayer(arg1, arg2, arg3, arg4);
         }
 
@@ -186,7 +186,7 @@ namespace Game.Entities
             return ObjectGuidFactory.CreateLMMLobby(0, arg2, arg3, arg4, counter);
         }
 
-        public static ObjectGuid Create(HighGuid type, uint subType, uint arg1, uint arg2, ulong arg3) 
+        public static ObjectGuid Create(HighGuid type, uint subType, uint arg1, uint arg2, ulong arg3)
         {
             if (type != HighGuid.Housing)
                 return Empty;
@@ -489,9 +489,9 @@ namespace Game.Entities
             return new ObjectGuid((ulong)((ulong)HighGuid.Uniq << 58), id);
         }
 
-        public static ObjectGuid CreatePlayer(uint realmId, ulong dbId)
+        public static ObjectGuid CreatePlayer(uint realmId, byte subType, uint arg1, ulong dbId)
         {
-            return new ObjectGuid((ulong)(((ulong)HighGuid.Player << 58) | ((ulong)(GetRealmIdForObjectGuid(realmId)) << 42)), dbId);
+            return new ObjectGuid((ulong)(((ulong)HighGuid.Player << 58) | ((ulong)(GetRealmIdForObjectGuid(realmId)) << 42) | ((ulong)(subType & 0x3) << 40) | ((ulong)(arg1 & 0xFFFFFF) << 16)), dbId);
         }
 
         public static ObjectGuid CreateItem(uint realmId, ulong dbId)
@@ -794,7 +794,29 @@ namespace Game.Entities
 
         static string FormatPlayer(HighGuid typeName, ObjectGuid guid)
         {
-            return $"{typeName}-{guid.GetRealmId()}-0x{guid.GetLowValue():X16}";
+            string str = $"{typeName}-{guid.GetRealmId()}";
+
+            byte subType = (byte)((guid.GetHighValue() >> 40) & 0x3);
+            switch (subType)
+            {
+                case 0:
+                    // no subType
+                    str += $"-{guid.GetLowValue():X8}";
+                    break;
+                case 1: // characterless (plunderstorm)
+                    str += $"-{subType}";
+                    str += $"-{guid.GetLowValue():X16}";
+                    break;
+                case 2: // npc-as-player
+                    str += $"-{subType}";
+                    str += $"-{guid.GetHighValue() >> 16 & 0xFFFFFF}"; // creature id?
+                    str += $"-{guid.GetLowValue():X16}";
+                    break;
+                default:
+                    break;
+            }
+
+            return str;
         }
 
         static ObjectGuid ParsePlayer(HighGuid type, string guidString)
@@ -806,7 +828,29 @@ namespace Game.Entities
             if (!uint.TryParse(split[0], out uint realmId) || !ulong.TryParse(split[1], out ulong dbId))
                 return ObjectGuid.FromStringFailed;
 
-            return ObjectGuidFactory.CreatePlayer(realmId, dbId);
+            byte subType = 0;
+            uint arg1 = 0;
+            if (split.Length > 2)
+            {
+                // dbId holds playerType at this point
+                switch (dbId)
+                {
+                    case 1: // characterless (plunderstorm)
+                        break;
+                    case 2: // npc-as-player
+                        if (!uint.TryParse(split[2], out arg1)) // creature id?
+                            return ObjectGuid.FromStringFailed;
+                        break;
+                    default:
+                        return ObjectGuid.FromStringFailed;
+                }
+
+                subType = (byte)dbId;
+                if (ulong.TryParse(split[3], out dbId))
+                    return ObjectGuid.FromStringFailed;
+            }
+
+            return ObjectGuidFactory.CreatePlayer(realmId, subType, arg1, dbId);
         }
 
         static string FormatItem(HighGuid typeName, ObjectGuid guid)
@@ -1121,17 +1165,17 @@ namespace Game.Entities
     {
         public enum LegacyTypeId
         {
-            Object          = 0,
-            Item            = 1,
-            Container       = 2,
-            Unit            = 3,
-            Player          = 4,
-            GameObject      = 5,
-            DynamicObject   = 6,
-            Corpse          = 7,
-            AreaTrigger     = 8,
-            SceneObject     = 9,
-            Conversation    = 10,
+            Object = 0,
+            Item = 1,
+            Container = 2,
+            Unit = 3,
+            Player = 4,
+            GameObject = 5,
+            DynamicObject = 6,
+            Corpse = 7,
+            AreaTrigger = 8,
+            SceneObject = 9,
+            Conversation = 10,
             Max
         }
 

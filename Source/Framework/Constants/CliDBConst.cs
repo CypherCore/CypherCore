@@ -1912,7 +1912,10 @@ namespace Framework.Constants
         Raid = 2,
         Battleground = 3,
         Arena = 4,
-        Scenario = 5
+        Scenario = 5,
+        Wowlabs = 6,
+        HouseInterior = 7,
+        HouseNeighborhood = 8
     }
 
     public enum MapDifficultyFlags : int
@@ -2215,7 +2218,7 @@ namespace Framework.Constants
         IgnoreDuringCooldownTimeRateCalculation = 0x800000, /*NYI*/
     }
 
-    public enum SpellProcsPerMinuteModType : byte
+    public enum SpellProcsPerMinuteModType : int
     {
         Haste = 1,
         Crit = 2,
@@ -3104,6 +3107,7 @@ namespace Framework.Constants
         GdapiCharacterProfileDisabled = 153,
         HousingEnabled = 154,
         RestrictedAchievementCategoryID = 155,
+        EjJourneysDisabled = 156,
         LootMethodStyle = 157,
         ExperienceBarDisabled = 159,
         HideUnavailableTransmogSlots = 160,
@@ -3115,6 +3119,7 @@ namespace Framework.Constants
         RecommendLeastPopulatedRealm = 169,
         BagSpaceOverride = 172,
         UnflaggedPlayersCanAttackPvPFlaggedPlayers = 173,
+        PvPInitialRatingOverride = 190,
     }
 
     public enum GlobalCurve
@@ -3143,6 +3148,16 @@ namespace Framework.Constants
         MythicPlusEndOfRunGearSequenceLevel = 23,
 
         SpellAreaEffectWarningRadius = 26,  // ground spell effect warning circle radius (based on spell radius)
+
+        HouseLevelFavorForLevel = 37,
+        HouseInteriorDecorBudget = 38,
+        HouseExteriorDecorBudget = 39,
+        HouseRoomPlacementBudget = 40,
+        HouseFixtureBudget = 41,
+
+        TransmogCost = 43,
+
+        MaxHouseSizeForLevel = 46,
     }
 
     public enum BattlePetSpeciesFlags : int

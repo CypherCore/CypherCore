@@ -55,7 +55,10 @@ namespace Game.Spells
 
             Player modOwner = caster.GetSpellModOwner();
             if (modOwner != null)
+            {
                 modOwner.ApplySpellMod(info, SpellModOp.Doses, ref m_spellValue.AuraStackAmount, this);
+                modOwner.ApplySpellMod(info, SpellModOp.MaxTargets, ref m_spellValue.MaxAffectedTargets, this);
+            }
 
             if (!originalCasterGUID.IsEmpty())
                 m_originalCasterGUID = originalCasterGUID;
@@ -3647,7 +3650,7 @@ namespace Game.Spells
                 unitCaster.AttackStop();
         }
 
-        static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, Player caster) where T : CastFailedBase
+        static void FillSpellCastFailedArgs(dynamic packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, Player caster)
         {
             packet.CastID = castId;
             packet.SpellID = (int)spellInfo.Id;
@@ -4923,7 +4926,7 @@ namespace Game.Spells
             }
 
             foreach (var reagentsCurrency in m_spellInfo.ReagentsCurrency)
-                p_caster.RemoveCurrency(reagentsCurrency.CurrencyTypesID, -reagentsCurrency.CurrencyCount, CurrencyDestroyReason.Spell);
+                p_caster.RemoveCurrency(reagentsCurrency.CurrencyTypesID, (int)reagentsCurrency.CurrencyCount, CurrencyDestroyReason.Spell);
         }
 
         void HandleThreatSpells()
@@ -6848,7 +6851,7 @@ namespace Game.Spells
                         if (!player.HasCurrency(reagentsCurrency.CurrencyTypesID, reagentsCurrency.CurrencyCount))
                         {
                             param1 = -1;
-                            param2 = reagentsCurrency.CurrencyTypesID;
+                            param2 = (int)reagentsCurrency.CurrencyTypesID;
 
                             return SpellCastResult.Reagents;
                         }
@@ -8727,9 +8730,12 @@ namespace Game.Spells
         [FieldOffset(4)]
         public uint Data1;
 
+        [FieldOffset(8)]
+        public uint Data2;
+
         public uint[] GetRawData()
         {
-            return new uint[] { Data0, Data1 };
+            return [Data0, Data1, Data2];
         }
     }
 

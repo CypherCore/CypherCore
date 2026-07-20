@@ -141,7 +141,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32((int)Type);
             _worldPacket.WriteUInt32(MapID);
-            _worldPacket.WriteUInt32((uint)DifficultyID);
+            _worldPacket.WriteInt16((short)DifficultyID);
             _worldPacket.WriteInt32(TimeLeft);
             _worldPacket.WriteBits(WarningMessage, 8);
             _worldPacket.WriteBit(Locked);
@@ -306,9 +306,9 @@ namespace Game.Networking.Packets
     //Structs
     public struct InstanceLockPkt
     {
-        public ulong InstanceID;
         public uint MapID;
-        public uint DifficultyID;
+        public short DifficultyID;
+        public ulong InstanceID;
         public int TimeRemaining;
         public uint CompletedMask;
 
@@ -317,9 +317,9 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt64(InstanceID);
             data.WriteUInt32(MapID);
-            data.WriteUInt32(DifficultyID);
+            data.WriteInt16(DifficultyID);
+            data.WriteUInt64(InstanceID);
             data.WriteInt32(TimeRemaining);
             data.WriteUInt32(CompletedMask);
 

@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -157,7 +156,7 @@ namespace Game.DataStorage
         public sbyte ShapeType;
         public short ShapeID;
         public uint AreaTriggerActionSetID;
-        public sbyte Flags;
+        public int Flags;
 
         public AreaTriggerShapeType GetShapeType() { return (AreaTriggerShapeType)ShapeType; }
     }
@@ -189,7 +188,7 @@ namespace Game.DataStorage
         public int UiBarOverlayColor;
         public int UiBarBackgroundColor;
         public ushort ChrSpecializationID;
-        public byte Flags;
+        public int Flags;
         public byte ArtifactCategoryID;
         public uint UiModelSceneID;
         public uint SpellVisualKitID;
@@ -210,7 +209,7 @@ namespace Game.DataStorage
         public uint OverrideShapeshiftDisplayID;
         public uint UiItemAppearanceID;
         public uint UiAltItemAppearanceID;
-        public byte Flags;
+        public int Flags;
         public ushort UiCameraID;
         public uint UsablePlayerConditionID;
     }
@@ -224,7 +223,7 @@ namespace Game.DataStorage
         public ushort UiCameraID;
         public ushort AltHandUICameraID;
         public sbyte ForgeAttachmentOverride;
-        public byte Flags;
+        public int Flags;
         public uint ArtifactID;
     }
 
@@ -242,7 +241,7 @@ namespace Game.DataStorage
         public byte ArtifactID;
         public byte MaxPurchasableRank;
         public int Label;
-        public byte Flags;
+        public int Flags;
         public byte Tier;
 
         public bool HasFlag(ArtifactPowerFlag artifactPowerFlag) { return (Flags & (byte)artifactPowerFlag) != 0; }

@@ -4,8 +4,6 @@
 using Framework.Constants;
 using Framework.Database;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Collections;
 using System.IO;
 
@@ -226,6 +224,7 @@ namespace Game.DataStorage
             ItemSparseStorage = ReadDB2<ItemSparseRecord>("ItemSparse.db2", HotfixStatements.SEL_ITEM_SPARSE, HotfixStatements.SEL_ITEM_SPARSE_LOCALE);
             ItemSpecStorage = ReadDB2<ItemSpecRecord>("ItemSpec.db2", HotfixStatements.SEL_ITEM_SPEC);
             ItemSpecOverrideStorage = ReadDB2<ItemSpecOverrideRecord>("ItemSpecOverride.db2", HotfixStatements.SEL_ITEM_SPEC_OVERRIDE);
+            ItemSquishEraStorage = ReadDB2<ItemSquishEraRecord>("ItemSquishEra.db2", HotfixStatements.SEL_ITEM_SQUISH_ERA);
             ItemXBonusTreeStorage = ReadDB2<ItemXBonusTreeRecord>("ItemXBonusTree.db2", HotfixStatements.SEL_ITEM_X_BONUS_TREE);
             ItemXItemEffectStorage = ReadDB2<ItemXItemEffectRecord>("ItemXItemEffect.db2", HotfixStatements.SEL_ITEM_X_ITEM_EFFECT);
             JournalEncounterStorage = ReadDB2<JournalEncounterRecord>("JournalEncounter.db2", HotfixStatements.SEL_JOURNAL_ENCOUNTER, HotfixStatements.SEL_JOURNAL_ENCOUNTER_LOCALE);
@@ -277,7 +276,6 @@ namespace Game.DataStorage
             PowerTypeStorage = ReadDB2<PowerTypeRecord>("PowerType.db2", HotfixStatements.SEL_POWER_TYPE);
             PrestigeLevelInfoStorage = ReadDB2<PrestigeLevelInfoRecord>("PrestigeLevelInfo.db2", HotfixStatements.SEL_PRESTIGE_LEVEL_INFO, HotfixStatements.SEL_PRESTIGE_LEVEL_INFO_LOCALE);
             PvpDifficultyStorage = ReadDB2<PvpDifficultyRecord>("PVPDifficulty.db2", HotfixStatements.SEL_PVP_DIFFICULTY);
-            PvpItemStorage = ReadDB2<PvpItemRecord>("PVPItem.db2", HotfixStatements.SEL_PVP_ITEM);
             PvpStatStorage = ReadDB2<PvpStatRecord>("PVPStat.db2", HotfixStatements.SEL_PVP_STAT, HotfixStatements.SEL_PVP_STAT_LOCALE);
             PvpSeasonStorage = ReadDB2<PvpSeasonRecord>("PvpSeason.db2", HotfixStatements.SEL_PVP_SEASON);
             PvpTalentStorage = ReadDB2<PvpTalentRecord>("PvpTalent.db2", HotfixStatements.SEL_PVP_TALENT, HotfixStatements.SEL_PVP_TALENT_LOCALE);
@@ -632,6 +630,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemSparseRecord> ItemSparseStorage;
         public static DB6Storage<ItemSpecRecord> ItemSpecStorage;
         public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage;
+        public static DB6Storage<ItemSquishEraRecord> ItemSquishEraStorage;
         public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage;
         public static DB6Storage<ItemXItemEffectRecord> ItemXItemEffectStorage;
         public static DB6Storage<JournalEncounterRecord> JournalEncounterStorage;
@@ -683,7 +682,6 @@ namespace Game.DataStorage
         public static DB6Storage<PowerTypeRecord> PowerTypeStorage;
         public static DB6Storage<PrestigeLevelInfoRecord> PrestigeLevelInfoStorage;
         public static DB6Storage<PvpDifficultyRecord> PvpDifficultyStorage;
-        public static DB6Storage<PvpItemRecord> PvpItemStorage;
         public static DB6Storage<PvpStatRecord> PvpStatStorage;
         public static DB6Storage<PvpSeasonRecord> PvpSeasonStorage;
         public static DB6Storage<PvpTalentRecord> PvpTalentStorage;

@@ -120,7 +120,7 @@ namespace Game.DataStorage
         public uint ModifierTreeID;
         public sbyte PowerType;
         public byte PowerTypeComp;
-        public byte PowerTypeValue;
+        public sbyte PowerTypeValue;
         public int WeaponSubclassMask;
         public byte MaxGuildLevel;
         public byte MinGuildLevel;
@@ -253,13 +253,6 @@ namespace Game.DataStorage
         {
             return (BattlegroundBracketId)RangeIndex;
         }
-    }
-
-    public sealed class PvpItemRecord
-    {
-        public uint Id;
-        public uint ItemID;
-        public byte ItemLevelDelta;
     }
 
     public sealed class PvpStatRecord

@@ -29,6 +29,7 @@ namespace Game.Entities
         PlayerHouseInfoComponent_C = 32, //  UPDATEABLE, INDIRECT,
         FHousingStorage_C = 33, //  UPDATEABLE,
         FHousingFixture_C = 34, //  UPDATEABLE,
+        PlayerInitiativeComponent_C = 37, //  UPDATEABLE, INDIRECT,
         Tag_Item = 200, //  TAG,
         Tag_Container = 201, //  TAG,
         Tag_AzeriteEmpoweredItem = 202, //  TAG,
@@ -81,7 +82,7 @@ namespace Game.Entities
             EntityFragment.End, EntityFragment.End, EntityFragment.End, EntityFragment.End
         ];
 
-        public UpdateableFragments Updateable = new(4);
+        public UpdateableFragments Updateable = new();
 
         byte Count;
         public bool IdsChanged;
@@ -221,7 +222,8 @@ namespace Game.Entities
                 || frag == EntityFragment.FMirroredPositionData_C
                 || frag == EntityFragment.PlayerHouseInfoComponent_C
                 || frag == EntityFragment.FHousingStorage_C
-                || frag == EntityFragment.FHousingFixture_C;
+                || frag == EntityFragment.FHousingFixture_C
+                || frag == EntityFragment.PlayerInitiativeComponent_C;
         }
 
         public static bool IsIndirectFragment(EntityFragment frag)
@@ -229,7 +231,8 @@ namespace Game.Entities
             return frag == EntityFragment.CGObject
                 || frag == EntityFragment.FPlayerOwnershipLink
                 || frag == EntityFragment.CActor
-                || frag == EntityFragment.PlayerHouseInfoComponent_C;
+                || frag == EntityFragment.PlayerHouseInfoComponent_C
+                || frag == EntityFragment.PlayerInitiativeComponent_C;
         }
 
         public Span<EntityFragment> GetIds() { return Ids[..Count]; }
@@ -246,13 +249,15 @@ namespace Game.Entities
             return 0;
         }
 
-        public struct UpdateableFragments(int count)
+        public struct UpdateableFragments()
         {
+            static int N = 4;
+
             public EntityFragment[] Ids = [EntityFragment.End, EntityFragment.End, EntityFragment.End, EntityFragment.End];
-            public byte[] Masks = new byte[count];
-            public EntityFragmentSerializeFn[] SerializeCreate = new EntityFragmentSerializeFn[count];
-            public EntityFragmentSerializeFn[] SerializeUpdate = new EntityFragmentSerializeFn[count];
-            public EntityFragmentIsChangedFn[] IsChanged = new EntityFragmentIsChangedFn[count];
+            public byte[] Masks = new byte[N];
+            public EntityFragmentSerializeFn[] SerializeCreate = new EntityFragmentSerializeFn[N];
+            public EntityFragmentSerializeFn[] SerializeUpdate = new EntityFragmentSerializeFn[N];
+            public EntityFragmentIsChangedFn[] IsChanged = new EntityFragmentIsChangedFn[N];
         }
     }
 }

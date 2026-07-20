@@ -48,7 +48,7 @@ namespace Game.DataStorage
         public sbyte PetTypeEnum;
         public uint Cooldown;
         public ushort BattlePetVisualID;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class BattlePetBreedQualityRecord
@@ -100,6 +100,7 @@ namespace Game.DataStorage
         public string GameType;
         public string ShortDescription;
         public string LongDescription;
+        public sbyte InstanceType;
         public int PvpType;
         public byte MinLevel;
         public byte MaxLevel;

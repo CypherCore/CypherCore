@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -359,6 +358,20 @@ namespace Game.Networking.Packets
 
     public class WorldServerInfo : ServerPacket
     {
+        public short DifficultyID;
+        public bool IsTournamentRealm;
+        public bool XRealmPvpAlert;
+        public bool BlockExitingLoadingScreen;     // when set to true, sending SMSG_UPDATE_OBJECT with CreateObject Self bit = true will not hide loading screen
+                                                   // instead it will be done after this packet is sent again with false in this bit and SMSG_UPDATE_OBJECT Values for player
+        public uint? RestrictedAccountMaxLevel;
+        public ulong? RestrictedAccountMaxMoney;
+        public uint? InstanceGroupSize;
+
+        ObjectGuid HouseGUID;
+        ObjectGuid HouseOwnerAccountGUID;
+        ObjectGuid HouseCosmeticOwnerGUID;
+        ObjectGuid NeighborhoodGUID;
+
         public WorldServerInfo() : base(ServerOpcodes.WorldServerInfo, ConnectionType.Instance)
         {
             InstanceGroupSize = new uint?();
@@ -369,11 +382,11 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(DifficultyID);
-            _worldPacket.WritePackedGuid(HouseGuid);
-            _worldPacket.WritePackedGuid(HouseOwnerBnetAccount);
-            _worldPacket.WritePackedGuid(HouseOwnerPlayer);
-            _worldPacket.WritePackedGuid(NeighborhoodGuid);
+            _worldPacket.WriteInt16(DifficultyID);
+            _worldPacket.WritePackedGuid(HouseGUID);
+            _worldPacket.WritePackedGuid(HouseOwnerAccountGUID);
+            _worldPacket.WritePackedGuid(HouseCosmeticOwnerGUID);
+            _worldPacket.WritePackedGuid(NeighborhoodGUID);
             _worldPacket.WriteBit(IsTournamentRealm);
             _worldPacket.WriteBit(XRealmPvpAlert);
             _worldPacket.WriteBit(BlockExitingLoadingScreen);
@@ -391,37 +404,23 @@ namespace Game.Networking.Packets
             if (InstanceGroupSize.HasValue)
                 _worldPacket.WriteUInt32(InstanceGroupSize.Value);
         }
-
-        public uint DifficultyID;
-        public bool IsTournamentRealm;
-        public bool XRealmPvpAlert;
-        public bool BlockExitingLoadingScreen;     // when set to true, sending SMSG_UPDATE_OBJECT with CreateObject Self bit = true will not hide loading screen
-                                                   // instead it will be done after this packet is sent again with false in this bit and SMSG_UPDATE_OBJECT Values for player
-        public uint? RestrictedAccountMaxLevel;
-        public ulong? RestrictedAccountMaxMoney;
-        public uint? InstanceGroupSize;
-
-        ObjectGuid HouseGuid;
-        ObjectGuid HouseOwnerBnetAccount;
-        ObjectGuid HouseOwnerPlayer;
-        ObjectGuid NeighborhoodGuid;
     }
 
     public class SetDungeonDifficulty : ClientPacket
     {
+        public short DifficultyID;
+
         public SetDungeonDifficulty(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
-            DifficultyID = _worldPacket.ReadUInt32();
+            DifficultyID = _worldPacket.ReadInt16();
         }
-
-        public uint DifficultyID;
     }
 
     public class SetRaidDifficulty : ClientPacket
     {
-        public int DifficultyID;
+        public short DifficultyID;
         public int Legacy;
 
         public SetRaidDifficulty(WorldPacket packet) : base(packet) { }
@@ -429,25 +428,25 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Legacy = _worldPacket.ReadInt32();
-            DifficultyID = _worldPacket.ReadInt32();
+            DifficultyID = _worldPacket.ReadInt16();
         }
     }
 
     public class DungeonDifficultySet : ServerPacket
     {
+        public short DifficultyID;
+
         public DungeonDifficultySet() : base(ServerOpcodes.SetDungeonDifficulty) { }
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(DifficultyID);
+            _worldPacket.WriteInt16(DifficultyID);
         }
-
-        public int DifficultyID;
     }
 
     public class RaidDifficultySet : ServerPacket
     {
-        public int DifficultyID;
+        public short DifficultyID;
         public int Legacy;
 
         public RaidDifficultySet() : base(ServerOpcodes.RaidDifficultySet) { }
@@ -455,7 +454,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Legacy);
-            _worldPacket.WriteInt32(DifficultyID);
+            _worldPacket.WriteInt16(DifficultyID);
         }
     }
 

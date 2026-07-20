@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Movement;
 using System;
@@ -59,8 +58,10 @@ namespace Game.Networking.Packets
 
         public static MovementInfo ReadMovementInfo(WorldPacket data)
         {
-            var movementInfo = new MovementInfo();
-            movementInfo.Guid = data.ReadPackedGuid();
+            var movementInfo = new MovementInfo
+            {
+                Guid = data.ReadPackedGuid()
+            };
             movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt32());
             movementInfo.SetMovementFlags2((MovementFlag2)data.ReadUInt32());
             movementInfo.SetExtraMovementFlags2((MovementFlags3)data.ReadUInt32());
@@ -77,6 +78,9 @@ namespace Game.Networking.Packets
             uint removeMovementForcesCount = data.ReadUInt32();
 
             uint moveIndex = data.ReadUInt32();
+
+
+            movementInfo.gravityModifier = data.ReadFloat();
 
             for (uint i = 0; i < removeMovementForcesCount; ++i)
             {
@@ -102,19 +106,23 @@ namespace Game.Networking.Packets
 
             if (hasInertia)
             {
-                MovementInfo.Inertia inertia = new();
-                inertia.id = data.ReadInt32();
-                inertia.force = data.ReadPosition();
-                inertia.lifetime = data.ReadUInt32();
+                MovementInfo.Inertia inertia = new()
+                {
+                    id = data.ReadInt32(),
+                    force = data.ReadPosition(),
+                    lifetime = data.ReadUInt32()
+                };
 
                 movementInfo.inertia = inertia;
             }
 
             if (hasAdvFlying)
             {
-                MovementInfo.AdvFlying advFlying = new();
-                advFlying.forwardVelocity = data.ReadFloat();
-                advFlying.upVelocity = data.ReadFloat();
+                MovementInfo.AdvFlying advFlying = new()
+                {
+                    forwardVelocity = data.ReadFloat(),
+                    upVelocity = data.ReadFloat()
+                };
 
                 movementInfo.advFlying = advFlying;
             }
@@ -139,11 +147,13 @@ namespace Game.Networking.Packets
             {
                 data.ResetBitPos();
 
-                MovementInfo.Drive driveStatus = new();
-                driveStatus.speed = data.ReadFloat();
-                driveStatus.movementAngle = data.ReadFloat();
-                driveStatus.accelerating = data.HasBit();
-                driveStatus.drifting = data.HasBit();
+                MovementInfo.Drive driveStatus = new()
+                {
+                    speed = data.ReadFloat(),
+                    movementAngle = data.ReadFloat(),
+                    accelerating = data.HasBit(),
+                    drifting = data.HasBit()
+                };
 
                 movementInfo.driveStatus = driveStatus;
             }
@@ -156,11 +166,6 @@ namespace Game.Networking.Packets
             bool hasTransportData = !movementInfo.transport.guid.IsEmpty();
             bool hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
             bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
-            bool hasSpline = false; // todo 6.x send this infos
-            bool hasInertia = movementInfo.inertia.HasValue;
-            bool hasAdvFlying = movementInfo.advFlying.HasValue;
-            bool hasDriveStatus = movementInfo.driveStatus.HasValue;
-            bool hasStandingOnGameObjectGUID = movementInfo.standingOnGameObjectGUID.HasValue;
 
             data.WritePackedGuid(movementInfo.Guid);
             data.WriteUInt32((uint)movementInfo.GetMovementFlags());
@@ -180,36 +185,38 @@ namespace Game.Networking.Packets
             uint moveIndex = 0;
             data.WriteUInt32(moveIndex);
 
+            data.WriteFloat(movementInfo.gravityModifier);
+
             /*for (public uint i = 0; i < removeMovementForcesCount; ++i)
             {
                 _worldPacket << ObjectGuid;
             }*/
 
-            data.WriteBit(hasStandingOnGameObjectGUID);
+            data.WriteBit(movementInfo.standingOnGameObjectGUID.HasValue);
             data.WriteBit(hasTransportData);
             data.WriteBit(hasFallData);
-            data.WriteBit(hasSpline);
+            data.WriteBit(false); // HasSpline
             data.WriteBit(false); // HeightChangeFailed
             data.WriteBit(false); // RemoteTimeValid
-            data.WriteBit(hasInertia);
-            data.WriteBit(hasAdvFlying);
-            data.WriteBit(hasDriveStatus);
+            data.WriteBit(movementInfo.inertia.HasValue);
+            data.WriteBit(movementInfo.advFlying.HasValue);
+            data.WriteBit(movementInfo.driveStatus.HasValue);
             data.FlushBits();
 
             if (hasTransportData)
                 WriteTransportInfo(data, movementInfo.transport);
 
-            if (hasStandingOnGameObjectGUID)
+            if (movementInfo.standingOnGameObjectGUID.HasValue)
                 data.WritePackedGuid(movementInfo.standingOnGameObjectGUID.Value);
 
-            if (hasInertia)
+            if (movementInfo.inertia.HasValue)
             {
                 data.WriteInt32(movementInfo.inertia.Value.id);
                 data.WriteXYZ(movementInfo.inertia.Value.force);
                 data.WriteUInt32(movementInfo.inertia.Value.lifetime);
             }
 
-            if (hasAdvFlying)
+            if (movementInfo.advFlying.HasValue)
             {
                 data.WriteFloat(movementInfo.advFlying.Value.forwardVelocity);
                 data.WriteFloat(movementInfo.advFlying.Value.upVelocity);
@@ -230,7 +237,7 @@ namespace Game.Networking.Packets
                 }
             }
 
-            if (hasDriveStatus)
+            if (movementInfo.driveStatus.HasValue)
             {
                 data.WriteFloat(movementInfo.driveStatus.Value.speed);
                 data.WriteFloat(movementInfo.driveStatus.Value.movementAngle);
@@ -273,7 +280,7 @@ namespace Game.Networking.Packets
                 bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(MoveSplineFlagEnum.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
                 data.WriteBit(moveSpline.turn != null);                                  // HasTurnData
                 data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
-                data.WriteBit(false);                                                   // HasUnknown901
+                data.WriteBit(false);                                                   // HasSpellVisualData
                 data.FlushBits();
 
                 //if (HasSplineFilterKey)
@@ -338,14 +345,13 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(0);
                 }
 
-                //if (HasUnknown901)
+                //if (HasSpellVisualData)
                 //{
-                //    for (WorldPackets::Movement::MonsterSplineUnknown901::Inner const& unkInner : unk.Data) size = 16
+                //    for (WorldPackets::Movement::MonsterSplineSpellVisualNodeInfo::Inner const& nodeInfo : SpellVisualData.NodeInfo)
                 //    {
-                //        data << int32(unkInner.Unknown_1);
-                //        data << int32(unkInner.Unknown_2);
-                //        data << int32(unkInner.Unknown_3);
-                //        data << uint32(unkInner.Unknown_4);
+                //        data << int32(nodeInfo.SpellID);
+                //        data << nodeInfo.Visual;
+                //        data << uint32(nodeInfo.StartNodeIndex);
                 //    }
                 //}
             }
@@ -386,8 +392,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(movementForce.TransportID);
             data.WriteFloat(movementForce.Magnitude);
             data.WriteInt32(movementForce.MovementForceID);
-            data.WriteInt32(movementForce.Unknown1110_1);
-            data.WriteInt32(movementForce.Unused1110);
+            data.WriteInt32(movementForce.DurationMs);
+            data.WriteUInt32(movementForce.EndTimestamp);
             data.WriteUInt32(movementForce.Flags);
             data.WriteBits((byte)movementForce.Type, 2);
             data.FlushBits();
@@ -1479,25 +1485,27 @@ namespace Game.Networking.Packets
         }
     }
 
-    public class MonsterSplineUnknown901
+    public class MonsterSplineSpellVisualNodeInfo
     {
-        public Array<Inner> Data = new(16);
+        public int SpellID;
+        public SpellCastVisual Visual;
+        public uint StartNodeIndex;
+
+
+    }
+
+    public struct MonsterSplineClientSpellVisualData()
+    {
+        public MonsterSplineSpellVisualNodeInfo[] NodeInfo = new MonsterSplineSpellVisualNodeInfo[16];
 
         public void Write(WorldPacket data)
         {
-            foreach (var unkInner in Data)
+            foreach (var nodeInfo in NodeInfo)
             {
-                data.WriteInt32(unkInner.Unknown_1);
-                unkInner.Visual.Write(data);
-                data.WriteUInt32(unkInner.Unknown_4);
+                data.WriteInt32(nodeInfo.SpellID);
+                nodeInfo.Visual.Write(data);
+                data.WriteUInt32(nodeInfo.StartNodeIndex);
             }
-        }
-
-        public struct Inner
-        {
-            public int Unknown_1;
-            public SpellCastVisual Visual;
-            public uint Unknown_4;
         }
     }
 
@@ -1551,7 +1559,7 @@ namespace Game.Networking.Packets
             data.WriteBit(JumpExtraData.HasValue);
             data.WriteBit(TurnData != null);
             data.WriteBit(AnimTierTransition.HasValue);
-            data.WriteBit(Unknown901 != null);
+            data.WriteBit(SpellVisualData.HasValue);
             data.FlushBits();
 
             if (SplineFilter != null)
@@ -1575,8 +1583,8 @@ namespace Game.Networking.Packets
             if (AnimTierTransition.HasValue)
                 AnimTierTransition.Value.Write(data);
 
-            if (Unknown901 != null)
-                Unknown901.Write(data);
+            if (SpellVisualData.HasValue)
+                SpellVisualData.Value.Write(data);
         }
 
         public uint Flags; // Spline flags
@@ -1596,7 +1604,7 @@ namespace Game.Networking.Packets
         public MonsterSplineJumpExtraData? JumpExtraData;
         public MonsterSplineTurnData TurnData;
         public MonsterSplineAnimTierTransition? AnimTierTransition;
-        public MonsterSplineUnknown901 Unknown901;
+        public MonsterSplineClientSpellVisualData? SpellVisualData;
         public float FaceDirection;
         public ObjectGuid FaceGUID;
         public Vector3 FaceSpot;

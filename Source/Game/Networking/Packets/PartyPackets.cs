@@ -207,18 +207,21 @@ namespace Game.Networking.Packets
 
     class RequestPartyMemberStats : ClientPacket
     {
+        public byte? PartyIndex;
+        public ObjectGuid[] Targets;
+
         public RequestPartyMemberStats(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             bool hasPartyIndex = _worldPacket.HasBit();
-            TargetGUID = _worldPacket.ReadPackedGuid();
+            Targets = new ObjectGuid[_worldPacket.ReadInt32()];
             if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
-        }
 
-        public byte? PartyIndex;
-        public ObjectGuid TargetGUID;
+            for (var i = 0; i < Targets.Length; ++i)
+                Targets[i] = _worldPacket.ReadPackedGuid();
+        }
     }
 
     class PartyMemberFullState : ServerPacket
@@ -1370,24 +1373,24 @@ namespace Game.Networking.Packets
 
     struct PartyDifficultySettings
     {
-        public uint DungeonDifficultyID;
-        public uint RaidDifficultyID;
-        public uint LegacyRaidDifficultyID;
+        public short DungeonDifficultyID;
+        public short RaidDifficultyID;
+        public short LegacyRaidDifficultyID;
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(DungeonDifficultyID);
-            data.WriteUInt32(RaidDifficultyID);
-            data.WriteUInt32(LegacyRaidDifficultyID);
+            data.WriteInt16(DungeonDifficultyID);
+            data.WriteInt16(RaidDifficultyID);
+            data.WriteInt16(LegacyRaidDifficultyID);
         }
     }
 
     struct ChallengeModeData
     {
-        public int Unknown_1120_1;
-        public int Unknown_1120_2;
-        public ulong Unknown_1120_3;
-        public long Unknown_1120_4;
+        public int MapID;
+        public int InitialPlayerCount;
+        public ulong InstanceID;
+        public long StartTime;
         public ObjectGuid KeystoneOwnerGUID;
         public ObjectGuid LeaverGUID;
         public long InstanceAbandonVoteCooldown;
@@ -1397,10 +1400,10 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Unknown_1120_1);
-            data.WriteInt32(Unknown_1120_2);
-            data.WriteUInt64(Unknown_1120_3);
-            data.WriteInt64(Unknown_1120_4);
+            data.WriteInt32(MapID);
+            data.WriteInt32(InitialPlayerCount);
+            data.WriteUInt64(InstanceID);
+            data.WriteInt64(StartTime);
             data.WritePackedGuid(KeystoneOwnerGUID);
             data.WritePackedGuid(LeaverGUID);
             data.WriteInt64(InstanceAbandonVoteCooldown);

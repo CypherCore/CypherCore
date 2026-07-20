@@ -6,15 +6,47 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
+    public struct CraftingReagentBase
+    {
+        public int? ItemID;
+        public int? CurrencyID;
+
+        public void Read(WorldPacket data)
+        {
+            data.ResetBitPos();
+            bool HasItemID = data.HasBit();
+            bool HasCurrencyID = data.HasBit();
+
+            if (HasItemID)
+                ItemID = data.ReadInt32();
+
+            if (HasCurrencyID)
+                CurrencyID = data.ReadInt32();
+        }
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(ItemID.HasValue);
+            data.WriteBit(CurrencyID.HasValue);
+            data.FlushBits();
+
+            if (ItemID.HasValue)
+                data.WriteInt32(ItemID.Value);
+
+            if (CurrencyID.HasValue)
+                data.WriteInt32(CurrencyID.Value);
+        }
+    }
+
     struct SpellReducedReagent
     {
-        public int ItemID;
+        public CraftingReagentBase Reagent;
         public int Quantity;
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(ItemID);
             data.WriteInt32(Quantity);
+            Reagent.Write(data);
         }
     }
 
@@ -28,12 +60,12 @@ namespace Game.Networking.Packets
         public int SkillFromReagents;
         public int Skill;
         public int CritBonusSkill;
-        public float field_1C;
-        public ulong field_20;
+        public float ModSkillGain;
+        public ulong OrderID;
         public bool IsCrit;
-        public bool field_29;
-        public bool field_2A;
-        public bool BonusCraft;
+        public bool IsRecraft;
+        public bool IsInitialRecraft;
+        public bool IsFirstCraft;
         public List<SpellReducedReagent> ResourcesReturned = new();
         public uint OperationID;
         public ObjectGuid ItemGUID;
@@ -57,8 +89,8 @@ namespace Game.Networking.Packets
             data.WriteInt32(SkillFromReagents);
             data.WriteInt32(Skill);
             data.WriteInt32(CritBonusSkill);
-            data.WriteFloat(field_1C);
-            data.WriteUInt64(field_20);
+            data.WriteFloat(ModSkillGain);
+            data.WriteUInt64(OrderID);
             data.WriteInt32(ResourcesReturned.Count);
             data.WriteUInt32(OperationID);
             data.WritePackedGuid(ItemGUID);
@@ -68,19 +100,19 @@ namespace Game.Networking.Packets
             data.WriteInt32(ConcentrationSpent);
             data.WriteInt32(IngenuityRefund);
 
-            foreach (SpellReducedReagent spellReducedReagent in ResourcesReturned)
-                spellReducedReagent.Write(data);
-
             data.WriteBit(IsCrit);
-            data.WriteBit(field_29);
-            data.WriteBit(field_2A);
-            data.WriteBit(BonusCraft);
+            data.WriteBit(IsRecraft);
+            data.WriteBit(IsInitialRecraft);
+            data.WriteBit(IsFirstCraft);
             data.WriteBit(HasIngenuityProc);
             data.WriteBit(ApplyConcentration);
             data.FlushBits();
 
             OldItem.Write(data);
             NewItem.Write(data);
+
+            foreach (SpellReducedReagent spellReducedReagent in ResourcesReturned)
+                spellReducedReagent.Write(data);
         }
     }
 }

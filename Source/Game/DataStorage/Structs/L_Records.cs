@@ -94,8 +94,8 @@ namespace Game.DataStorage
         public byte MaterialID;
         public int MinimapStaticCol;
         public byte[] FrameCountTexture = new byte[6];
-        public int[] Color = new int[2];
-        public float[] Float = new float[18];
+        public int[] Color = new int[3];
+        public float[] Float = new float[38];
         public uint[] Int = new uint[4];
         public float[] Coefficient = new float[4];
     }

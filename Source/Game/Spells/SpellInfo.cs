@@ -57,6 +57,7 @@ namespace Game.Spells
                 AttributesEx13 = (SpellAttr13)_misc.Attributes[13];
                 AttributesEx14 = (SpellAttr14)_misc.Attributes[14];
                 AttributesEx15 = (SpellAttr15)_misc.Attributes[15];
+                AttributesEx16 = (SpellAttr16)_misc.Attributes[16];
                 CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(_misc.CastingTimeIndex);
                 DurationEntry = CliDB.SpellDurationStorage.LookupByKey(_misc.DurationIndex);
                 RangeEntry = CliDB.SpellRangeStorage.LookupByKey(_misc.RangeIndex);
@@ -76,7 +77,6 @@ namespace Game.Spells
             {
                 Scaling.MinScalingLevel = _scaling.MinScalingLevel;
                 Scaling.MaxScalingLevel = _scaling.MaxScalingLevel;
-                Scaling.ScalesFromItemLevel = _scaling.ScalesFromItemLevel;
             }
 
             // SpellAuraOptionsEntry
@@ -3838,6 +3838,7 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr13 attribute) { return (AttributesEx13 & attribute) != 0; }
         public bool HasAttribute(SpellAttr14 attribute) { return (AttributesEx14 & attribute) != 0; }
         public bool HasAttribute(SpellAttr15 attribute) { return (AttributesEx15 & attribute) != 0; }
+        public bool HasAttribute(SpellAttr16 attribute) { return (AttributesEx16 & attribute) != 0; }
         public bool HasAttribute(SpellCustomAttributes attribute) { return (AttributesCu & attribute) != 0; }
 
         public bool CanBeInterrupted(WorldObject interruptCaster, Unit interruptTarget, bool ignoreImmunity = false)
@@ -3881,6 +3882,7 @@ namespace Game.Spells
         public SpellAttr13 AttributesEx13 { get; set; }
         public SpellAttr14 AttributesEx14 { get; set; }
         public SpellAttr15 AttributesEx15 { get; set; }
+        public SpellAttr16 AttributesEx16 { get; set; }
         public SpellCustomAttributes AttributesCu { get; set; }
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
         public ulong Stances { get; set; }
@@ -3976,7 +3978,6 @@ namespace Game.Spells
         {
             public uint MinScalingLevel;
             public uint MaxScalingLevel;
-            public uint ScalesFromItemLevel;
         }
 
         public struct SqrtDamageAndHealingDiminishingStruct
@@ -4220,11 +4221,8 @@ namespace Game.Spells
                         return 0;
 
                     uint effectiveItemLevel = itemLevel != -1 ? (uint)itemLevel : 1u;
-                    if (_spellInfo.Scaling.ScalesFromItemLevel != 0 || _spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel))
+                    if (_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel))
                     {
-                        if (_spellInfo.Scaling.ScalesFromItemLevel != 0)
-                            effectiveItemLevel = _spellInfo.Scaling.ScalesFromItemLevel;
-
                         if (Scaling.Class == -8 || Scaling.Class == -9)
                         {
                             RandPropPointsRecord randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(effectiveItemLevel);
@@ -4907,6 +4905,8 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 350 SPELL_EFFECT_LEARN_HOUSE_EXTERIOR_COMPONENT
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 351 SPELL_EFFECT_LEARN_HOUSE_THEME
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 352 SPELL_EFFECT_LEARN_HOUSE_ROOM_COMPONENT_TEXTURE
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 353 SPELL_EFFECT_CREATE_AREATRIGGER_2
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 354 SPELL_EFFECT_SET_NEIGHBORHOOD_INITIATIVE
         };
 
         #region Fields

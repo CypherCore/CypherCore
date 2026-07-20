@@ -2427,7 +2427,7 @@ namespace Game
             do
             {
                 uint entry = result.Read<uint>(0);
-                Difficulty difficulty = (Difficulty)result.Read<byte>(1);
+                Difficulty difficulty = (Difficulty)result.Read<int>(1);
                 uint item = result.Read<uint>(2);
                 uint idx = result.Read<uint>(3);
 
@@ -2742,7 +2742,7 @@ namespace Game
             do
             {
                 uint entry = result.Read<uint>(0);
-                Difficulty difficulty = (Difficulty)result.Read<byte>(1);
+                Difficulty difficulty = (Difficulty)result.Read<int>(1);
 
                 var template = creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
@@ -4082,8 +4082,6 @@ namespace Game
                             if (got.Chest.open != 0)
                                 CheckGOLockId(got, got.Chest.open, 0);
 
-                            CheckGOConsumable(got, got.Chest.consumable, 3);
-
                             if (got.Chest.linkedTrap != 0)              // linked trap
                                 CheckGOLinkedTrapId(got, got.Chest.linkedTrap, 7);
                             break;
@@ -4161,11 +4159,11 @@ namespace Game
                             break;
                         case GameObjectTypes.BarberChair:              //32
                             CheckAndFixGOChairHeightId(got, ref got.BarberChair.chairheight, 0);
-                            if (got.BarberChair.SitAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(got.BarberChair.SitAnimKit))
+                            if (got.BarberChair.CustomSitAnimKit != 0 && !CliDB.AnimKitStorage.ContainsKey(got.BarberChair.CustomSitAnimKit))
                             {
                                 Log.outError(LogFilter.Sql, "GameObject (Entry: {0} GoType: {1}) have data2 = {2} but AnimKit.dbc (Id: {3}) not exist, set to 0.",
-                                   entry, got.type, got.BarberChair.SitAnimKit, got.BarberChair.SitAnimKit);
-                                got.BarberChair.SitAnimKit = 0;
+                                   entry, got.type, got.BarberChair.CustomSitAnimKit, got.BarberChair.CustomSitAnimKit);
+                                got.BarberChair.CustomSitAnimKit = 0;
                             }
                             break;
                         case GameObjectTypes.DestructibleBuilding:
@@ -5548,15 +5546,17 @@ namespace Game
 
                 ulong requirementId = MathFunctions.MakePair64(mapid, difficulty);
 
-                AccessRequirement ar = new();
-                ar.levelMin = result.Read<byte>(2);
-                ar.levelMax = result.Read<byte>(3);
-                ar.item = result.Read<uint>(4);
-                ar.item2 = result.Read<uint>(5);
-                ar.quest_A = result.Read<uint>(6);
-                ar.quest_H = result.Read<uint>(7);
-                ar.achievement = result.Read<uint>(8);
-                ar.questFailedText = result.Read<string>(9);
+                AccessRequirement ar = new()
+                {
+                    levelMin = result.Read<byte>(2),
+                    levelMax = result.Read<byte>(3),
+                    item = result.Read<uint>(4),
+                    item2 = result.Read<uint>(5),
+                    quest_A = result.Read<uint>(6),
+                    quest_H = result.Read<uint>(7),
+                    achievement = result.Read<uint>(8),
+                    questFailedText = result.Read<string>(9)
+                };
 
                 if (ar.item != 0)
                 {
@@ -6410,8 +6410,8 @@ namespace Game
                 for (var i = 0; i < (int)Race.Max; ++i)
                     raceStatModifiers[i] = new short[(int)Stats.Max];
 
-                //                                         0     1    2    3    4 
-                SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte FROM player_racestats");
+                //                                         0     1    2    3    4     5
+                SQLResult result = DB.World.Query("SELECT race, str, agi, sta, inte, spi FROM player_racestats");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_racestats` is empty.");
@@ -7076,37 +7076,21 @@ namespace Game
             _exclusiveQuestGroups.Clear();
 
             SQLResult result = DB.World.Query("SELECT " +
-                //0  1          2               3                4            5            6                  7                8                   9
                 "ID, QuestType, QuestPackageID, ContentTuningID, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
-                //10                    11                     12                13           14           15               16
-                "RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
-                //17                         18                          19                        20     21       22        23
+                "RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardSpell, RewardHonor, RewardKillHonor, RewardFavor, StartItem, " +
                 "RewardArtifactXPDifficulty, RewardArtifactXPMultiplier, RewardArtifactCategoryID, Flags, FlagsEx, FlagsEx2, FlagsEx3, " +
-                //24          25             26         27                 28           29             30         31
                 "RewardItem1, RewardAmount1, ItemDrop1, ItemDropQuantity1, RewardItem2, RewardAmount2, ItemDrop2, ItemDropQuantity2, " +
-                //32          33             34         35                 36           37             38         39
                 "RewardItem3, RewardAmount3, ItemDrop3, ItemDropQuantity3, RewardItem4, RewardAmount4, ItemDrop4, ItemDropQuantity4, " +
-                //40                  41                         42                          43                   44                         45
                 "RewardChoiceItemID1, RewardChoiceItemQuantity1, RewardChoiceItemDisplayID1, RewardChoiceItemID2, RewardChoiceItemQuantity2, RewardChoiceItemDisplayID2, " +
-                //46                  47                         48                          49                   50                         51
                 "RewardChoiceItemID3, RewardChoiceItemQuantity3, RewardChoiceItemDisplayID3, RewardChoiceItemID4, RewardChoiceItemQuantity4, RewardChoiceItemDisplayID4, " +
-                //52                  53                         54                          55                   56                         57
                 "RewardChoiceItemID5, RewardChoiceItemQuantity5, RewardChoiceItemDisplayID5, RewardChoiceItemID6, RewardChoiceItemQuantity6, RewardChoiceItemDisplayID6, " +
-                //58           59    60    61           62           63                 64                 65
                 "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, " +
-                //66            67                  68                         69
                 "PortraitGiver, PortraitGiverMount, PortraitGiverModelSceneID, PortraitTurnIn, " +
-                //70               71                   72                      73                   74                75                   76                      77
                 "RewardFactionID1, RewardFactionValue1, RewardFactionOverride1, RewardFactionCapIn1, RewardFactionID2, RewardFactionValue2, RewardFactionOverride2, RewardFactionCapIn2, " +
-                //78               79                   80                      81                   82                83                   84                      85
                 "RewardFactionID3, RewardFactionValue3, RewardFactionOverride3, RewardFactionCapIn3, RewardFactionID4, RewardFactionValue4, RewardFactionOverride4, RewardFactionCapIn4, " +
-                //86               87                   88                      89                   90
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
-                //91                92                  93                 94                  95                 96                  97                 98
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //99                 100                 101          102          103             104               105        106                  107
                 "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, ResetByScheduler, Expansion, ManagedWorldStateID, QuestSessionBonus, " +
-                //108      109             110               111              112                113                114                 115                 116
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog " +
                 "FROM quest_template");
 
@@ -7284,7 +7268,7 @@ namespace Game
 
             // Load `quest_objectives`
             //                                  0           1      2        3                4            5           6                   7         8          9                     10                    11          12
-            result = DB.World.Query("SELECT qo.QuestID, qo.ID, qo.Type, qo.StorageIndex, qo.ObjectID, qo.Amount,  qo.SecondaryAmount, qo.Flags, qo.Flags2, qo.ProgressBarWeight, qo.ParentObjectiveID, qo.Visible, qo.Description, " +
+            result = DB.World.Query("SELECT qo.QuestID, qo.ID, qo.Type, qo.StorageIndex, qo.ObjectID, qo.Amount, qo.ConditionalAmount, qo.Flags, qo.Flags2, qo.ProgressBarWeight, qo.ParentObjectiveID, qo.Visible, qo.Description, " +
             //     13                14            15                   16                     17
             "qoce.GameEventID, qoce.SpellID, qoce.ConversationID, qoce.UpdatePhaseShift, qoce.UpdateZoneAuras FROM quest_objectives qo LEFT JOIN quest_objectives_completion_effect qoce ON qo.ID = qoce.ObjectiveID ORDER BY `Order` ASC, StorageIndex ASC");
             if (result.IsEmpty())
@@ -10708,7 +10692,7 @@ namespace Game
             do
             {
                 ulong spawnId = result.Read<ulong>(0);
-                Difficulty difficultyId = (Difficulty)result.Read<byte>(1);
+                Difficulty difficultyId = (Difficulty)result.Read<int>(1);
 
                 CreatureData creatureData = GetCreatureData(spawnId);
                 if (creatureData == null)

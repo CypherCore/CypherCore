@@ -335,7 +335,7 @@ namespace Framework.Constants
         Ingenuity = 82,
     }
 
-    public enum ItemSpelltriggerType : sbyte
+    public enum ItemSpelltriggerType : byte
     {
         OnUse = 0,                  // use after equip cooldown
         OnEquip = 1,
@@ -487,6 +487,7 @@ namespace Framework.Constants
         BondingWithPriority = 47,
         ItemOffsetCurve = 48,
         ScalingConfigAndReqLevel = 49,
+        ItemBonusList = 50,
         ScalingConfig = 51,
     }
 

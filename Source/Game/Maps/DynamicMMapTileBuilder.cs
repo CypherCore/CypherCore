@@ -198,9 +198,9 @@ namespace Game.Maps
         public uint Y;
         public ulong CachedHash; // computing the hash is expensive - store it
         public List<TileCacheKeyObject> Objects = [];
-        
+
         public static ulong Compute(TileCacheKey key)
-        {            
+        {
             HashFNV1a_64 hash = new();
             hash.ComputeHash(key.TerrainMapId);
             hash.ComputeHash(key.X);
@@ -229,9 +229,6 @@ namespace Game.Maps
         public TileCache()
         {
             _cacheCleanupTimer = new(OnCacheCleanupTimerTick, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
-
-            // init timer
-            OnCacheCleanupTimerTick();
         }
 
 
@@ -253,8 +250,6 @@ namespace Game.Maps
 
             DateTime now = GameTime.Now();
             RemoveOldCacheEntries(now - TimeSpan.FromMinutes(30));
-
-            OnCacheCleanupTimerTick();
         }
 
         void RemoveOldCacheEntries(DateTime oldestPreservedEntryTimestamp)

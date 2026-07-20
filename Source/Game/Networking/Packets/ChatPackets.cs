@@ -2,9 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
-using Game.Groups;
 using System;
 using System.Collections.Generic;
 
@@ -265,6 +263,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(FakeSenderName);
             _worldPacket.WriteBit(BroadcastTextID.HasValue);
             _worldPacket.WriteBit(ChannelGUID.HasValue);
+            _worldPacket.WriteBit(EncounterEventID.HasValue);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(SenderName);
@@ -278,6 +277,9 @@ namespace Game.Networking.Packets
 
             if (ChannelGUID.HasValue)
                 _worldPacket.WritePackedGuid(ChannelGUID.Value);
+
+            if (EncounterEventID.HasValue)
+                _worldPacket.WriteUInt32(EncounterEventID.Value);
         }
 
         public ChatMsg SlashCmd;
@@ -301,6 +303,7 @@ namespace Game.Networking.Packets
         public bool HideChatLog;
         public bool FakeSenderName;
         public ObjectGuid? ChannelGUID;
+        public uint? EncounterEventID;
     }
 
     public class EmoteMessage : ServerPacket

@@ -39,12 +39,12 @@ namespace Game.DataStorage
         public MapTypes InstanceType;
         public byte OrderIndex;
         public sbyte OldEnumValue;
-        public byte FallbackDifficultyID;
+        public short FallbackDifficultyID;
         public byte MinPlayers;
         public byte MaxPlayers;
-        public ushort Flags;
+        public int Flags;
         public byte ItemContext;
-        public byte ToggleDifficultyID;
+        public short ToggleDifficultyID;
         public uint GroupSizeHealthCurveID;
         public uint GroupSizeDmgCurveID;
         public uint GroupSizeSpellPointsCurveID;
@@ -58,7 +58,7 @@ namespace Game.DataStorage
         public LocalizedString Name;
         public uint Id;
         public ushort MapID;
-        public int DifficultyID;
+        public short DifficultyID;
         public int OrderIndex;
         public int CompleteWorldStateID;
         public sbyte Bit;

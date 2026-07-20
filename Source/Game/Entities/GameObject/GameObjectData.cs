@@ -5,7 +5,6 @@ using Framework.Collections;
 using Framework.Constants;
 using Game.Maps;
 using Game.Networking.Packets;
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -246,7 +245,8 @@ namespace Game.Entities
             switch (type)
             {
                 case GameObjectTypes.Chest:
-                    return Chest.consumable != 0;
+                    return Chest.Unused != 0; // TODO: update database values and research flag order
+                // case GAMEOBJECT_TYPE_CHEST:  return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::Consumable);
                 case GameObjectTypes.Goober:
                     return Goober.consumable != 0;
                 default:
@@ -373,7 +373,8 @@ namespace Game.Entities
         {
             GameObjectTypes.Button => Button.requireLOS,
             GameObjectTypes.QuestGiver => QuestGiver.requireLOS,
-            GameObjectTypes.Chest => Chest.requireLOS,
+            GameObjectTypes.Chest => Chest.Unused2, // TODO: update database values and research flag order
+            // GameObjectTypes.Chest => EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::RequireLOS),
             GameObjectTypes.Trap => Trap.requireLOS,
             GameObjectTypes.Goober => Goober.requireLOS,
             GameObjectTypes.FlagStand => FlagStand.requireLOS,
@@ -441,7 +442,8 @@ namespace Game.Entities
                 case GameObjectTypes.QuestGiver:
                     return QuestGiver.noDamageImmune;
                 case GameObjectTypes.Chest:
-                    return Chest.DamageImmuneOK == 0 ? 1 : 0u;
+                    return Chest.OneTimeChestAccountFlag; // TODO: update database values and research flag order
+                // case GAMEOBJECT_TYPE_CHEST:      return !EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::DamageImmuneOK);
                 case GameObjectTypes.Goober:
                     return Goober.noDamageImmune;
                 case GameObjectTypes.FlagStand:
@@ -455,7 +457,8 @@ namespace Game.Entities
 
         public uint GetNotInCombat() => type switch
         {
-            GameObjectTypes.Chest => Chest.notInCombat,
+            GameObjectTypes.Chest => Chest.Unused4, // TODO: update database values and research flag order
+            //GameObjectTypes.Chest => EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::NotInCombat),
             GameObjectTypes.GatheringNode => GatheringNode.notInCombat,
             _ => 0,
         };
@@ -540,6 +543,13 @@ namespace Game.Entities
                 default: return 0;
             }
         }
+
+        public bool IsUsingGroupLootRules() => type switch
+        {
+            GameObjectTypes.Chest => Chest.Unused6 != 0, // TODO: update database values and research flag order
+            //case GAMEOBJECT_TYPE_CHEST:  return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::UseGroupLootRules);
+            _ => false
+        };
 
         public uint GetGossipMenuId()
         {
@@ -702,7 +712,8 @@ namespace Game.Entities
                 case GameObjectTypes.QuestGiver:
                     return QuestGiver.GiganticAOI != 0;
                 case GameObjectTypes.Chest:
-                    return Chest.GiganticAOI != 0;
+                    return Chest.Unused8 != 0; // TODO: update database values and research flag order
+                // case GameObjectTypes.Chest:                 return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::GiganticAOI);
                 case GameObjectTypes.Generic:
                     return Generic.GiganticAOI != 0;
                 case GameObjectTypes.Trap:
@@ -745,8 +756,8 @@ namespace Game.Entities
         {
             switch (type)
             {
-                case GameObjectTypes.Chest:
-                    return Chest.LargeAOI != 0;
+                case GameObjectTypes.Chest: return Chest.Unused9 != 0; // TODO: update database values and research flag order
+                // case GameObjectTypes.Chest:                 return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::LargeAOI);
                 case GameObjectTypes.Generic:
                     return Generic.LargeAOI != 0;
                 case GameObjectTypes.DungeonDifficulty:
@@ -915,38 +926,38 @@ namespace Game.Entities
             public uint open;                                    // 0 open, References: Lock_, NoValue = 0
             public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint chestRestockTime;                        // 2 chestRestockTime, int, Min value: 0, Max value: 1800000, Default value: 0
-            public uint consumable;                              // 3 consumable, enum { false, true, }; Default: false
+            public uint Unused;                                  // 3 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint minRestock;                              // 4 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint maxRestock;                              // 5 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint triggeredEvent;                          // 6 triggeredEvent, References: GameEvents, NoValue = 0
             public uint linkedTrap;                              // 7 linkedTrap, References: GameObjects, NoValue = 0
             public uint questID;                                 // 8 questID, References: QuestV2, NoValue = 0
             public uint InteractRadiusOverride;                  // 9 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
-            public uint requireLOS;                              // 10 require LOS, enum { false, true, }; Default: false
-            public uint leaveLoot;                               // 11 leaveLoot, enum { false, true, }; Default: false
-            public uint notInCombat;                             // 12 notInCombat, enum { false, true, }; Default: false
-            public uint logloot;                                 // 13 log loot, enum { false, true, }; Default: false
+            public uint Unused2;                                 // 10 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Unused3;                                 // 11 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Unused4;                                 // 12 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Unused5;                                 // 13 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint openTextID;                              // 14 openTextID, References: BroadcastText, NoValue = 0
-            public uint usegrouplootrules;                       // 15 use group loot rules, enum { false, true, }; Default: false
-            public uint floatingTooltip;                         // 16 floatingTooltip, enum { false, true, }; Default: false
+            public uint Unused6;                                 // 15 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Unused7;                                 // 16 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint conditionID1;                            // 17 conditionID1, References: PlayerCondition, NoValue = 0
             public uint xpLevel;                                 // 18 xpLevel, int, Min value: -2147483648, Max value: 2147483647, Default value: 0
             public uint xpDifficulty;                            // 19 xpDifficulty, enum { No Exp, Trivial, Very Small, Small, Substandard, Standard, High, Epic, Dungeon, 5, }; Default: No Exp
-            public uint Unused ;                                 // 20 Unused, int, Min value: 0, Max value: 123, Default value: 0
-            public uint GroupXP;                                 // 21 Group XP, enum { false, true, }; Default: false
-            public uint DamageImmuneOK;                          // 22 Damage Immune OK, enum { false, true, }; Default: false
+            public uint ChestFlags;                              // 20 Chest Flags, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint OneTimeChestCharacterFlag;               // 21 One Time Chest Character Flag, References: PlayerDataFlagCharacter, NoValue = 0
+            public uint OneTimeChestAccountFlag;                 // 22 One Time Chest Account Flag, References: PlayerDataFlagAccount, NoValue = 0
             public uint trivialSkillLow;                         // 23 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0
             public uint trivialSkillHigh;                        // 24 trivialSkillHigh, int, Min value: 0, Max value: 65535, Default value: 0
             public uint DungeonEncounter;                        // 25 Dungeon Encounter, References: DungeonEncounter, NoValue = 0
             public uint spell;                                   // 26 spell, References: Spell, NoValue = 0
-            public uint GiganticAOI;                             // 27 Gigantic AOI, enum { false, true, }; Default: false
-            public uint LargeAOI;                                // 28 Large AOI, enum { false, true, }; Default: false
+            public uint Unused8;                                 // 27 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Unused9;                                 // 28 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint SpawnVignette;                           // 29 Spawn Vignette, References: vignette, NoValue = 0
             public uint chestPersonalLoot;                       // 30 chest Personal Loot, References: Treasure, NoValue = 0
-            public uint turnpersonallootsecurityoff;             // 31 turn personal loot security off, enum { false, true, }; Default: false
-            public uint ChestProperties;                         // 32 Chest Properties, References: ChestProperties, NoValue = 0
+            public uint Unused10;                                // 31 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint Unused11;                                // 32 Unused, References: ChestProperties, NoValue = 0
             public uint chestPushLoot;                           // 33 chest Push Loot, References: Treasure, NoValue = 0
-            public uint ForceSingleLooter;                       // 34 Force Single Looter, enum { false, true, }; Default: false
+            public uint Unused12;                                // 34 Unused, int, Min value: 0, Max value: 2147483647, Default value: 0
         }
 
         public struct binder
@@ -1003,6 +1014,8 @@ namespace Game.Entities
             public uint triggeredEvent;                          // 3 triggeredEvent, References: GameEvents, NoValue = 0
             public uint conditionID1;                            // 4 conditionID1, References: PlayerCondition, NoValue = 0
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint CustomSitAnimKit;                        // 6 Custom Sit Anim Kit, References: AnimKit, NoValue = 0
+            public int CustomSitHeightOffset;                    // 7 Custom Sit Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
         }
 
         public struct spellFocus
@@ -1295,7 +1308,7 @@ namespace Game.Entities
 
         public struct dungeonDifficulty
         {
-            public uint InstanceType;                            // 0 Instance Type, enum { Not Instanced, Party Dungeon, Raid Dungeon, PVP Battlefield, Arena Battlefield, Scenario, WoWLabs }; Default: Party Dungeon
+            public uint InstanceType;                            // 0 Instance Type, enum { Not Instanced, Party Dungeon, Raid Dungeon, PVP Battlefield, Arena Battlefield, Scenario, WoWLabs, House Interior, House Neighborhood, }; Default: Party Dungeon
             public uint DifficultyNormal;                        // 1 Difficulty Normal, References: animationdata, NoValue = 0
             public uint DifficultyHeroic;                        // 2 Difficulty Heroic, References: animationdata, NoValue = 0
             public uint DifficultyEpic;                          // 3 Difficulty Epic, References: animationdata, NoValue = 0
@@ -1312,8 +1325,8 @@ namespace Game.Entities
         public struct barberChair
         {
             public uint chairheight;                             // 0 chairheight, int, Min value: 0, Max value: 2, Default value: 1
-            public int HeightOffset;                             // 1 Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
-            public uint SitAnimKit;                              // 2 Sit Anim Kit, References: AnimKit, NoValue = 0
+            public int CustomSitHeightOffset;                    // 1 Custom Sit Height Offset (inches), int, Min value: -100, Max value: 100, Default value: 0
+            public uint CustomSitAnimKit;                        // 2 Custom Sit Anim Kit, References: AnimKit, NoValue = 0
             public uint InteractRadiusOverride;                  // 3 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint CustomizationFeatureMask;                // 4 Customization Feature Mask, int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Preventteleportingtheplayeroutofthebarbershopchair;// 5 Prevent teleporting the player out of the barbershop chair, enum { false, true, }; Default: false
@@ -1493,14 +1506,15 @@ namespace Game.Entities
 
         public struct uilink
         {
-            public uint UILinkType;                              // 0 UI Link Type(Deprecated), enum { Adventure Journal, Obliterum Forge, Scrapping Machine, Item Interaction }; Default: Adventure Journal
+            public uint UILinkType;                              // 0 UI Link Type(Deprecated), enum { Adventure Journal, Obliterum Forge, Scrapping Machine, Item Interaction, Cornerstone Interaction, }; Default: Adventure Journal
             public uint allowMounted;                            // 1 allowMounted, enum { false, true, }; Default: false
             public uint GiganticAOI;                             // 2 Gigantic AOI, enum { false, true, }; Default: false
             public uint spellFocusType;                          // 3 spellFocusType, References: SpellFocusObject, NoValue = 0
             public uint radius;                                  // 4 radius, int, Min value: 0, Max value: 50, Default value: 10
             public uint InteractRadiusOverride;                  // 5 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint ItemInteractionID;                       // 6 Item Interaction ID, References: UiItemInteraction, NoValue = 0
-            public uint PlayerInteractionType;                   // 7 Player Interaction Type, enum { None, TradePartner, Item, Gossip, QuestGiver, Merchant, TaxiNode, Trainer, Banker, AlliedRaceDetailsGiver, GuildBanker, Registrar, Vendor, PetitionVendor, GuildTabardVendor, TalentMaster, SpecializationMaster, MailInfo, SpiritHealer, AreaSpiritHealer, Binder, Auctioneer, StableMaster, BattleMaster, Transmogrifier, LFGDungeon, VoidStorageBanker, BlackMarketAuctioneer, AdventureMap, WorldMap, GarrArchitect, GarrTradeskill, GarrMission, ShipmentCrafter, GarrRecruitment, GarrTalent, Trophy, PlayerChoice, ArtifactForge, ObliterumForge, ScrappingMachine, ContributionCollector, AzeriteRespec, IslandQueue, ItemInteraction, ChromieTime, CovenantPreview, AnimaDiversion, LegendaryCrafting, WeeklyRewards, Soulbind, CovenantSanctum, NewPlayerGuide, ItemUpgrade, AdventureJournal, Renown, AzeriteForge, PerksProgramVendor, ProfessionsCraftingOrder, Professions, ProfessionsCustomerOrder, TraitSystem, BarbersChoice, JailersTowerBuffs, MajorFactionRenown, PersonalTabardVendor, ForgeMaster, CharacterBanker, AccountBanker, ProfessionRespec, PlaceholderType71, PlaceholderType72, PlaceholderType73, PlaceholderType74, PlaceholderType75, PlaceholderType76, GuildRename, PlaceholderType76, }; Default: None
+            public uint PlayerInteractionType;                   // 7 Player Interaction Type, enum { None, TradePartner, Item, Gossip, QuestGiver, Merchant, TaxiNode, Trainer, Banker, AlliedRaceDetailsGiver, GuildBanker, Registrar, Vendor, PetitionVendor, GuildTabardVendor, TalentMaster, SpecializationMaster, MailInfo, SpiritHealer, AreaSpiritHealer, Binder, Auctioneer, StableMaster, BattleMaster, Transmogrifier, LFGDungeon, VoidStorageBanker, BlackMarketAuctioneer, AdventureMap, WorldMap, GarrArchitect, GarrTradeskill, GarrMission, ShipmentCrafter, GarrRecruitment, GarrTalent, Trophy, PlayerChoice, ArtifactForge, ObliterumForge, ScrappingMachine, ContributionCollector, AzeriteRespec, IslandQueue, ItemInteraction, ChromieTime, CovenantPreview, AnimaDiversion, LegendaryCrafting, WeeklyRewards, Soulbind, CovenantSanctum, NewPlayerGuide, ItemUpgrade, AdventureJournal, Renown, AzeriteForge, PerksProgramVendor, ProfessionsCraftingOrder, Professions, ProfessionsCustomerOrder, TraitSystem, BarbersChoice, JailersTowerBuffs, MajorFactionRenown, PersonalTabardVendor, ForgeMaster, CharacterBanker, AccountBanker, ProfessionRespec, CornerstoneInteraction, RenameNeighborhood, HousingBulletinBoard, HousingPedestal, CreateGuildNeighborhood, NeighborhoodCharter, GuildRename, OpenNeighborhoodCharterConfirmation, OpenHouseFinder, TieredEntrance, }; Default: None
+            public uint spell;                                   // 8 spell, References: Spell, NoValue = 0
         }
 
         public struct keystonereceptacle

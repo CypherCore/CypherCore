@@ -260,6 +260,8 @@ namespace Game.Entities
                 data.WriteUInt32(0);                                             // RemoveForcesIDs.size()
                 data.WriteUInt32(0);                                             // MoveIndex
 
+                data.WriteFloat(unit.m_movementInfo.gravityModifier);
+
                 //for (public uint i = 0; i < RemoveForcesIDs.Count; ++i)
                 //    *data << ObjectGuid(RemoveForcesIDs);
 

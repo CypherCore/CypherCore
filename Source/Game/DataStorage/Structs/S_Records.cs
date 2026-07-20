@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using System;
 
 namespace Game.DataStorage
 {
@@ -12,8 +11,8 @@ namespace Game.DataStorage
         public uint Id;
         public string Name;
         public ushort AreaTableID;
-        public byte Type;
-        public byte Flags;
+        public int Type;
+        public int Flags;
         public uint UiTextureKitID;
     }
 
@@ -28,7 +27,7 @@ namespace Game.DataStorage
         public int RelatedStep;                                              // Bonus step can only be completed if scenario is in the step specified in this field
         public ushort Supersedes;                                              // Used in conjunction with Proving Grounds scenarios, when sequencing steps (Not using step order?)
         public byte OrderIndex;
-        public byte Flags;
+        public int Flags;
         public uint VisibilityPlayerConditionID;
         public ushort WidgetSetID;
 
@@ -45,6 +44,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint FirstSceneScriptID;
         public uint NextSceneScriptID;
+        public int Flags;
         public int Unknown915;
     }
 
@@ -191,7 +191,7 @@ namespace Game.DataStorage
     public sealed class SpellAuraOptionsRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public ushort CumulativeAura;
         public uint ProcCategoryRecovery;
         public byte ProcChance;
@@ -204,7 +204,7 @@ namespace Game.DataStorage
     public sealed class SpellAuraRestrictionsRecord
     {
         public uint Id;
-        public uint DifficultyID;
+        public short DifficultyID;
         public int CasterAuraState;
         public int TargetAuraState;
         public int ExcludeCasterAuraState;
@@ -213,10 +213,10 @@ namespace Game.DataStorage
         public uint TargetAuraSpell;
         public uint ExcludeCasterAuraSpell;
         public uint ExcludeTargetAuraSpell;
-        public int CasterAuraType;
-        public int TargetAuraType;
-        public int ExcludeCasterAuraType;
-        public int ExcludeTargetAuraType;
+        public short CasterAuraType;
+        public short TargetAuraType;
+        public short ExcludeCasterAuraType;
+        public short ExcludeTargetAuraType;
         public uint SpellID;
     }
 
@@ -242,9 +242,10 @@ namespace Game.DataStorage
     public sealed class SpellCategoriesRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public ushort Category;
-        public int DefenseType;
+        public sbyte DefenseType;
+        public int DiminishType;
         public sbyte DispelType;
         public sbyte Mechanic;
         public int PreventionType;
@@ -278,7 +279,7 @@ namespace Game.DataStorage
     public sealed class SpellCooldownsRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public uint CategoryRecoveryTime;
         public uint RecoveryTime;
         public uint StartRecoveryTime;
@@ -291,13 +292,14 @@ namespace Game.DataStorage
         public uint Id;
         public int Duration;
         public int MaxDuration;
+        public int DurationPerResource;
     }
 
     public sealed class SpellEffectRecord
     {
         public uint Id;
         public short EffectAura;
-        public uint DifficultyID;
+        public short DifficultyID;
         public int EffectIndex;
         public uint Effect;
         public float EffectAmplitude;
@@ -320,6 +322,7 @@ namespace Game.DataStorage
         public float GroupSizeBasePointsCoefficient;
         public float EffectBasePoints;
         public int ScalingClass;
+        public int TargetNodeGraph;
         public int[] EffectMiscValue = new int[2];
         public uint[] EffectRadiusIndex = new uint[2];
         public FlagArray128 EffectSpellClassMask;
@@ -360,7 +363,7 @@ namespace Game.DataStorage
     public sealed class SpellInterruptsRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public int InterruptFlags;
         public int[] AuraInterruptFlags = new int[2];
         public int[] ChannelInterruptFlags = new int[2];
@@ -435,7 +438,7 @@ namespace Game.DataStorage
     public sealed class SpellLevelsRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public ushort MaxLevel;
         public byte MaxPassiveAuraLevel;
         public ushort BaseLevel;
@@ -446,8 +449,8 @@ namespace Game.DataStorage
     public sealed class SpellMiscRecord
     {
         public uint Id;
-        public int[] Attributes = new int[16];
-        public byte DifficultyID;
+        public int[] Attributes = new int[17];
+        public short DifficultyID;
         public ushort CastingTimeIndex;
         public ushort DurationIndex;
         public ushort PvPDurationIndex;
@@ -494,7 +497,7 @@ namespace Game.DataStorage
     public sealed class SpellPowerDifficultyRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public byte OrderIndex;
     }
 
@@ -502,7 +505,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public float BaseProcRate;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class SpellProcsPerMinuteModRecord
@@ -528,7 +531,7 @@ namespace Game.DataStorage
         public uint Id;
         public string DisplayName;
         public string DisplayNameShort;
-        public byte Flags;
+        public int Flags;
         public float[] RangeMin = new float[2];
         public float[] RangeMax = new float[2];
 
@@ -549,8 +552,10 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int SpellID;
-        public ushort CurrencyTypesID;
-        public ushort CurrencyCount;
+        public uint CurrencyTypesID;
+        public uint CurrencyCount;
+        public int OverrideRecraftCurrencyCount;
+        public byte OrderSource;
     }
 
     public sealed class SpellScalingRecord
@@ -559,7 +564,6 @@ namespace Game.DataStorage
         public uint SpellID;
         public uint MinScalingLevel;
         public uint MaxScalingLevel;
-        public ushort ScalesFromItemLevel;
     }
 
     public sealed class SpellShapeshiftRecord
@@ -591,7 +595,7 @@ namespace Game.DataStorage
     public sealed class SpellTargetRestrictionsRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public float ConeDegrees;
         public byte MaxTargets;
         public uint MaxTargetLevel;
@@ -640,10 +644,10 @@ namespace Game.DataStorage
         public float MinAllowedScale;
         public float MaxAllowedScale;
         public float Alpha;
-        public uint Flags;
+        public int Flags;
         public int TextureFileDataID;
         public float EffectRadius;
-        public uint Type;
+        public int Type;
         public int GenericID;
         public uint RibbonQualityID;
         public int DissolveEffectID;
@@ -680,7 +684,7 @@ namespace Game.DataStorage
         public int FollowGroundHeight;
         public uint FollowGroundDropSpeed;
         public ushort FollowGroundApproach;
-        public uint Flags;
+        public int Flags;
         public ushort SpellMissileMotionID;
         public uint AnimKitID;
         public int ClutterLevel;
@@ -692,7 +696,7 @@ namespace Game.DataStorage
     public sealed class SpellXSpellVisualRecord
     {
         public uint Id;
-        public byte DifficultyID;
+        public short DifficultyID;
         public uint SpellVisualID;
         public float Probability;
         public int Flags;

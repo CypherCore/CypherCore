@@ -632,9 +632,9 @@ namespace Framework.Constants
         ReleasedSpirit = 95,  /*NYI*/ // Released Spirit
         AccountKnownPet = 96,  /*NYI*/ // Account knows pet "{Creature}" (Backtracked)
         DefeatDungeonEncounterWhileElegibleForLoot = 97, // Defeat Encounter "{DungeonEncounter}" While Eligible For Loot
-                                                                  // UNUSED 18{}                                 = 98,  // Unused
-                                                                  // UNUSED 19{}                                 = 99,  // Unused
-                                                                  // UNUSED 20{}                                 = 100, // Unused
+                                                         // UNUSED 18{}                                 = 98,  // Unused
+                                                         // UNUSED 19{}                                 = 99,  // Unused
+                                                         // UNUSED 20{}                                 = 100, // Unused
         HighestDamageDone = 101, // Highest damage done in 1 single ability
         HighestDamageTaken = 102, // Most damage taken in 1 single hit
         TotalDamageTaken = 103, // Total damage taken
@@ -787,7 +787,7 @@ namespace Framework.Constants
         RemoveDecor = 271, /*NYI*/ // Remove any decor
         CollectUniqueDecor = 272, /*NYI*/ // Collect Unique Decor
 
-        Count = 279
+        Count = 283
     }
 
     public enum CriteriaDataType

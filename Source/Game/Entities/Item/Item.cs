@@ -1,6 +1,7 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.ClientBuild;
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
@@ -1830,21 +1831,24 @@ namespace Game.Entities
             if (azeriteLevelInfo != null)
                 itemLevel = azeriteLevelInfo.ItemLevel;
 
-            if (bonusData.PlayerLevelToItemLevelCurveId != 0)
+            if (bonusData.ItemLevelOffsetCurveId == 0)
             {
-                if (fixedLevel != 0)
-                    level = fixedLevel;
-                else
+                if (bonusData.PlayerLevelToItemLevelCurveId != 0)
                 {
-                    var levels = Global.DB2Mgr.GetContentTuningData(bonusData.ContentTuningId, [], true);
-                    if (levels.HasValue)
-                        level = (uint)Math.Min(Math.Max((ushort)level, levels.Value.MinLevel), levels.Value.MaxLevel);
+                    if (fixedLevel != 0)
+                        level = fixedLevel;
+                    else
+                    {
+                        var levels = Global.DB2Mgr.GetContentTuningData(bonusData.ContentTuningId, [], true);
+                        if (levels.HasValue)
+                            level = (uint)Math.Min(Math.Max((ushort)level, levels.Value.MinLevel), levels.Value.MaxLevel);
+                    }
+
+                    itemLevel = (uint)Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level);
                 }
-
-                itemLevel = (uint)Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level);
             }
-
-            itemLevel += (uint)bonusData.ItemLevelBonus;
+            else
+                itemLevel = bonusData.ItemLevelOffset + (uint)Math.Round(Global.DB2Mgr.GetCurveValueAt(bonusData.ItemLevelOffsetCurveId, bonusData.ItemLevelOffsetItemLevel));
 
             for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
                 itemLevel += bonusData.GemItemLevelBonus[i];
@@ -1857,7 +1861,29 @@ namespace Game.Entities
                     itemLevel = bonusData.PvpItemLevel;
 
                 itemLevel += (uint)bonusData.PvpItemLevelBonus;
-                itemLevel += Global.DB2Mgr.GetPvpItemLevelBonus(itemTemplate.GetId());
+            }
+
+            if (!bonusData.IgnoreSquish)
+            {
+                Realm currentRealm = Global.RealmMgr.GetCurrentRealm();
+                if (currentRealm != null)
+                {
+                    uint currentBuild = ClientBuildHelper.GetMinorMajorBugfixVersionForBuild(currentRealm.Build);
+
+                    // apply all squishes between items_squish and server_squish
+                    for (uint squishId = bonusData.ItemSquishEraID; squishId < CliDB.ItemSquishEraStorage.GetNumRows(); ++squishId)
+                    {
+                        ItemSquishEraRecord squish = CliDB.ItemSquishEraStorage.LookupByKey(squishId);
+                        if (squish == null)
+                            continue;
+
+                        if (squish.Patch > currentBuild)
+                            break;
+
+                        if (squish.CurveID != 0)
+                            itemLevel = (uint)Global.DB2Mgr.GetCurveValueAt((uint)squish.CurveID, itemLevel);
+                    }
+                }
             }
 
             if (itemTemplate.GetInventoryType() != InventoryType.NonEquip)
@@ -2929,6 +2955,10 @@ namespace Game.Entities
         public uint RequiredLevelCurve;
         public ushort PvpItemLevel;
         public short PvpItemLevelBonus;
+        public uint ItemLevelOffsetCurveId;
+        public uint ItemLevelOffsetItemLevel;
+        public uint ItemLevelOffset;
+        public uint ItemSquishEraID;
         public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
         public int EffectCount;
         public uint LimitCategory;
@@ -2938,6 +2968,8 @@ namespace Game.Entities
         public bool CanRecraft;
         public bool HasFixedLevel;
         public bool CannotTradeBindOnPickup;
+        public bool IgnoreSquish;
+
         State _state;
 
         public BonusData(ItemTemplate proto)
@@ -2979,6 +3011,10 @@ namespace Game.Entities
             if (azeriteEmpoweredItem != null)
                 AzeriteTierUnlockSetId = azeriteEmpoweredItem.AzeriteTierUnlockSetID;
 
+            ItemLevelOffsetCurveId = proto.GetItemLevelOffsetCurveId();
+            ItemLevelOffsetItemLevel = proto.GetItemLevelOffsetItemLevel();
+            ItemSquishEraID = proto.GetItemSquishEraId();
+
             EffectCount = 0;
             foreach (ItemEffectRecord itemEffect in proto.Effects)
                 Effects[EffectCount++] = itemEffect;
@@ -2993,6 +3029,7 @@ namespace Game.Entities
             CanSalvage = !proto.HasFlag(ItemFlags4.NoSalvage);
             CanRecraft = proto.HasFlag(ItemFlags4.Recraftable);
             CannotTradeBindOnPickup = proto.HasFlag(ItemFlags2.NoTradeBindOnAcquire);
+            IgnoreSquish = false;
 
             _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;
@@ -3174,6 +3211,63 @@ namespace Game.Entities
                     {
                         Bonding = (ItemBondingType)values[0];
                         _state.BondingPriority = values[1];
+                    }
+                    break;
+                case ItemBonusType.ItemOffsetCurve:
+                    if (values[3] < _state.ScalingStatDistributionPriority)
+                    {
+                        ItemLevelOffsetCurveId = (uint)values[0];
+                        ItemLevelOffsetItemLevel = (uint)values[1];
+                        _state.ScalingStatDistributionPriority = values[3];
+                    }
+                    break;
+                case ItemBonusType.ScalingConfigAndReqLevel:
+                    if (values[1] < _state.ScalingStatDistributionPriority)
+                    {
+                        ItemScalingConfigRecord scalingConfig = CliDB.ItemScalingConfigStorage.LookupByKey(values[0]);
+                        if (scalingConfig != null)
+                        {
+                            ItemOffsetCurveRecord itemOffsetCurve = CliDB.ItemOffsetCurveStorage.LookupByKey(scalingConfig.ItemOffsetCurveID);
+                            if (itemOffsetCurve != null)
+                            {
+                                ItemLevelOffsetCurveId = (uint)itemOffsetCurve.CurveID;
+                                ItemLevelOffset = (uint)itemOffsetCurve.Offset;
+                            }
+
+                            ItemLevelOffsetItemLevel = (uint)scalingConfig.ItemLevel;
+                            ItemSquishEraID = (uint)scalingConfig.ItemSquishEraID;
+                            if ((scalingConfig.Flags & 0x1) != 0)
+                                IgnoreSquish = true;
+
+                            if (values[1] < _state.RequiredLevelCurvePriority)
+                            {
+                                RequiredLevelOverride = scalingConfig.RequiredLevel;
+                                RequiredLevelCurve = 0;
+                            }
+                        }
+                    }
+                    break;
+                case ItemBonusType.ItemBonusList:
+                    AddBonusList((uint)values[0]);
+                    break;
+                case ItemBonusType.ScalingConfig:
+                    if (values[1] < _state.ScalingStatDistributionPriority)
+                    {
+                        ItemScalingConfigRecord scalingConfig = CliDB.ItemScalingConfigStorage.LookupByKey(values[0]);
+                        if (scalingConfig != null)
+                        {
+                            ItemOffsetCurveRecord itemOffsetCurve = CliDB.ItemOffsetCurveStorage.LookupByKey(scalingConfig.ItemOffsetCurveID);
+                            if (itemOffsetCurve != null)
+                            {
+                                ItemLevelOffsetCurveId = (uint)itemOffsetCurve.CurveID;
+                                ItemLevelOffset = (uint)itemOffsetCurve.Offset;
+                            }
+
+                            ItemLevelOffsetItemLevel = 0;
+                            ItemSquishEraID = (uint)scalingConfig.ItemSquishEraID;
+                            if ((scalingConfig.Flags & 0x1) != 0)
+                                IgnoreSquish = true;
+                        }
                     }
                     break;
             }

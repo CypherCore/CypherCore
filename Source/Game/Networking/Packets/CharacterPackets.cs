@@ -4,8 +4,6 @@
 using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
-using Framework.IO;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -33,9 +31,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsRestrictedNewPlayer);
             _worldPacket.WriteBit(IsNewcomerChatCompleted);
             _worldPacket.WriteBit(IsRestrictedTrial);
-            _worldPacket.WriteBit(Unused1127);
+            _worldPacket.WriteBit(IsAccountLapsedPlayer);
             _worldPacket.WriteBit(ClassDisableMask.HasValue);
-            _worldPacket.WriteBit(DontCreateCharacterDisplays);
+            _worldPacket.WriteBit(ForceCharacterListSort);
             _worldPacket.WriteInt32(Characters.Count);
             _worldPacket.WriteInt32(RegionwideCharacters.Count);
             _worldPacket.WriteInt32(MaxCharacterLevel);
@@ -73,8 +71,8 @@ namespace Game.Networking.Packets
         public bool IsRestrictedNewPlayer; // forbids using level boost and class trials
         public bool IsNewcomerChatCompleted; // forbids hero classes and allied races
         public bool IsRestrictedTrial;
-        public bool Unused1127;
-        public bool DontCreateCharacterDisplays;
+        public bool IsAccountLapsedPlayer;
+        public bool ForceCharacterListSort;
 
         public int MaxCharacterLevel = 1;
         public uint? ClassDisableMask = new();
@@ -239,7 +237,7 @@ namespace Game.Networking.Packets
 
                 data.WriteInt32(TimerunningSeasonID);
                 data.WriteUInt32(OverrideSelectScreenFileDataID);
-                data.WriteUInt32(Unused1110_1);
+                data.WriteUInt32(RealmQueue);
 
                 foreach (ChrCustomizationChoice customization in Customizations)
                 {
@@ -249,8 +247,8 @@ namespace Game.Networking.Packets
 
                 data.WriteBits(Name.GetByteCount(), 6);
                 data.WriteBit(FirstLogin);
-                data.WriteBit(Unused1110_2);
-                data.WriteBit(Unused1110_3);
+                data.WriteBit(RealmInfoFound);
+                data.WriteBit(IsRealmOffline);
                 data.FlushBits();
 
                 data.WriteString(Name);
@@ -289,30 +287,30 @@ namespace Game.Networking.Packets
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[19];
             public CustomTabardInfo PersonalTabard = new();
-            public uint Unused1110_1;
-            public bool Unused1110_2;
-            public bool Unused1110_3;
+            public uint RealmQueue;
+            public bool RealmInfoFound;
+            public bool IsRealmOffline;
 
             public struct VisualItemInfo
             {
                 public void Write(WorldPacket data)
                 {
-                    data.WriteUInt32(DisplayId);
-                    data.WriteUInt8(InvType);
-                    data.WriteUInt32(DisplayEnchantId);
-                    data.WriteUInt8(Subclass);
-                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
                     data.WriteUInt32(ItemID);
                     data.WriteUInt32(TransmogrifiedItemID);
+                    data.WriteUInt8(Subclass);
+                    data.WriteUInt8(InvType);
+                    data.WriteUInt32(DisplayId);
+                    data.WriteUInt32(DisplayEnchantId);
+                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
                 }
 
+                public uint ItemID;
+                public uint TransmogrifiedItemID;
+                public byte Subclass;
+                public byte InvType;
                 public uint DisplayId;
                 public uint DisplayEnchantId;
                 public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value
-                public byte InvType;
-                public byte Subclass;
-                public uint ItemID;
-                public uint TransmogrifiedItemID;
             }
 
             public struct PetInfo
@@ -402,24 +400,44 @@ namespace Game.Networking.Packets
             }
         }
 
-        public struct RaceUnlock
+        public struct ClassUnlock
+        {
+            public sbyte ClassID;
+            public bool HasUnlockedAchievement;
+            public uint AchievementID;
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteInt8(ClassID);
+                data.WriteUInt32(AchievementID);
+                data.WriteBit(HasUnlockedAchievement);
+                data.FlushBits();
+            }
+        }
+
+        public struct RaceUnlock()
         {
             public sbyte RaceID;
             public bool HasUnlockedLicense;
             public bool HasUnlockedAchievement;
             public bool HasHeritageArmorUnlockAchievement;
             public bool HideRaceOnClient;
-            public bool Unused1027;
+            public bool FactionBalanceDisabled;
+            public List<ClassUnlock> ClassUnlocks = [];
 
             public void Write(WorldPacket data)
             {
                 data.WriteInt8(RaceID);
+                data.WriteInt32(ClassUnlocks.Count);
                 data.WriteBit(HasUnlockedLicense);
                 data.WriteBit(HasUnlockedAchievement);
                 data.WriteBit(HasHeritageArmorUnlockAchievement);
                 data.WriteBit(HideRaceOnClient);
-                data.WriteBit(Unused1027);
+                data.WriteBit(FactionBalanceDisabled);
                 data.FlushBits();
+
+                foreach (var classUnlock in ClassUnlocks)
+                    classUnlock.Write(data);
             }
         }
 

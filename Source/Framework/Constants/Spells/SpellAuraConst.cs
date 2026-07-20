@@ -653,6 +653,16 @@ namespace Framework.Constants
         ModRangedAttackSpeedFlat = 643,
         Unk644 = 644,
         Unk645 = 645,
+        AddFlatPvpModifier = 646,
+        AddPctPvpModifier = 647,
+        AddFlatPvpModifierBySpellLabel = 648,
+        AddPctPvpModifierBySpellLabel = 649,
+        Unk650 = 650,
+        Unk651 = 651,
+        Unk652 = 652,
+        Unk653 = 653,
+        Unk654 = 654,
+        RemoveTransmogOutfitUpdateCost = 655,
 
         Total
     }

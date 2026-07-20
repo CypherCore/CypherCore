@@ -335,7 +335,7 @@ namespace Game.Entities
                 InstanceLockPkt lockInfos = new();
                 lockInfos.InstanceID = instanceLock.GetInstanceId();
                 lockInfos.MapID = instanceLock.GetMapId();
-                lockInfos.DifficultyID = (uint)instanceLock.GetDifficultyId();
+                lockInfos.DifficultyID = (short)instanceLock.GetDifficultyId();
                 lockInfos.TimeRemaining = (int)Math.Max((instanceLock.GetEffectiveExpiryTime() - now).TotalSeconds, 0);
                 lockInfos.CompletedMask = instanceLock.GetData().CompletedEncountersMask;
 
@@ -539,14 +539,14 @@ namespace Game.Entities
         public void SendDungeonDifficulty(int forcedDifficulty = -1)
         {
             DungeonDifficultySet dungeonDifficultySet = new();
-            dungeonDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)GetDungeonDifficultyID() : forcedDifficulty;
+            dungeonDifficultySet.DifficultyID = (short)(forcedDifficulty == -1 ? (short)GetDungeonDifficultyID() : forcedDifficulty);
             SendPacket(dungeonDifficultySet);
         }
 
         public void SendRaidDifficulty(bool legacy, int forcedDifficulty = -1)
         {
             RaidDifficultySet raidDifficultySet = new();
-            raidDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID()) : forcedDifficulty;
+            raidDifficultySet.DifficultyID = (short)(forcedDifficulty == -1 ? (short)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID()) : forcedDifficulty);
             raidDifficultySet.Legacy = legacy ? 1 : 0;
             SendPacket(raidDifficultySet);
         }

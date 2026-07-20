@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Miscellaneous;
 using System;
@@ -118,6 +117,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(Info.RewardSpell);
                 _worldPacket.WriteUInt32(Info.RewardHonor);
                 _worldPacket.WriteFloat(Info.RewardKillHonor);
+                _worldPacket.WriteInt32(Info.RewardFavor);
                 _worldPacket.WriteInt32(Info.RewardArtifactXPDifficulty);
                 _worldPacket.WriteFloat(Info.RewardArtifactXPMultiplier);
                 _worldPacket.WriteInt32(Info.RewardArtifactCategoryID);
@@ -182,7 +182,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Info.Objectives.Count);
                 _worldPacket.WriteUInt64(Info.AllowableRaces.RawValue);
                 _worldPacket.WriteInt32(Info.TreasurePickerID.Count);
-                _worldPacket.WriteInt32(Info.TreasurePickerID2.Count);
+                _worldPacket.WriteInt32(Info.NonDisplayableTreasurePickerIDs.Count);
                 _worldPacket.WriteInt32(Info.Expansion);
                 _worldPacket.WriteInt32(Info.ManagedWorldStateID);
                 _worldPacket.WriteInt32(Info.QuestSessionBonus);
@@ -201,8 +201,8 @@ namespace Game.Networking.Packets
                     foreach (var id in Info.TreasurePickerID)
                         _worldPacket.WriteInt32(id);
 
-                if (!Info.TreasurePickerID2.Empty())
-                    foreach (var id in Info.TreasurePickerID2)
+                if (!Info.NonDisplayableTreasurePickerIDs.Empty())
+                    foreach (var id in Info.NonDisplayableTreasurePickerIDs)
                         _worldPacket.WriteInt32(id);
 
                 if (!Info.RewardHouseRoomIDs.Empty())
@@ -224,19 +224,19 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(Info.ReadyForTranslation);
                 _worldPacket.FlushBits();
 
-                foreach (QuestObjective questObjective in Info.Objectives)
+                foreach (QuestInfoObjective questObjective in Info.Objectives)
                 {
-                    _worldPacket.WriteUInt32(questObjective.Id);
-                    _worldPacket.WriteInt32((int)questObjective.Type);
+                    _worldPacket.WriteUInt32(questObjective.ID);
+                    _worldPacket.WriteInt32(questObjective.Type);
                     _worldPacket.WriteInt8(questObjective.StorageIndex);
                     _worldPacket.WriteInt32(questObjective.ObjectID);
                     _worldPacket.WriteInt32(questObjective.Amount);
-                    _worldPacket.WriteInt32(questObjective.SecondaryAmount); // only objective type 22
-                    _worldPacket.WriteUInt32((uint)questObjective.Flags);
-                    _worldPacket.WriteUInt32((uint)questObjective.Flags2);
+                    _worldPacket.WriteInt32(questObjective.ConditionalAmount); // only objective type 22
+                    _worldPacket.WriteUInt32(questObjective.Flags);
+                    _worldPacket.WriteUInt32(questObjective.Flags2);
                     _worldPacket.WriteFloat(questObjective.ProgressBarWeight);
 
-                    _worldPacket.WriteInt32(questObjective.VisualEffects.Length);
+                    _worldPacket.WriteInt32(questObjective.VisualEffects.Count);
                     _worldPacket.WriteInt32(questObjective.ParentObjectiveID); // related to new UF flags
 
                     foreach (var visualEffect in questObjective.VisualEffects)
@@ -714,14 +714,17 @@ namespace Game.Networking.Packets
 
     class QuestUpdateComplete : ServerPacket
     {
+        public uint QuestID;
+        public bool HideCreditMessage;
+
         public QuestUpdateComplete() : base(ServerOpcodes.QuestUpdateComplete) { }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(QuestID);
+            _worldPacket.WriteBit(HideCreditMessage);
+            _worldPacket.FlushBits();
         }
-
-        public uint QuestID;
     }
 
     class QuestConfirmAcceptResponse : ServerPacket
@@ -1095,6 +1098,24 @@ namespace Game.Networking.Packets
         }
     }
 
+    public class QuestInfoObjective
+    {
+        public uint ID;
+        public uint QuestID;
+        public byte Type;
+        public sbyte StorageIndex;
+        public int ObjectID;
+        public int Amount;
+        public int ConditionalAmount;
+        public uint Flags;
+        public uint Flags2;
+        public float ProgressBarWeight;
+        public int ParentObjectiveID;
+        public bool Visible;
+        public string Description = "";
+        public List<int> VisualEffects = [];
+    }
+
     public class ConditionalQuestText
     {
         public int PlayerConditionID;
@@ -1152,6 +1173,7 @@ namespace Game.Networking.Packets
         public uint RewardSpell;
         public uint RewardHonor;
         public float RewardKillHonor;
+        public int RewardFavor;
         public int RewardArtifactXPDifficulty;
         public float RewardArtifactXPMultiplier;
         public int RewardArtifactCategoryID;
@@ -1188,12 +1210,12 @@ namespace Game.Networking.Packets
         public uint AreaGroupID;
         public long TimeAllowed;
         public List<int> TreasurePickerID = new();
-        public List<int> TreasurePickerID2 = new();   // unknown purpose, used only sometimes and only if TreasurePickerID is empty
+        public List<int> NonDisplayableTreasurePickerIDs = new();
         public int Expansion;
         public int ManagedWorldStateID;
         public int QuestSessionBonus;
         public int QuestGiverCreatureID; // used to select ConditionalQuestText
-        public List<QuestObjective> Objectives = new();
+        public List<QuestInfoObjective> Objectives = new();
         public List<ConditionalQuestText> ConditionalQuestDescription = new();
         public List<ConditionalQuestText> ConditionalQuestCompletionLog = new();
         public List<int> RewardHouseRoomIDs = [];

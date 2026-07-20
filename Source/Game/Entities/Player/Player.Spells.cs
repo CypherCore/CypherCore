@@ -1567,9 +1567,11 @@ namespace Game.Entities
 
                     Spell spell = new(this, spellInfo, TriggerCastFlags.None);
 
-                    SpellPrepare spellPrepare = new();
-                    spellPrepare.ClientCastID = castCount;
-                    spellPrepare.ServerCastID = spell.m_castId;
+                    SpellPrepare spellPrepare = new()
+                    {
+                        ClientCastID = castCount,
+                        ServerCastID = spell.m_castId
+                    };
                     SendPacket(spellPrepare);
 
                     spell.m_fromClient = true;

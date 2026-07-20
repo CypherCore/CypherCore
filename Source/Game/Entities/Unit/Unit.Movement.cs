@@ -1771,13 +1771,13 @@ namespace Game.Entities
 
         public bool SetMoveCantSwim(bool cantSwim)
         {
-            if (cantSwim == HasExtraUnitMovementFlag2(MovementFlags3.CantSwim))
+            if (cantSwim == HasExtraUnitMovementFlag2(MovementFlags3.CannotSwim))
                 return false;
 
             if (cantSwim)
-                AddExtraUnitMovementFlag2(MovementFlags3.CantSwim);
+                AddExtraUnitMovementFlag2(MovementFlags3.CannotSwim);
             else
-                RemoveExtraUnitMovementFlag2(MovementFlags3.CantSwim);
+                RemoveExtraUnitMovementFlag2(MovementFlags3.CannotSwim);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)

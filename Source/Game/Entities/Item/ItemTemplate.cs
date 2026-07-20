@@ -41,7 +41,7 @@ namespace Game.Entities
         public bool HasFlag(ItemFlags3 flag) { return (ExtendedData.Flags[2] & (int)flag) != 0; }
         public bool HasFlag(ItemFlags4 flag) { return (ExtendedData.Flags[3] & (int)flag) != 0; }
         public bool HasFlag(ItemFlagsCustom customFlag) { return (FlagsCu & customFlag) != 0; }
-        
+
         public bool CanChangeEquipStateInCombat()
         {
             switch (GetInventoryType())
@@ -290,6 +290,9 @@ namespace Game.Entities
         public float GetStatPercentageOfSocket(uint index) { Cypher.Assert(index < ItemConst.MaxStats); return ExtendedData.StatPercentageOfSocket[index]; }
         public uint GetScalingStatContentTuning() { return ExtendedData.ContentTuningID; }
         public uint GetPlayerLevelToItemLevelCurveId() { return ExtendedData.PlayerLevelToItemLevelCurveID; }
+        public uint GetItemLevelOffsetCurveId() { return (uint)ExtendedData.ItemLevelOffsetCurveID; }
+        public uint GetItemLevelOffsetItemLevel() { return (uint)ExtendedData.ItemLevelOffsetItemLevel; }
+        public uint GetItemSquishEraId() { return (uint)ExtendedData.ItemSquishEraID; }
         public uint GetDamageType() { return ExtendedData.DamageType; }
         public uint GetDelay() { return ExtendedData.ItemDelay; }
         public float GetRangedModRange() { return ExtendedData.ItemRange; }
@@ -332,7 +335,7 @@ namespace Game.Entities
         public bool IsWeapon() { return GetClass() == ItemClass.Weapon; }
 
         public bool IsArmor() { return GetClass() == ItemClass.Armor; }
-        
+
         public bool IsRangedWeapon()
         {
             if (!IsWeapon())

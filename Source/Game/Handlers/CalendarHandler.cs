@@ -10,7 +10,6 @@ using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
-using Game.DataStorage;
 
 namespace Game
 {
@@ -528,12 +527,14 @@ namespace Game
             if (expiryTimes.Item1 == DateTime.MinValue)
                 return;
 
-            CalendarRaidLockoutUpdated calendarRaidLockoutUpdated = new();
-            calendarRaidLockoutUpdated.ServerTime = GameTime.GetWowTime();
-            calendarRaidLockoutUpdated.MapID = setSavedInstanceExtend.MapID;
-            calendarRaidLockoutUpdated.DifficultyID = setSavedInstanceExtend.DifficultyID;
-            calendarRaidLockoutUpdated.OldTimeRemaining = (int)Math.Max((expiryTimes.Item1 - GameTime.GetSystemTime()).TotalSeconds, 0);
-            calendarRaidLockoutUpdated.NewTimeRemaining = (int)Math.Max((expiryTimes.Item2 - GameTime.GetSystemTime()).TotalSeconds, 0);
+            CalendarRaidLockoutUpdated calendarRaidLockoutUpdated = new()
+            {
+                ServerTime = GameTime.GetWowTime(),
+                MapID = setSavedInstanceExtend.MapID,
+                DifficultyID = (short)setSavedInstanceExtend.DifficultyID,
+                OldTimeRemaining = (int)Math.Max((expiryTimes.Item1 - GameTime.GetSystemTime()).TotalSeconds, 0),
+                NewTimeRemaining = (int)Math.Max((expiryTimes.Item2 - GameTime.GetSystemTime()).TotalSeconds, 0)
+            };
             SendPacket(calendarRaidLockoutUpdated);
         }
 

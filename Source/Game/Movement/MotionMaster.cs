@@ -644,12 +644,12 @@ namespace Game.Movement
             MoveTierTransition(id, pos, AnimTier.Ground, tierTransitionId, velocity, speedSelectionMode, scriptResult);
         }
 
-        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason>? scriptResult = null)
+        public void MoveTakeoff(uint id, Position pos, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             MoveTierTransition(id, pos, AnimTier.Fly, tierTransitionId, velocity, speedSelectionMode, scriptResult);
         }
 
-        public void MoveTierTransition(uint id, Position pos, AnimTier newAnimTier, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason>? scriptResult = null)
+        public void MoveTierTransition(uint id, Position pos, AnimTier newAnimTier, uint? tierTransitionId = null, float? velocity = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             bool flyingTransition = newAnimTier == AnimTier.Fly || _owner.GetAnimTier() == AnimTier.Fly;
             if (tierTransitionId == 0)

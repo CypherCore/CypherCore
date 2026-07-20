@@ -556,18 +556,21 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPartyMemberStats)]
         void HandleRequestPartyMemberStats(RequestPartyMemberStats packet)
         {
-            PartyMemberFullState partyMemberStats = new();
-
-            Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
-            if (player == null)
+            foreach (ObjectGuid target in packet.Targets)
             {
-                partyMemberStats.MemberGuid = packet.TargetGUID;
-                partyMemberStats.MemberStats.Status = GroupMemberOnlineStatus.Offline;
+                PartyMemberFullState partyMemberStats = new();
+                Player player = Global.ObjAccessor.FindConnectedPlayer(target);
+                if (player != null)
+                {
+                    partyMemberStats.Initialize(player);
+                }
+                else
+                {
+                    partyMemberStats.MemberGuid = target;
+                    partyMemberStats.MemberStats.Status = GroupMemberOnlineStatus.Offline;
+                }
+                SendPacket(partyMemberStats);
             }
-            else
-                partyMemberStats.Initialize(player);
-
-            SendPacket(partyMemberStats);
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestRaidInfo)]

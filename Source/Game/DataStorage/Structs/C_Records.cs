@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using System;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -14,7 +13,7 @@ namespace Game.DataStorage
         public ushort LocaleMask;
         public byte CreateCharsetMask;
         public byte ExistingCharsetMask;
-        public byte Flags;
+        public int Flags;
         public sbyte Order;
 
         public CfgCategoriesCharsets GetCreateCharsetMask() { return (CfgCategoriesCharsets)CreateCharsetMask; }
@@ -462,6 +461,13 @@ namespace Game.DataStorage
         public int Flags;
     }
 
+    public sealed class CraftingQualityEntry
+    {
+        public uint Id;
+        public int QualityTier;
+        public int CraftingQualityAtlasSetID;
+    }
+
     public sealed class CreatureDisplayInfoRecord
     {
         public uint Id;
@@ -641,6 +647,9 @@ namespace Game.DataStorage
         public uint RechargingCycleDurationMS;
         public float AccountTransferPercentage;
         public byte OrderIndex;
+        public float RecraftReagentCountPercentage;
+        public byte OrderSource;
+        public int MCRCurrencyID;
         public int[] Flags = new int[2];
 
         public bool HasFlag(CurrencyTypesFlags currencyTypesFlags) { return (Flags[0] & (int)currencyTypesFlags) != 0; }

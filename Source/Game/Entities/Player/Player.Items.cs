@@ -5025,7 +5025,7 @@ namespace Game.Entities
             if (childEquipement == null)
                 return InventoryResult.Ok;
 
-            Item dstItem = GetItemByPos(InventorySlots.Bag0, childEquipement.ChildItemEquipSlot);
+            Item dstItem = GetItemByPos(InventorySlots.Bag0, (byte)childEquipement.ChildItemEquipSlot);
             if (dstItem == null)
                 return InventoryResult.Ok;
 

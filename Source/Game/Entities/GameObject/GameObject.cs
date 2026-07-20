@@ -726,7 +726,7 @@ namespace Game.Entities
                             loot?.Update();
 
                             // Non-consumable chest was partially looted and restock time passed, restock all loot now
-                            if (GetGoInfo().Chest.consumable == 0 && m_restockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
+                            if (GetGoInfo().IsDespawnAtAction() && m_restockTime != 0 && GameTime.GetGameTime() >= m_restockTime)
                             {
                                 m_restockTime = 0;
                                 m_lootState = LootState.Ready;
@@ -1742,7 +1742,7 @@ namespace Game.Entities
                         if (info.GetLootId() != 0)
                         {
                             Group group = player.GetGroup();
-                            bool groupRules = group != null && info.Chest.usegrouplootrules != 0;
+                            bool groupRules = group != null && info.IsUsingGroupLootRules();
 
                             loot = new Loot(GetMap(), GetGUID(), LootType.Chest, groupRules ? group : null);
                             loot.SetDungeonEncounterId(info.Chest.DungeonEncounter);
@@ -2370,7 +2370,7 @@ namespace Game.Entities
 
                     // fallback, will always work
                     player.TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
-                    player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
+                    player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.CustomSitAnimKit);
                     return;
                 }
                 case GameObjectTypes.NewFlag:
@@ -3127,7 +3127,7 @@ namespace Game.Entities
                 case GameObjectTypes.Chest:
                 {
                     GameObjectTemplate goInfo = GetGoInfo();
-                    if (goInfo.Chest.consumable == 0 && goInfo.Chest.chestPersonalLoot != 0)
+                    if (goInfo.IsDespawnAtAction() && goInfo.Chest.chestPersonalLoot != 0)
                     {
                         DespawnForPlayer(looter, goInfo.Chest.chestRestockTime != 0
                             ? TimeSpan.FromSeconds(goInfo.Chest.chestRestockTime)

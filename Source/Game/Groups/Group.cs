@@ -7,13 +7,11 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Loots;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Groups
 {
@@ -857,11 +855,12 @@ namespace Game.Groups
                 partyUpdate.LootSettings = lootSettings;
 
                 // Difficulty Settings
-                PartyDifficultySettings difficultySettings = new();
-
-                difficultySettings.DungeonDifficultyID = (uint)m_dungeonDifficulty;
-                difficultySettings.RaidDifficultyID = (uint)m_raidDifficulty;
-                difficultySettings.LegacyRaidDifficultyID = (uint)m_legacyRaidDifficulty;
+                PartyDifficultySettings difficultySettings = new()
+                {
+                    DungeonDifficultyID = (short)m_dungeonDifficulty,
+                    RaidDifficultyID = (short)m_raidDifficulty,
+                    LegacyRaidDifficultyID = (short)m_legacyRaidDifficulty
+                };
 
                 partyUpdate.DifficultySettings = difficultySettings;
             }
@@ -869,18 +868,19 @@ namespace Game.Groups
             // LfgInfos
             if (IsLFGGroup())
             {
-                PartyLFGInfo lfgInfos = new();
+                PartyLFGInfo lfgInfos = new()
+                {
+                    Slot = Global.LFGMgr.GetLFGDungeonEntry(Global.LFGMgr.GetDungeon(m_guid)),
+                    BootCount = 0,
+                    Aborted = false,
 
-                lfgInfos.Slot = Global.LFGMgr.GetLFGDungeonEntry(Global.LFGMgr.GetDungeon(m_guid));
-                lfgInfos.BootCount = 0;
-                lfgInfos.Aborted = false;
+                    MyFlags = (byte)(Global.LFGMgr.GetState(m_guid) == LfgState.FinishedDungeon ? 2 : 0),
+                    MyRandomSlot = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID()),
 
-                lfgInfos.MyFlags = (byte)(Global.LFGMgr.GetState(m_guid) == LfgState.FinishedDungeon ? 2 : 0);
-                lfgInfos.MyRandomSlot = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
-
-                lfgInfos.MyPartialClear = 0;
-                lfgInfos.MyGearDiff = 0.0f;
-                lfgInfos.MyFirstReward = false;
+                    MyPartialClear = 0,
+                    MyGearDiff = 0.0f,
+                    MyFirstReward = false
+                };
 
                 DungeonFinding.LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(partyUpdate.LfgInfos.Value.MyRandomSlot, player.GetLevel());
                 if (reward != null)

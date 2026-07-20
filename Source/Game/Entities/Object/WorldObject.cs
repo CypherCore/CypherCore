@@ -15,7 +15,6 @@ using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace Game.Entities
@@ -1143,29 +1142,14 @@ namespace Game.Entities
             if (minduration == maxduration)
                 return minduration;
 
-            Unit unit = ToUnit();
-            if (unit == null)
-                return minduration;
-
             if (powerCosts == null)
-                return minduration;
-
-            // we want only baseline cost here
-            var powerCostRecord = spellInfo.PowerCosts.FirstOrDefault(powerEntry => powerEntry != null && powerEntry.PowerType == PowerType.ComboPoints && (powerEntry.RequiredAuraSpellID == 0 || unit.HasAura(powerEntry.RequiredAuraSpellID)));
-            if (powerCostRecord == null)
                 return minduration;
 
             var consumedCost = powerCosts.Find(consumed => consumed.Power == PowerType.ComboPoints);
             if (consumedCost == null)
                 return minduration;
 
-            int baseComboCost = powerCostRecord.ManaCost + (int)powerCostRecord.OptionalCost;
-            var powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.ComboPoints);
-            if (powerTypeEntry != null)
-                baseComboCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, powerCostRecord.PowerCostPct + powerCostRecord.OptionalCostPct);
-
-            float durationPerComboPoint = (float)(maxduration - minduration) / baseComboCost;
-            return minduration + (int)(durationPerComboPoint * consumedCost.Amount);
+            return Math.Min(minduration + spellInfo.DurationEntry.DurationPerResource * consumedCost.Amount, maxduration);
         }
 
         public int ModSpellDuration(SpellInfo spellInfo, WorldObject target, int duration, bool positive, uint effectMask)
@@ -3085,6 +3069,7 @@ namespace Game.Entities
         public float stepUpStartElevation { get; set; }
         public AdvFlying? advFlying;
         public Drive? driveStatus;
+        public float gravityModifier = 1.0f;
         public ObjectGuid? standingOnGameObjectGUID;
 
         public MovementInfo()
@@ -3221,8 +3206,8 @@ namespace Game.Entities
         public float Magnitude;
         public MovementForceType Type;
         public int MovementForceID;
-        public int Unknown1110_1;
-        public int Unused1110;
+        public int DurationMs;
+        public uint EndTimestamp;
         public uint Flags;
 
         public void Read(WorldPacket data)
@@ -3233,8 +3218,8 @@ namespace Game.Entities
             TransportID = data.ReadUInt32();
             Magnitude = data.ReadFloat();
             MovementForceID = data.ReadInt32();
-            Unknown1110_1 = data.ReadInt32();
-            Unused1110 = data.ReadInt32();
+            DurationMs = data.ReadInt32();
+            EndTimestamp = data.ReadUInt32();
             Flags = data.ReadUInt32();
             Type = (MovementForceType)data.ReadBits<byte>(2);
         }

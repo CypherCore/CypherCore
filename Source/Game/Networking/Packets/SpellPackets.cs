@@ -315,6 +315,13 @@ namespace Game.Networking.Packets
 
     public class SpellFailure : ServerPacket
     {
+        public ObjectGuid CasterUnit;
+        public uint SpellID;
+        public SpellCastVisual Visual;
+        public ushort Reason;
+        public ObjectGuid CastID;
+        public ObjectGuid FailedBy;            ///< Unit that caused the spell to fail, set for SPELL_FAILED_INTERRUPTED_COMBAT TODO: port commit from 3.3.5 that implements SPELL_FAILED_INTERRUPTED_COMBAT
+
         public SpellFailure() : base(ServerOpcodes.SpellFailure, ConnectionType.Instance) { }
 
         public override void Write()
@@ -326,17 +333,19 @@ namespace Game.Networking.Packets
             Visual.Write(_worldPacket);
 
             _worldPacket.WriteUInt16(Reason);
+            _worldPacket.WritePackedGuid(FailedBy);
         }
-
-        public ObjectGuid CasterUnit;
-        public uint SpellID;
-        public SpellCastVisual Visual;
-        public ushort Reason;
-        public ObjectGuid CastID;
     }
 
     public class SpellFailedOther : ServerPacket
     {
+        public ObjectGuid CasterUnit;
+        public uint SpellID;
+        public SpellCastVisual Visual;
+        public byte Reason;
+        public ObjectGuid CastID;
+        public ObjectGuid FailedBy;            ///< Unit that caused the spell to fail, set for SPELL_FAILED_INTERRUPTED_COMBAT TODO: port commit from 3.3.5 that implements SPELL_FAILED_INTERRUPTED_COMBAT
+
         public SpellFailedOther() : base(ServerOpcodes.SpellFailedOther, ConnectionType.Instance) { }
 
         public override void Write()
@@ -348,34 +357,19 @@ namespace Game.Networking.Packets
             Visual.Write(_worldPacket);
 
             _worldPacket.WriteUInt8(Reason);
+            _worldPacket.WritePackedGuid(FailedBy);
         }
-
-        public ObjectGuid CasterUnit;
-        public uint SpellID;
-        public SpellCastVisual Visual;
-        public byte Reason;
-        public ObjectGuid CastID;
     }
 
-    class CastFailedBase : ServerPacket
+    class CastFailed : ServerPacket
     {
         public ObjectGuid CastID;
         public int SpellID;
+        public SpellCastVisual Visual;
         public SpellCastResult Reason;
         public int FailedArg1 = -1;
         public int FailedArg2 = -1;
-
-        public CastFailedBase(ServerOpcodes opcode, ConnectionType connectionType) : base(opcode, connectionType) { }
-
-        public override void Write()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    class CastFailed : CastFailedBase
-    {
-        public SpellCastVisual Visual;
+        public ObjectGuid FailedBy;            ///< Unit that caused the spell to fail, set for SPELL_FAILED_INTERRUPTED_COMBAT TODO: port commit from 3.3.5 that implements SPELL_FAILED_INTERRUPTED_COMBAT
 
         public CastFailed() : base(ServerOpcodes.CastFailed, ConnectionType.Instance) { }
 
@@ -389,11 +383,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32((int)Reason);
             _worldPacket.WriteInt32(FailedArg1);
             _worldPacket.WriteInt32(FailedArg2);
+            _worldPacket.WritePackedGuid(FailedBy);
         }
     }
 
-    class PetCastFailed : CastFailedBase
+    class PetCastFailed : ServerPacket
     {
+        public ObjectGuid CastID;
+        public int SpellID;
+        public SpellCastResult Reason;
+        public int FailedArg1 = -1;
+        public int FailedArg2 = -1;
+
         public PetCastFailed() : base(ServerOpcodes.PetCastFailed, ConnectionType.Instance) { }
 
         public override void Write()
@@ -865,10 +866,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WriteInt32(TimeRemaining);
+            _worldPacket.WritePackedGuid(FailedBy);
         }
 
         public ObjectGuid CasterGUID;
         public int TimeRemaining;
+        public ObjectGuid FailedBy;            ///< Unit that caused the spell to fail, set for SPELL_FAILED_INTERRUPTED_COMBAT TODO: port commit from 3.3.5 that implements SPELL_FAILED_INTERRUPTED_COMBAT
     }
 
     class SpellEmpowerStart : ServerPacket
@@ -924,6 +927,7 @@ namespace Game.Networking.Packets
         public TimeSpan TimeRemaining;
         public List<TimeSpan> StageDurations = new();
         public byte Status;
+        public ObjectGuid FailedBy;            ///< Unit that caused the spell to fail, set for SPELL_FAILED_INTERRUPTED_COMBAT TODO: port commit from 3.3.5 that implements SPELL_FAILED_INTERRUPTED_COMBAT
 
         public SpellEmpowerUpdate() : base(ServerOpcodes.SpellEmpowerUpdate) { }
 
@@ -934,7 +938,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)TimeRemaining.TotalMilliseconds);
             _worldPacket.WriteInt32(StageDurations.Count);
             _worldPacket.WriteUInt8(Status);
-            _worldPacket.FlushBits();
+            _worldPacket.WritePackedGuid(FailedBy);
 
             foreach (var stageDuration in StageDurations)
                 _worldPacket.WriteUInt32((uint)stageDuration.TotalMilliseconds);
@@ -1779,14 +1783,25 @@ namespace Game.Networking.Packets
 
     public class SpellTargetData
     {
+        public SpellCastTargetFlags Flags;
+        public bool HousingIsResident;
+        public ObjectGuid Unit;
+        public ObjectGuid Item;
+        public ObjectGuid HousingGUID;
+        public TargetLocation SrcLocation;
+        public TargetLocation DstLocation;
+        public float? Orientation;
+        public int? MapID;
+        public string Name = "";
+
         public void Read(WorldPacket data)
         {
             Flags = (SpellCastTargetFlags)data.ReadUInt32();
             Unit = data.ReadPackedGuid();
             Item = data.ReadPackedGuid();
-            Unknown1127_1 = data.ReadPackedGuid();
+            HousingGUID = data.ReadPackedGuid();
 
-            Unknown1127_2 = data.HasBit();
+            HousingIsResident = data.HasBit();
             if (data.HasBit())
                 SrcLocation = new();
 
@@ -1818,9 +1833,9 @@ namespace Game.Networking.Packets
             data.WriteUInt32((uint)Flags);
             data.WritePackedGuid(Unit);
             data.WritePackedGuid(Item);
-            data.WritePackedGuid(Unknown1127_1);
+            data.WritePackedGuid(HousingGUID);
 
-            data.WriteBit(Unknown1127_2);
+            data.WriteBit(HousingIsResident);
             data.WriteBit(SrcLocation != null);
             data.WriteBit(DstLocation != null);
             data.WriteBit(Orientation.HasValue);
@@ -1842,17 +1857,6 @@ namespace Game.Networking.Packets
 
             data.WriteString(Name);
         }
-
-        public SpellCastTargetFlags Flags;
-        public bool Unknown1127_2;
-        public ObjectGuid Unit;
-        public ObjectGuid Item;
-        public ObjectGuid Unknown1127_1;
-        public TargetLocation SrcLocation;
-        public TargetLocation DstLocation;
-        public float? Orientation;
-        public int? MapID;
-        public string Name = "";
     }
 
     public struct MissileTrajectoryRequest
@@ -1876,16 +1880,17 @@ namespace Game.Networking.Packets
 
     public struct SpellCraftingReagent
     {
-        public int ItemID;
-        public int DataSlotIndex;
+        public int Slot;
         public int Quantity;
+        public CraftingReagentBase Reagent;
         public byte? Source;
 
         public void Read(WorldPacket data)
         {
-            ItemID = data.ReadInt32();
-            DataSlotIndex = data.ReadInt32();
+            Slot = data.ReadInt32();
             Quantity = data.ReadInt32();
+            Reagent = new CraftingReagentBase();
+            Reagent.Read(data);
             if (data.HasBit())
                 Source = data.ReadUInt8();
         }
@@ -1913,13 +1918,13 @@ namespace Game.Networking.Packets
         public MissileTrajectoryRequest MissileTrajectory;
         public MovementInfo MoveUpdate;
         public List<SpellWeight> Weight = new();
-        public Array<SpellCraftingReagent> OptionalReagents = new(6);
-        public Array<SpellCraftingReagent> RemovedModifications = new(6);
-        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
+        public Array<SpellCraftingReagent> CraftingReagents = new(6);
+        public Array<SpellCraftingReagent> RemovedReagents = new(6);
+        public Array<SpellExtraCurrencyCost> ExtraCurrencyCosts = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
         public ulong? CraftingOrderID;
-        public byte CraftingFlags; // 1 = ApplyConcentration
+        public byte CraftingCastFlags; // 1 = ApplyConcentration
         public ObjectGuid CraftingNPC;
-        public uint[] Misc = new uint[2];
+        public uint[] Misc = new uint[3];
 
         public void Read(WorldPacket data)
         {
@@ -1927,6 +1932,7 @@ namespace Game.Networking.Packets
             SendCastFlags = data.ReadUInt32();
             Misc[0] = data.ReadUInt32();
             Misc[1] = data.ReadUInt32();
+            Misc[2] = data.ReadUInt32();
             SpellID = data.ReadUInt32();
 
             Visual.Read(data);
@@ -1934,13 +1940,13 @@ namespace Game.Networking.Packets
             MissileTrajectory.Read(data);
             CraftingNPC = data.ReadPackedGuid();
 
-            var optionalCurrenciesCount = data.ReadUInt32();
-            var optionalReagentsCount = data.ReadUInt32();
-            var removedModificationsCount = data.ReadUInt32();
-            CraftingFlags = data.ReadUInt8();
+            var extraCurrencyCostsCount = data.ReadUInt32();
+            var craftingReagentsCount = data.ReadUInt32();
+            var removedReagentsCount = data.ReadUInt32();
+            CraftingCastFlags = data.ReadUInt8();
 
-            for (var i = 0; i < optionalCurrenciesCount; ++i)
-                OptionalCurrencies[i].Read(data);
+            for (var i = 0; i < extraCurrencyCostsCount; ++i)
+                ExtraCurrencyCosts[i].Read(data);
 
             Target.Read(data);
 
@@ -1949,14 +1955,14 @@ namespace Game.Networking.Packets
             var weightCount = data.ReadBits<uint>(2);
             bool hasCraftingOrderID = data.HasBit();
 
-            for (var i = 0; i < optionalReagentsCount; ++i)
-                OptionalReagents[i].Read(data);
+            for (var i = 0; i < craftingReagentsCount; ++i)
+                CraftingReagents[i].Read(data);
 
             if (hasCraftingOrderID)
                 CraftingOrderID = data.ReadUInt64();
 
-            for (var i = 0; i < removedModificationsCount; ++i)
-                RemovedModifications[i].Read(data);
+            for (var i = 0; i < removedReagentsCount; ++i)
+                RemovedReagents[i].Read(data);
 
             if (hasMoveUpdate)
                 MoveUpdate = MovementExtensions.ReadMovementInfo(data);
