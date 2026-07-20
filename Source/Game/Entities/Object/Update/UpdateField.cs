@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.IO;
 using Game.Networking;
 using System;
 using System.Collections.Generic;
@@ -73,6 +74,52 @@ namespace Game.Entities
         public void SetValue(T value) { _value = value; }
 
         public T GetValue() { return _value; }
+    }
+
+    public class SetUpdateField<K>
+    {
+        public Dictionary<K, MapUpdateFieldState> _values = [];
+        public int BlockBit;
+        public int Bit;
+
+        public SetUpdateField(int blockBit, int bit)
+        {
+            BlockBit = blockBit;
+            Bit = bit;
+
+        }
+
+        public bool Insert(K key)
+        {
+            return _values.TryAdd(key, MapUpdateFieldState.Changed);
+        }
+
+        public bool Remove(K key)
+        {
+            var itr = _values.LookupByKey(key);
+            if (_values.ContainsKey(key))
+            {
+                _values[key] = MapUpdateFieldState.Deleted;
+                return true;
+            }
+            return false;
+        }
+
+        public bool Empty()
+        {
+            return _values.Empty();
+        }
+
+        public int Size()
+        {
+            return _values.Count;
+        }
+
+        public IEnumerator<KeyValuePair<K, MapUpdateFieldState>> GetEnumerator()
+        {
+            foreach (var obj in _values)
+                yield return obj;
+        }
     }
 
     public class OptionalUpdateField<T> : IUpdateField<T> where T : new()
@@ -392,11 +439,16 @@ namespace Game.Entities
             _values.Remove(key);
         }
 
-        public void MarkKeyForRemoval(K key)
+        public bool MarkKeyForRemoval(K key)
         {
             var itr = _values.LookupByKey(key);
             if (itr.Item1 != null)
+            {
                 itr.Item2 = MapUpdateFieldState.Deleted;
+                return true;
+            }
+
+            return false;
         }
 
         public (V, MapUpdateFieldState) Get(K key)
@@ -501,6 +553,12 @@ namespace Game.Entities
             updateField.ClearChanged(index);
         }
 
+        public void ClearChanged<K>(SetUpdateField<K> field, K key)
+        {
+            if (field._values.ContainsKey(key) && field._values[key] == MapUpdateFieldState.Changed)
+                field._values[key] = MapUpdateFieldState.Unchanged;
+        }
+
         public void ClearChangesMask<U>(UpdateField<U> updateField) where U : new()
         {
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
@@ -570,11 +628,27 @@ namespace Game.Entities
                 ((IHasChangesMask)field._value).ClearChangesMask();
         }
 
-        public dynamic ModifyValueOld(dynamic value, int bit, int blockBit)
+        public void ClearChangesMask<K>(SetUpdateField<K> field)
         {
-            _changesMask.Set(blockBit);
-            _changesMask.Set(bit);
-            return value;
+            foreach (var key in field._values.Keys.ToList())
+            {
+                switch (field._values[key])
+                {
+                    case MapUpdateFieldState.Unchanged:
+                        break;
+                    case MapUpdateFieldState.Changed:
+                        if (typeof(IHasChangesMask).IsAssignableFrom(typeof(K)))
+                            ((IHasChangesMask)key).ClearChangesMask();
+
+                        field._values[key] = MapUpdateFieldState.Unchanged;
+                        break;
+                    case MapUpdateFieldState.Deleted:
+                        field._values.Remove(key);
+                        continue;
+                    default:
+                        break;
+                }
+            }
         }
 
         public UpdateField<U> ModifyValue<U>(UpdateField<U> updateField) where U : new()
@@ -673,6 +747,15 @@ namespace Game.Entities
             return field.Get<V>();
         }
 
+        public SetUpdateField<K> ModifyValue<K>(SetUpdateField<K> field)
+        {
+            if (field.BlockBit >= 0)
+                _changesMask.Set(field.BlockBit);
+
+            _changesMask.Set(Bit);
+            return field;
+        }
+
         public void MarkChanged<U>(UpdateField<U> updateField) where U : new()
         {
             if (updateField.BlockBit >= 0)
@@ -714,6 +797,16 @@ namespace Game.Entities
             _changesMask.Set(updateField.Bit);
             if (updateField.FirstElementBit >= 0)
                 _changesMask.Set(updateField.FirstElementBit + index);
+        }
+
+        public void MarkChanged<K>(SetUpdateField<K> field, K key)
+        {
+            if (field.BlockBit >= 0)
+                _changesMask.Set(field.BlockBit);
+
+            _changesMask.Set(field.Bit);
+            if (field._values.ContainsKey(key) && field._values[key] == MapUpdateFieldState.Unchanged)
+                field._values[key] = MapUpdateFieldState.Changed;
         }
 
         public void WriteCompleteDynamicFieldUpdateMask(int size, WorldPacket data, int bitsForSize = 32)
@@ -773,7 +866,7 @@ namespace Game.Entities
                     ++changesCount;
 
                     if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(K)))
-                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(tempBuffer, true /*ignoreChangesMask*/, owner, receiver);
+                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(tempBuffer, false, owner, receiver);
                     else
                         tempBuffer.Write(k);
 
@@ -782,13 +875,54 @@ namespace Game.Entities
                         continue;
 
                     if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
-                        ((IsUpdateFieldStructure<T>)v).WriteUpdate(tempBuffer, true /*ignoreChangesMask*/, owner, receiver); // client bug replaces unchanged values with 0/default so send everything as if it changed
+                        ((IsUpdateFieldStructure<T>)v).WriteUpdate(tempBuffer, false, owner, receiver);
                     else
                         tempBuffer.Write(v);
                 }
 
                 data.WriteUInt16(changesCount);
                 data.WriteBytes(tempBuffer);
+            }
+        }
+
+        public void WriteSetFieldCreate<K, T>(SetUpdateField<K> set, WorldPacket data, T owner, Player receiver)
+        {
+            data.WriteInt32(set.Size());
+            foreach (var (k, _) in set)
+            {
+                if (typeof(IsUpdateFieldStructure<K>).IsAssignableFrom(typeof(T)))
+                    ((IsUpdateFieldStructure<T>)k).WriteCreate(data, owner, receiver);
+                else
+                    data.Write(k);
+            }
+        }
+
+        public void WriteSetFieldUpdate<K, T>(SetUpdateField<K> set, WorldPacket data, bool ignoreChangesMask, T owner, Player receiver)
+        {
+            data.WriteInt8((sbyte)(ignoreChangesMask ? 1 : 0));
+            if (ignoreChangesMask)
+                WriteSetFieldCreate(set, data, owner, receiver);
+            else
+            {
+                ushort changesCount = 0;
+                ByteBuffer byteBuffer = new();
+                foreach (var (k, state) in set)
+                {
+                    if (state == MapUpdateFieldState.Unchanged)
+                        continue;
+
+                    ++changesCount;
+
+                    if (typeof(IsUpdateFieldStructure<K>).IsAssignableFrom(typeof(T)))
+                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(data, false, owner, receiver);
+                    else
+                        data.Write(k);
+
+                    data.WriteUInt8((byte)state);
+                }
+
+                data.WriteUInt16(changesCount);
+                data.WriteBytes(byteBuffer);
             }
         }
 
@@ -815,6 +949,11 @@ namespace Game.Entities
         }
 
         public T GetValue() { return _dynamicUpdateField[_index]; }
+
+        public void Clear()
+        {
+            _dynamicUpdateField.Clear();
+        }
 
         public static implicit operator T(DynamicUpdateFieldSetter<T> dynamicUpdateFieldSetter)
         {

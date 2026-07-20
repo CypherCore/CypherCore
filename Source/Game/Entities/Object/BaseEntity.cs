@@ -802,10 +802,28 @@ namespace Game.Entities
             updateField.RemoveValue(index);
         }
 
-        public void RemoveMapUpdateFieldValue<K, V>(MapUpdateField<K, V> setter, K key) where V : new()
+        public void ClearDynamicUpdateFieldValues<T>(DynamicUpdateFieldSetter<T> setter) where T : new()
         {
             AddToObjectUpdateIfNeeded();
-            setter.MarkKeyForRemoval(key);
+            setter.Clear();
+        }
+
+        public void RemoveMapUpdateFieldValue<K, V>(MapUpdateField<K, V> setter, K key) where V : new()
+        {
+            if (setter.MarkKeyForRemoval(key))
+                AddToObjectUpdateIfNeeded();
+        }
+
+        public void InsertSetUpdateFieldValue<K>(SetUpdateField<K> setter, K key)
+        {
+            if (setter.Insert(key))
+                AddToObjectUpdateIfNeeded();
+        }
+
+        public void RemoveSetUpdateFieldValue<K>(SetUpdateField<K> setter, K key)
+        {
+            if (setter.Remove(key))
+                AddToObjectUpdateIfNeeded();
         }
 
         public void ClearDynamicUpdateFieldValues<T>(DynamicUpdateField<T> updateField) where T : new()
