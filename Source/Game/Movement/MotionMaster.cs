@@ -1105,7 +1105,7 @@ namespace Game.Movement
                 Add(new FormationMovementGenerator(leader, range, angle, point1, point2), MovementSlot.Default);
         }
 
-        public void LaunchMoveSpline(Action<MoveSplineInit> initializer, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect)
+        public void LaunchMoveSpline(Action<MoveSplineInit> initializer, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (IsInvalidMovementGeneratorType(type))
             {
@@ -1113,8 +1113,10 @@ namespace Game.Movement
                 return;
             }
 
-            GenericMovementGenerator movement = new(initializer, type, id);
-            movement.Priority = priority;
+            GenericMovementGenerator movement = new(initializer, type, id, new GenericMovementGeneratorArgs() { ScriptResult = scriptResult })
+            {
+                Priority = priority
+            };
             Add(movement);
         }
 
