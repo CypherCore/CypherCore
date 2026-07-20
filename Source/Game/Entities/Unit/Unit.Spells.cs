@@ -394,8 +394,7 @@ namespace Game.Entities
             }
 
             if (spellProto.HasAttribute(SpellAttr3.IgnoreCasterModifiers)
-                || spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers)
-                || spellProto.HasAttribute(SpellAttr9.IgnoreCasterHealingModifiers))
+                || spellProto.HasAttribute(SpellAttr11.IgnoreCasterAbsorbModifiers))
                 return absorbamount;
 
             int doneTotal = 0;
@@ -468,65 +467,23 @@ namespace Game.Entities
             if (modOwner != null)
                 MathFunctions.AddPct(ref doneTotalMod, modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + modOwner.GetTotalAuraModifier(AuraType.ModVersatility));
 
-            Player thisPlayer = ToPlayer();
-            if (thisPlayer != null)
-            {
-                float maxModHealingPercentSchool = 0.0f;
-                for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                    if (((int)spellProto.GetSchoolMask() & (1 << i)) != 0)
-                        maxModHealingPercentSchool = Math.Max(maxModHealingPercentSchool, thisPlayer.m_activePlayerData.ModHealingDonePercent[i]);
-
-                doneTotalMod *= maxModHealingPercentSchool;
-            }
-            else
-                doneTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingDonePercent);
+            doneTotalMod *= GetTotalAuraMultiplier(AuraType.ModAbsorbDonePct);
 
             return doneTotalMod;
         }
 
         public int SpellAbsorbBonusTaken(Unit caster, SpellInfo spellProto, int absorbamount)
         {
-            bool allowPositive = !spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers);
-            bool allowNegative = !spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers) || spellProto.HasAttribute(SpellAttr13.AlwaysAllowNegativeHealingPercentModifiers);
-            if (!allowPositive && !allowNegative)
+            if (spellProto.HasAttribute(SpellAttr11.IgnoreTargetAbsorbModifiers))
                 return absorbamount;
 
+            int doneTotal = 0;
             float takenTotalMod = 1.0f;
 
-            if (allowNegative)
-            {
-                float minval = (float)GetMaxNegativeAuraModifier(AuraType.ModHealingPct);
-                if (minval != 0)
-                    MathFunctions.AddPct(ref takenTotalMod, minval);
-            }
+            takenTotalMod *= GetTotalAuraMultiplier(AuraType.ModAbsorbTakenPct);
 
-            if (allowPositive)
-            {
-                float maxval = (float)GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
-                if (maxval != 0)
-                    MathFunctions.AddPct(ref takenTotalMod, maxval);
-            }
+            float absorb = (float)(absorbamount + doneTotal) * takenTotalMod;
 
-            if (caster != null)
-            {
-                takenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingReceived, aurEff =>
-                {
-                    if (caster.GetGUID() != aurEff.GetCasterGUID() || !aurEff.IsAffectingSpell(spellProto))
-                        return false;
-
-                    if (aurEff.GetAmount() > 0)
-                    {
-                        if (!allowPositive)
-                            return false;
-                    }
-                    else if (!allowNegative)
-                        return false;
-
-                    return true;
-                });
-            }
-
-            float absorb = absorbamount * takenTotalMod;
             return (int)Math.Round(absorb);
         }
 

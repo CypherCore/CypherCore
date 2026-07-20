@@ -2168,8 +2168,8 @@ namespace Framework.Constants
         Unk15 = 0x8000, // 15
         NotUsableInChallengeMode = 0x10000, // 16
         Unk17 = 0x20000, // 17
-        Unk18 = 0x40000, // 18
-        Unk19 = 0x80000, // 19
+        IgnoreCasterAbsorbModifiers = 0x40000, // 18
+        IgnoreTargetAbsorbModifiers = 0x80000, // 19
         Unk20 = 0x100000, // 20
         Unk21 = 0x200000, // 21
         Unk22 = 0x400000, // 22

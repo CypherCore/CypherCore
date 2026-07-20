@@ -428,8 +428,8 @@ namespace Framework.Constants
         ModMaxPower = 418, // NYI
         ModBaseManaPct = 419,
         ModBattlePetXpPct = 420,
-        ModAbsorbEffectsDonePct = 421, // NYI
-        ModAbsorbEffectsTakenPct = 422, //NYI
+        ModAbsorbDonePct = 421,
+        ModAbsorbTakenPct = 422,
         ModManaCostPct = 423,
         CasterIgnoreLos = 424, //NYI
         Unk425 = 425,
