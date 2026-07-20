@@ -216,7 +216,7 @@ namespace Game
                             SendChatPlayerNotfoundNotice(target);
                             break;
                         }
-                        
+
                         receiver = Global.ObjAccessor.FindPlayerByName(extName.Name);
                     }
 
@@ -424,8 +424,8 @@ namespace Game
                 case ChatMsg.Whisper:
                     // @todo implement cross realm whispers (someday)
                     Player receiver = null;
-                    if (targetGuid.HasValue && !targetGuid.Value.IsEmpty())                    
-                        receiver = Global.ObjAccessor.FindConnectedPlayer(targetGuid.Value);                    
+                    if (targetGuid.HasValue && !targetGuid.Value.IsEmpty())
+                        receiver = Global.ObjAccessor.FindConnectedPlayer(targetGuid.Value);
                     else
                     {
                         ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
@@ -594,6 +594,7 @@ namespace Game
                     break;
                 case Emote.StateDance:
                 case Emote.StateRead:
+                case Emote.StateLean:
                     GetPlayer().SetEmoteState(emote);
                     break;
                 default:
