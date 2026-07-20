@@ -378,7 +378,7 @@ namespace Framework.Constants
         Unk368 = 368,  // Not Used In 4.3.4
         EnablePowerBarTimer = 369,
         SpellOverrideNameGroup = 370, // picks a random SpellOverrideName id from a group (group id in miscValue)
-        Unk371 = 371,
+        DisableAutoattack = 371,
         OverrideMountFromSet = 372, // NYI
         ModSpeedNoControl = 373, // NYI
         ModifyFallDamagePct = 374,

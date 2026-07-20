@@ -628,6 +628,9 @@ namespace Game.Entities
             if (HasAuraType(AuraType.DisableAttackingExceptAbilities))
                 return;
 
+            if (HasAuraType(AuraType.DisableAutoattack))
+                return;
+
             if (!victim.IsAlive())
                 return;
 
