@@ -757,6 +757,7 @@ namespace Framework.Constants
         ShadowLands = 8,
         Dragonflight = 9,
         TheWarWithin = 10,
+        Midnight = 11,
         Max,
 
         MaxAccountExpansions

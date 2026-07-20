@@ -210,20 +210,24 @@ namespace Game
 
         static Expansion GetExpansionForLevel(uint level)
         {
-            if (level < 60)
+            if (level < 30)
                 return Expansion.Classic;
-            else if (level < 70)
-                return Expansion.BurningCrusade;
-            else if (level < 80)
-                return Expansion.WrathOfTheLichKing;
-            else if (level < 85)
+            else if (level < 35)
                 return Expansion.Cataclysm;
-            else if (level < 90)
-                return Expansion.MistsOfPandaria;
-            else if (level < 100)
+            else if (level < 40)
                 return Expansion.WarlordsOfDraenor;
-            else
-                return Expansion.Legion;
+            else if (level < 45)
+                return Expansion.BattleForAzeroth;
+            else if (level < 50)
+                return Expansion.MistsOfPandaria;
+            else if (level < 60)
+                return Expansion.ShadowLands;
+            else if (level < 70)
+                return Expansion.Dragonflight;
+            else if (level < 80)
+                return Expansion.TheWarWithin;
+
+            return PlayerConst.CurrentExpansion;
         }
 
         public static uint ConquestRatingCalculator(uint rate)

@@ -11157,6 +11157,8 @@ namespace Game
                     return 70;
                 case Expansion.TheWarWithin:
                     return 80;
+                case Expansion.Midnight:
+                    return 90;
                 default:
                     break;
             }
