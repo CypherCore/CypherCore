@@ -2000,7 +2000,7 @@ namespace Game.Entities
             ModSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
         }
 
-        Stats GetPrimaryStat()
+        public Stats GetPrimaryStat()
         {
             sbyte primaryStatPriority;
             var specialization = GetPrimarySpecializationEntry();

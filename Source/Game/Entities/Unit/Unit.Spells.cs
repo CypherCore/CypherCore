@@ -35,13 +35,12 @@ namespace Game.Entities
 
             int DoneAdvertisedBenefit = GetTotalAuraModifierByMiscMask(AuraType.ModDamageDone, (int)schoolMask);
 
-            if (IsTypeId(TypeId.Player))
+            if (thisPlayer != null)
             {
                 // Base value
-                DoneAdvertisedBenefit += (int)ToPlayer().GetBaseSpellPowerBonus();
+                DoneAdvertisedBenefit += (int)thisPlayer.GetBaseSpellPowerBonus();
 
-                // Check if we are ever using mana - PaperDollFrame.lua
-                if (GetPowerIndex(PowerType.Mana) != (uint)PowerType.Max)
+                if (thisPlayer.GetPrimaryStat() == Stats.Intellect)
                     DoneAdvertisedBenefit += Math.Max(0, (int)GetStat(Stats.Intellect));  // spellpower from intellect
 
                 // Damage bonus from stats
