@@ -65,7 +65,7 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                instanceTree.UnloadMapTile(x, y, this);
+                instanceTree.UnloadMapTile(x, y);
                 if (instanceTree.NumLoadedTiles() == 0)
                 {
                     iInstanceMapTrees.Remove(mapId);

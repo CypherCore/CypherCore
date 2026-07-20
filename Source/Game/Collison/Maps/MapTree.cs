@@ -51,7 +51,7 @@ namespace Game.Collision
         BIH iTree = new();
         ModelInstance[] iTreeValues; // the tree entries
 
-        Dictionary<uint, bool> iLoadedTiles = new();
+        MultiMap<uint, uint> iLoadedTiles = new();
         string iBasePath;
 
         public StaticMapTree(uint mapId, string basePath)
@@ -124,13 +124,8 @@ namespace Game.Collision
                         // read model spawns
                         if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
                         {
-                            // acquire model instance
-                            WorldModel model = vm.AcquireModelInstance(iBasePath, spawn.name);
-                            if (model == null)
-                                Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
-
                             // update tree
-                            int referencedVal = spawnIndicesReader.ReadInt32();
+                            uint referencedVal = spawnIndicesReader.ReadUInt32();
                             if (referencedVal >= iTreeValues.Length)
                             {
                                 Log.outError(LogFilter.Maps, $"StaticMapTree::LoadMapTile() : invalid tree element ({referencedVal}/{iTreeValues.Length}) referenced in tile {fileResult.Name}");
@@ -138,10 +133,19 @@ namespace Game.Collision
                                 continue;
                             }
 
+                            // acquire model instance
+                            WorldModel model = vm.AcquireModelInstance(iBasePath, spawn.name);
+                            if (model == null)
+                            {
+                                Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
+                                continue;
+                            }
+
                             if (iTreeValues[referencedVal]?.GetWorldModel() == null)
                                 iTreeValues[referencedVal] = new ModelInstance(spawn, model);
 
                             iTreeValues[referencedVal].AddTileReference();
+                            iLoadedTiles.Add(PackTileID(tileX, tileY), referencedVal);
                         }
                         else
                         {
@@ -150,17 +154,12 @@ namespace Game.Collision
                         }
                     }
                 }
-                iLoadedTiles[PackTileID(tileX, tileY)] = true;
-            }
-            else
-            {
-                iLoadedTiles[PackTileID(tileX, tileY)] = false;
             }
 
             return result;
         }
 
-        public void UnloadMapTile(uint tileX, uint tileY, VMapManager vm)
+        public void UnloadMapTile(uint tileX, uint tileY)
         {
             uint tileID = PackTileID(tileX, tileY);
             if (!iLoadedTiles.ContainsKey(tileID))
@@ -168,43 +167,18 @@ namespace Game.Collision
                 Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-loaded tile - Map:{0} X:{1} Y:{2}", iMapID, tileX, tileY);
                 return;
             }
-            if (iLoadedTiles[tileID]) // file associated with tile
+
+            foreach (uint referencedVal in iLoadedTiles[tileID])
             {
-                TileFileOpenResult fileResult = OpenMapTileFile(iBasePath, iMapID, tileX, tileY, vm);
-                if (fileResult.TileFile != null)
+                if (iTreeValues[referencedVal].GetWorldModel() == null)
                 {
-                    using BinaryReader reader = new(fileResult.TileFile);
-                    using BinaryReader spawnIndicesReader = new(fileResult.SpawnIndicesFile);
-                    bool result = true;
-                    if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
-                        result = false;
-
-                    uint numSpawns = reader.ReadUInt32();
-                    uint numSpawnIndices = spawnIndicesReader.ReadUInt32();
-                    if (numSpawns != numSpawnIndices)
-                        result = false;
-
-                    for (uint i = 0; i < numSpawns && result; ++i)
-                    {
-                        // read model spawns
-                        if (!ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
-                            break;
-
-                        // update tree
-                        int referencedNode = spawnIndicesReader.ReadInt32();
-                        if (referencedNode >= iTreeValues.Length)
-                        {
-                            Log.outError(LogFilter.Maps, $"StaticMapTree::LoadMapTile() : invalid tree element ({referencedNode}/{iTreeValues.Length}) referenced in tile {fileResult.Name}");
-                            result = false;
-                            continue;
-                        }
-
-                        if (iTreeValues[referencedNode].GetWorldModel() == null)
-                            Log.outError(LogFilter.Misc, $"StaticMapTree::UnloadMapTile() : trying to unload non-referenced model '{spawn.name}' (ID:{spawn.Id})");
-                        else if (iTreeValues[referencedNode].RemoveTileReference() == 0)
-                            iTreeValues[referencedNode].SetUnloaded();
-                    }
+                    Log.outError(LogFilter.Misc, $"StaticMapTree::UnloadMapTile() : trying to unload non-referenced model ID: {iTreeValues[referencedVal].Id} - Map:{iMapID} X:{tileX} Y:{tileY}");
+                    continue;
                 }
+
+                if (iTreeValues[referencedVal].RemoveTileReference() == 0)
+                    iTreeValues[referencedVal].SetUnloaded();
+
             }
             iLoadedTiles.Remove(tileID);
         }

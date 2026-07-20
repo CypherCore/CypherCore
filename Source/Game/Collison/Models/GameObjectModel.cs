@@ -69,7 +69,7 @@ namespace Game.Collision
         {
             GameObjectModel mdl = new();
             if (!mdl.Initialize(modelOwner, dataPath))
-                return null;
+                mdl = null;
 
             return mdl;
         }
