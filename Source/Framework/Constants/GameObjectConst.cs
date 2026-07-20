@@ -121,6 +121,23 @@ namespace Framework.Constants
         LowPrioritySelection = 0x4000000, // client will give lower cursor priority to this object when multiple objects overlap
     }
 
+    public enum GameObjectChestFlags
+    {
+        Consumable = 0x0001,
+        RequireLOS = 0x0002,
+        LeaveLoot = 0x0004,
+        NotInCombat = 0x0008,
+        LogLoot = 0x0010,
+        UseGroupLootRules = 0x0020,
+        FloatingTooltip = 0x0040,
+        GroupXP = 0x0080,
+        DamageImmuneOK = 0x0100,
+        GiganticAOI = 0x0200,
+        LargeAOI = 0x0400,
+        TurnPersonalLootSecurityOff = 0x0800,
+        ForceSingleLooter = 0x1000
+    }
+
     public enum LootState
     {
         NotReady = 0,

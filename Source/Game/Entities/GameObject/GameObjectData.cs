@@ -245,8 +245,7 @@ namespace Game.Entities
             switch (type)
             {
                 case GameObjectTypes.Chest:
-                    return Chest.Unused != 0; // TODO: update database values and research flag order
-                // case GAMEOBJECT_TYPE_CHEST:  return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::Consumable);
+                    return ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.Consumable);
                 case GameObjectTypes.Goober:
                     return Goober.consumable != 0;
                 default:
@@ -373,8 +372,7 @@ namespace Game.Entities
         {
             GameObjectTypes.Button => Button.requireLOS,
             GameObjectTypes.QuestGiver => QuestGiver.requireLOS,
-            GameObjectTypes.Chest => Chest.Unused2, // TODO: update database values and research flag order
-            // GameObjectTypes.Chest => EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::RequireLOS),
+            GameObjectTypes.Chest => ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.RequireLOS) ? 1 : 0u,
             GameObjectTypes.Trap => Trap.requireLOS,
             GameObjectTypes.Goober => Goober.requireLOS,
             GameObjectTypes.FlagStand => FlagStand.requireLOS,
@@ -442,8 +440,7 @@ namespace Game.Entities
                 case GameObjectTypes.QuestGiver:
                     return QuestGiver.noDamageImmune;
                 case GameObjectTypes.Chest:
-                    return Chest.OneTimeChestAccountFlag; // TODO: update database values and research flag order
-                // case GAMEOBJECT_TYPE_CHEST:      return !EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::DamageImmuneOK);
+                    return ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.DamageImmuneOK) ? 0 : 1u;
                 case GameObjectTypes.Goober:
                     return Goober.noDamageImmune;
                 case GameObjectTypes.FlagStand:
@@ -457,8 +454,7 @@ namespace Game.Entities
 
         public uint GetNotInCombat() => type switch
         {
-            GameObjectTypes.Chest => Chest.Unused4, // TODO: update database values and research flag order
-            //GameObjectTypes.Chest => EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::NotInCombat),
+            GameObjectTypes.Chest => ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.NotInCombat) ? 1 : 0u,
             GameObjectTypes.GatheringNode => GatheringNode.notInCombat,
             _ => 0,
         };
@@ -546,8 +542,7 @@ namespace Game.Entities
 
         public bool IsUsingGroupLootRules() => type switch
         {
-            GameObjectTypes.Chest => Chest.Unused6 != 0, // TODO: update database values and research flag order
-            //case GAMEOBJECT_TYPE_CHEST:  return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::UseGroupLootRules);
+            GameObjectTypes.Chest => ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.UseGroupLootRules),
             _ => false
         };
 
@@ -712,8 +707,7 @@ namespace Game.Entities
                 case GameObjectTypes.QuestGiver:
                     return QuestGiver.GiganticAOI != 0;
                 case GameObjectTypes.Chest:
-                    return Chest.Unused8 != 0; // TODO: update database values and research flag order
-                // case GameObjectTypes.Chest:                 return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::GiganticAOI);
+                    return ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.GiganticAOI);
                 case GameObjectTypes.Generic:
                     return Generic.GiganticAOI != 0;
                 case GameObjectTypes.Trap:
@@ -756,8 +750,8 @@ namespace Game.Entities
         {
             switch (type)
             {
-                case GameObjectTypes.Chest: return Chest.Unused9 != 0; // TODO: update database values and research flag order
-                // case GameObjectTypes.Chest:                 return EnumFlag(static_cast<GameObjectChestFlags>(chest.ChestFlags)).HasFlag(GameObjectChestFlags::LargeAOI);
+                case GameObjectTypes.Chest:
+                    return ((GameObjectChestFlags)Chest.ChestFlags).HasFlag(GameObjectChestFlags.LargeAOI);
                 case GameObjectTypes.Generic:
                     return Generic.LargeAOI != 0;
                 case GameObjectTypes.DungeonDifficulty:
