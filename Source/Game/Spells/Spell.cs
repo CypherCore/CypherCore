@@ -5249,7 +5249,7 @@ namespace Game.Spells
                     return castResult;
 
                 // If it's not a melee spell, check if vision is obscured by SPELL_AURA_INTERFERE_ENEMY_TARGETING
-                if (m_spellInfo.DmgClass != SpellDmgClass.Melee)
+                if (m_spellInfo.DmgClass != SpellDmgClass.Melee && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreLineOfSight)) // targets can be hit with spells that ignore LoS
                 {
                     Unit unitCaster1 = m_caster.ToUnit();
                     if (unitCaster1 != null)
