@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -114,7 +113,7 @@ namespace Game.Movement
 
             if (turn != null)
             {
-                float totalTurnTime = (float)(turn.TotalTurnRads / turn.RadsPerSec * (float)Time.InMilliseconds);
+                float totalTurnTime = MathF.Abs((float)(turn.TotalTurnRads / turn.RadsPerSec * (float)Time.InMilliseconds));
                 spline.Set_length(spline.Last(), MathF.Max(spline.Length(), totalTurnTime));
             }
 
@@ -171,7 +170,7 @@ namespace Game.Movement
             }
             else if (splineflags.HasFlag(MoveSplineFlagEnum.Turning))
             {
-                orientation = Position.NormalizeOrientation(turn.StartFacing + (float)time_point / (float)Time.InMilliseconds * turn.RadsPerSec);
+                orientation = Position.NormalizeOrientation(turn.StartFacing + MathF.CopySign((float)time_point / (float)Time.InMilliseconds * turn.RadsPerSec, turn.TotalTurnRads));
             }
             else
             {

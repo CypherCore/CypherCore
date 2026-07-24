@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -71,6 +70,11 @@ namespace Game.Movement
                     return false;
                 if (!CHECK(spellEffectExtra.ParabolicCurveId == 0 || CliDB.CurveStorage.ContainsKey(spellEffectExtra.ParabolicCurveId), unit.GetDebugInfo()))
                     return false;
+            }
+            if (turnData != null)
+            {
+                CHECK(MathFunctions.fuzzyNe(turnData.TotalTurnRads, 0.0f), unit.GetDebugInfo());
+                CHECK(turnData.RadsPerSec > 0.0f, unit.GetDebugInfo());
             }
             return true;
         }
