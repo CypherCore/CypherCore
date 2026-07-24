@@ -523,6 +523,7 @@ namespace Game.Entities
 
             Relocate(x, y, z, o);
             StationaryPosition.SetOrientation(o);
+            SetLocalRotationAngles(o, 0.0f, 0.0f);
             UpdateModelPosition();
 
             UpdatePassengerPositions(_passengers);
