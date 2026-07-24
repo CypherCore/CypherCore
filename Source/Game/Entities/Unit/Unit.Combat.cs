@@ -763,7 +763,7 @@ namespace Game.Entities
         public void SendAttackStateUpdate(CalcDamageInfo damageInfo)
         {
             AttackerStateUpdate packet = new();
-            packet.hitInfo = damageInfo.HitInfo;
+            packet.Flags = damageInfo.HitInfo;
             packet.AttackerGUID = damageInfo.Attacker.GetGUID();
             packet.VictimGUID = damageInfo.Target.GetGUID();
             packet.Damage = (int)damageInfo.Damage;

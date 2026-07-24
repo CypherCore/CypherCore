@@ -1072,15 +1072,17 @@ namespace Game.Entities
         }
     }
 
-    public class VisibleItem() : HasChangesMask(8), IsUpdateFieldStructure<Unit>
+    public class VisibleItem() : HasChangesMask(10), IsUpdateFieldStructure<Unit>
     {
-        public UpdateField<bool> Field_10 = new(0, 1);
-        public UpdateField<bool> Field_11 = new(0, 2);
+        public UpdateField<bool> HasTransmog = new(0, 1);
+        public UpdateField<bool> HasIllusion = new(0, 2);
         public UpdateField<uint> ItemID = new(0, 3);
         public UpdateField<uint> SecondaryItemModifiedAppearanceID = new(0, 4);
         public UpdateField<int> ConditionalItemAppearanceID = new(0, 5);
         public UpdateField<ushort> ItemAppearanceModID = new(0, 6);
         public UpdateField<ushort> ItemVisual = new(0, 7);
+        public UpdateField<uint> ItemModifiedAppearanceID = new(0, 8);
+        public UpdateField<byte> Field_18 = new(0, 9);
 
         public void WriteCreate(WorldPacket data, Player receiver, Unit owner)
         {
@@ -1089,8 +1091,10 @@ namespace Game.Entities
             data.WriteInt32(ConditionalItemAppearanceID);
             data.WriteUInt16(ItemAppearanceModID);
             data.WriteUInt16(ItemVisual);
-            data.WriteBit(Field_10);
-            data.WriteBit(Field_11);
+            data.WriteUInt32(ItemModifiedAppearanceID);
+            data.WriteUInt8(Field_18);
+            data.WriteBit(HasTransmog);
+            data.WriteBit(HasIllusion);
             data.FlushBits();
         }
 
@@ -1100,17 +1104,17 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlock(0), 8);
+            data.WriteBits(changesMask.GetBlock(0), 10);
 
             if (changesMask[0])
             {
                 if (changesMask[1])
                 {
-                    data.WriteBit(Field_10);
+                    data.WriteBit(HasTransmog);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteBit(Field_11);
+                    data.WriteBit(HasIllusion);
                 }
             }
             data.FlushBits();
@@ -1136,19 +1140,29 @@ namespace Game.Entities
                 {
                     data.WriteUInt16(ItemVisual);
                 }
+                if (changesMask[8])
+                {
+                    data.WriteUInt32(ItemModifiedAppearanceID);
+                }
+                if (changesMask[9])
+                {
+                    data.WriteUInt8(Field_18);
+                }
             }
             data.FlushBits();
         }
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Field_10);
-            ClearChangesMask(Field_11);
+            ClearChangesMask(HasTransmog);
+            ClearChangesMask(HasIllusion);
             ClearChangesMask(ItemID);
             ClearChangesMask(SecondaryItemModifiedAppearanceID);
             ClearChangesMask(ConditionalItemAppearanceID);
             ClearChangesMask(ItemAppearanceModID);
             ClearChangesMask(ItemVisual);
+            ClearChangesMask(ItemModifiedAppearanceID);
+            ClearChangesMask(Field_18);
             _changesMask.ResetAll();
         }
     }
@@ -6351,6 +6365,7 @@ namespace Game.Entities
         public uint TransmogOutfitID;
         public byte StampedOptionMainHand;
         public byte StampedOptionOffHand;
+        public float CostMod;                                                       // Used only with SPELL_AURA_MOD_TRANSMOG_OUTFIT_UPDATE_COST
 
         public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
@@ -6358,6 +6373,7 @@ namespace Game.Entities
             data.WriteUInt32(TransmogOutfitID);
             data.WriteUInt8(StampedOptionMainHand);
             data.WriteUInt8(StampedOptionOffHand);
+            data.WriteFloat(CostMod);
             data.WriteBit(Locked);
             data.FlushBits();
         }
@@ -6368,6 +6384,7 @@ namespace Game.Entities
             data.WriteUInt32(TransmogOutfitID);
             data.WriteUInt8(StampedOptionMainHand);
             data.WriteUInt8(StampedOptionOffHand);
+            data.WriteFloat(CostMod);
             data.WriteBit(Locked);
             data.FlushBits();
             data.FlushBits();
@@ -6379,7 +6396,8 @@ namespace Game.Entities
             && SituationTrigger == right.SituationTrigger
             && TransmogOutfitID == right.TransmogOutfitID
             && StampedOptionMainHand == right.StampedOptionMainHand
-            && StampedOptionOffHand == right.StampedOptionOffHand;
+            && StampedOptionOffHand == right.StampedOptionOffHand
+            && CostMod == right.CostMod;
         }
     }
 
@@ -10545,14 +10563,15 @@ namespace Game.Entities
         }
     }
 
-    public class ConversationData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Conversation, 7), IsUpdateFieldStructure<Conversation>
+    public class ConversationData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Conversation, 8), IsUpdateFieldStructure<Conversation>
     {
         public UpdateField<bool> DontPlayBroadcastTextSounds = new(0, 1);
-        public UpdateField<List<ConversationLine>> Lines = new(0, 2);
-        public DynamicUpdateField<ConversationActorField> Actors = new(0, 3);
-        public UpdateField<uint> LastLineEndTime = new(0, 4);
-        public UpdateField<uint> Progress = new(0, 5);
-        public UpdateField<uint> Flags = new(0, 6);
+        public UpdateField<bool> Field_33 = new(0, 2);                                           // UNK: Prevents line lookup from succeeding
+        public UpdateField<List<ConversationLine>> Lines = new(0, 3);
+        public DynamicUpdateField<ConversationActorField> Actors = new(0, 4);
+        public UpdateField<uint> LastLineEndTime = new(0, 5);
+        public UpdateField<uint> Progress = new(0, 6);
+        public UpdateField<uint> Flags = new(0, 7);
 
         public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Conversation owner)
         {
@@ -10564,6 +10583,7 @@ namespace Game.Entities
                 Lines.GetValue()[i].WriteCreate(data, receiver, owner);
             }
             data.WriteBit(DontPlayBroadcastTextSounds);
+            data.WriteBit(Field_33);
             data.WriteInt32(Actors.Size());
             data.WriteUInt32(Flags);
             for (int i = 0; i < Actors.Size(); ++i)
@@ -10580,7 +10600,7 @@ namespace Game.Entities
 
         public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Conversation owner, bool ignoreNestedChangesMask)
         {
-            data.WriteBits(_changesMask.GetBlock(0), 6);
+            data.WriteBits(_changesMask.GetBlock(0), 8);
 
             if (_changesMask[0])
             {
@@ -10589,6 +10609,10 @@ namespace Game.Entities
                     data.WriteBit(DontPlayBroadcastTextSounds);
                 }
                 if (changesMask[2])
+                {
+                    data.WriteBit(Field_33);
+                }
+                if (changesMask[3])
                 {
                     List<ConversationLine> list = Lines;
                     data.WriteBits(list.Count, 32);
@@ -10601,7 +10625,7 @@ namespace Game.Entities
             data.FlushBits();
             if (_changesMask[0])
             {
-                if (_changesMask[3])
+                if (_changesMask[4])
                 {
                     if (!ignoreNestedChangesMask)
                         Actors.WriteUpdateMask(data);
@@ -10612,7 +10636,7 @@ namespace Game.Entities
             data.FlushBits();
             if (_changesMask[0])
             {
-                if (_changesMask[3])
+                if (_changesMask[4])
                 {
                     for (int i = 0; i < Actors.Size(); ++i)
                     {
@@ -10622,15 +10646,15 @@ namespace Game.Entities
                         }
                     }
                 }
-                if (_changesMask[4])
+                if (_changesMask[5])
                 {
                     data.WriteUInt32(GetViewerLastLineEndTime(this, receiver, owner));
                 }
-                if (_changesMask[5])
+                if (_changesMask[6])
                 {
                     data.WriteUInt32(Progress);
                 }
-                if (changesMask[6])
+                if (changesMask[7])
                 {
                     data.WriteUInt32(Flags);
                 }
@@ -10641,6 +10665,7 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(DontPlayBroadcastTextSounds);
+            ClearChangesMask(Field_33);
             ClearChangesMask(Lines);
             ClearChangesMask(Actors);
             ClearChangesMask(LastLineEndTime);
@@ -12216,25 +12241,25 @@ namespace Game.Entities
 
     struct NICompletedMilestoneEntry : IEquatable<NICompletedMilestoneEntry>, IsUpdateFieldStructure<Player>
     {
-        public uint MilestoneID;
         public long AwardDate;
+        public uint MilestoneID;
 
         public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
-            data.WriteUInt32(MilestoneID);
             data.WriteInt64(AwardDate);
+            data.WriteUInt32(MilestoneID);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
-            data.WriteUInt32(MilestoneID);
             data.WriteInt64(AwardDate);
+            data.WriteUInt32(MilestoneID);
         }
 
         public bool Equals(NICompletedMilestoneEntry right)
         {
-            return MilestoneID == right.MilestoneID
-            && AwardDate == right.AwardDate;
+            return AwardDate == right.AwardDate
+                && MilestoneID == right.MilestoneID;
         }
     }
 

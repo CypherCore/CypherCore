@@ -2425,6 +2425,7 @@ namespace Game.Entities
             packet.Absorbed = (int)log.absorb;
             packet.Resisted = (int)log.resist;
             packet.ShieldBlock = (int)log.blocked;
+            packet.ReflectingSpellID = (int)log.reflectingSpellId;
             packet.Periodic = log.periodicLog;
             packet.Flags = (int)log.HitInfo;
 

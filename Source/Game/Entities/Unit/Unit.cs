@@ -3880,7 +3880,8 @@ namespace Game.Entities
                     absorbLog.AbsorbSpellID = (int)absorbAurEff.GetId();
                     absorbLog.Absorbed = currentAbsorb;
                     absorbLog.OriginalHeal = (int)healInfo.GetOriginalHeal();
-                    healInfo.GetTarget().SendMessageToSet(absorbLog, true);
+                    absorbLog.LogData.Initialize(healInfo.GetTarget());
+                    healInfo.GetTarget().SendCombatLogMessage(absorbLog);
                 }
             }
         }

@@ -2023,6 +2023,9 @@ namespace Game.Spells
                     false /*can't reflect twice*/,
                     false /*immunity will be checked after complete EffectMask is known*/);
 
+                if (targetInfo.ReflectResult == SpellMissInfo.Miss && target.HasAuraType(AuraType.ReflectSpells))
+                    targetInfo.ReflectingSpellId = target.GetAuraEffectsByType(AuraType.ReflectSpells).First().GetId();
+
                 // Proc spell reflect aura when missile hits the original target
                 target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(TimeSpan.FromMilliseconds(targetInfo.TimeDelay)));
 
@@ -8864,9 +8867,11 @@ namespace Game.Spells
         public ulong TimeDelay;
         public int Damage;
         public int Healing;
+        public bool Positive = true;
 
         public SpellMissInfo MissCondition;
         public SpellMissInfo ReflectResult;
+        public uint ReflectingSpellId;
 
         public bool IsAlive;
         public bool IsCrit;
@@ -8875,7 +8880,6 @@ namespace Game.Spells
         public DiminishingGroup DRGroup;
         public int AuraDuration;
         public int[] AuraBasePoints = new int[SpellConst.MaxEffects];
-        public bool Positive = true;
         public UnitAura HitAura;
         public ProcFlagsHit ProcHitMask;
 
@@ -9087,6 +9091,7 @@ namespace Game.Spells
                     hasDamage = true;
                     // Fill base damage struct (unitTarget - is real spell target)
                     SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask, spell.m_castId);
+                    damageInfo.reflectingSpellId = ReflectingSpellId;
                     // Check damage immunity
                     if (spell.unitTarget.IsImmunedToDamage(caster, spell.m_spellInfo))
                     {

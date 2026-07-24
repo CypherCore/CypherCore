@@ -1396,6 +1396,13 @@ namespace Game.Networking.Packets
             AttackPower = (int)unit.GetTotalAttackPowerValue(unit.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
             SpellPower = unit.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
             Armor = unit.GetArmor();
+
+            Player player = unit.ToPlayer();
+            if (player != null)
+            {
+                Versatility = (int)(player.GetRatingBonusValue(CombatRating.VersatilityDamageDone) * 100.0f);
+                Avoidance = (int)(player.GetRatingBonusValue(CombatRating.Avoidance) * 100.0f);
+            }
             PowerData.Add(new SpellLogPowerData((sbyte)unit.GetPowerType(), unit.GetPower(unit.GetPowerType()), 0));
         }
 
@@ -1408,11 +1415,18 @@ namespace Game.Networking.Packets
                 AttackPower = (int)unitCaster.GetTotalAttackPowerValue(unitCaster.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
                 SpellPower = unitCaster.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
                 Armor = unitCaster.GetArmor();
+
+                Player player = unitCaster.ToPlayer();
+                if (player != null)
+                {
+                    Versatility = (int)(player.GetRatingBonusValue(CombatRating.VersatilityDamageDone) * 100.0f);
+                    Avoidance = (int)(player.GetRatingBonusValue(CombatRating.Avoidance) * 100.0f);
+                }
                 PowerType primaryPowerType = unitCaster.GetPowerType();
                 bool primaryPowerAdded = false;
                 foreach (SpellPowerCost cost in spell.GetPowerCost())
                 {
-                    PowerData.Add(new SpellLogPowerData((sbyte)cost.Power, unitCaster.GetPower(cost.Power), (int)cost.Amount));
+                    PowerData.Add(new SpellLogPowerData((sbyte)cost.Power, unitCaster.GetPower(cost.Power), cost.Amount));
                     if (cost.Power == primaryPowerType)
                         primaryPowerAdded = true;
                 }
@@ -1428,8 +1442,9 @@ namespace Game.Networking.Packets
             data.WriteInt32(AttackPower);
             data.WriteInt32(SpellPower);
             data.WriteUInt32(Armor);
-            data.WriteInt32(Unknown_1105_1);
-            data.WriteInt32(Unknown_1105_2);
+            data.WriteInt32(Versatility);
+            data.WriteInt32(Avoidance);
+            data.WriteBit(HideFromCombatLog);
             data.WriteBits(PowerData.Count, 9);
             data.FlushBits();
 
@@ -1445,8 +1460,9 @@ namespace Game.Networking.Packets
         int AttackPower;
         int SpellPower;
         uint Armor;
-        int Unknown_1105_1;
-        int Unknown_1105_2;
+        int Versatility;
+        int Avoidance;
+        bool HideFromCombatLog;
         List<SpellLogPowerData> PowerData = new();
     }
 

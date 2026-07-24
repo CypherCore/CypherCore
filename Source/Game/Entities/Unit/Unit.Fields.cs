@@ -489,6 +489,7 @@ namespace Game.Entities
         public uint resist;
         public bool periodicLog;
         public uint blocked;
+        public uint reflectingSpellId;
         public HitInfo HitInfo;
         // Used for help
         public uint cleanDamage;

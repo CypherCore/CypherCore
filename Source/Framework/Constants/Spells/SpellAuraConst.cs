@@ -662,7 +662,7 @@ namespace Framework.Constants
         Unk652 = 652,
         Unk653 = 653,
         Unk654 = 654,
-        RemoveTransmogOutfitUpdateCost = 655,
+        ModTransmogOutfitUpdateCost = 655,
 
         Total
     }

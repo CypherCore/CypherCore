@@ -5453,6 +5453,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.SecondaryItemModifiedAppearanceID), pItem.GetVisibleSecondaryModifiedAppearanceId(this));
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemAppearanceModID), pItem.GetVisibleAppearanceModId(this));
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), pItem.GetVisibleItemVisual(this));
+                SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemModifiedAppearanceID), pItem.GetVisibleModifiedAppearanceId(this));
             }
             else
             {
@@ -5460,6 +5461,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.SecondaryItemModifiedAppearanceID), 0u);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemAppearanceModID), (ushort)0);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), (ushort)0);
+                SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemModifiedAppearanceID), 0u);
             }
         }
         void VisualizeItem(uint slot, Item pItem)

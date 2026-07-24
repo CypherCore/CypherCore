@@ -1587,8 +1587,9 @@ namespace Framework.Database
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
             // TraitTree.db2
-            PrepareStatement(HotfixStatements.SEL_TRAIT_TREE, "SELECT ID, TraitSystemID, Unused1000_1, FirstTraitNodeID, PlayerConditionID, Flags, Unused1000_2, " +
-                "Unused1000_3 FROM trait_tree WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_TRAIT_TREE, "SELECT TitleText, ID, TraitSystemID, BaseNodeGroup, FirstTraitNodeID, PlayerConditionID, Flags, MinZoom, " +
+                "MaxZoom, UiTextureKitID FROM trait_tree WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_TRAIT_TREE_LOCALE, "SELECT ID, TitleText_lang FROM trait_tree_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?");
 
             // TraitTreeLoadout.db2
             PrepareStatement(HotfixStatements.SEL_TRAIT_TREE_LOADOUT, "SELECT ID, TraitTreeID, ChrSpecializationID FROM trait_tree_loadout" +
@@ -2484,6 +2485,7 @@ namespace Framework.Database
         SEL_TRAIT_SYSTEM,
 
         SEL_TRAIT_TREE,
+        SEL_TRAIT_TREE_LOCALE,
 
         SEL_TRAIT_TREE_LOADOUT,
 

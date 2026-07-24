@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Spells;
 using System;
@@ -62,6 +61,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteInt32(Resisted);
             _worldPacket.WriteInt32(ShieldBlock);
+            _worldPacket.WriteInt32(ReflectingSpellID);
             _worldPacket.WriteInt32(Flags);
             _worldPacket.WriteInt32(WorldTextViewers.Count);
             _worldPacket.WriteInt32(Supporters.Count);
@@ -93,6 +93,7 @@ namespace Game.Networking.Packets
         public int Overkill = -1;
         public byte SchoolMask;
         public int ShieldBlock;
+        public int ReflectingSpellID;
         public int Resisted;
         public bool Periodic;
         public int Absorbed;
@@ -327,12 +328,15 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Victim);
             _worldPacket.WriteUInt32(InterruptedSpellID);
             _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteBit(HideFromCombatLog);
+            _worldPacket.FlushBits();
         }
 
         public ObjectGuid Caster;
         public ObjectGuid Victim;
         public uint InterruptedSpellID;
         public uint SpellID;
+        public bool HideFromCombatLog;
     }
 
     class SpellDispellLog : ServerPacket
@@ -424,6 +428,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteInt32(Entries.Count);
+            _worldPacket.WriteBit(HideFromCombatLog);
 
             foreach (SpellLogMissEntry missEntry in Entries)
                 missEntry.Write(_worldPacket);
@@ -432,6 +437,7 @@ namespace Game.Networking.Packets
         public uint SpellID;
         public ObjectGuid Caster;
         public List<SpellLogMissEntry> Entries = new();
+        public bool HideFromCombatLog;
     }
 
     class ProcResist : ServerPacket
@@ -517,7 +523,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             WorldPacket attackRoundInfo = new();
-            attackRoundInfo.WriteUInt32((uint)hitInfo);
+            attackRoundInfo.WriteUInt32((uint)Flags);
             attackRoundInfo.WritePackedGuid(AttackerGUID);
             attackRoundInfo.WritePackedGuid(VictimGUID);
             attackRoundInfo.WriteInt32(Damage);
@@ -530,9 +536,9 @@ namespace Game.Networking.Packets
                 attackRoundInfo.WriteInt32(SubDmg.Value.SchoolMask);
                 attackRoundInfo.WriteFloat(SubDmg.Value.FDamage);
                 attackRoundInfo.WriteInt32(SubDmg.Value.Damage);
-                if (hitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.PartialAbsorb))
+                if (Flags.HasAnyFlag(Framework.Constants.HitInfo.FullAbsorb | Framework.Constants.HitInfo.PartialAbsorb))
                     attackRoundInfo.WriteInt32(SubDmg.Value.Absorbed);
-                if (hitInfo.HasAnyFlag(HitInfo.FullResist | HitInfo.PartialResist))
+                if (Flags.HasAnyFlag(Framework.Constants.HitInfo.FullResist | Framework.Constants.HitInfo.PartialResist))
                     attackRoundInfo.WriteInt32(SubDmg.Value.Resisted);
             }
 
@@ -540,30 +546,30 @@ namespace Game.Networking.Packets
             attackRoundInfo.WriteUInt32(AttackerState);
             attackRoundInfo.WriteUInt32(MeleeSpellID);
 
-            if (hitInfo.HasAnyFlag(HitInfo.Block))
+            if (Flags.HasAnyFlag(Framework.Constants.HitInfo.Block))
                 attackRoundInfo.WriteInt32(BlockAmount);
 
-            if (hitInfo.HasAnyFlag(HitInfo.RageGain))
+            if (Flags.HasAnyFlag(Framework.Constants.HitInfo.RageGain))
                 attackRoundInfo.WriteInt32(RageGained);
 
-            if (hitInfo.HasAnyFlag(HitInfo.Unk1))
+            if (Flags.HasAnyFlag(Framework.Constants.HitInfo.Unk1))
             {
-                attackRoundInfo.WriteUInt32(UnkState.State1);
-                attackRoundInfo.WriteFloat(UnkState.State2);
-                attackRoundInfo.WriteFloat(UnkState.State3);
-                attackRoundInfo.WriteFloat(UnkState.State4);
-                attackRoundInfo.WriteFloat(UnkState.State5);
-                attackRoundInfo.WriteFloat(UnkState.State6);
-                attackRoundInfo.WriteFloat(UnkState.State7);
-                attackRoundInfo.WriteFloat(UnkState.State8);
-                attackRoundInfo.WriteFloat(UnkState.State9);
-                attackRoundInfo.WriteFloat(UnkState.State10);
-                attackRoundInfo.WriteFloat(UnkState.State11);
-                attackRoundInfo.WriteUInt32(UnkState.State12);
+                attackRoundInfo.WriteUInt32(HitInfo.ArmorReduction);
+                attackRoundInfo.WriteFloat(HitInfo.CritRollNeeded);
+                attackRoundInfo.WriteFloat(HitInfo.CombatRoll);
+                attackRoundInfo.WriteFloat(HitInfo.MissChance);
+                attackRoundInfo.WriteFloat(HitInfo.DodgeChance);
+                attackRoundInfo.WriteFloat(HitInfo.ParryChance);
+                attackRoundInfo.WriteFloat(HitInfo.BlockChance);
+                attackRoundInfo.WriteFloat(HitInfo.GlanceChance);
+                attackRoundInfo.WriteFloat(HitInfo.CrushChance);
+                attackRoundInfo.WriteFloat(HitInfo.MinDamage);
+                attackRoundInfo.WriteFloat(HitInfo.MaxDamage);
+                attackRoundInfo.WriteUInt32(HitInfo.SinceLastSwing);
             }
 
-            if (hitInfo.HasAnyFlag(HitInfo.Block | HitInfo.Unk12))
-                attackRoundInfo.WriteFloat(Unk);
+            if (Flags.HasAnyFlag(Framework.Constants.HitInfo.Block | Framework.Constants.HitInfo.Unk12))
+                attackRoundInfo.WriteFloat(BlockRoll);
 
             ContentTuning.Write(attackRoundInfo);
 
@@ -575,7 +581,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBytes(attackRoundInfo);
         }
 
-        public HitInfo hitInfo; // Flags
+        public HitInfo Flags; // Flags
         public ObjectGuid AttackerGUID;
         public ObjectGuid VictimGUID;
         public int Damage;
@@ -587,8 +593,8 @@ namespace Game.Networking.Packets
         public uint MeleeSpellID;
         public int BlockAmount;
         public int RageGained;
-        public UnkAttackerState UnkState;
-        public float Unk;
+        public HitInfoData HitInfo;
+        public float BlockRoll;
         public ContentTuningParams ContentTuning = new();
     }
 
@@ -628,7 +634,7 @@ namespace Game.Networking.Packets
         public List<SpellSupportInfo> Supporters = new();
     }
 
-    class SpellHealAbsorbLog : ServerPacket
+    class SpellHealAbsorbLog : CombatLogServerPacket
     {
         public SpellHealAbsorbLog() : base(ServerOpcodes.SpellHealAbsorbLog, ConnectionType.Instance) { }
 
@@ -641,8 +647,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(AbsorbedSpellID);
             _worldPacket.WriteInt32(Absorbed);
             _worldPacket.WriteInt32(OriginalHeal);
+
+            WriteLogDataBit();
             _worldPacket.WriteBit(ContentTuning != null);
             _worldPacket.FlushBits();
+
+            WriteLogData();
 
             if (ContentTuning != null)
                 ContentTuning.Write(_worldPacket);
@@ -747,19 +757,19 @@ namespace Game.Networking.Packets
         public int Resisted;
     }
 
-    public struct UnkAttackerState
+    public struct HitInfoData
     {
-        public uint State1;
-        public float State2;
-        public float State3;
-        public float State4;
-        public float State5;
-        public float State6;
-        public float State7;
-        public float State8;
-        public float State9;
-        public float State10;
-        public float State11;
-        public uint State12;
+        public uint ArmorReduction;
+        public float CritRollNeeded;
+        public float CombatRoll;
+        public float MissChance;
+        public float DodgeChance;
+        public float ParryChance;
+        public float BlockChance;
+        public float GlanceChance;
+        public float CrushChance;
+        public float MinDamage;
+        public float MaxDamage;
+        public uint SinceLastSwing;
     }
 }

@@ -2089,7 +2089,7 @@ namespace Game.Entities
             return (ushort)GetAppearanceModId();
         }
 
-        uint GetVisibleModifiedAppearanceId(Player owner)
+        public uint GetVisibleModifiedAppearanceId(Player owner)
         {
             uint itemModifiedAppearanceId = GetModifier(ItemConst.AppearanceModifierSlotBySpec[owner.GetActiveTalentGroup()]);
             if (itemModifiedAppearanceId == 0)
