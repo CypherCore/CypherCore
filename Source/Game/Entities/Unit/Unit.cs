@@ -2554,10 +2554,10 @@ namespace Game.Entities
             return spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.IgnoreArmor);
         }
 
-        public override void ClearUpdateMask(bool remove)
+        public override void ClearValuesChangesMask()
         {
             m_values.ClearChangesMask(m_unitData);
-            base.ClearUpdateMask(remove);
+            base.ClearValuesChangesMask();
         }
 
         public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)

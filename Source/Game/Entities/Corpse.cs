@@ -218,20 +218,20 @@ namespace Game.Entities
                 return m_time < t - 3 * Time.Day;
         }
 
-        public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesCreate(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
-            m_objectData.WriteCreate(data, flags, this, target);
-            m_corpseData.WriteCreate(data, flags, this, target);
+            m_objectData.WriteCreate(flags, data, target, this);
+            m_corpseData.WriteCreate(flags, data, target, this);
         }
 
-        public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdate(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
             data.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(data, flags, this, target);
+                m_objectData.WriteUpdate(flags, data, target, this);
 
             if (m_values.HasChanged(TypeId.Corpse))
-                m_corpseData.WriteUpdate(data, flags, this, target);
+                m_corpseData.WriteUpdate(flags, data, target, this);
         }
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
@@ -249,10 +249,10 @@ namespace Game.Entities
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, true);
 
             if (valuesMask[(int)TypeId.Corpse])
-                m_corpseData.WriteUpdate(buffer, requestedCorpseMask, true, this, target);
+                m_corpseData.WriteUpdate(requestedCorpseMask, buffer, target, this, true);
 
             WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
@@ -263,10 +263,10 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
+        public override void ClearValuesChangesMask()
         {
             m_values.ClearChangesMask(m_corpseData);
-            base.ClearUpdateMask(remove);
+            base.ClearValuesChangesMask();
         }
 
         public CorpseDynFlags GetCorpseDynamicFlags() { return (CorpseDynFlags)(uint)m_corpseData.DynamicFlags; }

@@ -1333,23 +1333,23 @@ namespace Game.Entities
             return UpdateFieldFlag.None;
         }
 
-        public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesCreate(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
-            m_objectData.WriteCreate(data, flags, this, target);
-            m_itemData.WriteCreate(data, flags, this, target);
+            m_objectData.WriteCreate(flags, data, target, this);
+            m_itemData.WriteCreate(flags, data, target, this);
         }
 
-        public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdate(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
             data.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(data, flags, this, target);
+                m_objectData.WriteUpdate(flags, data, target, this);
 
             if (m_values.HasChanged(TypeId.Item))
-                m_itemData.WriteUpdate(data, flags, this, target);
+                m_itemData.WriteUpdate(flags, data, target, this);
         }
 
-        public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdateWithFlag(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
             UpdateMask valuesMask = new((int)TypeId.Max);
             valuesMask.Set((int)TypeId.Item);
@@ -1358,7 +1358,7 @@ namespace Game.Entities
 
             data.WriteUInt32(valuesMask.GetBlock(0));
             m_itemData.AppendAllowedFieldsMaskForFlag(mask, flags);
-            m_itemData.WriteUpdate(data, mask, true, this, target);
+            m_itemData.WriteUpdate(mask, data, target, this, true);
         }
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
@@ -1377,10 +1377,10 @@ namespace Game.Entities
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, true);
 
             if (valuesMask[(int)TypeId.Item])
-                m_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
+                m_itemData.WriteUpdate(requestedItemMask, buffer, target, this, true);
 
             WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
@@ -1391,10 +1391,10 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
+        public override void ClearValuesChangesMask()
         {
             m_values.ClearChangesMask(m_itemData);
-            base.ClearUpdateMask(remove);
+            base.ClearValuesChangesMask();
         }
 
         public override bool AddToObjectUpdate()

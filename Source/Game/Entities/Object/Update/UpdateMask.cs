@@ -135,6 +135,6 @@ namespace Game.Entities
 
         //helpers
         public static int GetBlockIndex(int bit) { return bit / 32; }
-        public static int GetBlockFlag(int bit) { return 1 << (bit % 32); }
+        public static uint GetBlockFlag(int bit) { return 1u << (bit % 32); }
     }
 }

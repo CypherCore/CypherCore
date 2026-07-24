@@ -8101,32 +8101,32 @@ namespace Game.Entities
             return flags;
         }
 
-        public override void BuildValuesCreate(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesCreate(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
-            m_objectData.WriteCreate(data, flags, this, target);
-            m_unitData.WriteCreate(data, flags, this, target);
-            m_playerData.WriteCreate(data, flags, this, target);
+            m_objectData.WriteCreate(flags, data, target, this);
+            m_unitData.WriteCreate(flags, data, target, this);
+            m_playerData.WriteCreate(flags, data, target, this);
             if (target == this)
-                m_activePlayerData.WriteCreate(data, flags, this, target);
+                m_activePlayerData.WriteCreate(flags, data, target, this);
         }
 
-        public override void BuildValuesUpdate(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdate(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
             data.WriteUInt32((uint)(m_values.GetChangedObjectTypeMask() & ~((target != this ? 1 : 0) << (int)TypeId.ActivePlayer)));
             if (m_values.HasChanged(TypeId.Object))
-                m_objectData.WriteUpdate(data, flags, this, target);
+                m_objectData.WriteUpdate(flags, data, target, this);
 
             if (m_values.HasChanged(TypeId.Unit))
-                m_unitData.WriteUpdate(data, flags, this, target);
+                m_unitData.WriteUpdate(flags, data, target, this);
 
             if (m_values.HasChanged(TypeId.Player))
-                m_playerData.WriteUpdate(data, flags, this, target);
+                m_playerData.WriteUpdate(flags, data, target, this);
 
             if (target == this && m_values.HasChanged(TypeId.ActivePlayer))
-                m_activePlayerData.WriteUpdate(data, flags, this, target);
+                m_activePlayerData.WriteUpdate(flags, data, target, this);
         }
 
-        public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
+        public override void BuildValuesUpdateWithFlag(UpdateFieldFlag flags, WorldPacket data, Player target)
         {
             UpdateMask valuesMask = new((int)TypeId.Max);
             valuesMask.Set((int)TypeId.Unit);
@@ -8136,11 +8136,11 @@ namespace Game.Entities
 
             UpdateMask mask = m_unitData.GetStaticUpdateMask();
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
-            m_unitData.WriteUpdate(data, mask, true, this, target);
+            m_unitData.WriteUpdate(mask, data, target, this, true);
 
             UpdateMask mask2 = m_playerData.GetStaticUpdateMask();
             m_playerData.AppendAllowedFieldsMaskForFlag(mask2, flags);
-            m_playerData.WriteUpdate(data, mask2, true, this, target);
+            m_playerData.WriteUpdate(mask2, data, target, this, true);
         }
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, UpdateMask requestedPlayerMask, UpdateMask requestedActivePlayerMask, Player target)
@@ -8166,16 +8166,16 @@ namespace Game.Entities
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(buffer, requestedObjectMask, true, this, target);
+                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, true);
 
             if (valuesMask[(int)TypeId.Unit])
-                m_unitData.WriteUpdate(buffer, requestedUnitMask, true, this, target);
+                m_unitData.WriteUpdate(requestedUnitMask, buffer, target, this, true);
 
             if (valuesMask[(int)TypeId.Player])
-                m_playerData.WriteUpdate(buffer, requestedPlayerMask, true, this, target);
+                m_playerData.WriteUpdate(requestedPlayerMask, buffer, target, this, true);
 
             if (valuesMask[(int)TypeId.ActivePlayer])
-                m_activePlayerData.WriteUpdate(buffer, requestedActivePlayerMask, true, this, target);
+                m_activePlayerData.WriteUpdate(requestedActivePlayerMask, buffer, target, this, true);
 
             WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
@@ -8186,11 +8186,11 @@ namespace Game.Entities
             data.AddUpdateBlock(buffer1);
         }
 
-        public override void ClearUpdateMask(bool remove)
+        public override void ClearValuesChangesMask()
         {
             m_values.ClearChangesMask(m_playerData);
             m_values.ClearChangesMask(m_activePlayerData);
-            base.ClearUpdateMask(remove);
+            base.ClearValuesChangesMask();
         }
 
         //Helpers

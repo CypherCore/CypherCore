@@ -17,17 +17,12 @@ namespace Game.Entities
         public CreateObjectBits m_updateFlag;
         public EntityFragmentsHolder EntityFragments;
 
-        public UpdateFieldHolder m_values;
+        public UpdateFieldHolder m_values = new();
 
         bool _objectUpdated;
 
         bool _isNewObject;
         bool _isDestroyedObject;
-
-        public BaseEntity()
-        {
-            m_values = new UpdateFieldHolder(this);
-        }
 
         public virtual void Dispose()
         {
@@ -109,7 +104,7 @@ namespace Game.Entities
                 if (EntityFragmentsHolder.IsIndirectFragment(fragmentId))
                     tempBuffer.WriteUInt8(1);  // IndirectFragmentActive
 
-                EntityFragments.Updateable.SerializeCreate[i](this, tempBuffer, fieldFlags, target);
+                EntityFragmentInfo.SerializeCreate[(int)EntityFragments.Updateable.Ids[i]](EntityFragments.Updateable.Data[i], fieldFlags, tempBuffer, target, this);
             }
 
             buffer.WriteUInt32(tempBuffer.GetSize());
@@ -156,7 +151,7 @@ namespace Game.Entities
                 if ((EntityFragments.ContentsChangedMask & EntityFragments.Updateable.Masks[i]) == 0)
                     continue;
 
-                EntityFragments.Updateable.SerializeUpdate[i](this, tempBuffer, fieldFlags, target);
+                EntityFragmentInfo.SerializeUpdate[(int)EntityFragments.Updateable.Ids[i]](EntityFragments.Updateable.Data[i], fieldFlags, tempBuffer, target, this);
             }
 
             buffer.WriteUInt32(tempBuffer.GetSize());
@@ -642,8 +637,11 @@ namespace Game.Entities
                 _objectUpdated = AddToObjectUpdate();
         }
 
-        public virtual void ClearUpdateMask(bool remove)
+        public void ClearUpdateMask(bool remove)
         {
+            for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
+                EntityFragmentInfo.ClearChanged[(int)EntityFragments.Updateable.Ids[i]](EntityFragments.Updateable.Data[i]);
+
             EntityFragments.IdsChanged = false;
 
             if (_objectUpdated)
@@ -659,7 +657,7 @@ namespace Game.Entities
         {
             for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
             {
-                if (EntityFragments.Updateable.IsChanged[i](this))
+                if (EntityFragmentInfo.IsChanged[(int)EntityFragments.Updateable.Ids[i]](EntityFragments.Updateable.Data[i]))
                     EntityFragments.ContentsChangedMask |= EntityFragments.Updateable.Masks[i];
                 else
                     EntityFragments.ContentsChangedMask &= (byte)~EntityFragments.Updateable.Masks[i];
@@ -976,51 +974,33 @@ namespace Game.Entities
 
     public class UpdateFieldHolder
     {
-        UpdateMask _changesMask = new((int)TypeId.Max);
-        BaseEntity _owner;
-
-        public UpdateFieldHolder(BaseEntity owner)
-        {
-            _owner = owner;
-        }
+        uint _changesMask;
 
         public HasChangesMask ModifyValue(HasChangesMask updateData)
         {
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
-                _changesMask.Set(updateData.Bit);
+                _changesMask |= UpdateMask.GetBlockFlag(updateData.Bit);
+
             return updateData;
         }
 
         public void ClearChangesMask(HasChangesMask updateData)
         {
-            if (updateData == null)
-                return;
+            Cypher.Assert((EntityFragment)updateData._blockBit == EntityFragment.CGObject);
 
-            if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
-                _changesMask.Reset(updateData.Bit);
+            _changesMask &= ~UpdateMask.GetBlockFlag(updateData.Bit);
 
             updateData.ClearChangesMask();
         }
 
-        public void ClearChangesMask<U>(HasChangesMask updateData, ref UpdateField<U> updateField) where U : new()
-        {
-            if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
-                _changesMask.Reset(updateData.Bit);
-
-            if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
-                ((IHasChangesMask)updateField._value).ClearChangesMask();
-        }
-
         public uint GetChangedObjectTypeMask()
         {
-            return _changesMask.GetBlock(0);
+            return _changesMask;
         }
 
         public bool HasChanged(TypeId index)
         {
-            return _changesMask[(int)index];
+            return (_changesMask & UpdateMask.GetBlockFlag((int)index)) != 0; ;
         }
     }
-
-
 }

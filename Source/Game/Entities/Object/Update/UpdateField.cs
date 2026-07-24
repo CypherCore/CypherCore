@@ -22,10 +22,13 @@ namespace Game.Entities
         UpdateMask GetChangesMask();
     }
 
-    public interface IsUpdateFieldStructure<T>
+    public interface IsUpdateFieldStructure<in T>
     {
-        void WriteCreate(WorldPacket data, T owner, Player receiver);
-        void WriteUpdate(WorldPacket data, bool ignoreChangesMask, T owner, Player receiver);
+        void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, T owner) { }
+        void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, T owner) { }
+
+        void WriteCreate(WorldPacket data, Player receiver, T owner) { }
+        void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, T owner) { }
     }
 
     public class UpdateFieldString : IUpdateField<string>
@@ -831,28 +834,28 @@ namespace Game.Entities
                 data.WriteBits(0xFFFFFFFFu, size % 32);
         }
 
-        public void WriteMapFieldCreate<K, V, T>(MapUpdateField<K, V> map, WorldPacket data, T owner, Player receiver) where V : new()
+        public void WriteMapFieldCreate<K, V, T>(MapUpdateField<K, V> map, WorldPacket data, Player receiver, T owner) where V : new()
         {
             data.WriteInt32(map.Size());
             foreach (var (k, (v, _)) in map)
             {
                 if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(K)))
-                    ((IsUpdateFieldStructure<T>)k).WriteCreate(data, owner, receiver);
+                    ((IsUpdateFieldStructure<T>)k).WriteCreate(data, receiver, owner);
                 else
                     data.Write(k);
 
                 if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
-                    ((IsUpdateFieldStructure<T>)v).WriteCreate(data, owner, receiver);
+                    ((IsUpdateFieldStructure<T>)v).WriteCreate(data, receiver, owner);
                 else
                     data.Write(v);
             }
         }
 
-        public void WriteMapFieldUpdate<K, V, T>(MapUpdateField<K, V> map, WorldPacket data, bool ignoreChangesMask, T owner, Player receiver) where V : new()
+        public void WriteMapFieldUpdate<K, V, T>(MapUpdateField<K, V> map, bool ignoreChangesMask, WorldPacket data, Player receiver, T owner) where V : new()
         {
             data.WriteUInt8((byte)(ignoreChangesMask ? 1 : 0));
             if (ignoreChangesMask)
-                WriteMapFieldCreate(map, data, owner, receiver);
+                WriteMapFieldCreate(map, data, receiver, owner);
             else
             {
                 ushort changesCount = 0;
@@ -866,7 +869,7 @@ namespace Game.Entities
                     ++changesCount;
 
                     if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(K)))
-                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(tempBuffer, false, owner, receiver);
+                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(false, tempBuffer, receiver, owner);
                     else
                         tempBuffer.Write(k);
 
@@ -875,7 +878,7 @@ namespace Game.Entities
                         continue;
 
                     if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
-                        ((IsUpdateFieldStructure<T>)v).WriteUpdate(tempBuffer, false, owner, receiver);
+                        ((IsUpdateFieldStructure<T>)v).WriteUpdate(false, tempBuffer, receiver, owner);
                     else
                         tempBuffer.Write(v);
                 }
@@ -885,23 +888,23 @@ namespace Game.Entities
             }
         }
 
-        public void WriteSetFieldCreate<K, T>(SetUpdateField<K> set, WorldPacket data, T owner, Player receiver)
+        public void WriteSetFieldCreate<K, T>(SetUpdateField<K> set, WorldPacket data, Player receiver, T owner)
         {
             data.WriteInt32(set.Size());
             foreach (var (k, _) in set)
             {
                 if (typeof(IsUpdateFieldStructure<K>).IsAssignableFrom(typeof(T)))
-                    ((IsUpdateFieldStructure<T>)k).WriteCreate(data, owner, receiver);
+                    ((IsUpdateFieldStructure<T>)k).WriteCreate(data, receiver, owner);
                 else
                     data.Write(k);
             }
         }
 
-        public void WriteSetFieldUpdate<K, T>(SetUpdateField<K> set, WorldPacket data, bool ignoreChangesMask, T owner, Player receiver)
+        public void WriteSetFieldUpdate<K, T>(SetUpdateField<K> set, bool ignoreChangesMask, WorldPacket data, Player receiver, T owner)
         {
             data.WriteInt8((sbyte)(ignoreChangesMask ? 1 : 0));
             if (ignoreChangesMask)
-                WriteSetFieldCreate(set, data, owner, receiver);
+                WriteSetFieldCreate(set, data, receiver, owner);
             else
             {
                 ushort changesCount = 0;
@@ -914,7 +917,7 @@ namespace Game.Entities
                     ++changesCount;
 
                     if (typeof(IsUpdateFieldStructure<K>).IsAssignableFrom(typeof(T)))
-                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(data, false, owner, receiver);
+                        ((IsUpdateFieldStructure<T>)k).WriteUpdate(false, data, receiver, owner);
                     else
                         data.Write(k);
 

@@ -26,12 +26,6 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_housingStorageData).ModifyValue(m_housingStorageData.DecorMaxOwnedCount), 5000u);
         }
 
-        public override void ClearUpdateMask(bool remove)
-        {
-            m_values.ClearChangesMask(m_housingStorageData);
-            base.ClearUpdateMask(remove);
-        }
-
         public string GetNameForLocaleIdx(uint locale)
         {
             return m_name;

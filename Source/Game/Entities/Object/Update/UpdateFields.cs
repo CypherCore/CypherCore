@@ -13,25 +13,25 @@ using System.Numerics;
 
 namespace Game.Entities
 {
-    public class ObjectFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Object, 4)
+    public class ObjectFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Object, 4), IsUpdateFieldStructure<WorldObject>
     {
         public UpdateField<uint> EntryId = new(0, 1);
         public UpdateField<uint> DynamicFlags = new(0, 2);
         public UpdateField<float> Scale = new(0, 3);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            data.WriteUInt32(GetViewerDependentEntryId(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentDynamicFlags(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentEntryId(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentDynamicFlags(this, receiver, owner));
             data.WriteFloat(Scale);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, WorldObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 4);
 
@@ -40,11 +40,11 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(GetViewerDependentEntryId(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentEntryId(this, receiver, owner));
                 }
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(GetViewerDependentDynamicFlags(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentDynamicFlags(this, receiver, owner));
                 }
                 if (changesMask[3])
                 {
@@ -61,7 +61,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentEntryId(ObjectFieldData objectData, WorldObject obj, Player receiver)
+        uint GetViewerDependentEntryId(ObjectFieldData objectData, Player receiver, WorldObject obj)
         {
             uint entryId = objectData.EntryId;
             Unit unit = obj.ToUnit();
@@ -76,7 +76,7 @@ namespace Game.Entities
             return entryId;
         }
 
-        uint GetViewerDependentDynamicFlags(ObjectFieldData objectData, WorldObject obj, Player receiver)
+        uint GetViewerDependentDynamicFlags(ObjectFieldData objectData, Player receiver, WorldObject obj)
         {
             uint dynamicFlags = objectData.DynamicFlags;
 
@@ -177,14 +177,14 @@ namespace Game.Entities
         }
     }
 
-    public class ItemEnchantment() : HasChangesMask(5)
+    public class ItemEnchantment() : HasChangesMask(5), IsUpdateFieldStructure<Item>
     {
         public UpdateField<uint> ID = new(0, 1);
         public UpdateField<uint> Duration = new(0, 2);
         public UpdateField<short> Charges = new(0, 3);
         public UpdateField<ushort> Inactive = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Item owner)
         {
             data.WriteUInt32(ID);
             data.WriteUInt32(Duration);
@@ -192,7 +192,7 @@ namespace Game.Entities
             data.WriteUInt16(Inactive);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Item owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -232,18 +232,18 @@ namespace Game.Entities
         }
     }
 
-    public class ItemMod : IEquatable<ItemMod>
+    public class ItemMod : IEquatable<ItemMod>, IsUpdateFieldStructure<Item>
     {
         public byte Type;
         public uint Value;
 
-        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Item owner)
         {
             data.WriteUInt8(Type);
             data.WriteUInt32(Value);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Item owner)
         {
             data.WriteUInt8(Type);
             data.WriteUInt32(Value);
@@ -256,21 +256,21 @@ namespace Game.Entities
         }
     }
 
-    public class ItemModList() : HasChangesMask(1)
+    public class ItemModList() : HasChangesMask(1), IsUpdateFieldStructure<Item>
     {
         public DynamicUpdateField<ItemMod> Values = new(-1, 0);
 
-        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Item owner)
         {
             data.WriteBits(Values.Size(), 6);
             for (int i = 0; i < Values.Size(); ++i)
             {
-                Values[i].WriteCreate(data, owner, receiver);
+                Values[i].WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Item owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -292,7 +292,7 @@ namespace Game.Entities
                 {
                     if (Values.HasChanged(i) || ignoreChangesMask)
                     {
-                        Values[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        Values[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -306,20 +306,20 @@ namespace Game.Entities
         }
     }
 
-    public class ArtifactPower : IEquatable<ArtifactPower>
+    public class ArtifactPower : IEquatable<ArtifactPower>, IsUpdateFieldStructure<Item>
     {
         public ushort ArtifactPowerId;
         public byte PurchasedRank;
         public byte CurrentRankWithBonus;
 
-        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Item owner)
         {
             data.WriteUInt16(ArtifactPowerId);
             data.WriteUInt8(PurchasedRank);
             data.WriteUInt8(CurrentRankWithBonus);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Item owner)
         {
             data.WriteUInt16(ArtifactPowerId);
             data.WriteUInt8(PurchasedRank);
@@ -334,13 +334,13 @@ namespace Game.Entities
         }
     }
 
-    public class SocketedGem() : HasChangesMask(20)
+    public class SocketedGem() : HasChangesMask(20), IsUpdateFieldStructure<Item>
     {
         public UpdateField<uint> ItemId = new(0, 1);
         public UpdateField<byte> Context = new(0, 2);
         public UpdateFieldArray<ushort> BonusListIDs = new(16, 3, 4);
 
-        public void WriteCreate(WorldPacket data, Item owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Item owner)
         {
             data.WriteUInt32(ItemId);
             for (int i = 0; i < 16; ++i)
@@ -349,7 +349,7 @@ namespace Game.Entities
             data.WriteUInt8(Context);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Item owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Item owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -392,7 +392,7 @@ namespace Game.Entities
         }
     }
 
-    public class ItemData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Item, 41)
+    public class ItemData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Item, 41), IsUpdateFieldStructure<Item>
     {
         public DynamicUpdateField<ArtifactPower> ArtifactPowers = new(0, 1);
         public DynamicUpdateField<SocketedGem> Gems = new(0, 2);
@@ -417,7 +417,7 @@ namespace Game.Entities
         public UpdateFieldArray<int> SpellCharges = new(5, 21, 22);
         public UpdateFieldArray<ItemEnchantment> Enchantment = new(13, 27, 28);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Item owner)
         {
             data.WritePackedGuid(Owner);
             data.WritePackedGuid(ContainedIn);
@@ -435,7 +435,7 @@ namespace Game.Entities
             data.WriteUInt32(DynamicFlags);
             for (int i = 0; i < 13; ++i)
             {
-                Enchantment[i].WriteCreate(data, owner, receiver);
+                Enchantment[i].WriteCreate(data, receiver, owner);
             }
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
@@ -463,20 +463,20 @@ namespace Game.Entities
             }
             for (int i = 0; i < ArtifactPowers.Size(); ++i)
             {
-                ArtifactPowers[i].WriteCreate(data, owner, receiver);
+                ArtifactPowers[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < Gems.Size(); ++i)
             {
-                Gems[i].WriteCreate(data, owner, receiver);
+                Gems[i].WriteCreate(data, receiver, owner);
             }
-            Modifiers.GetValue().WriteCreate(data, owner, receiver);
+            Modifiers.GetValue().WriteCreate(data, receiver, owner);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Item owner)
         {
             UpdateMask allowedMaskForTarget = new(ChangeMaskLength, [0xF80A727Fu, 0x000001FFu]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-            WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+            WriteUpdate(_changesMask & allowedMaskForTarget, data, receiver, owner, false);
         }
 
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
@@ -492,7 +492,7 @@ namespace Game.Entities
             changesMask.AND(allowedMaskForTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Item owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Item owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 2);
             for (uint i = 0; i < 2; ++i)
@@ -525,7 +525,7 @@ namespace Game.Entities
                     {
                         if (ArtifactPowers.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            ArtifactPowers[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            ArtifactPowers[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -535,7 +535,7 @@ namespace Game.Entities
                     {
                         if (Gems.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Gems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Gems[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -609,7 +609,7 @@ namespace Game.Entities
                 }
                 if (changesMask[17])
                 {
-                    Modifiers.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    Modifiers.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
             if (changesMask[21])
@@ -628,7 +628,7 @@ namespace Game.Entities
                 {
                     if (changesMask[28 + i])
                     {
-                        Enchantment[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        Enchantment[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -662,12 +662,12 @@ namespace Game.Entities
         }
     }
 
-    public class ContainerData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Container, 101)
+    public class ContainerData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Container, 101), IsUpdateFieldStructure<Bag>
     {
         public UpdateField<uint> NumSlots = new(0, 1);
         public UpdateFieldArray<ObjectGuid> Slots = new(98, 2, 3);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Bag owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Bag owner)
         {
             for (int i = 0; i < 98; ++i)
             {
@@ -676,12 +676,12 @@ namespace Game.Entities
             data.WriteUInt32(NumSlots);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Bag owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Bag owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Bag owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Item owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(_changesMask.GetBlocksMask(0), 4);
             for (uint i = 0; i < 4; ++i)
@@ -716,11 +716,11 @@ namespace Game.Entities
         }
     }
 
-    public class AzeriteEmpoweredItemData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AzeriteEmpoweredItem, 6)
+    public class AzeriteEmpoweredItemData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AzeriteEmpoweredItem, 6), IsUpdateFieldStructure<Item>
     {
         public UpdateFieldArray<int> Selections = new(5, 0, 1);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AzeriteEmpoweredItem owner)
         {
             for (int i = 0; i < 5; ++i)
             {
@@ -728,12 +728,12 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteEmpoweredItem owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AzeriteEmpoweredItem owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AzeriteEmpoweredItem owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, AzeriteEmpoweredItem owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(_changesMask.GetBlocksMask(0), 1);
             if (_changesMask.GetBlock(0) != 0)
@@ -759,18 +759,18 @@ namespace Game.Entities
         }
     }
 
-    public class UnlockedAzeriteEssence : IEquatable<UnlockedAzeriteEssence>
+    public class UnlockedAzeriteEssence : IEquatable<UnlockedAzeriteEssence>, IsUpdateFieldStructure<AzeriteItem>
     {
         public uint AzeriteEssenceID;
         public uint Rank;
 
-        public void WriteCreate(WorldPacket data, AzeriteItem owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AzeriteItem owner)
         {
             data.WriteUInt32(AzeriteEssenceID);
             data.WriteUInt32(Rank);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AzeriteItem owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AzeriteItem owner)
         {
             data.WriteUInt32(AzeriteEssenceID);
             data.WriteUInt32(Rank);
@@ -783,13 +783,13 @@ namespace Game.Entities
         }
     }
 
-    public class SelectedAzeriteEssences() : HasChangesMask(8)
+    public class SelectedAzeriteEssences() : HasChangesMask(8), IsUpdateFieldStructure<AzeriteItem>
     {
         public UpdateField<bool> Enabled = new(0, 1);
         public UpdateField<uint> SpecializationID = new(0, 2);
         public UpdateFieldArray<uint> AzeriteEssenceID = new(4, 3, 4);
 
-        public void WriteCreate(WorldPacket data, AzeriteItem owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AzeriteItem owner)
         {
             for (int i = 0; i < 4; ++i)
             {
@@ -800,7 +800,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AzeriteItem owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AzeriteItem owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -848,7 +848,7 @@ namespace Game.Entities
         }
     }
 
-    public class AzeriteItemData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AzeriteItem, 10)
+    public class AzeriteItemData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AzeriteItem, 10), IsUpdateFieldStructure<AzeriteItem>
     {
         public UpdateField<bool> Enabled = new(0, 1);
         public DynamicUpdateField<UnlockedAzeriteEssence> UnlockedEssences = new(0, 2);
@@ -860,7 +860,7 @@ namespace Game.Entities
         public UpdateField<uint> KnowledgeLevel = new(0, 8);
         public UpdateField<int> DEBUGknowledgeWeek = new(0, 9);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AzeriteItem owner)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
@@ -875,7 +875,7 @@ namespace Game.Entities
             data.WriteInt32(UnlockedEssenceMilestones.Size());
             for (int i = 0; i < UnlockedEssences.Size(); ++i)
             {
-                UnlockedEssences[i].WriteCreate(data, owner, receiver);
+                UnlockedEssences[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < UnlockedEssenceMilestones.Size(); ++i)
             {
@@ -887,16 +887,16 @@ namespace Game.Entities
             }
             for (int i = 0; i < SelectedEssences.Size(); ++i)
             {
-                SelectedEssences[i].WriteCreate(data, owner, receiver);
+                SelectedEssences[i].WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AzeriteItem owner)
         {
             UpdateMask allowedMaskForTarget = new(ChangeMaskLength, [0x0000001Du]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-            WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+            WriteUpdate(_changesMask & allowedMaskForTarget, data, receiver, owner, false);
         }
 
         public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
@@ -912,7 +912,7 @@ namespace Game.Entities
             changesMask.AND(allowedMaskForTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AzeriteItem owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, AzeriteItem owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 10);
 
@@ -953,7 +953,7 @@ namespace Game.Entities
                     {
                         if (UnlockedEssences.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            UnlockedEssences[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            UnlockedEssences[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -973,7 +973,7 @@ namespace Game.Entities
                     {
                         if (SelectedEssences.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            SelectedEssences[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            SelectedEssences[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -1016,18 +1016,18 @@ namespace Game.Entities
         }
     }
 
-    public class SpellCastVisualField : IEquatable<SpellCastVisual>
+    public class SpellCastVisualField : IEquatable<SpellCastVisual>, IsUpdateFieldStructure<WorldObject>
     {
         public uint SpellXSpellVisualID;
         public uint ScriptVisualID;
 
-        public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteUInt32(SpellXSpellVisualID);
             data.WriteUInt32(ScriptVisualID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteUInt32(SpellXSpellVisualID);
             data.WriteUInt32(ScriptVisualID);
@@ -1040,25 +1040,25 @@ namespace Game.Entities
         }
     }
 
-    public class UnitChannel : IEquatable<UnitChannel>
+    public class UnitChannel : IEquatable<UnitChannel>, IsUpdateFieldStructure<Unit>
     {
         public uint SpellID;
         public SpellCastVisualField SpellVisual = new();
         public uint StartTimeMs;
         public uint Duration;
 
-        public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Unit owner)
         {
             data.WriteUInt32(SpellID);
-            SpellVisual.WriteCreate(data, owner, receiver);
+            SpellVisual.WriteCreate(data, receiver, owner);
             data.WriteUInt32(StartTimeMs);
             data.WriteUInt32(Duration);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Unit owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Unit owner)
         {
             data.WriteUInt32(SpellID);
-            SpellVisual.WriteUpdate(data, ignoreChangesMask, owner, receiver);
+            SpellVisual.WriteUpdate(ignoreChangesMask, data, receiver, owner);
             data.WriteUInt32(StartTimeMs);
             data.WriteUInt32(Duration);
         }
@@ -1072,7 +1072,7 @@ namespace Game.Entities
         }
     }
 
-    public class VisibleItem() : HasChangesMask(8)
+    public class VisibleItem() : HasChangesMask(8), IsUpdateFieldStructure<Unit>
     {
         public UpdateField<bool> Field_10 = new(0, 1);
         public UpdateField<bool> Field_11 = new(0, 2);
@@ -1082,7 +1082,7 @@ namespace Game.Entities
         public UpdateField<ushort> ItemAppearanceModID = new(0, 6);
         public UpdateField<ushort> ItemVisual = new(0, 7);
 
-        public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Unit owner)
         {
             data.WriteUInt32(ItemID);
             data.WriteUInt32(SecondaryItemModifiedAppearanceID);
@@ -1094,7 +1094,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Unit owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Unit owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -1153,18 +1153,18 @@ namespace Game.Entities
         }
     }
 
-    public class PassiveSpellHistory : IEquatable<PassiveSpellHistory>
+    public class PassiveSpellHistory : IEquatable<PassiveSpellHistory>, IsUpdateFieldStructure<Unit>
     {
         public int SpellID;
         public int AuraSpellID;
 
-        public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Unit owner)
         {
             data.WriteInt32(SpellID);
             data.WriteInt32(AuraSpellID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Unit owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Unit owner)
         {
             data.WriteInt32(SpellID);
             data.WriteInt32(AuraSpellID);
@@ -1177,13 +1177,13 @@ namespace Game.Entities
         }
     }
 
-    public class UnitAssistActionData() : HasChangesMask(4)
+    public class UnitAssistActionData() : HasChangesMask(4), IsUpdateFieldStructure<Unit>
     {
         public UpdateField<byte> Type = new(0, 1);
         public UpdateFieldString PlayerName = new(0, 2);
         public UpdateField<uint> VirtualRealmAddress = new(0, 3);
 
-        public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Unit owner)
         {
             data.WriteUInt8(Type);
             data.WriteUInt32(VirtualRealmAddress);
@@ -1192,7 +1192,7 @@ namespace Game.Entities
             data.WriteString(PlayerName);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Unit owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Unit owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -1229,7 +1229,7 @@ namespace Game.Entities
         }
     }
 
-    public class UnitData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Unit, 228)
+    public class UnitData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Unit, 228), IsUpdateFieldStructure<Unit>
     {
         public UpdateField<bool> Field_314 = new(0, 1);
         public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 2);
@@ -1377,19 +1377,19 @@ namespace Game.Entities
         public UpdateFieldArray<int> BonusResistanceMods = new(7, 206, 214);
         public UpdateFieldArray<int> ManaCostModifier = new(7, 206, 221);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Unit owner)
         {
-            data.WriteUInt32(GetViewerDependentDisplayId(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentNpcFlags(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentNpcFlags2(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentDisplayId(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentNpcFlags(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentNpcFlags2(this, receiver, owner));
 
-            data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentStateAnimID(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentStateAnimKitID(this, receiver, owner));
 
-            var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+            var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, receiver, owner);
             data.WriteInt32(stateWorldEffectIDs.Count);
-            data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, receiver, owner));
             data.WriteInt32(SpellOverrideNameID);
             for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
                 data.WriteUInt32(stateWorldEffectIDs[i]);
@@ -1407,7 +1407,7 @@ namespace Game.Entities
             data.WritePackedGuid(Target);
             data.WritePackedGuid(BattlePetCompanionGUID);
             data.WriteUInt64(BattlePetDBID);
-            ChannelData.GetValue().WriteCreate(data, owner, receiver);
+            ChannelData.GetValue().WriteCreate(data, receiver, owner);
             data.WriteInt8(SpellEmpowerStage);
             data.WriteUInt32(SummonedByHomeRealm);
             data.WriteUInt8(Race);
@@ -1439,12 +1439,12 @@ namespace Game.Entities
             data.WriteInt32(ScalingLevelMax);
             data.WriteInt32(ScalingLevelDelta);
             data.WriteUInt8(ScalingFactionGroup);
-            data.WriteUInt32(GetViewerDependentFactionTemplate(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentFlags(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentFlags2(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentFlags3(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentFlags4(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentAuraState(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentFactionTemplate(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentFlags(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentFlags2(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentFlags3(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentFlags4(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentAuraState(this, receiver, owner));
             for (int i = 0; i < 2; ++i)
                 data.WriteUInt32(AttackRoundBaseTime[i]);
 
@@ -1514,7 +1514,7 @@ namespace Game.Entities
                 data.WriteUInt32(BaseHealth);
 
             data.WriteUInt8(SheatheState);
-            data.WriteUInt8(GetViewerDependentPvpFlags(this, owner, receiver));
+            data.WriteUInt8(GetViewerDependentPvpFlags(this, receiver, owner));
             data.WriteUInt8(PetFlags);
             data.WriteUInt8(ShapeshiftForm);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
@@ -1547,7 +1547,7 @@ namespace Game.Entities
             data.WriteUInt32(WildBattlePetLevel);
             data.WriteUInt32(BattlePetCompanionExperience);
             data.WriteUInt32(BattlePetCompanionNameTimestamp);
-            data.WriteInt32(GetViewerDependentInteractSpellId(this, owner, receiver));
+            data.WriteInt32(GetViewerDependentInteractSpellId(this, receiver, owner));
             data.WriteInt32(ScaleDuration);
             data.WriteInt32(LooksLikeMountID);
             data.WriteInt32(LooksLikeCreatureID);
@@ -1570,7 +1570,7 @@ namespace Game.Entities
             data.WritePackedGuid(NameplateAttachToGUID);
 
             for (int i = 0; i < PassiveSpells.Size(); ++i)
-                PassiveSpells[i].WriteCreate(data, owner, receiver);
+                PassiveSpells[i].WriteCreate(data, receiver, owner);
 
             for (int i = 0; i < WorldEffects.Size(); ++i)
                 data.WriteInt32(WorldEffects[i]);
@@ -1579,14 +1579,14 @@ namespace Game.Entities
                 data.WritePackedGuid(ChannelObjects[i]);
 
             for (int i = 0; i < 3; ++i)
-                VirtualItems[i].WriteCreate(data, owner, receiver);
+                VirtualItems[i].WriteCreate(data, receiver, owner);
 
             data.FlushBits();
             data.WriteBit(Field_314);
             data.WriteBits(AssistActionData.HasValue(), 1);
             if (AssistActionData.HasValue())
             {
-                AssistActionData.GetValue().WriteCreate(data, owner, receiver);
+                AssistActionData.GetValue().WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
         }
@@ -1613,14 +1613,14 @@ namespace Game.Entities
             changesMask.AND(allowedMaskForTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Unit owner)
         {
             UpdateMask allowedMaskForTarget = new(ChangeMaskLength, [0xFFFEFFFFu, 0x1FF7FFFFu, 0x01EFFFFDu, 0xFFFFF001u, 0x3FFFFFFFu, 0x01FC0000u, 0x00000000u, 0x00000000u]);
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-            WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+            WriteUpdate(_changesMask & allowedMaskForTarget, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Unit owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Unit owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 8);
             for (uint i = 0; i < 8; ++i)
@@ -1637,7 +1637,7 @@ namespace Game.Entities
                 }
                 if (changesMask[2])
                 {
-                    stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+                    stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, receiver, owner);
                     data.WriteBits(stateWorldEffectIDs.Count, 32);
                     for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
                     {
@@ -1679,7 +1679,7 @@ namespace Game.Entities
                     {
                         if (PassiveSpells.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            PassiveSpells[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            PassiveSpells[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -1705,31 +1705,31 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(GetViewerDependentDisplayId(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentDisplayId(this, receiver, owner));
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(GetViewerDependentNpcFlags(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentNpcFlags(this, receiver, owner));
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(GetViewerDependentNpcFlags2(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentNpcFlags2(this, receiver, owner));
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, receiver, owner));
                 }
                 if (changesMask[10])
                 {
-                    data.WriteUInt32(GetViewerDependentStateAnimID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentStateAnimID(this, receiver, owner));
                 }
                 if (changesMask[11])
                 {
-                    data.WriteUInt32(GetViewerDependentStateAnimKitID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentStateAnimKitID(this, receiver, owner));
                 }
                 if (changesMask[12])
                 {
-                    data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, receiver, owner));
                 }
                 if (changesMask[13])
                 {
@@ -1781,7 +1781,7 @@ namespace Game.Entities
                 }
                 if (changesMask[25])
                 {
-                    ChannelData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    ChannelData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[26])
                 {
@@ -1860,27 +1860,27 @@ namespace Game.Entities
                 }
                 if (changesMask[45])
                 {
-                    data.WriteUInt32(GetViewerDependentFactionTemplate(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFactionTemplate(this, receiver, owner));
                 }
                 if (changesMask[46])
                 {
-                    data.WriteUInt32(GetViewerDependentFlags(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFlags(this, receiver, owner));
                 }
                 if (changesMask[47])
                 {
-                    data.WriteUInt32(GetViewerDependentFlags2(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFlags2(this, receiver, owner));
                 }
                 if (changesMask[48])
                 {
-                    data.WriteUInt32(GetViewerDependentFlags3(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFlags3(this, receiver, owner));
                 }
                 if (changesMask[49])
                 {
-                    data.WriteUInt32(GetViewerDependentFlags4(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFlags4(this, receiver, owner));
                 }
                 if (changesMask[50])
                 {
-                    data.WriteUInt32(GetViewerDependentAuraState(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentAuraState(this, receiver, owner));
                 }
                 if (changesMask[51])
                 {
@@ -2023,7 +2023,7 @@ namespace Game.Entities
                 }
                 if (changesMask[86])
                 {
-                    data.WriteUInt8(GetViewerDependentPvpFlags(this, owner, receiver));
+                    data.WriteUInt8(GetViewerDependentPvpFlags(this, receiver, owner));
                 }
                 if (changesMask[87])
                 {
@@ -2146,7 +2146,7 @@ namespace Game.Entities
                 }
                 if (changesMask[117])
                 {
-                    data.WriteInt32(GetViewerDependentInteractSpellId(this, owner, receiver));
+                    data.WriteInt32(GetViewerDependentInteractSpellId(this, receiver, owner));
                 }
                 if (changesMask[118])
                 {
@@ -2225,7 +2225,7 @@ namespace Game.Entities
                 {
                     if (AssistActionData.HasValue())
                     {
-                        AssistActionData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        AssistActionData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -2307,7 +2307,7 @@ namespace Game.Entities
                 {
                     if (changesMask[179 + i])
                     {
-                        VirtualItems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        VirtualItems[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -2464,7 +2464,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentDisplayId(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentDisplayId(UnitData unitData, Player receiver, Unit unit)
         {
             uint displayId = unitData.DisplayID;
             if (unit.IsCreature())
@@ -2509,7 +2509,7 @@ namespace Game.Entities
             return displayId;
         }
 
-        uint GetViewerDependentNpcFlags(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentNpcFlags(UnitData unitData, Player receiver, Unit unit)
         {
             uint npcFlag = unitData.NpcFlags;
             if (npcFlag != 0)
@@ -2534,7 +2534,7 @@ namespace Game.Entities
             return npcFlag;
         }
 
-        uint GetViewerDependentNpcFlags2(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentNpcFlags2(UnitData unitData, Player receiver, Unit unit)
         {
             uint npcFlag = unitData.NpcFlags2;
             if (npcFlag != 0)
@@ -2547,7 +2547,7 @@ namespace Game.Entities
             return npcFlag;
         }
 
-        uint GetViewerDependentFactionTemplate(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentFactionTemplate(UnitData unitData, Player receiver, Unit unit)
         {
             uint factionTemplate = unitData.FactionTemplate;
             if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
@@ -2562,7 +2562,7 @@ namespace Game.Entities
             return factionTemplate;
         }
 
-        uint GetViewerDependentFlags(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentFlags(UnitData unitData, Player receiver, Unit unit)
         {
             uint flags = unitData.Flags;
             // Update fields of triggers, transformed units or uninteractible units (values dependent on GM state)
@@ -2572,7 +2572,7 @@ namespace Game.Entities
             return flags;
         }
 
-        uint GetViewerDependentFlags2(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentFlags2(UnitData unitData, Player receiver, Unit unit)
         {
             uint flags = unitData.Flags2;
             // Gamemasters should be always able to interact with units - remove uninteractible flag
@@ -2582,7 +2582,7 @@ namespace Game.Entities
             return flags;
         }
 
-        uint GetViewerDependentFlags3(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentFlags3(UnitData unitData, Player receiver, Unit unit)
         {
             uint flags = unitData.Flags3;
             if ((flags & (uint)UnitFlags3.AlreadySkinned) != 0 && unit.IsCreature() && !unit.ToCreature().IsSkinnedBy(receiver))
@@ -2591,18 +2591,18 @@ namespace Game.Entities
             return flags;
         }
 
-        uint GetViewerDependentFlags4(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentFlags4(UnitData unitData, Player receiver, Unit unit)
         {
             return unitData.Flags4;
         }
 
-        uint GetViewerDependentAuraState(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentAuraState(UnitData unitData, Player receiver, Unit unit)
         {
             // Check per caster aura states to not enable using a spell in client if specified aura is not by target
             return unit.BuildAuraStateUpdateForTarget(receiver);
         }
 
-        byte GetViewerDependentPvpFlags(UnitData unitData, Unit unit, Player receiver)
+        byte GetViewerDependentPvpFlags(UnitData unitData, Player receiver, Unit unit)
         {
             byte pvpFlags = unitData.PvpFlags;
             if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
@@ -2617,7 +2617,7 @@ namespace Game.Entities
             return pvpFlags;
         }
 
-        int GetViewerDependentInteractSpellId(UnitData unitData, Unit unit, Player receiver)
+        int GetViewerDependentInteractSpellId(UnitData unitData, Player receiver, Unit unit)
         {
             int interactSpellId = unitData.InteractSpellID;
             if ((unitData.NpcFlags & (uint)NPCFlags.SpellClick) != 0 && interactSpellId == 0)
@@ -2640,7 +2640,7 @@ namespace Game.Entities
             return interactSpellId;
         }
 
-        List<uint> GetViewerDependentStateWorldEffectIDs(UnitData unitData, Unit unit, Player receiver)
+        List<uint> GetViewerDependentStateWorldEffectIDs(UnitData unitData, Player receiver, Unit unit)
         {
             List<uint> stateWorldEffects = unitData.StateWorldEffectIDs;
 
@@ -2654,7 +2654,7 @@ namespace Game.Entities
             return stateWorldEffects;
         }
 
-        uint GetViewerDependentStateSpellVisualID(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentStateSpellVisualID(UnitData unitData, Player receiver, Unit unit)
         {
             uint stateSpellVisual = unitData.StateSpellVisualID;
 
@@ -2668,7 +2668,7 @@ namespace Game.Entities
             return stateSpellVisual;
         }
 
-        uint GetViewerDependentStateAnimID(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentStateAnimID(UnitData unitData, Player receiver, Unit unit)
         {
             uint stateAnimId = Global.DB2Mgr.GetEmptyAnimStateID();
 
@@ -2682,7 +2682,7 @@ namespace Game.Entities
             return stateAnimId;
         }
 
-        uint GetViewerDependentStateAnimKitID(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentStateAnimKitID(UnitData unitData, Player receiver, Unit unit)
         {
             uint stateAnimKitId = unitData.StateAnimKitID;
 
@@ -2696,7 +2696,7 @@ namespace Game.Entities
             return stateAnimKitId;
         }
 
-        uint GetViewerDependentStateWorldEffectsQuestObjectiveID(UnitData unitData, Unit unit, Player receiver)
+        uint GetViewerDependentStateWorldEffectsQuestObjectiveID(UnitData unitData, Player receiver, Unit unit)
         {
             uint stateWorldEffectsQuestObjectiveId = unitData.StateWorldEffectsQuestObjectiveID;
 
@@ -2727,28 +2727,18 @@ namespace Game.Entities
         }
     }
 
-    public class ChrCustomizationChoice : IEquatable<ChrCustomizationChoice>, IComparable<ChrCustomizationChoice>
+    public class ChrCustomizationChoice : IEquatable<ChrCustomizationChoice>, IsUpdateFieldStructure<WorldObject>
     {
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationChoiceID;
 
-        public int CompareTo(ChrCustomizationChoice other)
-        {
-            int result = ChrCustomizationOptionID.CompareTo(other.ChrCustomizationOptionID);
-
-            if (result == 0)
-                result = ChrCustomizationChoiceID.CompareTo(other.ChrCustomizationChoiceID);
-
-            return result;
-        }
-
-        public void WriteCreate(WorldPacket data, WorldObject owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteUInt32(ChrCustomizationOptionID);
             data.WriteUInt32(ChrCustomizationChoiceID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteUInt32(ChrCustomizationOptionID);
             data.WriteUInt32(ChrCustomizationChoiceID);
@@ -2761,7 +2751,7 @@ namespace Game.Entities
         }
     }
 
-    public class QuestLog() : HasChangesMask(30)
+    public class QuestLog() : HasChangesMask(30), IsUpdateFieldStructure<Player>
     {
         public UpdateField<uint> QuestID = new(0, 1);
         public UpdateField<ushort> StateFlags = new(0, 2);
@@ -2770,7 +2760,7 @@ namespace Game.Entities
         public UpdateField<uint> EnabledObjectivesMask = new(0, 5);
         public UpdateFieldArray<ushort> ObjectiveProgress = new(24, 6, 7);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(QuestID);
             data.WriteUInt16(StateFlags);
@@ -2783,7 +2773,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -2841,7 +2831,7 @@ namespace Game.Entities
         }
     }
 
-    public class ArenaCooldown() : HasChangesMask(8)
+    public class ArenaCooldown() : HasChangesMask(8), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> SpellID = new(0, 1);
         public UpdateField<int> Charges = new(0, 2);
@@ -2851,7 +2841,7 @@ namespace Game.Entities
         public UpdateField<uint> NextChargeTime = new(0, 6);
         public UpdateField<byte> MaxCharges = new(0, 7);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellID);
             data.WriteInt32(Charges);
@@ -2862,7 +2852,7 @@ namespace Game.Entities
             data.WriteUInt8(MaxCharges);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -2917,18 +2907,18 @@ namespace Game.Entities
         }
     }
 
-    public class ZonePlayerForcedReaction() : HasChangesMask(3)
+    public class ZonePlayerForcedReaction() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> FactionID = new(0, 1);
         public UpdateField<int> Reaction = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(FactionID);
             data.WriteInt32(Reaction);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -2958,12 +2948,12 @@ namespace Game.Entities
         }
     }
 
-    public class PetCreatureName() : HasChangesMask(3)
+    public class PetCreatureName() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public UpdateField<uint> CreatureID = new(0, 1);
         public UpdateFieldString Name = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(CreatureID);
             data.WriteBits(Name.Size(), 8);
@@ -2971,7 +2961,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -3003,13 +2993,13 @@ namespace Game.Entities
         }
     }
 
-    public class CTROptions : IEquatable<CTROptions>
+    public class CTROptions : IEquatable<CTROptions>, IsUpdateFieldStructure<Player>
     {
         public List<uint> ConditionalFlags = [];
         public byte FactionGroup;
         public uint ChromieTimeExpansionMask;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ConditionalFlags.Count);
             data.WriteUInt8(FactionGroup);
@@ -3020,7 +3010,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ConditionalFlags.Count);
             data.FlushBits();
@@ -3040,7 +3030,7 @@ namespace Game.Entities
         }
     }
 
-    public struct LeaverInfo : IEquatable<LeaverInfo>
+    public struct LeaverInfo : IEquatable<LeaverInfo>, IsUpdateFieldStructure<Player>
     {
         public bool IsLeaver;
         public ObjectGuid BnetAccountGUID;
@@ -3053,7 +3043,7 @@ namespace Game.Entities
         public long LeaverExpirationTime;
         public int Flags;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(BnetAccountGUID);
             data.WriteFloat(LeaveScore);
@@ -3068,7 +3058,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.FlushBits();
             data.WritePackedGuid(BnetAccountGUID);
@@ -3099,11 +3089,11 @@ namespace Game.Entities
         }
     }
 
-    public class DeclinedNames() : HasChangesMask(6)
+    public class DeclinedNames() : HasChangesMask(6), IsUpdateFieldStructure<Player>
     {
         public UpdateFieldArrayString Name = new(5, 0, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             for (int i = 0; i < 5; ++i)
             {
@@ -3116,7 +3106,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -3157,7 +3147,7 @@ namespace Game.Entities
         }
     }
 
-    public class CustomTabardInfo() : HasChangesMask(6)
+    public class CustomTabardInfo() : HasChangesMask(6), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> EmblemStyle = new(0, 1);
         public UpdateField<int> EmblemColor = new(0, 2);
@@ -3165,7 +3155,7 @@ namespace Game.Entities
         public UpdateField<int> BorderColor = new(0, 4);
         public UpdateField<int> BackgroundColor = new(0, 5);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(EmblemStyle);
             data.WriteInt32(EmblemColor);
@@ -3174,7 +3164,7 @@ namespace Game.Entities
             data.WriteInt32(BackgroundColor);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -3219,7 +3209,7 @@ namespace Game.Entities
         }
     }
 
-    public struct NPCAsPlayerInfo : IEquatable<NPCAsPlayerInfo>
+    public struct NPCAsPlayerInfo : IEquatable<NPCAsPlayerInfo>, IsUpdateFieldStructure<Player>
     {
         public int Field_0;
         public int CharacterLoadoutID;
@@ -3228,7 +3218,7 @@ namespace Game.Entities
         public float FacingWorldSpace;
         public ObjectGuid TransportGUID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteInt32(CharacterLoadoutID);
@@ -3238,7 +3228,7 @@ namespace Game.Entities
             data.WritePackedGuid(TransportGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteInt32(CharacterLoadoutID);
@@ -3259,7 +3249,7 @@ namespace Game.Entities
         }
     }
 
-    public class PlayerData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Player, 325)
+    public class PlayerData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Player, 325), IsUpdateFieldStructure<Player>
     {
         public UpdateField<bool> HasQuestSession = new(0, 1);
         public UpdateField<bool> HasLevelLink = new(0, 2);
@@ -3316,7 +3306,7 @@ namespace Game.Entities
         public UpdateFieldArray<ItemInstance> VisibleEquipableSpells = new(16, 288, 289);
         public UpdateFieldArray<uint> PlunderstormItemDisplayID = new(19, 305, 306);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(DuelArbiter);
             data.WritePackedGuid(WowAccount);
@@ -3343,7 +3333,7 @@ namespace Game.Entities
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
                 for (int i = 0; i < 175; ++i)
-                    QuestLog[i].WriteCreate(data, owner, receiver);
+                    QuestLog[i].WriteCreate(data, receiver, owner);
 
                 data.WriteInt32(QuestSessionQuestLog.Size());
             }
@@ -3363,13 +3353,13 @@ namespace Game.Entities
             data.WriteInt32(ArenaCooldowns.Size());
             for (int i = 0; i < 32; ++i)
             {
-                ForcedReactions[i].WriteCreate(data, owner, receiver);
+                ForcedReactions[i].WriteCreate(data, receiver, owner);
             }
             data.WriteInt32(OfferedAdvJournalQuestID);
             data.WriteInt32(OfferedScriptQuestID);
             data.WriteInt32(CurrentBattlePetSpeciesID);
             data.WriteInt32(PetNames.Size());
-            ((CTROptions)CtrOptions).WriteCreate(data, owner, receiver);
+            ((CTROptions)CtrOptions).WriteCreate(data, receiver, owner);
             data.WriteInt32(CovenantID);
             data.WriteInt32(SoulbindID);
             data.WritePackedGuid(SpectateTarget);
@@ -3379,26 +3369,26 @@ namespace Game.Entities
             {
                 data.WriteUInt32(PlunderstormItemDisplayID[i]);
             }
-            PersonalTabard.GetValue().WriteCreate(data, owner, receiver);
-            NpcAsPlayerInfo.GetValue().WriteCreate(data, owner, receiver);
+            PersonalTabard.GetValue().WriteCreate(data, receiver, owner);
+            NpcAsPlayerInfo.GetValue().WriteCreate(data, receiver, owner);
             for (int i = 0; i < Customizations.Size(); ++i)
             {
-                Customizations[i].WriteCreate(data, owner, receiver);
+                Customizations[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < RandomCustomizations.Size(); ++i)
             {
-                RandomCustomizations[i].WriteCreate(data, owner, receiver);
+                RandomCustomizations[i].WriteCreate(data, receiver, owner);
             }
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
                 for (int i = 0; i < QuestSessionQuestLog.Size(); ++i)
                 {
-                    QuestSessionQuestLog[i].WriteCreate(data, owner, receiver);
+                    QuestSessionQuestLog[i].WriteCreate(data, receiver, owner);
                 }
             }
             for (int i = 0; i < ArenaCooldowns.Size(); ++i)
             {
-                ArenaCooldowns[i].WriteCreate(data, owner, receiver);
+                ArenaCooldowns[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < VisualItemReplacements.Size(); ++i)
             {
@@ -3406,7 +3396,7 @@ namespace Game.Entities
             }
             for (int i = 0; i < 19; ++i)
             {
-                VisibleItems[i].WriteCreate(data, owner, receiver);
+                VisibleItems[i].WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
             data.WriteBits(Name.Size(), 6);
@@ -3418,18 +3408,18 @@ namespace Game.Entities
             data.WriteBits(DeclinedNames.HasValue(), 1);
             DungeonScore.GetValue().Write(data);
             data.WriteString(Name);
-            LeaverInfo.GetValue().WriteCreate(data, owner, receiver);
+            LeaverInfo.GetValue().WriteCreate(data, receiver, owner);
             for (int i = 0; i < 16; ++i)
             {
                 VisibleEquipableSpells[i].Write(data);
             }
             for (int i = 0; i < PetNames.Size(); ++i)
             {
-                PetNames[i].WriteCreate(data, owner, receiver);
+                PetNames[i].WriteCreate(data, receiver, owner);
             }
             if (DeclinedNames.HasValue())
             {
-                DeclinedNames.GetValue().WriteCreate(data, owner, receiver);
+                DeclinedNames.GetValue().WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
         }
@@ -3452,14 +3442,14 @@ namespace Game.Entities
             changesMask.AND(allowedMaskForTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask allowedMaskForTarget = new(ChangeMaskLength, [0x000FFFFFu, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0x00000000u, 0xFFFFFFF0u, 0xFFFFFFFFu, 0xFFFFFFFFu, 0x0000001Fu]);
             PlayerDataAppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-            WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+            WriteUpdate(_changesMask & allowedMaskForTarget, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Player owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 11);
             for (uint i = 0; i < 11; ++i)
@@ -3529,7 +3519,7 @@ namespace Game.Entities
                     {
                         if (Customizations.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Customizations[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Customizations[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -3539,7 +3529,7 @@ namespace Game.Entities
                     {
                         if (RandomCustomizations.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            RandomCustomizations[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            RandomCustomizations[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -3550,9 +3540,9 @@ namespace Game.Entities
                         if (QuestSessionQuestLog.HasChanged(i) || ignoreNestedChangesMask)
                         {
                             if (noQuestLogChangesMask)
-                                QuestSessionQuestLog[i].WriteCreate(data, owner, receiver);
+                                QuestSessionQuestLog[i].WriteCreate(data, receiver, owner);
                             else
-                                QuestSessionQuestLog[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                                QuestSessionQuestLog[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -3562,7 +3552,7 @@ namespace Game.Entities
                     {
                         if (ArenaCooldowns.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            ArenaCooldowns[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            ArenaCooldowns[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -3582,7 +3572,7 @@ namespace Game.Entities
                     {
                         if (PetNames.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            PetNames[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            PetNames[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -3703,7 +3693,7 @@ namespace Game.Entities
                 }
                 if (changesMask[39])
                 {
-                    CtrOptions.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    CtrOptions.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[40])
                 {
@@ -3723,11 +3713,11 @@ namespace Game.Entities
                 }
                 if (changesMask[47])
                 {
-                    PersonalTabard.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    PersonalTabard.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[48])
                 {
-                    NpcAsPlayerInfo.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    NpcAsPlayerInfo.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[35])
                 {
@@ -3745,13 +3735,13 @@ namespace Game.Entities
                 }
                 if (changesMask[43])
                 {
-                    LeaverInfo.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    LeaverInfo.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[46])
                 {
                     if (DeclinedNames.HasValue())
                     {
-                        DeclinedNames.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        DeclinedNames.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -3772,9 +3762,9 @@ namespace Game.Entities
                     if (changesMask[53 + i])
                     {
                         if (noQuestLogChangesMask)
-                            QuestLog[i].WriteCreate(data, owner, receiver);
+                            QuestLog[i].WriteCreate(data, receiver, owner);
                         else
-                            QuestLog[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            QuestLog[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -3794,7 +3784,7 @@ namespace Game.Entities
                 {
                     if (changesMask[256 + i])
                     {
-                        ForcedReactions[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ForcedReactions[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -3814,7 +3804,7 @@ namespace Game.Entities
                 {
                     if (changesMask[229 + i])
                     {
-                        VisibleItems[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        VisibleItems[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -3893,7 +3883,7 @@ namespace Game.Entities
         bool IsQuestLogChangesMaskSkipped() { return false; } // bandwidth savings aren't worth the cpu time
     }
 
-    public class SkillInfo() : HasChangesMask(2101)
+    public class SkillInfo() : HasChangesMask(2101), IsUpdateFieldStructure<Player>
     {
         public UpdateFieldArray<ushort> SkillLineID = new(300, 0, 1);
         public UpdateFieldArray<ushort> SkillStep = new(300, 0, 301);
@@ -3903,7 +3893,7 @@ namespace Game.Entities
         public UpdateFieldArray<ushort> SkillTempBonus = new(300, 0, 1501);
         public UpdateFieldArray<ushort> SkillPermBonus = new(300, 0, 1801);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             for (int i = 0; i < 300; ++i)
             {
@@ -3917,7 +3907,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -3980,18 +3970,18 @@ namespace Game.Entities
         }
     }
 
-    public class BitVector() : HasChangesMask(2)
+    public class BitVector() : HasChangesMask(2), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<ulong> Values = new(0, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Values.Size());
             for (int i = 0; i < Values.Size(); ++i)
                 data.WriteUInt64(Values[i]);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4032,17 +4022,17 @@ namespace Game.Entities
         }
     }
 
-    public class BitVectors() : HasChangesMask(15)
+    public class BitVectors() : HasChangesMask(15), IsUpdateFieldStructure<Player>
     {
         public UpdateFieldArray<BitVector> Values = new(14, 0, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             for (int i = 0; i < 14; ++i)
-                Values[i].WriteCreate(data, owner, receiver);
+                Values[i].WriteCreate(data, receiver, owner);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4059,7 +4049,7 @@ namespace Game.Entities
                 {
                     if (changesMask[1 + i])
                     {
-                        Values[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        Values[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -4072,13 +4062,13 @@ namespace Game.Entities
         }
     }
 
-    public class PlayerDataElement : IEquatable<PlayerDataElement>
+    public class PlayerDataElement : IEquatable<PlayerDataElement>, IsUpdateFieldStructure<Player>
     {
         public uint Type;
         public float FloatValue;
         public long Int64Value;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(Type);
             if (Type == 1)
@@ -4091,7 +4081,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(Type);
             if (Type == 1)
@@ -4112,18 +4102,18 @@ namespace Game.Entities
         }
     }
 
-    public class RestInfo() : HasChangesMask(3)
+    public class RestInfo() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public UpdateField<uint> Threshold = new(0, 1);
         public UpdateField<byte> StateID = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(Threshold);
             data.WriteUInt8(StateID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4153,7 +4143,7 @@ namespace Game.Entities
         }
     }
 
-    public class PVPInfo() : HasChangesMask(19)
+    public class PVPInfo() : HasChangesMask(19), IsUpdateFieldStructure<Player>
     {
         public UpdateField<bool> Disqualified = new(0, 1);
         public UpdateField<sbyte> Bracket = new(0, 2);
@@ -4174,7 +4164,7 @@ namespace Game.Entities
         public UpdateField<uint> SeasonRoundsPlayed = new(0, 17);
         public UpdateField<uint> SeasonRoundsWon = new(0, 18);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt8(Bracket);
             data.WriteUInt32(PvpRatingID);
@@ -4197,7 +4187,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4311,14 +4301,14 @@ namespace Game.Entities
         }
     }
 
-    public class CharacterRestriction : IEquatable<CharacterRestriction>
+    public class CharacterRestriction : IEquatable<CharacterRestriction>, IsUpdateFieldStructure<Player>
     {
         public int Field_0;
         public int Field_4;
         public int Field_8;
         public uint Type;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteInt32(Field_4);
@@ -4327,7 +4317,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteInt32(Field_4);
@@ -4345,20 +4335,20 @@ namespace Game.Entities
         }
     }
 
-    public class SpellPctModByLabel : IEquatable<SpellPctModByLabel>
+    public class SpellPctModByLabel : IEquatable<SpellPctModByLabel>, IsUpdateFieldStructure<Player>
     {
         public int ModIndex;
         public float ModifierValue;
         public int LabelID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ModIndex);
             data.WriteFloat(ModifierValue);
             data.WriteInt32(LabelID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ModIndex);
             data.WriteFloat(ModifierValue);
@@ -4373,20 +4363,20 @@ namespace Game.Entities
         }
     }
 
-    public class SpellFlatModByLabel : IEquatable<SpellFlatModByLabel>
+    public class SpellFlatModByLabel : IEquatable<SpellFlatModByLabel>, IsUpdateFieldStructure<Player>
     {
         public int ModIndex;
         public int ModifierValue;
         public int LabelID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ModIndex);
             data.WriteInt32(ModifierValue);
             data.WriteInt32(LabelID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ModIndex);
             data.WriteInt32(ModifierValue);
@@ -4401,20 +4391,20 @@ namespace Game.Entities
         }
     }
 
-    public struct SpellPctPVPModByLabel : IEquatable<SpellPctPVPModByLabel>
+    public struct SpellPctPVPModByLabel : IEquatable<SpellPctPVPModByLabel>, IsUpdateFieldStructure<Player>
     {
         public int PvpModIndex;
         public float ModifierValue;
         public int LabelID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(PvpModIndex);
             data.WriteFloat(ModifierValue);
             data.WriteInt32(LabelID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(PvpModIndex);
             data.WriteFloat(ModifierValue);
@@ -4429,20 +4419,20 @@ namespace Game.Entities
         }
     }
 
-    public struct SpellFlatPVPModByLabel : IEquatable<SpellFlatPVPModByLabel>
+    public struct SpellFlatPVPModByLabel : IEquatable<SpellFlatPVPModByLabel>, IsUpdateFieldStructure<Player>
     {
         public int PvpModIndex;
         public int ModifierValue;
         public int LabelID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(PvpModIndex);
             data.WriteInt32(ModifierValue);
             data.WriteInt32(LabelID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(PvpModIndex);
             data.WriteInt32(ModifierValue);
@@ -4457,20 +4447,20 @@ namespace Game.Entities
         }
     }
 
-    public class CompletedProject() : HasChangesMask(4)
+    public class CompletedProject() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public UpdateField<long> FirstCompleted = new(0, 1);
         public UpdateField<uint> ProjectID = new(0, 2);
         public UpdateField<uint> CompletionCount = new(0, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt64(FirstCompleted);
             data.WriteUInt32(ProjectID);
             data.WriteUInt32(CompletionCount);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4505,20 +4495,20 @@ namespace Game.Entities
         }
     }
 
-    public class ResearchHistory() : HasChangesMask(2)
+    public class ResearchHistory() : HasChangesMask(2), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<CompletedProject> CompletedProjects = new(0, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(CompletedProjects.Size());
             for (int i = 0; i < CompletedProjects.Size(); ++i)
             {
-                CompletedProjects[i].WriteCreate(data, owner, receiver);
+                CompletedProjects[i].WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4545,7 +4535,7 @@ namespace Game.Entities
                     {
                         if (CompletedProjects.HasChanged(i) || ignoreChangesMask)
                         {
-                            CompletedProjects[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                            CompletedProjects[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -4559,20 +4549,20 @@ namespace Game.Entities
         }
     }
 
-    public class MawPower : IEquatable<MawPower>
+    public class MawPower : IEquatable<MawPower>, IsUpdateFieldStructure<Player>
     {
         public int SpellID;
         public int MawPowerID;
         public int Stacks;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellID);
             data.WriteInt32(MawPowerID);
             data.WriteInt32(Stacks);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellID);
             data.WriteInt32(MawPowerID);
@@ -4587,11 +4577,11 @@ namespace Game.Entities
         }
     }
 
-    public class MultiFloorExplore : IEquatable<MultiFloorExplore>
+    public class MultiFloorExplore : IEquatable<MultiFloorExplore>, IsUpdateFieldStructure<Player>
     {
         public List<int> WorldMapOverlayIDs = new();
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(WorldMapOverlayIDs.Count);
             for (int i = 0; i < WorldMapOverlayIDs.Count; ++i)
@@ -4600,7 +4590,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(WorldMapOverlayIDs.Count);
             for (int i = 0; i < WorldMapOverlayIDs.Count; ++i)
@@ -4616,18 +4606,18 @@ namespace Game.Entities
         }
     }
 
-    public class RecipeProgressionInfo : IEquatable<RecipeProgressionInfo>
+    public class RecipeProgressionInfo : IEquatable<RecipeProgressionInfo>, IsUpdateFieldStructure<Player>
     {
         public ushort RecipeProgressionGroupID;
         public ushort Experience;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt16(RecipeProgressionGroupID);
             data.WriteUInt16(Experience);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt16(RecipeProgressionGroupID);
             data.WriteUInt16(Experience);
@@ -4640,18 +4630,18 @@ namespace Game.Entities
         }
     }
 
-    public class LevelLinkInfo() : HasChangesMask(3)
+    public class LevelLinkInfo() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public UpdateField<ObjectGuid> TargetGUID = new(0, 1);
         public UpdateField<int> Level = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(TargetGUID);
             data.WriteInt32(Level);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4681,18 +4671,18 @@ namespace Game.Entities
         }
     }
 
-    public class QuestSession() : HasChangesMask(3)
+    public class QuestSession() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public UpdateField<ObjectGuid> Owner = new(0, 1);
         public UpdateField<BitVector> QuestCompleted = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(Owner);
-            QuestCompleted.GetValue().WriteCreate(data, owner, receiver);
+            QuestCompleted.GetValue().WriteCreate(data, receiver, owner);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4710,7 +4700,7 @@ namespace Game.Entities
 
                 if (changesMask[2])
                 {
-                    QuestCompleted.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                    QuestCompleted.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
                 }
             }
         }
@@ -4723,18 +4713,18 @@ namespace Game.Entities
         }
     }
 
-    public class ReplayedQuest() : HasChangesMask(3)
+    public class ReplayedQuest() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> QuestID = new(0, 1);
         public UpdateField<uint> ReplayTime = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(QuestID);
             data.WriteUInt32(ReplayTime);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4764,7 +4754,7 @@ namespace Game.Entities
         }
     }
 
-    public class TraitEntry : IEquatable<TraitEntry>
+    public class TraitEntry : IEquatable<TraitEntry>, IsUpdateFieldStructure<Player>
     {
         public int TraitNodeID;
         public int TraitNodeEntryID;
@@ -4772,7 +4762,7 @@ namespace Game.Entities
         public int GrantedRanks;
         public int BonusRanks;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(TraitNodeID);
             data.WriteInt32(TraitNodeEntryID);
@@ -4781,7 +4771,7 @@ namespace Game.Entities
             data.WriteInt32(BonusRanks);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(TraitNodeID);
             data.WriteInt32(TraitNodeEntryID);
@@ -4800,31 +4790,31 @@ namespace Game.Entities
         }
     }
 
-    public class TraitSubTreeCache : IEquatable<TraitSubTreeCache>
+    public class TraitSubTreeCache : IEquatable<TraitSubTreeCache>, IsUpdateFieldStructure<Player>
     {
         public List<TraitEntry> Entries = new();
         public int TraitSubTreeID;
         public uint Active;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(TraitSubTreeID);
             data.WriteInt32(Entries.Count);
             for (int i = 0; i < Entries.Count; ++i)
             {
-                Entries[i].WriteCreate(data, owner, receiver);
+                Entries[i].WriteCreate(data, receiver, owner);
             }
             data.WriteBits(Active, 1);
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(TraitSubTreeID);
             data.WriteInt32(Entries.Count);
             for (int i = 0; i < Entries.Count; ++i)
             {
-                Entries[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                Entries[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
             }
             data.FlushBits();
             data.WriteBits(Active, 1);
@@ -4853,7 +4843,7 @@ namespace Game.Entities
         public UpdateField<uint> TraitSystemID = new(12, 13);
         public UpdateField<int> VariationID = new(12, 14);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ID);
             data.WriteInt32(Type);
@@ -4876,18 +4866,18 @@ namespace Game.Entities
             }
             for (int i = 0; i < Entries.Size(); ++i)
             {
-                Entries[i].WriteCreate(data, owner, receiver);
+                Entries[i].WriteCreate(data, receiver, owner);
             }
             data.WriteBits(Name.Size(), 9);
             for (int i = 0; i < SubTrees.Size(); ++i)
             {
-                SubTrees[i].WriteCreate(data, owner, receiver);
+                SubTrees[i].WriteCreate(data, receiver, owner);
             }
             data.WriteString(Name);
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -4921,7 +4911,7 @@ namespace Game.Entities
                     {
                         if (Entries.HasChanged(i) || ignoreChangesMask)
                         {
-                            Entries[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                            Entries[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -4931,7 +4921,7 @@ namespace Game.Entities
                     {
                         if (SubTrees.HasChanged(i) || ignoreChangesMask)
                         {
-                            SubTrees[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                            SubTrees[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -5023,7 +5013,7 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrderItem() : HasChangesMask(7)
+    public class CraftingOrderItem() : HasChangesMask(7), IsUpdateFieldStructure<Player>
     {
         public UpdateField<ulong> OrderItemID = new(-1, 0);
         public UpdateField<ObjectGuid> ItemGUID = new(-1, 1);
@@ -5033,7 +5023,7 @@ namespace Game.Entities
         public UpdateField<int> ReagentQuality = new(-1, 5);
         public OptionalUpdateField<byte> DataSlotIndex = new(-1, 6);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt64(OrderItemID);
             data.WritePackedGuid(ItemGUID);
@@ -5049,7 +5039,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5106,18 +5096,18 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrderCustomer() : HasChangesMask(2)
+    public class CraftingOrderCustomer() : HasChangesMask(2), IsUpdateFieldStructure<Player>
     {
         public UpdateField<ObjectGuid> CustomerGUID = new(-1, 0);
         public UpdateField<ObjectGuid> CustomerAccountGUID = new(-1, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(CustomerGUID);
             data.WritePackedGuid(CustomerAccountGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5144,18 +5134,18 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrderNpcCustomer() : HasChangesMask(2)
+    public class CraftingOrderNpcCustomer() : HasChangesMask(2), IsUpdateFieldStructure<Player>
     {
         public UpdateField<long> NpcCraftingOrderCustomerID = new(-1, 0);
         public UpdateField<int> RealmAddress = new(-1, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt64(NpcCraftingOrderCustomerID);
             data.WriteInt32(RealmAddress);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5182,7 +5172,7 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrderData() : HasChangesMask(26)
+    public class CraftingOrderData() : HasChangesMask(26), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<CraftingOrderItem> Reagents = new(0, 1);
         public UpdateField<int> Field_0 = new(0, 2);
@@ -5206,7 +5196,7 @@ namespace Game.Entities
         public OptionalUpdateField<CraftingOrderItem> OutputItem = new(18, 23);
         public OptionalUpdateField<ItemInstance> OutputItemData = new(24, 25);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteUInt64(OrderID);
@@ -5232,20 +5222,20 @@ namespace Game.Entities
             data.FlushBits();
             for (int i = 0; i < Reagents.Size(); ++i)
             {
-                Reagents[i].WriteCreate(data, owner, receiver);
+                Reagents[i].WriteCreate(data, receiver, owner);
             }
             data.WriteString(CustomerNotes);
             if (Customer.HasValue())
             {
-                Customer.GetValue().WriteCreate(data, owner, receiver);
+                Customer.GetValue().WriteCreate(data, receiver, owner);
             }
             if (NpcCustomer.HasValue())
             {
-                NpcCustomer.GetValue().WriteCreate(data, owner, receiver);
+                NpcCustomer.GetValue().WriteCreate(data, receiver, owner);
             }
             if (OutputItem.HasValue())
             {
-                OutputItem.GetValue().WriteCreate(data, owner, receiver);
+                OutputItem.GetValue().WriteCreate(data, receiver, owner);
             }
             if (OutputItemData.HasValue())
             {
@@ -5254,7 +5244,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5281,7 +5271,7 @@ namespace Game.Entities
                     {
                         if (Reagents.HasChanged(i) || ignoreChangesMask)
                         {
-                            Reagents[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                            Reagents[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -5376,21 +5366,21 @@ namespace Game.Entities
                 {
                     if (Customer.HasValue())
                     {
-                        Customer.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        Customer.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[22])
                 {
                     if (NpcCustomer.HasValue())
                     {
-                        NpcCustomer.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        NpcCustomer.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[23])
                 {
                     if (OutputItem.HasValue())
                     {
-                        OutputItem.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        OutputItem.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -5434,16 +5424,16 @@ namespace Game.Entities
         }
     }
 
-    public class CraftingOrder() : HasChangesMask(4)
+    public class CraftingOrder() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<ItemEnchantData> Enchantments = new(-1, 0);
         public DynamicUpdateField<ItemGemData> Gems = new(-1, 1);
         public UpdateField<CraftingOrderData> Data = new(-1, 2);
         public OptionalUpdateField<ItemInstance> RecraftItemInfo = new(-1, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
-            Data.GetValue().WriteCreate(data, owner, receiver);
+            Data.GetValue().WriteCreate(data, receiver, owner);
             data.WriteBits(RecraftItemInfo.HasValue(), 1);
             data.WriteBits(Enchantments.Size(), 4);
             data.WriteBits(Gems.Size(), 2);
@@ -5463,7 +5453,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5509,7 +5499,7 @@ namespace Game.Entities
 
             if (changesMask[2])
             {
-                Data.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                Data.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
             }
             data.WriteBits(RecraftItemInfo.HasValue(), 1);
             data.FlushBits();
@@ -5533,18 +5523,18 @@ namespace Game.Entities
         }
     }
 
-    public class PersonalCraftingOrderCount() : HasChangesMask(2)
+    public class PersonalCraftingOrderCount() : HasChangesMask(2), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> ProfessionID = new(-1, 0);
         public UpdateField<uint> Count = new(-1, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(ProfessionID);
             data.WriteUInt32(Count);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5571,14 +5561,14 @@ namespace Game.Entities
         }
     }
 
-    public class NPCCraftingOrderInfo() : HasChangesMask(4)
+    public class NPCCraftingOrderInfo() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public UpdateField<ulong> OrderID = new(-1, 0);
         public UpdateField<int> NpcCraftingOrderSetID = new(-1, 1);
         public UpdateField<int> NpcTreasureID = new(-1, 2);
         public UpdateField<int> NpcCraftingOrderCustomerID = new(-1, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt64(OrderID);
             data.WriteInt32(NpcCraftingOrderSetID);
@@ -5586,7 +5576,7 @@ namespace Game.Entities
             data.WriteInt32(NpcCraftingOrderCustomerID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5623,18 +5613,18 @@ namespace Game.Entities
         }
     }
 
-    public struct CategoryCooldownMod : IEquatable<CategoryCooldownMod>
+    public struct CategoryCooldownMod : IEquatable<CategoryCooldownMod>, IsUpdateFieldStructure<Player>
     {
         public int SpellCategoryID;
         public int ModCooldown;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellCategoryID);
             data.WriteInt32(ModCooldown);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellCategoryID);
             data.WriteInt32(ModCooldown);
@@ -5647,18 +5637,18 @@ namespace Game.Entities
         }
     }
 
-    public struct WeeklySpellUse : IEquatable<WeeklySpellUse>
+    public struct WeeklySpellUse : IEquatable<WeeklySpellUse>, IsUpdateFieldStructure<Player>
     {
         public int SpellCategoryID;
         public byte Uses;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellCategoryID);
             data.WriteUInt8(Uses);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(SpellCategoryID);
             data.WriteUInt8(Uses);
@@ -5671,7 +5661,7 @@ namespace Game.Entities
         }
     }
 
-    public class StablePetInfo() : HasChangesMask(9)
+    public class StablePetInfo() : HasChangesMask(9), IsUpdateFieldStructure<Player>
     {
         public UpdateField<uint> PetSlot = new(0, 1);
         public UpdateField<uint> PetNumber = new(0, 2);
@@ -5682,7 +5672,7 @@ namespace Game.Entities
         public UpdateField<byte> PetFlags = new(0, 7);
         public UpdateField<uint> Specialization = new(0, 8);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(PetSlot);
             data.WriteUInt32(PetNumber);
@@ -5696,7 +5686,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5758,22 +5748,22 @@ namespace Game.Entities
         }
     }
 
-    public class StableInfo() : HasChangesMask(3)
+    public class StableInfo() : HasChangesMask(3), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<StablePetInfo> Pets = new(0, 1);
         public UpdateField<ObjectGuid> StableMaster = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Pets.Size());
             data.WritePackedGuid(StableMaster);
             for (int i = 0; i < Pets.Size(); ++i)
             {
-                Pets[i].WriteCreate(data, owner, receiver);
+                Pets[i].WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5800,7 +5790,7 @@ namespace Game.Entities
                     {
                         if (Pets.HasChanged(i) || ignoreChangesMask)
                         {
-                            Pets[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                            Pets[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -5819,20 +5809,20 @@ namespace Game.Entities
         }
     }
 
-    public class CollectableSourceTrackedData() : HasChangesMask(4)
+    public class CollectableSourceTrackedData() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> TargetType = new(0, 1);
         public UpdateField<int> TargetID = new(0, 2);
         public UpdateField<int> CollectableSourceInfoID = new(0, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(TargetType);
             data.WriteInt32(TargetID);
             data.WriteInt32(CollectableSourceInfoID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5867,14 +5857,14 @@ namespace Game.Entities
         }
     }
 
-    public class BankTabSettings() : HasChangesMask(4)
+    public class BankTabSettings() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public UpdateFieldString Name = new(-1, 0);
         public UpdateFieldString Icon = new(-1, 1);
         public UpdateFieldString Description = new(-1, 2);
         public UpdateField<int> DepositFlags = new(-1, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteBits(Name.Size(), 7);
             data.WriteBits(Icon.Size(), 9);
@@ -5886,7 +5876,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -5936,14 +5926,14 @@ namespace Game.Entities
         }
     }
 
-    public struct WalkInData : IEquatable<WalkInData>
+    public struct WalkInData : IEquatable<WalkInData>, IsUpdateFieldStructure<Player>
     {
         public int MapID;
         public long Field_8;
         public uint Type;
         public ObjectGuid Field_18;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(MapID);
             data.WriteInt64(Field_8);
@@ -5952,7 +5942,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(MapID);
             data.WriteInt64(Field_8);
@@ -5970,7 +5960,7 @@ namespace Game.Entities
         }
     }
 
-    public class DelveData : IEquatable<DelveData>
+    public class DelveData : IEquatable<DelveData>, IsUpdateFieldStructure<Player>
     {
         public List<ObjectGuid> Owners = new();
         public int Field_0;
@@ -5979,7 +5969,7 @@ namespace Game.Entities
         public int SpellID;
         public uint Started;                                                             // Restricts rewards to players in m_owners if set to true. Intended to prevent rewarwding players that join in-progress delve?
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteUInt64(Field_8);
@@ -5994,7 +5984,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.FlushBits();
             data.WriteInt32(Field_0);
@@ -6021,7 +6011,7 @@ namespace Game.Entities
         }
     }
 
-    public struct ChallengeModeData : IEquatable<ChallengeModeData>
+    public struct ChallengeModeData : IEquatable<ChallengeModeData>, IsUpdateFieldStructure<Player>
     {
         public int MapID;
         public int InitialPlayerCount;
@@ -6034,7 +6024,7 @@ namespace Game.Entities
         public uint HasRestrictions;
         public uint CanVoteAbandon;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(MapID);
             data.WriteInt32(InitialPlayerCount);
@@ -6049,7 +6039,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(MapID);
             data.WriteInt32(InitialPlayerCount);
@@ -6079,14 +6069,14 @@ namespace Game.Entities
         }
     }
 
-    public class TransmogOutfitDataInfo() : HasChangesMask(4)
+    public class TransmogOutfitDataInfo() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public UpdateField<bool> SituationsEnabled = new(-1, 0);
         public UpdateField<byte> SetType = new(-1, 1);
         public UpdateFieldString Name = new(-1, 2);
         public UpdateField<uint> Icon = new(-1, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt8(SetType);
             data.WriteUInt32(Icon);
@@ -6097,7 +6087,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -6136,14 +6126,14 @@ namespace Game.Entities
         }
     }
 
-    public class TransmogOutfitSituationInfo() : HasChangesMask(4)
+    public class TransmogOutfitSituationInfo() : HasChangesMask(4), IsUpdateFieldStructure<Player>
     {
         public UpdateField<uint> SituationID = new(-1, 0);
         public UpdateField<uint> SpecID = new(-1, 1);
         public UpdateField<uint> LoadoutID = new(-1, 2);
         public UpdateField<uint> EquipmentSetID = new(-1, 3);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(SituationID);
             data.WriteUInt32(SpecID);
@@ -6151,8 +6141,7 @@ namespace Game.Entities
             data.WriteUInt32(EquipmentSetID);
         }
 
-
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -6189,7 +6178,7 @@ namespace Game.Entities
         }
     }
 
-    public class TransmogOutfitSlotData() : HasChangesMask(7)
+    public class TransmogOutfitSlotData() : HasChangesMask(7), IsUpdateFieldStructure<Player>
     {
         public UpdateField<sbyte> Slot = new(-1, 0);
         public UpdateField<byte> SlotOption = new(-1, 1);
@@ -6199,7 +6188,7 @@ namespace Game.Entities
         public UpdateField<byte> IllusionDisplayType = new(-1, 5);
         public UpdateField<uint> Flags = new(-1, 6);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt8(Slot);
             data.WriteUInt8(SlotOption);
@@ -6210,7 +6199,7 @@ namespace Game.Entities
             data.WriteUInt32(Flags);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -6262,7 +6251,7 @@ namespace Game.Entities
         }
     }
 
-    public class TransmogOutfitData() : HasChangesMask(5)
+    public class TransmogOutfitData() : HasChangesMask(5), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<TransmogOutfitSituationInfo> Situations = new(-1, 0);
         public DynamicUpdateField<TransmogOutfitSlotData> Slots = new(-1, 1);
@@ -6270,7 +6259,7 @@ namespace Game.Entities
         public UpdateField<TransmogOutfitDataInfo> OutfitInfo = new(-1, 3);
         public UpdateField<uint> Flags = new(-1, 4);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(Id);
             data.WriteInt32(Situations.Size());
@@ -6278,16 +6267,16 @@ namespace Game.Entities
             data.WriteUInt32(Flags);
             for (int i = 0; i < Situations.Size(); ++i)
             {
-                Situations[i].WriteCreate(data, owner, receiver);
+                Situations[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < Slots.Size(); ++i)
             {
-                Slots[i].WriteCreate(data, owner, receiver);
+                Slots[i].WriteCreate(data, receiver, owner);
             }
-            OutfitInfo.GetValue().WriteCreate(data, owner, receiver);
+            OutfitInfo.GetValue().WriteCreate(data, receiver, owner);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -6316,7 +6305,7 @@ namespace Game.Entities
                 {
                     if (Situations.HasChanged(i) || ignoreChangesMask)
                     {
-                        Situations[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        Situations[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -6326,7 +6315,7 @@ namespace Game.Entities
                 {
                     if (Slots.HasChanged(i) || ignoreChangesMask)
                     {
-                        Slots[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                        Slots[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -6340,7 +6329,7 @@ namespace Game.Entities
             }
             if (changesMask[3])
             {
-                OutfitInfo.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                OutfitInfo.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
             }
         }
 
@@ -6355,7 +6344,7 @@ namespace Game.Entities
         }
     }
 
-    public class TransmogOutfitMetadata : IEquatable<TransmogOutfitMetadata>
+    public class TransmogOutfitMetadata : IEquatable<TransmogOutfitMetadata>, IsUpdateFieldStructure<Player>
     {
         public bool Locked;
         public byte SituationTrigger;
@@ -6363,7 +6352,7 @@ namespace Game.Entities
         public byte StampedOptionMainHand;
         public byte StampedOptionOffHand;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt8(SituationTrigger);
             data.WriteUInt32(TransmogOutfitID);
@@ -6373,7 +6362,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt8(SituationTrigger);
             data.WriteUInt32(TransmogOutfitID);
@@ -6394,16 +6383,16 @@ namespace Game.Entities
         }
     }
 
-    public struct Research : IEquatable<Research>
+    public struct Research : IEquatable<Research>, IsUpdateFieldStructure<Player>
     {
         public short ResearchProjectID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt16(ResearchProjectID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt16(ResearchProjectID);
         }
@@ -6414,7 +6403,7 @@ namespace Game.Entities
         }
     }
 
-    public class ActivePlayerData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.ActivePlayer, 397)
+    public class ActivePlayerData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.ActivePlayer, 397), IsUpdateFieldStructure<Player>
     {
         public static int QuestCompletedBitsPerBlock = sizeof(ulong) * 8;
 
@@ -6588,7 +6577,7 @@ namespace Game.Entities
         public UpdateFieldArray<uint> BagSlotFlags = new(5, 373, 374);
         public UpdateFieldArray<float> ItemUpgradeHighWatermark = new(17, 379, 380);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             for (int i = 0; i < 105; ++i)
             {
@@ -6602,7 +6591,7 @@ namespace Game.Entities
             data.WriteUInt32(XP);
             data.WriteUInt32(NextLevelXP);
             data.WriteInt32(TrialXP);
-            Skill.GetValue().WriteCreate(data, owner, receiver);
+            Skill.GetValue().WriteCreate(data, receiver, owner);
             data.WriteUInt32(CharacterPoints);
             data.WriteUInt32(MaxTalentTiers);
             data.WriteUInt32(TrackCreatureMask);
@@ -6629,12 +6618,12 @@ namespace Game.Entities
             data.WriteFloat(VersatilityBonus);
             data.WriteFloat(PvpPowerDamage);
             data.WriteFloat(PvpPowerHealing);
-            BitVectors.GetValue().WriteCreate(data, owner, receiver);
+            BitVectors.GetValue().WriteCreate(data, receiver, owner);
             data.WriteInt32(CharacterDataElements.Size());
             data.WriteInt32(AccountDataElements.Size());
             for (int i = 0; i < 2; ++i)
             {
-                RestInfo[i].WriteCreate(data, owner, receiver);
+                RestInfo[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < 7; ++i)
             {
@@ -6727,7 +6716,7 @@ namespace Game.Entities
                 }
                 for (int j = 0; j < Research[i].Size(); ++j)
                 {
-                    Research[i][j].WriteCreate(data, owner, receiver);
+                    Research[i][j].WriteCreate(data, receiver, owner);
                 }
             }
             data.WriteInt32(DailyQuestsCompleted.Size());
@@ -6789,11 +6778,11 @@ namespace Game.Entities
             }
             for (int i = 0; i < CharacterDataElements.Size(); ++i)
             {
-                CharacterDataElements[i].WriteCreate(data, owner, receiver);
+                CharacterDataElements[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < AccountDataElements.Size(); ++i)
             {
-                AccountDataElements[i].WriteCreate(data, owner, receiver);
+                AccountDataElements[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < DailyQuestsCompleted.Size(); ++i)
             {
@@ -6873,39 +6862,39 @@ namespace Game.Entities
             }
             for (int i = 0; i < SpellPctModByLabel.Size(); ++i)
             {
-                SpellPctModByLabel[i].WriteCreate(data, owner, receiver);
+                SpellPctModByLabel[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < SpellFlatModByLabel.Size(); ++i)
             {
-                SpellFlatModByLabel[i].WriteCreate(data, owner, receiver);
+                SpellFlatModByLabel[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < SpellPctModPVPByLabel.Size(); ++i)
             {
-                SpellPctModPVPByLabel[i].WriteCreate(data, owner, receiver);
+                SpellPctModPVPByLabel[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < SpellFlatModPVPByLabel.Size(); ++i)
             {
-                SpellFlatModPVPByLabel[i].WriteCreate(data, owner, receiver);
+                SpellFlatModPVPByLabel[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < MawPowers.Size(); ++i)
             {
-                MawPowers[i].WriteCreate(data, owner, receiver);
+                MawPowers[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < MultiFloorExploration.Size(); ++i)
             {
-                MultiFloorExploration[i].WriteCreate(data, owner, receiver);
+                MultiFloorExploration[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < RecipeProgression.Size(); ++i)
             {
-                RecipeProgression[i].WriteCreate(data, owner, receiver);
+                RecipeProgression[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < ReplayedQuests.Size(); ++i)
             {
-                ReplayedQuests[i].WriteCreate(data, owner, receiver);
+                ReplayedQuests[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < TaskQuests.Size(); ++i)
             {
-                TaskQuests[i].WriteCreate(data, owner, receiver);
+                TaskQuests[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < DisabledSpells.Size(); ++i)
             {
@@ -6913,23 +6902,23 @@ namespace Game.Entities
             }
             for (int i = 0; i < PersonalCraftingOrderCounts.Size(); ++i)
             {
-                PersonalCraftingOrderCounts[i].WriteCreate(data, owner, receiver);
+                PersonalCraftingOrderCounts[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < NpcCraftingOrders.Size(); ++i)
             {
-                NpcCraftingOrders[i].WriteCreate(data, owner, receiver);
+                NpcCraftingOrders[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < CategoryCooldownMods.Size(); ++i)
             {
-                CategoryCooldownMods[i].WriteCreate(data, owner, receiver);
+                CategoryCooldownMods[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < WeeklySpellUses.Size(); ++i)
             {
-                WeeklySpellUses[i].WriteCreate(data, owner, receiver);
+                WeeklySpellUses[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < TrackedCollectableSources.Size(); ++i)
             {
-                TrackedCollectableSources[i].WriteCreate(data, owner, receiver);
+                TrackedCollectableSources[i].WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
             data.WriteBit(BackpackAutoSortDisabled);
@@ -6946,63 +6935,63 @@ namespace Game.Entities
             data.WriteBits(DelveData.HasValue(), 1);
             data.WriteBits(ChallengeModeData.HasValue(), 1);
             data.FlushBits();
-            ResearchHistory.GetValue().WriteCreate(data, owner, receiver);
+            ResearchHistory.GetValue().WriteCreate(data, receiver, owner);
             if (QuestSession.HasValue())
             {
-                QuestSession.GetValue().WriteCreate(data, owner, receiver);
+                QuestSession.GetValue().WriteCreate(data, receiver, owner);
             }
             FrozenPerksVendorItem.GetValue().Write(data);
-            LevelLinkInfo.GetValue().WriteCreate(data, owner, receiver);
+            LevelLinkInfo.GetValue().WriteCreate(data, receiver, owner);
             DungeonScore.GetValue().Write(data);
-            WriteMapFieldCreate(TraitConfigs, data, owner, receiver);
-            WriteMapFieldCreate(TransmogOutfits, data, owner, receiver);
-            ViewedOutfit.GetValue().WriteCreate(data, owner, receiver);
-            TransmogMetadata.GetValue().WriteCreate(data, owner, receiver);
+            WriteMapFieldCreate(TraitConfigs, data, receiver, owner);
+            WriteMapFieldCreate(TransmogOutfits, data, receiver, owner);
+            ViewedOutfit.GetValue().WriteCreate(data, receiver, owner);
+            TransmogMetadata.GetValue().WriteCreate(data, receiver, owner);
             for (int i = 0; i < PvpInfo.Size(); ++i)
             {
-                PvpInfo[i].WriteCreate(data, owner, receiver);
+                PvpInfo[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < CharacterRestrictions.Size(); ++i)
             {
-                CharacterRestrictions[i].WriteCreate(data, owner, receiver);
+                CharacterRestrictions[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < CraftingOrders.Size(); ++i)
             {
-                CraftingOrders[i].WriteCreate(data, owner, receiver);
+                CraftingOrders[i].WriteCreate(data, receiver, owner);
             }
             if (PetStable.HasValue())
             {
-                PetStable.GetValue().WriteCreate(data, owner, receiver);
+                PetStable.GetValue().WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < CharacterBankTabSettings.Size(); ++i)
             {
-                CharacterBankTabSettings[i].WriteCreate(data, owner, receiver);
+                CharacterBankTabSettings[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < AccountBankTabSettings.Size(); ++i)
             {
-                AccountBankTabSettings[i].WriteCreate(data, owner, receiver);
+                AccountBankTabSettings[i].WriteCreate(data, receiver, owner);
             }
             if (WalkInData.HasValue())
             {
-                WalkInData.GetValue().WriteCreate(data, owner, receiver);
+                WalkInData.GetValue().WriteCreate(data, receiver, owner);
             }
             if (DelveData.HasValue())
             {
-                DelveData.GetValue().WriteCreate(data, owner, receiver);
+                DelveData.GetValue().WriteCreate(data, receiver, owner);
             }
             if (ChallengeModeData.HasValue())
             {
-                ChallengeModeData.GetValue().WriteCreate(data, owner, receiver);
+                ChallengeModeData.GetValue().WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Player owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 13);
             for (uint i = 0; i < 13; ++i)
@@ -7146,7 +7135,7 @@ namespace Game.Entities
                         {
                             if (Research[i].HasChanged(j) || ignoreNestedChangesMask)
                             {
-                                Research[i][j].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                                Research[i][j].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                             }
                         }
                     }
@@ -7430,7 +7419,7 @@ namespace Game.Entities
                     {
                         if (CharacterDataElements.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CharacterDataElements[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CharacterDataElements[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7440,7 +7429,7 @@ namespace Game.Entities
                     {
                         if (AccountDataElements.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            AccountDataElements[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            AccountDataElements[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7640,7 +7629,7 @@ namespace Game.Entities
                     {
                         if (SpellPctModByLabel.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            SpellPctModByLabel[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            SpellPctModByLabel[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7653,7 +7642,7 @@ namespace Game.Entities
                     {
                         if (SpellFlatModByLabel.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            SpellFlatModByLabel[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            SpellFlatModByLabel[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7663,7 +7652,7 @@ namespace Game.Entities
                     {
                         if (SpellPctModPVPByLabel.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            SpellPctModPVPByLabel[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            SpellPctModPVPByLabel[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7673,7 +7662,7 @@ namespace Game.Entities
                     {
                         if (SpellFlatModPVPByLabel.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            SpellFlatModPVPByLabel[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            SpellFlatModPVPByLabel[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7683,7 +7672,7 @@ namespace Game.Entities
                     {
                         if (MawPowers.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            MawPowers[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            MawPowers[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7693,7 +7682,7 @@ namespace Game.Entities
                     {
                         if (MultiFloorExploration.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            MultiFloorExploration[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            MultiFloorExploration[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7703,7 +7692,7 @@ namespace Game.Entities
                     {
                         if (RecipeProgression.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            RecipeProgression[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            RecipeProgression[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7713,7 +7702,7 @@ namespace Game.Entities
                     {
                         if (ReplayedQuests.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            ReplayedQuests[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            ReplayedQuests[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7723,7 +7712,7 @@ namespace Game.Entities
                     {
                         if (TaskQuests.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            TaskQuests[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            TaskQuests[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7743,7 +7732,7 @@ namespace Game.Entities
                     {
                         if (PersonalCraftingOrderCounts.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            PersonalCraftingOrderCounts[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            PersonalCraftingOrderCounts[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7753,7 +7742,7 @@ namespace Game.Entities
                     {
                         if (NpcCraftingOrders.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            NpcCraftingOrders[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            NpcCraftingOrders[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7763,7 +7752,7 @@ namespace Game.Entities
                     {
                         if (CategoryCooldownMods.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CategoryCooldownMods[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CategoryCooldownMods[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7773,7 +7762,7 @@ namespace Game.Entities
                     {
                         if (WeeklySpellUses.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            WeeklySpellUses[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            WeeklySpellUses[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7783,7 +7772,7 @@ namespace Game.Entities
                     {
                         if (TrackedCollectableSources.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            TrackedCollectableSources[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            TrackedCollectableSources[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7815,7 +7804,7 @@ namespace Game.Entities
                     {
                         if (PvpInfo.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            PvpInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            PvpInfo[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7825,7 +7814,7 @@ namespace Game.Entities
                     {
                         if (CharacterRestrictions.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CharacterRestrictions[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CharacterRestrictions[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7838,7 +7827,7 @@ namespace Game.Entities
                     {
                         if (CraftingOrders.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CraftingOrders[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CraftingOrders[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7848,7 +7837,7 @@ namespace Game.Entities
                     {
                         if (CharacterBankTabSettings.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CharacterBankTabSettings[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CharacterBankTabSettings[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7858,7 +7847,7 @@ namespace Game.Entities
                     {
                         if (AccountBankTabSettings.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            AccountBankTabSettings[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            AccountBankTabSettings[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -7892,7 +7881,7 @@ namespace Game.Entities
                 }
                 if (changesMask[63])
                 {
-                    Skill.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    Skill.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[64])
                 {
@@ -8003,7 +7992,7 @@ namespace Game.Entities
                 }
                 if (changesMask[91])
                 {
-                    BitVectors.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    BitVectors.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[92])
                 {
@@ -8242,13 +8231,13 @@ namespace Game.Entities
             {
                 if (changesMask[136])
                 {
-                    ResearchHistory.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    ResearchHistory.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[138])
                 {
                     if (QuestSession.HasValue())
                     {
-                        QuestSession.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        QuestSession.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[137])
@@ -8257,7 +8246,7 @@ namespace Game.Entities
                 }
                 if (changesMask[139])
                 {
-                    LevelLinkInfo.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    LevelLinkInfo.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[145])
                 {
@@ -8265,46 +8254,46 @@ namespace Game.Entities
                 }
                 if (changesMask[146])
                 {
-                    WriteMapFieldUpdate(TraitConfigs, data, ignoreNestedChangesMask, owner, receiver);
+                    WriteMapFieldUpdate(TraitConfigs, ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[159])
                 {
-                    WriteMapFieldUpdate(TransmogOutfits, data, ignoreNestedChangesMask, owner, receiver);
+                    WriteMapFieldUpdate(TransmogOutfits, ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[160])
                 {
-                    ViewedOutfit.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    ViewedOutfit.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[161])
                 {
-                    TransmogMetadata.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    TransmogMetadata.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[154])
                 {
                     if (PetStable.HasValue())
                     {
-                        PetStable.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        PetStable.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[156])
                 {
                     if (WalkInData.HasValue())
                     {
-                        WalkInData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        WalkInData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[157])
                 {
                     if (DelveData.HasValue())
                     {
-                        DelveData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        DelveData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[158])
                 {
                     if (ChallengeModeData.HasValue())
                     {
-                        ChallengeModeData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ChallengeModeData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -8324,7 +8313,7 @@ namespace Game.Entities
                 {
                     if (changesMask[269 + i])
                     {
-                        RestInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        RestInfo[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -8605,7 +8594,7 @@ namespace Game.Entities
         }
     }
 
-    public struct GameObjectAssistActionData : IEquatable<GameObjectAssistActionData>
+    public struct GameObjectAssistActionData : IEquatable<GameObjectAssistActionData>, IsUpdateFieldStructure<GameObject>
     {
         public string PlayerName;
         public string MonsterName;
@@ -8614,7 +8603,7 @@ namespace Game.Entities
         public long Time;
         public int DelveTier;
 
-        public void WriteCreate(WorldPacket data, GameObject owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, GameObject owner)
         {
             data.WriteBits(PlayerName.GetByteCount(), 6);
             data.WriteBits(MonsterName.GetByteCount() + 1, 11);
@@ -8626,7 +8615,7 @@ namespace Game.Entities
             data.WriteCString(MonsterName);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, GameObject owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, GameObject owner)
         {
             data.WriteBits(PlayerName.GetByteCount(), 6);
             data.WriteBits(MonsterName.GetByteCount() + 1, 11);
@@ -8649,7 +8638,7 @@ namespace Game.Entities
         }
     }
 
-    public class GameObjectFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.GameObject, 26)
+    public class GameObjectFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.GameObject, 26), IsUpdateFieldStructure<GameObject>
     {
         public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
         public DynamicUpdateField<int> EnableDoodadSets = new(0, 2);
@@ -8677,30 +8666,30 @@ namespace Game.Entities
         public UpdateField<uint> UiWidgetItemCount = new(0, 24);
         public OptionalUpdateField<GameObjectAssistActionData> AssistActionData = new(0, 25);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, GameObject owner)
         {
             data.WriteUInt32(DisplayID);
             data.WriteUInt32(SpellVisualID);
-            data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimID(this, owner, receiver));
-            data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, owner, receiver));
-            var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+            data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimID(this, receiver, owner));
+            data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, receiver, owner));
+            var stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, receiver, owner);
             data.WriteInt32(stateWorldEffectIDs.Count);
-            data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, receiver, owner));
             for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
             {
                 data.WriteUInt32(stateWorldEffectIDs[i]);
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
-            data.WriteUInt32(GetViewerDependentGameObjectFlags(this, owner, receiver));
+            data.WriteUInt32(GetViewerDependentGameObjectFlags(this, receiver, owner));
             Quaternion rotation = ParentRotation;
             data.WriteFloat(rotation.X);
             data.WriteFloat(rotation.Y);
             data.WriteFloat(rotation.Z);
             data.WriteFloat(rotation.W);
             data.WriteUInt32(FactionTemplate);
-            data.WriteInt8(GetViewerDependentGameObjectState(this, owner, receiver));
+            data.WriteInt8(GetViewerDependentGameObjectState(this, receiver, owner));
             data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
             data.WriteUInt32(ArtKit);
@@ -8724,16 +8713,16 @@ namespace Game.Entities
             data.FlushBits();
             if (AssistActionData.HasValue())
             {
-                AssistActionData.GetValue().WriteCreate(data, owner, receiver);
+                AssistActionData.GetValue().WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, GameObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, GameObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, GameObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 26);
 
@@ -8743,7 +8732,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, owner, receiver);
+                    stateWorldEffectIDs = GetViewerDependentStateWorldEffectIDs(this, receiver, owner);
                     data.WriteBits(stateWorldEffectIDs.Count, 32);
                     for (int i = 0; i < stateWorldEffectIDs.Count; ++i)
                     {
@@ -8802,19 +8791,19 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentStateSpellVisualID(this, receiver, owner));
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimID(this, receiver, owner));
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentSpawnTrackingStateAnimKitID(this, receiver, owner));
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentStateWorldEffectsQuestObjectiveID(this, receiver, owner));
                 }
                 if (changesMask[10])
                 {
@@ -8826,7 +8815,7 @@ namespace Game.Entities
                 }
                 if (changesMask[12])
                 {
-                    data.WriteUInt32(GetViewerDependentGameObjectFlags(this, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentGameObjectFlags(this, receiver, owner));
                 }
                 if (changesMask[13])
                 {
@@ -8841,7 +8830,7 @@ namespace Game.Entities
                 }
                 if (changesMask[15])
                 {
-                    data.WriteInt8(GetViewerDependentGameObjectState(this, owner, receiver));
+                    data.WriteInt8(GetViewerDependentGameObjectState(this, receiver, owner));
                 }
                 if (changesMask[16])
                 {
@@ -8885,7 +8874,7 @@ namespace Game.Entities
                 {
                     if (AssistActionData.HasValue())
                     {
-                        AssistActionData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        AssistActionData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -8921,7 +8910,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentGameObjectFlags(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentGameObjectFlags(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             uint flags = gameObjectData.Flags;
             if (gameObject.GetGoType() == GameObjectTypes.Chest)
@@ -8931,12 +8920,12 @@ namespace Game.Entities
             return flags;
         }
 
-        sbyte GetViewerDependentGameObjectState(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        sbyte GetViewerDependentGameObjectState(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             return (sbyte)gameObject.GetGoStateFor(receiver.GetGUID());
         }
 
-        List<uint> GetViewerDependentStateWorldEffectIDs(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        List<uint> GetViewerDependentStateWorldEffectIDs(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             List<uint> stateWorldEffects = gameObjectData.StateWorldEffectIDs;
 
@@ -8947,7 +8936,7 @@ namespace Game.Entities
             return stateWorldEffects;
         }
 
-        uint GetViewerDependentStateSpellVisualID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentStateSpellVisualID(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             uint stateSpellVisual = gameObjectData.StateSpellVisualID;
 
@@ -8958,7 +8947,7 @@ namespace Game.Entities
             return stateSpellVisual;
         }
 
-        uint GetViewerDependentSpawnTrackingStateAnimID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentSpawnTrackingStateAnimID(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             uint stateAnimId = Global.DB2Mgr.GetEmptyAnimStateID();
 
@@ -8969,7 +8958,7 @@ namespace Game.Entities
             return stateAnimId;
         }
 
-        uint GetViewerDependentSpawnTrackingStateAnimKitID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentSpawnTrackingStateAnimKitID(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             uint stateAnimKitId = gameObjectData.SpawnTrackingStateAnimKitID;
 
@@ -8980,7 +8969,7 @@ namespace Game.Entities
             return stateAnimKitId;
         }
 
-        uint GetViewerDependentStateWorldEffectsQuestObjectiveID(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
+        uint GetViewerDependentStateWorldEffectsQuestObjectiveID(GameObjectFieldData gameObjectData, Player receiver, GameObject gameObject)
         {
             uint stateWorldEffectsQuestObjectiveId = gameObjectData.StateWorldEffectsQuestObjectiveID;
 
@@ -9012,7 +9001,7 @@ namespace Game.Entities
         }
     }
 
-    public class DynamicObjectData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.DynamicObject, 7)
+    public class DynamicObjectData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.DynamicObject, 7), IsUpdateFieldStructure<DynamicObject>
     {
         public UpdateField<ObjectGuid> Caster = new(0, 1);
         public UpdateField<byte> Type = new(0, 2);
@@ -9021,22 +9010,22 @@ namespace Game.Entities
         public UpdateField<float> Radius = new(0, 5);
         public UpdateField<uint> CastTime = new(0, 6);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, DynamicObject owner)
         {
             data.WritePackedGuid(Caster);
             data.WriteUInt8(Type);
-            ((SpellCastVisualField)SpellVisual).WriteCreate(data, owner, receiver);
+            ((SpellCastVisualField)SpellVisual).WriteCreate(data, receiver, owner);
             data.WriteUInt32(SpellID);
             data.WriteFloat(Radius);
             data.WriteUInt32(CastTime);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, DynamicObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, DynamicObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, DynamicObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, DynamicObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(_changesMask.GetBlock(0), 7);
 
@@ -9053,7 +9042,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[3])
                 {
-                    ((SpellCastVisualField)SpellVisual).WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    ((SpellCastVisualField)SpellVisual).WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (_changesMask[4])
                 {
@@ -9082,7 +9071,7 @@ namespace Game.Entities
         }
     }
 
-    public class CorpseData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Corpse, 33)
+    public class CorpseData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Corpse, 33), IsUpdateFieldStructure<Corpse>
     {
         public DynamicUpdateField<ChrCustomizationChoice> Customizations = new(0, 1);
         public UpdateField<uint> DynamicFlags = new(0, 2);
@@ -9098,7 +9087,7 @@ namespace Game.Entities
         public UpdateField<uint> StateSpellVisualKitID = new(0, 12);
         public UpdateFieldArray<uint> Items = new(19, 13, 14);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Corpse owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Corpse owner)
         {
             data.WriteUInt32(DynamicFlags);
             data.WritePackedGuid(Owner);
@@ -9118,16 +9107,16 @@ namespace Game.Entities
             data.WriteUInt32(StateSpellVisualKitID);
             for (int i = 0; i < Customizations.Size(); ++i)
             {
-                Customizations[i].WriteCreate(data, owner, receiver);
+                Customizations[i].WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Corpse owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Corpse owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Corpse owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Corpse owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlocksMask(0), 2);
             for (uint i = 0; i < 2; ++i)
@@ -9153,7 +9142,7 @@ namespace Game.Entities
                     {
                         if (Customizations.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Customizations[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Customizations[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -9233,14 +9222,14 @@ namespace Game.Entities
         }
     }
 
-    public class ScaleCurve() : HasChangesMask(7)
+    public class ScaleCurve() : HasChangesMask(7), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<bool> OverrideActive = new(0, 1);
         public UpdateField<uint> StartTimeOffset = new(0, 2);
         public UpdateField<uint> ParameterCurve = new(0, 3);
         public UpdateFieldArray<Vector2> Points = new(2, 4, 5);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteUInt32(StartTimeOffset);
             for (int i = 0; i < 2; ++i)
@@ -9252,7 +9241,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9303,14 +9292,14 @@ namespace Game.Entities
         }
     }
 
-    public class VisualAnim() : HasChangesMask(0, TypeId.AreaTrigger, 5)
+    public class VisualAnim() : HasChangesMask(0, TypeId.AreaTrigger, 5), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<bool> IsDecay = new(0, 1);
         public OptionalUpdateField<ushort> AnimationDataID = new(0, 2);
         public UpdateField<uint> AnimKitID = new(0, 3);
         public UpdateField<uint> AnimProgress = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteBits(AnimationDataID.HasValue(), 1);
             data.WriteBit(IsDecay);
@@ -9324,7 +9313,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9372,13 +9361,13 @@ namespace Game.Entities
         }
     }
 
-    public struct ForceSetAreaTriggerPositionAndRotation : IEquatable<ForceSetAreaTriggerPositionAndRotation>
+    public struct ForceSetAreaTriggerPositionAndRotation : IEquatable<ForceSetAreaTriggerPositionAndRotation>, IsUpdateFieldStructure<AreaTrigger>
     {
         public ObjectGuid TriggerGUID;
         public Position Pos;
         public Quaternion Rotation;
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WritePackedGuid(TriggerGUID);
             data.WriteVector3(Pos);
@@ -9388,7 +9377,7 @@ namespace Game.Entities
             data.WriteFloat(Rotation.W);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WritePackedGuid(TriggerGUID);
             data.WriteVector3(Pos);
@@ -9406,18 +9395,18 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerActionSetPeriodModifier() : HasChangesMask(3)
+    public class AreaTriggerActionSetPeriodModifier() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<int> Field_0 = new(0, 1);
         public UpdateField<float> Field_4 = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteInt32(Field_0);
             data.WriteFloat(Field_4);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9447,12 +9436,12 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerSplineCalculator() : HasChangesMask(3)
+    public class AreaTriggerSplineCalculator() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<bool> Catmullrom = new(0, 1);
         public DynamicUpdateField<Vector3> Points = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteBits(Points.Size(), 16);
             data.WriteBit(Catmullrom);
@@ -9463,7 +9452,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9510,7 +9499,7 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerOrbit() : HasChangesMask(7)
+    public class AreaTriggerOrbit() : HasChangesMask(7), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<bool> CounterClockwise = new(0, 1);
         public UpdateField<Vector3> Center = new(0, 2);
@@ -9519,7 +9508,7 @@ namespace Game.Entities
         public UpdateField<float> BlendFromRadius = new(0, 5);
         public UpdateField<int> ExtraTimeForBlending = new(0, 6);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteVector3(Center);
             data.WriteFloat(Radius);
@@ -9530,7 +9519,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9584,20 +9573,20 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerMovementScript() : HasChangesMask(4)
+    public class AreaTriggerMovementScript() : HasChangesMask(4), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<int> SpellScriptID = new(0, 1);
         public UpdateField<Vector3> Center = new(0, 2);
         public UpdateField<uint> CreationTime = new(0, 3);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteInt32(SpellScriptID);
             data.WriteVector3(Center);
             data.WriteUInt32(CreationTime);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9632,18 +9621,18 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerSphere() : HasChangesMask(3)
+    public class AreaTriggerSphere() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<float> Radius = new(0, 1);
         public UpdateField<float> RadiusTarget = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteFloat(Radius);
             data.WriteFloat(RadiusTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9673,18 +9662,18 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerBox() : HasChangesMask(3)
+    public class AreaTriggerBox() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<Vector3> Extents = new(0, 1);
         public UpdateField<Vector3> ExtentsTarget = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteVector3(Extents);
             data.WriteVector3(ExtentsTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9714,14 +9703,14 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerPolygon() : HasChangesMask(5)
+    public class AreaTriggerPolygon() : HasChangesMask(5), IsUpdateFieldStructure<AreaTrigger>
     {
         public DynamicUpdateField<Vector2> Vertices = new(0, 1);
         public DynamicUpdateField<Vector2> VerticesTarget = new(0, 2);
         public UpdateField<float> Height = new(0, 3);
         public UpdateField<float> HeightTarget = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteInt32(Vertices.Size());
             data.WriteInt32(VerticesTarget.Size());
@@ -9737,7 +9726,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9806,7 +9795,7 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerCylinder() : HasChangesMask(7)
+    public class AreaTriggerCylinder() : HasChangesMask(7), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<float> Radius = new(0, 1);
         public UpdateField<float> RadiusTarget = new(0, 2);
@@ -9815,7 +9804,7 @@ namespace Game.Entities
         public UpdateField<float> LocationZOffset = new(0, 5);
         public UpdateField<float> LocationZOffsetTarget = new(0, 6);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteFloat(Radius);
             data.WriteFloat(RadiusTarget);
@@ -9825,7 +9814,7 @@ namespace Game.Entities
             data.WriteFloat(LocationZOffsetTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9875,7 +9864,7 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerDisk() : HasChangesMask(9)
+    public class AreaTriggerDisk() : HasChangesMask(9), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<float> InnerRadius = new(0, 1);
         public UpdateField<float> InnerRadiusTarget = new(0, 2);
@@ -9886,7 +9875,7 @@ namespace Game.Entities
         public UpdateField<float> LocationZOffset = new(0, 7);
         public UpdateField<float> LocationZOffsetTarget = new(0, 8);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteFloat(InnerRadius);
             data.WriteFloat(InnerRadiusTarget);
@@ -9898,7 +9887,7 @@ namespace Game.Entities
             data.WriteFloat(LocationZOffsetTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9958,18 +9947,18 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerBoundedPlane() : HasChangesMask(3)
+    public class AreaTriggerBoundedPlane() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<Vector2> Extents = new(0, 1);
         public UpdateField<Vector2> ExtentsTarget = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, AreaTrigger owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteVector2(Extents);
             data.WriteVector2(ExtentsTarget);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -9999,7 +9988,7 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AreaTrigger, 37)
+    public class AreaTriggerFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AreaTrigger, 37), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<ScaleCurve> OverrideScaleCurve = new(0, 1);
         public UpdateField<ScaleCurve> ExtraScaleCurve = new(0, 2);
@@ -10039,9 +10028,9 @@ namespace Game.Entities
         public VariantUpdateField PathData = new(32, 34);//, AreaTriggerSplineCalculator, AreaTriggerOrbit, AreaTriggerMovementScript);
         public VariantUpdateField ShapeData = new(32, 35);//, AreaTriggerSphere, AreaTriggerBox, AreaTriggerPolygon, AreaTriggerCylinder, AreaTriggerDisk, AreaTriggerBoundedPlane);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AreaTrigger owner)
         {
-            OverrideScaleCurve.GetValue().WriteCreate(data, owner, receiver);
+            OverrideScaleCurve.GetValue().WriteCreate(data, receiver, owner);
             data.WritePackedGuid(Caster);
             data.WriteUInt32(Duration);
             data.WriteUInt32(TimeToTarget);
@@ -10050,7 +10039,7 @@ namespace Game.Entities
             data.WriteUInt32(TimeToTargetPos);
             data.WriteUInt32(SpellID);
             data.WriteUInt32(SpellForVisuals);
-            SpellVisual.GetValue().WriteCreate(data, owner, receiver);
+            SpellVisual.GetValue().WriteCreate(data, receiver, owner);
             data.WriteFloat(BoundsRadius2D);
             data.WriteUInt32(DecalPropertiesID);
             data.WritePackedGuid(CreatingEffectGUID);
@@ -10068,67 +10057,67 @@ namespace Game.Entities
             data.WriteFloat(Facing);
             data.WriteInt32(PathType);
             data.WriteUInt8(ShapeType);
-            PeriodModifier.GetValue().WriteCreate(data, owner, receiver);
+            PeriodModifier.GetValue().WriteCreate(data, receiver, owner);
             if (PathType == 3)
             {
-                PathData.Get<AreaTriggerMovementScript>().WriteCreate(data, owner, receiver);
+                PathData.Get<AreaTriggerMovementScript>().WriteCreate(data, receiver, owner);
             }
             if (ShapeType == 0)
             {
-                ShapeData.Get<AreaTriggerSphere>().WriteCreate(data, owner, receiver);
+                ShapeData.Get<AreaTriggerSphere>().WriteCreate(data, receiver, owner);
             }
             if (ShapeType == 1)
             {
-                ShapeData.Get<AreaTriggerBox>().WriteCreate(data, owner, receiver);
+                ShapeData.Get<AreaTriggerBox>().WriteCreate(data, receiver, owner);
             }
             if (ShapeType == 2 || ShapeType == 3 || ShapeType == 5 || ShapeType == 6)
             {
-                ShapeData.Get<AreaTriggerPolygon>().WriteCreate(data, owner, receiver);
+                ShapeData.Get<AreaTriggerPolygon>().WriteCreate(data, receiver, owner);
             }
             if (ShapeType == 4)
             {
-                ShapeData.Get<AreaTriggerCylinder>().WriteCreate(data, owner, receiver);
+                ShapeData.Get<AreaTriggerCylinder>().WriteCreate(data, receiver, owner);
             }
             if (ShapeType == 7)
             {
-                ShapeData.Get<AreaTriggerDisk>().WriteCreate(data, owner, receiver);
+                ShapeData.Get<AreaTriggerDisk>().WriteCreate(data, receiver, owner);
             }
             if (ShapeType == 8)
             {
-                ShapeData.Get<AreaTriggerBoundedPlane>().WriteCreate(data, owner, receiver);
+                ShapeData.Get<AreaTriggerBoundedPlane>().WriteCreate(data, receiver, owner);
             }
-            ExtraScaleCurve.GetValue().WriteCreate(data, owner, receiver);
+            ExtraScaleCurve.GetValue().WriteCreate(data, receiver, owner);
             data.FlushBits();
             data.WriteBits(TargetRollPitchYaw.HasValue(), 1);
             data.WriteBits(ForcedPositionAndRotation.HasValue(), 1);
-            OverrideMoveCurveX.GetValue().WriteCreate(data, owner, receiver);
+            OverrideMoveCurveX.GetValue().WriteCreate(data, receiver, owner);
             if (TargetRollPitchYaw.HasValue())
             {
                 data.WriteVector3(TargetRollPitchYaw);
             }
             if (ForcedPositionAndRotation.HasValue())
             {
-                ForcedPositionAndRotation.GetValue().WriteCreate(data, owner, receiver);
+                ForcedPositionAndRotation.GetValue().WriteCreate(data, receiver, owner);
             }
-            OverrideMoveCurveY.GetValue().WriteCreate(data, owner, receiver);
-            OverrideMoveCurveZ.GetValue().WriteCreate(data, owner, receiver);
-            VisualAnim.GetValue().WriteCreate(data, owner, receiver);
+            OverrideMoveCurveY.GetValue().WriteCreate(data, receiver, owner);
+            OverrideMoveCurveZ.GetValue().WriteCreate(data, receiver, owner);
+            VisualAnim.GetValue().WriteCreate(data, receiver, owner);
             if (PathType == 0)
             {
-                PathData.Get<AreaTriggerSplineCalculator>().WriteCreate(data, owner, receiver);
+                PathData.Get<AreaTriggerSplineCalculator>().WriteCreate(data, receiver, owner);
             }
             if (PathType == 1)
             {
-                PathData.Get<AreaTriggerOrbit>().WriteCreate(data, owner, receiver);
+                PathData.Get<AreaTriggerOrbit>().WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AreaTrigger owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, AreaTrigger owner, bool ignoreNestedChangesMask)
         {
             data.WriteUInt32(changesMask.GetBlock(0));
             data.WriteBits(changesMask.GetBlock(1), 5);
@@ -10138,7 +10127,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    OverrideScaleCurve.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    OverrideScaleCurve.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[6])
                 {
@@ -10174,7 +10163,7 @@ namespace Game.Entities
                 }
                 if (changesMask[14])
                 {
-                    SpellVisual.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    SpellVisual.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[15])
                 {
@@ -10249,40 +10238,40 @@ namespace Game.Entities
                 }
                 if (changesMask[36])
                 {
-                    PeriodModifier.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    PeriodModifier.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[34])
                 {
                     if (PathType == 3)
                     {
-                        PathData.Get<AreaTriggerMovementScript>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        PathData.Get<AreaTriggerMovementScript>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
                 if (changesMask[35])
                 {
                     if (ShapeType == 0)
                     {
-                        ShapeData.Get<AreaTriggerSphere>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ShapeData.Get<AreaTriggerSphere>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                     if (ShapeType == 1)
                     {
-                        ShapeData.Get<AreaTriggerBox>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ShapeData.Get<AreaTriggerBox>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                     if (ShapeType == 2 || ShapeType == 3 || ShapeType == 5 || ShapeType == 6)
                     {
-                        ShapeData.Get<AreaTriggerPolygon>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ShapeData.Get<AreaTriggerPolygon>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                     if (ShapeType == 4)
                     {
-                        ShapeData.Get<AreaTriggerCylinder>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ShapeData.Get<AreaTriggerCylinder>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                     if (ShapeType == 7)
                     {
-                        ShapeData.Get<AreaTriggerDisk>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ShapeData.Get<AreaTriggerDisk>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                     if (ShapeType == 8)
                     {
-                        ShapeData.Get<AreaTriggerBoundedPlane>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ShapeData.Get<AreaTriggerBoundedPlane>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -10290,7 +10279,7 @@ namespace Game.Entities
             {
                 if (changesMask[2])
                 {
-                    ExtraScaleCurve.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    ExtraScaleCurve.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
             data.FlushBits();
@@ -10307,7 +10296,7 @@ namespace Game.Entities
             {
                 if (changesMask[3])
                 {
-                    OverrideMoveCurveX.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    OverrideMoveCurveX.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[24])
                 {
@@ -10323,7 +10312,7 @@ namespace Game.Entities
                 {
                     if (ForcedPositionAndRotation.HasValue())
                     {
-                        ForcedPositionAndRotation.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        ForcedPositionAndRotation.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -10331,15 +10320,15 @@ namespace Game.Entities
             {
                 if (changesMask[4])
                 {
-                    OverrideMoveCurveY.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    OverrideMoveCurveY.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[5])
                 {
-                    OverrideMoveCurveZ.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    OverrideMoveCurveZ.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[26])
                 {
-                    VisualAnim.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    VisualAnim.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
             if (changesMask[32])
@@ -10348,11 +10337,11 @@ namespace Game.Entities
                 {
                     if (PathType == 0)
                     {
-                        PathData.Get<AreaTriggerSplineCalculator>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        PathData.Get<AreaTriggerSplineCalculator>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                     if (PathType == 1)
                     {
-                        PathData.Get<AreaTriggerOrbit>().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        PathData.Get<AreaTriggerOrbit>().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -10401,14 +10390,15 @@ namespace Game.Entities
         }
     }
 
-    public class SceneObjectData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.SceneObject, 5)
+    public class SceneObjectData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.SceneObject, 5), IsUpdateFieldStructure<WorldObject>
     {
         public UpdateField<int> ScriptPackageID = new(0, 1);
         public UpdateField<uint> RndSeedVal = new(0, 2);
         public UpdateField<ObjectGuid> CreatedBy = new(0, 3);
         public UpdateField<uint> SceneType = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        //(nt|UpdateFieldFlag fieldVisibilityFlags),
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteInt32(ScriptPackageID);
             data.WriteUInt32(RndSeedVal);
@@ -10416,12 +10406,12 @@ namespace Game.Entities
             data.WriteUInt32(SceneType);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, WorldObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(_changesMask.GetBlock(0), 5);
 
@@ -10457,7 +10447,7 @@ namespace Game.Entities
         }
     }
 
-    public class ConversationLine : IEquatable<ConversationLine>
+    public class ConversationLine : IEquatable<ConversationLine>, IsUpdateFieldStructure<Conversation>
     {
         public uint ConversationLineID;
         public uint BroadcastTextID;
@@ -10467,29 +10457,29 @@ namespace Game.Entities
         public byte Flags;
         public byte ChatType;
 
-        public void WriteCreate(WorldPacket data, Conversation owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Conversation owner)
         {
             data.WriteUInt32(ConversationLineID);
             data.WriteUInt32(BroadcastTextID);
-            data.WriteUInt32(GetViewerStartTime(this, owner, receiver));
+            data.WriteUInt32(GetViewerStartTime(this, receiver, owner));
             data.WriteUInt32(UiCameraID);
             data.WriteUInt8(ActorIndex);
             data.WriteUInt8(Flags);
             data.WriteUInt8(ChatType);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Conversation owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Conversation owner)
         {
             data.WriteUInt32(ConversationLineID);
             data.WriteUInt32(BroadcastTextID);
-            data.WriteUInt32(GetViewerStartTime(this, owner, receiver));
+            data.WriteUInt32(GetViewerStartTime(this, receiver, owner));
             data.WriteUInt32(UiCameraID);
             data.WriteUInt8(ActorIndex);
             data.WriteUInt8(Flags);
             data.WriteUInt8(ChatType);
         }
 
-        public uint GetViewerStartTime(ConversationLine conversationLine, Conversation conversation, Player receiver)
+        public uint GetViewerStartTime(ConversationLine conversationLine, Player receiver, Conversation conversation)
         {
             uint startTime = conversationLine.StartTime;
             Locale locale = receiver.GetSession().GetSessionDbLocaleIndex();
@@ -10513,7 +10503,7 @@ namespace Game.Entities
         }
     }
 
-    public class ConversationActorField : IEquatable<ConversationActorField>
+    public class ConversationActorField : IEquatable<ConversationActorField>, IsUpdateFieldStructure<Conversation>
     {
         public uint CreatureID;
         public uint CreatureDisplayInfoID;
@@ -10522,7 +10512,7 @@ namespace Game.Entities
         public ConversationActorType Type;
         public uint NoActorObject;
 
-        public void WriteCreate(WorldPacket data, Conversation owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Conversation owner)
         {
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(CreatureDisplayInfoID);
@@ -10533,7 +10523,7 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Conversation owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Conversation owner)
         {
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(CreatureDisplayInfoID);
@@ -10555,7 +10545,7 @@ namespace Game.Entities
         }
     }
 
-    public class ConversationData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Conversation, 7)
+    public class ConversationData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.Conversation, 7), IsUpdateFieldStructure<Conversation>
     {
         public UpdateField<bool> DontPlayBroadcastTextSounds = new(0, 1);
         public UpdateField<List<ConversationLine>> Lines = new(0, 2);
@@ -10564,31 +10554,31 @@ namespace Game.Entities
         public UpdateField<uint> Progress = new(0, 5);
         public UpdateField<uint> Flags = new(0, 6);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Conversation owner)
         {
             data.WriteInt32(Lines.GetValue().Count);
-            data.WriteUInt32(GetViewerLastLineEndTime(this, owner, receiver));
+            data.WriteUInt32(GetViewerLastLineEndTime(this, receiver, owner));
             data.WriteUInt32(Progress);
             for (int i = 0; i < Lines.GetValue().Count; ++i)
             {
-                Lines.GetValue()[i].WriteCreate(data, owner, receiver);
+                Lines.GetValue()[i].WriteCreate(data, receiver, owner);
             }
             data.WriteBit(DontPlayBroadcastTextSounds);
             data.WriteInt32(Actors.Size());
             data.WriteUInt32(Flags);
             for (int i = 0; i < Actors.Size(); ++i)
             {
-                Actors[i].WriteCreate(data, owner, receiver);
+                Actors[i].WriteCreate(data, receiver, owner);
             }
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Conversation owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Conversation owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Conversation owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(_changesMask.GetBlock(0), 6);
 
@@ -10604,7 +10594,7 @@ namespace Game.Entities
                     data.WriteBits(list.Count, 32);
                     for (int i = 0; i < list.Count; ++i)
                     {
-                        list[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        list[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -10628,13 +10618,13 @@ namespace Game.Entities
                     {
                         if (Actors.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Actors[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Actors[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
                 if (_changesMask[4])
                 {
-                    data.WriteUInt32(GetViewerLastLineEndTime(this, owner, receiver));
+                    data.WriteUInt32(GetViewerLastLineEndTime(this, receiver, owner));
                 }
                 if (_changesMask[5])
                 {
@@ -10658,21 +10648,21 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        public uint GetViewerLastLineEndTime(ConversationData conversationLineData, Conversation conversation, Player receiver)
+        public uint GetViewerLastLineEndTime(ConversationData conversationLineData, Player receiver, Conversation conversation)
         {
             Locale locale = receiver.GetSession().GetSessionDbLocaleIndex();
             return (uint)conversation.GetLastLineEndTime(locale).TotalMilliseconds;
         }
     }
 
-    class MeshObjectData() : HasChangesMask(5)
+    class MeshObjectData() : HasChangesMask(5), IsUpdateFieldStructure<WorldObject>
     {
         public UpdateField<bool> IsWMO = new(0, 1);
         public UpdateField<bool> IsRoom = new(0, 2);
         public UpdateField<int> FileDataID = new(0, 3);
         public OptionalUpdateField<AaBox> Geobox = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteBit(IsWMO);
             data.WriteBit(IsRoom);
@@ -10686,12 +10676,12 @@ namespace Game.Entities
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, WorldObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 5);
 
@@ -10718,7 +10708,7 @@ namespace Game.Entities
                 {
                     if (Geobox.HasValue())
                     {
-                        Geobox.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        Geobox.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -10735,21 +10725,21 @@ namespace Game.Entities
         }
     }
 
-    public class VendorData() : HasChangesMask(2)
+    public class VendorData() : HasChangesMask(2), IsUpdateFieldStructure<Creature>
     {
         public UpdateField<int> Flags = new(0, 1);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Creature owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Creature owner)
         {
             data.WriteInt32(Flags);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Creature owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Creature owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Creature owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Creature owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 2);
 
@@ -10770,11 +10760,11 @@ namespace Game.Entities
         }
     }
 
-    class DecorDyeSlots : IEquatable<DecorDyeSlots>
+    class DecorDyeSlots : IEquatable<DecorDyeSlots>, IsUpdateFieldStructure<BaseEntity>
     {
         public int[] DyeColorID = new int[3];
 
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, BaseEntity owner)
         {
             for (uint i = 0; i < 3; ++i)
             {
@@ -10782,7 +10772,7 @@ namespace Game.Entities
             }
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             for (uint i = 0; i < 3; ++i)
             {
@@ -10796,14 +10786,14 @@ namespace Game.Entities
         }
     }
 
-    class DecorStoragePersistedData() : HasChangesMask(4)
+    class DecorStoragePersistedData() : HasChangesMask(4), IsUpdateFieldStructure<BaseEntity>
     {
         public UpdateField<ObjectGuid> HouseGUID = new(-1, 0);
         public OptionalUpdateField<DecorDyeSlots> DyeSlots = new(-1, 1);
         public UpdateField<byte> SourceType = new(-1, 2);
         public UpdateFieldString SourceValue = new(-1, 3);
 
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(HouseGUID);
             data.WriteUInt8(SourceType);
@@ -10812,12 +10802,12 @@ namespace Game.Entities
             data.FlushBits();
             if (DyeSlots.HasValue())
             {
-                DyeSlots.GetValue().WriteCreate(data, owner, receiver);
+                DyeSlots.GetValue().WriteCreate(data, receiver, owner);
             }
             data.WriteCString(SourceValue);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -10843,7 +10833,7 @@ namespace Game.Entities
             if (changesMask[1])
             {
                 if (DyeSlots.HasValue())
-                    DyeSlots.GetValue().WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                    DyeSlots.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
             }
             if (changesMask[3])
             {
@@ -10861,7 +10851,7 @@ namespace Game.Entities
         }
     }
 
-    class HousingDecorData() : HasChangesMask(6)
+    class HousingDecorData() : HasChangesMask(6), IsUpdateFieldStructure<WorldObject>
     {
         public UpdateField<ObjectGuid> DecorGUID = new(0, 1);
         public UpdateField<ObjectGuid> AttachParentGUID = new(0, 2);
@@ -10869,7 +10859,7 @@ namespace Game.Entities
         public OptionalUpdateField<DecorStoragePersistedData> PersistedData = new(0, 4);
         public UpdateField<ObjectGuid> TargetGameObjectGUID = new(0, 5);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WritePackedGuid(DecorGUID);
             data.WritePackedGuid(AttachParentGUID);
@@ -10879,16 +10869,16 @@ namespace Game.Entities
             data.FlushBits();
             if (PersistedData.HasValue())
             {
-                PersistedData.GetValue().WriteCreate(data, owner, receiver);
+                PersistedData.GetValue().WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, WorldObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 6);
 
@@ -10917,7 +10907,7 @@ namespace Game.Entities
                 {
                     if (PersistedData.HasValue())
                     {
-                        PersistedData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                        PersistedData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                     }
                 }
             }
@@ -10934,14 +10924,14 @@ namespace Game.Entities
         }
     }
 
-    class HousingDoorData() : HasChangesMask(5)
+    class HousingDoorData() : HasChangesMask(5), IsUpdateFieldStructure<BaseEntity>
     {
         public UpdateField<int> RoomComponentID = new(0, 1);
         public UpdateField<Position> RoomComponentOffset = new(0, 2);
         public UpdateField<byte> RoomComponentType = new(0, 3);
         public UpdateField<ObjectGuid> AttachedRoomGUID = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WriteInt32(RoomComponentID);
             data.WriteVector3(RoomComponentOffset.GetValue());
@@ -10949,7 +10939,7 @@ namespace Game.Entities
             data.WritePackedGuid(AttachedRoomGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -10989,7 +10979,7 @@ namespace Game.Entities
         }
     }
 
-    class HousingRoomData() : HasChangesMask(7)
+    class HousingRoomData() : HasChangesMask(7), IsUpdateFieldStructure<BaseEntity>
     {
         public DynamicUpdateField<ObjectGuid> MeshObjects = new(0, 1);
         public DynamicUpdateField<HousingDoorData> Doors = new(0, 2);
@@ -10998,7 +10988,7 @@ namespace Game.Entities
         public UpdateField<int> Flags = new(0, 5);
         public UpdateField<int> FloorIndex = new(0, 6);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(HouseGUID);
             data.WriteInt32(HouseRoomID);
@@ -11012,16 +11002,16 @@ namespace Game.Entities
             }
             for (int i = 0; i < Doors.Size(); ++i)
             {
-                Doors[i].WriteCreate(data, owner, receiver);
+                Doors[i].WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, BaseEntity owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 7);
 
@@ -11061,7 +11051,7 @@ namespace Game.Entities
                     {
                         if (Doors.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Doors[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Doors[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -11096,7 +11086,7 @@ namespace Game.Entities
         }
     }
 
-    class HousingRoomComponentMeshData() : HasChangesMask(10)
+    class HousingRoomComponentMeshData() : HasChangesMask(10), IsUpdateFieldStructure<WorldObject>
     {
         public UpdateField<ObjectGuid> RoomGUID = new(0, 1);
         public UpdateField<int> RoomComponentOptionID = new(0, 2);
@@ -11108,7 +11098,7 @@ namespace Game.Entities
         public UpdateField<int> RoomComponentTextureID = new(0, 8);
         public UpdateField<int> RoomComponentTypeParam = new(0, 9);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WritePackedGuid(RoomGUID);
             data.WriteInt32(RoomComponentOptionID);
@@ -11121,12 +11111,12 @@ namespace Game.Entities
             data.WriteInt32(RoomComponentTypeParam);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, WorldObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 10);
 
@@ -11187,7 +11177,7 @@ namespace Game.Entities
         }
     }
 
-    class HousingPlayerHouseData() : HasChangesMask(10)
+    class HousingPlayerHouseData() : HasChangesMask(10), IsUpdateFieldStructure<BaseEntity>
     {
         public UpdateField<ObjectGuid> BnetAccount = new(0, 1);
         public UpdateField<int> PlotIndex = new(0, 2);
@@ -11199,7 +11189,7 @@ namespace Game.Entities
         public UpdateField<uint> RoomPlacementBudget = new(0, 8);
         public UpdateField<ObjectGuid> EntityGUID = new(0, 9);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(BnetAccount);
             data.WriteInt32(PlotIndex);
@@ -11212,12 +11202,12 @@ namespace Game.Entities
             data.WritePackedGuid(EntityGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, BaseEntity owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 10);
 
@@ -11278,23 +11268,23 @@ namespace Game.Entities
         }
     }
 
-    class HousingCornerstoneData() : HasChangesMask(3)
+    class HousingCornerstoneData() : HasChangesMask(3), IsUpdateFieldStructure<GameObject>
     {
         public UpdateField<ulong> Cost = new(0, 1);
         public UpdateField<int> PlotIndex = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, GameObject owner)
         {
             data.WriteUInt64(Cost);
             data.WriteInt32(PlotIndex);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, GameObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, GameObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, GameObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, GameObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 3);
 
@@ -11320,14 +11310,14 @@ namespace Game.Entities
         }
     }
 
-    class HousingPlotAreaTriggerData() : HasChangesMask(5)
+    class HousingPlotAreaTriggerData() : HasChangesMask(5), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<uint> PlotID = new(0, 1);
         public UpdateField<ObjectGuid> HouseOwnerGUID = new(0, 2);
         public UpdateField<ObjectGuid> HouseGUID = new(0, 3);
         public UpdateField<ObjectGuid> HouseOwnerBnetAccountGUID = new(0, 4);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteUInt32(PlotID);
             data.WritePackedGuid(HouseOwnerGUID);
@@ -11335,12 +11325,12 @@ namespace Game.Entities
             data.WritePackedGuid(HouseOwnerBnetAccountGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, AreaTrigger owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, AreaTrigger owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, AreaTrigger owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 5);
 
@@ -11376,18 +11366,18 @@ namespace Game.Entities
         }
     }
 
-    class PlayerHouseInfo : IEquatable<PlayerHouseInfo>
+    class PlayerHouseInfo : IEquatable<PlayerHouseInfo>, IsUpdateFieldStructure<BaseEntity>
     {
         public ObjectGuid HouseGUID;
         public ObjectGuid OwnerGUID;
 
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(HouseGUID);
             data.WritePackedGuid(OwnerGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(HouseGUID);
             data.WritePackedGuid(OwnerGUID);
@@ -11400,18 +11390,18 @@ namespace Game.Entities
         }
     }
 
-    class HousingOwner : IEquatable<HousingOwner>
+    class HousingOwner : IEquatable<HousingOwner>, IsUpdateFieldStructure<BaseEntity>
     {
         public ObjectGuid BnetAccountGUID;
         public ObjectGuid PlayerGUID;
 
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(BnetAccountGUID);
             data.WritePackedGuid(PlayerGUID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(BnetAccountGUID);
             data.WritePackedGuid(PlayerGUID);
@@ -11424,14 +11414,14 @@ namespace Game.Entities
         }
     }
 
-    class NeighborhoodMirrorData() : HasChangesMask(5)
+    class NeighborhoodMirrorData() : HasChangesMask(5), IsUpdateFieldStructure<BaseEntity>
     {
         public DynamicUpdateField<PlayerHouseInfo> Houses = new(0, 1);
         public DynamicUpdateField<HousingOwner> Managers = new(0, 2);
         public UpdateField<ObjectGuid> OwnerGUID = new(0, 4);
         public UpdateFieldString Name = new(0, 3);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WriteBits(Name.Size() + 1, 8);
             data.WritePackedGuid(OwnerGUID);
@@ -11440,20 +11430,20 @@ namespace Game.Entities
             data.WriteCString(Name);
             for (int i = 0; i < Houses.Size(); ++i)
             {
-                Houses[i].WriteCreate(data, owner, receiver);
+                Houses[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < Managers.Size(); ++i)
             {
-                Managers[i].WriteCreate(data, owner, receiver);
+                Managers[i].WriteCreate(data, receiver, owner);
             }
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, BaseEntity owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 5);
 
@@ -11483,7 +11473,7 @@ namespace Game.Entities
                     {
                         if (Houses.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Houses[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Houses[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -11493,7 +11483,7 @@ namespace Game.Entities
                     {
                         if (Managers.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Managers[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Managers[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -11526,7 +11516,7 @@ namespace Game.Entities
         }
     }
 
-    class MirroredMeshObjectData() : HasChangesMask(6)
+    class MirroredMeshObjectData() : HasChangesMask(6), IsUpdateFieldStructure<BaseEntity>
     {
         public UpdateField<ObjectGuid> AttachParentGUID = new(0, 1);
         public UpdateField<Position> PositionLocalSpace = new(0, 2);
@@ -11534,7 +11524,7 @@ namespace Game.Entities
         public UpdateField<float> ScaleLocalSpace = new(0, 4);
         public UpdateField<byte> AttachmentFlags = new(0, 5);
 
-        public void WriteCreate(WorldPacket data, BaseEntity owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WritePackedGuid(AttachParentGUID);
             data.WriteVector3(PositionLocalSpace.GetValue());
@@ -11546,7 +11536,7 @@ namespace Game.Entities
             data.WriteUInt8(AttachmentFlags);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -11594,21 +11584,21 @@ namespace Game.Entities
         }
     }
 
-    class MirroredPositionData() : HasChangesMask(2)
+    class MirroredPositionData() : HasChangesMask(2), IsUpdateFieldStructure<BaseEntity>
     {
         public UpdateField<MirroredMeshObjectData> PositionData = new(0, 1);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            PositionData.GetValue().WriteCreate(data, owner, receiver);
+            PositionData.GetValue().WriteCreate(data, receiver, owner);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, BaseEntity owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 2);
 
@@ -11617,7 +11607,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    PositionData.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    PositionData.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
         }
@@ -11629,7 +11619,7 @@ namespace Game.Entities
         }
     }
 
-    class PlayerMirrorHouse : IEquatable<PlayerMirrorHouse>
+    class PlayerMirrorHouse : IEquatable<PlayerMirrorHouse>, IsUpdateFieldStructure<Player>
     {
         public ObjectGuid Guid;
         public ObjectGuid NeighborhoodGUID;
@@ -11640,7 +11630,7 @@ namespace Game.Entities
         public int MapID;
         public int PlotID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(Guid);
             data.WritePackedGuid(NeighborhoodGUID);
@@ -11652,7 +11642,7 @@ namespace Game.Entities
             data.WriteInt32(PlotID);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(Guid);
             data.WritePackedGuid(NeighborhoodGUID);
@@ -11677,16 +11667,16 @@ namespace Game.Entities
         }
     }
 
-    class NeighborhoodCharterSignature : IEquatable<NeighborhoodCharterSignature>
+    class NeighborhoodCharterSignature : IEquatable<NeighborhoodCharterSignature>, IsUpdateFieldStructure<Player>
     {
         public ObjectGuid Guid;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(Guid);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(Guid);
         }
@@ -11697,34 +11687,34 @@ namespace Game.Entities
         }
     }
 
-    class NeighborhoodCharter : IEquatable<NeighborhoodCharter>
+    class NeighborhoodCharter : IEquatable<NeighborhoodCharter>, IsUpdateFieldStructure<Player>
     {
         public List<NeighborhoodCharterSignature> Signatures = [];
         public int Field_0;
         public int Field_4;
         public string Name;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteInt32(Field_4);
             data.WriteInt32(Signatures.Count);
             for (int i = 0; i < Signatures.Count; ++i)
             {
-                Signatures[i].WriteCreate(data, owner, receiver);
+                Signatures[i].WriteCreate(data, receiver, owner);
             }
             data.WriteBits(Name.GetByteCount() + 1, 8);
             data.WriteCString(Name);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(Field_0);
             data.WriteInt32(Field_4);
             data.WriteInt32(Signatures.Count);
             for (int i = 0; i < Signatures.Count; ++i)
             {
-                Signatures[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                Signatures[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
             }
             data.FlushBits();
             data.WriteBits(Name.GetByteCount() + 1, 8);
@@ -11740,13 +11730,13 @@ namespace Game.Entities
         }
     }
 
-    struct NeighborhoodOwnershipTransfer : IEquatable<NeighborhoodOwnershipTransfer>
+    struct NeighborhoodOwnershipTransfer : IEquatable<NeighborhoodOwnershipTransfer>, IsUpdateFieldStructure<Player>
     {
         public ObjectGuid NeighborhoodGUID;
         public ObjectGuid CurrentOwnerGUID;
         public string NeighborhoodName;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(NeighborhoodGUID);
             data.WritePackedGuid(CurrentOwnerGUID);
@@ -11755,7 +11745,7 @@ namespace Game.Entities
             data.WriteCString(NeighborhoodName);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(NeighborhoodGUID);
             data.WritePackedGuid(CurrentOwnerGUID);
@@ -11772,7 +11762,7 @@ namespace Game.Entities
         }
     }
 
-    class PlayerHouseInfoComponentData() : HasChangesMask(9)
+    class PlayerHouseInfoComponentData() : HasChangesMask(9), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<ObjectGuid> Field_8 = new(0, 1);
         public DynamicUpdateField<PlayerMirrorHouse> Houses = new(0, 2);
@@ -11783,7 +11773,7 @@ namespace Game.Entities
         public UpdateField<byte> Field_178 = new(0, 7);
         public UpdateField<NeighborhoodOwnershipTransfer> NeighborhoodOwnershipTransfer = new(0, 8);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
@@ -11803,7 +11793,7 @@ namespace Game.Entities
             }
             for (int i = 0; i < Houses.Size(); ++i)
             {
-                Houses[i].WriteCreate(data, owner, receiver);
+                Houses[i].WriteCreate(data, receiver, owner);
             }
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
@@ -11819,8 +11809,8 @@ namespace Game.Entities
                 {
                     data.WritePackedGuid(Field_F8[i]);
                 }
-                Charter.GetValue().WriteCreate(data, owner, receiver);
-                NeighborhoodOwnershipTransfer.GetValue().WriteCreate(data, owner, receiver);
+                Charter.GetValue().WriteCreate(data, receiver, owner);
+                NeighborhoodOwnershipTransfer.GetValue().WriteCreate(data, receiver, owner);
             }
         }
 
@@ -11842,14 +11832,14 @@ namespace Game.Entities
             changesMask &= allowedMaskForTarget;
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask allowedMaskForTarget = new(ChangeMaskLength, [0x00000005u]);
             PlayerHouseInfoComponentDataAppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-            WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+            WriteUpdate(_changesMask & allowedMaskForTarget, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Player owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 9);
 
@@ -11910,7 +11900,7 @@ namespace Game.Entities
                     {
                         if (Houses.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            Houses[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            Houses[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -11950,11 +11940,11 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    Charter.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    Charter.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[8])
                 {
-                    NeighborhoodOwnershipTransfer.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    NeighborhoodOwnershipTransfer.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
         }
@@ -11973,23 +11963,23 @@ namespace Game.Entities
         }
     }
 
-    class HousingStorageData() : HasChangesMask((int)EntityFragment.FHousingStorage_C, TypeId.Object, 3)
+    class HousingStorageData() : HasChangesMask((int)EntityFragment.FHousingStorage_C, TypeId.Object, 3), IsUpdateFieldStructure<BaseEntity>
     {
         public MapUpdateField<ObjectGuid, DecorStoragePersistedData> Decor = new(0, 1);
         public UpdateField<uint> DecorMaxOwnedCount = new(0, 2);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            WriteMapFieldCreate(Decor, data, owner, receiver);
+            WriteMapFieldCreate(Decor, data, receiver, owner);
             data.WriteUInt32(DecorMaxOwnedCount);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, BaseEntity owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, BaseEntity owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 3);
 
@@ -11998,7 +11988,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    WriteMapFieldUpdate(Decor, data, ignoreNestedChangesMask, owner, receiver);
+                    WriteMapFieldUpdate(Decor, ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[2])
                 {
@@ -12015,7 +12005,7 @@ namespace Game.Entities
         }
     }
 
-    class HousingFixtureData() : HasChangesMask(11)
+    class HousingFixtureData() : HasChangesMask(11), IsUpdateFieldStructure<WorldObject>
     {
         public UpdateField<int> ExteriorComponentID = new(0, 1);
         public UpdateField<int> HouseExteriorWmoDataID = new(0, 2);
@@ -12028,7 +12018,7 @@ namespace Game.Entities
         public UpdateField<byte> Field_59 = new(0, 9);
         public UpdateField<byte> Size = new(0, 10);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
             data.WriteInt32(ExteriorComponentID);
             data.WriteInt32(HouseExteriorWmoDataID);
@@ -12042,12 +12032,12 @@ namespace Game.Entities
             data.WriteUInt8(Size);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, WorldObject owner)
         {
-            WriteUpdate(data, _changesMask, false, owner, receiver);
+            WriteUpdate(_changesMask, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, WorldObject owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 11);
 
@@ -12113,7 +12103,7 @@ namespace Game.Entities
         }
     }
 
-    class PlayerInitiativeInfo() : HasChangesMask(7)
+    class PlayerInitiativeInfo() : HasChangesMask(7), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> RemainingDuration = new(-1, 0);
         public UpdateField<int> CurrentInitiativeID = new(-1, 1);
@@ -12123,7 +12113,7 @@ namespace Game.Entities
         public UpdateField<float> CurrentProgress = new(-1, 5);
         public UpdateField<float> PlayerTotalContribution = new(-1, 6);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt64(RemainingDuration);
             data.WriteInt32(CurrentInitiativeID);
@@ -12134,7 +12124,7 @@ namespace Game.Entities
             data.WriteFloat(PlayerTotalContribution);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -12186,18 +12176,18 @@ namespace Game.Entities
         }
     }
 
-    class PlayerInitiativeTaskInfo() : HasChangesMask(2)
+    class PlayerInitiativeTaskInfo() : HasChangesMask(2), IsUpdateFieldStructure<Player>
     {
         public UpdateField<int> TaskID = new(-1, 0);
         public UpdateField<int> TimesCompleted = new(-1, 1);
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteInt32(TaskID);
             data.WriteInt32(TimesCompleted);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask changesMask = _changesMask;
             if (ignoreChangesMask)
@@ -12224,18 +12214,18 @@ namespace Game.Entities
         }
     }
 
-    struct NICompletedMilestoneEntry : IEquatable<NICompletedMilestoneEntry>
+    struct NICompletedMilestoneEntry : IEquatable<NICompletedMilestoneEntry>, IsUpdateFieldStructure<Player>
     {
         public uint MilestoneID;
         public long AwardDate;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(MilestoneID);
             data.WriteInt64(AwardDate);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(MilestoneID);
             data.WriteInt64(AwardDate);
@@ -12248,31 +12238,31 @@ namespace Game.Entities
         }
     }
 
-    class NICompletedInitiativesEntry : IEquatable<NICompletedInitiativesEntry>
+    class NICompletedInitiativesEntry : IEquatable<NICompletedInitiativesEntry>, IsUpdateFieldStructure<Player>
     {
         public bool Completed;
         public List<NICompletedMilestoneEntry> CompletedMilestones = [];
         public uint InitiativeID;
 
-        public void WriteCreate(WorldPacket data, Player owner, Player receiver)
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(InitiativeID);
             data.WriteInt32(CompletedMilestones.Count);
             for (int i = 0; i < CompletedMilestones.Count; ++i)
             {
-                CompletedMilestones[i].WriteCreate(data, owner, receiver);
+                CompletedMilestones[i].WriteCreate(data, receiver, owner);
             }
             data.WriteBit(Completed);
             data.FlushBits();
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt32(InitiativeID);
             data.WriteInt32(CompletedMilestones.Count);
             for (int i = 0; i < CompletedMilestones.Count; ++i)
             {
-                CompletedMilestones[i].WriteUpdate(data, ignoreChangesMask, owner, receiver);
+                CompletedMilestones[i].WriteUpdate(ignoreChangesMask, data, receiver, owner);
             }
             data.FlushBits();
             data.FlushBits();
@@ -12288,7 +12278,7 @@ namespace Game.Entities
         }
     }
 
-    class PlayerInitiativeComponentData() : HasChangesMask(6)
+    class PlayerInitiativeComponentData() : HasChangesMask(6), IsUpdateFieldStructure<Player>
     {
         public DynamicUpdateField<PlayerInitiativeTaskInfo> CompletedTasks = new(0, 1);
         public DynamicUpdateField<NICompletedInitiativesEntry> CompletedInitiatives = new(0, 2);
@@ -12296,23 +12286,23 @@ namespace Game.Entities
         public UpdateField<PlayerInitiativeInfo> InitiativeInfo = new(0, 4);
         public SetUpdateField<ObjectGuid> Houses = new(0, 5);
 
-        public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             data.WritePackedGuid(NeighborhoodGUID);
-            InitiativeInfo.GetValue().WriteCreate(data, owner, receiver);
+            InitiativeInfo.GetValue().WriteCreate(data, receiver, owner);
             data.WriteInt32(CompletedTasks.Size());
             data.WriteInt32(CompletedInitiatives.Size());
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
-                WriteSetFieldCreate(Houses, data, owner, receiver);
+                WriteSetFieldCreate(Houses, data, receiver, owner);
             }
             for (int i = 0; i < CompletedTasks.Size(); ++i)
             {
-                CompletedTasks[i].WriteCreate(data, owner, receiver);
+                CompletedTasks[i].WriteCreate(data, receiver, owner);
             }
             for (int i = 0; i < CompletedInitiatives.Size(); ++i)
             {
-                CompletedInitiatives[i].WriteCreate(data, owner, receiver);
+                CompletedInitiatives[i].WriteCreate(data, receiver, owner);
             }
         }
 
@@ -12322,26 +12312,26 @@ namespace Game.Entities
                 allowedMaskForTarget |= new UpdateMask(1, [0x00000020u]);
         }
 
-        void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
+        public void AppendAllowedFieldsMaskForFlag(UpdateMask allowedMaskForTarget, UpdateFieldFlag fieldVisibilityFlags)
         {
             PlayerInitiativeComponentDataAppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
         }
 
-        void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
+        public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
             UpdateMask allowedMaskForTarget = new(1, [0x0000001Fu]);
             PlayerInitiativeComponentDataAppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask &= allowedMaskForTarget;
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
+        public void WriteUpdate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, Player owner)
         {
             UpdateMask allowedMaskForTarget = new(1, [0x0000001Fu]);
             PlayerInitiativeComponentDataAppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
-            WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
+            WriteUpdate(_changesMask & allowedMaskForTarget, data, receiver, owner, false);
         }
 
-        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, Player owner, Player receiver)
+        public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, Player owner, bool ignoreNestedChangesMask)
         {
             data.WriteBits(changesMask.GetBlock(0), 6);
 
@@ -12371,7 +12361,7 @@ namespace Game.Entities
                     {
                         if (CompletedTasks.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CompletedTasks[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CompletedTasks[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -12381,7 +12371,7 @@ namespace Game.Entities
                     {
                         if (CompletedInitiatives.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            CompletedInitiatives[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                            CompletedInitiatives[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                         }
                     }
                 }
@@ -12391,11 +12381,11 @@ namespace Game.Entities
                 }
                 if (changesMask[4])
                 {
-                    InitiativeInfo.GetValue().WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
+                    InitiativeInfo.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[5])
                 {
-                    WriteSetFieldUpdate(Houses, data, ignoreNestedChangesMask, owner, receiver);
+                    WriteSetFieldUpdate(Houses, ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
         }

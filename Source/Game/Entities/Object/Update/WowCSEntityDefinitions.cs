@@ -71,9 +71,6 @@ namespace Game.Entities
         public const byte CGObjectUpdateMask = CGObjectActiveMask | CGObjectChangedMask;
     }
 
-    public delegate void EntityFragmentSerializeFn(BaseEntity entity, WorldPacket data, UpdateFieldFlag flags, Player target);
-    public delegate bool EntityFragmentIsChangedFn(BaseEntity entity);
-
     public class EntityFragmentsHolder
     {
         EntityFragment[] Ids =
@@ -89,7 +86,7 @@ namespace Game.Entities
         public byte UpdateableCount;
         public byte ContentsChangedMask;
 
-        public void Add(EntityFragment fragment, bool update, EntityFragmentSerializeFn serializeCreate, EntityFragmentSerializeFn serializeUpdate, EntityFragmentIsChangedFn isChanged)
+        public void Add(EntityFragment fragment, bool update, dynamic data = null)
         {
             Cypher.Assert(Count < Ids.Length);
 
@@ -129,29 +126,11 @@ namespace Game.Entities
                     }
                 }
 
-                void insertAtIndex<T>(T[] arr, byte size, int i, T value)
-                {
-                    //todo fix me
-                    //std::ranges::move_backward(arr.begin() + i, arr.begin() + size - 1, arr.begin() + size);
-                    arr[i] = value;
-                }
-                ;
-
-                insertAtIndex(Updateable.SerializeCreate, UpdateableCount, index, serializeCreate);
-                insertAtIndex(Updateable.SerializeUpdate, UpdateableCount, index, serializeUpdate);
-                insertAtIndex(Updateable.IsChanged, UpdateableCount, index, isChanged);
+                Updateable.Data[index] = data;
             }
 
             if (update)
                 IdsChanged = true;
-        }
-
-        public void Add(EntityFragment fragment, bool update) { Add(fragment, update, null, null, null); }
-
-        public void Add(EntityFragment fragment, bool update, IHasChangesMask blah)
-        {
-            //todo fix me
-            //Add(fragment, update, blah.WriteCreate, blah.WriteUpdate, blah.GetChangesMask().IsAnySet());
         }
 
         public void Remove(EntityFragment fragment)
@@ -190,17 +169,7 @@ namespace Game.Entities
                         }
                     }
 
-                    void removeAtIndex<T>(T[] arr, int oldSize, int i, T value)
-                    {
-                        //todo fix me
-                        //std::ranges::move(arr.begin() + i + 1, arr.begin() + oldSize, arr.begin() + i) = value;
-                    }
-                    ;
-
-                    int oldSize = UpdateableCount + 1;
-                    removeAtIndex(Updateable.SerializeCreate, oldSize, index, null);
-                    removeAtIndex(Updateable.SerializeUpdate, oldSize, index, null);
-                    removeAtIndex(Updateable.IsChanged, oldSize, index, null);
+                    Updateable.Data[index] = null;
                 }
             }
 
@@ -255,9 +224,66 @@ namespace Game.Entities
 
             public EntityFragment[] Ids = [EntityFragment.End, EntityFragment.End, EntityFragment.End, EntityFragment.End];
             public byte[] Masks = new byte[N];
-            public EntityFragmentSerializeFn[] SerializeCreate = new EntityFragmentSerializeFn[N];
-            public EntityFragmentSerializeFn[] SerializeUpdate = new EntityFragmentSerializeFn[N];
-            public EntityFragmentIsChangedFn[] IsChanged = new EntityFragmentIsChangedFn[N];
+            public dynamic[] Data = new dynamic[N];
+        }
+    }
+
+    public delegate void EntityFragmentSerializeFn(dynamic rawFragmentData, UpdateFieldFlag flags, WorldPacket data, Player target, BaseEntity baseEntity);
+    public delegate bool EntityFragmentIsChangedFn(dynamic rawFragmentData);
+    public delegate void EntityFragmentClearChangedFn(dynamic rawFragmentData);
+
+    public struct EntityFragmentInfo
+    {
+        static EntityFragmentInfo()
+        {
+            Register<VendorData, Creature>(EntityFragment.FVendor_C);
+            Register<MeshObjectData, WorldObject>(EntityFragment.FMeshObjectData_C);
+            Register<HousingDecorData, WorldObject>(EntityFragment.FHousingDecor_C);
+            Register<HousingRoomData, BaseEntity>(EntityFragment.FHousingRoom_C);
+            Register<HousingRoomComponentMeshData, WorldObject>(EntityFragment.FHousingRoomComponentMesh_C);
+            Register<HousingPlayerHouseData, BaseEntity>(EntityFragment.FHousingPlayerHouse_C);
+            Register<HousingCornerstoneData, GameObject>(EntityFragment.FJamHousingCornerstone_C);
+            Register<NeighborhoodMirrorData, BaseEntity>(EntityFragment.FNeighborhoodMirrorData_C);
+            Register<MirroredPositionData, BaseEntity>(EntityFragment.FMirroredPositionData_C);
+            Register<PlayerHouseInfoComponentData, Player>(EntityFragment.PlayerHouseInfoComponent_C);
+            Register<HousingStorageData, BaseEntity>(EntityFragment.FHousingStorage_C);
+            Register<HousingFixtureData, WorldObject>(EntityFragment.FHousingFixture_C);
+            Register<PlayerInitiativeComponentData, Player>(EntityFragment.PlayerInitiativeComponent_C);
+        }
+
+        static int N = (int)EntityFragment.End + 1;
+
+        public static EntityFragmentSerializeFn[] SerializeCreate = new EntityFragmentSerializeFn[N];
+        public static EntityFragmentSerializeFn[] SerializeUpdate = new EntityFragmentSerializeFn[N];
+        public static EntityFragmentIsChangedFn[] IsChanged = new EntityFragmentIsChangedFn[N];
+        public static EntityFragmentClearChangedFn[] ClearChanged = new EntityFragmentClearChangedFn[N];
+
+        public static void Register<FragmentData, OwnerObject>(EntityFragment index) where FragmentData : IsUpdateFieldStructure<OwnerObject> where OwnerObject : BaseEntity
+        {
+            SerializeCreate[(int)index] = BuildCreate<FragmentData, OwnerObject>;
+            SerializeUpdate[(int)index] = BuildUpdate<OwnerObject>;
+            IsChanged[(int)index] = BuildIsChanged<OwnerObject>;
+            ClearChanged[(int)index] = BuildClearChanged<OwnerObject>;
+        }
+
+        static void BuildCreate<FragmentData, OwnerObject>(dynamic rawFragmentData, UpdateFieldFlag flags, WorldPacket data, Player target, BaseEntity baseEntity) where FragmentData : IsUpdateFieldStructure<OwnerObject> where OwnerObject : BaseEntity
+        {
+            ((FragmentData)rawFragmentData).WriteCreate(flags, data, target, (OwnerObject)baseEntity);
+        }
+
+        static void BuildUpdate<OwnerObject>(dynamic rawFragmentData, UpdateFieldFlag flags, WorldPacket data, Player target, BaseEntity baseEntity) where OwnerObject : BaseEntity
+        {
+            ((IsUpdateFieldStructure<OwnerObject>)rawFragmentData).WriteUpdate(flags, data, target, (OwnerObject)baseEntity);
+        }
+
+        static bool BuildIsChanged<OwnerObject>(dynamic rawFragmentData) where OwnerObject : BaseEntity
+        {
+            return ((IHasChangesMask)rawFragmentData).GetChangesMask().IsAnySet();
+        }
+
+        static void BuildClearChanged<OwnerObject>(dynamic rawFragmentData) where OwnerObject : BaseEntity
+        {
+            ((IHasChangesMask)rawFragmentData).ClearChangesMask();
         }
     }
 }

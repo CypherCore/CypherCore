@@ -17,7 +17,7 @@ namespace Game.Entities
             data.WriteVector3(High);
         }
 
-        public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, BaseEntity owner, Player receiver)
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
         {
             data.WriteVector3(Low);
             data.WriteVector3(High);
