@@ -113,6 +113,7 @@ namespace Game.Entities
                 case UnitMods.StatAgility:
                 case UnitMods.StatStamina:
                 case UnitMods.StatIntellect:
+                case UnitMods.StatSpirit:
                     UpdateStats(GetStatByAuraGroup(unitMod));
                     break;
                 case UnitMods.Armor:
@@ -231,6 +232,9 @@ namespace Game.Entities
                     break;
                 case UnitMods.StatIntellect:
                     stat = Stats.Intellect;
+                    break;
+                case UnitMods.StatSpirit:
+                    stat = Stats.Spirit;
                     break;
                 default:
                     break;
