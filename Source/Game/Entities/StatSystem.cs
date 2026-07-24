@@ -1520,6 +1520,9 @@ namespace Game.Entities
                 if (Convert.ToBoolean(aurEff.GetMiscValue() & (1 << (int)cr)))
                     amount += MathFunctions.CalculatePct(amount, aurEff.GetAmount());
 
+            if (cr == CombatRating.Parry)
+                amount += (int)(baseRatingValue[(int)CombatRating.CritMelee] * (GetTotalAuraMultiplier(AuraType.ConvertCritRatingPctToParryRating) - 1.0f));
+
             if (amount < 0)
                 amount = 0;
 
@@ -1557,6 +1560,7 @@ namespace Game.Entities
                         UpdateCritPercentage(WeaponAttackType.BaseAttack);
                         UpdateCritPercentage(WeaponAttackType.OffAttack);
                     }
+                    UpdateRating(CombatRating.Parry);
                     break;
                 case CombatRating.CritRanged:
                     if (affectStats)

@@ -3546,6 +3546,19 @@ namespace Game.Spells
             target.HandleStatFlatModifier(unitMod, UnitModifierFlatType.Total, GetAmount(), apply);
         }
 
+        [AuraEffectHandler(AuraType.ConvertCritRatingPctToParryRating)]
+        void HandleConvertCritToParry(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            target.UpdateRating(CombatRating.Parry);
+        }
+
         /********************************/
         /***      HEAL & ENERGIZE     ***/
         /********************************/
