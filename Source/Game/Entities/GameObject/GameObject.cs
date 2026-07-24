@@ -263,7 +263,10 @@ namespace Game.Entities
                 }
 
                 if (m_goTemplateAddon.AIAnimKitID != 0)
+                {
+                    m_updateFlag.AnimKit = true;
                     _animKitId = (ushort)m_goTemplateAddon.AIAnimKitID;
+                }
             }
 
             SetEntry(goInfo.entry);
@@ -370,7 +373,10 @@ namespace Game.Entities
                 }
 
                 if (gameObjectAddon.AIAnimKitID != 0)
+                {
+                    m_updateFlag.AnimKit = true;
                     _animKitId = (ushort)gameObjectAddon.AIAnimKitID;
+                }
             }
 
             uint vignetteId = GetGoInfo().GetSpawnVignette();
