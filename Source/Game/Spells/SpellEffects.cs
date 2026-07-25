@@ -3670,7 +3670,7 @@ namespace Game.Spells
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)
             {
                 // not all charge effects used in negative spells
-                if (m_spellInfo.HasAttribute(SpellAttr7.AttackOnChargeToUnit))
+                if (m_spellInfo.HasAttribute(SpellAttr7.AttackOnChargeToUnit) && unitCaster.IsValidAttackTarget(unitTarget))
                     unitCaster.Attack(unitTarget, true);
 
                 if (effectInfo.TriggerSpell != 0)
