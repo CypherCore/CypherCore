@@ -341,6 +341,8 @@ namespace Game.Entities
                         continue;
                     }
 
+                    ushort step = 0;
+
                     // set fixed skill ranges
                     switch (Global.SpellMgr.GetSkillRangeType(rcEntry))
                     {
@@ -353,6 +355,14 @@ namespace Game.Entities
                         case SkillRangeType.Level:
                             max = GetMaxSkillValueForLevel();
                             break;
+                        case SkillRangeType.Rank:
+                        {
+                            SkillTiersEntry tier = Global.ObjectMgr.GetSkillTier(rcEntry.SkillTierID);
+                            var tierIndex = tier.Value.IndexOf(max);
+                            if (tierIndex != -1)
+                                step = (ushort)tierIndex;
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -361,17 +371,17 @@ namespace Game.Entities
                         mSkillStatus.Add(skill, new SkillStatusData((uint)mSkillStatus.Count, SkillState.Unchanged));
 
                     var skillStatusData = mSkillStatus[skill];
-                    ushort step = 0;
 
                     SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(rcEntry.SkillID);
                     if (skillLine != null)
                     {
-                        if (skillLine.CategoryID == SkillCategory.Secondary)
+                        if (step == 0 && skillLine.CategoryID == SkillCategory.Secondary)
                             step = (ushort)(max / 75);
 
                         if (skillLine.CategoryID == SkillCategory.Profession)
                         {
-                            step = (ushort)(max / 75);
+                            if (step == 0)
+                                step = (ushort)(max / 75);
 
                             if (skillLine.ParentSkillLineID != 0 && skillLine.ParentTierIndex != 0)
                             {
@@ -384,6 +394,13 @@ namespace Game.Entities
                     }
 
                     SetSkillLineId(skillStatusData.Pos, skill);
+
+                    if (value == 0)
+                    {
+                        skillStatusData.State = SkillState.Deleted;
+                        continue;
+                    }
+
                     SetSkillStep(skillStatusData.Pos, step);
                     SetSkillRank(skillStatusData.Pos, value);
                     SetSkillStartingRank(skillStatusData.Pos, 1);

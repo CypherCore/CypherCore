@@ -1191,14 +1191,14 @@ namespace Game.Entities
             else
             {
                 // We are about to learn a skill that has been added outside of normal circumstances (Game Master command, scripts etc.)
-                byte skillSlot = 0;
+                uint skillSlot = 0;
 
                 // Find a free skill slot
                 for (uint i = 0; i < SkillConst.MaxPlayerSkills; ++i)
                 {
                     if (GetSkillLineIdByPos(i) == 0)
                     {
-                        skillSlot = (byte)i;
+                        skillSlot = i;
                         break;
                     }
                 }

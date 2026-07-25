@@ -8770,13 +8770,14 @@ namespace Game.Spells
 
     public class SkillStatusData
     {
-        public SkillStatusData(uint _pos, SkillState state)
+        public uint Pos;
+        public SkillState State;
+
+        public SkillStatusData(uint pos, SkillState state)
         {
-            Pos = (byte)_pos;
+            Pos = pos;
             State = state;
         }
-        public byte Pos;
-        public SkillState State;
     }
 
     public class SpellChainNode
