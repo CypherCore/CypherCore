@@ -4714,11 +4714,11 @@ namespace Game.Entities
             // Odyn's Fury
             ApplySpellFix([385060, 385061, 385062], spellInfo =>
             {
-                spellInfo._LoadSqrtTargetLimit(5, 0, 385059, 5, null, null);
+                spellInfo._LoadSqrtTargetLimit(8, 0, 385059, 5, null, null);
             });
 
             // Flamestrike
-            ApplySpellFix([2120], spellInfo =>
+            ApplySpellFix([2120, 1254851], spellInfo =>
             {
                 spellInfo._LoadSqrtTargetLimit(8, 0, null, 2, null, null);
             });
