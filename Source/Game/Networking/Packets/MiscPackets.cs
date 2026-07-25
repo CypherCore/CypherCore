@@ -176,6 +176,18 @@ namespace Game.Networking.Packets
         public uint Type;
     }
 
+    class SetCurrencyFlags(WorldPacket packet) : ClientPacket(packet)
+    {
+        public uint CurrencyID;
+        public CurrencyDbFlags Flags;
+
+        public override void Read()
+        {
+            CurrencyID = _worldPacket.ReadUInt32();
+            Flags = (CurrencyDbFlags)_worldPacket.ReadUInt8();
+        }
+    }
+
     public class SetSelection : ClientPacket
     {
         public SetSelection(WorldPacket packet) : base(packet) { }

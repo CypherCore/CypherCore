@@ -506,6 +506,12 @@ namespace Game
             _player.SendPacket(startTimer);
         }
 
+        [WorldPacketHandler(ClientOpcodes.SetCurrencyFlags, Processing = PacketProcessing.Inplace)]
+        void HandleSetCurrencyFlags(SetCurrencyFlags setCurrenctFlags)
+        {
+            _player.SetCurrencyFlagsFromClient(setCurrenctFlags.CurrencyID, setCurrenctFlags.Flags);
+        }
+
         [WorldPacketHandler(ClientOpcodes.ChatUnregisterAllAddonPrefixes)]
         void HandleUnregisterAllAddonPrefixes(ChatUnregisterAllAddonPrefixes packet)
         {

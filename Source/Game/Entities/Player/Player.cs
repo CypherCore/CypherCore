@@ -1587,6 +1587,21 @@ namespace Game.Entities
             return playerCurrency != null && playerCurrency.Quantity >= amount;
         }
 
+        public void SetCurrencyFlagsFromClient(uint id, CurrencyDbFlags flags)
+        {
+            var itr = _currencyStorage.LookupByKey(id);
+            if (itr == null)
+                return;
+
+            CurrencyDbFlags newValue = (flags & CurrencyDbFlags.ClientFlags) | (itr.Flags & ~CurrencyDbFlags.ClientFlags);
+            if (itr.Flags == newValue)
+                return;
+
+            itr.Flags = newValue;
+            if (itr.state != PlayerCurrencyState.New)
+                itr.state = PlayerCurrencyState.Changed;
+        }
+
         //Action Buttons - CUF Profile
         public void SaveCUFProfile(byte id, CUFProfile profile) { _CUFProfiles[id] = profile; }
         public CUFProfile GetCUFProfile(byte id) { return _CUFProfiles[id]; }
