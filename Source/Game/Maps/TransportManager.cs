@@ -188,7 +188,7 @@ namespace Game.Maps
                     return (uint)(Math.Sqrt((dist + dist) / accel) * 1000.0);
                 else
                     return (uint)(((dist - accelDist) / speed + speed / accel) * 1000.0);
-            };
+            }
 
             // Init segments
             int pauseItr = 0;
@@ -328,6 +328,9 @@ namespace Game.Maps
             {
                 if (node.ContinentID != leg.MapId || prevNodeWasTeleport)
                 {
+                    if (prevNodeWasTeleport && !pathPoints.Empty())
+                        pathPoints.Add(pathPoints.Last());
+
                     InitializeLeg(leg, transport.Events, pathPoints, pauses, events, goInfo, ref totalTime);
 
                     leg = new();
@@ -339,13 +342,13 @@ namespace Game.Maps
                 }
 
                 prevNodeWasTeleport = node.HasFlag(TaxiPathNodeFlags.Teleport);
-                pathPoints.Add(node);
-                if (node.HasFlag(TaxiPathNodeFlags.Stop))
+                if (!pathPoints.Empty() && node.HasFlag(TaxiPathNodeFlags.Stop))
                     pauses.Add(node);
 
                 if (node.ArrivalEventID != 0 || node.DepartureEventID != 0)
                     events.Add(node);
 
+                pathPoints.Add(node);
                 transport.MapIds.Add(node.ContinentID);
             }
 
