@@ -80,27 +80,10 @@ namespace Game.Maps
             }
         }
 
-        public void LoadMinionData(params MinionData[] data)
-        {
-            foreach (var minion in data)
-            {
-                if (minion.entry == 0)
-                    continue;
-
-                if (minion.bossId < bosses.Count)
-                    minions.Add(minion.entry, new MinionInfo(bosses[minion.bossId]));
-            }
-
-            Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadMinionData: {0} minions loaded.", minions.Count);
-        }
-
-        public void LoadDoorData(params DoorData[] data)
+        public void LoadDoorData(Span<DoorData> data)
         {
             foreach (var door in data)
             {
-                if (door.entry == 0)
-                    continue;
-
                 if (door.bossId < bosses.Count)
                     doors.Add(door.entry, new DoorInfo(bosses[door.bossId], door.Behavior));
             }
@@ -108,30 +91,38 @@ namespace Game.Maps
             Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadDoorData: {0} doors loaded.", doors.Count);
         }
 
-        public void LoadObjectData(ObjectData[] creatureData, ObjectData[] gameObjectData)
+        public void LoadObjectData(Span<ObjectData> creatureData, Span<ObjectData> gameObjectData)
         {
-            if (creatureData != null)
-                LoadObjectData(creatureData, _creatureInfo);
-
-            if (gameObjectData != null)
-                LoadObjectData(gameObjectData, _gameObjectInfo);
+            LoadObjectData(creatureData, _creatureInfo);
+            LoadObjectData(gameObjectData, _gameObjectInfo);
 
             Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadObjectData: {0} objects loaded.", _creatureInfo.Count + _gameObjectInfo.Count);
         }
 
-        void LoadObjectData(ObjectData[] objectData, Dictionary<uint, uint> objectInfo)
-        {
-            foreach (var data in objectData)
-            {
-                Cypher.Assert(!objectInfo.ContainsKey(data.entry));
-                objectInfo[data.entry] = data.type;
-            }
-        }
-
-        public void LoadDungeonEncounterData(DungeonEncounterData[] encounters)
+        public void LoadDungeonEncounterData(Span<DungeonEncounterData> encounters)
         {
             foreach (DungeonEncounterData encounter in encounters)
                 LoadDungeonEncounterData(encounter.BossId, encounter.DungeonEncounterId);
+        }
+
+        public void LoadMinionData(Span<MinionData> data)
+        {
+            foreach (var minion in data)
+            {
+                if (minion.bossId < bosses.Count)
+                    minions.Add(minion.entry, new MinionInfo(bosses[minion.bossId]));
+            }
+
+            Log.outDebug(LogFilter.Scripts, "InstanceScript.LoadMinionData: {0} minions loaded.", minions.Count);
+        }
+
+        void LoadObjectData(Span<ObjectData> objectData, Dictionary<uint, uint> objectInfo)
+        {
+            foreach (var data in objectData)
+            {
+                bool inserted = objectInfo.TryAdd(data.entry, data.type);
+                Cypher.Assert(inserted);
+            }
         }
 
         void LoadDungeonEncounterData(uint bossId, uint[] dungeonEncounterIds)
