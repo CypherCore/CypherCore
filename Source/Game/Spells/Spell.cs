@@ -85,7 +85,11 @@ namespace Game.Spells
             m_castItemLevel = -1;
 
             if (IsIgnoringCooldowns())
+            {
                 m_castFlagsEx |= SpellCastFlagsEx.IgnoreCooldown;
+                if (m_spellInfo.ChargeCategoryId != 0)
+                    m_castFlagsEx |= SpellCastFlagsEx.DontConsumeCharges;
+            }
 
             if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.SuppressCasterAnim))
                 m_castFlagsEx |= SpellCastFlagsEx.SuppressCasterAnim;
