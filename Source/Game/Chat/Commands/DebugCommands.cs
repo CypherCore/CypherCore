@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Combat;
@@ -1128,6 +1127,25 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("modifiertree", RBACPermissions.CommandDebug)]
+        static bool HandleDebugModifierTreeCommand(CommandHandler handler, uint modifierTreeId)
+        {
+            Player target = handler.GetSelectedPlayerOrSelf();
+
+            if (target == null)
+            {
+                handler.SendSysMessage(CypherStrings.PlayerNotFound);
+                return false;
+            }
+
+            if (target.ModifierTreeSatisfied(modifierTreeId))
+                handler.SendSysMessage($"ModifierTree {modifierTreeId} met");
+            else
+                handler.SendSysMessage($"ModifierTree {modifierTreeId} not met");
+
+            return true;
+        }
+
         [Command("wsexpression", RBACPermissions.CommandDebug)]
         static bool HandleDebugWSExpressionCommand(CommandHandler handler, uint expressionId)
         {
@@ -1143,9 +1161,9 @@ namespace Game.Chat
                 return false;
 
             if (ConditionManager.IsMeetingWorldStateExpression(target.GetMap(), wsExpressionEntry))
-                handler.SendSysMessage($"Expression {expressionId} meet");
+                handler.SendSysMessage($"WorldStateExpression {expressionId} met");
             else
-                handler.SendSysMessage($"Expression {expressionId} not meet");
+                handler.SendSysMessage($"WorldStateExpression {expressionId} not met");
 
             return true;
         }
