@@ -4302,7 +4302,7 @@ namespace Game.Entities
             // in specific slot
             if (bag != ItemConst.NullBag && slot != ItemConst.NullSlot)
             {
-                if (slot >= InventorySlots.BagStart && slot < InventorySlots.BagEnd)
+                if (bag == InventorySlots.Bag0 && slot >= InventorySlots.BagStart && slot < InventorySlots.BagEnd)
                 {
                     if (!pItem.IsBag())
                         return InventoryResult.WrongSlot;
