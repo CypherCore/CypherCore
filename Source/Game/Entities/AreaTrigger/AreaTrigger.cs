@@ -858,8 +858,8 @@ namespace Game.Entities
 
             _ai.OnUnitEnter(unit);
 
-            // OnUnitEnter script can despawn this areatrigger
-            if (!IsInWorld)
+            // OnUnitEnter script can despawn this areatrigger or teleport player to a different map
+            if (!IsInWorld || !IsInMap(unit))
                 return;
 
             // Register areatrigger in Unit after actions/scripts to allow them to determine
@@ -890,10 +890,11 @@ namespace Game.Entities
 
             UndoActions(unit);
 
+            // OnUnitExit script can teleport player to another map, causing it to attempt to exit the areatrigger again (from Unit::ExitAllAreaTriggers)
+            unit.ExitAreaTrigger(this);
+
             if (canTriggerOnExit)
                 _ai.OnUnitExit(unit, exitMode);
-
-            unit.ExitAreaTrigger(this);
         }
 
         public void HandleUnitExit(Unit unit)
