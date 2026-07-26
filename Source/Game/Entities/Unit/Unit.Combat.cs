@@ -30,8 +30,9 @@ namespace Game.Entities
             if (spell != null)
                 if (spell.GetState() == SpellState.Preparing
                     && spell.m_spellInfo.HasAttribute(SpellAttr0.NotInCombatOnlyPeaceful)
-                    && spell.m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat))
-                    InterruptNonMeleeSpells(false);
+                    && spell.m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat)
+                    && !spell.m_spellInfo.HasAura(AuraType.Mounted)) // for some reason mounts are not interrupted by entering combat even with both interrupt flag and attribute
+                    InterruptSpell(CurrentSpellTypes.Generic, false, false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
             ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.EnterCombat), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);

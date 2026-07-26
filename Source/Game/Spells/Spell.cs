@@ -7548,7 +7548,7 @@ namespace Game.Spells
 
         bool IsAutoActionResetSpell()
         {
-            if (IsTriggered() || m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
+            if (IsTriggered() || !m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Combat) || m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
                 return false;
 
             if (m_casttime == 0 && m_spellInfo.HasAttribute(SpellAttr6.DoesntResetSwingTimerIfInstant))

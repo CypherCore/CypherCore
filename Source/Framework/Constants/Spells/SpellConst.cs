@@ -97,7 +97,7 @@ namespace Framework.Constants
         Movement = 0x01,
         DamagePushbackPlayerOnly = 0x02,
         Stun = 0x04, // useless, even spells without it get interrupted
-        Combat = 0x08,
+        Combat = 0x08, // used for both interrupting spell when entering combat and to reset auto attack timer
         DamageCancelsPlayerOnly = 0x10,
         MeleeCombat = 0x20, // NYI
         Immunity = 0x40, // NYI

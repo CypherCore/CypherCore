@@ -4290,12 +4290,12 @@ namespace Game.Entities
             Player player = ToPlayer();
             if (player != null)
             {
-                if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aurApp.GetBase().GetId()))
+                if (Global.ConditionMgr.IsSpellUsedInSpellClickConditions(aura.GetId()))
                     player.UpdateVisibleObjectInteractions(false, true, false, false);
 
-                player.FailCriteria(CriteriaFailEvent.GainAura, aurApp.GetBase().GetId());
-                player.StartCriteria(CriteriaStartEvent.GainAura, aurApp.GetBase().GetId());
-                player.UpdateCriteria(CriteriaType.GainAura, aurApp.GetBase().GetId());
+                player.FailCriteria(CriteriaFailEvent.GainAura, aura.GetId());
+                player.StartCriteria(CriteriaStartEvent.GainAura, aura.GetId());
+                player.UpdateCriteria(CriteriaType.GainAura, aura.GetId(), 0, 0, caster);
             }
         }
 
@@ -4704,8 +4704,8 @@ namespace Game.Entities
                 Player player = ToPlayer();
                 if (player != null)
                 {
-                    player.StartCriteria(CriteriaStartEvent.GainAuraEffect, (uint)aurEff.GetAuraType());
                     player.FailCriteria(CriteriaFailEvent.GainAuraEffect, (uint)aurEff.GetAuraType());
+                    player.StartCriteria(CriteriaStartEvent.GainAuraEffect, (uint)aurEff.GetAuraType());
                 }
             }
             else
