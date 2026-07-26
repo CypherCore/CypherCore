@@ -3080,6 +3080,30 @@ namespace Game.Spells
                 if (creatureCaster != null)
                     creatureCaster.ReleaseSpellFocus(this);
 
+            if (m_originalCaster != null)
+            {
+                // Handle procs on cast
+                ProcFlagsInit procAttacker = m_procAttacker;
+                if (!procAttacker)
+                    procAttacker = FinalizeDataForTriggerSystem(IsPositive()).attacker;
+
+                procAttacker.Or(ProcFlags2.CastSuccessful);
+
+                ProcFlagsHit hitMask = m_hitMask;
+                if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
+                    hitMask |= ProcFlagsHit.Normal;
+
+                if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
+                    m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed, m_spellInfo);
+
+                Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
+
+                // Call CreatureAI hook OnSpellCast
+                Creature caster = m_originalCaster.ToCreature();
+                if (caster != null && caster.IsAIEnabled())
+                    caster.GetAI().OnSpellCast(GetSpellInfo());
+            }
+
             // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
             if (m_delayMoment != 0 && !m_spellInfo.IsChanneled())
             {
@@ -3136,53 +3160,6 @@ namespace Game.Spells
             }
 
             SetExecutedCurrently(false);
-
-            if (m_originalCaster == null)
-                return;
-
-            // Handle procs on cast
-            ProcFlagsInit procAttacker = m_procAttacker;
-            if (!procAttacker)
-            {
-                if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
-                {
-                    if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
-                    else
-                        procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
-                }
-                else if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
-                {
-                    if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulAbility);
-                    else
-                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
-                }
-                else
-                {
-                    if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulSpell);
-                    else
-                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
-                }
-            }
-
-            procAttacker.Or(ProcFlags2.CastSuccessful);
-
-            ProcFlagsHit hitMask = m_hitMask;
-            if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
-                hitMask |= ProcFlagsHit.Normal;
-
-            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress) && !m_spellInfo.HasAttribute(SpellAttr2.NotAnAction))
-                m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed, m_spellInfo);
-
-            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
-
-            // Call CreatureAI hook OnSpellCast
-            Creature caster = m_originalCaster.ToCreature();
-            if (caster != null)
-                if (caster.IsAIEnabled())
-                    caster.GetAI().OnSpellCast(GetSpellInfo());
         }
 
         void DoProcessTargetContainer<T>(List<T> targetContainer) where T : TargetInfoBase
