@@ -422,23 +422,18 @@ namespace Game
                 return;
             }
 
-            // collect junk items first - can't modify inventory while iterating
+            // remove fake death
+            if (GetPlayer().HasUnitState(UnitState.Died))
+                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
+
+            // collect junk items first
             List<Item> junkItems = [];
             _player.ForEachItem(ItemSearchLocation.Inventory, item =>
             {
                 if (item.GetQuality() != ItemQuality.Poor)
                     return true;
 
-                if (item.GetSellPrice(_player) == 0)
-                    return true;
-
                 if (item.IsRefundable())
-                    return true;
-
-                if (_player.GetLootGUID() == item.GetGUID())
-                    return true;
-
-                if (item.IsNotEmptyBag())
                     return true;
 
                 // check per-bag junk sell exclusion
@@ -454,30 +449,18 @@ namespace Game
                         return true;
                 }
 
-                junkItems.Add(item);
+                SellResult? sellError = _player.CanSellItemToVendor(item, item.GetCount());
+                if (!sellError.HasValue)
+                    junkItems.Add(item);
+
                 return true;
             });
 
-            foreach (Item item in junkItems)
-            {
-                uint sellPrice = item.GetSellPrice(_player);
+            SellResult? sellError = null;
 
-                ulong money = (ulong)sellPrice * item.GetCount();
-
-                if (money > uint.MaxValue)
-                    continue;
-
-                if (!_player.ModifyMoney((long)money))
-                    continue;
-
-                _player.UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
-                _player.UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
-
-                _player.RemoveItem(item.GetBagSlot(), item.GetSlot(), true);
-                _player.ItemRemovedQuestCheck(item.GetEntry(), item.GetCount());
-                Item.RemoveItemFromUpdateQueueOf(item, _player);
-                _player.AddItemToBuyBackSlot(item);
-            }
+            // stop on first sell failure (gold cap reached)
+            for (int i = 0; i != junkItems.Count && !sellError.HasValue; ++i)
+                sellError = _player.SellItemToVendor(junkItems[i], junkItems[i].GetCount());
         }
 
         [WorldPacketHandler(ClientOpcodes.BuyBackItem, Processing = PacketProcessing.Inplace)]
