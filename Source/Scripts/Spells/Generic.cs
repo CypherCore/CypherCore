@@ -26,6 +26,7 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game;
 using Game.AI;
+using Game.Collision;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
@@ -37,7 +38,6 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Collision;
 
 namespace Scripts.Spells.Generic;
 
@@ -894,7 +894,13 @@ class spell_gen_battleground_mercenary_shapeshift : AuraScript
         [Race.DarkIronDwarf] = [88409, 88408],
         [Race.Vulpera] = [94999, 95001],
         [Race.MagharOrc] = [88420, 88410],
-        [Race.MechaGnome] = [94998, 95000]
+        [Race.MechaGnome] = [94998, 95000],
+        [Race.DracthyrAlliance] = [112794, 112793],
+        [Race.DracthyrHorde] = [112796, 112795],
+        [Race.EarthenDwarfHorde] = [118113, 118114],
+        [Race.EarthenDwarfAlliance] = [118111, 118112],
+        [Race.HaranirAlliance] = [140501, 140500],
+        [Race.HaranirHorde] = [140503, 140502]
     };
 
     List<uint> RacialSkills = new();

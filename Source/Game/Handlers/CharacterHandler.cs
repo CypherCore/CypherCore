@@ -1998,6 +1998,10 @@ namespace Game
                         case Race.EarthenDwarfAlliance:
                             stmt.AddValue(1, 140);
                             break;
+                        case Race.HaranirAlliance:
+                        case Race.HaranirHorde:
+                            stmt.AddValue(1, 2987);
+                            break;
                         default:
                             Log.outError(LogFilter.Player, $"Could not find language data for race ({factionChangeInfo.RaceID}).");
                             SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
@@ -2097,11 +2101,8 @@ namespace Game
                     Player.SavePositionInDB(loc, zoneId, factionChangeInfo.Guid, trans);
 
                     // Achievement conversion
-                    foreach (var it in Global.ObjectMgr.FactionChangeAchievements)
+                    foreach (var (achiev_alliance, achiev_horde) in Global.ObjectMgr.FactionChangeAchievements)
                     {
-                        uint achiev_alliance = it.Key;
-                        uint achiev_horde = it.Value;
-
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_BY_ACHIEVEMENT);
                         stmt.AddValue(0, (ushort)(newTeamId == BattleGroundTeamId.Alliance ? achiev_alliance : achiev_horde));
                         stmt.AddValue(1, lowGuid);
@@ -2116,11 +2117,8 @@ namespace Game
 
                     // Item conversion
                     var itemConversionMap = newTeamId == BattleGroundTeamId.Alliance ? Global.ObjectMgr.FactionChangeItemsHordeToAlliance : Global.ObjectMgr.FactionChangeItemsAllianceToHorde;
-                    foreach (var it in itemConversionMap)
+                    foreach (var (oldItemId, newItemId) in itemConversionMap)
                     {
-                        uint oldItemId = it.Key;
-                        uint newItemId = it.Value;
-
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_INVENTORY_FACTION_CHANGE);
                         stmt.AddValue(0, newItemId);
                         stmt.AddValue(1, oldItemId);
@@ -2134,11 +2132,8 @@ namespace Game
                     trans.Append(stmt);
 
                     // Quest conversion
-                    foreach (var it in Global.ObjectMgr.FactionChangeQuests)
+                    foreach (var (quest_alliance, quest_horde) in Global.ObjectMgr.FactionChangeQuests)
                     {
-                        uint quest_alliance = it.Key;
-                        uint quest_horde = it.Value;
-
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED_BY_QUEST);
                         stmt.AddValue(0, lowGuid);
                         stmt.AddValue(1, (newTeamId == BattleGroundTeamId.Alliance ? quest_alliance : quest_horde));
@@ -2173,11 +2168,8 @@ namespace Game
                     }
 
                     // Spell conversion
-                    foreach (var it in Global.ObjectMgr.FactionChangeSpells)
+                    foreach (var (spell_alliance, spell_horde) in Global.ObjectMgr.FactionChangeSpells)
                     {
-                        uint spell_alliance = it.Key;
-                        uint spell_horde = it.Value;
-
                         stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_BY_SPELL);
                         stmt.AddValue(0, (newTeamId == BattleGroundTeamId.Alliance ? spell_alliance : spell_horde));
                         stmt.AddValue(1, lowGuid);
@@ -2191,10 +2183,8 @@ namespace Game
                     }
 
                     // Reputation conversion
-                    foreach (var it in Global.ObjectMgr.FactionChangeReputation)
+                    foreach (var (reputation_alliance, reputation_horde) in Global.ObjectMgr.FactionChangeReputation)
                     {
-                        uint reputation_alliance = it.Key;
-                        uint reputation_horde = it.Value;
                         uint newReputation = (newTeamId == BattleGroundTeamId.Alliance) ? reputation_alliance : reputation_horde;
                         uint oldReputation = (newTeamId == BattleGroundTeamId.Alliance) ? reputation_horde : reputation_alliance;
 
@@ -2245,11 +2235,8 @@ namespace Game
                                 knownTitles.Add(id);
                         }
 
-                        foreach (var it in Global.ObjectMgr.FactionChangeTitles)
+                        foreach (var (title_alliance, title_horde) in Global.ObjectMgr.FactionChangeTitles)
                         {
-                            uint title_alliance = it.Key;
-                            uint title_horde = it.Value;
-
                             CharTitlesRecord atitleInfo = CliDB.CharTitlesStorage.LookupByKey(title_alliance);
                             CharTitlesRecord htitleInfo = CliDB.CharTitlesStorage.LookupByKey(title_horde);
                             // new team
