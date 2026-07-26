@@ -460,7 +460,7 @@ namespace Framework.Constants
         PlayerHasActiveTraitSubTree = 385, // Player has active trait config with {TraitSubTree}
         PlayerIsInTimerunningSeason = 386, // Player is timerunning {TimerunningSeason}
         PlayerIsInSoloRBG = 387, /*NYI*/ // Player is in solo RBG (BG Blitz)
-        PlayerHasCompletedCampaign = 388, /*NYI*/ // Player has completed campaign "{Campaign}"
+        PlayerHasCompletedCampaign = 388, // Player has completed campaign "{Campaign}"
         TargetCreatureClassificationEqual = 389, // Creature classification is {CreatureClassification}
         PlayerDataElementCharacterBetween = 390, // Player {PlayerDataElementCharacter} is between {#Amount} and {#Amount2}
         PlayerDataElementAccountBetween = 391, // Player {PlayerDataElementAccount} is between {#Amount} and {#Amount2}

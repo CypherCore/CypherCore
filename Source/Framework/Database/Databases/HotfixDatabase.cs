@@ -223,6 +223,16 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT_DURATION, "SELECT ID, Locale, Duration, BroadcastTextID FROM broadcast_text_duration" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
 
+            // Campaign.db2
+            PrepareStatement(HotfixStatements.SEL_CAMPAIGN, "SELECT ID, Title, Description, UiTextureKitID, RewardQuestID, Prerequisite, Stalled, Completed, " +
+                "OnlyStallIf, UiQuestDetailsThemeID, Flags, DisplayPriority, SortAsNormalQuest, UseMinimalHeader FROM campaign WHERE (`VerifiedBuild` > 0) = ?");
+            PrepareStatement(HotfixStatements.SEL_CAMPAIGN_LOCALE, "SELECT ID, Title_lang, Description_lang FROM campaign_locale WHERE (`VerifiedBuild` > 0) = ?" +
+                " AND locale = ?");
+
+            // CampaignXQuestLine.db2
+            PrepareStatement(HotfixStatements.SEL_CAMPAIGN_X_QUEST_LINE, "SELECT ID, CampaignID, QuestLineID, OrderIndex FROM campaign_x_quest_line" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // CfgCategories.db2
             PrepareStatement(HotfixStatements.SEL_CFG_CATEGORIES, "SELECT ID, Name, LocaleMask, CreateCharsetMask, ExistingCharsetMask, Flags, `Order`" +
                 " FROM cfg_categories WHERE (`VerifiedBuild` > 0) = ?");
@@ -1833,6 +1843,11 @@ namespace Framework.Database
         SEL_BROADCAST_TEXT_LOCALE,
 
         SEL_BROADCAST_TEXT_DURATION,
+
+        SEL_CAMPAIGN,
+        SEL_CAMPAIGN_LOCALE,
+
+        SEL_CAMPAIGN_X_QUEST_LINE,
 
         SEL_CFG_CATEGORIES,
         SEL_CFG_CATEGORIES_LOCALE,

@@ -2073,6 +2073,8 @@ namespace Game.Entities
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.CovenantCallingRewardCompleteNoPOI : QuestGiverStatus.CovenantCallingRewardCompletePOI;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.LegendaryRewardCompleteNoPOI : QuestGiverStatus.LegendaryRewardCompletePOI;
+                        else if (QuestManager.IsCampaignQuestStatusVisibleForPlayer(questId, this))
+                            result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.JourneyRewardCompleteNoPOI : QuestGiverStatus.JourneyRewardCompletePOI;
                         else if (quest.IsDailyOrWeekly())
                             result |= quest.HasFlag(QuestFlags.HideRewardPoi) ? QuestGiverStatus.RepeatableRewardCompleteNoPOI : QuestGiverStatus.RepeatableRewardCompletePOI;
                         else
@@ -2087,6 +2089,8 @@ namespace Game.Entities
                             result |= QuestGiverStatus.CovenantCallingReward;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= QuestGiverStatus.LegendaryReward;
+                        else if (QuestManager.IsCampaignQuestStatusVisibleForPlayer(questId, this))
+                            result |= QuestGiverStatus.JourneyReward;
                         else if (quest.IsDailyOrWeekly())
                             result |= QuestGiverStatus.RepeatableReward;
                         else
@@ -2130,6 +2134,8 @@ namespace Game.Entities
                                 result |= QuestGiverStatus.CovenantCallingQuest;
                             else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                                 result |= isTrivial ? QuestGiverStatus.TrivialLegendaryQuest : QuestGiverStatus.LegendaryQuest;
+                            else if (QuestManager.IsCampaignQuestStatusVisibleForPlayer(questId, this))
+                                result |= isTrivial ? QuestGiverStatus.TrivialJourneyQuest : QuestGiverStatus.JourneyQuest;
                             else if (quest.IsDailyOrWeekly())
                                 result |= isTrivial ? QuestGiverStatus.TrivialRepeatableQuest : QuestGiverStatus.RepeatableQuest;
                             else
@@ -2139,6 +2145,8 @@ namespace Game.Entities
                             result |= QuestGiverStatus.FutureImportantQuest;
                         else if (quest.HasFlagEx(QuestFlagsEx.Legendary))
                             result |= QuestGiverStatus.FutureLegendaryQuest;
+                        else if (QuestManager.IsCampaignQuestStatusVisibleForPlayer(questId, this))
+                            result |= QuestGiverStatus.FutureJourneyQuest;
                         else
                             result |= QuestGiverStatus.Future;
                     }

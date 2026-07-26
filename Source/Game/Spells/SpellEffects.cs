@@ -5821,6 +5821,19 @@ namespace Game.Spells
             playerTarget.SendPacket(applyMountEquipmentResult);
         }
 
+        [SpellEffectHandler(SpellEffectName.CompleteCampaign)]
+        void EffectSkipCampaign()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            QuestManager.SkipCampaignForPlayer((uint)effectInfo.MiscValue, target);
+        }
+
         [SpellEffectHandler(SpellEffectName.SendChatMessage)]
         void EffectSendChatMessage()
         {

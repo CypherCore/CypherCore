@@ -3717,6 +3717,10 @@ namespace Game.Achievements
                     if (referencePlayer.m_activePlayerData.TimerunningSeasonID != reqValue)
                         return false;
                     break;
+                case ModifierTreeType.PlayerHasCompletedCampaign: // 388
+                    if (!QuestManager.IsCampaignCompletedByPlayer(reqValue, referencePlayer))
+                        return false;
+                    break;
                 case ModifierTreeType.TargetCreatureClassificationEqual: // 389
                 {
                     Creature targetCreature = refe?.ToCreature();

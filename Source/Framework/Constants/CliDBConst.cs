@@ -1125,6 +1125,13 @@ namespace Framework.Constants
     }
 
     [Flags]
+    public enum CampaignFlags
+    {
+        DontUseJourneyQuestBang = 0x01,
+        IsContainer = 0x02
+    }
+
+    [Flags]
     public enum CfgCategoriesCharsets
     {
         Any = 0x00,

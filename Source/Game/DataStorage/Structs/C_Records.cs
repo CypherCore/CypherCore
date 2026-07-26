@@ -6,6 +6,34 @@ using System.Numerics;
 
 namespace Game.DataStorage
 {
+    public sealed class CampaignRecord
+    {
+        public uint ID;
+        public LocalizedString Title;
+        public LocalizedString Description;
+        public int UiTextureKitID;
+        public int RewardQuestID;
+        public int Prerequisite;
+        public int Stalled;
+        public int Completed;
+        public int OnlyStallIf;
+        public int UiQuestDetailsThemeID;
+        public int Flags;
+        public int DisplayPriority;
+        public int SortAsNormalQuest;
+        public int UseMinimalHeader;
+
+        public bool HasFlag(CampaignFlags flag) { return ((CampaignFlags)Flags).HasFlag(flag); }
+    }
+
+    public sealed class CampaignXQuestLineRecord
+    {
+        public uint ID;
+        public uint CampaignID;
+        public uint QuestLineID;
+        public uint OrderIndex;
+    }
+
     public sealed class Cfg_CategoriesRecord
     {
         public uint Id;
