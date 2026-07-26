@@ -6128,7 +6128,7 @@ namespace Game.Entities
 
             uint exp_max_lvl = ObjectMgr.GetMaxLevelForExpansion(GetSession().GetExpansion());
             uint conf_max_lvl = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
-            if (exp_max_lvl == SharedConst.DefaultMaxLevel || exp_max_lvl >= conf_max_lvl)
+            if (exp_max_lvl == Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion) || exp_max_lvl >= conf_max_lvl)
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), conf_max_lvl);
             else
                 SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.MaxLevel), exp_max_lvl);

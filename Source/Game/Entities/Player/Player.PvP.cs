@@ -706,8 +706,9 @@ namespace Game.Entities
 
             // limit check leel to dbc compatible level range
             uint level = GetLevel();
-            if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
-                level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
+            uint maxLevel = Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion);
+            if (level > maxLevel)
+                level = maxLevel;
 
             if (level < bg.GetMinLevel() || level > bg.GetMaxLevel())
                 return false;

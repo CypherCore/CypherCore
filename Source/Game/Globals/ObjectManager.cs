@@ -2583,7 +2583,8 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            for (byte unitLevel = 1; unitLevel <= SharedConst.DefaultMaxLevel + 3; ++unitLevel)
+            uint maxLevel = Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion);
+            for (byte unitLevel = 1; unitLevel <= maxLevel + 3; ++unitLevel)
             {
                 for (byte unitClass = 1; unitClass <= SharedConst.MaxUnitClasses; ++unitClass)
                 {

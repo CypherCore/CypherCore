@@ -3,7 +3,6 @@
 
 using Framework.Configuration;
 using Framework.Constants;
-using Game.DataStorage;
 using System;
 using System.Collections.Generic;
 
@@ -165,7 +164,7 @@ namespace Game
                 new() { Name = "CharacterCreatingMinLevelForDemonHunter", DefaultValue = 0, Index = WorldCfg.CharacterCreatingMinLevelForDemonHunter },
                 new() { Name = "CharacterCreatingMinLevelForEvoker", DefaultValue = 50, Index = WorldCfg.CharacterCreatingMinLevelForEvoker },
                 new() { Name = "SkipCinematics", DefaultValue = 0, Index = WorldCfg.SkipCinematics, Min = 0, Max = 2 },
-                new() { Name = "MaxPlayerLevel", DefaultValue = SharedConst.DefaultMaxLevel, Index = WorldCfg.MaxPlayerLevel, Min = 1, Max = SharedConst.MaxLevel, Reloadable = false },
+                new() { Name = "MaxPlayerLevel", DefaultValue = Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion), Index = WorldCfg.MaxPlayerLevel, Min = 1, Max = SharedConst.MaxLevel, Reloadable = false },
                 new() { Name = "MinDualSpecLevel", DefaultValue = 40, Index = WorldCfg.MinDualspecLevel },
                 new() { Name = "StartPlayerLevel", DefaultValue = 1, Index = WorldCfg.StartPlayerLevel, Min = 1 },
                 new() { Name = "StartDeathKnightPlayerLevel", DefaultValue = 8, Index = WorldCfg.StartDeathKnightPlayerLevel, Min = 1 },
@@ -175,7 +174,7 @@ namespace Game
                 new() { Name = "Currency.ResetHour", DefaultValue = 3, Index = WorldCfg.CurrencyResetHour, Min = 0, Max = 23 },
                 new() { Name = "Currency.ResetDay", DefaultValue = 3, Index = WorldCfg.CurrencyResetDay, Min = 0, Max = 6 },
                 new() { Name = "Currency.ResetInterval", DefaultValue = 7, Index = WorldCfg.CurrencyResetInterval, Min = 1 },
-                new() { Name = "RecruitAFriendMaxLevel", DefaultValue = SharedConst.DefaultMaxLevel, Index = WorldCfg.MaxRecruitAFriendBonusPlayerLevel, Min = 1 },
+                new() { Name = "RecruitAFriendMaxLevel", DefaultValue = Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion), Index = WorldCfg.MaxRecruitAFriendBonusPlayerLevel, Min = 1 },
                 new() { Name = "RecruitAFriendMaxDifference", DefaultValue = 4, Index = WorldCfg.MaxRecruitAFriendBonusPlayerLevelDifference },
                 new() { Name = "ResetSchedule.WeekDay", DefaultValue = 2, Index = WorldCfg.ResetScheduleWeekDay, Min = 0, Max = 6 },
                 new() { Name = "ResetSchedule.Hour", DefaultValue = 8, Index = WorldCfg.ResetScheduleHour, Min = 0, Max = 23 },
