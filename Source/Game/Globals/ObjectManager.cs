@@ -897,13 +897,21 @@ namespace Game
                     parentEntry = null;
             }
 
+            if (graveyard == null && !CliDB.MapStorage.LookupByKey(MapId).IsBattlegroundOrArena())
+            {
+                if (zoneId != 0)
+                    Log.outError(LogFilter.Sql, $"Table `graveyard_zone` incomplete: Zone {zoneId} Team {team} does not have a linked graveyard.");
+
+                graveyard = GetDefaultGraveyard(team);
+            }
+
             return graveyard;
         }
 
         WorldSafeLocsEntry GetClosestGraveyardInZone(WorldLocation location, Team team, WorldObject conditionObject, uint zoneId)
         {
-            location.GetPosition(out float x, out float y, out float z);
             uint MapId = location.GetMapId();
+
             // Simulate std. algorithm:
             //   found some graveyard associated to (ghost_zone, ghost_map)
             //
@@ -916,22 +924,12 @@ namespace Game
 
             ConditionSourceInfo conditionSource = new(conditionObject);
 
-            // not need to check validity of map object; MapId _MUST_ be valid here
-            if (range.Empty() && !mapEntry.IsBattlegroundOrArena())
-            {
-                if (zoneId != 0) // zone == 0 can't be fixed, used by bliz for bugged zones
-                    Log.outError(LogFilter.Sql, "Table `game_graveyard_zone` incomplete: Zone {0} Team {1} does not have a linked graveyard.", zoneId, team);
-                return GetDefaultGraveyard(team);
-            }
-
             // at corpse map
-            bool foundNear = false;
-            float distNear = 10000;
+            float? distNear = null;
             WorldSafeLocsEntry entryNear = null;
 
             // at entrance map for corpse map
-            bool foundEntr = false;
-            float distEntr = 10000;
+            float? distEntr = null;
             WorldSafeLocsEntry entryEntr = null;
 
             // some where other
@@ -987,19 +985,9 @@ namespace Game
                     }
 
                     // at entrance map calculate distance (2D);
-                    float dist2 = (entry.Loc.GetPositionX() - mapEntry.Corpse.X) * (entry.Loc.GetPositionX() - mapEntry.Corpse.X)
-                        + (entry.Loc.GetPositionY() - mapEntry.Corpse.Y) * (entry.Loc.GetPositionY() - mapEntry.Corpse.Y);
-                    if (foundEntr)
+                    float dist2 = entry.Loc.GetExactDist2dSq(mapEntry.Corpse.X, mapEntry.Corpse.Y);
+                    if (!distEntr.HasValue || dist2 < distEntr)
                     {
-                        if (dist2 < distEntr)
-                        {
-                            distEntr = dist2;
-                            entryEntr = entry;
-                        }
-                    }
-                    else
-                    {
-                        foundEntr = true;
                         distEntr = dist2;
                         entryEntr = entry;
                     }
@@ -1007,18 +995,9 @@ namespace Game
                 // find now nearest graveyard at same map
                 else
                 {
-                    float dist2 = (entry.Loc.GetPositionX() - x) * (entry.Loc.GetPositionX() - x) + (entry.Loc.GetPositionY() - y) * (entry.Loc.GetPositionY() - y) + (entry.Loc.GetPositionZ() - z) * (entry.Loc.GetPositionZ() - z);
-                    if (foundNear)
+                    float dist2 = entry.Loc.GetExactDistSq(location);
+                    if (!distNear.HasValue || dist2 < distNear)
                     {
-                        if (dist2 < distNear)
-                        {
-                            distNear = dist2;
-                            entryNear = entry;
-                        }
-                    }
-                    else
-                    {
-                        foundNear = true;
                         distNear = dist2;
                         entryNear = entry;
                     }
