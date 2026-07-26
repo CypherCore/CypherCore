@@ -1288,8 +1288,7 @@ namespace Game.Entities
 
         public bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura = 0)
         {
-            var auras = GetAuraEffectsByType(type);
-            foreach (var eff in auras)
+            foreach (var eff in GetAuraEffectsByType(type))
                 if ((excludeAura == 0 || excludeAura != eff.GetSpellInfo().Id) && //Avoid self interrupt of channeled Crowd Control spells like Seduction
                     eff.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Damage))
                     return true;
@@ -1298,17 +1297,24 @@ namespace Game.Entities
 
         public bool HasBreakableByDamageCrowdControlAura(Unit excludeCasterChannel = null)
         {
-            uint excludeAura = 0;
-            Spell currentChanneledSpell = excludeCasterChannel?.GetCurrentSpell(CurrentSpellTypes.Channeled);
-            if (currentChanneledSpell != null)
-                excludeAura = currentChanneledSpell.GetSpellInfo().Id; //Avoid self interrupt of channeled Crowd Control spells like Seduction
+            if (!HasInterruptFlag(SpellAuraInterruptFlags.AnyDamageMask))
+                return false;
 
-            return (HasBreakableByDamageAuraType(AuraType.ModConfuse, excludeAura)
-                    || HasBreakableByDamageAuraType(AuraType.ModFear, excludeAura)
-                    || HasBreakableByDamageAuraType(AuraType.ModStun, excludeAura)
-                    || HasBreakableByDamageAuraType(AuraType.ModRoot, excludeAura)
-                    || HasBreakableByDamageAuraType(AuraType.ModRoot2, excludeAura)
-                    || HasBreakableByDamageAuraType(AuraType.Transform, excludeAura));
+            uint excludeAura = 0;
+            if (excludeCasterChannel != null)
+            {
+                Spell currentChanneledSpell = excludeCasterChannel.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                if (currentChanneledSpell != null)
+                    excludeAura = currentChanneledSpell.GetSpellInfo().Id; //Avoid self interrupt of channeled Crowd Control spells like Seduction
+            }
+
+            // This function is named after spell attribute it is meant for - SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS
+            // Not checking aura type is not a mistake here
+            foreach (AuraApplication aurApp in m_interruptableAuras)
+                if (!aurApp.IsPositive() && (excludeAura == 0 || excludeAura != aurApp.GetBase().GetId()) && aurApp.GetBase().GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.AnyDamageMask))
+                    return true;
+
+            return false;
         }
 
         public uint GetDiseasesByCaster(ObjectGuid casterGUID, bool remove = false)

@@ -144,7 +144,8 @@ namespace Framework.Constants
         Summon = 0x40000000,
         LeavingCombat = 0x80000000,
 
-        NotVictim = (HostileActionReceived | Damage | NonPeriodicDamage)
+        NotVictim = HostileActionReceived | Damage | NonPeriodicDamage,
+        AnyDamageMask = Damage | NonPeriodicDamage | DamageCancelsScript
     }
 
     [Flags]

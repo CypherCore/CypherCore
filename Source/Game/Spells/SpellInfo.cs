@@ -1124,7 +1124,7 @@ namespace Game.Spells
                 return SpellCastResult.TargetsDead;
 
             // check this flag only for implicit targets (chain and area), allow to explicitly target units for spells like Shield of Righteousness
-            if (Implicit && HasAttribute(SpellAttr6.DoNotChainToCrowdControlledTargets) && !unitTarget.CanFreeMove())
+            if (Implicit && HasAttribute(SpellAttr6.DoNotChainToCrowdControlledTargets) && unitTarget.HasBreakableByDamageCrowdControlAura())
                 return SpellCastResult.BadTargets;
 
             if (!CheckTargetCreatureType(unitTarget))
