@@ -721,6 +721,16 @@ namespace Game.Scripting
             return m_spell.GetUnitTargetCountForEffect(effect);
         }
 
+        public int GetUnitTargetIndexForEffect(ObjectGuid target, uint effect)
+        {
+            if (!IsAfterTargetSelectionPhase())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript::GetUnitTargetIndexForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                return 0;
+            }
+            return m_spell.GetUnitTargetIndexForEffect(target, effect);
+        }
+
         public long GetGameObjectTargetCountForEffect(uint effect)
         {
             if (!IsAfterTargetSelectionPhase())

@@ -2180,7 +2180,7 @@ namespace Game.Spells
             m_destTargets[effIndex] = dest;
         }
 
-        int GetUnitTargetIndexForEffect(ObjectGuid target, uint effect)
+        public int GetUnitTargetIndexForEffect(ObjectGuid target, uint effect)
         {
             int index = 0;
             foreach (TargetInfo uniqueTargetInfo in m_UniqueTargetInfo)
@@ -2188,13 +2188,13 @@ namespace Game.Spells
                 if (uniqueTargetInfo.MissCondition == SpellMissInfo.None && (uniqueTargetInfo.EffectMask & (1 << (int)effect)) != 0)
                 {
                     if (uniqueTargetInfo.TargetGUID == target)
-                        break;
+                        return index;
 
                     ++index;
                 }
             }
 
-            return index;
+            return -1;
         }
 
         public long GetUnitTargetCountForEffect(uint effect)
