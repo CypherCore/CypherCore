@@ -1184,9 +1184,9 @@ namespace Game
             {
                 case ConditionTypes.None:
                 {
-                    if (cond.ScriptId == 0)
+                    if (!cond.NegativeCondition && cond.ScriptId == 0)
                     {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} must have a `ScriptName` in `condition` table, ignoring.");
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} must have `NegativeCondition` or `ScriptName` in `condition` table, ignoring.");
                         return false;
                     }
                     break;
