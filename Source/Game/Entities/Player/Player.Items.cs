@@ -3360,6 +3360,76 @@ namespace Game.Entities
             return crItem.maxcount != 0;
         }
 
+        public SellResult? CanSellItemToVendor(Item item, uint amount)
+        {
+            // prevent sell not owner item
+            if (GetGUID() != item.GetOwnerGUID())
+                return SellResult.CantSellItem;
+
+            // prevent sell non empty bag by drag-and-drop at vendor's item list
+            if (item.IsNotEmptyBag())
+                return SellResult.CantSellItem;
+
+            // prevent sell currently looted item
+            if (GetLootGUID() == item.GetGUID())
+                return SellResult.CantSellItem;
+
+            // prevent sell more items that exist in stack (possible only not from client)
+            if (amount > item.GetCount())
+                return SellResult.CantSellItem;
+
+            uint sellPrice = item.GetSellPrice(this);
+            if (sellPrice <= 0)
+                return SellResult.CantSellItem;
+
+            ulong money = (ulong)sellPrice * amount;
+
+            if (money > uint.MaxValue) // ensure sell price * amount doesn't overflow buyback price
+                return SellResult.CantSellItem;
+
+            return null;
+        }
+
+        public SellResult? SellItemToVendor(Item item, uint amount)
+        {
+            ulong money = (ulong)item.GetSellPrice(this) * amount;
+
+            if (!ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
+                return SellResult.CantSellItem;
+
+            UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
+            UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
+
+            if (amount < item.GetCount()) // need split items
+            {
+                Item pNewItem = item.CloneItem(amount, this);
+                if (pNewItem == null)
+                {
+                    Log.outError(LogFilter.Network, $"Player::SellItemToVendor - could not create clone of item {item.GetEntry()}; count = {amount}");
+                    return SellResult.CantSellItem;
+                }
+
+                item.SetCount(item.GetCount() - amount);
+                ItemRemovedQuestCheck(item.GetEntry(), amount);
+                if (IsInWorld)
+                    item.SendUpdateToPlayer(this);
+                item.SetState(ItemUpdateState.Changed, this);
+
+                AddItemToBuyBackSlot(pNewItem);
+                if (IsInWorld)
+                    pNewItem.SendUpdateToPlayer(this);
+            }
+            else
+            {
+                RemoveItem(item.GetBagSlot(), item.GetSlot(), true);
+                ItemRemovedQuestCheck(item.GetEntry(), item.GetCount());
+                Item.RemoveItemFromUpdateQueueOf(item, this);
+                AddItemToBuyBackSlot(item);
+            }
+
+            return null;
+        }
+
         public uint GetMaxPersonalArenaRatingRequirement(uint minarenaslot)
         {
             // returns the maximal personal arena rating that can be used to purchase items requiring this condition

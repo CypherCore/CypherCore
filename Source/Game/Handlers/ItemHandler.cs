@@ -361,128 +361,49 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.SellItem, Processing = PacketProcessing.Inplace)]
-        void HandleSellItem(SellItem packet)
+        void HandleSellItem(SellItem sellItem)
         {
-            if (packet.ItemGUID.IsEmpty())
-                return;
-
-            var pl = GetPlayer();
-
-            Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellItem.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
             if (creature == null)
             {
-                Log.outDebug(LogFilter.Network, "WORLD: HandleSellItemOpcode - {0} not found or you can not interact with him.", packet.VendorGUID.ToString());
-                pl.SendSellError(SellResult.CantFindVendor, null, packet.ItemGUID);
+                Log.outDebug(LogFilter.Network, $"WORLD: HandleSellItemOpcode - {sellItem.VendorGUID} not found or you can not interact with him.");
+                GetPlayer().SendSellError(SellResult.CantFindVendor, null, sellItem.ItemGUID);
                 return;
             }
 
             if (creature.GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.NoSellVendor))
             {
-                _player.SendSellError(SellResult.CantSellToThisMerchant, creature, packet.ItemGUID);
+                _player.SendSellError(SellResult.CantSellToThisMerchant, creature, sellItem.ItemGUID);
                 return;
             }
+
+            Item pItem = GetPlayer().GetItemByGuid(sellItem.ItemGUID);
+            if (pItem == null)
+            {
+                GetPlayer().SendSellError(SellResult.CantFindItem, creature, sellItem.ItemGUID);
+                return;
+            }
+
+            // prevent selling item for sellprice when the item is still refundable
+            // this probably happens when right clicking a refundable item, the client sends both
+            // CMSG_SELL_ITEM and CMSG_REFUND_ITEM (unverified)
+            if (pItem.IsRefundable())
+                return;
 
             // remove fake death
-            if (pl.HasUnitState(UnitState.Died))
-                pl.RemoveAurasByType(AuraType.FeignDeath);
+            if (GetPlayer().HasUnitState(UnitState.Died))
+                GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            Item pItem = pl.GetItemByGuid(packet.ItemGUID);
-            if (pItem != null)
-            {
-                // prevent sell not owner item
-                if (pl.GetGUID() != pItem.GetOwnerGUID())
-                {
-                    pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                    return;
-                }
 
-                // prevent sell non empty bag by drag-and-drop at vendor's item list
-                if (pItem.IsNotEmptyBag())
-                {
-                    pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                    return;
-                }
+            uint amount = sellItem.Amount != 0 ? sellItem.Amount : pItem.GetCount();
 
-                // prevent sell currently looted item
-                if (pl.GetLootGUID() == pItem.GetGUID())
-                {
-                    pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                    return;
-                }
+            SellResult? sellResult = GetPlayer().CanSellItemToVendor(pItem, amount);
+            if (!sellResult.HasValue)
+                sellResult = GetPlayer().SellItemToVendor(pItem, amount);
 
-                // prevent selling item for sellprice when the item is still refundable
-                // this probably happens when right clicking a refundable item, the client sends both
-                // CMSG_SELL_ITEM and CMSG_REFUND_ITEM (unverified)
-                if (pItem.IsRefundable())
-                    return; // Therefore, no feedback to client
 
-                // special case at auto sell (sell all)
-                if (packet.Amount == 0)
-                    packet.Amount = pItem.GetCount();
-                else
-                {
-                    // prevent sell more items that exist in stack (possible only not from client)
-                    if (packet.Amount > pItem.GetCount())
-                    {
-                        pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                        return;
-                    }
-                }
-
-                uint sellPrice = pItem.GetSellPrice(_player);
-                if (sellPrice > 0)
-                {
-                    ulong money = sellPrice * packet.Amount;
-
-                    if (money > uint.MaxValue) // ensure sell price * amount doesn't overflow buyback price
-                    {
-                        _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                        return;
-                    }
-
-                    if (!_player.ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
-                    {
-                        _player.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                        return;
-                    }
-
-                    _player.UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
-                    _player.UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
-
-                    if (packet.Amount < pItem.GetCount())               // need split items
-                    {
-                        Item pNewItem = pItem.CloneItem(packet.Amount, pl);
-                        if (pNewItem == null)
-                        {
-                            Log.outError(LogFilter.Network, "WORLD: HandleSellItemOpcode - could not create clone of item {0}; count = {1}", pItem.GetEntry(), packet.Amount);
-                            pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                            return;
-                        }
-
-                        pItem.SetCount(pItem.GetCount() - packet.Amount);
-                        pl.ItemRemovedQuestCheck(pItem.GetEntry(), packet.Amount);
-                        if (pl.IsInWorld)
-                            pItem.SendUpdateToPlayer(pl);
-                        pItem.SetState(ItemUpdateState.Changed, pl);
-
-                        pl.AddItemToBuyBackSlot(pNewItem);
-                        if (pl.IsInWorld)
-                            pNewItem.SendUpdateToPlayer(pl);
-                    }
-                    else
-                    {
-                        pl.RemoveItem(pItem.GetBagSlot(), pItem.GetSlot(), true);
-                        pl.ItemRemovedQuestCheck(pItem.GetEntry(), pItem.GetCount());
-                        Item.RemoveItemFromUpdateQueueOf(pItem, pl);
-                        pl.AddItemToBuyBackSlot(pItem);
-                    }
-                }
-                else
-                    pl.SendSellError(SellResult.CantSellItem, creature, packet.ItemGUID);
-                return;
-            }
-            pl.SendSellError(SellResult.CantFindItem, creature, packet.ItemGUID);
-            return;
+            if (sellResult.HasValue)
+                GetPlayer().SendSellError(sellResult.Value, creature, sellItem.ItemGUID);
         }
 
         [WorldPacketHandler(ClientOpcodes.BuyBackItem, Processing = PacketProcessing.Inplace)]
@@ -829,7 +750,7 @@ namespace Game
                             return;
 
                         if (i != firstPrismatic)
-                        return;
+                            return;
                         acceptableGemTypeMask = SocketColor.Red | SocketColor.Yellow | SocketColor.Blue;
                         break;
                     }
