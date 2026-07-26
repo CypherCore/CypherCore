@@ -406,6 +406,80 @@ namespace Game
                 GetPlayer().SendSellError(sellResult.Value, creature, sellItem.ItemGUID);
         }
 
+        [WorldPacketHandler(ClientOpcodes.SellAllJunkItems, Processing = PacketProcessing.Inplace)]
+        void HandleSellAllJunkItems(SellAllJunkItems sellAllJunkItems)
+        {
+            Creature creature = GetPlayer().GetNPCIfCanInteractWith(sellAllJunkItems.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
+            if (creature == null)
+            {
+                _player.SendSellError(SellResult.CantFindVendor, null, ObjectGuid.Empty);
+                return;
+            }
+
+            if ((creature.GetCreatureTemplate().FlagsExtra & CreatureFlagsExtra.NoSellVendor) != 0)
+            {
+                _player.SendSellError(SellResult.CantSellToThisMerchant, creature, ObjectGuid.Empty);
+                return;
+            }
+
+            // collect junk items first - can't modify inventory while iterating
+            List<Item> junkItems = [];
+            _player.ForEachItem(ItemSearchLocation.Inventory, item =>
+            {
+                if (item.GetQuality() != ItemQuality.Poor)
+                    return true;
+
+                if (item.GetSellPrice(_player) == 0)
+                    return true;
+
+                if (item.IsRefundable())
+                    return true;
+
+                if (_player.GetLootGUID() == item.GetGUID())
+                    return true;
+
+                if (item.IsNotEmptyBag())
+                    return true;
+
+                // check per-bag junk sell exclusion
+                if (item.GetBagSlot() == InventorySlots.Bag0)
+                {
+                    if (_player.IsBackpackSellJunkDisabled())
+                        return true;
+                }
+                else
+                {
+                    int bagIndex = item.GetBagSlot() - InventorySlots.BagStart;
+                    if (bagIndex < _player.m_activePlayerData.BagSlotFlags.GetSize() && _player.GetBagSlotFlags(bagIndex).HasFlag(BagSlotFlags.ExcludeJunkSell))
+                        return true;
+                }
+
+                junkItems.Add(item);
+                return true;
+            });
+
+            foreach (Item item in junkItems)
+            {
+                uint sellPrice = item.GetSellPrice(_player);
+
+                ulong money = (ulong)sellPrice * item.GetCount();
+
+                if (money > uint.MaxValue)
+                    continue;
+
+                if (!_player.ModifyMoney((long)money))
+                    continue;
+
+                _player.UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
+                _player.UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
+
+                _player.RemoveItem(item.GetBagSlot(), item.GetSlot(), true);
+                _player.ItemRemovedQuestCheck(item.GetEntry(), item.GetCount());
+                Item.RemoveItemFromUpdateQueueOf(item, _player);
+                _player.AddItemToBuyBackSlot(item);
+            }
+        }
+
         [WorldPacketHandler(ClientOpcodes.BuyBackItem, Processing = PacketProcessing.Inplace)]
         void HandleBuybackItem(BuyBackItem packet)
         {

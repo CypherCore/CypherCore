@@ -125,6 +125,7 @@ namespace Game
             MirrorVarSingle[] vars =
             {
                 new MirrorVarSingle("raidLockoutExtendEnabled", "1"),
+                new MirrorVarSingle("sellAllJunkEnabled", "1"),
                 new MirrorVarSingle("bypassItemLevelScalingCode", "0"),
                 new MirrorVarSingle("shop2Enabled", "0"),
                 new MirrorVarSingle("bpayStoreEnable", "0"),

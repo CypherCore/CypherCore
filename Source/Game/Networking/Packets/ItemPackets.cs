@@ -189,6 +189,16 @@ namespace Game.Networking.Packets
         public uint Amount;
     }
 
+    class SellAllJunkItems(WorldPacket packet) : ClientPacket(packet)
+    {
+        public ObjectGuid VendorGUID;
+
+        public override void Read()
+        {
+            VendorGUID = _worldPacket.ReadPackedGuid();
+        }
+    }
+
     public class ItemTimeUpdate : ServerPacket
     {
         public ItemTimeUpdate() : base(ServerOpcodes.ItemTimeUpdate) { }
@@ -446,7 +456,7 @@ namespace Game.Networking.Packets
         public int SlotInBag;
         public ItemInstance Item = new();
         public int ProxyItemID;// Item ID used for updating quest progress
-                                  // only set if different than real ID (similar to CreatureTemplate.KillCredit)
+                               // only set if different than real ID (similar to CreatureTemplate.KillCredit)
         public uint Quantity;
         public uint QuantityInInventory;
         public int QuantityInQuestLog;
@@ -877,7 +887,7 @@ namespace Game.Networking.Packets
         }
 
         public void Write(WorldPacket data)
-        {     
+        {
             data.WriteUInt8((byte)Type);
             data.WriteUInt32(Value);
         }
