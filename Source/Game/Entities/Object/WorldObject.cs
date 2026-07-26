@@ -2002,7 +2002,7 @@ namespace Game.Entities
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable2))
                 return false;
 
-            if (unitTarget != null && unitTarget.IsUninteractible())
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr11.CanAssistUninteractible)) && unitTarget != null && unitTarget.IsUninteractible())
                 return false;
 
             // check flags for negative spells
