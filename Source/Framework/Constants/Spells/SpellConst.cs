@@ -1708,7 +1708,7 @@ namespace Framework.Constants
         Unk16 = 0x8000,
         Unk17 = 0x10000,
         AdjustMissile = 0x20000,
-        NoGCD = 0x40000, // no GCD for spell casts from charm/summon (vehicle spells is an example)
+        FromClient = 0x40000, // no GCD for spell casts from charm/summon (vehicle spells is an example)
         VisualChain = 0x80000,
         Unk21 = 0x100000,
         RuneList = 0x200000,

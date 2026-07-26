@@ -3963,8 +3963,8 @@ namespace Game.Spells
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
-            if (HasPowerTypeCost(PowerType.Runes))
-                castFlags |= SpellCastFlags.NoGCD; // not needed, but Blizzard sends it
+            if (m_fromClient)
+                castFlags |= SpellCastFlags.FromClient;
 
             if (m_spellInfo.HasAttribute(SpellAttr8.HealPrediction) && m_casttime != 0 && m_caster.IsUnit())
                 castFlags |= SpellCastFlags.HealPrediction;
@@ -4062,18 +4062,14 @@ namespace Game.Spells
             if ((m_caster.IsPlayer() || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
                 castFlags |= SpellCastFlags.PowerLeftSelf;
 
-            if (m_caster.IsPlayer() && m_caster.ToPlayer().GetClass() == Class.DeathKnight &&
-                HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
-            {
-                castFlags |= SpellCastFlags.NoGCD; // not needed, but it's being sent according to sniffs
+            if (m_caster.IsPlayer() && m_caster.ToPlayer().GetClass() == Class.DeathKnight && HasPowerTypeCost(PowerType.Runes) && !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnorePowerCost))
                 castFlags |= SpellCastFlags.RuneList; // rune cooldowns list
-            }
 
             if (m_targets.HasTraj())
                 castFlags |= SpellCastFlags.AdjustMissile;
 
-            if (m_spellInfo.StartRecoveryTime == 0)
-                castFlags |= SpellCastFlags.NoGCD;
+            if (m_fromClient)
+                castFlags |= SpellCastFlags.FromClient;
 
             SpellGo packet = new();
             SpellCastData castData = packet.Cast;
