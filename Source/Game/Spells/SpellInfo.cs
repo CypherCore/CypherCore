@@ -3186,8 +3186,8 @@ namespace Game.Spells
                 visualCandidates.Add(record);
 
                 for (var c = i + 1; c != _visuals.Count && record.Priority == _visuals[c].Priority; ++c)
-                    if (canUseSpellVisual(record))
-                        visualCandidates.Add(record);
+                    if (canUseSpellVisual(_visuals[c]))
+                        visualCandidates.Add(_visuals[c]);
 
                 if (visualCandidates.Count == 1)
                     return visualCandidates.First().Id;    // special case, ignores Probability
