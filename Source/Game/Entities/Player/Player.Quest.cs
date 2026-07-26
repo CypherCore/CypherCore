@@ -2152,7 +2152,7 @@ namespace Game.Entities
         /// Removes quest from log, flags rewarded, but does not give any rewards to player
         /// </summary>
         /// <param name="questIds"></param>
-        public void SkipQuests(List<uint> questIds)
+        public void SkipQuests(IEnumerable<uint> questIds)
         {
             bool updateVisibility = false;
             foreach (uint questId in questIds)

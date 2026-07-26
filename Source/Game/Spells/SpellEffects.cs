@@ -6026,6 +6026,19 @@ namespace Game.Spells
             target.UpdateVisibleObjectInteractions(true, false, true, true);
         }
 
+        [SpellEffectHandler(SpellEffectName.SkipQuestline)]
+        void EffectSkipQuestLine()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            QuestManager.SkipQuestLineForPlayer((uint)effectInfo.MiscValue, target);
+        }
+
         [SpellEffectHandler(SpellEffectName.LearnWarbanScene)]
         void EffectLearnWarbandScene()
         {

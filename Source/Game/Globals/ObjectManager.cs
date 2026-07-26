@@ -10845,7 +10845,7 @@ namespace Game
                     continue;
                 }
 
-                if (Global.DB2Mgr.GetQuestsForQuestLine(questLineId) == null)
+                if (QuestManager.GetQuestsForQuestLine(questLineId) == null)
                 {
                     Log.outError(LogFilter.Sql, $"Table `ui_map_quest_line` references empty or non-existing questline {questLineId}, skipped");
                     continue;

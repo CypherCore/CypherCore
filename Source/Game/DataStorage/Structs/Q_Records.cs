@@ -28,6 +28,11 @@ namespace Game.DataStorage
         public uint OrderIndex;
         public int Flags;
         public int Unknown1110;
+
+        public bool HasFlag(QuestLineXQuestFlags flag)
+        {
+            return ((QuestLineXQuestFlags)Flags).HasFlag(flag);
+        }
     }
 
     public sealed class QuestMoneyRewardRecord

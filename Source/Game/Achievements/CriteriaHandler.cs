@@ -2929,12 +2929,7 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerIsOnQuestInQuestline: // 236
                 {
-                    bool isOnQuest = false;
-                    var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(reqValue);
-                    if (!questLineQuests.Empty())
-                        isOnQuest = questLineQuests.Any(questLineQuest => referencePlayer.FindQuestSlot(questLineQuest.QuestID) < SharedConst.MaxQuestLogSize);
-
-                    if (!isOnQuest)
+                    if (!QuestManager.IsQuestLineQuestActiveForPlayer(reqValue, referencePlayer))
                         return false;
                     break;
                 }
@@ -2964,61 +2959,26 @@ namespace Game.Achievements
                 }
                 case ModifierTreeType.PlayerCanAcceptQuestInQuestline: // 240
                 {
-                    var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(reqValue);
-                    if (questLineQuests.Empty())
-                        return false;
-
-                    bool canTakeQuest = questLineQuests.Any(questLineQuest =>
-                    {
-                        Quest quest = Global.ObjectMgr.GetQuestTemplate(questLineQuest.QuestID);
-                        if (quest != null)
-                            return referencePlayer.CanTakeQuest(quest, false);
-
-                        return false;
-                    });
-
-                    if (!canTakeQuest)
+                    if (!QuestManager.IsQuestLineQuestAvailableForPlayer(reqValue, referencePlayer))
                         return false;
                     break;
                 }
                 case ModifierTreeType.PlayerHasCompletedQuestline: // 241
                 {
-                    var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(reqValue);
-                    if (questLineQuests.Empty())
+                    if (!QuestManager.IsQuestLineCompletedByPlayer(reqValue, referencePlayer))
                         return false;
-
-                    foreach (var questLineQuest in questLineQuests)
-                        if (!referencePlayer.GetQuestRewardStatus(questLineQuest.QuestID))
-                            return false;
                     break;
                 }
                 case ModifierTreeType.PlayerHasCompletedQuestlineQuestCount: // 242
                 {
-                    var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(reqValue);
-                    if (questLineQuests.Empty())
-                        return false;
-
-                    uint completedQuests = 0;
-                    foreach (var questLineQuest in questLineQuests)
-                        if (referencePlayer.GetQuestRewardStatus(questLineQuest.QuestID))
-                            ++completedQuests;
-
-                    if (completedQuests < reqValue)
+                    if (QuestManager.GetQuestLineStatsForPlayer(reqValue, referencePlayer).Completed < reqValue)
                         return false;
                     break;
                 }
                 case ModifierTreeType.PlayerHasCompletedPercentageOfQuestline: // 243
                 {
-                    var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(reqValue);
-                    if (questLineQuests.Empty())
-                        return false;
-
-                    int completedQuests = 0;
-                    foreach (var questLineQuest in questLineQuests)
-                        if (referencePlayer.GetQuestRewardStatus(questLineQuest.QuestID))
-                            ++completedQuests;
-
-                    if (MathFunctions.GetPctOf(completedQuests, questLineQuests.Count) < reqValue)
+                    var questLineStats = QuestManager.GetQuestLineStatsForPlayer(reqValue, referencePlayer);
+                    if (MathFunctions.GetPctOf(questLineStats.Completed, questLineStats.Total) < reqValue)
                         return false;
                     break;
                 }

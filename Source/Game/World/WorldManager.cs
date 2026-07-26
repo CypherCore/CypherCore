@@ -679,6 +679,7 @@ namespace Game
             Global.WeatherMgr.LoadWeatherData();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Quests...");
+            QuestManager.Load();
             Global.ObjectMgr.LoadQuests();
 
             Log.outInfo(LogFilter.ServerLoading, "Checking Quest Disables");

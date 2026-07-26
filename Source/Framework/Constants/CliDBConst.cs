@@ -2155,6 +2155,12 @@ namespace Framework.Constants
         Disabled = 0x01                      // Prestige levels with this flag won't be included to calculate max prestigelevel.
     }
 
+    [Flags]
+    public enum QuestLineXQuestFlags
+    {
+        IgnoreForCompletion = 0x01
+    }
+
     public enum QuestPackageFilter : byte
     {
         LootSpecialization = 0,    // Players can select this quest reward if it matches their selected loot specialization

@@ -482,12 +482,6 @@ namespace Game.DataStorage
                 }
             }
 
-            foreach (QuestLineXQuestRecord questLineQuest in QuestLineXQuestStorage.Values)
-                _questsByQuestLine.Add(questLineQuest.QuestLineID, questLineQuest);
-
-            foreach (var questLineId in _questsByQuestLine.Keys)
-                _questsByQuestLine[questLineId].OrderByDescending(p => p.OrderIndex);
-
             foreach (QuestPackageItemRecord questPackageItem in QuestPackageItemStorage.Values)
             {
                 if (!_questPackages.ContainsKey(questPackageItem.PackageID))
@@ -1923,11 +1917,6 @@ namespace Game.DataStorage
             return slots;
         }
 
-        public List<QuestLineXQuestRecord> GetQuestsForQuestLine(uint questLineId)
-        {
-            return _questsByQuestLine.LookupByKey(questLineId);
-        }
-
         public List<QuestPackageItemRecord> GetQuestPackageItems(uint questPackageID)
         {
             if (_questPackages.ContainsKey(questPackageID))
@@ -2458,7 +2447,6 @@ namespace Game.DataStorage
         MultiMap<uint, uint> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         PvpTalentSlotUnlockRecord[] _pvpTalentSlotUnlock = new PvpTalentSlotUnlockRecord[PlayerConst.MaxPvpTalentSlots];
-        MultiMap<uint, QuestLineXQuestRecord> _questsByQuestLine = new();
         Dictionary<uint, Tuple<List<QuestPackageItemRecord>, List<QuestPackageItemRecord>>> _questPackages = new();
         MultiMap<uint, RewardPackXCurrencyTypeRecord> _rewardPackCurrencyTypes = new();
         MultiMap<uint, RewardPackXItemRecord> _rewardPackItems = new();

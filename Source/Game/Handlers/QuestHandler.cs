@@ -2,15 +2,14 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.BattleGrounds;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
+using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.DataStorage;
-using System.Collections.Generic;
 using System;
-using Game.Misc;
+using System.Collections.Generic;
 
 namespace Game
 {
@@ -779,7 +778,7 @@ namespace Game
             var questLines = Global.ObjectMgr.GetUiMapQuestLinesList(uiMap.Id);
             foreach (uint questLineId in questLines)
             {
-                var questLineQuests = Global.DB2Mgr.GetQuestsForQuestLine(questLineId);
+                var questLineQuests = QuestManager.GetQuestsForQuestLine(questLineId);
                 if (questLineQuests.Empty())
                     continue;
 
