@@ -62,7 +62,7 @@ namespace Game.Maps
             List<GameObjectModelWorkData> modelSpawns = [];
             foreach (GameObjectModel gameObjectModel in m_map.GetGameObjectModelsInGrid(tileX, tileY))
             {
-                if (!gameObjectModel.IsMapObject() || !gameObjectModel.IsIncludedInNavMesh())
+                if (!gameObjectModel.IsIncludedInNavMesh())
                     continue;
 
                 WorldModel worldModel = gameObjectModel.GetWorldModel();
