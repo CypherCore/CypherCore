@@ -2090,6 +2090,9 @@ namespace Game.Entities
             }
             else
             {
+                if (IsBeingTeleportedFar())
+                    return false;
+
                 if (GetClass() == Class.DeathKnight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
                 {
                     SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.UniqueMessage, 1);
@@ -2118,11 +2121,11 @@ namespace Game.Entities
                 SetSemaphoreTeleportNear(false);
                 //setup delayed teleport flag
                 SetDelayedTeleportFlag(IsCanDelayTeleport());
+                SetSemaphoreTeleportFar(true);
                 //if teleport spell is cast in Unit::Update() func
                 //then we need to delay it until update process will be finished
                 if (IsHasDelayedTeleport())
                 {
-                    SetSemaphoreTeleportFar(true);
                     //lets save teleport destination for player
                     teleportDest = teleportLocation;
                     m_teleport_options = options;
