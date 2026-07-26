@@ -1361,7 +1361,7 @@ namespace Game.Entities
             m_itemData.WriteUpdate(mask, data, target, this, true);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
+        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target, bool ignoreNestedChangesMask)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
@@ -1377,10 +1377,10 @@ namespace Game.Entities
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, true);
+                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, ignoreNestedChangesMask);
 
             if (valuesMask[(int)TypeId.Item])
-                m_itemData.WriteUpdate(requestedItemMask, buffer, target, this, true);
+                m_itemData.WriteUpdate(requestedItemMask, buffer, target, this, ignoreNestedChangesMask);
 
             WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
@@ -2882,6 +2882,7 @@ namespace Game.Entities
             Item Owner;
             ObjectFieldData ObjectMask = new();
             ItemData ItemMask = new();
+            bool IgnoreNestedChangesMask;
 
             public ValuesUpdateForPlayerWithMaskSender(Item owner)
             {
@@ -2892,7 +2893,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ItemMask.GetChangesMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ItemMask.GetChangesMask(), player, IgnoreNestedChangesMask);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

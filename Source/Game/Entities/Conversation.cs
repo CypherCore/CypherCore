@@ -328,7 +328,7 @@ namespace Game.Entities
                 m_conversationData.WriteUpdate(flags, data, target, this);
         }
 
-        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
+        void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target, bool ignoreNestedChangesMask)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
@@ -343,10 +343,10 @@ namespace Game.Entities
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, true);
+                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, ignoreNestedChangesMask);
 
             if (valuesMask[(int)TypeId.Conversation])
-                m_conversationData.WriteUpdate(requestedConversationMask, buffer, target, this, true);
+                m_conversationData.WriteUpdate(requestedConversationMask, buffer, target, this, ignoreNestedChangesMask);
 
             WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
@@ -390,6 +390,7 @@ namespace Game.Entities
             Conversation Owner;
             ObjectFieldData ObjectMask = new();
             ConversationData ConversationMask = new();
+            bool IgnoreNestedChangesMask;
 
             public ValuesUpdateForPlayerWithMaskSender(Conversation owner)
             {
@@ -400,7 +401,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ConversationMask.GetChangesMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), ConversationMask.GetChangesMask(), player, IgnoreNestedChangesMask);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

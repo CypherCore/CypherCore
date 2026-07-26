@@ -3575,7 +3575,7 @@ namespace Game.Entities
                         }
 
                         if (objMask.GetChangesMask().IsAnySet() || goMask.GetChangesMask().IsAnySet())
-                            gameObject.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), this);
+                            gameObject.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), this, false);
                     }
 
                 }
@@ -3607,7 +3607,7 @@ namespace Game.Entities
                         }
 
                         if (objMask.GetChangesMask().IsAnySet() || unitMask.GetChangesMask().IsAnySet())
-                            creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), unitMask.GetChangesMask(), this);
+                            creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), unitMask.GetChangesMask(), this, false);
 
                         if (creature.IsQuestGiver())
                             giverStatusMultiple.QuestGiver.Add(new QuestGiverInfo(visibleObjectGuid, GetQuestDialogStatus(creature)));
@@ -3626,7 +3626,7 @@ namespace Game.Entities
                                 ObjectFieldData objMask = new();
                                 UnitData unitMask = new();
                                 unitMask.MarkChanged(m_unitData.NpcFlags); // NpcFlags has UNIT_NPC_FLAG_SPELLCLICK
-                                creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), unitMask.GetChangesMask(), this);
+                                creature.BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), unitMask.GetChangesMask(), this, false);
                                 break;
                             }
                         }

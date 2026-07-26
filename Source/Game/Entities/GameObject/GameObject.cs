@@ -468,7 +468,7 @@ namespace Game.Entities
                             goMask.MarkChanged(m_gameObjectData.State);
 
                             UpdateData udata = new(GetMapId());
-                            BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), seer);
+                            BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), seer, false);
                             udata.BuildPacket(out UpdateObject packet);
                             seer.SendPacket(packet);
                         }
@@ -3151,7 +3151,7 @@ namespace Game.Entities
                     objMask.MarkChanged(objMask.DynamicFlags);
 
                     UpdateData udata = new(GetMapId());
-                    BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), looter);
+                    BuildValuesUpdateForPlayerWithMask(udata, objMask.GetChangesMask(), goMask.GetChangesMask(), looter, false);
                     udata.BuildPacket(out UpdateObject packet);
                     looter.SendPacket(packet);
                     break;
@@ -3349,7 +3349,7 @@ namespace Game.Entities
                 m_gameObjectData.WriteUpdate(flags, data, target, this);
         }
 
-        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedGameObjectMask, Player target)
+        public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedGameObjectMask, Player target, bool ignoreNestedChangesMask)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
             UpdateMask valuesMask = new((int)TypeId.Max);
@@ -3364,10 +3364,10 @@ namespace Game.Entities
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
-                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, true);
+                m_objectData.WriteUpdate(requestedObjectMask, buffer, target, this, ignoreNestedChangesMask);
 
             if (valuesMask[(int)TypeId.GameObject])
-                m_gameObjectData.WriteUpdate(requestedGameObjectMask, buffer, target, this, true);
+                m_gameObjectData.WriteUpdate(requestedGameObjectMask, buffer, target, this, ignoreNestedChangesMask);
 
             WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
@@ -4043,6 +4043,7 @@ namespace Game.Entities
             public GameObject Owner;
             public ObjectFieldData ObjectMask = new();
             public GameObjectFieldData GameObjectMask = new();
+            bool IgnoreNestedChangesMask;
 
             public ValuesUpdateForPlayerWithMaskSender(GameObject owner)
             {
@@ -4053,7 +4054,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), GameObjectMask.GetChangesMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), GameObjectMask.GetChangesMask(), player, IgnoreNestedChangesMask);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);

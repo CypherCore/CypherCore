@@ -10,7 +10,6 @@ using Game.Garrisons;
 using Game.Groups;
 using Game.Loots;
 using Game.Mails;
-using Game.Maps;
 using Game.Misc;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -262,6 +261,7 @@ namespace Game.Entities
             UnitData UnitMask = new();
             PlayerData PlayerMask = new();
             ActivePlayerData ActivePlayerMask = new();
+            bool IgnoreNestedChangesMask;
 
             public ValuesUpdateForPlayerWithMaskSender(Player owner)
             {
@@ -272,7 +272,7 @@ namespace Game.Entities
             {
                 UpdateData udata = new(Owner.GetMapId());
 
-                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), UnitMask.GetChangesMask(), PlayerMask.GetChangesMask(), ActivePlayerMask.GetChangesMask(), player);
+                Owner.BuildValuesUpdateForPlayerWithMask(udata, ObjectMask.GetChangesMask(), UnitMask.GetChangesMask(), PlayerMask.GetChangesMask(), ActivePlayerMask.GetChangesMask(), player, IgnoreNestedChangesMask);
 
                 udata.BuildPacket(out UpdateObject packet);
                 player.SendPacket(packet);
@@ -508,7 +508,7 @@ namespace Game.Entities
             public EquipmentSetType Type;
             public ulong Guid; // Set Identifier
             public uint SetID; // Index
-            public uint IgnoreMask ; // Mask of EquipmentSlot
+            public uint IgnoreMask; // Mask of EquipmentSlot
             public int AssignedSpecIndex = -1; // Index of character specialization that this set is automatically equipped for
             public string SetName = "";
             public string SetIcon = "";
