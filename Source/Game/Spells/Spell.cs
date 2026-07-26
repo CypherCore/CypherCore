@@ -1930,6 +1930,31 @@ namespace Game.Spells
             }
         }
 
+        public (ProcFlagsInit attacker, ProcFlagsInit victim) FinalizeDataForTriggerSystem(bool positive)
+        {
+            if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
+            {
+                if (positive)
+                    return (new ProcFlagsInit(ProcFlags.DealHelpfulPeriodic), new ProcFlagsInit(ProcFlags.TakeHelpfulPeriodic));
+                else
+                    return (new ProcFlagsInit(ProcFlags.DealHarmfulPeriodic), new ProcFlagsInit(ProcFlags.TakeHarmfulPeriodic));
+            }
+            if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
+            {
+                if (positive)
+                    return (new ProcFlagsInit(ProcFlags.DealHelpfulAbility), new ProcFlagsInit(ProcFlags.TakeHelpfulAbility));
+                else
+                    return (new ProcFlagsInit(ProcFlags.DealHarmfulAbility), new ProcFlagsInit(ProcFlags.TakeHarmfulAbility));
+            }
+            else
+            {
+                if (positive)
+                    return (new ProcFlagsInit(ProcFlags.DealHelpfulSpell), new ProcFlagsInit(ProcFlags.TakeHelpfulSpell));
+                else
+                    return (new ProcFlagsInit(ProcFlags.DealHarmfulSpell), new ProcFlagsInit(ProcFlags.TakeHarmfulSpell));
+            }
+        }
+
         public void CleanupTargetList()
         {
             m_UniqueTargetInfo.Clear();
@@ -3403,29 +3428,7 @@ namespace Game.Spells
 
             ProcFlagsInit procAttacker = m_procAttacker;
             if (!procAttacker)
-            {
-                if (m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
-                {
-                    if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
-                    else
-                        procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
-                }
-                else if (m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
-                {
-                    if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulAbility);
-                    else
-                        procAttacker.Or(ProcFlags.DealHarmfulAbility);
-                }
-                else
-                {
-                    if (IsPositive())
-                        procAttacker.Or(ProcFlags.DealHelpfulSpell);
-                    else
-                        procAttacker.Or(ProcFlags.DealHarmfulSpell);
-                }
-            }
+                procAttacker = FinalizeDataForTriggerSystem(IsPositive()).attacker;
 
             Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, new ProcFlagsInit(ProcFlags.None), m_procSpellType, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
@@ -9013,51 +9016,7 @@ namespace Game.Spells
                         }
                     }
 
-                    switch (spell.m_spellInfo.DmgClass)
-                    {
-                        case SpellDmgClass.None:
-                        case SpellDmgClass.Magic:
-                            if (spell.m_spellInfo.HasAttribute(SpellAttr3.TreatAsPeriodic))
-                            {
-                                if (positive)
-                                {
-                                    procAttacker.Or(ProcFlags.DealHelpfulPeriodic);
-                                    procVictim.Or(ProcFlags.TakeHelpfulPeriodic);
-                                }
-                                else
-                                {
-                                    procAttacker.Or(ProcFlags.DealHarmfulPeriodic);
-                                    procVictim.Or(ProcFlags.TakeHarmfulPeriodic);
-                                }
-                            }
-                            else if (spell.m_spellInfo.HasAttribute(SpellAttr0.IsAbility))
-                            {
-                                if (positive)
-                                {
-                                    procAttacker.Or(ProcFlags.DealHelpfulAbility);
-                                    procVictim.Or(ProcFlags.TakeHelpfulAbility);
-                                }
-                                else
-                                {
-                                    procAttacker.Or(ProcFlags.DealHarmfulAbility);
-                                    procVictim.Or(ProcFlags.TakeHarmfulAbility);
-                                }
-                            }
-                            else
-                            {
-                                if (positive)
-                                {
-                                    procAttacker.Or(ProcFlags.DealHelpfulSpell);
-                                    procVictim.Or(ProcFlags.TakeHelpfulSpell);
-                                }
-                                else
-                                {
-                                    procAttacker.Or(ProcFlags.DealHarmfulSpell);
-                                    procVictim.Or(ProcFlags.TakeHarmfulSpell);
-                                }
-                            }
-                            break;
-                    }
+                    (procAttacker, procVictim) = spell.FinalizeDataForTriggerSystem(positive);
                 }
 
                 // All calculated do it!
