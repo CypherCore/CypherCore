@@ -735,11 +735,13 @@ namespace Framework.Constants
         //CompanionNetherwingDrake = 80,
         //RostrumStormGryphon      = 82,
         //RostrumFaerieDragon      = 83,
-        EarthenDwarfHorde = 84, // Title Earthen Description Earthen (Horde) (Racemask Bit 17)
-        EarthenDwarfAlliance = 85, // Title Earthen Description Earthen (Alliance) (Racemask Bit 18)
-        //Harronir                   = 86,
-        //RostrumAirship            = 87,
-        Max = 88
+        EarthenDwarfHorde = 84, // Earthen (Horde) (Racemask Bit 17)
+        EarthenDwarfAlliance = 85, // Earthen (Alliance) (Racemask Bit 18)
+        HaranirAlliance = 86, // Haranir (Alliance) (RaceMask bit 20)
+        //RACE_ROSTRUM_AIRSHIP_SEASON_1   = 87,
+        //RACE_ROSTRUM_AIRSHIP_SEASON_2   = 90,
+        HaranirHorde = 91, // Haranir (Horde) (RaceMask bit 19)
+        //RACE_ROSTRUM_AIRSHIP_SEASON_3   = 92,
     }
 
     public enum Expansion

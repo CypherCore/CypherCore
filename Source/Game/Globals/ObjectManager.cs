@@ -6092,13 +6092,13 @@ namespace Game
 
                     var raceMask = new RaceMask<long>(characterLoadout.RaceMask);
 
-                    for (var raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                    foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                     {
 
-                        if (!raceMask.HasRace(raceIndex))
+                        if (!raceMask.HasRace((Race)race.Id))
                             continue;
 
-                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)raceIndex, (Class)characterLoadout.ChrClassID));
+                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race.Id, (Class)characterLoadout.ChrClassID));
                         if (playerInfo != null)
                         {
                             playerInfo.itemContext = (ItemContext)characterLoadout.ItemContext;
@@ -6146,14 +6146,14 @@ namespace Game
                     do
                     {
                         uint currentrace = result.Read<uint>(0);
-                        if (currentrace >= (int)Race.Max)
+                        if (!CliDB.ChrRacesStorage.HasRecord(currentrace))
                         {
                             Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo_item` table, ignoring.", currentrace);
                             continue;
                         }
 
                         uint currentclass = result.Read<uint>(1);
-                        if (currentclass >= (int)Class.Max)
+                        if (!CliDB.ChrClassesStorage.HasRecord(currentclass))
                         {
                             Log.outError(LogFilter.Sql, "Wrong class {0} in `playercreateinfo_item` table, ignoring.", currentclass);
                             continue;
@@ -6177,9 +6177,9 @@ namespace Game
                         if (currentrace == 0 || currentclass == 0)
                         {
                             uint minrace = currentrace != 0 ? currentrace : 1;
-                            uint maxrace = currentrace != 0 ? currentrace + 1 : (int)Race.Max;
+                            uint maxrace = currentrace != 0 ? currentrace + 1 : CliDB.ChrRacesStorage.GetNumRows();
                             uint minclass = currentclass != 0 ? currentclass : 1;
-                            uint maxclass = currentclass != 0 ? currentclass + 1 : (int)Class.Max;
+                            uint maxclass = currentclass != 0 ? currentclass + 1 : CliDB.ChrClassesStorage.GetNumRows();
                             for (var r = minrace; r < maxrace; ++r)
                                 for (var c = minclass; c < maxclass; ++c)
                                     PlayerCreateInfoAddItemHelper(r, c, itemid, amount);
@@ -6205,15 +6205,15 @@ namespace Game
                     if (rcInfo.Availability == 1)
                     {
                         var raceMask = new RaceMask<long>(rcInfo.RaceMask);
-                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                        foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                         {
-                            if (raceMask.IsEmpty() || raceMask.HasRace(raceIndex))
+                            if (raceMask.IsEmpty() || raceMask.HasRace((Race)race.Id))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
                                     if (rcInfo.ClassMask == -1 || rcInfo.ClassMask == 0 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & rcInfo.ClassMask))
                                     {
-                                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
+                                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create((Race)race.Id, classIndex));
                                         if (info != null)
                                             info.skills.Add(rcInfo);
                                     }
@@ -6256,15 +6256,15 @@ namespace Game
                             continue;
                         }
 
-                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                        foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                         {
-                            if (raceMask.IsEmpty() || raceMask.HasRace(raceIndex))
+                            if (raceMask.IsEmpty() || raceMask.HasRace((Race)race.Id))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
                                     if (classMask == 0 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & classMask))
                                     {
-                                        PlayerInfo playerInfo = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
+                                        PlayerInfo playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race.Id, classIndex));
                                         if (playerInfo != null)
                                         {
                                             playerInfo.customSpells.Add(spellId);
@@ -6321,15 +6321,15 @@ namespace Game
                             continue;
                         }
 
-                        for (Race raceIndex = Race.Human; raceIndex < Race.Max; ++raceIndex)
+                        foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                         {
-                            if (raceMask.IsEmpty() || raceMask.HasRace(raceIndex))
+                            if (raceMask.IsEmpty() || raceMask.HasRace((Race)race.Id))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
                                     if (classMask == 0 || Convert.ToBoolean((1 << ((int)classIndex - 1)) & classMask))
                                     {
-                                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(raceIndex, classIndex));
+                                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create((Race)race.Id, classIndex));
                                         if (info != null)
                                         {
                                             info.castSpells[playerCreateMode].Add(spellId);
@@ -6359,20 +6359,20 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        Race currentrace = (Race)result.Read<uint>(0);
-                        if (currentrace >= Race.Max)
+                        uint currentRace = result.Read<uint>(0);
+                        if (CliDB.ChrRacesStorage.HasRecord(currentRace))
                         {
-                            Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo_action` table, ignoring.", currentrace);
+                            Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo_action` table, ignoring.", currentRace);
                             continue;
                         }
 
-                        Class currentclass = (Class)result.Read<uint>(1);
-                        if (currentclass >= Class.Max)
+                        uint currentclass = result.Read<uint>(1);
+                        if (CliDB.ChrClassesStorage.HasRecord(currentclass))
                         {
                             Log.outError(LogFilter.Sql, "Wrong class {0} in `playercreateinfo_action` table, ignoring.", currentclass);
                             continue;
                         }
-                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create(currentrace, currentclass));
+                        PlayerInfo info = _playerInfo.LookupByKey(Tuple.Create((Race)currentRace, (Class)currentclass));
                         if (info != null)
                             info.action.Add(new PlayerCreateInfoAction(result.Read<byte>(2), result.Read<uint>(3), result.Read<byte>(4)));
 
@@ -6386,8 +6386,8 @@ namespace Game
             // Loading levels data (class/race dependent)
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Level Stats Data...");
             {
-                short[][] raceStatModifiers = new short[(int)Race.Max][];
-                for (var i = 0; i < (int)Race.Max; ++i)
+                short[][] raceStatModifiers = new short[CliDB.ChrRacesStorage.GetNumRows()][];
+                for (var i = 0; i < raceStatModifiers.Length; ++i)
                     raceStatModifiers[i] = new short[(int)Stats.Max];
 
                 //                                         0     1    2    3    4     5
@@ -6401,15 +6401,15 @@ namespace Game
 
                 do
                 {
-                    Race currentrace = (Race)result.Read<uint>(0);
-                    if (currentrace >= Race.Max)
+                    uint currentRace = result.Read<uint>(0);
+                    if (!CliDB.ChrRacesStorage.HasRecord(currentRace))
                     {
-                        Log.outError(LogFilter.Sql, $"Wrong race {currentrace} in `player_racestats` table, ignoring.");
+                        Log.outError(LogFilter.Sql, $"Wrong race {currentRace} in `player_racestats` table, ignoring.");
                         continue;
                     }
 
                     for (int i = 0; i < (int)Stats.Max; ++i)
-                        raceStatModifiers[(int)currentrace][i] = result.Read<short>(i + 1);
+                        raceStatModifiers[currentRace][i] = result.Read<short>(i + 1);
 
                 } while (result.NextRow());
 
@@ -6426,10 +6426,10 @@ namespace Game
 
                 do
                 {
-                    Class currentclass = (Class)result.Read<byte>(0);
-                    if (currentclass >= Class.Max)
+                    Class currentClass = (Class)result.Read<byte>(0);
+                    if (!CliDB.ChrClassesStorage.HasRecord((uint)currentClass))
                     {
-                        Log.outError(LogFilter.Sql, "Wrong class {0} in `player_classlevelstats` table, ignoring.", currentclass);
+                        Log.outError(LogFilter.Sql, "Wrong class {0} in `player_classlevelstats` table, ignoring.", currentClass);
                         continue;
                     }
 
@@ -6446,7 +6446,7 @@ namespace Game
 
                     for (var race = 0; race < raceStatModifiers.Length; ++race)
                     {
-                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race, currentclass));
+                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race, currentClass));
                         if (playerInfo == null)
                             continue;
 
@@ -6458,58 +6458,23 @@ namespace Game
                 } while (result.NextRow());
 
                 // Fill gaps and check integrity
-                for (Race race = 0; race < Race.Max; ++race)
+                foreach (var ((race, class_), playerInfo) in _playerInfo)
                 {
-                    // skip non existed races
-                    if (!CliDB.ChrRacesStorage.ContainsKey(race))
-                        continue;
-
-                    for (Class _class = 0; _class < Class.Max; ++_class)
+                    // fatal error if no level 1 data
+                    if (playerInfo.levelInfo == null || playerInfo.levelInfo[0].stats[0] == 0)
                     {
-                        // skip non existed classes
-                        if (CliDB.ChrClassesStorage.LookupByKey(_class) == null)
-                            continue;
+                        Log.outError(LogFilter.Sql, "Race {0} Class {1} Level 1 does not have stats data!", race, class_);
+                        Environment.Exit(1);
+                        return;
+                    }
 
-                        var playerInfo = _playerInfo.LookupByKey(Tuple.Create(race, _class));
-                        if (playerInfo == null)
-                            continue;
-
-                        // skip expansion races if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.BurningCrusade && (race == Race.BloodElf || race == Race.Draenei))
-                            continue;
-
-                        // skip expansion classes if not playing with expansion
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.WrathOfTheLichKing && _class == Class.DeathKnight)
-                            continue;
-
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.MistsOfPandaria && (race == Race.PandarenNeutral || race == Race.PandarenHorde || race == Race.PandarenAlliance))
-                            continue;
-
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Legion && _class == Class.DemonHunter)
-                            continue;
-
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.Dragonflight && (_class == Class.Evoker || race == Race.DracthyrAlliance || race == Race.DracthyrHorde))
-                            continue;
-
-                        if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.TheWarWithin && (race == Race.EarthenDwarfHorde || race == Race.EarthenDwarfAlliance))
-                            continue;
-
-                        // fatal error if no level 1 data
-                        if (playerInfo.levelInfo[0].stats[0] == 0)
+                    // fill level gaps
+                    for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
+                    {
+                        if (playerInfo.levelInfo[level].stats[0] == 0)
                         {
-                            Log.outError(LogFilter.Sql, "Race {0} Class {1} Level 1 does not have stats data!", race, _class);
-                            Environment.Exit(1);
-                            return;
-                        }
-
-                        // fill level gaps
-                        for (var level = 1; level < WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel); ++level)
-                        {
-                            if (playerInfo.levelInfo[level].stats[0] == 0)
-                            {
-                                Log.outError(LogFilter.Sql, "Race {0} Class {1} Level {2} does not have stats data. Using stats data of level {3}.", race, _class, level + 1, level);
-                                playerInfo.levelInfo[level] = playerInfo.levelInfo[level - 1];
-                            }
+                            Log.outError(LogFilter.Sql, "Race {0} Class {1} Level {2} does not have stats data. Using stats data of level {3}.", race, class_, level + 1, level);
+                            playerInfo.levelInfo[level] = playerInfo.levelInfo[level - 1];
                         }
                     }
                 }
@@ -6587,12 +6552,6 @@ namespace Game
 
         public PlayerInfo GetPlayerInfo(Race raceId, Class classId)
         {
-            if (raceId >= Race.Max)
-                return null;
-
-            if (classId >= Class.Max)
-                return null;
-
             var info = _playerInfo.LookupByKey(Tuple.Create(raceId, classId));
             if (info == null)
                 return null;
@@ -6619,7 +6578,7 @@ namespace Game
         }
         public PlayerLevelInfo GetPlayerLevelInfo(Race race, Class _class, uint level)
         {
-            if (level < 1 || race >= Race.Max || _class >= Class.Max)
+            if (level < 1)
                 return null;
 
             PlayerInfo pInfo = _playerInfo.LookupByKey(Tuple.Create(race, _class));
