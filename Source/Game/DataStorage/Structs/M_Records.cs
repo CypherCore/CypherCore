@@ -108,6 +108,7 @@ namespace Game.DataStorage
 
         public bool HasFlag(MapFlags mapFlags) { return (Flags[0] & (uint)mapFlags) != 0; }
         public bool HasFlag(MapFlags2 mapFlags2) { return (Flags[1] & (uint)mapFlags2) != 0; }
+        public bool HasFlag(MapFlags3 mapFlags3) { return (Flags[2] & (uint)mapFlags3) != 0; }
     }
 
     public sealed class MapChallengeModeRecord

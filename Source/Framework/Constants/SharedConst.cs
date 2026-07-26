@@ -1040,6 +1040,12 @@ namespace Framework.Constants
         BelongsToLayer = 0x100000,
     }
 
+    [Flags]
+    public enum MapFlags3
+    {
+        IsDelve = 0x00000100,
+    }
+
     public enum StringIdType
     {
         Template = 0,
