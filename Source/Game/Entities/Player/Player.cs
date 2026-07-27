@@ -2792,7 +2792,7 @@ namespace Game.Entities
             bool isTransmogDisplayed(TransmogOutfitDisplayType displayType) => displayType == TransmogOutfitDisplayType.Assigned || displayType == TransmogOutfitDisplayType.Hidden;
 
             string result = "";
-            for (uint i = EquipmentSlot.Start; i < EquipmentSlot.End; i = i + 1)
+            for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; i = i + 1)
             {
                 TransmogOutfitSlotOption transmogSlotOption = TransmogOutfitSlotOption.None;
                 switch (i)
@@ -2807,18 +2807,14 @@ namespace Game.Entities
                         break;
                 }
 
-                var slotInfo = TransmogMgr.GetSlotAndOption(i, transmogSlotOption);
+                var slotInfo = TransmogMgr.GetSlotAndOption((uint)i, transmogSlotOption);
                 if (slotInfo != null)
                 {
                     var transmogOutfitSlot = outfit.Slots[(int)slotInfo.SlotIndex];
 
                     uint itemModifiedAppearanceId = transmogOutfitSlot.ItemModifiedAppearanceID;
                     if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.AppearanceDisplayType))
-                        itemModifiedAppearanceId = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)slotInfo.SlotIndex].ItemModifiedAppearanceID;
-
-                    uint spellItemEnchantmentId = transmogOutfitSlot.SpellItemEnchantmentID;
-                    if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.IllusionDisplayType))
-                        spellItemEnchantmentId = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)slotInfo.SlotIndex].SpellItemEnchantmentID;
+                        itemModifiedAppearanceId = m_playerData.VisibleItems[i].ItemModifiedAppearanceID;
 
                     InventoryType inventoryType = InventoryType.NonEquip;
                     uint displayId = 0;
@@ -2840,9 +2836,12 @@ namespace Game.Entities
                             displayId = itemAppearance.ItemDisplayInfoID;
                     }
 
-                    SpellItemEnchantmentRecord spellItemEnchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(spellItemEnchantmentId);
+                    SpellItemEnchantmentRecord spellItemEnchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(transmogOutfitSlot.SpellItemEnchantmentID);
                     if (spellItemEnchantment != null)
                         itemVisual = spellItemEnchantment.ItemVisual;
+
+                    if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.IllusionDisplayType))
+                        itemVisual = m_playerData.VisibleItems[i].ItemVisual;
 
                     TransmogOutfitSlotInfoRecord secondarySlot = CliDB.TransmogOutfitSlotInfoStorage.LookupByKey(slotInfo.Slot.SecondarySlotID);
                     if (secondarySlot != null)
@@ -2854,7 +2853,7 @@ namespace Game.Entities
 
                             secondaryItemModifiedAppearanceId = secondaryTransmogOutfitSlot.ItemModifiedAppearanceID;
                             if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitSlot.AppearanceDisplayType))
-                                secondaryItemModifiedAppearanceId = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)secondarySlotInfo.SlotIndex].ItemModifiedAppearanceID;
+                                secondaryItemModifiedAppearanceId = m_playerData.VisibleItems[i].SecondaryItemModifiedAppearanceID;
                         }
                     }
 
