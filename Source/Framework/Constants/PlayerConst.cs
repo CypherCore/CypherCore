@@ -499,17 +499,21 @@ namespace Framework.Constants
 
     public enum CharacterFlags4
     {
-        None = 0x00000000,
-        UsedRpeReset = 0x00000001, // Character Has Used A Rpe Reset Recently
-        OnlyRpeResetOrTimerunningEndBoost = 0x00000002, // Character Has Only Ever Used An Rpe Reset Boost Or Timerunning-Season-End Boost
-        SelfFound = 0x00000004, // Character Is Self-Found, And Cannot Trade, Use The Auction House, Or Use Most Mail Functions
-        TimerunningConversionDone = 0x00000008, // Character Has Been Updated To Normal Characters From A Timerunning Season
-        LoggedInByCrawlerOverridingLocks = 0x00000010, // Character Is Being Logged In By Crawler Overriding Locks.
-        ProcessedForWarbands = 0x00000020, // Character Has Had Their Information Added To Account-Wide Warband Tracking
-        LoggedOutWhileLorewalking = 0x00000040, // Character Last Logged Out While Actively Lorewalking
-        NoNeighborhoodInvites = 0x00000080, // Character Does Not Accept Neighborhood Invites
-        CheckedFor2ndWaveAccountWideFactions = 0x00000100, // Character Has Been Checked For 2nd Wave Of Account Wide Factions
-        WillBeResurrectedInHardcore = 0x00000200, // Character Will Be Resurrected Overriding Hardcore Game Rule
+        None = 0x00,
+        UsedRpeReset = 0x01, // Character Has Used A Rpe Reset Recently
+        OnlyRpeResetOrTimerunningEndBoost = 0x02, // Character Has Only Ever Used An Rpe Reset Boost Or Timerunning-Season-End Boost
+        SelfFound = 0x04, // Character Is Self-Found, And Cannot Trade, Use The Auction House, Or Use Most Mail Functions
+        TimerunningConversionDone = 0x08, // Character Has Been Updated To Normal Characters From A Timerunning Season
+        LoggedInByCrawlerOverridingLocks = 0x10, // Character Is Being Logged In By Crawler Overriding Locks.
+        ProcessedForWarbands = 0x20, // Character Has Had Their Information Added To Account-Wide Warband Tracking
+        LoggedOutWhileLorewalking = 0x40, // Character Last Logged Out While Actively Lorewalking
+        NoNeighborhoodInvites = 0x80, // Character Does Not Accept Neighborhood Invites
+        CheckedFor2ndWaveAccountWideFactions = 0x100, // Character Has Been Checked For 2nd Wave Of Account Wide Factions
+        WillBeResurrectedInHardcore = 0x200, // Character Will Be Resurrected Overriding Hardcore Game Rule
+        UsedMaxLevelBoost = 0x400, // Character Used A Max Level Boost And Cannot Use It Again
+        DisallowRecentAlliesToSeeLocation = 0x800, // Other Players Cannot See Your Character's Location If You Are In Their Recent Allies List
+        HasArathiRpe = 0x1000, // Character Is Granted The Arathi Teleport Option At Selection (Removed After Entering World)
+        FreeTransmogClaimed = 0x2000, // Character Has Used Their First Discounted Transmog Transaction
     }
 
     public enum CharacterRestrictionFlags
