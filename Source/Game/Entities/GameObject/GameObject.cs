@@ -276,10 +276,9 @@ namespace Game.Entities
 
             SetDisplayId(goInfo.displayId);
 
-            CreateModel();
-
             // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
             SetGoType(goInfo.type);
+            CreateModel();
             m_prevGoState = goState;
             SetGoState(goState);
             SetGoArtKit(artKit);
