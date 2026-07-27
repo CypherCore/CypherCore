@@ -125,6 +125,10 @@ public static class MathFunctions
     {
         return Base = CalculatePct(Base, pct);
     }
+    public static double ApplyPct(ref double Base, float pct)
+    {
+        return Base = CalculatePct(Base, pct);
+    }
 
     public static long AddPct(ref long value, float pct)
     {
@@ -142,6 +146,10 @@ public static class MathFunctions
     {
         return value += CalculatePct(value, pct);
     }
+    public static double AddPct(ref double value, float pct)
+    {
+        return value += CalculatePct(value, pct);
+    }
 
     public static int CalculatePct(int value, float pct)
     {
@@ -155,15 +163,19 @@ public static class MathFunctions
     {
         return value * pct / 100.0f;
     }
+    public static double CalculatePct(double value, float pct)
+    {
+        return value * pct / 100.0;
+    }
     public static ulong CalculatePct(ulong value, float pct)
     {
         return (ulong)(value * pct / 100.0f);
     }
-
     public static float GetPctOf(float value, float max)
     {
         return value / max * 100.0f;
     }
+
 
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
     {

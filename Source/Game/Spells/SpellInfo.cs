@@ -2310,7 +2310,7 @@ namespace Game.Spells
                 else
                 {
                     SpellEffectInfo valueHolder = maxTargetValueHolder.GetEffect(maxTargetsValueHolderEffect.Value);
-                    int expectedValue = valueHolder.CalcBaseValue(null, null, 0, -1);
+                    int expectedValue = (int)valueHolder.CalcBaseValue(null, null, 0, -1);
                     if (maxTargets != expectedValue)
                         Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(maxTargets): Spell {maxTargetValueHolder.Id} has different value in effect {maxTargetsValueHolderEffect.Value} than expected, recheck target caps (expected {maxTargets}, got {expectedValue})");
                 }
@@ -2329,7 +2329,7 @@ namespace Game.Spells
                 else
                 {
                     SpellEffectInfo valueHolder = numNonDiminishedTargetsValueHolder.GetEffect(numNonDiminishedTargetsValueHolderEffect.Value);
-                    int expectedValue = valueHolder.CalcBaseValue(null, null, 0, -1);
+                    int expectedValue = (int)valueHolder.CalcBaseValue(null, null, 0, -1);
                     if (numNonDiminishedTargets != expectedValue)
                         Log.outError(LogFilter.Spells, $"SpellInfo::_LoadSqrtTargetLimit(numNonDiminishedTargets): Spell {numNonDiminishedTargetsValueHolder.Id} has different value in effect {numNonDiminishedTargetsValueHolderEffect.Value} than expected, recheck target caps (expected {numNonDiminishedTargets}, got {expectedValue})");
                 }
@@ -4098,10 +4098,9 @@ namespace Game.Spells
         public int CalcValue(out float variance, WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
-            double basePointsPerLevel = RealPointsPerLevel;
-            // TODO: this needs to be a float, not rounded
-            int basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
+            double basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
             double value = bp.HasValue ? bp.Value : basePoints;
+            double basePointsPerLevel = RealPointsPerLevel;
             double comboDamage = PointsPerResource;
 
             Unit casterUnit = null;
@@ -4142,16 +4141,15 @@ namespace Game.Spells
             if (Scaling.Variance != 0)
             {
                 float delta = Math.Abs(Scaling.Variance * 0.5f);
-                double valueVariance = RandomHelper.FRand(-delta, delta);
-                value += (double)basePoints * valueVariance;
-                variance = (float)valueVariance;
+                float valueVariance = RandomHelper.FRand(-delta, delta);
+                value += basePoints * valueVariance;
             }
 
             // base amount modification based on spell lvl vs caster lvl
             if (Scaling.Coefficient != 0.0f)
             {
                 if (Scaling.ResourceCoefficient != 0)
-                    comboDamage = Scaling.ResourceCoefficient * value;
+                    comboDamage = value * Scaling.ResourceCoefficient;
             }
             else if (GetScalingExpectedStat() == ExpectedStatType.None)
             {
@@ -4163,8 +4161,7 @@ namespace Game.Spells
 
                     // if base level is greater than spell level, reduce by base level (eg. pilgrims foods)
                     level -= (int)Math.Max(_spellInfo.BaseLevel, _spellInfo.SpellLevel);
-                    if (level < 0)
-                        level = 0;
+                    level = Math.Max(level, 0);
                     value += level * basePointsPerLevel;
                 }
             }
@@ -4195,7 +4192,7 @@ namespace Game.Spells
             return (int)Math.Round(value);
         }
 
-        public int CalcBaseValue(WorldObject caster, Unit target, uint itemId, int itemLevel)
+        public double CalcBaseValue(WorldObject caster, Unit target, uint itemId, int itemLevel)
         {
             if (Scaling.Coefficient != 0.0f)
             {
@@ -4264,7 +4261,7 @@ namespace Game.Spells
                 if (tempValue > 0.0f && tempValue < 1.0f)
                     tempValue = 1.0f;
 
-                return (int)Math.Round(tempValue);
+                return Math.Round(tempValue);
             }
             else
             {
@@ -4291,7 +4288,7 @@ namespace Game.Spells
                     tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None, 0) * BasePoints / 100.0f;
                 }
 
-                return (int)Math.Round(tempValue);
+                return Math.Round(tempValue);
             }
         }
 

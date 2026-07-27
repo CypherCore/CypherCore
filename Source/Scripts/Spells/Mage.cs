@@ -621,11 +621,11 @@ class spell_mage_ethereal_blink_triggered : SpellScript
         if (effectivenessEffect != null)
             effectivenessPct = effectivenessEffect.GetAmount();
 
-        int slowPct = Global.SpellMgr.GetSpellInfo(SpellIds.Slow, Difficulty.None).GetEffect(0).CalcBaseValue(GetCaster(), GetHitUnit(), 0, -1);
+        double slowPct = Global.SpellMgr.GetSpellInfo(SpellIds.Slow, Difficulty.None).GetEffect(0).CalcBaseValue(GetCaster(), GetHitUnit(), 0, -1);
         MathFunctions.ApplyPct(ref slowPct, effectivenessPct);
 
         GetCaster().CastSpell(GetHitUnit(), SpellIds.Slow, new CastSpellExtraArgs(GetSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, slowPct));
+            .AddSpellMod(SpellValueMod.BasePoint0, (int)slowPct));
     }
 
     public override void Register()
