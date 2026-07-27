@@ -1451,21 +1451,13 @@ class spell_sha_hailstorm : AuraScript
     void CalcCleaveMod(AuraEffect aurEff, ref SpellModifier spellMod)
     {
         if (spellMod == null)
-        {
-            SpellModifierByClassMask mod = new SpellModifierByClassMask(GetAura());
-            mod.op = SpellModOp.ChainTargets;
-            mod.type = SpellModType.Flat;
-            mod.spellId = GetId();
-            mod.mask = new FlagArray128(0x80000000, 0x00000000, 0x00000000, 0x00000000);
-
-            spellMod = mod;
-        }
+            spellMod = new SpellFlatModifierByClassMask(SpellModOp.ChainTargets, GetId(), GetAura(), new FlagArray128(0x80000000, 0x00000000, 0x00000000, 0x00000000));
 
         AuraEffect hailstormPassive = GetUnitOwner().GetAuraEffect(SpellIds.HailstormTalent, 0);
         if (hailstormPassive != null)
         {
             int targetCap = hailstormPassive.GetAmount() / aurEff.GetBaseAmount();
-            ((SpellModifierByClassMask)spellMod).value = Math.Min(targetCap, GetStackAmount()) + 1;
+            ((SpellFlatModifierByClassMask)spellMod).value = Math.Min(targetCap, GetStackAmount()) + 1;
         }
     }
 

@@ -9313,44 +9313,66 @@ namespace Game.Spells
     // Spell modifier (used for modify other spells)
     public class SpellModifier
     {
-        public SpellModifier(Aura _ownerAura)
-        {
-            op = SpellModOp.HealingAndDamage;
-            type = SpellModType.Flat;
-            spellId = 0;
-            ownerAura = _ownerAura;
-        }
-
         public SpellModOp op { get; set; }
         public SpellModType type { get; set; }
         public uint spellId { get; set; }
         public Aura ownerAura { get; set; }
+
+        public SpellModifier(SpellModOp _op, SpellModType _type, uint _spellId, Aura _ownerAura)
+        {
+            op = _op;
+            type = _type;
+            spellId = _spellId;
+            ownerAura = _ownerAura;
+        }
     }
 
     public class SpellModifierByClassMask : SpellModifier
     {
-        public SpellModifierByClassMask(Aura _ownerAura) : base(_ownerAura)
-        {
-            value = 0;
-            mask = new FlagArray128();
-        }
-
-        public int value;
         public FlagArray128 mask;
+
+        public SpellModifierByClassMask(SpellModOp _op, SpellModType _type, uint _spellId, Aura _ownerAura, FlagArray128 _mask) : base(_op, _type, _spellId, _ownerAura)
+        {
+            mask = _mask;
+        }
+    }
+
+    public class SpellFlatModifierByClassMask : SpellModifierByClassMask
+    {
+        public int value;
+
+        public SpellFlatModifierByClassMask(SpellModOp _op, uint _spellId, Aura _ownerAura, FlagArray128 _mask) : base(_op, SpellModType.Flat, _spellId, _ownerAura, _mask) { }
+    }
+
+    public class SpellPctModifierByClassMask : SpellModifierByClassMask
+    {
+        public int value;
+
+        public SpellPctModifierByClassMask(SpellModOp _op, uint _spellId, Aura _ownerAura, FlagArray128 _mask) : base(_op, SpellModType.Pct, _spellId, _ownerAura, _mask) { }
     }
 
     public class SpellFlatModifierByLabel : SpellModifier
     {
         public SpellFlatModByLabel value = new();
 
-        public SpellFlatModifierByLabel(Aura _ownerAura) : base(_ownerAura) { }
+        public SpellFlatModifierByLabel(SpellModOp _op, uint _spellId, Aura _ownerAura, int _label) : base(_op, SpellModType.LabelFlat, _spellId, _ownerAura)
+        {
+            value.ModIndex = (int)_op;
+            value.ModifierValue = 0;
+            value.LabelID = _label;
+        }
     }
 
     class SpellPctModifierByLabel : SpellModifier
     {
         public SpellPctModByLabel value = new();
 
-        public SpellPctModifierByLabel(Aura _ownerAura) : base(_ownerAura) { }
+        public SpellPctModifierByLabel(SpellModOp _op, uint _spellId, Aura _ownerAura, int _label) : base(_op, SpellModType.LabelPct, _spellId, _ownerAura)
+        {
+            value.ModIndex = (int)_op;
+            value.ModifierValue = 0.0f;
+            value.LabelID = _label;
+        }
     }
 
     public class WorldObjectSpellTargetCheck : ICheck<WorldObject>

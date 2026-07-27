@@ -1502,7 +1502,7 @@ class spell_dh_glide_timer : AuraScript
 }
 
 [Script] // 339895 - Repeat Decree (attached to 307046 - Elysian Decree and 389860 - Sigil of Spite)
-class spell_dh_repeat_decree_conduit :  SpellScript
+class spell_dh_repeat_decree_conduit : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -1631,12 +1631,8 @@ class spell_dh_soul_furnace_conduit : AuraScript
         {
             if (spellMod == null)
             {
-                spellMod = new SpellModifierByClassMask(GetAura());
-                spellMod.op = SpellModOp.HealingAndDamage;
-                spellMod.type = SpellModType.Pct;
-                spellMod.spellId = GetId();
-                ((SpellModifierByClassMask)spellMod).mask = new FlagArray128(0x80000000);
-                ((SpellModifierByClassMask)spellMod).value = GetEffect(1).GetAmount() + 1;
+                spellMod = new SpellPctModifierByClassMask(SpellModOp.HealingAndDamage, GetId(), GetAura(), new FlagArray128(0x80000000));
+                ((SpellPctModifierByClassMask)spellMod).value = GetEffect(1).GetAmount() + 1;
             }
         }
     }

@@ -2890,14 +2890,14 @@ namespace Game.Entities
                                 if (mod.type == SpellModType.Flat)
                                 {
                                     modData.ModifierValue = 0.0f;
-                                    foreach (SpellModifierByClassMask spell in m_spellMods[(int)mod.op][(int)SpellModType.Flat])
+                                    foreach (SpellFlatModifierByClassMask spell in m_spellMods[(int)mod.op][(int)SpellModType.Flat])
                                         if (spell.mask & mask)
                                             modData.ModifierValue += spell.value;
                                 }
                                 else
                                 {
                                     modData.ModifierValue = 1.0f;
-                                    foreach (SpellModifierByClassMask spell in m_spellMods[(int)mod.op][(int)SpellModType.Pct])
+                                    foreach (SpellPctModifierByClassMask spell in m_spellMods[(int)mod.op][(int)SpellModType.Pct])
                                         if (spell.mask & mask)
                                             modData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, spell.value);
                                 }
@@ -2997,7 +2997,7 @@ namespace Game.Entities
                 case SpellModOp.ChangeCastTime:
                 {
                     SpellModifier modInstantSpell = null;
-                    foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Pct])
+                    foreach (SpellPctModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Pct])
                     {
                         if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                             continue;
@@ -3036,7 +3036,7 @@ namespace Game.Entities
                 case SpellModOp.CritChance:
                 {
                     SpellModifier modCritical = null;
-                    foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Flat])
+                    foreach (SpellFlatModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Flat])
                     {
                         if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                             continue;
@@ -3075,7 +3075,7 @@ namespace Game.Entities
                     break;
             }
 
-            foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Flat])
+            foreach (SpellFlatModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Flat])
             {
                 int applyCount = IsAffectedBySpellmod(spellInfo, mod, spell);
                 if (applyCount == 0)
@@ -3103,7 +3103,7 @@ namespace Game.Entities
                 ApplyModToSpell(mod, spell);
             }
 
-            foreach (SpellModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Pct])
+            foreach (SpellPctModifierByClassMask mod in m_spellMods[(int)op][(int)SpellModType.Pct])
             {
                 int applyCount = IsAffectedBySpellmod(spellInfo, mod, spell);
                 if (applyCount == 0)
@@ -3234,13 +3234,13 @@ namespace Game.Entities
                     pctData.ClassIndex = j;
                     pctData.ModifierValue = 1.0f;
 
-                    foreach (SpellModifierByClassMask mod in m_spellMods[i][(int)SpellModType.Flat])
+                    foreach (SpellFlatModifierByClassMask mod in m_spellMods[i][(int)SpellModType.Flat])
                     {
                         if (mod.mask & mask)
                             flatData.ModifierValue += mod.value;
                     }
 
-                    foreach (SpellModifierByClassMask mod in m_spellMods[i][(int)SpellModType.Pct])
+                    foreach (SpellPctModifierByClassMask mod in m_spellMods[i][(int)SpellModType.Pct])
                     {
                         if (mod.mask & mask)
                             pctData.ModifierValue *= 1.0f + MathFunctions.CalculatePct(1.0f, mod.value);
