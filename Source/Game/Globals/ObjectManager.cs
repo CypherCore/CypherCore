@@ -6146,14 +6146,14 @@ namespace Game
                     do
                     {
                         uint currentrace = result.Read<uint>(0);
-                        if (!CliDB.ChrRacesStorage.HasRecord(currentrace))
+                        if (currentrace != 0 && !CliDB.ChrRacesStorage.HasRecord(currentrace))
                         {
                             Log.outError(LogFilter.Sql, "Wrong race {0} in `playercreateinfo_item` table, ignoring.", currentrace);
                             continue;
                         }
 
                         uint currentclass = result.Read<uint>(1);
-                        if (!CliDB.ChrClassesStorage.HasRecord(currentclass))
+                        if (currentclass != 0 && !CliDB.ChrClassesStorage.HasRecord(currentclass))
                         {
                             Log.outError(LogFilter.Sql, "Wrong class {0} in `playercreateinfo_item` table, ignoring.", currentclass);
                             continue;
