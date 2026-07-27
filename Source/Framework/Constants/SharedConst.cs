@@ -899,6 +899,9 @@ namespace Framework.Constants
         GuildItemLooted = 0x40,
         CommunitiesChannel = 0x41,
         VoiceText = 0x42,
+        Ping = 0x43,
+        EncounterEvent = 0x44,
+
         Max
     }
 
