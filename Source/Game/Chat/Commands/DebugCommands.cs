@@ -1110,9 +1110,10 @@ namespace Game.Chat
         }
 
         [Command("worldstate", RBACPermissions.CommandDebug)]
-        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, uint variable, uint value)
+        static bool HandleDebugUpdateWorldStateCommand(CommandHandler handler, int variable, int value)
         {
-            handler.GetPlayer().SendUpdateWorldState(variable, value);
+            Map map = handler.GetPlayer().GetMap();
+            map.SetWorldStateValue(variable, value, false);
             return true;
         }
 
