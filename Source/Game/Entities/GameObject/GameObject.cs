@@ -342,6 +342,12 @@ namespace Game.Entities
                 case GameObjectTypes.PhaseableMo:
                     RemoveFlag((GameObjectFlags)0xF00);
                     SetFlag((GameObjectFlags)((m_goInfo.PhaseableMO.AreaNameSet & 0xF) << 8));
+
+                    if (GetGoInfo().PhaseableMO.DoodadSetA != 0)
+                        AddDynamicUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.EnableDoodadSets), (int)GetGoInfo().PhaseableMO.DoodadSetA);
+
+                    if (GetGoInfo().PhaseableMO.DoodadSetB != 0)
+                        AddDynamicUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.EnableDoodadSets), (int)GetGoInfo().PhaseableMO.DoodadSetB);
                     break;
                 case GameObjectTypes.CapturePoint:
                     SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), m_goInfo.CapturePoint.SpellVisual1);
