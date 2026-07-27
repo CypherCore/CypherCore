@@ -651,7 +651,7 @@ namespace Framework.Constants
         Unk641 = 641,
         Unk642 = 642,
         ModRangedAttackSpeedFlat = 643,
-        Unk644 = 644,
+        ModGravity = 644, // NYI
         Unk645 = 645,
         AddFlatPvpModifier = 646,
         AddPctPvpModifier = 647,
