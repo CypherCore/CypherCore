@@ -1149,6 +1149,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading phase names...");
             Global.ObjectMgr.LoadPhaseNames();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading transmog data...");
+            Global.TransmogMgr.Load();
+
             return true;
         }
 

@@ -384,6 +384,57 @@ namespace Game.DataStorage
         public bool HasFlag(TransmogIllusionFlags transmogIllusionFlags) { return (Flags & (int)transmogIllusionFlags) != 0; }
     }
 
+    public sealed class TransmogOutfitEntryRecord
+    {
+        public ulong Cost;
+        public LocalizedString Name;
+        public uint Id;
+        public int OrderIndex;
+        public byte Source;
+        public int Flags;
+        public byte SetType;
+        public float OverrideCostModifier;
+
+        public TransmogOutfitEntrySource GetSource() { return (TransmogOutfitEntrySource)Source; }
+        public bool HasFlag(TransmogOutfitEntryFlags flag) { return ((TransmogOutfitEntryFlags)Flags).HasFlag(flag); }
+        public TransmogOutfitSetType GetSetType() { return (TransmogOutfitSetType)SetType; }
+    }
+
+    public sealed class TransmogOutfitSlotInfoRecord
+    {
+        public string InventorySlotName;
+        public uint Id;
+        public sbyte TransmogOutfitSlotEnum;
+        public int InventorySlotEnum;
+        public int Flags;
+        public byte Unused1200;
+        public byte TransmogCollectionType;
+        public int SecondarySlotID;
+        public int InventorySlotID;
+        public int UnassignedAtlasID;
+        public int UnassignedDisplayAtlasID;
+        public float ItemCostMultiplier;
+        public float IllusionCostMultiplier;
+
+        public TransmogOutfitSlot GetSlot() { return (TransmogOutfitSlot)TransmogOutfitSlotEnum; }
+        public bool HasFlag(TransmogOutfitSlotFlags flag) { return ((TransmogOutfitSlotFlags)Flags).HasFlag(flag); }
+    }
+
+    public sealed class TransmogOutfitSlotOptionRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public byte OptionEnum;
+        public uint TransmogOutfitSlotInfoID;
+        public int Flags;
+        public int SecondaryOptionID;
+        public float ItemCostMultiplier;
+        public float IllusionCostMultiplier;
+
+        public TransmogOutfitSlotOption GetOption() { return (TransmogOutfitSlotOption)OptionEnum; }
+        public bool HasFlag(TransmogOutfitSlotOptionFlags flag) { return ((TransmogOutfitSlotOptionFlags)Flags).HasFlag(flag); }
+    }
+
     public sealed class TransmogSetRecord
     {
         public string Name;
@@ -413,6 +464,39 @@ namespace Game.DataStorage
         public uint TransmogSetID;
         public uint ItemModifiedAppearanceID;
         public int Flags;
+    }
+
+    public sealed class TransmogSituationRecord
+    {
+        public LocalizedString Name;
+        public uint Id;
+        public sbyte SituationEnum;
+        public int Flags;
+        public uint TransmogSituationGroupID;
+        public int OrderIndex;
+
+        public TransmogSituation GetSituation() { return (TransmogSituation)SituationEnum; }
+        public bool HasFlag(TransmogSituationFlags flag) { return ((TransmogSituationFlags)Flags).HasFlag(flag); }
+    }
+
+    public sealed class TransmogSituationGroupRecord
+    {
+        public uint Id;
+        public uint TransmogSituationTriggerID;
+        public int OrderIndex;
+        public int Flags;
+    }
+
+    public sealed class TransmogSituationTriggerRecord
+    {
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public uint Id;
+        public byte TriggerEnum;
+        public int Flags;
+
+        public TransmogSituationTrigger GetTrigger() { return (TransmogSituationTrigger)TriggerEnum; }
+        public bool HasFlag(TransmogSituationTriggerFlags flag) { return ((TransmogSituationTriggerFlags)Flags).HasFlag(flag); }
     }
 
     public sealed class TransportAnimationRecord

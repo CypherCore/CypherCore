@@ -2867,14 +2867,9 @@ namespace Game.Achievements
                         {
                             itemSubclass = itemTemplate.GetSubClass();
 
-                            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(visibleItem.ItemID, visibleItem.ItemAppearanceModID);
-                            if (itemModifiedAppearance != null)
-                            {
-                                var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(itemModifiedAppearance.Id);
-                                if (itemModifiedAppearaceExtra != null)
-                                    if (itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
-                                        itemSubclass = (uint)itemModifiedAppearaceExtra.DisplayWeaponSubclassID;
-                            }
+                            var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(visibleItem.ItemModifiedAppearanceID);
+                            if (itemModifiedAppearaceExtra != null && itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
+                                itemSubclass = (uint)itemModifiedAppearaceExtra.DisplayWeaponSubclassID;
                         }
                     }
                     if (itemSubclass != reqValue)
@@ -2892,14 +2887,9 @@ namespace Game.Achievements
                         {
                             itemSubclass = itemTemplate.GetSubClass();
 
-                            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(visibleItem.ItemID, visibleItem.ItemAppearanceModID);
-                            if (itemModifiedAppearance != null)
-                            {
-                                var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(itemModifiedAppearance.Id);
-                                if (itemModifiedAppearaceExtra != null)
-                                    if (itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
-                                        itemSubclass = (uint)itemModifiedAppearaceExtra.DisplayWeaponSubclassID;
-                            }
+                            var itemModifiedAppearaceExtra = CliDB.ItemModifiedAppearanceExtraStorage.LookupByKey(visibleItem.ItemModifiedAppearanceID);
+                            if (itemModifiedAppearaceExtra != null && itemModifiedAppearaceExtra.DisplayWeaponSubclassID > 0)
+                                itemSubclass = (uint)itemModifiedAppearaceExtra.DisplayWeaponSubclassID;
                         }
                     }
                     if (itemSubclass != reqValue)

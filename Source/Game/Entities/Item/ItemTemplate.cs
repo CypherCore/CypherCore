@@ -263,6 +263,52 @@ namespace Game.Entities
             return (int)((spec.ClassID - 1) * PlayerConst.MaxSpecializations + spec.OrderIndex);
         }
 
+        public TransmogOutfitSlotOption GetWeaponTransmogOutfitSlotOption()
+        {
+            switch (GetClass())
+            {
+                case ItemClass.Weapon:
+                    switch ((ItemSubClassWeapon)GetSubClass())
+                    {
+                        case ItemSubClassWeapon.Axe2:
+                        case ItemSubClassWeapon.Mace2:
+                        case ItemSubClassWeapon.Sword2:
+                        case ItemSubClassWeapon.Staff:
+                        case ItemSubClassWeapon.Polearm:
+                            return TransmogOutfitSlotOption.TwoHandedWeapon;
+                        case ItemSubClassWeapon.Bow:
+                        case ItemSubClassWeapon.Gun:
+                        case ItemSubClassWeapon.Crossbow:
+                            return TransmogOutfitSlotOption.RangedWeapon;
+                        case ItemSubClassWeapon.Axe:
+                        case ItemSubClassWeapon.Mace:
+                        case ItemSubClassWeapon.Sword:
+                        case ItemSubClassWeapon.Warglaives:
+                        case ItemSubClassWeapon.Fist:
+                        case ItemSubClassWeapon.Dagger:
+                            return TransmogOutfitSlotOption.OneHandedWeapon;
+                        default:
+                            break;
+                    }
+                    break;
+                case ItemClass.Armor:
+                    switch (GetInventoryType())
+                    {
+                        case InventoryType.Shield:
+                            return TransmogOutfitSlotOption.Shield;
+                        case InventoryType.Holdable:
+                            return TransmogOutfitSlotOption.OffHand;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            return TransmogOutfitSlotOption.None;
+        }
+
         public uint GetId() { return BasicData.Id; }
         public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
         public uint GetSubClass() { return BasicData.SubclassID; }

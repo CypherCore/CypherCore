@@ -658,7 +658,7 @@ namespace Framework.Constants
         AddFlatPvpModifierBySpellLabel = 648,
         AddPctPvpModifierBySpellLabel = 649,
         Unk650 = 650,
-        Unk651 = 651,
+        EnableEventTransmogOutfit = 651,
         Unk652 = 652,
         Unk653 = 653,
         Unk654 = 654,

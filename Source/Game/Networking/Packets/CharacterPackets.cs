@@ -637,7 +637,37 @@ namespace Game.Networking.Packets
         public CharCustomizeInfo CustomizeInfo;
     }
 
-    // @todo: CharCustomizeResult
+    class CharCustomizeSuccess : ServerPacket
+    {
+        public CharCustomizeSuccess(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomizeSuccess)
+        {
+            CharGUID = customizeInfo.CharGUID;
+            SexID = (byte)customizeInfo.SexID;
+            CharName = customizeInfo.CharName;
+            Customizations = customizeInfo.Customizations;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(CharGUID);
+            _worldPacket.WriteUInt8(SexID);
+            _worldPacket.WriteInt32(Customizations.Count);
+            foreach (ChrCustomizationChoice customization in Customizations)
+            {
+                _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
+                _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
+
+            _worldPacket.WriteBits(CharName.GetByteCount(), 6);
+            _worldPacket.FlushBits();
+            _worldPacket.WriteString(CharName);
+        }
+
+        ObjectGuid CharGUID;
+        string CharName = "";
+        byte SexID;
+        Array<ChrCustomizationChoice> Customizations = new(125);
+    }
 
     public class CharRaceOrFactionChange : ClientPacket
     {
@@ -1156,38 +1186,6 @@ namespace Game.Networking.Packets
         }
 
         public uint FactionIndex;
-    }
-
-    class CharCustomizeSuccess : ServerPacket
-    {
-        public CharCustomizeSuccess(CharCustomizeInfo customizeInfo) : base(ServerOpcodes.CharCustomizeSuccess)
-        {
-            CharGUID = customizeInfo.CharGUID;
-            SexID = (byte)customizeInfo.SexID;
-            CharName = customizeInfo.CharName;
-            Customizations = customizeInfo.Customizations;
-        }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(CharGUID);
-            _worldPacket.WriteUInt8(SexID);
-            _worldPacket.WriteInt32(Customizations.Count);
-            foreach (ChrCustomizationChoice customization in Customizations)
-            {
-                _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
-                _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
-            }
-
-            _worldPacket.WriteBits(CharName.GetByteCount(), 6);
-            _worldPacket.FlushBits();
-            _worldPacket.WriteString(CharName);
-        }
-
-        ObjectGuid CharGUID;
-        string CharName = "";
-        byte SexID;
-        Array<ChrCustomizationChoice> Customizations = new(125);
     }
 
     class CharCustomizeFailure : ServerPacket

@@ -81,7 +81,7 @@ namespace Game
                     bindAppearances.Add(itemModifiedAppearanceId);
 
                 return true;
-            };
+            }
 
             foreach (TransmogrifyItem transmogItem in transmogrifyItems.Items)
             {
@@ -122,7 +122,7 @@ namespace Game
                         return;
                     }
 
-                    TransmogIllusionRecord illusion = Global.DB2Mgr.GetTransmogIllusionForEnchantment((uint)transmogItem.SpellItemEnchantmentID);
+                    TransmogIllusionRecord illusion = Global.TransmogMgr.GetTransmogIllusionForSpellItemEnchantment((uint)transmogItem.SpellItemEnchantmentID);
                     if (illusion == null)
                     {
                         Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using invalid enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
@@ -316,6 +316,275 @@ namespace Game
                     {
                         item.SetNotRefundable(player);
                         item.ClearSoulboundTradeable(player);
+                        GetCollectionMgr().AddItemAppearance(item);
+                    }
+                }
+            }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TransmogOutfitNew)]
+        void HandleTransmogOutfitNew(TransmogOutfitNew transmogOutfitNew)
+        {
+            if (_player.GetNPCIfCanInteractWith(transmogOutfitNew.Npc, NPCFlags.Transmogrifier, NPCFlags2.None) == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - {transmogOutfitNew.Npc} not found or player can't interact with it.");
+                return;
+            }
+
+            _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+
+            if (transmogOutfitNew.Source != TransmogOutfitEntrySource.PlayerPurchased)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - source {transmogOutfitNew.Source} not allowed.");
+                return;
+            }
+
+            if (transmogOutfitNew.Info.SetType != TransmogOutfitSetType.Outfit)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - set type {transmogOutfitNew.Info.SetType} not allowed.");
+                return;
+            }
+
+            TransmogOutfitEntryRecord transmogOutfitEntry = Global.TransmogMgr.GetNextOutfitToUnlock(transmogOutfitNew.Source, _player);
+            if (transmogOutfitEntry == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - no next unlockable outfit entry found for source {transmogOutfitNew.Source}.");
+                return;
+            }
+
+            if (!_player.HasEnoughMoney(transmogOutfitEntry.Cost))
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - not enough money.");
+                return;
+            }
+
+            GetCollectionMgr().AddTransmogOutfit((int)transmogOutfitEntry.Id);
+            _player.CreateTransmogOutfit(transmogOutfitEntry.Id, transmogOutfitNew.Info);
+            _player.ModifyMoney(-(long)transmogOutfitEntry.Cost);
+
+            TransmogOutfitNewEntryAdded transmogOutfitNewEntryAdded = new()
+            {
+                TransmogOutfitID = transmogOutfitEntry.Id
+            };
+            SendPacket(transmogOutfitNewEntryAdded);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TransmogOutfitUpdateInfo)]
+        void HandleTransmogOutfitUpdateInfo(TransmogOutfitUpdateInfo transmogOutfitUpdateInfo)
+        {
+            if (_player.GetNPCIfCanInteractWith(transmogOutfitUpdateInfo.Npc, NPCFlags.Transmogrifier, NPCFlags2.None) == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - {transmogOutfitUpdateInfo.Npc} not found or player can't interact with it.");
+                return;
+            }
+
+            _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+
+            if (!_player.UpdateTransmogOutfit(transmogOutfitUpdateInfo.OutfitID, transmogOutfitUpdateInfo.Info))
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateInfo - player does not have outfit {transmogOutfitUpdateInfo.OutfitID}.");
+                return;
+            }
+
+            // SMSG_UPDATE_OBJECT must be received by client before transmog packet for UI to properly update
+            Player.ValuesUpdateForPlayerWithMaskSender sendUpdateObject = new(_player);
+            sendUpdateObject.ActivePlayerMask.MarkChanged(_player.m_activePlayerData.TransmogOutfits);
+            sendUpdateObject.Invoke(_player);
+
+            TransmogOutfitInfoUpdated transmogOutfitInfoUpdated = new()
+            {
+                TransmogOutfitID = transmogOutfitUpdateInfo.OutfitID,
+                OutfitInfo = transmogOutfitUpdateInfo.Info
+            };
+            SendPacket(transmogOutfitInfoUpdated);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TransmogOutfitUpdateSituations)]
+        void HandleTransmogOutfitUpdateSituations(TransmogOutfitUpdateSituations transmogOutfitUpdateSituations)
+        {
+            if (_player.GetNPCIfCanInteractWith(transmogOutfitUpdateSituations.Npc, NPCFlags.Transmogrifier, NPCFlags2.None) == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - {transmogOutfitUpdateSituations.Npc} not found or player can't interact with it.");
+                return;
+            }
+
+            _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+
+            if (_player.m_activePlayerData.TransmogOutfits.Get(transmogOutfitUpdateSituations.OutfitID).Item1 == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSituations - player does not have outfit {transmogOutfitUpdateSituations.OutfitID}.");
+                return;
+            }
+
+            if (!Global.TransmogMgr.ValidateSituations(transmogOutfitUpdateSituations.Situations))
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSituations - player sent invalid situations.");
+                return;
+            }
+
+            _player.UpdateTransmogOutfitSituations(transmogOutfitUpdateSituations.OutfitID, transmogOutfitUpdateSituations.SituationsEnabled,
+                transmogOutfitUpdateSituations.Situations);
+
+            // SMSG_UPDATE_OBJECT must be received by client before transmog packet for UI to properly update
+            Player.ValuesUpdateForPlayerWithMaskSender sendUpdateObject = new(_player);
+            sendUpdateObject.ActivePlayerMask.MarkChanged(_player.m_activePlayerData.TransmogOutfits);
+            sendUpdateObject.Invoke(_player);
+
+            TransmogOutfitSituationsUpdated transmogOutfitSituationsUpdated = new()
+            {
+                TransmogOutfitID = (int)transmogOutfitUpdateSituations.OutfitID,
+                SituationsEnabled = transmogOutfitUpdateSituations.SituationsEnabled,
+                Situations = transmogOutfitUpdateSituations.Situations
+            };
+            SendPacket(transmogOutfitSituationsUpdated);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.TransmogOutfitUpdateSlots)]
+        void HandleTransmogOutfitUpdateSlots(TransmogOutfitUpdateSlots transmogOutfitUpdateSlots)
+        {
+            if (_player.GetNPCIfCanInteractWith(transmogOutfitUpdateSlots.Npc, NPCFlags.Transmogrifier, NPCFlags2.None) == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitNew - {transmogOutfitUpdateSlots.Npc} not found or player can't interact with it.");
+                return;
+            }
+
+            _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+
+            var transmogOutfit = _player.m_activePlayerData.TransmogOutfits.Get(transmogOutfitUpdateSlots.OutfitID);
+            if (transmogOutfit.Item1 == null)
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player does not have outfit {transmogOutfitUpdateSlots.OutfitID}.");
+                return;
+            }
+
+            if (!Global.TransmogMgr.ValidateSlots(transmogOutfitUpdateSlots.Slots))
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player sent invalid slots.");
+                return;
+            }
+
+            List<uint> bindAppearances = [];
+
+            foreach (var slot in transmogOutfitUpdateSlots.Slots)
+            {
+                if (slot.ItemModifiedAppearanceID != 0)
+                {
+                    var (hasAppearance, isTemporary) = GetCollectionMgr().HasItemAppearance(slot.ItemModifiedAppearanceID);
+                    if (!hasAppearance)
+                    {
+                        Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player does not have appearance {slot.ItemModifiedAppearanceID} in collection.");
+                        return;
+                    }
+
+                    if (isTemporary)
+                        bindAppearances.Add(slot.ItemModifiedAppearanceID);
+                }
+
+                if (slot.SpellItemEnchantmentID != 0 && !GetCollectionMgr().HasTransmogIllusion(Global.TransmogMgr.GetTransmogIllusionForSpellItemEnchantment(slot.SpellItemEnchantmentID).Id))
+                {
+                    Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player does not have enchant {slot.SpellItemEnchantmentID} in illusion collection.");
+                    return;
+                }
+            }
+
+            if (transmogOutfitUpdateSlots.UseAvailableDiscount && _player.HasPlayerLocalFlag(PlayerLocalFlags.FreeTransmogClaimed))
+            {
+                Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player has already claimed free transmog before.");
+                return;
+            }
+
+            // calculate cost
+            float baseCost = 0;
+            uint curveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.TransmogCost);
+            if (curveId != 0)
+                baseCost = Global.DB2Mgr.GetCurveValueAt(curveId, Math.Max(_player.GetLevel(), _player.m_activePlayerData.MaxLevel));
+
+            float costMultiplier = 1.0f;
+            TransmogOutfitEntryRecord transmogOutfitEntry = CliDB.TransmogOutfitEntryStorage.LookupByKey(transmogOutfitUpdateSlots.OutfitID);
+            if (transmogOutfitEntry.HasFlag(TransmogOutfitEntryFlags.UseOverrideCostModifier))
+                costMultiplier *= transmogOutfitEntry.OverrideCostModifier;
+
+            if (_player.HasAuraType(AuraType.ModTransmogOutfitUpdateCost))
+                costMultiplier *= _player.m_activePlayerData.TransmogMetadata.GetValue().CostMod;
+
+            if (CliDB.ChrRacesStorage.LookupByKey(_player.GetRace()).HasFlag(ChrRacesFlag.VoidVendorDiscount))
+                costMultiplier *= 0.5f;
+
+            ulong cost = 0;
+
+            if (!transmogOutfitUpdateSlots.UseAvailableDiscount)
+            {
+                foreach (var slot in transmogOutfitUpdateSlots.Slots)
+                {
+                    int oldSlotIndex = transmogOutfit.Item1.Slots.FindIndexIf(p => p.Slot == (sbyte)slot.Slot && p.SlotOption == (byte)slot.SlotOption);
+
+                    var transmogOutfitSlotAndOptionInfo = Global.TransmogMgr.GetSlotAndOption(slot.Slot, slot.SlotOption);
+
+                    if (slot.AppearanceDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Item1.Slots[oldSlotIndex].ItemModifiedAppearanceID != slot.ItemModifiedAppearanceID)
+                    {
+                        if (transmogOutfitSlotAndOptionInfo.Slot != null)
+                            cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.Slot.ItemCostMultiplier) + cost;
+
+                        if (transmogOutfitSlotAndOptionInfo.SlotOption != null)
+                            cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.SlotOption.ItemCostMultiplier) + cost;
+                    }
+
+                    if (slot.IllusionDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Item1.Slots[oldSlotIndex].SpellItemEnchantmentID != slot.SpellItemEnchantmentID)
+                    {
+                        if (transmogOutfitSlotAndOptionInfo.Slot != null)
+                            cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.Slot.IllusionCostMultiplier) + cost;
+
+                        if (transmogOutfitSlotAndOptionInfo.SlotOption != null)
+                            cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.SlotOption.IllusionCostMultiplier) + cost;
+                    }
+
+                    ++oldSlotIndex;
+                }
+
+                cost = (ulong)(Math.Clamp(costMultiplier, 0.0f, 1.0f) * cost);
+
+                if (cost != transmogOutfitUpdateSlots.Cost)
+                {
+                    Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player sent invalid cost {transmogOutfitUpdateSlots.Cost}.");
+                    return;
+                }
+
+                if (!_player.HasEnoughMoney(cost))
+                {
+                    Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - not enough money.");
+                    return;
+                }
+            }
+            else
+            {
+                _player.SetPlayerLocalFlag(PlayerLocalFlags.FreeTransmogClaimed);
+                _player.SetHasClaimedFreeTransmog();
+            }
+
+            _player.ModifyMoney(-(long)cost);
+
+            _player.UpdateTransmogOutfitSlots(transmogOutfitUpdateSlots.OutfitID, transmogOutfitUpdateSlots.Slots);
+
+            if (transmogOutfitUpdateSlots.OutfitID == _player.m_activePlayerData.TransmogMetadata.GetValue().TransmogOutfitID)
+                _player.EquipTransmogOutfit(transmogOutfitUpdateSlots.OutfitID, TransmogSituationTrigger.TransmogUpdate, null);
+
+            TransmogOutfitSlotsUpdated transmogOutfitSlotsUpdated = new()
+            {
+                TransmogOutfitID = transmogOutfitUpdateSlots.OutfitID,
+                Slots = transmogOutfitUpdateSlots.Slots
+            };
+            SendPacket(transmogOutfitSlotsUpdated);
+
+            foreach (uint itemModifedAppearanceId in bindAppearances)
+            {
+                var itemsProvidingAppearance = GetCollectionMgr().GetItemsProvidingTemporaryAppearance(itemModifedAppearanceId);
+                foreach (ObjectGuid itemGuid in itemsProvidingAppearance)
+                {
+                    Item item = _player.GetItemByGuid(itemGuid);
+                    if (item != null)
+                    {
+                        item.SetNotRefundable(_player);
+                        item.ClearSoulboundTradeable(_player);
                         GetCollectionMgr().AddItemAppearance(item);
                     }
                 }

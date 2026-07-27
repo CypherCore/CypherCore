@@ -3216,4 +3216,172 @@ namespace Framework.Constants
         HideUntilCollected = 0x1,
         PlayerConditionGrantsOnLogin = 0x2,
     }
+
+    public enum TransmogOutfitDisplayType : byte
+    {
+        Unassigned = 0,
+        Assigned = 1,
+        Equipped = 2,
+        Hidden = 3,
+        Disabled = 4,
+
+        Max
+    }
+
+    public enum TransmogOutfitEquipAction : byte
+    {
+        Equip = 0,
+        EquipAndLock = 1,
+        Remove = 2,
+        RemoveAndLock = 3,
+        Unlock = 4,
+        Lock = 5,
+    }
+
+    [Flags]
+    public enum TransmogOutfitEntryFlags : int
+    {
+        AutomaticallyAwardedOnLogin = 0x01,
+        UseOverrideName = 0x02,
+        OnlyAvailableDuringEvent = 0x04,
+        SortedToTopOfList = 0x08,
+        UseOverrideCostModifier = 0x10,
+        IsDefaultEquipped = 0x20
+    }
+
+    public enum TransmogOutfitEntrySource : byte
+    {
+        StampedSource = 0,
+        AutomaticallyAwarded = 1,
+        PlayerPurchased = 2,
+
+        Max
+    }
+
+    public enum TransmogOutfitSetType : byte
+    {
+        Equipped = 0,
+        Outfit = 1,
+        CustomSet = 2
+    }
+
+    public enum TransmogOutfitSlot : sbyte
+    {
+        Head = 0,
+        ShoulderRight = 1,
+        ShoulderLeft = 2,
+        Back = 3,
+        Chest = 4,
+        Tabard = 5,
+        Body = 6,
+        Wrist = 7,
+        Hand = 8,
+        Waist = 9,
+        Legs = 10,
+        Feet = 11,
+        WeaponMainHand = 12,
+        WeaponOffHand = 13,
+        WeaponRanged = 14,
+
+        Max
+    }
+
+    [Flags]
+    public enum TransmogOutfitSlotFlags : int
+    {
+        CannotBeHidden = 0x01,
+        CanHaveIllusions = 0x02,
+        IsSecondarySlot = 0x04
+    }
+
+    public enum TransmogOutfitSlotOption : byte
+    {
+        None = 0,
+        OneHandedWeapon = 1,
+        TwoHandedWeapon = 2,
+        RangedWeapon = 3,
+        OffHand = 4,
+        Shield = 5,
+        DeprecatedReuseMe = 6,
+        FuryTwoHandedWeapon = 7,
+        ArtifactSpecOne = 8,
+        ArtifactSpecTwo = 9,
+        ArtifactSpecThree = 10,
+        ArtifactSpecFour = 11,
+
+        Max
+    }
+
+    [Flags]
+    public enum TransmogOutfitSlotOptionFlags : int
+    {
+        IllusionNotAllowed = 0x01,
+        DynamicOptionName = 0x02,
+        DisablesOffhandSlot = 0x04
+    }
+
+    public enum TransmogSituation : sbyte
+    {
+        AllSpecs = 0,
+        Spec = 1,
+        AllLocations = 2,
+        LocationRested = 3,
+        LocationHouse = 4,
+        LocationCharacterSelect = 5,
+        LocationWorld = 6,
+        LocationDelves = 7,
+        LocationDungeons = 8,
+        LocationRaids = 9,
+        LocationArenas = 10,
+        LocationBattlegrounds = 11,
+        AllMovement = 12,
+        MovementUnmounted = 13,
+        MovementSwimming = 14,
+        MovementGroundMount = 15,
+        MovementFlyingMount = 16,
+        AllEquipmentSets = 17,
+        EquipmentSets = 18,
+        AllRacialForms = 19,
+        FormNative = 20,
+        FormNonNative = 21,
+
+        Max
+    }
+
+    [Flags]
+    public enum TransmogSituationFlags : int
+    {
+        IsPlayerFacing = 0x01,
+        SpecUseTalentLoadout = 0x02,
+        AllSituation = 0x04,
+        DefaultsToOn = 0x08,
+        DynamicallyNamed = 0x10,
+        NoneSituation = 0x20,
+        DisabledSituation = 0x40
+    }
+
+    public enum TransmogSituationTrigger : byte
+    {
+        None = 0,
+        Manual = 1,
+        TransmogUpdate = 2,
+        Location = 3,
+        Movement = 4,
+        Specialization = 5,
+        EquipmentSet = 6,
+        Forms = 7,
+        EventOutfit = 8,
+
+        Max
+    }
+
+    [Flags]
+    public enum TransmogSituationTriggerFlags : int
+    {
+        CanLockOutfit = 0x01,
+        CanChangeLockedOutfit = 0x02,
+        IsPlayerFacing = 0x04,
+        SituationsAreExclusive = 0x08,
+        DisabledTrigger = 0x10
+    }
 }

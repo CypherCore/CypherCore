@@ -6,26 +6,27 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Networking.Packets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections;
 
 namespace Game.Entities
 {
     public class CollectionMgr
     {
-        static Dictionary<uint, uint> FactionSpecificMounts = new();
-        static List<uint> DefaultWarbandScenes = new();
+        static Dictionary<uint, uint> FactionSpecificMounts = [];
+        static List<uint> DefaultWarbandScenes = [];
 
         WorldSession _owner;
-        Dictionary<uint, ToyFlags> _toys = new();
-        Dictionary<uint, HeirloomData> _heirlooms = new();
-        Dictionary<uint, MountStatusFlags> _mounts = new();
+        Dictionary<uint, ToyFlags> _toys = [];
+        Dictionary<uint, HeirloomData> _heirlooms = [];
+        Dictionary<uint, MountStatusFlags> _mounts = [];
         BitSet _appearances;
-        MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
-        Dictionary<uint, CollectionItemState> _favoriteAppearances = new();
+        MultiMap<uint, ObjectGuid> _temporaryAppearances = [];
+        Dictionary<uint, CollectionItemState> _favoriteAppearances = [];
         BitSet _transmogIllusions;
-        Dictionary<uint, WarbandSceneCollectionItem> _warbandScenes = new();
+        List<int> _transmogOutfits = [];
+        Dictionary<uint, WarbandSceneCollectionItem> _warbandScenes = [];
 
         public static void LoadMountDefinitions()
         {
@@ -73,6 +74,29 @@ namespace Game.Entities
             _owner = owner;
             _appearances = new BitSet(0);
             _transmogIllusions = new BitSet(0);
+        }
+
+
+        public void LoadCharacterData()
+        {
+            LoadToys();
+            LoadHeirlooms();
+            LoadMounts();
+            LoadItemAppearances();
+            LoadTransmogIllusions();
+            LoadTransmogOutfits();
+            LoadWarbandScenes();
+        }
+
+        public void SaveToDB(SQLTransaction trans)
+        {
+            SaveAccountToys(trans);
+            SaveAccountHeirlooms(trans);
+            SaveAccountMounts(trans);
+            SaveAccountItemAppearances(trans);
+            SaveAccountTransmogIllusions(trans);
+            SaveAccountTransmogOutfits(trans);
+            SaveAccountWarbandScenes(trans);
         }
 
         public void LoadToys()
@@ -491,8 +515,8 @@ namespace Game.Entities
 
             foreach (uint hiddenItem in hiddenAppearanceItems)
             {
-                ItemModifiedAppearanceRecord hiddenAppearance = Global.DB2Mgr.GetItemModifiedAppearance(hiddenItem, 0);
-                //ASSERT(hiddenAppearance);
+                ItemModifiedAppearanceRecord hiddenAppearance = Global.TransmogMgr.GetItemModifiedAppearance(hiddenItem, 0);
+                Cypher.Assert(hiddenAppearance != null);
                 if (_appearances.Length <= hiddenAppearance.Id)
                     _appearances.Length = (int)hiddenAppearance.Id + 1;
 
@@ -563,7 +587,7 @@ namespace Game.Entities
 
         public void AddItemAppearance(uint itemId, uint appearanceModId = 0)
         {
-            ItemModifiedAppearanceRecord itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(itemId, appearanceModId);
+            ItemModifiedAppearanceRecord itemModifiedAppearance = Global.TransmogMgr.GetItemModifiedAppearance(itemId, appearanceModId);
             if (!CanAddAppearance(itemModifiedAppearance))
                 return;
 
@@ -672,8 +696,7 @@ namespace Game.Entities
                     owner.UpdateCriteria(CriteriaType.LearnAnyTransmogInSlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
             }
 
-            var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
-            foreach (TransmogSetRecord set in sets)
+            foreach (TransmogSetRecord set in Global.TransmogMgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id))
             {
                 if (IsSetCompleted(set.Id))
                 {
@@ -783,11 +806,7 @@ namespace Game.Entities
 
         public void AddTransmogSet(uint transmogSetId)
         {
-            var items = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
-            if (items.Empty())
-                return;
-
-            foreach (TransmogSetItemRecord item in items)
+            foreach (TransmogSetItemRecord item in Global.TransmogMgr.GetTransmogSetItems(transmogSetId))
             {
                 ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(item.ItemModifiedAppearanceID);
                 if (itemModifiedAppearance == null)
@@ -799,8 +818,8 @@ namespace Game.Entities
 
         bool IsSetCompleted(uint transmogSetId)
         {
-            var transmogSetItems = Global.DB2Mgr.GetTransmogSetItems(transmogSetId);
-            if (transmogSetItems.Empty())
+            var transmogSetItems = Global.TransmogMgr.GetTransmogSetItems(transmogSetId);
+            if (transmogSetItems.IsEmpty)
                 return false;
 
             int[] knownPieces = new int[EquipmentSlot.End];
@@ -911,6 +930,57 @@ namespace Game.Entities
         public bool HasTransmogIllusion(uint transmogIllusionId)
         {
             return transmogIllusionId < _transmogIllusions.Count && _transmogIllusions.Get((int)transmogIllusionId);
+        }
+
+        void LoadTransmogOutfits()
+        {
+            _owner.GetPlayer().AddUnlockedTransmogOutfits(_transmogOutfits);
+        }
+
+        public void LoadAccountTransmogOutfits(SQLResult result)
+        {
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint transmogOutfitId = result.Read<uint>(0);
+
+                    if (!CliDB.TransmogOutfitEntryStorage.HasRecord(transmogOutfitId))
+                        continue;
+
+                    _transmogOutfits.Add((int)transmogOutfitId);
+
+                } while (result.NextRow());
+            }
+
+            foreach (TransmogOutfitEntryRecord transmogOutfitEntry in Global.TransmogMgr.GetAutomaticallyUnlockedOutfits())
+                _transmogOutfits.Add((int)transmogOutfitEntry.Id);
+        }
+
+        void SaveAccountTransmogOutfits(SQLTransaction trans)
+        {
+            foreach (int transmogOutfitId in _transmogOutfits)
+            {
+                PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.INS_BNET_TRANSMOG_OUTFITS);
+                stmt.AddValue(0, _owner.GetBattlenetAccountId());
+                stmt.AddValue(1, transmogOutfitId);
+                trans.Append(stmt);
+            }
+        }
+
+        public void AddTransmogOutfit(int transmogOutfitId)
+        {
+
+            if (!_transmogOutfits.Contains(transmogOutfitId))
+            {
+                _owner.GetPlayer().AddUnlockedTransmogOutfit(transmogOutfitId);
+                _transmogOutfits.Add(transmogOutfitId);
+            }
+        }
+
+        bool HasTransmogOutfit(int transmogOutfitId)
+        {
+            return _transmogOutfits.Contains(transmogOutfitId);
         }
 
         public void LoadWarbandScenes()

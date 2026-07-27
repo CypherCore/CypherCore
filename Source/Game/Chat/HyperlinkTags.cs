@@ -1065,7 +1065,7 @@ namespace Game.Chat
             if (!t.TryConsumeTo(out uint spellItemEnchantmentId))
                 return false;
             return (value = CliDB.SpellItemEnchantmentStorage.LookupByKey(spellItemEnchantmentId)) != null
-                && Global.DB2Mgr.GetTransmogIllusionForEnchantment(spellItemEnchantmentId) != null && t.IsEmpty();
+                && Global.TransmogMgr.GetTransmogIllusionForSpellItemEnchantment(spellItemEnchantmentId) != null && t.IsEmpty();
         }
     }
 

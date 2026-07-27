@@ -326,6 +326,8 @@ namespace Game.Entities
 
             GetThreatManager().Initialize();
 
+            EquipTransmogOutfit(0, TransmogSituationTrigger.Manual, false);
+
             return true;
         }
         public override void Update(uint diff)
@@ -356,7 +358,7 @@ namespace Game.Entities
             base.Update(diff);
             SetCanDelayTeleport(false);
 
-            // Unit::Update updates the spell history and spell states. We can now check if we can launch another pending cast.
+            // Unit.Update updates the spell history and spell states. We can now check if we can launch another pending cast.
             if (CanExecutePendingSpellCastRequest())
                 ExecutePendingSpellCastRequest();
 
@@ -1577,7 +1579,7 @@ namespace Game.Entities
 
         uint GetCurrencyWeeklyCap(CurrencyTypesRecord currency)
         {
-            // TODO: CurrencyTypeFlags::ComputedWeeklyMaximum
+            // TODO: CurrencyTypeFlags.ComputedWeeklyMaximum
             return currency.MaxEarnablePerWeek;
         }
 
@@ -1667,6 +1669,7 @@ namespace Game.Entities
                 case ActionButtonType.CMacro:
                 case ActionButtonType.Macro:
                 case ActionButtonType.Eqset:
+                case ActionButtonType.Outfit:
                     break;
                 default:
                     Log.outError(LogFilter.Player, $"Unknown action type {type}");
@@ -2122,7 +2125,7 @@ namespace Game.Entities
                 //setup delayed teleport flag
                 SetDelayedTeleportFlag(IsCanDelayTeleport());
                 SetSemaphoreTeleportFar(true);
-                //if teleport spell is cast in Unit::Update() func
+                //if teleport spell is cast in Unit.Update() func
                 //then we need to delay it until update process will be finished
                 if (IsHasDelayedTeleport())
                 {
@@ -2554,6 +2557,319 @@ namespace Game.Entities
             broadcastSummonResponse(true);
         }
 
+        public void AddUnlockedTransmogOutfits(ICollection<int> transmogOutfitIds)
+        {
+            var unlockedTransmogOutfits = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.UnlockedTransmogOutfits);
+            foreach (int transmogOutfitId in transmogOutfitIds)
+                AddDynamicUpdateFieldValue(unlockedTransmogOutfits, transmogOutfitId);
+        }
+
+        public void AddUnlockedTransmogOutfit(int transmogOutfitIds) { AddUnlockedTransmogOutfits([transmogOutfitIds]); }
+
+        public void CreateTransmogOutfit(uint id, Networking.Packets.TransmogOutfitDataInfo outfitData)
+        {
+            var outfit = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
+            InitializeNewTransmogOutfit(outfit, id, outfitData);
+            m_changedTransmogOutfits.Add(id);
+        }
+
+        public void InitializeNewTransmogOutfit(TransmogOutfitData outfit, uint id, Networking.Packets.TransmogOutfitDataInfo outfitData)
+        {
+            SetUpdateFieldValue(outfit.ModifyValue(outfit.Id), id);
+
+            TransmogOutfitDataInfo outfitInfo = outfit.ModifyValue(outfit.OutfitInfo);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.SetType), (byte)outfitData.SetType);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.SituationsEnabled), outfitData.SituationsEnabled);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.Icon), outfitData.Icon);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.Name), outfitData.Name);
+
+            var situations = outfit.ModifyValue(outfit.Situations);
+            foreach (TransmogSituationRecord defaultSituation in Global.TransmogMgr.GetDefaultSituations())
+            {
+                var situation = new TransmogOutfitSituationInfo();
+                situation.ModifyValue(situation.SituationID).SetValue(defaultSituation.Id);
+                AddDynamicUpdateFieldValue(situations, situation);
+
+            }
+
+            var slots = outfit.ModifyValue(outfit.Slots);
+            foreach (var slotInfo in Global.TransmogMgr.GetAllSlots())
+            {
+                var slot = new TransmogOutfitSlotData();
+                slot.ModifyValue(slot.Slot).SetValue((sbyte)slotInfo.Slot.GetSlot());
+
+                if (slotInfo.SlotOption != null)
+                {
+                    slot.ModifyValue(slot.SlotOption).SetValue((byte)slotInfo.SlotOption.GetOption());
+
+                    switch (slotInfo.SlotOption.GetOption())
+                    {
+                        case TransmogOutfitSlotOption.ArtifactSpecOne:
+                        case TransmogOutfitSlotOption.ArtifactSpecTwo:
+                        case TransmogOutfitSlotOption.ArtifactSpecThree:
+                        case TransmogOutfitSlotOption.ArtifactSpecFour:
+                            // artifacts are disabled by default
+                            slot.ModifyValue(slot.AppearanceDisplayType).SetValue((byte)TransmogOutfitDisplayType.Disabled);
+                            slot.ModifyValue(slot.IllusionDisplayType).SetValue((byte)TransmogOutfitDisplayType.Disabled);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                AddDynamicUpdateFieldValue(slots, slot);
+            }
+        }
+
+        public bool UpdateTransmogOutfit(uint id, Networking.Packets.TransmogOutfitDataInfo outfitData)
+        {
+            if (m_activePlayerData.TransmogOutfits.Get(id).Item1 == null)
+                return false;
+
+            var transmogOutfits = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
+            TransmogOutfitDataInfo outfitInfo = transmogOutfits.ModifyValue(transmogOutfits.OutfitInfo);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.SetType), (byte)outfitData.SetType);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.SituationsEnabled), outfitData.SituationsEnabled);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.Icon), outfitData.Icon);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.Name), outfitData.Name);
+
+            m_changedTransmogOutfits.Add(id);
+            return true;
+        }
+
+        public void UpdateTransmogOutfitSituations(uint id, bool situationsEnabled, Span<Networking.Packets.TransmogOutfitSituationInfo> situations)
+        {
+            var outfit = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
+            TransmogOutfitDataInfo outfitInfo = outfit.ModifyValue(outfit.OutfitInfo);
+            SetUpdateFieldValue(outfitInfo.ModifyValue(outfitInfo.SituationsEnabled), situationsEnabled);
+
+
+            var outfitSituations = outfit.ModifyValue(outfit.Situations);
+
+            ClearDynamicUpdateFieldValues(outfitSituations);
+
+            foreach (var situation in situations)
+            {
+                TransmogOutfitSituationInfo outfitSituation = new();
+                outfitSituation.ModifyValue(outfitSituation.SituationID).SetValue(situation.SituationID);
+                outfitSituation.ModifyValue(outfitSituation.SpecID).SetValue(situation.SpecID);
+                outfitSituation.ModifyValue(outfitSituation.LoadoutID).SetValue(situation.LoadoutID);
+                outfitSituation.ModifyValue(outfitSituation.EquipmentSetID).SetValue(situation.EquipmentSetID);
+
+                AddDynamicUpdateFieldValue(outfitSituations, outfitSituation);
+            }
+
+            m_changedTransmogOutfits.Add(id);
+        }
+
+        public void UpdateTransmogOutfitSlots(uint id, Span<Networking.Packets.TransmogOutfitSlotData> slots)
+        {
+            var transmogOutfit = m_activePlayerData.TransmogOutfits.Get(id);
+            if (transmogOutfit.Item1 == null)
+                return;
+
+            var outfit = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
+
+            uint outfitSlotIndex = 0;
+            foreach (var slot in slots)
+            {
+                while (((sbyte)transmogOutfit.Item1.Slots[(int)outfitSlotIndex].Slot, (byte)transmogOutfit.Item1.Slots[(int)outfitSlotIndex].SlotOption).CompareTo(((sbyte)slot.Slot, (byte)slot.SlotOption)) > 0)
+                    if (++outfitSlotIndex >= transmogOutfit.Item1.Slots.Size())
+                        return;
+
+                TransmogOutfitSlotData viewedOutfitSlot = outfit.ModifyValue(outfit.Slots, (int)outfitSlotIndex);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.Slot), (sbyte)slot.Slot);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SlotOption), (byte)slot.SlotOption);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.ItemModifiedAppearanceID), slot.ItemModifiedAppearanceID);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.AppearanceDisplayType), (byte)slot.AppearanceDisplayType);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SpellItemEnchantmentID), slot.SpellItemEnchantmentID);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.IllusionDisplayType), (byte)slot.IllusionDisplayType);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.Flags), slot.Flags);
+            }
+
+            m_changedTransmogOutfits.Add(id);
+        }
+
+        public void EquipTransmogOutfit(uint id, TransmogSituationTrigger trigger, bool? locked)
+        {
+            var activePlayerData = m_values.ModifyValue(m_activePlayerData);
+
+            TransmogOutfitMetadata transmogMetadata = activePlayerData.ModifyValue(m_activePlayerData.TransmogMetadata);
+            SetUpdateFieldValue(ref transmogMetadata.TransmogOutfitID, id);
+            SetUpdateFieldValue(ref transmogMetadata.SituationTrigger, (byte)trigger);
+            if (locked.HasValue)
+                SetUpdateFieldValue(ref transmogMetadata.Locked, locked.Value);
+
+            TransmogOutfitData viewedOutfit = activePlayerData.ModifyValue(m_activePlayerData.ViewedOutfit);
+
+            var transmogOutfit = m_activePlayerData.TransmogOutfits.Get(id);
+            if (transmogOutfit.Item1 != null)
+            {
+                foreach (var slot in transmogOutfit.Item1.Slots)
+                {
+                    uint slotIndex = TransmogMgr.GetSlotAndOption((TransmogOutfitSlot)(sbyte)slot.Slot, (TransmogOutfitSlotOption)(byte)slot.SlotOption).SlotIndex;
+                    TransmogOutfitSlotData viewedOutfitSlot = viewedOutfit.ModifyValue(viewedOutfit.Slots, (int)slotIndex);
+                    if ((TransmogOutfitDisplayType)(byte)slot.AppearanceDisplayType != TransmogOutfitDisplayType.Unassigned)
+                    {
+                        SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.ItemModifiedAppearanceID), slot.ItemModifiedAppearanceID);
+                        SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.AppearanceDisplayType), slot.AppearanceDisplayType);
+                    }
+                    if ((TransmogOutfitDisplayType)(byte)slot.IllusionDisplayType != TransmogOutfitDisplayType.Unassigned)
+                    {
+                        SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SpellItemEnchantmentID), slot.SpellItemEnchantmentID);
+                        SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.IllusionDisplayType), slot.IllusionDisplayType);
+                    }
+                    SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.Flags), slot.Flags);
+                }
+            }
+            else
+            {
+                foreach (var slotInfo in Global.TransmogMgr.GetAllSlots())
+                {
+                    TransmogOutfitSlotData viewedOutfitSlot = viewedOutfit.ModifyValue(viewedOutfit.Slots, (int)slotInfo.SlotIndex);
+                    SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.Slot), (sbyte)slotInfo.Slot.GetSlot());
+
+                    TransmogOutfitSlotOption slotOption = slotInfo.SlotOption != null ? slotInfo.SlotOption.GetOption() : TransmogOutfitSlotOption.None;
+                    SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SlotOption), (byte)slotOption);
+
+                    Item item = GetItemByPos(InventorySlots.Bag0, (byte)slotInfo.Slot.InventorySlotEnum);
+                    if (item != null)
+                    {
+                        if (item.GetTemplate().GetWeaponTransmogOutfitSlotOption() == slotOption)
+                        {
+                            ItemModifiedAppearanceRecord itemModifiedAppearance = item.GetItemModifiedAppearance();
+                            if (itemModifiedAppearance != null)
+                            {
+                                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.ItemModifiedAppearanceID), itemModifiedAppearance.Id);
+                                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.AppearanceDisplayType), (byte)TransmogOutfitDisplayType.Equipped);
+                            }
+                        }
+                    }
+
+                    switch (slotOption)
+                    {
+                        case TransmogOutfitSlotOption.ArtifactSpecOne:
+                        case TransmogOutfitSlotOption.ArtifactSpecTwo:
+                        case TransmogOutfitSlotOption.ArtifactSpecThree:
+                        case TransmogOutfitSlotOption.ArtifactSpecFour:
+                            // artifacts are disabled by default
+                            SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.AppearanceDisplayType), (byte)TransmogOutfitDisplayType.Disabled);
+                            SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.IllusionDisplayType), (byte)TransmogOutfitDisplayType.Disabled);
+                            break;
+                        case TransmogOutfitSlotOption.None:
+                            break;
+                        default:
+                            SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.IllusionDisplayType), (byte)TransmogOutfitDisplayType.Equipped);
+                            break;
+                    }
+                }
+            }
+
+            for (byte equipSlot = EquipmentSlot.Start; equipSlot < EquipmentSlot.End; ++equipSlot)
+                SetVisibleItemSlot(equipSlot, GetItemByPos(InventorySlots.Bag0, equipSlot));
+        }
+
+        string GetCharacterSelectOutfit()
+        {
+            List<TransmogOutfitData> outfits = [];
+            foreach (var (_, transmogOutfit) in m_activePlayerData.TransmogOutfits)
+            {
+                if (!transmogOutfit.Item1.OutfitInfo.GetValue().SituationsEnabled)
+                    continue;
+
+                bool isCharacterSelect = transmogOutfit.Item1.Situations.FindIndexIf(situation => CliDB.TransmogSituationStorage.LookupByKey(situation.SituationID).GetSituation() == TransmogSituation.LocationCharacterSelect) >= 0;
+
+                if (!isCharacterSelect)
+                    continue;
+
+                outfits.Add(transmogOutfit.Item1);
+            }
+
+            TransmogOutfitData outfit = m_activePlayerData.ViewedOutfit;
+            if (!outfits.Empty())
+                outfit = outfits.SelectRandom();
+
+            bool isTransmogDisplayed(TransmogOutfitDisplayType displayType) => displayType == TransmogOutfitDisplayType.Assigned || displayType == TransmogOutfitDisplayType.Hidden;
+
+            string result = "";
+            for (uint i = EquipmentSlot.Start; i < EquipmentSlot.End; i = i + 1)
+            {
+                TransmogOutfitSlotOption transmogSlotOption = TransmogOutfitSlotOption.None;
+                switch (i)
+                {
+                    case EquipmentSlot.MainHand:
+                        transmogSlotOption = (TransmogOutfitSlotOption)m_activePlayerData.TransmogMetadata.GetValue().StampedOptionMainHand;
+                        break;
+                    case EquipmentSlot.OffHand:
+                        transmogSlotOption = (TransmogOutfitSlotOption)m_activePlayerData.TransmogMetadata.GetValue().StampedOptionOffHand;
+                        break;
+                    default:
+                        break;
+                }
+
+                var slotInfo = TransmogMgr.GetSlotAndOption(i, transmogSlotOption);
+                if (slotInfo != null)
+                {
+                    var transmogOutfitSlot = outfit.Slots[(int)slotInfo.SlotIndex];
+
+                    uint itemModifiedAppearanceId = transmogOutfitSlot.ItemModifiedAppearanceID;
+                    if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.AppearanceDisplayType))
+                        itemModifiedAppearanceId = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)slotInfo.SlotIndex].ItemModifiedAppearanceID;
+
+                    uint spellItemEnchantmentId = transmogOutfitSlot.SpellItemEnchantmentID;
+                    if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.IllusionDisplayType))
+                        spellItemEnchantmentId = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)slotInfo.SlotIndex].SpellItemEnchantmentID;
+
+                    InventoryType inventoryType = InventoryType.NonEquip;
+                    uint displayId = 0;
+                    ushort itemVisual = 0;
+                    byte subClass = 0;
+                    uint secondaryItemModifiedAppearanceId = 0;
+                    ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
+                    if (itemModifiedAppearance != null)
+                    {
+                        ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                        if (item != null)
+                        {
+                            subClass = item.SubclassID;
+                            inventoryType = item.inventoryType;
+                        }
+
+                        ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(itemModifiedAppearance.ItemAppearanceID);
+                        if (itemAppearance != null)
+                            displayId = itemAppearance.ItemDisplayInfoID;
+                    }
+
+                    SpellItemEnchantmentRecord spellItemEnchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(spellItemEnchantmentId);
+                    if (spellItemEnchantment != null)
+                        itemVisual = spellItemEnchantment.ItemVisual;
+
+                    TransmogOutfitSlotInfoRecord secondarySlot = CliDB.TransmogOutfitSlotInfoStorage.LookupByKey(slotInfo.Slot.SecondarySlotID);
+                    if (secondarySlot != null)
+                    {
+                        var secondarySlotInfo = TransmogMgr.GetSlotAndOption(secondarySlot.GetSlot(), transmogSlotOption);
+                        if (secondarySlotInfo != null)
+                        {
+                            var secondaryTransmogOutfitSlot = outfit.Slots[(int)secondarySlotInfo.SlotIndex];
+
+                            secondaryItemModifiedAppearanceId = secondaryTransmogOutfitSlot.ItemModifiedAppearanceID;
+                            if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitSlot.AppearanceDisplayType))
+                                secondaryItemModifiedAppearanceId = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)secondarySlotInfo.SlotIndex].ItemModifiedAppearanceID;
+                        }
+                    }
+
+                    result += $"{inventoryType} {displayId} {itemVisual} {subClass} {secondaryItemModifiedAppearanceId} ";
+                }
+                else
+                    result += "0 0 0 0 0 ";
+            }
+
+            for (uint i = EquipmentSlot.End; i < InventorySlots.ReagentBagEnd; ++i)
+                result += "0 0 0 0 0 ";
+
+            return result;
+        }
+
         public override void OnPhaseChange()
         {
             base.OnPhaseChange();
@@ -2837,7 +3153,7 @@ namespace Game.Entities
                 SendPreparedGossip(source);
             }
 
-            // types that have their dedicated open opcode dont send WorldPackets::NPC::GossipOptionNPCInteraction
+            // types that have their dedicated open opcode dont send WorldPackets.NPC.GossipOptionNPCInteraction
             bool handled = true;
             switch (gossipOptionNpc)
             {
@@ -4478,17 +4794,16 @@ namespace Game.Entities
 
             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
             {
-                if (m_items[i] != null)
+                var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(m_playerData.VisibleItems[i].ItemModifiedAppearanceID);
+                if (itemModifiedAppearance != null)
                 {
-                    uint itemDisplayId = m_items[i].GetDisplayId(this);
-                    uint itemInventoryType;
-                    ItemRecord itemEntry = CliDB.ItemStorage.LookupByKey(m_items[i].GetVisibleEntry(this));
-                    if (itemEntry != null)
-                        itemInventoryType = (uint)itemEntry.inventoryType;
-                    else
-                        itemInventoryType = (uint)m_items[i].GetTemplate().GetInventoryType();
-
-                    corpse.SetItem(i, itemDisplayId | (itemInventoryType << 24));
+                    var itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(itemModifiedAppearance.ItemAppearanceID);
+                    if (itemAppearance != null)
+                    {
+                        var item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                        if (item != null)
+                            corpse.SetItem(i, itemAppearance.ItemDisplayInfoID | (uint)item.inventoryType << 24);
+                    }
                 }
             }
 
@@ -5762,7 +6077,7 @@ namespace Game.Entities
             if (creature.IsInCombat() && !creature.IsInteractionAllowedInCombat())
                 return null;
 
-            // not too far, taken from CGGameUI::SetInteractTarget
+            // not too far, taken from CGGameUI.SetInteractTarget
             if (!creature.IsWithinDistInMap(this, creature.GetCombatReach() + 4.0f))
                 return null;
 
@@ -7031,6 +7346,8 @@ namespace Game.Entities
         public void SetBeenGrantedLevelsFromRaF() { m_ExtraFlags |= PlayerExtraFlags.GrantedLevelsFromRaf; }
         public bool HasLevelBoosted() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.LevelBoosted); }
         public void SetHasLevelBoosted() { m_ExtraFlags |= PlayerExtraFlags.LevelBoosted; }
+        public bool HasClaimedFreeTransmog() { return (m_ExtraFlags & PlayerExtraFlags.FreeTransmogClaimed) != 0; }
+        public void SetHasClaimedFreeTransmog() { m_ExtraFlags |= PlayerExtraFlags.FreeTransmogClaimed; }
 
         public uint GetXP() { return m_activePlayerData.XP; }
         public uint GetXPForNextLevel() { return m_activePlayerData.NextLevelXP; }
@@ -7108,7 +7425,7 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.HandleBaseModFlatValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, $"Player::HandleBaseModFlatValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
                 return;
             }
             m_auraBaseFlatMod[(int)modGroup] += apply ? amount : -amount;
@@ -7119,7 +7436,7 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.ApplyBaseModPctValue: Invalid BaseModGroup/BaseModType ({modGroup}/{BaseModType.FlatMod}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, $"Player::ApplyBaseModPctValue: Invalid BaseModGroup/BaseModType ({modGroup}/{BaseModType.FlatMod}) for player '{GetName()}' ({GetGUID()})");
                 return;
             }
 
@@ -7216,7 +7533,7 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End || modType >= BaseModType.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.GetBaseModValue: Invalid BaseModGroup/BaseModType ({modGroup}/{modType}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, $"Player::GetBaseModValue: Invalid BaseModGroup/BaseModType ({modGroup}/{modType}) for player '{GetName()}' ({GetGUID()})");
                 return 0.0f;
             }
 
@@ -7227,7 +7544,7 @@ namespace Game.Entities
         {
             if (modGroup >= BaseModGroup.End)
             {
-                Log.outError(LogFilter.Spells, $"Player.GetTotalBaseModValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
+                Log.outError(LogFilter.Spells, $"Player::GetTotalBaseModValue: Invalid BaseModGroup ({modGroup}) for player '{GetName()}' ({GetGUID()})");
                 return 0.0f;
             }
 

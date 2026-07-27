@@ -174,6 +174,8 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_BNET_TRANSMOG_ILLUSIONS, "SELECT blobIndex, illusionMask FROM battlenet_account_transmog_illusions WHERE battlenetAccountId = ? ORDER BY blobIndex DESC");
             PrepareStatement(LoginStatements.INS_BNET_TRANSMOG_ILLUSIONS, "INSERT INTO battlenet_account_transmog_illusions (battlenetAccountId, blobIndex, illusionMask) VALUES (?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE illusionMask = illusionMask | VALUES(illusionMask)");
+            PrepareStatement(LoginStatements.SEL_BNET_TRANSMOG_OUTFITS, "SELECT transmogOutfitId FROM battlenet_account_transmog_outfits WHERE battlenetAccountId = ?");
+            PrepareStatement(LoginStatements.INS_BNET_TRANSMOG_OUTFITS, "INSERT IGNORE INTO battlenet_account_transmog_outfits (battlenetAccountId, transmogOutfitId) VALUES (?, ?)");
             PrepareStatement(LoginStatements.SEL_BNET_WARBAND_SCENES, "SELECT warbandSceneId, isFavorite, hasFanfare FROM battlenet_account_warband_scenes WHERE battlenetAccountId = ?");
             PrepareStatement(LoginStatements.INS_BNET_WARBAND_SCENE, "INSERT INTO battlenet_account_warband_scenes (battlenetAccountId, warbandSceneId, isFavorite, hasFanfare) VALUES (?, ?, ?, ?) " +
                 "ON DUPLICATE KEY UPDATE isFavorite = VALUES(isFavorite)");
@@ -339,6 +341,8 @@ namespace Framework.Database
         DEL_BNET_ITEM_FAVORITE_APPEARANCE,
         SEL_BNET_TRANSMOG_ILLUSIONS,
         INS_BNET_TRANSMOG_ILLUSIONS,
+        SEL_BNET_TRANSMOG_OUTFITS,
+        INS_BNET_TRANSMOG_OUTFITS,
         SEL_BNET_WARBAND_SCENES,
         INS_BNET_WARBAND_SCENE,
         UPD_BNET_WARBAND_SCENE,

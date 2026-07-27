@@ -25,6 +25,12 @@ namespace System.Collections.Generic
             Fill(defaultFillValue);
         }
 
+        public Array(int size, IEnumerable<T> values) : base(size)
+        {
+            _limit = size;
+            AddRange(values);
+        }
+
         public void Fill(T value)
         {
             for (var i = 0; i < _limit; ++i)
@@ -53,7 +59,7 @@ namespace System.Collections.Generic
 
         public int GetLimit() { return _limit; }
 
-        public static implicit operator T[] (Array<T> array)
+        public static implicit operator T[](Array<T> array)
         {
             return array.ToArray();
         }

@@ -294,7 +294,8 @@ namespace Framework.Constants
         CMacro = C | Macro,
         Companion = 0x50,
         Mount = 0x60,
-        Item = 0x80
+        Item = 0x80,
+        Outfit = 0x90,
     }
 
     [Flags]
@@ -538,6 +539,7 @@ namespace Framework.Constants
         CharacterBankDisabled = 0x80000,
         CharacterBankConversionFailed = 0x100000,
         AccountBankDisabled = 0x200000,
+        FreeTransmogClaimed = 0x400000,
     }
 
     public enum PlayerFieldByte2Flags
@@ -663,7 +665,9 @@ namespace Framework.Constants
         // Character services markers
         HasRaceChanged = 0x0200,
         GrantedLevelsFromRaf = 0x0400,
-        LevelBoosted = 0x0800
+        LevelBoosted = 0x0800,
+
+        FreeTransmogClaimed = 0x1000,
     }
 
     public enum EquipmentSetUpdateState

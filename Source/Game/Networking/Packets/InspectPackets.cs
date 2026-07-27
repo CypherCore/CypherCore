@@ -2,10 +2,9 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
@@ -73,7 +72,7 @@ namespace Game.Networking.Packets
         public List<ushort> Talents = new();
         public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
         public InspectGuildData? GuildData;
-        public Array<PVPBracketData> Bracket = new(7, default);
+        public Array<PVPBracketData> Bracket = new(7, new PVPBracketData());
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;

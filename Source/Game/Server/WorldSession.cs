@@ -444,9 +444,6 @@ namespace Game
             if (!_filterAddonMessages) // if we have hit the softcap (64) nothing should be filtered
                 return true;
 
-            if (_registeredAddonPrefixes.Empty())
-                return false;
-
             return _registeredAddonPrefixes.Contains(prefix);
         }
 
@@ -964,6 +961,7 @@ namespace Game
             _collectionMgr.LoadAccountMounts(holder.GetResult(AccountInfoQueryLoad.Mounts));
             _collectionMgr.LoadAccountItemAppearances(holder.GetResult(AccountInfoQueryLoad.ItemAppearances), holder.GetResult(AccountInfoQueryLoad.ItemFavoriteAppearances));
             _collectionMgr.LoadAccountTransmogIllusions(holder.GetResult(AccountInfoQueryLoad.TransmogIllusions));
+            _collectionMgr.LoadAccountTransmogOutfits(holder.GetResult(AccountInfoQueryLoad.TransmogOutfits));
             _collectionMgr.LoadAccountWarbandScenes(holder.GetResult(AccountInfoQueryLoad.WarbandScenes));
             LoadPlayerDataAccount(holder.GetResult(AccountInfoQueryLoad.PlayerDataElementsAccount), holder.GetResult(AccountInfoQueryLoad.PlayerDataFlagsAccount));
 
@@ -1340,6 +1338,10 @@ namespace Game
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.TransmogIllusions, stmt);
 
+            stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_TRANSMOG_OUTFITS);
+            stmt.AddValue(0, battlenetAccountId);
+            SetQuery(AccountInfoQueryLoad.TransmogOutfits, stmt);
+
             stmt = LoginDatabase.GetPreparedStatement(LoginStatements.SEL_BNET_WARBAND_SCENES);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.WarbandScenes, stmt);
@@ -1359,6 +1361,7 @@ namespace Game
         GlobalAccountDataIndexPerRealm,
         TutorialsIndexPerRealm,
         TransmogIllusions,
+        TransmogOutfits,
         WarbandScenes,
         PlayerDataElementsAccount,
         PlayerDataFlagsAccount,

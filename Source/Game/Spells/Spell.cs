@@ -4194,9 +4194,18 @@ namespace Game.Spells
                                     switch ((ItemSubClassWeapon)itemEntry.SubclassID)
                                     {
                                         case ItemSubClassWeapon.Thrown:
-                                            ammoDisplayID = Global.DB2Mgr.GetItemDisplayId(itemId, unitCaster.GetVirtualItemAppearanceMod(i));
-                                            ammoInventoryType = (InventoryType)itemEntry.inventoryType;
+                                        {
+                                            ItemModifiedAppearanceRecord modifiedAppearance = Global.TransmogMgr.GetItemModifiedAppearance(itemId, unitCaster.GetVirtualItemAppearanceMod(i));
+                                            if (modifiedAppearance != null)
+                                            {
+                                                ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(modifiedAppearance.ItemAppearanceID);
+                                                if (itemAppearance != null)
+                                                    ammoDisplayID = itemAppearance.ItemDisplayInfoID;
+                                            }
+
+                                            ammoInventoryType = itemEntry.inventoryType;
                                             break;
+                                        }
                                         case ItemSubClassWeapon.Bow:
                                         case ItemSubClassWeapon.Crossbow:
                                             ammoDisplayID = 5996;       // is this need fixing?
@@ -4207,9 +4216,18 @@ namespace Game.Spells
                                             ammoInventoryType = InventoryType.Ammo;
                                             break;
                                         default:
-                                            nonRangedAmmoDisplayID = Global.DB2Mgr.GetItemDisplayId(itemId, unitCaster.GetVirtualItemAppearanceMod(i));
+                                        {
+                                            ItemModifiedAppearanceRecord modifiedAppearance = Global.TransmogMgr.GetItemModifiedAppearance(itemId, unitCaster.GetVirtualItemAppearanceMod(i));
+                                            if (modifiedAppearance != null)
+                                            {
+                                                ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(modifiedAppearance.ItemAppearanceID);
+                                                if (itemAppearance != null)
+                                                    nonRangedAmmoDisplayID = itemAppearance.ItemDisplayInfoID;
+                                            }
+
                                             nonRangedAmmoInventoryType = itemEntry.inventoryType;
                                             break;
+                                        }
                                     }
 
                                     if (ammoDisplayID != 0)
@@ -8709,6 +8727,16 @@ namespace Game.Spells
         // SPELL_EFFECT_UPGRADE_HEIRLOOM
         [FieldOffset(0)]
         public uint ItemId;
+
+        // SPELL_EFFECT_EQUIP_TRANSMOG_OUTFIT
+        [FieldOffset(0)]
+        public uint EquipAction;
+
+        [FieldOffset(4)]
+        public uint TransmogOutfitId;
+
+        [FieldOffset(8)]
+        public uint SituationTrigger;
 
         [FieldOffset(0)]
         public uint Data0;

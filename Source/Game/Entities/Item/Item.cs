@@ -1523,38 +1523,6 @@ namespace Game.Entities
             return true;
         }
 
-        static ItemTransmogrificationWeaponCategory GetTransmogrificationWeaponCategory(ItemTemplate proto)
-        {
-            if (proto.GetClass() == ItemClass.Weapon)
-            {
-                switch ((ItemSubClassWeapon)proto.GetSubClass())
-                {
-                    case ItemSubClassWeapon.Axe2:
-                    case ItemSubClassWeapon.Mace2:
-                    case ItemSubClassWeapon.Sword2:
-                    case ItemSubClassWeapon.Staff:
-                    case ItemSubClassWeapon.Polearm:
-                        return ItemTransmogrificationWeaponCategory.Melee2H;
-                    case ItemSubClassWeapon.Bow:
-                    case ItemSubClassWeapon.Gun:
-                    case ItemSubClassWeapon.Crossbow:
-                        return ItemTransmogrificationWeaponCategory.Ranged;
-                    case ItemSubClassWeapon.Axe:
-                    case ItemSubClassWeapon.Mace:
-                    case ItemSubClassWeapon.Sword:
-                    case ItemSubClassWeapon.Warglaives:
-                    case ItemSubClassWeapon.Fist:
-                        return ItemTransmogrificationWeaponCategory.AxeMaceSword1H;
-                    case ItemSubClassWeapon.Dagger:
-                        return ItemTransmogrificationWeaponCategory.Dagger;
-                    default:
-                        break;
-                }
-            }
-
-            return ItemTransmogrificationWeaponCategory.Invalid;
-        }
-
         public static int[] ItemTransmogrificationSlots =
         {
             -1,                                                     // INVTYPE_NON_EQUIP
@@ -1624,7 +1592,7 @@ namespace Game.Entities
                 switch (source.GetClass())
                 {
                     case ItemClass.Weapon:
-                        if (GetTransmogrificationWeaponCategory(source) != GetTransmogrificationWeaponCategory(target))
+                        if (source.GetWeaponTransmogOutfitSlotOption() != target.GetWeaponTransmogOutfitSlotOption())
                             return false;
                         break;
                     case ItemClass.Armor:
@@ -2001,20 +1969,23 @@ namespace Game.Entities
             if (itemModifiedAppearanceId == 0)
                 itemModifiedAppearanceId = GetModifier(ItemModifier.TransmogAppearanceAllSpecs);
 
-            ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
-            if (transmog != null)
+            ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
+            if (itemModifiedAppearance == null)
+                itemModifiedAppearance = GetItemModifiedAppearance();
+
+            if (itemModifiedAppearance != null)
             {
-                ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(transmog.ItemAppearanceID);
+                ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(itemModifiedAppearance.ItemAppearanceID);
                 if (itemAppearance != null)
                     return itemAppearance.ItemDisplayInfoID;
             }
 
-            return Global.DB2Mgr.GetItemDisplayId(GetEntry(), GetAppearanceModId());
+            return 0;
         }
 
         public ItemModifiedAppearanceRecord GetItemModifiedAppearance()
         {
-            return Global.DB2Mgr.GetItemModifiedAppearance(GetEntry(), _bonusData.AppearanceModID);
+            return Global.TransmogMgr.GetItemModifiedAppearance(GetEntry(), _bonusData.AppearanceModID);
         }
 
         public uint GetModifier(ItemModifier modifier)

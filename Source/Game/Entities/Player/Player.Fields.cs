@@ -33,6 +33,7 @@ namespace Game.Entities
 
         //Inventory
         Dictionary<ulong, EquipmentSetInfo> _equipmentSets = new();
+        List<uint> m_changedTransmogOutfits = [];
         public List<ItemSetEffect> ItemSetEff = new();
         List<EnchantDuration> m_enchantDuration = new();
         List<Item> m_itemDuration = new();
@@ -254,13 +255,13 @@ namespace Game.Entities
         List<uint> _playerDataElementsNeedSave = new();
         List<uint> _playerDataFlagsNeedSave = new();
 
-        class ValuesUpdateForPlayerWithMaskSender
+        public class ValuesUpdateForPlayerWithMaskSender
         {
             Player Owner;
-            ObjectFieldData ObjectMask = new();
-            UnitData UnitMask = new();
-            PlayerData PlayerMask = new();
-            ActivePlayerData ActivePlayerMask = new();
+            public ObjectFieldData ObjectMask = new();
+            public UnitData UnitMask = new();
+            public PlayerData PlayerMask = new();
+            public ActivePlayerData ActivePlayerMask = new();
             bool IgnoreNestedChangesMask;
 
             public ValuesUpdateForPlayerWithMaskSender(Player owner)

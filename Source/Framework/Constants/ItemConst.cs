@@ -1552,19 +1552,6 @@ namespace Framework.Constants
         Removed = 3     //not removed just set count == 0
     }
 
-    public enum ItemTransmogrificationWeaponCategory
-    {
-        // Two-handed
-        Melee2H,
-        Ranged,
-
-        // One-handed
-        AxeMaceSword1H,
-        Dagger,
-
-        Invalid
-    }
-
     public enum AzeriteEssenceActivateResult
     {
         None = 0,

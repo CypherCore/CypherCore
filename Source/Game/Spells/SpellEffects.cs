@@ -6116,6 +6116,34 @@ namespace Game.Spells
 
             target.SetDataFlagCharacter((uint)effectInfo.MiscValue, damage != 0);
         }
+
+        [SpellEffectHandler(SpellEffectName.SetPlayerDataFlagCharacter)]
+        void EffectEquipTransmogOutfit()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player target = unitTarget?.ToPlayer();
+            if (target == null)
+                return;
+
+            bool? locked = null;
+            switch ((TransmogOutfitEquipAction)m_misc.EquipAction)
+            {
+                case TransmogOutfitEquipAction.EquipAndLock:
+                case TransmogOutfitEquipAction.RemoveAndLock:
+                case TransmogOutfitEquipAction.Lock:
+                    locked = true;
+                    break;
+                case TransmogOutfitEquipAction.Unlock:
+                    locked = false;
+                    break;
+                default:
+                    break;
+            }
+
+            target.EquipTransmogOutfit(m_misc.TransmogOutfitId, (TransmogSituationTrigger)m_misc.SituationTrigger, locked);
+        }
     }
 
     public class DispelableAura

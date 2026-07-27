@@ -1082,7 +1082,7 @@ namespace Game.Entities
         public UpdateField<ushort> ItemAppearanceModID = new(0, 6);
         public UpdateField<ushort> ItemVisual = new(0, 7);
         public UpdateField<uint> ItemModifiedAppearanceID = new(0, 8);
-        public UpdateField<byte> Field_18 = new(0, 9);
+        public UpdateField<byte> TransmogSlotOption = new(0, 9);
 
         public void WriteCreate(WorldPacket data, Player receiver, Unit owner)
         {
@@ -1092,7 +1092,7 @@ namespace Game.Entities
             data.WriteUInt16(ItemAppearanceModID);
             data.WriteUInt16(ItemVisual);
             data.WriteUInt32(ItemModifiedAppearanceID);
-            data.WriteUInt8(Field_18);
+            data.WriteUInt8(TransmogSlotOption);
             data.WriteBit(HasTransmog);
             data.WriteBit(HasIllusion);
             data.FlushBits();
@@ -1146,7 +1146,7 @@ namespace Game.Entities
                 }
                 if (changesMask[9])
                 {
-                    data.WriteUInt8(Field_18);
+                    data.WriteUInt8(TransmogSlotOption);
                 }
             }
             data.FlushBits();
@@ -1162,7 +1162,7 @@ namespace Game.Entities
             ClearChangesMask(ItemAppearanceModID);
             ClearChangesMask(ItemVisual);
             ClearChangesMask(ItemModifiedAppearanceID);
-            ClearChangesMask(Field_18);
+            ClearChangesMask(TransmogSlotOption);
             _changesMask.ResetAll();
         }
     }
@@ -6455,7 +6455,7 @@ namespace Game.Entities
         public DynamicUpdateField<uint> HouseThemes = new(0, 26);
         public DynamicUpdateField<uint> HouseRoomComponentTextures = new(0, 27);
         public DynamicUpdateField<uint> HouseTypes = new(0, 28);
-        public DynamicUpdateField<int> Field_1980 = new(0, 29);
+        public DynamicUpdateField<int> UnlockedTransmogOutfits = new(0, 29);
         public DynamicUpdateField<SpellPctModByLabel> SpellPctModByLabel = new(0, 31);
         public DynamicUpdateField<SpellFlatModByLabel> SpellFlatModByLabel = new(32, 33);
         public DynamicUpdateField<SpellPctPVPModByLabel> SpellPctModPVPByLabel = new(32, 34);
@@ -6755,7 +6755,7 @@ namespace Game.Entities
             data.WriteInt32(HouseThemes.Size());
             data.WriteInt32(HouseRoomComponentTextures.Size());
             data.WriteInt32(HouseTypes.Size());
-            data.WriteInt32(Field_1980.Size());
+            data.WriteInt32(UnlockedTransmogOutfits.Size());
             data.WriteInt32(CharacterRestrictions.Size());
             data.WriteInt32(SpellPctModByLabel.Size());
             data.WriteInt32(SpellFlatModByLabel.Size());
@@ -6874,9 +6874,9 @@ namespace Game.Entities
             {
                 data.WriteUInt32(HouseTypes[i]);
             }
-            for (int i = 0; i < Field_1980.Size(); ++i)
+            for (int i = 0; i < UnlockedTransmogOutfits.Size(); ++i)
             {
-                data.WriteInt32(Field_1980[i]);
+                data.WriteInt32(UnlockedTransmogOutfits[i]);
             }
             for (int i = 0; i < SpellPctModByLabel.Size(); ++i)
             {
@@ -7291,9 +7291,9 @@ namespace Game.Entities
                 if (changesMask[29])
                 {
                     if (!ignoreNestedChangesMask)
-                        Field_1980.WriteUpdateMask(data);
+                        UnlockedTransmogOutfits.WriteUpdateMask(data);
                     else
-                        WriteCompleteDynamicFieldUpdateMask(Field_1980.Size(), data);
+                        WriteCompleteDynamicFieldUpdateMask(UnlockedTransmogOutfits.Size(), data);
                 }
                 if (changesMask[30])
                 {
@@ -7633,11 +7633,11 @@ namespace Game.Entities
                 }
                 if (changesMask[29])
                 {
-                    for (int i = 0; i < Field_1980.Size(); ++i)
+                    for (int i = 0; i < UnlockedTransmogOutfits.Size(); ++i)
                     {
-                        if (Field_1980.HasChanged(i) || ignoreNestedChangesMask)
+                        if (UnlockedTransmogOutfits.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            data.WriteInt32(Field_1980[i]);
+                            data.WriteInt32(UnlockedTransmogOutfits[i]);
                         }
                     }
                 }
@@ -8469,7 +8469,7 @@ namespace Game.Entities
             ClearChangesMask(HouseThemes);
             ClearChangesMask(HouseRoomComponentTextures);
             ClearChangesMask(HouseTypes);
-            ClearChangesMask(Field_1980);
+            ClearChangesMask(UnlockedTransmogOutfits);
             ClearChangesMask(SpellPctModByLabel);
             ClearChangesMask(SpellFlatModByLabel);
             ClearChangesMask(SpellPctModPVPByLabel);

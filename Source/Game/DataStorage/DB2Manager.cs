@@ -332,12 +332,6 @@ namespace Game.DataStorage
             foreach (ItemLimitCategoryConditionRecord condition in ItemLimitCategoryConditionStorage.Values)
                 _itemCategoryConditions.Add(condition.ParentItemLimitCategoryID, condition);
 
-            foreach (var appearanceMod in ItemModifiedAppearanceStorage.Values)
-            {
-                //ASSERT(appearanceMod.ItemID <= 0xFFFFFF);
-                _itemModifiedAppearancesByItem[(uint)((int)appearanceMod.ItemID | (appearanceMod.ItemAppearanceModifierID << 24))] = appearanceMod;
-            }
-
             foreach (ItemSetSpellRecord itemSetSpell in ItemSetSpellStorage.Values)
                 _itemSetSpells.Add(itemSetSpell.ItemSetID, itemSetSpell);
 
@@ -572,19 +566,6 @@ namespace Game.DataStorage
 
             foreach (ToyRecord toy in ToyStorage.Values)
                 _toys.Add(toy.ItemID);
-
-            foreach (TransmogIllusionRecord transmogIllusion in TransmogIllusionStorage.Values)
-                _transmogIllusionsByEnchantmentId[(uint)transmogIllusion.SpellItemEnchantmentID] = transmogIllusion;
-
-            foreach (TransmogSetItemRecord transmogSetItem in TransmogSetItemStorage.Values)
-            {
-                TransmogSetRecord set = TransmogSetStorage.LookupByKey(transmogSetItem.TransmogSetID);
-                if (set == null)
-                    continue;
-
-                _transmogSetsByItemModifiedAppearance.Add(transmogSetItem.ItemModifiedAppearanceID, set);
-                _transmogSetItemsByTransmogSet.Add(transmogSetItem.TransmogSetID, transmogSetItem);
-            }
 
             for (var i = 0; i < (int)UiMapSystem.Max; ++i)
             {
@@ -1629,41 +1610,6 @@ namespace Game.DataStorage
             return _itemCategoryConditions.LookupByKey(categoryId);
         }
 
-        public uint GetItemDisplayId(uint itemId, uint appearanceModId)
-        {
-            ItemModifiedAppearanceRecord modifiedAppearance = GetItemModifiedAppearance(itemId, appearanceModId);
-            if (modifiedAppearance != null)
-            {
-                ItemAppearanceRecord itemAppearance = ItemAppearanceStorage.LookupByKey(modifiedAppearance.ItemAppearanceID);
-                if (itemAppearance != null)
-                    return itemAppearance.ItemDisplayInfoID;
-            }
-
-            return 0;
-        }
-
-        public ItemModifiedAppearanceRecord GetItemModifiedAppearance(uint itemId, uint appearanceModId)
-        {
-            var itemModifiedAppearance = _itemModifiedAppearancesByItem.LookupByKey(itemId | (appearanceModId << 24));
-            if (itemModifiedAppearance != null)
-                return itemModifiedAppearance;
-
-            // Fall back to unmodified appearance
-            if (appearanceModId != 0)
-            {
-                itemModifiedAppearance = _itemModifiedAppearancesByItem.LookupByKey(itemId);
-                if (itemModifiedAppearance != null)
-                    return itemModifiedAppearance;
-            }
-
-            return null;
-        }
-
-        public ItemModifiedAppearanceRecord GetDefaultItemModifiedAppearance(uint itemId)
-        {
-            return _itemModifiedAppearancesByItem.LookupByKey(itemId);
-        }
-
         public List<ItemSetSpellRecord> GetItemSetSpells(uint itemSetId)
         {
             return _itemSetSpells.LookupByKey(itemSetId);
@@ -2081,21 +2027,6 @@ namespace Game.DataStorage
             return _toys.Contains(toy);
         }
 
-        public TransmogIllusionRecord GetTransmogIllusionForEnchantment(uint spellItemEnchantmentId)
-        {
-            return _transmogIllusionsByEnchantmentId.LookupByKey(spellItemEnchantmentId);
-        }
-
-        public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(uint itemModifiedAppearanceId)
-        {
-            return _transmogSetsByItemModifiedAppearance.LookupByKey(itemModifiedAppearanceId);
-        }
-
-        public List<TransmogSetItemRecord> GetTransmogSetItems(uint transmogSetId)
-        {
-            return _transmogSetItemsByTransmogSet.LookupByKey(transmogSetId);
-        }
-
         static bool CheckUiMapAssignmentStatus(float x, float y, float z, int mapId, int areaId, int wmoDoodadPlacementId, int wmoGroupId, UiMapAssignmentRecord uiMapAssignment, out UiMapAssignmentStatus status)
         {
             status = new UiMapAssignmentStatus();
@@ -2431,7 +2362,6 @@ namespace Game.DataStorage
         ItemClassRecord[] _itemClassByOldEnum = new ItemClassRecord[21];
         List<uint> _itemsWithCurrencyCost = new();
         MultiMap<uint, ItemLimitCategoryConditionRecord> _itemCategoryConditions = new();
-        Dictionary<uint, ItemModifiedAppearanceRecord> _itemModifiedAppearancesByItem = new();
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
@@ -2462,9 +2392,6 @@ namespace Game.DataStorage
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         Dictionary<(uint, uint), TaxiPathRecord> _taxiPaths = new();
         List<uint> _toys = new();
-        Dictionary<uint, TransmogIllusionRecord> _transmogIllusionsByEnchantmentId = new();
-        MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
-        MultiMap<uint, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new();
         Dictionary<int, UiMapBounds> _uiMapBounds = new();
         MultiMap<int, UiMapAssignmentRecord>[] _uiMapAssignmentByMap = new MultiMap<int, UiMapAssignmentRecord>[(int)UiMapSystem.Max];
         MultiMap<int, UiMapAssignmentRecord>[] _uiMapAssignmentByArea = new MultiMap<int, UiMapAssignmentRecord>[(int)UiMapSystem.Max];

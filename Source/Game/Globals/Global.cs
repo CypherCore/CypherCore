@@ -104,4 +104,5 @@ public static class Global
     public static BlackMarketManager BlackMarketMgr { get { return BlackMarketManager.Instance; } }
 
     public static WorldStateManager WorldStateMgr { get { return WorldStateManager.Instance; } }
+    public static TransmogManager TransmogMgr { get { return TransmogManager.Instance; } }
 }

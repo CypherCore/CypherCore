@@ -388,6 +388,12 @@ namespace Game.DataStorage
             TraitTreeXTraitCurrencyStorage = ReadDB2<TraitTreeXTraitCurrencyRecord>("TraitTreeXTraitCurrency.db2", HotfixStatements.SEL_TRAIT_TREE_X_TRAIT_CURRENCY);
             TransmogHolidayStorage = ReadDB2<TransmogHolidayRecord>("TransmogHoliday.db2", HotfixStatements.SEL_TRANSMOG_HOLIDAY);
             TransmogIllusionStorage = ReadDB2<TransmogIllusionRecord>("TransmogIllusion.db2", HotfixStatements.SEL_TRANSMOG_ILLUSION);
+            TransmogOutfitEntryStorage = ReadDB2<TransmogOutfitEntryRecord>("TransmogOutfitEntry.db2", HotfixStatements.SEL_TRANSMOG_OUTFIT_ENTRY, HotfixStatements.SEL_TRANSMOG_OUTFIT_ENTRY_LOCALE);
+            TransmogOutfitSlotInfoStorage = ReadDB2<TransmogOutfitSlotInfoRecord>("TransmogOutfitSlotInfo.db2", HotfixStatements.SEL_TRANSMOG_OUTFIT_SLOT_INFO);
+            TransmogOutfitSlotOptionInfoStorage = ReadDB2<TransmogOutfitSlotOptionRecord>("TransmogOutfitSlotOption.db2", HotfixStatements.SEL_TRANSMOG_OUTFIT_SLOT_OPTION, HotfixStatements.SEL_TRANSMOG_OUTFIT_SLOT_OPTION_LOCALE);
+            TransmogSituationStorage = ReadDB2<TransmogSituationRecord>("TransmogSituation.db2", HotfixStatements.SEL_TRANSMOG_SITUATION, HotfixStatements.SEL_TRANSMOG_SITUATION_LOCALE);
+            TransmogSituationGroupStorage = ReadDB2<TransmogSituationGroupRecord>("TransmogSituationGroup.db2", HotfixStatements.SEL_TRANSMOG_SITUATION_GROUP);
+            TransmogSituationTriggerStorage = ReadDB2<TransmogSituationTriggerRecord>("TransmogSituationTrigger.db2", HotfixStatements.SEL_TRANSMOG_SITUATION_TRIGGER, HotfixStatements.SEL_TRANSMOG_SITUATION_TRIGGER_LOCALE);
             TransmogSetStorage = ReadDB2<TransmogSetRecord>("TransmogSet.db2", HotfixStatements.SEL_TRANSMOG_SET, HotfixStatements.SEL_TRANSMOG_SET_LOCALE);
             TransmogSetGroupStorage = ReadDB2<TransmogSetGroupRecord>("TransmogSetGroup.db2", HotfixStatements.SEL_TRANSMOG_SET_GROUP, HotfixStatements.SEL_TRANSMOG_SET_GROUP_LOCALE);
             TransmogSetItemStorage = ReadDB2<TransmogSetItemRecord>("TransmogSetItem.db2", HotfixStatements.SEL_TRANSMOG_SET_ITEM);
@@ -797,6 +803,12 @@ namespace Game.DataStorage
         public static DB6Storage<TraitTreeXTraitCurrencyRecord> TraitTreeXTraitCurrencyStorage;
         public static DB6Storage<TransmogHolidayRecord> TransmogHolidayStorage;
         public static DB6Storage<TransmogIllusionRecord> TransmogIllusionStorage;
+        public static DB6Storage<TransmogOutfitEntryRecord> TransmogOutfitEntryStorage;
+        public static DB6Storage<TransmogOutfitSlotInfoRecord> TransmogOutfitSlotInfoStorage;
+        public static DB6Storage<TransmogOutfitSlotOptionRecord> TransmogOutfitSlotOptionInfoStorage;
+        public static DB6Storage<TransmogSituationRecord> TransmogSituationStorage;
+        public static DB6Storage<TransmogSituationGroupRecord> TransmogSituationGroupStorage;
+        public static DB6Storage<TransmogSituationTriggerRecord> TransmogSituationTriggerStorage;
         public static DB6Storage<TransmogSetRecord> TransmogSetStorage;
         public static DB6Storage<TransmogSetGroupRecord> TransmogSetGroupStorage;
         public static DB6Storage<TransmogSetItemRecord> TransmogSetItemStorage;

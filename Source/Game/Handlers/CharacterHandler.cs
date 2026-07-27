@@ -1663,13 +1663,10 @@ namespace Game
             }
             else
             {
-                var validateIllusion = new Func<uint, bool>(enchantId =>
+                bool validateIllusion(uint enchantId)
                 {
                     SpellItemEnchantmentRecord illusion = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchantId);
-                    if (illusion == null)
-                        return false;
-
-                    if (illusion.ItemVisual == 0 || !illusion.HasFlag(SpellItemEnchantmentFlags.AllowTransmog))
+                    if (illusion == null || Global.TransmogMgr.GetTransmogIllusionForSpellItemEnchantment(enchantId) == null)
                         return false;
 
                     if (!ConditionManager.IsPlayerMeetingCondition(_player, illusion.TransmogUseConditionID))
@@ -1679,7 +1676,7 @@ namespace Game
                         return false;
 
                     return true;
-                });
+                }
 
                 if (saveEquipmentSet.Set.Enchants[0] != 0 && !validateIllusion((uint)saveEquipmentSet.Set.Enchants[0]))
                     return;
@@ -2882,6 +2879,18 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.TransmogOutfits, stmt);
 
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TransmogOutfit, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT_SITUATION);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TransmogOutfitSituation, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT_SLOT);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.TransmogOutfitSlot, stmt);
+
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_CHAR_CUF_PROFILES);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.CufProfiles, stmt);
@@ -3057,6 +3066,9 @@ namespace Game
         Achievements,
         CriteriaProgress,
         EquipmentSets,
+        TransmogOutfit,
+        TransmogOutfitSituation,
+        TransmogOutfitSlot,
         TransmogOutfits,
         BgData,
         Glyphs,
