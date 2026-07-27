@@ -5558,12 +5558,17 @@ namespace Game.Entities
                     if (transmogSlotOption != TransmogOutfitSlotOption.None)
                     {
                         // check if artifact override is active
-                        TransmogOutfitSlotOption artifactOption = (TransmogOutfitSlotOption.ArtifactSpecOne + GetPrimarySpecializationEntry().OrderIndex);
-                        var artifactSlotInfo = Global.TransmogMgr.GetSlotAndOption(slot, artifactOption);
-                        if (artifactSlotInfo != null && m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)artifactSlotInfo.SlotIndex].AppearanceDisplayType == (byte)TransmogOutfitDisplayType.Assigned)
+                        int MaxArtifactSpecializations = TransmogOutfitSlotOption.ArtifactSpecFour - TransmogOutfitSlotOption.ArtifactSpecOne + 1;
+                        int specIndex = GetPrimarySpecializationEntry().OrderIndex;
+                        if (specIndex >= 0 && specIndex < MaxArtifactSpecializations)
                         {
-                            transmogSlotOption = artifactOption;
-                            slotInfo = artifactSlotInfo;
+                            TransmogOutfitSlotOption artifactOption = TransmogOutfitSlotOption.ArtifactSpecOne + (byte)specIndex;
+                            var artifactSlotInfo = Global.TransmogMgr.GetSlotAndOption(slot, artifactOption);
+                            if (artifactSlotInfo != null && (TransmogOutfitDisplayType)(byte)m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)artifactSlotInfo.SlotIndex].AppearanceDisplayType == TransmogOutfitDisplayType.Assigned)
+                            {
+                                transmogSlotOption = artifactOption;
+                                slotInfo = artifactSlotInfo;
+                            }
                         }
                     }
 
