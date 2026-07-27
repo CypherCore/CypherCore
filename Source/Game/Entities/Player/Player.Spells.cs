@@ -2946,7 +2946,7 @@ namespace Game.Entities
 
             GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            basevalue = (int)(((float)basevalue + totalflat) * totalmul);
+            basevalue = (int)(((double)basevalue + totalflat) * totalmul);
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref uint basevalue, Spell spell = null)
@@ -2956,7 +2956,7 @@ namespace Game.Entities
 
             GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            basevalue = (uint)(((float)basevalue + totalflat) * totalmul);
+            basevalue = (uint)(((double)basevalue + totalflat) * totalmul);
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref float basevalue, Spell spell = null)
@@ -2966,7 +2966,7 @@ namespace Game.Entities
 
             GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            basevalue = (float)(basevalue + totalflat) * totalmul;
+            basevalue = (float)((double)basevalue + totalflat) * totalmul;
         }
 
         public void ApplySpellMod(SpellInfo spellInfo, SpellModOp op, ref double basevalue, Spell spell = null)
@@ -2976,10 +2976,10 @@ namespace Game.Entities
 
             GetSpellModValues(spellInfo, op, spell, basevalue, ref totalflat, ref totalmul);
 
-            basevalue = (double)(basevalue + totalflat) * totalmul;
+            basevalue = (double)((double)basevalue + totalflat) * totalmul;
         }
 
-        public void GetSpellModValues<T>(SpellInfo spellInfo, SpellModOp op, Spell spell, T baseValue, ref int flat, ref float pct) where T : IComparable
+        public void GetSpellModValues(SpellInfo spellInfo, SpellModOp op, Spell spell, double baseValue, ref int flat, ref float pct)
         {
             flat = 0;
             pct = 1.0f;
@@ -3002,7 +3002,7 @@ namespace Game.Entities
                         if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                             continue;
 
-                        if (baseValue.CompareTo(10000) < 0 && mod.value <= -100)
+                        if (baseValue < 10000.0 && mod.value <= -100)
                         {
                             modInstantSpell = mod;
                             break;
@@ -3016,7 +3016,7 @@ namespace Game.Entities
                             if (IsAffectedBySpellmod(spellInfo, mod, spell) == 0)
                                 continue;
 
-                            if (baseValue.CompareTo(10000) < 0 && mod.value.ModifierValue <= -1.0f)
+                            if (baseValue < 10000.0 && mod.value.ModifierValue <= -1.0f)
                             {
                                 modInstantSpell = mod;
                                 break;
@@ -3110,7 +3110,7 @@ namespace Game.Entities
                     continue;
 
                 // skip percent mods for null basevalue (most important for spell mods with charges)
-                if (baseValue + (dynamic)flat == 0)
+                if (baseValue + flat == 0)
                     continue;
 
                 int value = mod.value;
@@ -3120,7 +3120,7 @@ namespace Game.Entities
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.ChangeCastTime)
                 {
-                    if (baseValue.CompareTo(10000) > 0 && value <= -100)
+                    if (baseValue >= 10000.0 && value <= -100)
                         continue;
                 }
 
@@ -3135,7 +3135,7 @@ namespace Game.Entities
                     continue;
 
                 // skip percent mods for null basevalue (most important for spell mods with charges)
-                if (baseValue + (dynamic)flat == 0)
+                if (baseValue + flat == 0)
                     continue;
 
                 float value = mod.value.ModifierValue;
@@ -3145,7 +3145,7 @@ namespace Game.Entities
                 // special case (skip > 10sec spell casts for instant cast setting)
                 if (op == SpellModOp.ChangeCastTime)
                 {
-                    if (baseValue.CompareTo(10000) > 0 && value <= -1.0f)
+                    if (baseValue >= 10000.0 && value <= -1.0f)
                         continue;
                 }
 
