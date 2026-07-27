@@ -497,7 +497,7 @@ namespace Game
             float baseCost = 0;
             uint curveId = Global.DB2Mgr.GetGlobalCurveId(GlobalCurve.TransmogCost);
             if (curveId != 0)
-                baseCost = Global.DB2Mgr.GetCurveValueAt(curveId, Math.Max(_player.GetLevel(), _player.m_activePlayerData.MaxLevel));
+                baseCost = Global.DB2Mgr.GetCurveValueAt(curveId, Math.Max(_player.GetLevel(), _player.m_activePlayerData.TransmogCostMinScalingLevel));
 
             float costMultiplier = 1.0f;
             TransmogOutfitEntryRecord transmogOutfitEntry = CliDB.TransmogOutfitEntryStorage.LookupByKey(transmogOutfitUpdateSlots.OutfitID);
@@ -522,11 +522,15 @@ namespace Game
 
                     if (slot.AppearanceDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Item1.Slots[oldSlotIndex].ItemModifiedAppearanceID != slot.ItemModifiedAppearanceID)
                     {
-                        if (transmogOutfitSlotAndOptionInfo.Slot != null)
-                            cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.Slot.ItemCostMultiplier) + cost;
+                        ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(slot.ItemModifiedAppearanceID);
+                        if (itemModifiedAppearance == null || !CliDB.TransmogHolidayStorage.HasRecord(itemModifiedAppearance.ItemID))
+                        {
+                            if (transmogOutfitSlotAndOptionInfo.Slot != null)
+                                cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.Slot.ItemCostMultiplier) + cost;
 
-                        if (transmogOutfitSlotAndOptionInfo.SlotOption != null)
-                            cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.SlotOption.ItemCostMultiplier) + cost;
+                            if (transmogOutfitSlotAndOptionInfo.SlotOption != null)
+                                cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.SlotOption.ItemCostMultiplier) + cost;
+                        }
                     }
 
                     if (slot.IllusionDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Item1.Slots[oldSlotIndex].SpellItemEnchantmentID != slot.SpellItemEnchantmentID)

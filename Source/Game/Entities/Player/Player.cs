@@ -2824,16 +2824,20 @@ namespace Game.Entities
                     ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
                     if (itemModifiedAppearance != null)
                     {
-                        ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
-                        if (item != null)
+                        TransmogHolidayRecord transmogHoliday = CliDB.TransmogHolidayStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                        if (transmogHoliday == null || Global.GameEventMgr.IsHolidayActive((HolidayIds)transmogHoliday.RequiredTransmogHoliday))
                         {
-                            subClass = item.SubclassID;
-                            inventoryType = item.inventoryType;
-                        }
+                            ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                            if (item != null)
+                            {
+                                subClass = item.SubclassID;
+                                inventoryType = item.inventoryType;
+                            }
 
-                        ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(itemModifiedAppearance.ItemAppearanceID);
-                        if (itemAppearance != null)
-                            displayId = itemAppearance.ItemDisplayInfoID;
+                            ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(itemModifiedAppearance.ItemAppearanceID);
+                            if (itemAppearance != null)
+                                displayId = itemAppearance.ItemDisplayInfoID;
+                        }
                     }
 
                     SpellItemEnchantmentRecord spellItemEnchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(transmogOutfitSlot.SpellItemEnchantmentID);
@@ -2854,6 +2858,15 @@ namespace Game.Entities
                             secondaryItemModifiedAppearanceId = secondaryTransmogOutfitSlot.ItemModifiedAppearanceID;
                             if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitSlot.AppearanceDisplayType))
                                 secondaryItemModifiedAppearanceId = m_playerData.VisibleItems[i].SecondaryItemModifiedAppearanceID;
+
+                            itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(secondaryItemModifiedAppearanceId);
+                            if (itemModifiedAppearance != null)
+                            {
+                                TransmogHolidayRecord transmogHoliday = CliDB.TransmogHolidayStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                                if (transmogHoliday != null)
+                                    if (!Global.GameEventMgr.IsHolidayActive((HolidayIds)transmogHoliday.RequiredTransmogHoliday))
+                                        secondaryItemModifiedAppearanceId = 0;
+                            }
                         }
                     }
 

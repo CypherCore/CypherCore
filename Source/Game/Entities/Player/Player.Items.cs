@@ -5577,12 +5577,32 @@ namespace Game.Entities
                             ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(transmogOutfitItem.ItemModifiedAppearanceID);
                             if (itemModifiedAppearance != null)
                             {
-                                itemId = itemModifiedAppearance.ItemID;
-                                itemAppearanceModId = (ushort)itemModifiedAppearance.ItemAppearanceModifierID;
-                                itemModifiedAppearanceId = itemModifiedAppearance.Id;
+                                TransmogHolidayRecord transmogHoliday = CliDB.TransmogHolidayStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                                if (transmogHoliday == null || Global.GameEventMgr.IsHolidayActive((HolidayIds)transmogHoliday.RequiredTransmogHoliday))
+                                {
+                                    itemId = itemModifiedAppearance.ItemID;
+                                    itemAppearanceModId = (ushort)itemModifiedAppearance.ItemAppearanceModifierID;
+                                    itemModifiedAppearanceId = itemModifiedAppearance.Id;
+                                    hasTransmog = true;
+                                }
+                            }
+                        }
+
+                        uint getSecondaryItemModifiedAppearance(TransmogOutfitSlotData secondaryTransmogOutfitItem)
+                        {
+                            if (isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitItem.AppearanceDisplayType)
+                                || (TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitItem.AppearanceDisplayType == TransmogOutfitDisplayType.Equipped)
+                            {
+                                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(secondaryTransmogOutfitItem.ItemModifiedAppearanceID);
+                                if (itemModifiedAppearance != null)
+                                {
+                                    TransmogHolidayRecord transmogHoliday = CliDB.TransmogHolidayStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                                    if (transmogHoliday == null || Global.GameEventMgr.IsHolidayActive((HolidayIds)transmogHoliday.RequiredTransmogHoliday))
+                                        return secondaryTransmogOutfitItem.ItemModifiedAppearanceID;
+                                }
                             }
 
-                            hasTransmog = true;
+                            return 0;
                         }
 
                         TransmogOutfitSlotInfoRecord secondarySlot = CliDB.TransmogOutfitSlotInfoStorage.LookupByKey(slotInfo.Slot.SecondarySlotID);
@@ -5590,15 +5610,7 @@ namespace Game.Entities
                         {
                             var secondarySlotInfo = Global.TransmogMgr.GetSlotAndOption(secondarySlot.GetSlot(), transmogSlotOption);
                             if (secondarySlotInfo != null)
-                            {
-                                var secondaryTransmogOutfitItem = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)secondarySlotInfo.SlotIndex];
-                                if (isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitItem.AppearanceDisplayType)
-                                    || (TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitItem.AppearanceDisplayType == TransmogOutfitDisplayType.Equipped)
-                                {
-                                    secondaryItemModifiedAppearanceId = secondaryTransmogOutfitItem.ItemModifiedAppearanceID;
-                                    hasTransmog = true;
-                                }
-                            }
+                                secondaryItemModifiedAppearanceId = getSecondaryItemModifiedAppearance(m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)secondarySlotInfo.SlotIndex]);
                         }
 
                         TransmogOutfitSlotOptionRecord secondarySlotOption = CliDB.TransmogOutfitSlotOptionInfoStorage.LookupByKey(slotInfo.SlotOption != null ? slotInfo.SlotOption.SecondaryOptionID : 0);
@@ -5606,16 +5618,11 @@ namespace Game.Entities
                         {
                             var secondarySlotInfo = Global.TransmogMgr.GetSlotAndOption(slotInfo.Slot.GetSlot(), secondarySlotOption.GetOption());
                             if (secondarySlotInfo != null)
-                            {
-                                var secondaryTransmogOutfitItem = m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)secondarySlotInfo.SlotIndex];
-                                if (isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitItem.AppearanceDisplayType)
-                                    || (TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitItem.AppearanceDisplayType == TransmogOutfitDisplayType.Equipped)
-                                {
-                                    secondaryItemModifiedAppearanceId = secondaryTransmogOutfitItem.ItemModifiedAppearanceID;
-                                    hasTransmog = true;
-                                }
-                            }
+                                secondaryItemModifiedAppearanceId = getSecondaryItemModifiedAppearance(m_activePlayerData.ViewedOutfit.GetValue().Slots[(int)secondarySlotInfo.SlotIndex]);
                         }
+
+                        if (secondaryItemModifiedAppearanceId != 0)
+                            hasTransmog = true;
 
                         if (isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitItem.IllusionDisplayType))
                         {
