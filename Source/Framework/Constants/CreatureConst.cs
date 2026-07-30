@@ -230,6 +230,7 @@ namespace Framework.Constants
         AzeriteRespec = 0x4000,
         IslandsQueue = 0x8000,
         SuppressNpcSoundsExceptEndOfInteraction = 0x10000,
+        PerksVendor = 0x80000,
         PersonalTabardDesigner = 0x200000
     }
 
