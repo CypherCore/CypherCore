@@ -2791,20 +2791,29 @@ namespace Game.Spells
                     SendCastResult(SpellCastResult.Interrupted);
                     break;
                 case SpellState.Channeling:
-                    foreach (var ihit in m_UniqueTargetInfo)
+                {
+                    // Mark current spell as not deletable to protect against scripts attempting to despawn the caster twice (aura removal)
+                    // while current spell is being cancelled by despawn
+                    bool executed = m_executedCurrently;
+                    SetExecutedCurrently(true);
+
+                    foreach (TargetInfo targetInfo in m_UniqueTargetInfo)
                     {
-                        if (ihit.MissCondition == SpellMissInfo.None)
+                        if (targetInfo.MissCondition == SpellMissInfo.None)
                         {
-                            Unit unit = m_caster.GetGUID() == ihit.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, ihit.TargetGUID);
+                            Unit unit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster.ToUnit() : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
                             if (unit != null)
                                 unit.RemoveOwnedAura(m_spellInfo.Id, m_originalCasterGUID, 0, AuraRemoveMode.Cancel);
                         }
                     }
 
-                    SendChannelUpdate(0, SpellCastResult.Interrupted);
-                    SendInterrupted(0);
-                    SendCastResult(SpellCastResult.Interrupted);
-                    break;
+                    SetExecutedCurrently(executed);
+                }
+
+                SendChannelUpdate(0, SpellCastResult.Interrupted);
+                SendInterrupted(0);
+                SendCastResult(SpellCastResult.Interrupted);
+                break;
                 default:
                     break;
             }
@@ -3586,7 +3595,16 @@ namespace Game.Spells
             if (creatureCaster != null)
                 creatureCaster.ReleaseSpellFocus(this);
 
-            Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
+            {
+                // Mark current spell as not deletable to protect against scripts attempting to despawn the caster twice
+                // while current spell is already being finished by despawn
+                bool executed = m_executedCurrently;
+                SetExecutedCurrently(true);
+
+                Unit.ProcSkillsAndAuras(unitCaster, null, new ProcFlagsInit(ProcFlags.CastEnded), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, this, null, null);
+
+                SetExecutedCurrently(executed);
+            }
 
             if (IsEmpowerSpell())
             {
