@@ -233,6 +233,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.WorldPortResponse, Status = SessionStatus.Transfer)]
         void HandleMoveWorldportAck(WorldPortResponse packet)
         {
+            if (_player.GetTeleportState() != TeleportState.WaitingForWorldPortAck)
+                return;
+
             HandleMoveWorldportAck();
         }
 
@@ -240,12 +243,8 @@ namespace Game
         {
             Player player = GetPlayer();
 
-            // ignore unexpected far teleports
-            if (!player.IsBeingTeleportedFar())
-                return;
-
-            bool seamlessTeleport = player.IsBeingTeleportedSeamlessly();
-            player.SetSemaphoreTeleportFar(false);
+            bool seamlessTeleport = player.GetTeleportOptions().HasAnyFlag(TeleportToOptions.Seamless);
+            player.SetTeleportState(TeleportState.NotTeleporting);
 
             // get the teleport destination
             var loc = player.GetTeleportDest();
@@ -450,7 +449,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SuspendTokenResponse, Status = SessionStatus.Transfer)]
         void HandleSuspendTokenResponse(SuspendTokenResponse suspendTokenResponse)
         {
-            if (!_player.IsBeingTeleportedFar())
+            if (_player.GetTeleportState() != TeleportState.WaitingForSuspendTokenResponse)
                 return;
 
             var loc = GetPlayer().GetTeleportDest();
@@ -465,11 +464,13 @@ namespace Game
             NewWorld packet = new();
             packet.MapID = loc.Location.GetMapId();
             packet.Loc.Pos = loc.Location;
-            packet.Reason = (uint)(!_player.IsBeingTeleportedSeamlessly() ? NewWorldReason.Normal : NewWorldReason.Seamless);
+            packet.Reason = (uint)(!_player.GetTeleportOptions().HasAnyFlag(TeleportToOptions.Seamless) ? NewWorldReason.Normal : NewWorldReason.Seamless);
             packet.Counter = _player.GetNewWorldCounter();
             SendPacket(packet);
 
-            if (_player.IsBeingTeleportedSeamlessly())
+            _player.SetTeleportState(TeleportState.WaitingForWorldPortAck);
+
+            if (_player.GetTeleportOptions().HasAnyFlag(TeleportToOptions.Seamless))
                 HandleMoveWorldportAck();
         }
 
@@ -478,13 +479,13 @@ namespace Game
         {
             Player plMover = GetPlayer().GetUnitBeingMoved().ToPlayer();
 
-            if (plMover == null || !plMover.IsBeingTeleportedNear())
+            if (plMover == null || plMover.GetTeleportState() != TeleportState.WaitingForTeleportAck)
                 return;
 
             if (packet.MoverGUID != plMover.GetGUID())
                 return;
 
-            plMover.SetSemaphoreTeleportNear(false);
+            plMover.SetTeleportState(TeleportState.NotTeleporting);
 
             uint old_zone = plMover.GetZoneId();
 

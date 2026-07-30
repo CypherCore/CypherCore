@@ -529,8 +529,11 @@ namespace Game.Entities
 
             //we should execute delayed teleports only for alive(!) players
             //because we don't want player's ghost teleported from graveyard
-            if (IsHasDelayedTeleport() && IsAlive())
+            if ((GetTeleportState() == TeleportState.DelayedTeleport || GetTeleportState() == TeleportState.DelayedWorldPort) && IsAlive())
+            {
+                SetTeleportState(TeleportState.NotTeleporting); // skip state check inside TeleportTo
                 TeleportTo(teleportDest, m_teleport_options, m_teleportSpellId);
+            }
         }
 
         public override void Heartbeat()
@@ -1969,10 +1972,6 @@ namespace Game.Entities
 
         void SetCanDelayTeleport(bool setting) { m_bCanDelayTeleport = setting; }
 
-        bool IsHasDelayedTeleport() { return m_bHasDelayedTeleport; }
-
-        void SetDelayedTeleportFlag(bool setting) { m_bHasDelayedTeleport = setting; }
-
         public bool TeleportTo(uint mapid, float x, float y, float z, float orientation, TeleportToOptions options = TeleportToOptions.None, uint? instanceId = null, uint teleportSpellId = 0)
         {
             return TeleportTo(new TeleportLocation() { Location = new WorldLocation(mapid, x, y, z, orientation), InstanceId = instanceId }, options, teleportSpellId);
@@ -1997,6 +1996,9 @@ namespace Game.Entities
                 SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.MapNotAllowed);
                 return false;
             }
+
+            if (GetTeleportState() != TeleportState.NotTeleporting)
+                return false;
 
             // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
             Pet pet = GetPet();
@@ -2049,15 +2051,12 @@ namespace Game.Entities
 
             if (GetMapId() == teleportLocation.Location.GetMapId() && (!teleportLocation.InstanceId.HasValue || GetInstanceId() == teleportLocation.InstanceId))
             {
-                //lets reset far teleport flag if it wasn't reset during chained teleports
-                SetSemaphoreTeleportFar(false);
-                //setup delayed teleport flag
-                SetDelayedTeleportFlag(IsCanDelayTeleport());
-                //if teleport spell is casted in Unit.Update() func
+                SetTeleportState(TeleportState.Initiated);
+                //if teleport spell is cast in Unit::Update() func
                 //then we need to delay it until update process will be finished
-                if (IsHasDelayedTeleport())
+                if (IsCanDelayTeleport())
                 {
-                    SetSemaphoreTeleportNear(true);
+                    SetTeleportState(TeleportState.DelayedTeleport);
                     //lets save teleport destination for player
                     teleportDest = teleportLocation;
                     m_teleport_options = options;
@@ -2086,16 +2085,13 @@ namespace Game.Entities
 
                 // code for finish transfer called in WorldSession.HandleMovementOpcodes()
                 // at client packet CMSG_MOVE_TELEPORT_ACK
-                SetSemaphoreTeleportNear(true);
+                SetTeleportState(TeleportState.WaitingForTeleportAck);
                 // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
                 if (!GetSession().PlayerLogout())
                     SendTeleportPacket(teleportDest);
             }
             else
             {
-                if (IsBeingTeleportedFar())
-                    return false;
-
                 if (GetClass() == Class.DeathKnight && GetMapId() == 609 && !IsGameMaster() && !HasSpell(50977))
                 {
                     SendTransferAborted(teleportLocation.Location.GetMapId(), TransferAbortReason.UniqueMessage, 1);
@@ -2120,16 +2116,13 @@ namespace Game.Entities
                     !((oldmap.GetEntry().CosmeticParentMapID != -1) ^ (oldmap.GetEntry().CosmeticParentMapID != mEntry.CosmeticParentMapID))))
                     options &= ~TeleportToOptions.Seamless;
 
-                //lets reset near teleport flag if it wasn't reset during chained teleports
-                SetSemaphoreTeleportNear(false);
-                //setup delayed teleport flag
-                SetDelayedTeleportFlag(IsCanDelayTeleport());
-                SetSemaphoreTeleportFar(true);
-                //if teleport spell is cast in Unit.Update() func
+                SetTeleportState(TeleportState.Initiated);
+                //if teleport spell is cast in Unit::Update() func
                 //then we need to delay it until update process will be finished
-                if (IsHasDelayedTeleport())
+                if (IsCanDelayTeleport())
                 {
                     //lets save teleport destination for player
+                    SetTeleportState(TeleportState.DelayedWorldPort);
                     teleportDest = teleportLocation;
                     m_teleport_options = options;
                     m_teleportSpellId = teleportSpellId;
@@ -2219,6 +2212,8 @@ namespace Game.Entities
                 // if the player is saved before worldportack (at logout for example)
                 // this will be used instead of the current location in SaveToDB
 
+                SetTeleportState(TeleportState.WaitingForSuspendTokenResponse);
+
                 if (!GetSession().PlayerLogout())
                 {
                     ++m_newWorldCounter;
@@ -2228,11 +2223,6 @@ namespace Game.Entities
                     suspendToken.Reason = options.HasAnyFlag(TeleportToOptions.Seamless) ? 2 : 1u;
                     SendPacket(suspendToken);
                 }
-
-                // move packet sent by client always after far teleport
-                // code for finish transfer to new map called in WorldSession.HandleMoveWorldportAckOpcode at client packet
-                SetSemaphoreTeleportFar(true);
-
             }
             return true;
         }
@@ -7931,13 +7921,20 @@ namespace Game.Entities
             return pOther.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.MaxRecruitAFriendDistance);
         }
 
+        public TeleportState GetTeleportState() { return m_teleport_state; }
+        public void SetTeleportState(TeleportState state) { m_teleport_state = state; }
         public TeleportToOptions GetTeleportOptions() { return m_teleport_options; }
-        public bool IsBeingTeleported() { return IsBeingTeleportedNear() || IsBeingTeleportedFar(); }
-        public bool IsBeingTeleportedNear() { return mSemaphoreTeleport_Near; }
-        public bool IsBeingTeleportedFar() { return mSemaphoreTeleport_Far; }
-        public bool IsBeingTeleportedSeamlessly() { return IsBeingTeleportedFar() && m_teleport_options.HasAnyFlag(TeleportToOptions.Seamless); }
-        public void SetSemaphoreTeleportNear(bool semphsetting) { mSemaphoreTeleport_Near = semphsetting; }
-        public void SetSemaphoreTeleportFar(bool semphsetting) { mSemaphoreTeleport_Far = semphsetting; }
+        public bool IsBeingTeleported() { return m_teleport_state != TeleportState.NotTeleporting; }
+        public bool IsBeingTeleportedNear()
+        {
+            return m_teleport_state == TeleportState.DelayedTeleport || m_teleport_state == TeleportState.WaitingForTeleportAck;
+        }
+        public bool IsBeingTeleportedFar()
+        {
+            return m_teleport_state == TeleportState.DelayedWorldPort
+            || m_teleport_state == TeleportState.WaitingForSuspendTokenResponse
+            || m_teleport_state == TeleportState.WaitingForWorldPortAck;
+        }
 
         public int GetNewWorldCounter() { return m_newWorldCounter; }
 

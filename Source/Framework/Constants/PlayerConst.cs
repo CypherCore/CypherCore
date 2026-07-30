@@ -311,6 +311,19 @@ namespace Framework.Constants
         Seamless = 0x80
     }
 
+    public enum TeleportState
+    {
+        NotTeleporting,
+        Initiated,
+        // destination is on same map and instance
+        DelayedTeleport,
+        WaitingForTeleportAck,
+        // destination is on different map or different instance of the same map
+        DelayedWorldPort,
+        WaitingForSuspendTokenResponse,
+        WaitingForWorldPortAck
+    }
+
     /// Type of environmental damages
     public enum EnviromentalDamage
     {

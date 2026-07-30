@@ -83,14 +83,12 @@ namespace Game.Entities
         uint m_lastFallTime;
         float m_lastFallZ;
         TeleportLocation teleportDest;
+        TeleportState m_teleport_state;
         TeleportToOptions m_teleport_options;
         uint m_teleportSpellId;
         int m_newWorldCounter;
-        bool mSemaphoreTeleport_Near;
-        bool mSemaphoreTeleport_Far;
         PlayerDelayedOperations m_DelayedOperations;
         bool m_bCanDelayTeleport;
-        bool m_bHasDelayedTeleport;
 
         PlayerUnderwaterState m_MirrorTimerFlags;
         PlayerUnderwaterState m_MirrorTimerFlagsLast;
