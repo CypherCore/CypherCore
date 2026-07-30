@@ -4251,7 +4251,7 @@ namespace Game.Spells
                     }
                     break;
                 default:
-                    return 0.0;
+                    break;
             }
 
             return Math.Clamp(value, MinValue, MaxValue);
