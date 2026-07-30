@@ -1001,18 +1001,23 @@ namespace Game.Scripting
             return m_spell.effectInfo;
         }
 
+        public int GetEffectValueAsInt()
+        {
+            return (int)GetEffectValue();
+        }
+
         // method avalible only in EffectHandler method
-        public int GetEffectValue()
+        public double GetEffectValue()
         {
             if (!IsInEffectHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitDefaultEffect was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return 0;
             }
-            return m_spell.damage;
+            return m_spell.effectValue;
         }
 
-        public void SetEffectValue(int value)
+        public void SetEffectValue(double value)
         {
             if (!IsInEffectHook())
             {
@@ -1020,7 +1025,7 @@ namespace Game.Scripting
                 return;
             }
 
-            m_spell.damage = value;
+            m_spell.effectValue = Math.Clamp(value, SpellEffectInfo.MinValue, SpellEffectInfo.MaxValue);
         }
 
         public float GetEffectVariance()
@@ -1212,7 +1217,7 @@ namespace Game.Scripting
         public delegate void AuraEffectApplicationModeDelegate(AuraEffect aura, AuraEffectHandleModes auraMode);
         public delegate void AuraEffectPeriodicDelegate(AuraEffect aura);
         public delegate void AuraEffectUpdatePeriodicDelegate(AuraEffect aura);
-        public delegate void AuraEffectCalcAmountDelegate(AuraEffect aura, ref int amount, ref bool canBeRecalculated);
+        public delegate void AuraEffectCalcAmountDelegate(AuraEffect aura, ref double amount, ref bool canBeRecalculated);
         public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
         public delegate void AuraEffectCalcSpellModDelegate(AuraEffect aura, ref SpellModifier spellMod);
         public delegate void AuraEffectCalcCritChanceFnType(AuraEffect aura, Unit victim, ref float critChance);
@@ -1325,7 +1330,7 @@ namespace Game.Scripting
                 _callImpl = callImpl;
             }
 
-            public void Call(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+            public void Call(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
             {
                 _callImpl(aurEff, ref amount, ref canBeRecalculated);
             }
@@ -1766,7 +1771,7 @@ namespace Game.Scripting
 
         // executed when aura effect calculates amount
         // example: DoEffectCalcAmount += AuraEffectCalcAmounFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
-        // where function is: void function (AuraEffect aurEff, int& amount, bool& canBeRecalculated);
+        // where function is: void function (AuraEffect aurEff, double& amount, bool& canBeRecalculated);
         public List<EffectCalcAmountHandler> DoEffectCalcAmount = new();
 
         // executed when aura effect calculates periodic data

@@ -386,9 +386,9 @@ namespace Game.Spells
                     }
 
                     {
-                        float calcRecoveryRate(AuraEffect modRecoveryRate)
+                        double calcRecoveryRate(AuraEffect modRecoveryRate)
                         {
-                            float rate = 100.0f / (Math.Max(modRecoveryRate.GetAmount(), -99.0f) + 100.0f);
+                            double rate = 100.0 / (Math.Max(modRecoveryRate.GetAmount(), -99.0) + 100.0);
                             if (baseCooldown <= TimeSpan.FromHours(1)
                                 && !spellInfo.HasAttribute(SpellAttr6.IgnoreForModTimeRate)
                                 && !modRecoveryRate.GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.IgnoreDuringCooldownTimeRateCalculation))
@@ -398,7 +398,7 @@ namespace Game.Spells
                         }
 
 
-                        float recoveryRate = 1.0f;
+                        double recoveryRate = 1.0f;
                         foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModRecoveryRate))
                             if (modRecoveryRate.IsAffectingSpell(spellInfo))
                                 recoveryRate *= calcRecoveryRate(modRecoveryRate);
@@ -407,14 +407,14 @@ namespace Game.Spells
                             if (spellInfo.HasLabel((uint)modRecoveryRate.GetMiscValue()) || (modRecoveryRate.GetMiscValueB() != 0 && spellInfo.HasLabel((uint)modRecoveryRate.GetMiscValueB())))
                                 recoveryRate *= calcRecoveryRate(modRecoveryRate);
 
-                        if (recoveryRate > 0.0f)
+                        if (recoveryRate > 0.0)
                         {
                             cooldown = TimeSpan.FromMilliseconds((long)(cooldown.TotalMilliseconds * recoveryRate));
                             categoryCooldown = TimeSpan.FromMilliseconds((long)(categoryCooldown.TotalMilliseconds * recoveryRate));
                         }
                     }
 
-                    int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
+                    int cooldownMod = (int)_owner.GetTotalAuraModifier(AuraType.ModCooldown);
                     if (cooldownMod != 0)
                     {
                         // Apply SPELL_AURA_MOD_COOLDOWN only to own spells
@@ -430,7 +430,7 @@ namespace Game.Spells
                     // Note: This aura applies its modifiers to all cooldowns of spells with set category, not to category cooldown only
                     if (categoryId != 0)
                     {
-                        int categoryModifier = _owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
+                        int categoryModifier = (int)_owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
                         if (categoryModifier != 0)
                         {
                             if (cooldown > TimeSpan.Zero)
@@ -987,7 +987,7 @@ namespace Game.Spells
                 return 0;
 
             int charges = chargeCategoryEntry.MaxCharges;
-            charges += _owner.GetTotalAuraModifierByMiscValue(AuraType.ModMaxCharges, (int)chargeCategoryId);
+            charges += (int)_owner.GetTotalAuraModifierByMiscValue(AuraType.ModMaxCharges, (int)chargeCategoryId);
             return charges;
         }
 
@@ -997,36 +997,35 @@ namespace Game.Spells
             if (chargeCategoryEntry == null)
                 return 0;
 
-            int recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
+            double recoveryTime = chargeCategoryEntry.ChargeRecoveryTime;
             recoveryTime += _owner.GetTotalAuraModifierByMiscValue(AuraType.ChargeRecoveryMod, (int)chargeCategoryId);
 
             foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModChargeRecoveryByTypeMask))
                 if ((modRecoveryRate.GetMiscValue() & chargeCategoryEntry.TypeMask) != 0)
                     recoveryTime += modRecoveryRate.GetAmount();
 
-            float recoveryTimeF = recoveryTime;
-            recoveryTimeF *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
+            recoveryTime *= _owner.GetTotalAuraMultiplierByMiscValue(AuraType.ChargeRecoveryMultiplier, (int)chargeCategoryId);
 
             if (_owner.HasAuraType(AuraType.ChargeRecoveryAffectedByHaste))
-                recoveryTimeF *= _owner.m_unitData.ModSpellHaste;
+                recoveryTime *= _owner.m_unitData.ModSpellHaste;
 
             if (_owner.HasAuraTypeWithMiscvalue(AuraType.ChargeRecoveryAffectedByHasteRegen, (int)chargeCategoryId))
-                recoveryTimeF *= _owner.m_unitData.ModHasteRegen;
+                recoveryTime *= _owner.m_unitData.ModHasteRegen;
 
             foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModChargeRecoveryRate))
                 if (modRecoveryRate.GetMiscValue() == chargeCategoryId)
-                    recoveryTimeF *= 100.0f / (Math.Max(modRecoveryRate.GetAmount(), -99.0f) + 100.0f);
+                    recoveryTime *= 100.0 / (Math.Max(modRecoveryRate.GetAmount(), -99.0) + 100.0);
 
             foreach (AuraEffect modRecoveryRate in _owner.GetAuraEffectsByType(AuraType.ModChargeRecoveryRateByTypeMask))
                 if ((modRecoveryRate.GetMiscValue() & chargeCategoryEntry.TypeMask) != 0)
-                    recoveryTimeF *= 100.0f / (Math.Max(modRecoveryRate.GetAmount(), -99.0f) + 100.0f);
+                    recoveryTime *= 100.0 / (Math.Max(modRecoveryRate.GetAmount(), -99.0) + 100.0);
 
             if (TimeSpan.FromMilliseconds(chargeCategoryEntry.ChargeRecoveryTime) <= TimeSpan.FromHours(1)
                 && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.IgnoreForModTimeRate)
                 && !chargeCategoryEntry.HasFlag(SpellCategoryFlags.CooldownInDays))
-                recoveryTimeF *= _owner.m_unitData.ModTimeRate;
+                recoveryTime *= _owner.m_unitData.ModTimeRate;
 
-            return (int)Math.Floor(recoveryTimeF);
+            return (int)Math.Floor(recoveryTime);
         }
 
         public bool HasGlobalCooldown(SpellInfo spellInfo)

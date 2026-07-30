@@ -479,7 +479,7 @@ struct MiscConst
     public const uint QuestDefenderOfAzerothAlliance = 58902;
     public const uint QuestDefenderOfAzerothHorde = 58903;
 
-    public static float GetBonusMultiplier(Unit unit, uint spellId)
+    public static double GetBonusMultiplier(Unit unit, uint spellId)
     {
         // Note: if caster is not in a raid setting, is in PvP or while in arena combat with 5 or less allied players.
         if (!unit.GetMap().IsRaid() || !unit.GetMap().IsBattleground())
@@ -513,7 +513,7 @@ struct MiscConst
                     effIndex = 3;
                     break;
                 default:
-                    return 0.0f;
+                    return 0.0;
             }
 
             AuraEffect healingIncreaseEffect = unit.GetAuraEffect(bonusSpellId, effIndex);
@@ -523,7 +523,7 @@ struct MiscConst
             return Global.SpellMgr.GetSpellInfo(bonusSpellId, Difficulty.None).GetEffect(effIndex).CalcValue(unit);
         }
 
-        return 0.0f;
+        return 0.0;
     }
 }
 
@@ -535,7 +535,7 @@ class spell_gen_absorb0_hitlimit1 : AuraScript
     public override bool Load()
     {
         // Max absorb stored in 1 dummy effect
-        limit = (uint)GetSpellInfo().GetEffect(1).CalcValue();
+        limit = (uint)GetSpellInfo().GetEffect(1).CalcValueAsInt();
         return true;
     }
 
@@ -725,7 +725,7 @@ class spell_gen_arena_drink : AuraScript
             isPeriodic = false;
     }
 
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         AuraEffect regen = GetAura().GetEffect(0);
         if (regen == null)
@@ -1021,7 +1021,7 @@ class spell_gen_blood_reserve : AuraScript
 
         Unit caster = eventInfo.GetActionTarget();
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, aurEff.GetAmount());
         caster.CastSpell(caster, SpellIds.GenBloodReserveHeal, args);
         caster.RemoveAura(SpellIds.GenBloodReserveAura);
     }
@@ -1145,19 +1145,19 @@ class spell_gen_burning_depths_necrolyte_image : AuraScript
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellEffect((spellInfo.Id, 2))
-            && ValidateSpellInfo((uint)spellInfo.GetEffect(2).CalcValue());
+            && ValidateSpellInfo((uint)spellInfo.GetEffect(2).CalcValueAsInt());
     }
 
     void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         Unit caster = GetCaster();
         if (caster != null)
-            caster.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValue());
+            caster.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValueAsInt());
     }
 
     void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
-        GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(2).CalcValue(), GetCasterGUID());
+        GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(2).CalcValueAsInt(), GetCasterGUID());
     }
 
     public override void Register()
@@ -1212,7 +1212,7 @@ class spell_gen_chains_of_ice : AuraScript
         if (slow == null)
             return;
 
-        int newAmount = Math.Min(slow.GetAmount() + aurEff.GetAmount(), 0);
+        double newAmount = Math.Min(slow.GetAmount() + aurEff.GetAmount(), 0);
         slow.ChangeAmount(newAmount);
     }
 
@@ -1238,7 +1238,7 @@ class spell_gen_chaos_blast : SpellScript
         if (target != null)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, basepoints0);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, basepoints0);
             caster.CastSpell(target, SpellIds.ChaosBlast, args);
         }
     }
@@ -1270,7 +1270,7 @@ class spell_gen_clone : SpellScript
     void HandleScriptEffect(uint effIndex)
     {
         PreventHitDefaultEffect(effIndex);
-        GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+        GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValueAsInt(), true);
     }
 
     public override void Register()
@@ -1294,7 +1294,7 @@ class spell_gen_clone_weapon : SpellScript
     void HandleScriptEffect(uint effIndex)
     {
         PreventHitDefaultEffect(effIndex);
-        GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValue(), true);
+        GetHitUnit().CastSpell(GetCaster(), (uint)GetEffectValueAsInt(), true);
     }
 
     public override void Register()
@@ -1431,7 +1431,7 @@ class spell_gen_consumption : SpellScript
     {
         SpellInfo createdBySpell = Global.SpellMgr.GetSpellInfo(GetCaster().m_unitData.CreatedBySpell, GetCastDifficulty());
         if (createdBySpell != null)
-            damage = createdBySpell.GetEffect(1).CalcValue();
+            damage = createdBySpell.GetEffect(1).CalcValueAsInt();
     }
 
     public override void Register()
@@ -2208,14 +2208,14 @@ class spell_gen_gift_of_naaru : AuraScript
         return ValidateSpellEffect((spellInfo.Id, 1));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         if (GetCaster() == null || aurEff.GetTotalTicks() == 0)
             return;
 
-        float healPct = GetEffectInfo(1).CalcValue() / 100.0f;
-        float heal = healPct * GetCaster().GetMaxHealth();
-        int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
+        double healPct = GetEffectInfo(1).CalcValue() / 100.0;
+        double heal = healPct * GetCaster().GetMaxHealth();
+        double healTick = Math.Floor(heal / aurEff.GetTotalTicks());
         amount += healTick;
     }
 
@@ -2369,9 +2369,9 @@ class spell_gen_increase_stats_buff : SpellScript
     void HandleDummy(uint effIndex)
     {
         if (GetHitUnit().IsInRaidWith(GetCaster()))
-            GetCaster().CastSpell(GetCaster(), (uint)GetEffectValue() + 1, true); // raid buff
+            GetCaster().CastSpell(GetCaster(), (uint)GetEffectValueAsInt() + 1, true); // raid buff
         else
-            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true); // single-target buff
+            GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValueAsInt(), true); // single-target buff
     }
 
     public override void Register()
@@ -2702,8 +2702,8 @@ class spell_gen_oracle_wolvar_reputation : SpellScript
     void HandleDummy(uint effIndex)
     {
         Player player = GetCaster().ToPlayer();
-        uint factionId = (uint)GetEffectInfo().CalcValue();
-        int repChange = GetEffectInfo(1).CalcValue();
+        uint factionId = (uint)GetEffectInfo().CalcValueAsInt();
+        int repChange = GetEffectInfo(1).CalcValueAsInt();
 
         var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
         if (factionEntry == null)
@@ -2800,7 +2800,7 @@ class spell_gen_player_say : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
+        return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValueAsInt());
     }
 
     void HandleScript(uint effIndex)
@@ -2808,7 +2808,7 @@ class spell_gen_player_say : SpellScript
         // Note: target here is always player; caster here is gameobject, creature or player (self cast)
         Unit target = GetHitUnit();
         if (target != null)
-            target.Say((uint)GetEffectValue(), target);
+            target.Say((uint)GetEffectValueAsInt(), target);
     }
 
     public override void Register()
@@ -2831,9 +2831,9 @@ class spell_gen_proc_below_pct_damaged : AuraScript
         if (damageInfo == null || damageInfo.GetDamage() == 0)
             return false;
 
-        int pct = GetSpellInfo().GetEffect(0).CalcValue();
+        double pct = GetSpellInfo().GetEffect(0).CalcValue();
 
-        if (eventInfo.GetActionTarget().HealthBelowPctDamaged(pct, damageInfo.GetDamage()))
+        if (eventInfo.GetActionTarget().HealthBelowPctDamaged((float)pct, damageInfo.GetDamage()))
             return true;
 
         return false;
@@ -3098,7 +3098,7 @@ class spell_gen_remove_on_health_pct : AuraScript
     {
         // they apply damage so no need to check for ticks here
 
-        if (GetTarget().HealthAbovePct(GetEffectInfo(1).CalcValue()))
+        if (GetTarget().HealthAbovePct((float)GetEffectInfo(1).CalcValue()))
         {
             Remove(AuraRemoveMode.EnemySpell);
             PreventDefaultAction();
@@ -3213,7 +3213,7 @@ class spell_gen_replenishment_aura : AuraScript
         return GetUnitOwner().GetPowerType() == PowerType.Mana;
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         switch (GetSpellInfo().Id)
         {
@@ -3270,7 +3270,7 @@ class spell_gen_running_wild_aura : AuraScript
         target.Mount(SharedConst.DisplayIdHiddenMount, 0, 0);
 
         // cast speed aura
-        var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
+        var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmountAsInt());
         if (mountCapability != null)
             target.CastSpell(target, mountCapability.ModSpellAuraID, TriggerCastFlags.FullMask);
     }
@@ -3310,7 +3310,7 @@ class spell_gen_two_forms : SpellScript
         if (target.HasAuraType(AuraType.WorgenAlteredForm))
             target.RemoveAurasByType(AuraType.WorgenAlteredForm);
         else    // Basepoints 1 for this aura control whether to trigger transform transition animation or not.
-            target.CastSpell(target, SpellIds.AlteredForm, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 1));
+            target.CastSpell(target, SpellIds.AlteredForm, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, 1));
     }
 
     public override void Register()
@@ -3443,7 +3443,7 @@ class spell_gen_throw_shield : SpellScript
     void HandleScriptEffect(uint effIndex)
     {
         PreventHitDefaultEffect(effIndex);
-        GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+        GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValueAsInt(), true);
     }
 
     public override void Register()
@@ -3693,7 +3693,7 @@ class spell_gen_vampiric_touch : AuraScript
 
         Unit caster = eventInfo.GetActor();
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)(damageInfo.GetDamage() / 2));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)(damageInfo.GetDamage() / 2));
         caster.CastSpell(caster, SpellIds.VampiricTouchHeal, args);
     }
 
@@ -3711,22 +3711,22 @@ class spell_gen_vehicle_scaling : AuraScript
         return GetCaster() != null && GetCaster().IsPlayer();
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Unit caster = GetCaster();
         float factor;
-        ushort baseItemLevel;
+        float baseItemLevel;
 
         /// @todo Reserach coeffs for different vehicles
         switch (GetId())
         {
             case SpellIds.GearScaling:
                 factor = 1.0f;
-                baseItemLevel = 205;
+                baseItemLevel = 205.0f;
                 break;
             default:
                 factor = 1.0f;
-                baseItemLevel = 170;
+                baseItemLevel = 170.0f;
                 break;
         }
 
@@ -3734,7 +3734,7 @@ class spell_gen_vehicle_scaling : AuraScript
         if (avgILvl < baseItemLevel)
             return;                     /// @todo Research possibility of scaling down
 
-        amount = (ushort)((avgILvl - baseItemLevel) * factor);
+        amount = (avgILvl - baseItemLevel) * factor;
     }
 
     public override void Register()
@@ -3802,7 +3802,7 @@ class spell_gen_whisper_to_controller : SpellScript
 {
     public override bool Validate(SpellInfo spellInfo)
     {
-        return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValue());
+        return CliDB.BroadcastTextStorage.HasRecord((uint)spellInfo.GetEffect(0).CalcValueAsInt());
     }
 
     void HandleScript(uint effIndex)
@@ -3812,7 +3812,7 @@ class spell_gen_whisper_to_controller : SpellScript
         {
             Player target = casterSummon.GetSummonerUnit().ToPlayer();
             if (target != null)
-                casterSummon.Whisper((uint)GetEffectValue(), target, false);
+                casterSummon.Whisper((uint)GetEffectValueAsInt(), target, false);
         }
     }
 
@@ -3879,7 +3879,7 @@ class spell_gen_eject_passenger : SpellScript
     {
         if (!ValidateSpellEffect((spellInfo.Id, 0)))
             return false;
-        if (spellInfo.GetEffect(0).CalcValue() < 1)
+        if (spellInfo.GetEffect(0).CalcValueAsInt() < 1)
             return false;
         return true;
     }
@@ -3889,7 +3889,7 @@ class spell_gen_eject_passenger : SpellScript
         Vehicle vehicle = GetHitUnit().GetVehicleKit();
         if (vehicle != null)
         {
-            Unit passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
+            Unit passenger = vehicle.GetPassenger((sbyte)(GetEffectValueAsInt() - 1));
             if (passenger != null)
                 passenger.ExitVehicle();
         }
@@ -4019,7 +4019,7 @@ class spell_gen_mixology_bonus : AuraScript
             bonus = value;
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         if (GetCaster().HasAura(SpellIds.Mixology) && GetCaster().HasSpell(GetEffectInfo(0).TriggerSpell))
         {
@@ -4027,12 +4027,12 @@ class spell_gen_mixology_bonus : AuraScript
             {
                 case SpellIds.WeakTrollsBloodElixir:
                 case SpellIds.MagebloodElixir:
-                    bonus = amount;
+                    bonus = (int)amount;
                     break;
                 case SpellIds.ElixirOfFrostPower:
                 case SpellIds.LesserFlaskOfToughness:
                 case SpellIds.LesserFlaskOfResistance:
-                    bonus = MathFunctions.CalculatePct(amount, 80);
+                    bonus = (int)MathFunctions.CalculatePct(amount, 80);
                     break;
                 case SpellIds.ElixirOfMinorDefense:
                 case SpellIds.ElixirOfLionsStrength:
@@ -4049,7 +4049,7 @@ class spell_gen_mixology_bonus : AuraScript
                 case SpellIds.FlaskOfRelentlessAssault:
                 case SpellIds.FlaskOfStoneblood:
                 case SpellIds.ElixirOfMinorAccuracy:
-                    bonus = MathFunctions.CalculatePct(amount, 50);
+                    bonus = (int)MathFunctions.CalculatePct(amount, 50);
                     break;
                 case SpellIds.ElixirOfProtection:
                     bonus = 280;
@@ -4393,7 +4393,7 @@ class spell_freezing_circle : SpellScript
 
         SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
         if (spellInfo != null && !spellInfo.GetEffects().Empty())
-            SetHitDamage(spellInfo.GetEffect(0).CalcValue());
+            SetHitDamage(spellInfo.GetEffect(0).CalcValueAsInt());
     }
 
     public override void Register()
@@ -4435,10 +4435,10 @@ class spell_gen_cannon_blast : SpellScript
 
     void HandleScript(uint effIndex)
     {
-        int bp = GetEffectValue();
+        double bp = GetEffectValue();
         Unit target = GetHitUnit();
         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-        args.AddSpellMod(SpellValueMod.BasePoint0, bp);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, bp);
         target.CastSpell(target, SpellIds.CannonBlastDamage, args);
     }
 
@@ -4485,7 +4485,7 @@ class spell_gen_anetheron_summon_towering_infernal : SpellScript
 {
     void HandleDummy(uint effIndex)
     {
-        GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+        GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValueAsInt(), true);
     }
 
     public override void Register()
@@ -4550,7 +4550,7 @@ class spell_gen_azgalor_rain_of_fire_hellfire_citadel : SpellScript
 {
     void HandleDummy(uint effIndex)
     {
-        GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+        GetCaster().CastSpell(GetHitUnit(), (uint)GetEffectValueAsInt(), true);
     }
 
     public override void Register()
@@ -4625,7 +4625,7 @@ class spell_gen_boost_2_0_paladin_priest_watch_for_shield : AuraScript
 [Script] // 282559 - Enlisted
 class spell_gen_war_mode_enlisted : AuraScript
 {
-    void CalcWarModeBonus(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcWarModeBonus(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player target = GetUnitOwner().ToPlayer();
         if (target == null)
@@ -4919,7 +4919,7 @@ class spell_gen_reverse_cast_target_to_caster_triggered : SpellScript
 {
     void HandleScript(uint effIndex)
     {
-        GetHitUnit().CastSpell(GetCaster(), (uint)GetSpellInfo().GetEffect(effIndex).CalcValue(), true);
+        GetHitUnit().CastSpell(GetCaster(), (uint)GetSpellInfo().GetEffect(effIndex).CalcValueAsInt(), true);
     }
 
     public override void Register()
@@ -5454,7 +5454,7 @@ class spell_gen_force_phase_update : AuraScript
 [Script("spell_gen_no_npc_damage_below_override_70", 70.0f)]
 class spell_gen_no_npc_damage_below_override(float healthPct) : AuraScript
 {
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         amount = -1;
     }

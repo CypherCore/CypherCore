@@ -119,7 +119,7 @@ namespace Scripts.Spells.Warrior
 
         bool ValidateProc(AuraEffect aurEff, ProcEventInfo eventInfo, ChrSpecialization spec)
         {
-            if (aurEff.GetAmount() == 0)
+            if (aurEff.GetAmountAsInt() == 0)
                 return false;
 
             Player player = eventInfo.GetActor().ToPlayer();
@@ -166,7 +166,7 @@ namespace Scripts.Spells.Warrior
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo, uint[] spellIds)
         {
             int rageCost = (int)eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Rage) / 10; // db values are 10x the actual rage cost
-            float multiplier = (float)(rageCost) / (float)(aurEff.GetAmount());
+            double multiplier = (float)rageCost / aurEff.GetAmount();
             TimeSpan cooldownMod = -(multiplier * CooldownReduction);
 
             foreach (uint spellId in spellIds)
@@ -429,7 +429,7 @@ namespace Scripts.Spells.Warrior
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.InForTheKill, Difficulty.None);
                 if (spellInfo != null)
                 {
-                    if (target.HealthBelowPct(spellInfo.GetEffect(2).CalcValue(caster)))
+                    if (target.HealthBelowPct((float)spellInfo.GetEffect(2).CalcValue(caster)))
                         _bonusHaste = true;
                 }
             }
@@ -443,9 +443,9 @@ namespace Scripts.Spells.Warrior
                 return;
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, spellInfo.GetEffect(0).CalcValue(caster));
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, spellInfo.GetEffect(0).CalcValue(caster));
             if (_bonusHaste)
-                args.AddSpellMod(SpellValueMod.BasePoint0, spellInfo.GetEffect(1).CalcValue(caster));
+                args.AddSpellMod(SpellValueModFloat.BasePoint0, spellInfo.GetEffect(1).CalcValue(caster));
             caster.CastSpell(caster, SpellIds.InForTheKillHaste, args);
         }
 
@@ -469,7 +469,7 @@ namespace Scripts.Spells.Warrior
             var rageCost = eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Rage);
             if (rageCost.HasValue)
                 GetTarget().CastSpell(null, SpellIds.CriticalThinkingEnergize, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                    .AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(rageCost.Value, aurEff.GetAmount())));
+                    .AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct(rageCost.Value, aurEff.GetAmount())));
         }
 
         public override void Register()
@@ -503,7 +503,7 @@ namespace Scripts.Spells.Warrior
             {
                 AuraEffect aurEff = caster.GetAuraEffect(SpellIds.DeftExperience, 1);
                 if (aurEff != null)
-                    enrageAura.SetDuration(enrageAura.GetDuration() + aurEff.GetAmount());
+                    enrageAura.SetDuration(enrageAura.GetDuration() + aurEff.GetAmountAsInt());
             }
         }
 
@@ -784,7 +784,7 @@ namespace Scripts.Spells.Warrior
 
             Unit target = GetTarget();
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)_nextHealAmount);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)_nextHealAmount);
 
             target.CastSpell(target, SpellIds.FueledByViolenceHeal, args);
             _nextHealAmount = 0;
@@ -900,7 +900,7 @@ namespace Scripts.Spells.Warrior
     }
 
     [Script] // 12950 - Improved Whirlwind (attached to 190411 - Whirlwind)
-    class spell_improved_whirlwind : SpellScript
+    class spell_warr_improved_whirlwind : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -923,16 +923,16 @@ namespace Scripts.Spells.Warrior
             if (caster == null)
                 return;
 
-            int ragePerTarget = GetEffectValue();
-            int baseRage = GetEffectInfo(0).CalcValue();
-            int maxRage = baseRage + (ragePerTarget * GetEffectInfo(2).CalcValue());
+            int ragePerTarget = GetEffectValueAsInt();
+            int baseRage = GetEffectInfo(0).CalcValueAsInt();
+            int maxRage = baseRage + (ragePerTarget * GetEffectInfo(2).CalcValueAsInt());
             int rageGained = (int)Math.Min(baseRage + (targetsHit * ragePerTarget), maxRage);
 
             caster.CastSpell(null, SpellIds.WhirlwindEnergize, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringSpell = GetSpell(),
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, rageGained * 10) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, (double)(rageGained * 10)) }
             });
 
             WarriorMisc.ApplyWhirlwindCleaveAura(caster, GetCastDifficulty(), GetSpell());
@@ -1046,9 +1046,9 @@ namespace Scripts.Spells.Warrior
             PreventDefaultAction();
 
             Unit target = eventInfo.GetActionTarget();
-            int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetEffectInfo(1).CalcValue());
+            double bp0 = MathFunctions.CalculatePct(target.GetMaxHealth(), GetEffectInfo(1).CalcValue());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, bp0);
             target.CastSpell(null, SpellIds.Stoicism, args);
         }
 
@@ -1101,7 +1101,7 @@ namespace Scripts.Spells.Warrior
         {
             // it is currently impossible to have Wrath and Fury without having Improved Raging Blow, but we will check it anyway
             Unit caster = GetCaster();
-            int value = 0;
+            double value = 0;
             if (caster.HasAura(SpellIds.ImprovedRagingBlow))
                 value = GetEffectValue();
 
@@ -1135,7 +1135,7 @@ namespace Scripts.Spells.Warrior
         void HandleScript(uint effIndex)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, GetHitUnit().CountPctFromMaxHealth((float)GetEffectValue()));
 
             GetCaster().CastSpell(GetHitUnit(), SpellIds.RallyingCry, args);
         }
@@ -1171,7 +1171,7 @@ namespace Scripts.Spells.Warrior
             if (minTargetCount == null || cooldownReduction == null)
                 return;
 
-            if (GetUnitTargetCountForEffect(0) >= minTargetCount.GetAmount())
+            if (GetUnitTargetCountForEffect(0) >= minTargetCount.GetAmountAsInt())
                 GetCaster().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-cooldownReduction.GetAmount()));
         }
 
@@ -1385,7 +1385,7 @@ namespace Scripts.Spells.Warrior
                 else
                 {
                     CastSpellExtraArgs args = new(aurEff);
-                    args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage());
+                    args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)damageInfo.GetDamage());
                     GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack1, args);
                 }
             }
@@ -1425,7 +1425,7 @@ namespace Scripts.Spells.Warrior
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringSpell = eventInfo.GetProcSpell(),
-                SpellValueOverrides = { new(SpellValueMod.AuraStack, aurEff.GetAmount()) }
+                SpellValueOverrides = { new(SpellValueMod.AuraStack, aurEff.GetAmountAsInt()) }
             });
         }
 
@@ -1478,9 +1478,9 @@ namespace Scripts.Spells.Warrior
         {
             Unit target = eventInfo.GetActionTarget();
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetEffect(0).GetPeriodicTickCount());
+            double damage = (MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetEffect(0).GetPeriodicTickCount());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.AddSpellMod(SpellValueMod.BasePoint0, damage);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, damage);
             GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);
         }
 
@@ -1525,7 +1525,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleProc(ProcEventInfo eventInfo)
         {
-            int durationMs = GetEffect(1).GetAmount();
+            int durationMs = GetEffect(1).GetAmountAsInt();
 
             GetTarget().CastSpell(null, SpellIds.Recklessness, new CastSpellExtraArgs()
             {

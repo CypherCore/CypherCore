@@ -2776,7 +2776,7 @@ namespace Game.Spells
                     }
                 }
 
-                powerCost += unitCaster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
+                powerCost += (int)unitCaster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
                 {
                     return aurEff.GetMiscValue() == (int)power.PowerType && aurEff.IsAffectingSpell(this);
                 });
@@ -2816,7 +2816,7 @@ namespace Game.Spells
                         if ((aura.GetMiscValueB() & (1 << (int)power.PowerType)) == 0)
                             continue;
 
-                        powerCost += aura.GetAmount();
+                        powerCost += aura.GetAmountAsInt();
                     }
                 }
 
@@ -3287,7 +3287,7 @@ namespace Game.Spells
 
             //We need scaling level info for some auras that compute bp 0 or positive but should be debuffs
             float bpScalePerLevel = effect.RealPointsPerLevel;
-            int bp = effect.CalcValue();
+            double bp = effect.CalcValue();
             switch (spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
@@ -3989,6 +3989,9 @@ namespace Game.Spells
 
     public class SpellEffectInfo
     {
+        public const double MinValue = -2000000000.0;
+        public const double MaxValue = 2000000000.0;
+
         public SpellEffectInfo(SpellInfo spellInfo, SpellEffectRecord effect = null)
         {
             _spellInfo = spellInfo;
@@ -4090,12 +4093,22 @@ namespace Game.Spells
             return totalTicks;
         }
 
-        public int CalcValue(WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalcValueAsInt(WorldObject caster = null, double? basePoints = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        {
+            return (int)CalcValue(out _, caster, basePoints, target, castItemId, itemLevel);
+        }
+
+        public int CalcValueAsInt(out float variance, WorldObject caster = null, double? basePoints = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        {
+            return (int)CalcValue(out variance, caster, basePoints, target, castItemId, itemLevel);
+        }
+
+        public double CalcValue(WorldObject caster = null, double? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             return CalcValue(out _, caster, bp, target, castItemId, itemLevel);
         }
 
-        public int CalcValue(out float variance, WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        public double CalcValue(out float variance, WorldObject caster = null, double? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
             double basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
@@ -4189,7 +4202,59 @@ namespace Game.Spells
                 value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
 
 
-            return (int)Math.Round(value);
+            switch (Effect)
+            {
+                case SpellEffectName.SchoolDamage:
+                case SpellEffectName.EnvironmentalDamage:
+                case SpellEffectName.HealthLeech:
+                case SpellEffectName.Heal:
+                case SpellEffectName.WeaponDamageNoSchool:
+                case SpellEffectName.WeaponPercentDamage:
+                case SpellEffectName.WeaponDamage:
+                case SpellEffectName.HealMaxHealth:
+                case SpellEffectName.HealMechanical:
+                case SpellEffectName.NormalizedWeaponDmg:
+                case SpellEffectName.PowerDrain:
+                case SpellEffectName.Energize:
+                case SpellEffectName.PowerBurn:
+                    value = Math.Round(value);
+                    break;
+                case SpellEffectName.ApplyAura:
+                case SpellEffectName.PersistentAreaAura:
+                case SpellEffectName.ApplyAreaAuraParty:
+                case SpellEffectName.ApplyAreaAuraRaid:
+                case SpellEffectName.ApplyAreaAuraPet:
+                case SpellEffectName.ApplyAreaAuraFriend:
+                case SpellEffectName.ApplyAreaAuraEnemy:
+                case SpellEffectName.ApplyAreaAuraOwner:
+                case SpellEffectName.ApplyAuraOnPet:
+                case SpellEffectName.ApplyAreaAuraSummons:
+                    switch (ApplyAuraName)
+                    {
+                        case AuraType.PeriodicDamage:
+                        case AuraType.PeriodicHeal:
+                        case AuraType.PeriodicLeech:
+                        case AuraType.PeriodicHealthFunnel:
+                        case AuraType.PeriodicWeaponPercentDamage:
+                        case AuraType.DamageShield:
+                        case AuraType.ProcTriggerDamage:
+                        case AuraType.ObsModHealth:
+                        case AuraType.ObsModPower:
+                        case AuraType.PeriodicEnergize:
+                        case AuraType.PeriodicManaLeech:
+                        case AuraType.PeriodicDamagePercent:
+                        case AuraType.PowerBurn:
+                            value = Math.Round(value);
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    return 0.0;
+            }
+
+            return Math.Clamp(value, MinValue, MaxValue);
         }
 
         public double CalcBaseValue(WorldObject caster, Unit target, uint itemId, int itemLevel)
@@ -4261,7 +4326,10 @@ namespace Game.Spells
                 if (tempValue > 0.0f && tempValue < 1.0f)
                     tempValue = 1.0f;
 
-                return Math.Round(tempValue);
+                if (!_spellInfo.HasAttribute(SpellAttr12.UseFloatValuesForScalingAmounts))
+                    tempValue = MathF.Round(tempValue);
+
+                return tempValue;
             }
             else
             {
@@ -4285,10 +4353,12 @@ namespace Game.Spells
                     else if (caster != null && caster.IsUnit())
                         level = caster.ToUnit().GetLevel();
 
-                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None, 0) * BasePoints / 100.0f;
+                    tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None, 0) * tempValue / 100.0f;
+                    if (!_spellInfo.HasAttribute(SpellAttr12.UseFloatValuesForScalingAmounts))
+                        tempValue = MathF.Round(tempValue);
                 }
 
-                return Math.Round(tempValue);
+                return tempValue;
             }
         }
 

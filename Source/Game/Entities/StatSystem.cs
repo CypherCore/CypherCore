@@ -560,17 +560,17 @@ namespace Game.Entities
 
         public bool IsFullHealth() { return GetHealth() == GetMaxHealth(); }
 
-        public bool HealthBelowPct(int pct) { return GetHealth() < CountPctFromMaxHealth(pct); }
+        public bool HealthBelowPct(float pct) { return GetHealth() < CountPctFromMaxHealth(pct); }
 
-        public bool HealthBelowPctDamaged(int pct, uint damage) { return GetHealth() - damage < CountPctFromMaxHealth(pct); }
+        public bool HealthBelowPctDamaged(float pct, uint damage) { return GetHealth() - damage < CountPctFromMaxHealth(pct); }
 
-        public bool HealthAbovePct(int pct) { return GetHealth() > CountPctFromMaxHealth(pct); }
+        public bool HealthAbovePct(float pct) { return GetHealth() > CountPctFromMaxHealth(pct); }
 
-        public bool HealthAbovePctHealed(int pct, uint heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
+        public bool HealthAbovePctHealed(float pct, uint heal) { return GetHealth() + heal > CountPctFromMaxHealth(pct); }
 
-        public ulong CountPctFromMaxHealth(int pct) { return MathFunctions.CalculatePct(GetMaxHealth(), pct); }
+        public ulong CountPctFromMaxHealth(float pct) { return MathFunctions.CalculatePct(GetMaxHealth(), pct); }
 
-        public ulong CountPctFromCurHealth(int pct) { return MathFunctions.CalculatePct(GetHealth(), pct); }
+        public ulong CountPctFromCurHealth(float pct) { return MathFunctions.CalculatePct(GetHealth(), pct); }
 
         public virtual float GetHealthMultiplierForTarget(WorldObject target) { return 1.0f; }
 
@@ -759,11 +759,11 @@ namespace Game.Entities
                 {
                     if (effect.GetMiscValue() == (int)power)
                     {
-                        int effectAmount = effect.GetAmount();
+                        double effectAmount = effect.GetAmount();
                         uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
 
-                        float oldValueCheck = oldVal;
-                        float newValueCheck = newVal;
+                        double oldValueCheck = oldVal;
+                        double newValueCheck = newVal;
 
                         if (effect.GetAuraType() == AuraType.TriggerSpellOnPowerPct)
                         {
@@ -1096,12 +1096,12 @@ namespace Game.Entities
             return Math.Max(chance, 0.0f);
         }
 
-        public int GetMechanicResistChance(SpellInfo spellInfo)
+        public float GetMechanicResistChance(SpellInfo spellInfo)
         {
             if (spellInfo == null)
                 return 0;
 
-            int resistMech = 0;
+            float resistMech = 0;
             foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
                 if (!spellEffectInfo.IsEffect())
@@ -1110,12 +1110,12 @@ namespace Game.Entities
                 int effect_mech = (int)spellInfo.GetEffectMechanic(spellEffectInfo.EffectIndex);
                 if (effect_mech != 0)
                 {
-                    int temp = GetTotalAuraModifierByMiscValue(AuraType.ModMechanicResistance, effect_mech);
+                    float temp = GetTotalAuraModifierByMiscValue(AuraType.ModMechanicResistance, effect_mech);
                     if (resistMech < temp)
                         resistMech = temp;
                 }
             }
-            return Math.Max(resistMech, 0);
+            return Math.Max(resistMech, 0.0f);
         }
 
         public void ApplyModManaCostMultiplier(float manaCostMultiplier, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ManaCostMultiplier), manaCostMultiplier, apply); }
@@ -1338,7 +1338,7 @@ namespace Game.Entities
             var modDamageAuras = GetAuraEffectsByType(AuraType.ModDamageDone);
             for (int i = (int)SpellSchools.Holy; i < (int)SpellSchools.Max; ++i)
             {
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, i), modDamageAuras.Aggregate(0, (negativeMod, aurEff) =>
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ModDamageDoneNeg, i), (int)modDamageAuras.Aggregate(0.0, (negativeMod, aurEff) =>
                 {
                     if (aurEff.GetAmount() < 0 && Convert.ToBoolean(aurEff.GetMiscValue() & (1 << i)))
                         negativeMod += aurEff.GetAmount();
@@ -1886,7 +1886,7 @@ namespace Game.Entities
 
             Item weapon = GetWeaponForAttack(attack, true);
 
-            expertise += GetTotalAuraModifier(AuraType.ModExpertise, aurEff => aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon));
+            expertise += (int)GetTotalAuraModifier(AuraType.ModExpertise, aurEff => aurEff.GetSpellInfo().IsItemFitToSpellRequirements(weapon));
 
             if (expertise < 0)
                 expertise = 0;

@@ -83,7 +83,7 @@ class spell_gen_pet_calculate : AuraScript
         return true;
     }
 
-    void CalculateAmountCritSpell(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmountCritSpell(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player owner = GetCaster().GetOwner().ToPlayer();
         if (owner != null)
@@ -97,11 +97,11 @@ class spell_gen_pet_calculate : AuraScript
             // Increase crit spell from spell crit ratings
             CritSpell += owner.GetRatingBonusValue(CombatRating.CritSpell);
 
-            amount += (int)CritSpell;
+            amount += CritSpell;
         }
     }
 
-    void CalculateAmountCritMelee(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmountCritMelee(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player owner = GetCaster().GetOwner().ToPlayer();
         if (owner != null)
@@ -115,11 +115,11 @@ class spell_gen_pet_calculate : AuraScript
             // Increase crit melee from melee crit ratings
             CritMelee += owner.GetRatingBonusValue(CombatRating.CritMelee);
 
-            amount += (int)CritMelee;
+            amount += CritMelee;
         }
     }
 
-    void CalculateAmountMeleeHit(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmountMeleeHit(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player owner = GetCaster().GetOwner().ToPlayer();
         if (owner != null)
@@ -131,11 +131,11 @@ class spell_gen_pet_calculate : AuraScript
             // Increase hit melee from meele hit ratings
             HitMelee += owner.GetRatingBonusValue(CombatRating.HitMelee);
 
-            amount += (int)HitMelee;
+            amount += HitMelee;
         }
     }
 
-    void CalculateAmountSpellHit(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmountSpellHit(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player owner = GetCaster().GetOwner().ToPlayer();
         if (owner != null)
@@ -147,11 +147,11 @@ class spell_gen_pet_calculate : AuraScript
             // Increase hit spell from spell hit ratings
             HitSpell += owner.GetRatingBonusValue(CombatRating.HitSpell);
 
-            amount += (int)HitSpell;
+            amount += HitSpell;
         }
     }
 
-    void CalculateAmountExpertise(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmountExpertise(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player owner = GetCaster().GetOwner().ToPlayer();
         if (owner != null)
@@ -163,7 +163,7 @@ class spell_gen_pet_calculate : AuraScript
             // Increase Expertise from Expertise ratings
             Expertise += owner.GetRatingBonusValue(CombatRating.Expertise);
 
-            amount += (int)Expertise;
+            amount += Expertise;
         }
     }
 

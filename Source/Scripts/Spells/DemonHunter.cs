@@ -358,11 +358,11 @@ class spell_dh_chaos_theory : SpellScript
         if (min == null || max == null)
             return;
 
-        int critChance = RandomHelper.IRand(min.GetAmount(), max.GetAmount());
+        double critChance = RandomHelper.FRand(min.GetAmount(), max.GetAmount());
         caster.CastSpell(caster, SpellIds.ChaosTheoryCrit, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, critChance) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, critChance) }
         });
     }
 
@@ -446,7 +446,7 @@ class spell_dh_charred_warblades : AuraScript
         GetTarget().CastSpell(GetTarget(), SpellIds.CharredWarbladesHeal,
             new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
             .SetTriggeringAura(aurEff)
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)_healAmount));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, (int)_healAmount));
 
         _healAmount = 0;
     }
@@ -529,7 +529,7 @@ class spell_dh_collective_anguish_eye_beam : AuraScript
 [Script] // 320413 - Critical Chaos
 class spell_dh_critical_chaos : AuraScript
 {
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         AuraEffect amountHolder = GetEffect(1);
         if (amountHolder != null)
@@ -668,17 +668,17 @@ class spell_dh_darkglare_boon : AuraScript
         TimeSpan cooldown = TimeSpan.Zero;
         TimeSpan categoryCooldown = TimeSpan.Zero;
         SpellHistory.GetCooldownDurations(GetSpellInfo(), 0, ref cooldown, ref unused, ref categoryCooldown);
-        int reductionPct = RandomHelper.IRand(darkglareBoon.GetEffect(0).GetAmount(), darkglareBoon.GetEffect(1).GetAmount());
+        double reductionPct = RandomHelper.FRand(darkglareBoon.GetEffect(0).GetAmount(), darkglareBoon.GetEffect(1).GetAmount());
         TimeSpan cooldownReduction = TimeSpan.FromSeconds(MathFunctions.CalculatePct(MathF.Max((float)cooldown.TotalMilliseconds, (float)categoryCooldown.TotalMilliseconds), reductionPct));
 
-        int energizeValue = RandomHelper.IRand(darkglareBoon.GetEffect(2).GetAmount(), darkglareBoon.GetEffect(3).GetAmount());
+        double energizeValue = RandomHelper.FRand(darkglareBoon.GetEffect(2).GetAmount(), darkglareBoon.GetEffect(3).GetAmount());
 
         target.GetSpellHistory().ModifyCooldown(SpellIds.FelDevastation, -cooldownReduction);
 
         target.CastSpell(target, SpellIds.DarkglareBoonEnergize, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, energizeValue) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, energizeValue) }
         });
     }
 
@@ -696,7 +696,7 @@ class spell_dh_darkness : AuraScript
         return ValidateSpellEffect((spellInfo.Id, 1));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         // Set absorbtion amount to unlimited
         amount = -1;
@@ -793,7 +793,7 @@ class spell_dh_demonic(uint transformSpellId) : SpellScript
         if (demonic == null)
             return;
 
-        int duration = demonic.GetAmount() + GetSpell().GetChannelDuration();
+        int duration = demonic.GetAmountAsInt() + GetSpell().GetChannelDuration();
         Aura aura = caster.GetAura(transformSpellId);
         if (aura != null)
         {
@@ -861,7 +861,7 @@ class spell_dh_elysian_decree(uint primarySpellId) : SpellScript
 
     public override bool Load()
     {
-        _maxFragmentsToCreate = Global.SpellMgr.GetSpellInfo(primarySpellId, GetCastDifficulty()).GetEffect(2).CalcValue(GetCaster());
+        _maxFragmentsToCreate = Global.SpellMgr.GetSpellInfo(primarySpellId, GetCastDifficulty()).GetEffect(2).CalcValueAsInt(GetCaster());
         _fragmentsToCreate = _maxFragmentsToCreate;
         return true;
     }
@@ -1236,7 +1236,7 @@ class at_dh_inner_demon(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
         if (caster == null)
             return;
 
-        Position destPos = at.GetFirstCollisionPosition(spellInfo.GetEffect(0).CalcValue(caster) + at.GetMaxSearchRadius(), at.GetRelativeAngle(caster));
+        Position destPos = at.GetFirstCollisionPosition((float)(spellInfo.GetEffect(0).CalcValue(caster) + at.GetMaxSearchRadius()), at.GetRelativeAngle(caster));
         PathGenerator path = new(at);
 
         path.CalculatePath(destPos.GetPositionX(), destPos.GetPositionY(), destPos.GetPositionZ(), false);
@@ -1255,7 +1255,7 @@ class at_dh_inner_demon(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 [Script] // 388118 - Know Your Enemy
 class spell_dh_know_your_enemy : AuraScript
 {
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         AuraEffect amountHolder = GetEffect(1);
         if (amountHolder != null)
@@ -1304,7 +1304,7 @@ class spell_dh_last_resort : AuraScript
         target.CastSpell(target, SpellIds.MetamorphosisVengeanceTransform, castArgs);
         target.CastSpell(target, SpellIds.UncontainedFel, castArgs);
 
-        target.SetHealth(target.CountPctFromMaxHealth(GetEffectInfo(1).CalcValue(target)));
+        target.SetHealth(target.CountPctFromMaxHealth((float)GetEffectInfo(1).CalcValue(target)));
     }
 
     public override void Register()
@@ -1575,7 +1575,7 @@ class spell_dh_shattered_destiny : AuraScript
             return false;
 
         _furySpent += procSpell.GetPowerTypeCostAmount(PowerType.Fury).GetValueOrDefault(0);
-        return _furySpent >= GetEffect(1).GetAmount();
+        return _furySpent >= GetEffect(1).GetAmountAsInt();
     }
 
     void HandleProc(ProcEventInfo eventInfo)
@@ -1584,8 +1584,8 @@ class spell_dh_shattered_destiny : AuraScript
         if (metamorphosis == null)
             return;
 
-        int requiredFuryAmount = GetEffect(1).GetAmount();
-        metamorphosis.SetDuration(metamorphosis.GetDuration() + _furySpent / requiredFuryAmount * GetEffect(0).GetAmount());
+        int requiredFuryAmount = GetEffect(1).GetAmountAsInt();
+        metamorphosis.SetDuration(metamorphosis.GetDuration() + _furySpent / requiredFuryAmount * GetEffect(0).GetAmountAsInt());
         _furySpent %= requiredFuryAmount;
     }
 
@@ -1627,12 +1627,12 @@ class spell_dh_soul_furnace_conduit : AuraScript
 {
     void CalculateSpellMod(AuraEffect aurEff, ref SpellModifier spellMod)
     {
-        if (aurEff.GetAmount() == 10)
+        if (aurEff.GetAmountAsInt() == 10)
         {
             if (spellMod == null)
             {
                 spellMod = new SpellPctModifierByClassMask(SpellModOp.HealingAndDamage, GetId(), GetAura(), new FlagArray128(0x80000000));
-                ((SpellPctModifierByClassMask)spellMod).value = GetEffect(1).GetAmount() + 1;
+                ((SpellPctModifierByClassMask)spellMod).value = GetEffect(1).GetAmountAsInt() + 1;
             }
         }
     }

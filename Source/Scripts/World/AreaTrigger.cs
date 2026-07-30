@@ -454,7 +454,7 @@ namespace Scripts.World.Areatriggers
         {
             Unit caster = at.GetCaster();
             if (caster != null)
-                _remainingSummons = creatingSpell.GetSpellInfo().GetEffect(0).CalcValue(caster);
+                _remainingSummons = creatingSpell.GetSpellInfo().GetEffect(0).CalcValueAsInt(caster);
 
             _scheduler.Schedule(TimeSpan.FromMilliseconds(500), task =>
             {

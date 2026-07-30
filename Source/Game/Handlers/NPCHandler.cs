@@ -477,7 +477,7 @@ namespace Game
                     ulong price = (ulong)Math.Floor(itemTemplate.GetBuyPrice() * discountMod);
                     price = itemTemplate.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
 
-                    int priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
+                    float priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                     if (priceMod != 0)
                         price -= MathFunctions.CalculatePct(price, priceMod);
 

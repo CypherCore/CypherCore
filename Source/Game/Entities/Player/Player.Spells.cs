@@ -347,9 +347,9 @@ namespace Game.Entities
                 var cooldownInfo = cooldowns.CategoryCooldowns.Find(p => p.Category == categoryId);
 
                 if (cooldownInfo == null)
-                    cooldowns.CategoryCooldowns.Add(new SpellCategoryCooldown.CategoryCooldownInfo(categoryId, -aurEff.GetAmount()));
+                    cooldowns.CategoryCooldowns.Add(new SpellCategoryCooldown.CategoryCooldownInfo(categoryId, (int)-aurEff.GetAmount()));
                 else
-                    cooldownInfo.ModCooldown -= aurEff.GetAmount();
+                    cooldownInfo.ModCooldown -= (int)aurEff.GetAmount();
             }
 
             SendPacket(cooldowns);
@@ -3113,7 +3113,7 @@ namespace Game.Entities
                 if (baseValue + flat == 0)
                     continue;
 
-                int value = mod.value;
+                float value = mod.value;
                 if (value == 0)
                     continue;
 
@@ -3335,12 +3335,12 @@ namespace Game.Entities
 
         public uint GetRuneBaseCooldown()
         {
-            float cooldown = RuneCooldowns.Base;
+            double cooldown = RuneCooldowns.Base;
 
             var regenAura = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
             foreach (var i in regenAura)
                 if (i.GetMiscValue() == (int)PowerType.Runes)
-                    cooldown *= 1.0f - i.GetAmount() / 100.0f;
+                    cooldown *= 1.0 - i.GetAmount() / 100.0;
 
             // Runes cooldown are now affected by player's haste from equipment ...
             float hastePct = GetRatingBonusValue(CombatRating.HasteMelee);
@@ -3350,7 +3350,7 @@ namespace Game.Entities
             hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste2);
             hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste3);
 
-            cooldown *= 1.0f - (hastePct / 100.0f);
+            cooldown *= 1.0 - (hastePct / 100.0);
 
             return (uint)cooldown;
         }
@@ -3601,7 +3601,7 @@ namespace Game.Entities
                             foreach (var spellEffectInfo in spellInfo.GetEffects())
                             {
                                 if (spellEffectInfo.IsEffect())
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
+                                    args.AddSpellMod(SpellValueModFloat.BasePoint0 + (int)spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
                             }
                         }
 

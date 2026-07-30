@@ -1059,7 +1059,7 @@ namespace Game.Entities
         public void EnterVehicle(Unit baseUnit, sbyte seatId = -1)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
-            args.AddSpellMod(SpellValueMod.BasePoint0, seatId + 1);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, seatId + 1);
             CastSpell(baseUnit, SharedConst.VehicleSpellRideHardcoded, args);
         }
 
@@ -2039,7 +2039,7 @@ namespace Game.Entities
 
         public void RecalculateObjectScale()
         {
-            int scaleAuras = GetTotalAuraModifier(AuraType.ModScale) + GetTotalAuraModifier(AuraType.ModScale2);
+            float scaleAuras = GetTotalAuraModifier(AuraType.ModScale) + GetTotalAuraModifier(AuraType.ModScale2);
             float scale = GetNativeObjectScale() + MathFunctions.CalculatePct(1.0f, scaleAuras);
             float scaleMin = IsPlayer() ? 0.1f : 0.01f;
             SetObjectScale(Math.Max(scale, scaleMin));
@@ -3130,7 +3130,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    uint damage = (uint)dmgShield.GetAmount();
+                    uint damage = (uint)dmgShield.GetAmountAsInt();
                     Unit caster = dmgShield.GetCaster();
                     if (caster != null)
                     {
@@ -3233,9 +3233,9 @@ namespace Game.Entities
         {
             foreach (AuraEffect effect in GetAuraEffectsByType(AuraType.TriggerSpellOnHealthPct))
             {
-                int triggerHealthPct = effect.GetAmount();
+                double triggerHealthPct = effect.GetAmount();
                 uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
-                ulong threshold = CountPctFromMaxHealth(triggerHealthPct);
+                ulong threshold = CountPctFromMaxHealth((float)triggerHealthPct);
 
                 switch ((AuraTriggerOnHealthChangeDirection)effect.GetMiscValue())
                 {
@@ -3506,13 +3506,13 @@ namespace Game.Entities
             float damageResisted = damage * resistance / 10f;
             if (damageResisted > 0.0f) // if any damage was resisted
             {
-                int ignoredResistance = 0;
+                float ignoredResistance = 0.0f;
 
                 if (attacker != null)
                     ignoredResistance += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)schoolMask);
 
-                ignoredResistance = Math.Min(ignoredResistance, 100);
-                MathFunctions.ApplyPct(ref damageResisted, 100 - ignoredResistance);
+                ignoredResistance = Math.Min(ignoredResistance, 100.0f);
+                MathFunctions.ApplyPct(ref damageResisted, 100.0f - ignoredResistance);
 
                 // Spells with melee and magic school mask, decide whether resistance or armor absorb is higher
                 if (spellInfo != null && spellInfo.HasAttribute(SpellCustomAttributes.SchoolmaskNormalWithMagic))
@@ -3618,7 +3618,7 @@ namespace Game.Entities
                     continue;
 
                 // get amount which can be still absorbed by the aura
-                int currentAbsorb = absorbAurEff.GetAmount();
+                int currentAbsorb = absorbAurEff.GetAmountAsInt();
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
@@ -3689,7 +3689,7 @@ namespace Game.Entities
                     continue;
 
                 // get amount which can be still absorbed by the aura
-                int currentAbsorb = absorbAurEff.GetAmount();
+                int currentAbsorb = absorbAurEff.GetAmountAsInt();
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
@@ -3837,7 +3837,7 @@ namespace Game.Entities
                     continue;
 
                 // get amount which can be still absorbed by the aura
-                int currentAbsorb = absorbAurEff.GetAmount();
+                int currentAbsorb = absorbAurEff.GetAmountAsInt();
                 // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
                 if (currentAbsorb < 0)
                     currentAbsorb = 0;
@@ -3895,13 +3895,13 @@ namespace Game.Entities
                 armor *= victim.GetArmorMultiplierForTarget(attacker);
 
                 // bypass enemy armor by SPELL_AURA_BYPASS_ARMOR_FOR_CASTER
-                int armorBypassPct = 0;
+                double armorBypassPct = 0;
                 var reductionAuras = victim.GetAuraEffectsByType(AuraType.BypassArmorForCaster);
                 foreach (var eff in reductionAuras)
                     if (eff.GetCasterGUID() == attacker.GetGUID())
                         armorBypassPct += eff.GetAmount();
 
-                armor = MathFunctions.CalculatePct(armor, 100 - Math.Min(armorBypassPct, 100));
+                armor = MathFunctions.CalculatePct(armor, 100 - Math.Min(armorBypassPct, 100.0));
 
                 // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
                 armor += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)SpellSchoolMask.Normal);
@@ -3991,7 +3991,7 @@ namespace Game.Entities
             int DoneFlatBenefit = 0;
 
             // ..done
-            DoneFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
+            DoneFlatBenefit += (int)GetTotalAuraModifierByMiscMask(AuraType.ModDamageDoneCreature, (int)creatureTypeMask);
 
             // ..done
             // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
@@ -4001,17 +4001,17 @@ namespace Game.Entities
 
             if (attType == WeaponAttackType.RangedAttack)
             {
-                APbonus += victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
+                APbonus += (int)victim.GetTotalAuraModifier(AuraType.RangedAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
+                APbonus += (int)GetTotalAuraModifierByMiscMask(AuraType.ModRangedAttackPowerVersus, (int)creatureTypeMask);
             }
             else
             {
-                APbonus += victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
+                APbonus += (int)victim.GetTotalAuraModifier(AuraType.MeleeAttackPowerAttackerBonus);
 
                 // ..done (base at attack power and creature type)
-                APbonus += GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
+                APbonus += (int)GetTotalAuraModifierByMiscMask(AuraType.ModMeleeAttackPowerVersus, (int)creatureTypeMask);
             }
 
             if (APbonus != 0)                                       // Can be negative
@@ -4106,12 +4106,12 @@ namespace Game.Entities
             int TakenFlatBenefit = 0;
 
             // ..taken
-            TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
+            TakenFlatBenefit += (int)GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
 
             if (attType != WeaponAttackType.RangedAttack)
-                TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModMeleeDamageTaken);
+                TakenFlatBenefit += (int)GetTotalAuraModifier(AuraType.ModMeleeDamageTaken);
             else
-                TakenFlatBenefit += GetTotalAuraModifier(AuraType.ModRangedDamageTaken);
+                TakenFlatBenefit += (int)GetTotalAuraModifier(AuraType.ModRangedDamageTaken);
 
             if ((TakenFlatBenefit < 0) && (pdamage < -TakenFlatBenefit))
                 return 0;

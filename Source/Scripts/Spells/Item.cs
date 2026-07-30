@@ -696,7 +696,7 @@ class spell_item_alchemist_stone : AuraScript
 
         Unit caster = eventInfo.GetActionTarget();
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         caster.CastSpell(null, spellId, args);
     }
 
@@ -756,7 +756,7 @@ class spell_item_anger_capacitor(uint stacks) : AuraScript
 [Script] // 26400 - Arcane Shroud
 class spell_item_arcane_shroud : AuraScript
 {
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         int diff = (int)GetUnitOwner().GetLevel() - 60;
         if (diff > 0)
@@ -884,12 +884,12 @@ class spell_item_blessing_of_ancient_kings : AuraScript
         if (healInfo == null || healInfo.GetHeal() == 0)
             return;
 
-        int absorb = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0f);
+        double absorb = MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0);
         AuraEffect protEff = eventInfo.GetProcTarget().GetAuraEffect(SpellIds.ProtectionOfAncientKings, 0, eventInfo.GetActor().GetGUID());
         if (protEff != null)
         {
             // The shield can grow to a maximum size of 20,000 damage absorbtion
-            protEff.SetAmount(Math.Min(protEff.GetAmount() + absorb, 20000));
+            protEff.SetAmount(Math.Min(protEff.GetAmount() + absorb, 20000.0));
 
             // Refresh and return to prevent replacing the aura
             protEff.GetBase().RefreshDuration();
@@ -897,7 +897,7 @@ class spell_item_blessing_of_ancient_kings : AuraScript
         else
         {
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, absorb);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, absorb);
             GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ProtectionOfAncientKings, args);
         }
     }
@@ -1421,7 +1421,7 @@ class spell_item_frozen_shadoweave : AuraScript
 
         Unit caster = eventInfo.GetActor();
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
         caster.CastSpell(null, SpellIds.Shadowmend, args);
     }
 
@@ -1556,12 +1556,12 @@ class spell_item_crystal_spire_of_karabor : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        int pct = GetSpellInfo().GetEffect(0).CalcValue();
+        double pct = GetSpellInfo().GetEffect(0).CalcValue();
         HealInfo healInfo = eventInfo.GetHealInfo();
         if (healInfo != null)
         {
             Unit healTarget = healInfo.GetTarget();
-            if (healTarget != null && healTarget.GetHealth() - healInfo.GetEffectiveHeal() <= healTarget.CountPctFromMaxHealth(pct))
+            if (healTarget != null && healTarget.GetHealth() - healInfo.GetEffectiveHeal() <= healTarget.CountPctFromMaxHealth((float)pct))
                 return true;
         }
 
@@ -1711,7 +1711,7 @@ class spell_item_necrotic_touch : AuraScript
             return;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
         GetTarget().CastSpell(null, SpellIds.ItemNecroticTouchProc, args);
     }
 
@@ -1825,7 +1825,7 @@ class spell_item_persistent_shield : AuraScript
     {
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
-        int bp0 = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), 15);
+        double bp0 = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), 15);
 
         // Scarab Brooch does not replace stronger shields
         AuraEffect shield = target.GetAuraEffect(SpellIds.PersistentShieldTriggered, 0, caster.GetGUID());
@@ -1833,7 +1833,7 @@ class spell_item_persistent_shield : AuraScript
             return;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, bp0);
         caster.CastSpell(target, SpellIds.PersistentShieldTriggered, args);
     }
 
@@ -1862,7 +1862,7 @@ class spell_item_pet_healing : AuraScript
             return;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
         eventInfo.GetActor().CastSpell(null, SpellIds.HealthLink, args);
     }
 
@@ -2344,7 +2344,7 @@ class spell_item_swift_hand_justice_dummy : AuraScript
 
         Unit caster = eventInfo.GetActor();
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(aurEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)caster.CountPctFromMaxHealth((float)aurEff.GetAmount()));
         caster.CastSpell(null, SpellIds.SwiftHandOfJusticeHeal, args);
     }
 
@@ -2357,7 +2357,7 @@ class spell_item_swift_hand_justice_dummy : AuraScript
 [Script] // 28862 - The Eye of Diminution
 class spell_item_the_eye_of_diminution : AuraScript
 {
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         int diff = (int)GetUnitOwner().GetLevel() - 60;
         if (diff > 0)
@@ -3342,7 +3342,7 @@ class spell_item_trinket_stack(uint stackSpell, uint triggerSpell) : AuraScript(
         Aura dummy = caster.GetAura(stackSpell); // retrieve aura
 
         //dont do anything if it's not the right amount of stacks;
-        if (dummy == null || dummy.GetStackAmount() < aurEff.GetAmount())
+        if (dummy == null || dummy.GetStackAmount() < aurEff.GetAmountAsInt())
             return;
 
         // if right amount, remove the aura and cast real trigger
@@ -3634,11 +3634,11 @@ class spell_item_artifical_stamina : AuraScript
         return GetOwner().IsPlayer();
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
         if (artifact != null)
-            amount = (int)(GetEffectInfo(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
+            amount = GetEffectInfo(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100;
     }
 
     public override void Register()
@@ -3660,11 +3660,11 @@ class spell_item_artifical_damage : AuraScript
         return GetOwner().IsPlayer();
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
         if (artifact != null)
-            amount = (int)(GetSpellInfo().GetEffect(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
+            amount = GetSpellInfo().GetEffect(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100;
     }
 
     public override void Register()
@@ -4055,7 +4055,7 @@ class spell_item_amalgams_seventh_spine_mana_restore : AuraScript
 
         AuraEffect trinketEffect = caster.GetAuraEffect(aurEff.GetSpellEffectInfo().TriggerSpell, 0);
         if (trinketEffect != null)
-            caster.CastSpell(caster, SpellIds.FragileEchoEnergize, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, trinketEffect.GetAmount()));
+            caster.CastSpell(caster, SpellIds.FragileEchoEnergize, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueModFloat.BasePoint0, trinketEffect.GetAmount()));
     }
 
     public override void Register()
@@ -4122,7 +4122,7 @@ class spell_item_highfathers_machination : AuraScript
 
     bool CheckHealth(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetDamageInfo() != null && GetTarget().HealthBelowPctDamaged(aurEff.GetAmount(), eventInfo.GetDamageInfo().GetDamage());
+        return eventInfo.GetDamageInfo() != null && GetTarget().HealthBelowPctDamaged((float)aurEff.GetAmount(), eventInfo.GetDamageInfo().GetDamage());
     }
 
     void Heal(AuraEffect aurEff, ProcEventInfo procInfo)
@@ -4193,7 +4193,7 @@ class spell_item_grips_of_forsaken_sanity : AuraScript
 
     bool CheckHealth(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetActor().GetHealthPct() >= (float)GetEffectInfo(1).CalcValue();
+        return eventInfo.GetActor().GetHealthPct() >= GetEffectInfo(1).CalcValue();
     }
 
     public override void Register()
@@ -4229,7 +4229,7 @@ class spell_item_shiver_venom_weapon_proc(uint additionalProcSpellId) : AuraScri
     {
         if (procInfo.GetProcTarget().HasAura(SpellIds.ShiverVenom))
             procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), additionalProcSpellId, new CastSpellExtraArgs(aurEff)
-                .AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount())
+                .AddSpellMod(SpellValueModFloat.BasePoint0, aurEff.GetAmount())
                 .SetTriggeringSpell(procInfo.GetProcSpell()));
     }
 

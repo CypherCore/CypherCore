@@ -32,8 +32,8 @@ namespace Game.Combat
         public float[] _singleSchoolModifiers = new float[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
         public volatile Dictionary<SpellSchoolMask, float> _multiSchoolModifiers = new(); // these are calculated on demand
 
-        public List<Tuple<ObjectGuid, uint>> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
-        public Dictionary<uint, Dictionary<ObjectGuid, uint>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
+        public List<Tuple<ObjectGuid, float>> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
+        public Dictionary<uint, Dictionary<ObjectGuid, float>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
 
         public static bool CanHaveThreatList(Unit who)
         {
@@ -641,7 +641,7 @@ namespace Game.Combat
 
         public void UpdateMyTempModifiers()
         {
-            int mod = 0;
+            double mod = 0;
             foreach (AuraEffect eff in _owner.GetAuraEffectsByType(AuraType.ModTotalThreat))
                 mod += eff.GetAmount();
 
@@ -650,7 +650,7 @@ namespace Game.Combat
 
             foreach (var pair in _threatenedByMe)
             {
-                pair.Value.TempModifier = mod;
+                pair.Value.TempModifier = (float)mod;
                 pair.Value.ListNotifyChanged();
             }
         }
@@ -662,7 +662,7 @@ namespace Game.Combat
             _multiSchoolModifiers.Clear();
         }
 
-        public void RegisterRedirectThreat(uint spellId, ObjectGuid victim, uint pct)
+        public void RegisterRedirectThreat(uint spellId, ObjectGuid victim, float pct)
         {
             if (!_redirectRegistry.ContainsKey(spellId))
                 _redirectRegistry[spellId] = new();
@@ -785,12 +785,12 @@ namespace Game.Combat
         void UpdateRedirectInfo()
         {
             _redirectInfo.Clear();
-            uint totalPct = 0;
+            float totalPct = 0;
             foreach (var pair in _redirectRegistry) // (spellid, victim . pct)
             {
                 foreach (var victimPair in pair.Value) // (victim,pct)
                 {
-                    uint thisPct = Math.Min(100 - totalPct, victimPair.Value);
+                    float thisPct = Math.Min(100.0f - totalPct, victimPair.Value);
                     if (thisPct > 0)
                     {
                         _redirectInfo.Add(Tuple.Create(victimPair.Key, thisPct));
@@ -823,7 +823,7 @@ namespace Game.Combat
         public Dictionary<ObjectGuid, ThreatReference> GetThreatenedByMeList() { return _threatenedByMe; }
 
         // Modify target's threat by +percent%
-        public void ModifyThreatByPercent(Unit target, int percent)
+        public void ModifyThreatByPercent(Unit target, float percent)
         {
             if (percent != 0)
                 ScaleThreat(target, 0.01f * (100f + percent));
@@ -855,7 +855,7 @@ namespace Game.Combat
         Unit _victim;
         public OnlineState Online;
         float _baseAmount;
-        public int TempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
+        public float TempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
         TauntState _taunted;
 
         public ThreatReference(ThreatManager mgr, Unit victim)
@@ -983,7 +983,7 @@ namespace Game.Combat
 
         public Creature GetOwner() { return _owner; }
         public Unit GetVictim() { return _victim; }
-        public float GetThreat() { return Math.Max(_baseAmount + (float)TempModifier, 0.0f); }
+        public float GetThreat() { return Math.Max(_baseAmount + TempModifier, 0.0f); }
         public OnlineState GetOnlineState() { return Online; }
         public bool IsOnline() { return Online >= OnlineState.Online; }
         public bool IsAvailable() { return Online > OnlineState.Offline; }

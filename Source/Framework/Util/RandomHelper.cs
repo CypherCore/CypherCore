@@ -59,6 +59,11 @@ public class RandomHelper
         Cypher.Assert(max >= min);
         return (float)(rand.NextDouble() * (max - min) + min);
     }
+    public static double FRand(double min, double max)
+    {
+        Cypher.Assert(max >= min);
+        return (rand.NextDouble() * (max - min) + min);
+    }
 
     /// <summary>
     /// Returns true if rand.Next less then i
@@ -66,6 +71,11 @@ public class RandomHelper
     /// <param name="i"></param>
     /// <returns></returns>
     public static bool randChance(float i)
+    {
+        return i > randChance();
+    }
+
+    public static bool randChance(double i)
     {
         return i > randChance();
     }

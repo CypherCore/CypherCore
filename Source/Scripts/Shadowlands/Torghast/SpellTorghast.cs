@@ -45,7 +45,7 @@ namespace Scripts.Shadowlands.Torghast
             PreventDefaultAction();
 
             procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff)
-                .AddSpellMod(SpellValueMod.BasePoint0, (int)GetTarget().CountPctFromMaxHealth(aurEff.GetAmount()))
+                .AddSpellMod(SpellValueModFloat.BasePoint0, (int)GetTarget().CountPctFromMaxHealth((float)aurEff.GetAmount()))
                 .SetTriggeringSpell(procInfo.GetProcSpell()));
         }
 
@@ -75,7 +75,7 @@ namespace Scripts.Shadowlands.Torghast
             PreventDefaultAction();
 
             procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff)
-                .AddSpellMod(SpellValueMod.BasePoint0, (int)GetTarget().CountPctFromMaxHealth(aurEff.GetAmount()))
+                .AddSpellMod(SpellValueModFloat.BasePoint0, (int)GetTarget().CountPctFromMaxHealth((float)aurEff.GetAmount()))
                 .SetTriggeringSpell(procInfo.GetProcSpell()));
         }
 

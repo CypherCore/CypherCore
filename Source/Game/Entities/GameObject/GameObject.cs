@@ -2934,7 +2934,7 @@ namespace Game.Entities
                     {
                         foreach (var effect in spell.GetEffects())
                             if (effect.Effect == SpellEffectName.OpenLock && effect.MiscValue == lockEntry.Index[i])
-                                if (effect.CalcValue(player) >= lockEntry.Skill[i])
+                                if (effect.CalcValueAsInt(player) >= lockEntry.Skill[i])
                                     return spell;
                     }
                 }

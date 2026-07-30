@@ -198,11 +198,11 @@ namespace Game.Entities
             if (rateAura != AuraType.None)
             {
                 // take only lowest negative and highest positive auras - these effects do not stack
-                int neg = GetMaxNegativeAuraModifier(rateAura, mod => mod.GetAmount() > 0 && mod.GetAmount() < 100);
+                float neg = GetMaxNegativeAuraModifier(rateAura, mod => mod.GetAmount() > 0 && mod.GetAmount() < 100);
                 if (neg != 0)
                     MathFunctions.ApplyPct(ref newValue, neg);
 
-                int pos = GetMaxPositiveAuraModifier(rateAura, mod => mod.GetAmount() > 100);
+                float pos = GetMaxPositiveAuraModifier(rateAura, mod => mod.GetAmount() > 100);
                 if (pos != 0)
                     MathFunctions.ApplyPct(ref newValue, pos);
             }
@@ -244,14 +244,14 @@ namespace Game.Entities
             if (rateAura != AuraType.None)
             {
                 // take only lowest negative and highest positive auras - these effects do not stack
-                int neg = GetMaxNegativeAuraModifier(rateAura, mod => mod.GetAmount() > 0 && mod.GetAmount() < 100);
+                float neg = GetMaxNegativeAuraModifier(rateAura, mod => mod.GetAmount() > 0 && mod.GetAmount() < 100);
                 if (neg != 0)
                 {
                     MathFunctions.ApplyPct(ref min, neg);
                     MathFunctions.ApplyPct(ref max, neg);
                 }
 
-                int pos = GetMaxPositiveAuraModifier(rateAura, mod => mod.GetAmount() > 100);
+                float pos = GetMaxPositiveAuraModifier(rateAura, mod => mod.GetAmount() > 100);
                 if (pos != 0)
                 {
                     MathFunctions.ApplyPct(ref min, pos);
@@ -619,7 +619,7 @@ namespace Game.Entities
 
         public void UpdateSpeed(UnitMoveType mtype)
         {
-            int main_speed_mod = 0;
+            float main_speed_mod = 0;
             float stack_bonus = 1.0f;
             float non_stack_bonus = 1.0f;
 
@@ -661,7 +661,7 @@ namespace Game.Entities
                         stack_bonus = GetTotalAuraMultiplier(AuraType.ModVehicleSpeedAlways);
 
                         // for some spells this mod is applied on vehicle owner
-                        int owner_speed_mod = 0;
+                        float owner_speed_mod = 0;
 
                         Unit owner = GetCharmer();
                         if (owner != null)
@@ -706,7 +706,7 @@ namespace Game.Entities
 
                     // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
                     // @todo possible affect only on MOVE_RUN
-                    int normalization = GetMaxPositiveAuraModifier(AuraType.UseNormalMovementSpeed);
+                    float normalization = GetMaxPositiveAuraModifier(AuraType.UseNormalMovementSpeed);
                     if (normalization != 0)
                     {
                         Creature creature1 = ToCreature();
@@ -726,7 +726,7 @@ namespace Game.Entities
                     if (mtype == UnitMoveType.Run)
                     {
                         // force minimum speed rate @ aura 437 SPELL_AURA_MOD_MINIMUM_SPEED_RATE
-                        int minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
+                        float minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
                         if (minSpeedMod1 != 0)
                         {
                             float minSpeed = minSpeedMod1 / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
@@ -761,7 +761,7 @@ namespace Game.Entities
             }
 
             // Apply strongest slow aura mod to speed
-            int slow = GetMaxNegativeAuraModifier(AuraType.ModDecreaseSpeed);
+            float slow = GetMaxNegativeAuraModifier(AuraType.ModDecreaseSpeed);
             if (slow != 0)
                 MathFunctions.AddPct(ref speed, slow);
 
@@ -1054,11 +1054,11 @@ namespace Game.Entities
             foreach (AuraEffect aurEff in mounts.ToArray())
             {
                 aurEff.RecalculateAmount();
-                if (aurEff.GetAmount() == 0)
+                if (aurEff.GetAmountAsInt() == 0)
                     aurEff.GetBase().Remove();
                 else
                 {
-                    var capability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
+                    var capability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmountAsInt());
                     if (capability != null) // aura may get removed by interrupt flag, reapply
                     {
                         SetFlightCapabilityID(capability.FlightCapabilityID, true);

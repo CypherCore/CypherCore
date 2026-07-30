@@ -602,7 +602,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
 
         void HandleHit(uint effIndex)
         {
-            GetHitUnit().CastSpell(GetHitUnit(), SpellIds.SearingBarrageSelector, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)GetSpellInfo().Id));
+            GetHitUnit().CastSpell(GetHitUnit(), SpellIds.SearingBarrageSelector, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, (int)GetSpellInfo().Id));
         }
 
         public override void Register()

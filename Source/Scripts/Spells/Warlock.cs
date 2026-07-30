@@ -106,7 +106,7 @@ class spell_warl_absolute_corruption : SpellScript
         if (absoluteCorruption != null)
         {
             TimeSpan duration = GetHitUnit().IsPvP()
-                ? TimeSpan.FromSeconds(absoluteCorruption.GetSpellInfo().GetEffect(0).CalcValue())
+                ? TimeSpan.FromSeconds(absoluteCorruption.GetSpellInfo().GetEffect(0).CalcValueAsInt())
                 : TimeSpan.FromSeconds(-1);
 
             GetHitAura().SetMaxDuration((int)duration.TotalMilliseconds);
@@ -240,7 +240,7 @@ class spell_warl_burning_rush : SpellScript
     {
         Unit caster = GetCaster();
 
-        if (caster.GetHealthPct() <= (float)GetEffectInfo(1).CalcValue(caster))
+        if (caster.GetHealthPct() <= GetEffectInfo(1).CalcValue(caster))
         {
             SetCustomCastResultMessage(SpellCustomErrors.YouDontHaveEnoughHealth);
             return SpellCastResult.CustomError;
@@ -260,7 +260,7 @@ class spell_warl_burning_rush_aura : AuraScript
 {
     void PeriodicTick(AuraEffect aurEff)
     {
-        if (GetTarget().GetHealthPct() <= (float)aurEff.GetAmount())
+        if (GetTarget().GetHealthPct() <= aurEff.GetAmount())
         {
             PreventDefaultAction();
             Remove();
@@ -433,7 +433,7 @@ class spell_warl_chaotic_energies : AuraScript
         }
 
         // You take ${$s2/3}% reduced damage
-        float damageReductionPct = (float)(aura.GetAmount()) / 3;
+        float damageReductionPct = (float)(aura.GetAmount() / 3);
         // plus a random amount of up to ${$s2/3}% additional reduced damage
         damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
 
@@ -501,16 +501,16 @@ class spell_warl_dark_pact : AuraScript
         return ValidateSpellEffect((spellInfo.Id, 1), (spellInfo.Id, 2));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = false;
         Unit caster = GetCaster();
         if (caster != null)
         {
             float extraAmount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * 2.5f;
-            ulong absorb = caster.CountPctFromCurHealth(GetEffectInfo(1).CalcValue(caster));
-            caster.SetHealth((ulong)(caster.GetHealth() - absorb));
-            amount = (int)(MathFunctions.CalculatePct(absorb, GetEffectInfo(2).CalcValue(caster)) + extraAmount);
+            ulong absorb = caster.CountPctFromCurHealth((float)GetEffectInfo(1).CalcValue(caster));
+            caster.SetHealth(caster.GetHealth() - absorb);
+            amount = MathFunctions.CalculatePct(absorb, GetEffectInfo(2).CalcValue(caster)) + extraAmount;
         }
     }
 
@@ -528,7 +528,7 @@ class spell_warl_deaths_embrace_impl
         if (deathsEmbrace == null)
             return;
 
-        if (!target.HealthBelowPct(deathsEmbrace.GetEffect(healthLimitEffect).GetAmount()))
+        if (!target.HealthBelowPct((float)deathsEmbrace.GetEffect(healthLimitEffect).GetAmount()))
             return;
 
         MathFunctions.AddPct(ref pctMod, deathsEmbrace.GetEffect(inreaseEffect).GetAmount());
@@ -701,7 +701,7 @@ class spell_warl_devour_magic : SpellScript
         Unit caster = GetCaster();
         CastSpellExtraArgs args = new();
         args.TriggerFlags = TriggerCastFlags.FullMask;
-        args.AddSpellMod(SpellValueMod.BasePoint0, GetEffectInfo(1).CalcValue(caster));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, GetEffectInfo(1).CalcValue(caster));
 
         caster.CastSpell(caster, SpellIds.DevourMagicHeal, args);
 
@@ -760,7 +760,7 @@ class spell_warl_drain_soul : AuraScript
 
     void CalculateDamage(AuraEffect aurEff, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
     {
-        if (victim.HealthBelowPct(GetEffectInfo(2).CalcValue(GetCaster())))
+        if (victim.HealthBelowPct((float)GetEffectInfo(2).CalcValue(GetCaster())))
             MathFunctions.AddPct(ref pctMod, GetEffectInfo(1).CalcValue(GetCaster()));
     }
 
@@ -819,7 +819,7 @@ class spell_warl_health_funnel : AuraScript
         if (caster == null)
             return;
         //! Hack for self damage, is not blizz :/
-        uint damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
+        uint damage = (uint)caster.CountPctFromMaxHealth((float)aurEff.GetBaseAmount());
 
         Player modOwner = caster.GetSpellModOwner();
         if (modOwner != null)
@@ -1155,7 +1155,7 @@ class spell_warl_seed_of_corruption_dummy_aura : AuraScript
             caster.CastSpell(GetTarget(), SpellIds.SeedOfCorruptionDamage, aurEff);
     }
 
-    void CalculateBuffer(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateBuffer(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Unit caster = GetCaster();
         if (caster == null)
@@ -1182,7 +1182,7 @@ class spell_warl_seed_of_corruption_dummy_aura : AuraScript
         // other seed explosions detonate this instantly, no matter what damage amount is
         if (damageInfo.GetSpellInfo() == null || damageInfo.GetSpellInfo().Id != SpellIds.SeedOfCorruptionDamage)
         {
-            int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
+            double amount = aurEff.GetAmount() - damageInfo.GetDamage();
             if (amount > 0)
             {
                 aurEff.SetAmount(amount);
@@ -1225,7 +1225,7 @@ class spell_warl_seed_of_corruption_generic : AuraScript
         if (damageInfo == null || damageInfo.GetDamage() == 0)
             return;
 
-        int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
+        double amount = aurEff.GetAmount() - damageInfo.GetDamage();
         if (amount > 0)
         {
             aurEff.SetAmount(amount);
@@ -1272,8 +1272,8 @@ class spell_warl_shadowburn : SpellScript
 
     void CalcCritChance(Unit victim, ref float critChance)
     {
-        if (victim.HealthBelowPct(GetEffectInfo(3).CalcValue(GetCaster())))
-            critChance += GetEffectInfo(2).CalcValue(GetCaster());
+        if (victim.HealthBelowPct((float)GetEffectInfo(3).CalcValue(GetCaster())))
+            critChance += (float)GetEffectInfo(2).CalcValue(GetCaster());
     }
 
     public override void Register()
@@ -1369,7 +1369,7 @@ class spell_warl_siphon_life : AuraScript
 
         Unit caster = GetTarget();
         caster.CastSpell(caster, SpellIds.SiphonLifeHeal, new CastSpellExtraArgs(aurEff)
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount())));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount())));
     }
 
     public override void Register()
@@ -1681,9 +1681,9 @@ class spell_warl_unstable_affliction : AuraScript
         if (removedEffect == null)
             return;
 
-        int damage = (int)(GetEffectInfo(0).CalcValue(caster, null, GetUnitOwner()) / 100.0f * removedEffect.CalculateEstimatedAmount(caster, removedEffect.GetAmount()).Value);
+        double damage = GetEffectInfo(0).CalcValue(caster, null, GetUnitOwner()) / 100.0 * removedEffect.CalculateEstimatedAmount(caster, removedEffect.GetAmount()).Value;
         caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDamage, new CastSpellExtraArgs()
-            .AddSpellMod(SpellValueMod.BasePoint0, damage)
+            .AddSpellMod(SpellValueModFloat.BasePoint0, damage)
             .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError));
     }
 

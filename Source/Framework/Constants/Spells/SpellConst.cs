@@ -2207,7 +2207,7 @@ namespace Framework.Constants
         Unk18 = 0x40000, // 18
         Unk19 = 0x80000, // 19
         Unk20 = 0x100000, // 20
-        Unk21 = 0x200000, // 21
+        UseFloatValuesForScalingAmounts = 0x200000, // 21
         Unk22 = 0x400000, // 22
         StartCooldownOnCastStart = 0x800000, // 23
         IsGarrisonBuff = 0x1000000, // 24

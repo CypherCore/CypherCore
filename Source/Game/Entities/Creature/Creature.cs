@@ -710,7 +710,7 @@ namespace Game.Entities
             if (curValue >= maxValue)
                 return;
 
-            long addvalue;
+            ulong addvalue;
 
             // Not only pet, but any controlled creature (and not polymorphed)
             if (!GetCharmerOrOwnerGUID().IsEmpty() && !IsPolymorphed())
@@ -719,13 +719,13 @@ namespace Game.Entities
                 addvalue = (uint)(0.015f * GetMaxHealth() * HealthIncreaseRate);
             }
             else
-                addvalue = (long)maxValue / 3;
+                addvalue = maxValue / 3;
 
             // Apply modifiers (if any).
-            addvalue *= (int)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
-            addvalue += GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds);
+            addvalue *= (ulong)GetTotalAuraMultiplier(AuraType.ModHealthRegenPercent);
+            addvalue += (ulong)(GetTotalAuraModifier(AuraType.ModRegen) * SharedConst.CreatureRegenInterval / (5 * Time.InMilliseconds));
 
-            ModifyHealth(addvalue);
+            ModifyHealth((long)addvalue);
         }
 
         public void DoFleeToGetAssistance()

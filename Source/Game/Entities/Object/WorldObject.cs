@@ -1068,18 +1068,6 @@ namespace Game.Entities
 
             return null;
         }
-        public int CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
-        {
-            return CalculateSpellDamage(out _, target, spellEffectInfo, basePoints, castItemId, itemLevel);
-        }
-
-        // function uses real base points (typically value - 1)
-        public int CalculateSpellDamage(out float variance, Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
-        {
-            variance = 0.0f;
-
-            return spellEffectInfo != null ? spellEffectInfo.CalcValue(out variance, this, basePoints, target, castItemId, itemLevel) : 0;
-        }
 
         public float GetSpellMaxRangeForTarget(Unit target, SpellInfo spellInfo)
         {
@@ -1183,9 +1171,9 @@ namespace Game.Entities
                 }
 
                 // Find total mod value (negative bonus)
-                int durationMod_always = unitTarget.GetTotalAuraModifier(AuraType.MechanicDurationMod, mechanicCheck);
+                int durationMod_always = (int)unitTarget.GetTotalAuraModifier(AuraType.MechanicDurationMod, mechanicCheck);
                 // Find max mod (negative bonus)
-                int durationMod_not_stack = unitTarget.GetMaxNegativeAuraModifier(AuraType.MechanicDurationModNotStack, mechanicCheck);
+                int durationMod_not_stack = (int)unitTarget.GetMaxNegativeAuraModifier(AuraType.MechanicDurationModNotStack, mechanicCheck);
 
                 // Select strongest negative mod
                 int durationMod = Math.Min(durationMod_always, durationMod_not_stack);
@@ -1193,8 +1181,8 @@ namespace Game.Entities
                     MathFunctions.AddPct(ref duration, durationMod);
 
                 // there are only negative mods currently
-                durationMod_always = unitTarget.GetTotalAuraModifierByMiscValue(AuraType.ModAuraDurationByDispel, (int)spellInfo.Dispel);
-                durationMod_not_stack = unitTarget.GetMaxNegativeAuraModifierByMiscValue(AuraType.ModAuraDurationByDispelNotStack, (int)spellInfo.Dispel);
+                durationMod_always = (int)unitTarget.GetTotalAuraModifierByMiscValue(AuraType.ModAuraDurationByDispel, (int)spellInfo.Dispel);
+                durationMod_not_stack = (int)unitTarget.GetMaxNegativeAuraModifierByMiscValue(AuraType.ModAuraDurationByDispelNotStack, (int)spellInfo.Dispel);
 
                 durationMod = Math.Min(durationMod_always, durationMod_not_stack);
                 if (durationMod != 0)
@@ -1308,7 +1296,7 @@ namespace Game.Entities
                 int levelBasedHitDiff = leveldif;
 
                 // Base hit chance from attacker and victim levels
-                int modHitChance = 100;
+                float modHitChance = 100.0f;
                 if (levelBasedHitDiff >= 0)
                 {
                     if (!victim.IsPlayer())
@@ -1357,7 +1345,7 @@ namespace Game.Entities
                 return SpellMissInfo.Miss;
 
             // Chance resist mechanic (select max value from every mechanic spell effect)
-            int resist_chance = victim.GetMechanicResistChance(spellInfo) * 100;
+            int resist_chance = (int)(victim.GetMechanicResistChance(spellInfo) * 100.0f);
 
             // Roll chance
             if (resist_chance > 0 && rand < (tmp += resist_chance))
@@ -1366,7 +1354,7 @@ namespace Game.Entities
             // cast by caster in front of victim
             if (!victim.HasUnitState(UnitState.Controlled) && (victim.HasInArc(MathF.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
             {
-                int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
+                int deflect_chance = (int)(victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100.0f);
                 if (deflect_chance > 0 && rand < (tmp += deflect_chance))
                     return SpellMissInfo.Deflect;
             }
@@ -1408,7 +1396,7 @@ namespace Game.Entities
             // Try victim reflect spell
             if (canReflect)
             {
-                int reflectchance = victim.GetTotalAuraModifier(AuraType.ReflectSpells);
+                float reflectchance = victim.GetTotalAuraModifier(AuraType.ReflectSpells);
                 reflectchance += victim.GetTotalAuraModifierByMiscMask(AuraType.ReflectSpellsSchool, (int)spellInfo.GetSchoolMask());
 
                 if (reflectchance > 0 && RandomHelper.randChance(reflectchance))

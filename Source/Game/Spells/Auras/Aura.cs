@@ -278,7 +278,7 @@ namespace Game.Spells
                 {
                     if (effect != null && HasEffect(effect.GetEffIndex()))       // Not all of aura's effects have to be applied on every target
                     {
-                        auraData.Points.Add(effect.GetAmount());
+                        auraData.Points.Add((float)effect.GetAmount());
                         if (effect.GetEstimatedAmount().HasValue)
                             hasEstimatedAmounts = true;
                     }
@@ -289,7 +289,7 @@ namespace Game.Spells
                     // When sending EstimatedPoints all effects (at least up to the last one that uses GetEstimatedAmount) must have proper value in packet
                     foreach (AuraEffect effect in GetBase().GetAuraEffects())
                         if (effect != null && HasEffect(effect.GetEffIndex()))       // Not all of aura's effects have to be applied on every target
-                            auraData.EstimatedPoints.Add(effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount()));
+                            auraData.EstimatedPoints.Add((float)effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount()));
                 }
             }
         }
@@ -396,7 +396,7 @@ namespace Game.Spells
             return null;
         }
 
-        public void _InitEffects(uint effMask, Unit caster, int[] baseAmount)
+        public void _InitEffects(uint effMask, Unit caster, double[] baseAmount)
         {
             // shouldn't be in constructor - functions in AuraEffect.AuraEffect use polymorphism
             _effects = new AuraEffect[SpellConst.MaxEffects];
@@ -1139,7 +1139,7 @@ namespace Game.Spells
             return key;
         }
 
-        public void SetLoadedState(int maxduration, int duration, int charges, uint recalculateMask, int[] amount)
+        public void SetLoadedState(int maxduration, int duration, int charges, uint recalculateMask, double[] amount)
         {
             m_maxDuration = maxduration;
             m_duration = duration;
@@ -1344,7 +1344,7 @@ namespace Game.Spells
                             if (caster.HasAura(64760))
                             {
                                 CastSpellExtraArgs args = new(GetEffect(0));
-                                args.AddSpellMod(SpellValueMod.BasePoint0, GetEffect(0).GetAmount());
+                                args.AddSpellMod(SpellValueModFloat.BasePoint0, GetEffect(0).GetAmount());
                                 caster.CastSpell(target, 64801, args);
                             }
                         }
@@ -1396,10 +1396,10 @@ namespace Game.Spells
                                 AuraEffect aurEff = aura.GetEffect(0);
                                 if (aurEff != null)
                                 {
-                                    float multiplier = aurEff.GetAmount();
+                                    double multiplier = aurEff.GetAmount();
                                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                                     args.SetOriginalCastId(GetCastId());
-                                    args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
+                                    args.AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
                                     caster.CastSpell(caster, 47755, args);
                                 }
                             }
@@ -2132,7 +2132,7 @@ namespace Game.Spells
             }
         }
 
-        public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        public void CallScriptEffectCalcAmountHandlers(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
         {
             foreach (var auraScript in m_loadedScripts)
             {
@@ -3071,15 +3071,15 @@ namespace Game.Spells
 
     public class AuraLoadEffectInfo
     {
-        public int[] Amounts = new int[SpellConst.MaxEffects];
-        public int[] BaseAmounts = new int[SpellConst.MaxEffects];
+        public double[] Amounts = new double[SpellConst.MaxEffects];
+        public double[] BaseAmounts = new double[SpellConst.MaxEffects];
     }
 
     public class AuraCreateInfo
     {
         public ObjectGuid CasterGUID;
         public Unit Caster;
-        public int[] BaseAmount;
+        public double[] BaseAmount;
         public ObjectGuid CastItemGUID;
         public uint CastItemId = 0;
         public int CastItemLevel = -1;
@@ -3122,7 +3122,7 @@ namespace Game.Spells
 
         public void SetCasterGUID(ObjectGuid guid) { CasterGUID = guid; }
         public void SetCaster(Unit caster) { Caster = caster; }
-        public void SetBaseAmount(int[] bp) { BaseAmount = bp; }
+        public void SetBaseAmount(double[] bp) { BaseAmount = bp; }
         public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
         public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
         public void SetStackAmount(int stackAmount) { StackAmount = stackAmount > 0 ? stackAmount : 1; }

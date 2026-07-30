@@ -80,7 +80,7 @@ class spell_monk_burst_of_life : AuraScript
     void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         AuraRemoveMode removeMode = GetTargetApplication().GetRemoveMode();
-        if (removeMode != AuraRemoveMode.Expire && (removeMode != AuraRemoveMode.EnemySpell || aurEff.GetAmount() != 0))
+        if (removeMode != AuraRemoveMode.Expire && (removeMode != AuraRemoveMode.EnemySpell || aurEff.GetAmountAsInt() != 0))
             return;
 
         Unit caster = GetCaster();
@@ -94,7 +94,7 @@ class spell_monk_burst_of_life : AuraScript
         caster.CastSpell(GetTarget(), SpellIds.BurstOfLifeHeal, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-            SpellValueOverrides = [new(SpellValueMod.MaxTargets, burstOfLife.GetAmount())]
+            SpellValueOverrides = [new(SpellValueMod.MaxTargets, burstOfLife.GetAmountAsInt())]
         });
     }
 
@@ -215,7 +215,7 @@ class spell_monk_life_cocoon : SpellScript
 
     void CalculateAbsorb(uint effIndex)
     {
-        int absorb = (int)GetCaster().CountPctFromMaxHealth(GetEffectValue());
+        double absorb = GetCaster().CountPctFromMaxHealth((float)GetEffectValue());
         Player player = GetCaster().ToPlayer();
         if (player != null)
             MathFunctions.AddPct(ref absorb, player.GetRatingBonusValue(CombatRating.VersatilityHealingDone));
@@ -227,7 +227,7 @@ class spell_monk_life_cocoon : SpellScript
             calmingCoalescence.GetBase().Remove();
         }
 
-        GetSpell().SetSpellValue(new(SpellValueMod.BasePoint0, absorb));
+        GetSpell().SetSpellValue(new(SpellValueModFloat.BasePoint0, absorb));
     }
 
     public override void Register()
@@ -455,14 +455,14 @@ class spell_monk_roll : SpellScript
 [Script] // 109131 - Roll (backward)
 class spell_monk_roll_aura : AuraScript
 {
-    void CalcMovementAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcMovementAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
-        amount += 100;
+        amount += 100.0;
     }
 
-    void CalcImmunityAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcImmunityAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
-        amount -= 100;
+        amount -= 100.0;
     }
 
     void ChangeRunBackSpeed(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -500,7 +500,7 @@ class spell_monk_save_them_all : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        return eventInfo.GetActionTarget().HealthBelowPct(GetEffectInfo(2).CalcValue(eventInfo.GetActor()));
+        return eventInfo.GetActionTarget().HealthBelowPct((float)GetEffectInfo(2).CalcValue(eventInfo.GetActor()));
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -591,11 +591,11 @@ class spell_monk_stagger : AuraScript
         float base1 = MathFunctions.CalculatePct(agility, (float)effect.GetAmount());
         float K = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass(), 0);
 
-        float newAmount = (base1 / (base1 + K));
+        float newAmount = base1 / (base1 + K);
         newAmount *= multiplier;
 
         // Absorb X percentage of the damage
-        float absorbAmount = (float)dmgInfo.GetDamage() * newAmount;
+        float absorbAmount = dmgInfo.GetDamage() * newAmount;
         if (absorbAmount > 0)
         {
             uint tempAbsorb = (uint)absorbAmount;
@@ -623,7 +623,7 @@ class spell_monk_stagger : AuraScript
             if (effStaggerRemaining == null)
                 return;
 
-            float newAmount = effStaggerRemaining.GetAmount() + amount;
+            double newAmount = effStaggerRemaining.GetAmount() + amount;
             uint spellId = GetStaggerSpellId(target, newAmount);
             if (spellId == effStaggerRemaining.GetSpellInfo().Id)
             {
@@ -641,20 +641,20 @@ class spell_monk_stagger : AuraScript
             AddNewStagger(target, GetStaggerSpellId(target, amount), amount);
     }
 
-    uint GetStaggerSpellId(Unit unit, float amount)
+    uint GetStaggerSpellId(Unit unit, double amount)
     {
-        const float StaggerHeavy = 0.6f;
-        const float StaggerModerate = 0.3f;
+        const double StaggerHeavy = 0.6;
+        const double StaggerModerate = 0.3;
 
-        float staggerPct = amount / (float)unit.GetMaxHealth();
+        double staggerPct = amount / unit.GetMaxHealth();
         return (staggerPct >= StaggerHeavy) ? SpellIds.StaggerHeavy :
             (staggerPct >= StaggerModerate) ? SpellIds.StaggerModerate : SpellIds.StaggerLight;
     }
 
-    void AddNewStagger(Unit unit, uint staggerSpellId, float staggerAmount)
+    void AddNewStagger(Unit unit, uint staggerSpellId, double staggerAmount)
     {
         // We only set the total stagger amount. The amount per tick will be set by the stagger spell script
-        unit.CastSpell(unit, staggerSpellId, new CastSpellExtraArgs(SpellValueMod.BasePoint1, (int)staggerAmount).SetTriggerFlags(TriggerCastFlags.FullMask));
+        unit.CastSpell(unit, staggerSpellId, new CastSpellExtraArgs(SpellValueModFloat.BasePoint1, staggerAmount).SetTriggerFlags(TriggerCastFlags.FullMask));
     }
 }
 
@@ -672,12 +672,12 @@ class spell_monk_stagger_damage_aura : AuraScript
         Aura auraStagger = SpellIds.FindExistingStaggerEffect(GetTarget());
         if (auraStagger != null)
         {
-            AuraEffect auraEff = auraStagger.GetEffect(1);
-            if (auraEff != null)
+            AuraEffect totalEffect = auraStagger.GetEffect(1);
+            if (totalEffect != null)
             {
-                float total = (float)auraEff.GetAmount();
-                float tickDamage = (float)aurEff.GetAmount();
-                auraEff.ChangeAmount((int)(total - tickDamage));
+                double total = totalEffect.GetAmount();
+                double tickDamage = aurEff.GetAmount();
+                totalEffect.ChangeAmount(total - tickDamage);
             }
         }
     }
@@ -705,8 +705,8 @@ class spell_monk_stagger_debuff_aura : AuraScript
     void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         // Calculate damage per tick
-        float total = (float)aurEff.GetAmount();
-        float perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() Todo: verify
+        double total = aurEff.GetAmount();
+        double perTick = total * _period / GetDuration(); // should be same as GetMaxDuration() Todo: verify
 
         // Set amount on effect for tooltip
         AuraEffect effInfo = GetAura().GetEffect(0);
@@ -734,7 +734,7 @@ class spell_monk_stagger_debuff_aura : AuraScript
 
     float _period = 0.0f;
 
-    void CastOrChangeTickDamage(float tickDamage)
+    void CastOrChangeTickDamage(double tickDamage)
     {
         Unit unit = GetTarget();
         Aura auraDamage = unit.GetAura(SpellIds.StaggerDamageAura);
@@ -748,7 +748,7 @@ class spell_monk_stagger_debuff_aura : AuraScript
         {
             AuraEffect eff = auraDamage.GetEffect(0);
             if (eff != null)
-                eff.ChangeAmount((int)tickDamage);
+                eff.ChangeAmount(tickDamage);
         }
     }
 }

@@ -494,7 +494,7 @@ namespace Game.Entities
             petInfo.Type = GetPetType();
             petInfo.SpecializationId = GetSpecialization();
         }
-        
+
         public static void DeleteFromDB(uint petNumber)
         {
             SQLTransaction trans = new();
@@ -859,8 +859,8 @@ namespace Game.Entities
                             effectInfo[key] = new AuraLoadEffectInfo();
 
                         var info = effectInfo[key];
-                        info.Amounts[effectIndex] = effectResult.Read<int>(4);
-                        info.BaseAmounts[effectIndex] = effectResult.Read<int>(5);
+                        info.Amounts[effectIndex] = effectResult.Read<double>(4);
+                        info.BaseAmounts[effectIndex] = effectResult.Read<double>(5);
                     }
                 } while (effectResult.NextRow());
             }
@@ -1415,7 +1415,7 @@ namespace Game.Entities
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 
             if (auraId == 35696)                                      // Demonic Knowledge
-                args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
+                args.AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
 
             CastSpell(this, auraId, args);
         }
@@ -1698,7 +1698,7 @@ namespace Game.Entities
         uint? GetCurrentUnslottedPetIndex() { return CurrentPetIndex.HasValue && ((CurrentPetIndex & UnslottedPetIndexMask) != 0) ? (CurrentPetIndex & ~UnslottedPetIndexMask) : null; }
         public void SetCurrentUnslottedPetIndex(uint index) { CurrentPetIndex = index | UnslottedPetIndexMask; }
     }
-    
+
     public enum ActiveStates
     {
         Passive = 0x01,                                    // 0x01 - passive

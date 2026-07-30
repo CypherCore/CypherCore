@@ -113,69 +113,69 @@ public static class MathFunctions
     }
     #endregion
 
-    public static int ApplyPct(ref int Base, float pct)
+    public static int ApplyPct<U>(ref int Base, U pct)
     {
         return Base = CalculatePct(Base, pct);
     }
-    public static uint ApplyPct(ref uint Base, float pct)
+    public static uint ApplyPct<U>(ref uint Base, U pct)
     {
         return Base = CalculatePct(Base, pct);
     }
-    public static float ApplyPct(ref float Base, float pct)
+    public static float ApplyPct<U>(ref float Base, U pct)
     {
         return Base = CalculatePct(Base, pct);
     }
-    public static double ApplyPct(ref double Base, float pct)
+    public static double ApplyPct<U>(ref double Base, U pct)
     {
         return Base = CalculatePct(Base, pct);
     }
 
-    public static long AddPct(ref long value, float pct)
+    public static long AddPct<U>(ref long value, U pct)
     {
         return value += (long)CalculatePct(value, pct);
     }
-    public static int AddPct(ref int value, float pct)
+    public static int AddPct<U>(ref int value, U pct)
     {
         return value += CalculatePct(value, pct);
     }
-    public static uint AddPct(ref uint value, float pct)
+    public static uint AddPct<U>(ref uint value, U pct)
     {
         return value += CalculatePct(value, pct);
     }
-    public static float AddPct(ref float value, float pct)
+    public static float AddPct<U>(ref float value, U pct)
     {
         return value += CalculatePct(value, pct);
     }
-    public static double AddPct(ref double value, float pct)
+    public static double AddPct<U>(ref double value, U pct)
     {
         return value += CalculatePct(value, pct);
     }
 
-    public static int CalculatePct(int value, float pct)
+    public static int CalculatePct<U>(int value, U pct)
     {
         return (int)(value * Convert.ToSingle(pct) / 100.0f);
     }
-    public static uint CalculatePct(uint value, float pct)
+    public static uint CalculatePct<U>(uint value, U pct)
     {
         return (uint)(value * Convert.ToSingle(pct) / 100.0f);
     }
-    public static float CalculatePct(float value, float pct)
+    public static float CalculatePct<U>(float value, U pct)
     {
-        return value * pct / 100.0f;
+        return value * Convert.ToSingle(pct) / 100.0f;
     }
-    public static double CalculatePct(double value, float pct)
+    public static double CalculatePct<U>(double value, U pct)
     {
-        return value * pct / 100.0;
+        return value * Convert.ToSingle(pct) / 100.0;
     }
-    public static ulong CalculatePct(ulong value, float pct)
+    public static ulong CalculatePct<U>(ulong value, U pct)
     {
-        return (ulong)(value * pct / 100.0f);
+        return (ulong)(value * Convert.ToSingle(pct) / 100.0f);
     }
+
     public static float GetPctOf(float value, float max)
     {
         return value / max * 100.0f;
     }
-
 
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
     {

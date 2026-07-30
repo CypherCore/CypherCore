@@ -209,10 +209,10 @@ class spell_sha_maelstrom_weapon_base
                     TriggeringSpell = consumingSpell,
                     SpellValueOverrides =
                     {
-                        new(SpellValueMod.BasePoint0, maelstromSpellMod.GetEffect(0).GetAmount()),
+                        new(SpellValueModFloat.BasePoint0, maelstromSpellMod.GetEffect(0).GetAmount()),
                         // this is indeed very silly but it is how it behaves on official servers
                         // it ignores how many stacks were actually consumed and calculates benefit from max stacks (Thorim's Invocation can consume less stacks than entire aura)
-                        new(SpellValueMod.BasePoint1, MathFunctions.CalculatePct(maelstromSpellMod.GetEffect(1).GetAmount(), stormweaver.GetAmount())),
+                        new(SpellValueModFloat.BasePoint1, MathFunctions.CalculatePct(maelstromSpellMod.GetEffect(1).GetAmount(), stormweaver.GetAmount())),
                         new(SpellValueMod.AuraStack, Math.Min(stacks, maelstromWeaponVisibleAura.GetStackAmount()))
                     }
                 });
@@ -378,7 +378,7 @@ class spell_sha_aftershock : AuraScript
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringSpell = procSpell,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom).Value) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, procSpell.GetPowerTypeCostAmount(PowerType.Maelstrom).Value) }
         });
     }
 
@@ -411,7 +411,7 @@ class spell_sha_ancestral_guidance : AuraScript
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        int bp0 = MathFunctions.CalculatePct((int)(eventInfo.GetDamageInfo() != null ? eventInfo.GetDamageInfo().GetDamage() : eventInfo.GetHealInfo().GetHeal()), aurEff.GetAmount());
+        double bp0 = MathFunctions.CalculatePct(eventInfo.GetDamageInfo() != null ? eventInfo.GetDamageInfo().GetDamage() : eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
         if (bp0 == 0)
             return;
 
@@ -419,7 +419,7 @@ class spell_sha_ancestral_guidance : AuraScript
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, bp0) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, bp0) }
         });
     }
 
@@ -486,7 +486,7 @@ class spell_sha_artifact_gathering_storms : SpellScript
         GetCaster().CastSpell(GetCaster(), SpellIds.GatheringStormsBuff, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.FullMask,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, (int)(gatheringStorms.GetAmount() * GetUnitTargetCountForEffect(effIndex))) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, gatheringStorms.GetAmount() * GetUnitTargetCountForEffect(effIndex)) }
         });
     }
 
@@ -499,7 +499,7 @@ class spell_sha_artifact_gathering_storms : SpellScript
 [Script] // 114052 - Ascendance (Restoration)
 class spell_sha_ascendance_restoration : AuraScript
 {
-    int _healToDistribute;
+    double _healToDistribute;
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -513,7 +513,7 @@ class spell_sha_ascendance_restoration : AuraScript
 
     void OnProcHeal(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        _healToDistribute += MathFunctions.CalculatePct((int)(procInfo.GetHealInfo().GetOriginalHeal()), aurEff.GetAmount());
+        _healToDistribute += MathFunctions.CalculatePct(procInfo.GetHealInfo().GetOriginalHeal(), aurEff.GetAmount());
     }
 
     void HandleEffectPeriodic(AuraEffect aurEff)
@@ -525,7 +525,7 @@ class spell_sha_ascendance_restoration : AuraScript
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, _healToDistribute) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, _healToDistribute) }
         });
         _healToDistribute = 0;
     }
@@ -548,7 +548,7 @@ class spell_sha_ashen_catalyst : AuraScript
 
     void ReduceLavaLashCooldown(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.LavaLash, -aurEff.GetAmount() * TimeSpan.FromSeconds(100));
+        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.LavaLash, -aurEff.GetAmountAsInt() * TimeSpan.FromSeconds(100));
     }
 
     public override void Register()
@@ -572,7 +572,7 @@ class spell_sha_chain_lightning_crash_lightning : SpellScript
 
     void HandleCooldownReduction(uint effIndex)
     {
-        GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.CrashLightning, TimeSpan.FromSeconds(-GetEffectValue()) * GetUnitTargetCountForEffect(0));
+        GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.CrashLightning, TimeSpan.FromSeconds(-GetEffectValueAsInt()) * GetUnitTargetCountForEffect(0));
     }
 
     void HandleDamageBuff(uint effIndex)
@@ -615,7 +615,7 @@ class spell_sha_chain_lightning_energize : SpellScript
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringAura = energizeAmount,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0)) }
             });
     }
 
@@ -647,7 +647,7 @@ class spell_sha_chain_lightning_overload : SpellScript
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringAura = energizeAmount,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, (int)(energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0))) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, energizeAmount.GetAmount() * GetUnitTargetCountForEffect(0)) }
             });
     }
 
@@ -821,7 +821,7 @@ class spell_sha_deeply_rooted_elements : AuraScript
 
         Unit target = eventInfo.GetActor();
 
-        int duration = GetEffect(0).GetAmount();
+        int duration = GetEffect(0).GetAmountAsInt();
         Aura ascendanceAura = target.GetAura(_triggeredSpellId);
         if (ascendanceAura != null)
             duration += ascendanceAura.GetDuration();
@@ -945,7 +945,7 @@ class spell_sha_downpour : SpellScript
 
     void HandleCooldown()
     {
-        TimeSpan cooldown = TimeSpan.FromSeconds(GetSpellInfo().RecoveryTime) + TimeSpan.FromSeconds(GetEffectInfo(1).CalcValue() * _healedTargets);
+        TimeSpan cooldown = TimeSpan.FromSeconds(GetSpellInfo().RecoveryTime) + TimeSpan.FromSeconds(GetEffectInfo(1).CalcValueAsInt() * _healedTargets);
         GetCaster().GetSpellHistory().StartCooldown(GetSpellInfo(), 0, GetSpell(), false, cooldown);
     }
 
@@ -967,7 +967,7 @@ class spell_sha_earth_shield : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        if (eventInfo.GetDamageInfo() == null || !HasEffect(1) || eventInfo.GetDamageInfo().GetDamage() < GetTarget().CountPctFromMaxHealth(GetEffect(1).GetAmount()))
+        if (eventInfo.GetDamageInfo() == null || !HasEffect(1) || eventInfo.GetDamageInfo().GetDamage() < GetTarget().CountPctFromMaxHealth((float)GetEffect(1).GetAmount()))
             return false;
         return true;
     }
@@ -1121,7 +1121,7 @@ class areatrigger_sha_earthquake(AreaTrigger areaTrigger) : AreaTriggerAI(areaTr
                 {
                     TriggerFlags = TriggerCastFlags.FullMask,
                     OriginalCaster = at.GetGUID(),
-                    SpellValueOverrides = { new(SpellValueMod.BasePoint0, (int)(caster.SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.213f * _damageMultiplier)) }
+                    SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, caster.SpellBaseDamageBonusDone(SpellSchoolMask.Nature) * 0.213f * _damageMultiplier) }
                 });
 
             _refreshTimer += _period;
@@ -1282,7 +1282,7 @@ class spell_sha_elemental_weapons : AuraScript
         if (owner.HasAura(SpellIds.WindfuryAura))
             ++enchatmentCount;
 
-        int valuePerStack = GetEffect(0).GetAmount();
+        double valuePerStack = GetEffect(0).GetAmount();
         Aura buff = owner.GetAura(SpellIds.ElementalWeaponsBuff);
         if (buff != null)
         {
@@ -1298,8 +1298,8 @@ class spell_sha_elemental_weapons : AuraScript
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 SpellValueOverrides =
                 {
-                    new( SpellValueMod.BasePoint0, valuePerStack * enchatmentCount / 10 ),
-                    new( SpellValueMod.BasePoint1, valuePerStack * enchatmentCount / 10 )
+                    new( SpellValueModFloat.BasePoint0, valuePerStack * enchatmentCount / 10 ),
+                    new( SpellValueModFloat.BasePoint1, valuePerStack * enchatmentCount / 10 )
                 }
             });
     }
@@ -1456,7 +1456,7 @@ class spell_sha_hailstorm : AuraScript
         AuraEffect hailstormPassive = GetUnitOwner().GetAuraEffect(SpellIds.HailstormTalent, 0);
         if (hailstormPassive != null)
         {
-            int targetCap = hailstormPassive.GetAmount() / aurEff.GetBaseAmount();
+            int targetCap = (int)(hailstormPassive.GetAmount() / aurEff.GetBaseAmount());
             ((SpellFlatModifierByClassMask)spellMod).value = Math.Min(targetCap, GetStackAmount()) + 1;
         }
     }
@@ -1589,7 +1589,7 @@ class spell_sha_ice_strike : SpellScript
 
     void EnergizeMaelstrom(uint effIndex)
     {
-        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetCaster(), GetEffectValue());
+        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetCaster(), GetEffectValueAsInt());
     }
 
     public override void Register()
@@ -1713,14 +1713,14 @@ class spell_sha_item_mana_surge : AuraScript
         var manaCost = eventInfo.GetProcSpell().GetPowerTypeCostAmount(PowerType.Mana);
         if (manaCost.HasValue)
         {
-            int mana = MathFunctions.CalculatePct(manaCost.Value, 35);
+            double mana = MathFunctions.CalculatePct(manaCost.Value, 35);
             if (mana > 0)
             {
                 GetTarget().CastSpell(GetTarget(), SpellIds.ItemManaSurge, new CastSpellExtraArgs()
                 {
                     TriggerFlags = TriggerCastFlags.FullMask,
                     TriggeringAura = aurEff,
-                    SpellValueOverrides = { new(SpellValueMod.BasePoint0, mana) }
+                    SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, mana) }
                 });
             }
         }
@@ -1795,7 +1795,7 @@ class spell_sha_item_t10_elemental_2p_bonus : AuraScript
         PreventDefaultAction();
         Player target = GetTarget().ToPlayer();
         if (target != null)
-            target.GetSpellHistory().ModifyCooldown(SpellIds.ElementalMastery, TimeSpan.FromSeconds(-aurEff.GetAmount()));
+            target.GetSpellHistory().ModifyCooldown(SpellIds.ElementalMastery, TimeSpan.FromSeconds(-aurEff.GetAmountAsInt()));
     }
 
     public override void Register()
@@ -1883,7 +1883,7 @@ class spell_sha_lava_crit_chance : SpellScript
             return;
 
         if (victim.HasAura(SpellIds.FlameShock, caster.GetGUID()))
-            if (victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
+            if (victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100.0f)
                 chance = 100.0f;
     }
 
@@ -1924,7 +1924,7 @@ class spell_sha_lava_lash : SpellScript
 [Script] // 77756 - Lava Surge
 class spell_sha_lava_surge : AuraScript
 {
-    float _normalizedTicks = 0.0f;
+    double _normalizedTicks = 0.0;
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -1946,20 +1946,20 @@ class spell_sha_lava_surge : AuraScript
         Cell.VisitAllObjects(caster, worker, 100.0f);
 
         // Proc uptime is not supposed to scale with the number of applied flame shocks
-        _normalizedTicks += 1.0f / flameShocks;
+        _normalizedTicks += 1.0 / flameShocks;
 
         // first 6 ticks after last proc fail to prevent overwriting
-        if (_normalizedTicks < 6.0f)
+        if (_normalizedTicks < 6.0)
             return false;
 
-        float procChance = aurEff.GetAmount();
+        double procChance = aurEff.GetAmount();
         AuraEffect igneousPotential = GetTarget().GetAuraEffect(SpellIds.IgneousPotential, 0);
         if (igneousPotential != null)
             procChance += igneousPotential.GetAmount();
 
-        float missChance = MathF.Max(100 - procChance, 0.0f) / 100.0f;
+        double missChance = Math.Max(100 - procChance, 0.0) / 100.0;
 
-        procChance = (1.0f - MathF.Pow(missChance, _normalizedTicks)) * 100.0f;
+        procChance = (1.0 - Math.Pow(missChance, _normalizedTicks)) * 100.0;
 
         return RandomHelper.randChance(procChance);
     }
@@ -2020,7 +2020,7 @@ class spell_sha_lightning_bolt : SpellScript
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringAura = energizeAmount,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, energizeAmount.GetAmount()) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, energizeAmount.GetAmount()) }
             });
     }
 
@@ -2047,7 +2047,7 @@ class spell_sha_lightning_bolt_overload : SpellScript
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringAura = energizeAmount,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, energizeAmount.GetAmount()) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, energizeAmount.GetAmount()) }
             });
     }
 
@@ -2188,14 +2188,14 @@ class spell_sha_mastery_elemental_overload : AuraScript
         if (GetTriggeredSpellId(spellInfo.Id) == 0)
             return false;
 
-        float chance = aurEff.GetAmount();   // Mastery % amount
+        double chance = aurEff.GetAmount();   // Mastery % amount
 
         if (spellInfo.Id == SpellIds.ChainLightning)
-            chance /= 3.0f;
+            chance /= 3.0;
 
         Aura stormkeeper = eventInfo.GetActor().GetAura(SpellIds.Stormkeeper);
         if (stormkeeper != null && eventInfo.GetProcSpell().m_appliedMods.Contains(stormkeeper))
-            chance = 100.0f;
+            chance = 100.0;
 
         return RandomHelper.randChance(chance);
     }
@@ -2309,7 +2309,7 @@ class spell_sha_molten_assault : SpellScript
         args.SetTriggeringSpell(GetSpell());
 
         // targets that already have flame shock are first in the list (and need to refresh it)
-        for (var i = 0; i < Math.Min(targets.Count, GetEffectValue() + 1); ++i)
+        for (var i = 0; i < Math.Min(targets.Count, GetEffectValueAsInt() + 1); ++i)
             caster.CastSpell(targets[i], SpellIds.FlameShock, args);
     }
 
@@ -2362,9 +2362,9 @@ class spell_sha_molten_thunder_sundering : SpellScript
         if (counterScript == null)
             return;
 
-        int procChance = chanceBaseEffect.GetAmount();
-        procChance += (int)Math.Min(targetLimitEffect.GetAmount(), GetUnitTargetCountForEffect(0)) * chancePerTargetEffect.GetAmount();
-        procChance >>= counterScript.ProcCount; // Each consecutive reset reduces these chances by half
+        double procChance = chanceBaseEffect.GetAmount();
+        procChance += Math.Min(targetLimitEffect.GetAmount(), GetUnitTargetCountForEffect(0)) * chancePerTargetEffect.GetAmount();
+        procChance *= Math.Pow(0.5, counterScript.ProcCount); // Each consecutive reset reduces these chances by half
         if (RandomHelper.randChance(procChance))
         {
             shaman.CastSpell(shaman, SpellIds.MoltenThunderProc, new CastSpellExtraArgs()
@@ -2396,7 +2396,7 @@ class spell_sha_natures_guardian : AuraScript
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetActionTarget().HealthBelowPct(aurEff.GetAmount())
+        return eventInfo.GetActionTarget().HealthBelowPct((float)aurEff.GetAmount())
             && !eventInfo.GetActionTarget().HasAura(SpellIds.NaturesGuardianCooldown);
     }
 
@@ -2487,7 +2487,7 @@ class spell_sha_primordial_wave : SpellScript
 
     void EnergizeMaelstrom(uint effIndex)
     {
-        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetCaster(), GetEffectValue());
+        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetCaster(), GetEffectValueAsInt());
     }
 
     public override void Register()
@@ -2593,7 +2593,7 @@ class spell_sha_stormblast_damage : SpellScript
         AuraEffect stormblast = GetCaster().GetAuraEffect(SpellIds.StormblastTalent, 0);
         if (stormblast != null)
         {
-            int damage = MathFunctions.CalculatePct(GetHitDamage(), stormblast.GetAmount());
+            double damage = MathFunctions.CalculatePct(GetHitDamage(), stormblast.GetAmount());
 
             // Not part of SpellFamilyFlags for mastery effect but known to be affected by it
             AuraEffect mastery = GetCaster().GetAuraEffect(SpellIds.EnhancedElements, 0);
@@ -2603,7 +2603,7 @@ class spell_sha_stormblast_damage : SpellScript
             GetCaster().CastSpell(GetHitUnit(), SpellIds.StormblastDamage, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, damage) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, damage) }
             });
         }
     }
@@ -2650,12 +2650,12 @@ class StormflurryEvent : BasicEvent
     Unit _caster;
     CastSpellTargetArg _target;
     ObjectGuid _originalCastId;
-    int _damagePercent;
+    double _damagePercent;
     uint _mainHandDamageSpellId;
     uint _offHandDamageSpellId;
-    int _procChance;
+    double _procChance;
 
-    public StormflurryEvent(Unit caster, Unit target, ObjectGuid originalCastId, int damagePercent, uint mainHandDamageSpellId, uint offHandDamageSpellId, int procChance)
+    public StormflurryEvent(Unit caster, Unit target, ObjectGuid originalCastId, double damagePercent, uint mainHandDamageSpellId, uint offHandDamageSpellId, double procChance)
     {
         _caster = caster;
         _target = target;
@@ -2690,7 +2690,7 @@ class StormflurryEvent : BasicEvent
 
     public class Data
     {
-        public int DamagePercent;
+        public double DamagePercent;
     }
 }
 
@@ -2738,7 +2738,7 @@ class spell_sha_stormflurry : SpellScript
         if (chanceEffect == null || damageEffect == null)
             return;
 
-        int procChance = chanceEffect.GetAmount();
+        double procChance = chanceEffect.GetAmount();
         if (!RandomHelper.randChance(procChance))
             return;
 
@@ -2846,7 +2846,7 @@ class spell_sha_swirling_maelstrom : AuraScript
 
     void EnergizeMaelstrom(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetTarget(), aurEff.GetAmount());
+        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetTarget(), aurEff.GetAmountAsInt());
     }
 
     public override void Register()
@@ -2942,7 +2942,7 @@ class spell_sha_thorims_invocation_trigger : SpellScript
         // Manually remove stacks - Maelstrom Weapon aura cannot proc from procs and free Lightning Bolt/Chain Lightning procs from Arc Discharge (455096) shoulnd't consume it
         Aura maelstromWeaponVisibleAura = caster.GetAura(SpellIds.MaelstromWeaponVisibleAura);
         if (maelstromWeaponVisibleAura != null)
-            spell_sha_maelstrom_weapon_base.ConsumeMaelstromWeapon(caster, maelstromWeaponVisibleAura, thorimsInvocation.GetAmount());
+            spell_sha_maelstrom_weapon_base.ConsumeMaelstromWeapon(caster, maelstromWeaponVisibleAura, thorimsInvocation.GetAmountAsInt());
     }
 
     public override void Register()
@@ -2969,8 +2969,8 @@ class spell_sha_tidal_waves : AuraScript
             TriggeringAura = aurEff,
             SpellValueOverrides =
             {
-                new( SpellValueMod.BasePoint0, -aurEff.GetAmount() ),
-                new(SpellValueMod.BasePoint1, aurEff.GetAmount() )
+                new(SpellValueModFloat.BasePoint0, -aurEff.GetAmount() ),
+                new(SpellValueModFloat.BasePoint1, aurEff.GetAmount() )
             }
         });
     }
@@ -3069,9 +3069,9 @@ class spell_sha_t8_elemental_4p_bonus : AuraScript
             return;
 
         SpellEffectInfo dotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, GetCastDifficulty()).GetEffect(0);
-        int amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
 
-        amount /= (int)dotEffect.GetPeriodicTickCount();
+        amount /= dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
@@ -3080,7 +3080,7 @@ class spell_sha_t8_elemental_4p_bonus : AuraScript
         {
             TriggerFlags = TriggerCastFlags.FullMask,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
         });
     }
 
@@ -3108,9 +3108,9 @@ class spell_sha_t9_elemental_4p_bonus : AuraScript
             return;
 
         SpellEffectInfo dotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, GetCastDifficulty()).GetEffect(0);
-        int amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
 
-        amount /= (int)dotEffect.GetPeriodicTickCount();
+        amount /= dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
@@ -3119,7 +3119,7 @@ class spell_sha_t9_elemental_4p_bonus : AuraScript
         {
             TriggerFlags = TriggerCastFlags.FullMask,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
         });
     }
 
@@ -3147,7 +3147,7 @@ class spell_sha_t10_elemental_4p_bonus : AuraScript
         Aura flameShockAura = flameShock.GetBase();
 
         int maxDuration = flameShockAura.GetMaxDuration();
-        int newDuration = flameShockAura.GetDuration() + aurEff.GetAmount() * Time.InMilliseconds;
+        int newDuration = flameShockAura.GetDuration() + aurEff.GetAmountAsInt() * Time.InMilliseconds;
 
         flameShockAura.SetDuration(newDuration);
         // is it blizzlike to change max duration for Fs?
@@ -3179,9 +3179,9 @@ class spell_sha_t10_restoration_4p_bonus : AuraScript
             return;
 
         SpellEffectInfo dotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, GetCastDifficulty()).GetEffect(0);
-        int amount = MathFunctions.CalculatePct((int)(healInfo.GetHeal()), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
-        amount /= (int)dotEffect.GetPeriodicTickCount();
+        amount /= dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
@@ -3190,7 +3190,7 @@ class spell_sha_t10_restoration_4p_bonus : AuraScript
         {
             TriggerFlags = TriggerCastFlags.FullMask,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
         });
     }
 
@@ -3277,7 +3277,7 @@ class spell_sha_unrelenting_storms : SpellScript
         long targetLimit = 0;
         AuraEffect limitEffect = unrelentingStorms.GetEffect(0);
         if (limitEffect != null)
-            targetLimit = limitEffect.GetAmount();
+            targetLimit = limitEffect.GetAmountAsInt();
 
         if (GetUnitTargetCountForEffect(effIndex) > targetLimit)
             return;
@@ -3291,7 +3291,7 @@ class spell_sha_unrelenting_storms : SpellScript
             shaman.CastSpell(shaman, SpellIds.UnrelentingStormsReduction, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, -(int)(MathFunctions.CalculatePct((int)cooldown.TotalMilliseconds, reductionPctEffect.GetAmount()))) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, -MathFunctions.CalculatePct(cooldown.TotalMilliseconds, reductionPctEffect.GetAmount())) }
             });
         }
 
@@ -3330,7 +3330,7 @@ class spell_sha_voltaic_blaze : SpellScript
 
     void EnergizeMaelstrom(uint effIndex)
     {
-        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetCaster(), GetEffectValue());
+        spell_sha_maelstrom_weapon_base.GenerateMaelstromWeapon(GetCaster(), GetEffectValueAsInt());
     }
 
     public override void Register()

@@ -314,7 +314,7 @@ class spell_pri_answered_prayers : AuraScript
             answeredPrayers.ModStackAmount(1);
 
             // Note: if current stacks match max. stacks, trigger Apotheosis.
-            if (answeredPrayers.GetStackAmount() != aurEff.GetAmount())
+            if (answeredPrayers.GetStackAmount() != aurEff.GetAmountAsInt())
                 return;
 
             answeredPrayers.Remove();
@@ -358,7 +358,7 @@ class spell_pri_aq_3p_bonus : AuraScript
             return;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct((int)(healInfo.GetHeal()), 10));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct((int)(healInfo.GetHeal()), 10));
         caster.CastSpell(caster, SpellIds.OracularHeal, args);
     }
 
@@ -427,7 +427,7 @@ class spell_pri_atonement : AuraScript
         CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
 
         // Note: atonementEffect holds the correct amount since we passed the effect in the AuraScript that calls this method.
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), atonementEffect.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), atonementEffect.GetAmount()));
 
         args.SetCustomArg(new TriggerArgs()
         {
@@ -435,7 +435,7 @@ class spell_pri_atonement : AuraScript
             DamageSchoolMask = eventInfo.GetDamageInfo().GetSchoolMask()
         });
 
-        float distanceLimit = GetEffectInfo(1).CalcValue();
+        float distanceLimit = (float)GetEffectInfo(1).CalcValue();
 
         _appliedAtonements.RemoveAll(targetGuid =>
         {
@@ -455,13 +455,13 @@ class spell_pri_atonement : AuraScript
     void UpdateSinsOfTheManyValue()
     {
         // Note: the damage dimish starts at the 6th application as of 10.0.5.
-        float[] damageByStack = [20.0f, 20.0f, 20.0f, 20.0f, 20.0f, 17.5f, 15.0f, 12.5f, 10.0f, 7.5f, 5.5f, 4.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f, 0.75f, 0.63f, 0.5f];
+        double[] damageByStack = [20.0f, 20.0f, 20.0f, 20.0f, 20.0f, 17.5f, 15.0f, 12.5f, 10.0f, 7.5f, 5.5f, 4.0f, 2.5f, 2.0f, 1.5f, 1.25f, 1.0f, 0.75f, 0.63f, 0.5f];
 
         foreach (uint effectIndex in new uint[] { 0, 1, 2 })
         {
             AuraEffect sinOfTheMany = GetUnitOwner().GetAuraEffect(SpellIds.SinsOfTheMany, effectIndex);
             if (sinOfTheMany != null)
-                sinOfTheMany.ChangeAmount((int)damageByStack[Math.Min(_appliedAtonements.Count, (byte)(damageByStack.Length - 1))]);
+                sinOfTheMany.ChangeAmount(damageByStack[Math.Min(_appliedAtonements.Count, (byte)(damageByStack.Length - 1))]);
         }
     }
 }
@@ -698,7 +698,7 @@ class spell_pri_circle_of_healing : SpellScript
     void FilterTargets(List<WorldObject> targets)
     {
         // Note: we must remove one since target is always chosen.
-        uint maxTargets = (uint)(GetSpellInfo().GetEffect(1).CalcValue(GetCaster()) - 1);
+        uint maxTargets = (uint)(GetSpellInfo().GetEffect(1).CalcValueAsInt(GetCaster()) - 1);
 
         SelectRandomInjuredTargets(targets, maxTargets, true);
 
@@ -748,7 +748,7 @@ class spell_pri_crystalline_reflection : AuraScript
             return;
 
         CastSpellExtraArgs args = new(TriggerCastFlags.DontReportCastError);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, auraEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, auraEff.GetAmount()));
         caster.CastSpell(attacker, SpellIds.CrystallineReflectionReflect, args);
     }
 
@@ -807,8 +807,8 @@ class spell_pri_dispersing_light : AuraScript
             TriggeringAura = aurEff,
             SpellValueOverrides =
             {
-                new CastSpellExtraArgsInit.SpellValueOverride(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount())),
-                new CastSpellExtraArgsInit.SpellValueOverride(SpellValueMod.MaxTargets, GetEffectInfo(1).CalcValue(caster))
+                new CastSpellExtraArgsInit.SpellValueOverride(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount())),
+                new CastSpellExtraArgsInit.SpellValueOverride(SpellValueMod.MaxTargets, GetEffectInfo(1).CalcValueAsInt(caster))
             },
             CustomArg = new TriggerArgs() { TargetToExclude = target.GetGUID() }
         });
@@ -1056,7 +1056,7 @@ class spell_pri_divine_service : SpellScript
         {
             Aura prayerOfMending = victim.GetAura(SpellIds.PrayerOfMendingAura, GetCaster().GetGUID());
             if (prayerOfMending != null)
-                MathFunctions.AddPct(ref pctMod, (int)divineServiceEffect.GetAmount() * prayerOfMending.GetStackAmount());
+                MathFunctions.AddPct(ref pctMod, divineServiceEffect.GetAmount() * prayerOfMending.GetStackAmount());
         }
     }
 
@@ -1201,7 +1201,7 @@ class spell_pri_empowered_renew : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         spell_pri_holy_words_base.ModifyCooldown(eventInfo.GetActor(), Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, GetCastDifficulty()),
-           TimeSpan.FromMilliseconds(-aurEff.GetAmount()));
+           TimeSpan.FromMilliseconds(-aurEff.GetAmountAsInt()));
     }
 
     public override void Register()
@@ -1351,7 +1351,7 @@ class spell_pri_from_darkness_comes_light : AuraScript
 [Script] // 47788 - Guardian Spirit
 class spell_pri_guardian_spirit : AuraScript
 {
-    uint healPct = 0;
+    double healPct = 0.0;
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -1364,7 +1364,7 @@ class spell_pri_guardian_spirit : AuraScript
         return true;
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         // Set absorbtion amount to unlimited
         amount = -1;
@@ -1376,11 +1376,11 @@ class spell_pri_guardian_spirit : AuraScript
         if (dmgInfo.GetDamage() < target.GetHealth())
             return;
 
-        int healAmount = (int)target.CountPctFromMaxHealth((int)healPct);
+        double healAmount = target.CountPctFromMaxHealth((float)healPct);
         // remove the aura now, we don't want 40% healing bonus
         Remove(AuraRemoveMode.EnemySpell);
         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-        args.AddSpellMod(SpellValueMod.BasePoint0, healAmount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, healAmount);
         target.CastSpell(target, SpellIds.GuardianSpiritHeal, args);
         absorbAmount = dmgInfo.GetDamage();
     }
@@ -1411,8 +1411,8 @@ class spell_pri_heavens_wrath : AuraScript
         if (caster == null)
             return;
 
-        int cdReduction = aurEff.GetAmount();
-        caster.GetSpellHistory().ModifyCooldown(SpellIds.UltimatePenitence, TimeSpan.FromSeconds(-cdReduction), true);
+        TimeSpan cdReduction = -TimeSpan.FromSeconds(aurEff.GetAmount());
+        caster.GetSpellHistory().ModifyCooldown(SpellIds.UltimatePenitence, cdReduction, true);
     }
 
     public override void Register()
@@ -1513,7 +1513,7 @@ class spell_pri_holy_words : AuraScript
             case SpellIds.FlashHeal: // reduce Holy Word: Serenity cd by 6 seconds
                 targetSpellId = SpellIds.HolyWordSerenity;
                 cdReductionEffIndex = 1;
-                // cdReduction = Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSerenity, GetCastDifficulty()).GetEffect(1).CalcValue(player);
+                // cdReduction = Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSerenity, GetCastDifficulty()).GetEffect(1).CalcValueAsInt(player);
                 break;
             case SpellIds.PrayerOfHealing: // reduce Holy Word: Sanctify cd by 6 seconds
                 targetSpellId = SpellIds.HolyWordSanctify;
@@ -1533,7 +1533,7 @@ class spell_pri_holy_words : AuraScript
         }
 
         SpellInfo targetSpellInfo = Global.SpellMgr.GetSpellInfo(targetSpellId, GetCastDifficulty());
-        int cdReduction = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValue(GetTarget());
+        int cdReduction = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValueAsInt(GetTarget());
         spell_pri_holy_words_base.ModifyCooldown(GetTarget(), targetSpellInfo, TimeSpan.FromSeconds(-cdReduction));
     }
 
@@ -1568,10 +1568,10 @@ class spell_pri_holy_word_salvation : SpellScript
         args.TriggerFlags = TriggerCastFlags.FullMask;
 
         // amount of Prayer of Mending is SpellIds.HolyWordSalvation's 1.
-        args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValue());
+        args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValueAsInt());
 
-        int basePoints = caster.SpellHealingBonusDone(target, _spellInfoHeal, _healEffectDummy.CalcValue(caster), DamageEffectType.Heal, _healEffectDummy);
-        args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
+        int basePoints = caster.SpellHealingBonusDone(target, _spellInfoHeal, _healEffectDummy.CalcValueAsInt(caster), DamageEffectType.Heal, _healEffectDummy);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, basePoints);
         caster.CastSpell(target, SpellIds.PrayerOfMendingAura, args);
 
         // a full duration Renew is triggered.
@@ -1605,7 +1605,7 @@ class spell_pri_holy_word_salvation_cooldown_reduction : SpellScript
     void ReduceCooldown()
     {
         // cooldown reduced by SpellIds.HolyWordSalvation's TimeSpan.FromSeconds(2).
-        int cooldownReduction = Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSalvation, GetCastDifficulty()).GetEffect(2).CalcValue(GetCaster());
+        int cooldownReduction = Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSalvation, GetCastDifficulty()).GetEffect(2).CalcValueAsInt(GetCaster());
 
         GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.HolyWordSalvation, TimeSpan.FromSeconds(-cooldownReduction), true);
     }
@@ -1656,7 +1656,7 @@ class spell_pri_leap_of_faith_effect_trigger : SpellScript
         SpellCastTargets targets = new();
         targets.SetDst(destPos);
         targets.SetUnitTarget(GetCaster());
-        GetHitUnit().CastSpell(targets, (uint)GetEffectValue(), GetCastDifficulty());
+        GetHitUnit().CastSpell(targets, (uint)GetEffectValueAsInt(), GetCastDifficulty());
     }
 
     public override void Register()
@@ -1787,7 +1787,7 @@ class spell_pri_mind_devourer : SpellScript
 [Script] // Attached to 335467 - Devouring Plague
 class spell_pri_mind_devourer_buff_aura : AuraScript
 {
-    public float DamageIncrease = 0.0f;
+    public double DamageIncrease = 0.0;
 
     void CalculateDamage(AuraEffect aurEff, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
     {
@@ -1803,7 +1803,7 @@ class spell_pri_mind_devourer_buff_aura : AuraScript
 [Script]
 class spell_pri_mind_devourer_buff : SpellScript
 {
-    float _damageIncrease = 0.0f;
+    double _damageIncrease = 0.0;
 
     public override bool Validate(SpellInfo spellInfo)
     {
@@ -1862,7 +1862,7 @@ class spell_pri_painful_punishment : AuraScript
         if (caster == null || target == null)
             return;
 
-        int additionalDuration = aurEff.GetAmount();
+        int additionalDuration = aurEff.GetAmountAsInt();
 
         Aura shadowWordPain = target.GetOwnedAura(SpellIds.ShadowWordPain, caster.GetGUID());
         if (shadowWordPain != null)
@@ -2044,7 +2044,7 @@ class spell_pri_power_leech_passive : AuraScript
                 : SpellIds.PowerLeechMindbenderInsanity, GetCastDifficulty());
 
         target.CastSpell(summoner, spellInfo.Id, new CastSpellExtraArgs(aurEff)
-            .AddSpellMod(SpellValueMod.BasePoint0, spellInfo.GetEffect(0).CalcValue() / divisor));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, spellInfo.GetEffect(0).CalcValue() / divisor));
 
         // Note: Essence Devourer talent.
         if (summoner.HasAura(SpellIds.EssenceDevourer))
@@ -2147,7 +2147,7 @@ class spell_pri_power_word_radiance : SpellScript
         Unit explTarget = GetExplTargetUnit();
 
         // we must add one since explicit target is always chosen.
-        int maxTargets = GetEffectInfo(2).CalcValue(caster) + 1;
+        int maxTargets = GetEffectInfo(2).CalcValueAsInt(caster) + 1;
 
         SortTargetsWithPriorityRules(targets, maxTargets, GetRadianceRules(caster, explTarget));
 
@@ -2264,11 +2264,11 @@ class spell_pri_divine_aegis : AuraScript
         if (caster == null)
             return;
 
-        int aegisAmount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
+        double aegisAmount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
         CastSpellExtraArgs args = new(aurEff);
         args.SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
-        args.AddSpellMod(SpellValueMod.BasePoint0, aegisAmount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, aegisAmount);
         caster.CastSpell(eventInfo.GetProcTarget(), SpellIds.DivineAegisAbsorb, args);
     }
 
@@ -2325,7 +2325,7 @@ class spell_pri_divine_procession : AuraScript
             {
                 if (atonement.GetDuration() < 30 * Time.InMilliseconds)
                 {
-                    int newDuration = atonement.GetDuration() + aurEff.GetAmount();
+                    int newDuration = atonement.GetDuration() + aurEff.GetAmountAsInt();
                     atonement.SetDuration(newDuration);
                     atonement.SetMaxDuration(newDuration);
                 }
@@ -2352,7 +2352,7 @@ class spell_pri_power_word_solace : SpellScript
     {
         GetCaster().CastSpell(GetCaster(), SpellIds.PowerWordSolaceEnergize,
             new CastSpellExtraArgs(TriggerCastFlags.IgnoreCastInProgress).SetTriggeringSpell(GetSpell())
-                .AddSpellMod(SpellValueMod.BasePoint0, GetEffectValue() / 100));
+                .AddSpellMod(SpellValueModFloat.BasePoint0, GetEffectValue() / 100.0));
     }
 
     public override void Register()
@@ -2391,8 +2391,8 @@ class spell_pri_prayer_of_mending_dummy : SpellScript
 
         // Note: this line's purpose is to show the correct amount in Points field in SmsgAuraUpdate.
         SpellEffectInfo healEffectDummy = _spellInfoHeal.GetEffect(0);
-        uint basePoints = (uint)caster.SpellHealingBonusDone(target, _spellInfoHeal, healEffectDummy.CalcValue(caster), DamageEffectType.Heal, healEffectDummy);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);
+        uint basePoints = (uint)caster.SpellHealingBonusDone(target, _spellInfoHeal, healEffectDummy.CalcValueAsInt(caster), DamageEffectType.Heal, healEffectDummy);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)basePoints);
 
         // Note: Focused Mending talent.
         args.SetCustomArg(true);
@@ -2449,7 +2449,7 @@ class spell_pri_prayer_of_mending_aura : AuraScript
                     if (RandomHelper.randChance(sayYourPrayers.GetAmount()))
                         ++newStackAmount;
 
-                args.AddSpellMod(SpellValueMod.BasePoint0, newStackAmount);
+                args.AddSpellMod(SpellValueModFloat.BasePoint0, newStackAmount);
 
                 target.CastSpell(target, SpellIds.PrayerOfMendingJump, args);
             }
@@ -2521,12 +2521,12 @@ class spell_pri_prayer_of_mending_jump : SpellScript
         {
             CastSpellExtraArgs args = new();
             args.TriggerFlags = TriggerCastFlags.FullMask;
-            args.AddSpellMod(SpellValueMod.AuraStack, (byte)GetEffectValue());
+            args.AddSpellMod(SpellValueMod.AuraStack, GetEffectValueAsInt());
 
             // Note: this line's purpose is to show the correct amount in Points field in SmsgAuraUpdate.
             SpellEffectInfo healEffectDummy = _spellInfoHeal.GetEffect(0);
-            uint basePoints = (uint)origCaster.SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, healEffectDummy);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);
+            double basePoints = origCaster.SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, healEffectDummy.CalcValueAsInt(origCaster), DamageEffectType.Heal, healEffectDummy);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, basePoints);
 
             // Note: Focused Mending talent.
             args.SetCustomArg(false);
@@ -2583,7 +2583,7 @@ class spell_pri_holy_10_1_class_set_2pc : AuraScript
     {
         CastSpellExtraArgs args = new(aurEff);
         args.SetTriggeringSpell(eventInfo.GetProcSpell());
-        args.AddSpellMod(SpellValueMod.BasePoint0, Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMending, GetCastDifficulty()).GetEffect(0).CalcValue(GetCaster()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMending, GetCastDifficulty()).GetEffect(0).CalcValue(GetCaster()));
 
         GetTarget().CastSpell(GetTarget(), SpellIds.Holy10_1_ClassSet2PChooser, args);
     }
@@ -2622,7 +2622,7 @@ class spell_pri_holy_10_1_class_set_2pc_chooser : SpellScript
         Unit target = GetHitUnit();
 
         // Note: we need to increase BasePoints by 1 since it's 4 as default. Also Hackfix, we shouldn't reduce it by 1 if the target has the aura already.
-        byte stackAmount = (byte)(target.HasAura(SpellIds.PrayerOfMendingAura, caster.GetGUID()) ? GetEffectValue() : GetEffectValue() + 1);
+        byte stackAmount = (byte)(target.HasAura(SpellIds.PrayerOfMendingAura, caster.GetGUID()) ? GetEffectValueAsInt() : GetEffectValueAsInt() + 1);
 
         CastSpellExtraArgs args = new();
         args.TriggerFlags = TriggerCastFlags.FullMask;
@@ -2630,8 +2630,8 @@ class spell_pri_holy_10_1_class_set_2pc_chooser : SpellScript
 
         // Note: this line's purpose is to show the correct amount in Points field in SmsgAuraUpdate.
         SpellEffectInfo healEffectDummy = _spellInfoHeal.GetEffect(0);
-        uint basePoints = (uint)caster.SpellHealingBonusDone(target, _spellInfoHeal, healEffectDummy.CalcValue(caster), DamageEffectType.Heal, healEffectDummy);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);
+        double basePoints = caster.SpellHealingBonusDone(target, _spellInfoHeal, healEffectDummy.CalcValueAsInt(caster), DamageEffectType.Heal, healEffectDummy);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, basePoints);
 
         // Note: Focused Mending talent.
         args.SetCustomArg(true);
@@ -2720,8 +2720,8 @@ class spell_pri_assured_safety : SpellScript
 
             // Note: this line's purpose is to show the correct amount in Points field in SmsgAuraUpdate.
             SpellEffectInfo healEffectDummy = _spellInfoHeal.GetEffect(0);
-            uint basePoints = (uint)caster.SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, healEffectDummy.CalcValue(caster), DamageEffectType.Heal, healEffectDummy);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)basePoints);
+            double basePoints = caster.SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (int)healEffectDummy.CalcValue(caster), DamageEffectType.Heal, healEffectDummy);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, basePoints);
 
             // Note: Focused Mending talent.
             args.SetCustomArg(false);
@@ -2813,7 +2813,7 @@ class spell_pri_purge_the_wicked_dummy : SpellScript
 
         // Note: Revel in Purity talent.
         if (caster.HasAura(SpellIds.RevelInPurity))
-            spreadCount += (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None).GetEffect(1).CalcValue(GetCaster());
+            spreadCount += (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RevelInPurity, Difficulty.None).GetEffect(1).CalcValueAsInt(GetCaster());
 
         if (targets.Count > spreadCount)
             targets.Resize(spreadCount);
@@ -2953,14 +2953,14 @@ class spell_pri_sanctuary_absorb : AuraScript
         if (amountHolderEffect == null)
             return;
 
-        if (dmgInfo.GetDamage() >= amountHolderEffect.GetAmount())
+        if (dmgInfo.GetDamage() >= amountHolderEffect.GetAmountAsInt())
         {
             amountHolderEffect.GetBase().Remove(AuraRemoveMode.EnemySpell);
-            dmgInfo.AbsorbDamage((uint)amountHolderEffect.GetAmount());
+            dmgInfo.AbsorbDamage((uint)amountHolderEffect.GetAmountAsInt());
         }
         else
         {
-            amountHolderEffect.ChangeAmount(amountHolderEffect.GetAmount() - (int)dmgInfo.GetDamage());
+            amountHolderEffect.ChangeAmount(amountHolderEffect.GetAmount() - dmgInfo.GetDamage());
             dmgInfo.AbsorbDamage(dmgInfo.GetDamage());
         }
     }
@@ -2991,7 +2991,7 @@ class spell_pri_sanctuary_trigger : SpellScript
             Unit target = GetHitUnit();
             if (target != null)
             {
-                float absorbAmount = MathFunctions.CalculatePct(caster.SpellBaseDamageBonusDone(SpellSchoolMask.Shadow), sanctuaryEffect.GetAmount());
+                double absorbAmount = MathFunctions.CalculatePct(caster.SpellBaseDamageBonusDone(SpellSchoolMask.Shadow), sanctuaryEffect.GetAmount());
                 MathFunctions.AddPct(ref absorbAmount, caster.GetRatingBonusValue(CombatRating.VersatilityDamageDone));
 
                 caster.CastSpell(caster, SpellIds.SanctuaryAbsorb, new CastSpellExtraArgs()
@@ -2999,7 +2999,7 @@ class spell_pri_sanctuary_trigger : SpellScript
                     .SetTriggeringSpell(GetSpell()));
 
                 caster.CastSpell(target, SpellIds.SanctuaryAura, new CastSpellExtraArgs()
-                    .AddSpellMod(SpellValueMod.BasePoint0, (int)absorbAmount)
+                    .AddSpellMod(SpellValueModFloat.BasePoint0, absorbAmount)
                     .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
                     .SetTriggeringSpell(GetSpell()));
             }
@@ -3108,13 +3108,13 @@ class spell_pri_shadow_mend : SpellScript
 
             // Handle Masochism talent
             if (caster.HasAura(SpellIds.MasochismTalent) && caster.GetGUID() == target.GetGUID())
-                caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal, new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueMod.BasePoint0, periodicAmount));
+                caster.CastSpell(caster, SpellIds.MasochismPeriodicHeal, new CastSpellExtraArgs(GetSpell()).AddSpellMod(SpellValueModFloat.BasePoint0, periodicAmount));
             else if (target.IsInCombat() && periodicAmount != 0)
             {
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.SetTriggeringSpell(GetSpell());
-                args.AddSpellMod(SpellValueMod.BasePoint0, periodicAmount);
-                args.AddSpellMod(SpellValueMod.BasePoint1, damageForAuraRemoveAmount);
+                args.AddSpellMod(SpellValueModFloat.BasePoint0, periodicAmount);
+                args.AddSpellMod(SpellValueModFloat.BasePoint1, damageForAuraRemoveAmount);
                 caster.CastSpell(target, SpellIds.ShadowMendPeriodicDummy, args);
             }
         }
@@ -3139,7 +3139,7 @@ class spell_pri_shadow_mend_periodic_damage : AuraScript
         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
         args.SetOriginalCaster(GetCasterGUID());
         args.SetTriggeringAura(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, aurEff.GetAmount());
         GetTarget().CastSpell(GetTarget(), SpellIds.ShadowMendDamage, args);
     }
 
@@ -3150,7 +3150,7 @@ class spell_pri_shadow_mend_periodic_damage : AuraScript
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        int newAmount = aurEff.GetAmount() - (int)eventInfo.GetDamageInfo().GetDamage();
+        double newAmount = aurEff.GetAmount() - eventInfo.GetDamageInfo().GetDamage();
 
         aurEff.ChangeAmount(newAmount);
         if (newAmount < 0)
@@ -3181,7 +3181,7 @@ class spell_pri_shadow_word_death : SpellScript
 
     void HandleDamageCalculation(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
     {
-        if (victim.HealthBelowPct(GetEffectInfo(2).CalcValue(GetCaster())))
+        if (victim.HealthBelowPct((float)GetEffectInfo(2).CalcValue(GetCaster())))
             MathFunctions.AddPct(ref pctMod, GetEffectInfo(3).CalcValue(GetCaster()));
     }
 
@@ -3191,14 +3191,14 @@ class spell_pri_shadow_word_death : SpellScript
         if (!killed)
         {
             Unit caster = GetCaster();
-            int backlashDamage = (int)caster.CountPctFromMaxHealth(GetEffectInfo(5).CalcValue(caster));
+            int backlashDamage = (int)caster.CountPctFromMaxHealth((float)GetEffectInfo(5).CalcValue(caster));
             var originalCastId = GetSpell().m_castId;
             caster.m_Events.AddEventAtOffset(() =>
             {
                 caster.CastSpell(caster, SpellIds.ShadowWordDeathDamage, new CastSpellExtraArgs()
                     .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
                     .SetOriginalCastId(originalCastId)
-                    .AddSpellMod(SpellValueMod.BasePoint0, backlashDamage));
+                    .AddSpellMod(SpellValueModFloat.BasePoint0, backlashDamage));
 
             }, BacklashDelay);
         }
@@ -3318,15 +3318,15 @@ class spell_pri_t10_heal_2p_bonus : AuraScript
             return;
 
         SpellEffectInfo hotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, GetCastDifficulty()).GetEffect(0);
-        int amount = MathFunctions.CalculatePct((int)(healInfo.GetHeal()), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
-        amount /= (int)hotEffect.GetPeriodicTickCount();
+        amount /= hotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
         Unit target = eventInfo.GetProcTarget();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         caster.CastSpell(target, SpellIds.BlessedHealing, args);
     }
 
@@ -3379,9 +3379,9 @@ class spell_pri_trail_of_light : AuraScript
         if (!caster.IsWithinDist(oldTarget, healSpellInfo.GetMaxRange(true, caster)))
             return;
 
-        uint healAmount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
+        double healAmount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
-        caster.CastSpell(oldTarget, SpellIds.TrailOfLightHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, (int)healAmount));
+        caster.CastSpell(oldTarget, SpellIds.TrailOfLightHeal, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueModFloat.BasePoint0, healAmount));
     }
 
     public override void Register()
@@ -3414,12 +3414,12 @@ class spell_pri_train_of_thought : AuraScript
 
     void ReducePowerWordShieldCooldown(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.PowerWordShield, TimeSpan.FromSeconds(aurEff.GetAmount()));
+        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.PowerWordShield, TimeSpan.FromSeconds(aurEff.GetAmountAsInt()));
     }
 
     void ReducePenanceCooldown(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.Penance, TimeSpan.FromSeconds(aurEff.GetAmount()));
+        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.Penance, TimeSpan.FromSeconds(aurEff.GetAmountAsInt()));
     }
 
     public override void Register()
@@ -3468,7 +3468,7 @@ class spell_pri_twilight_equilibrium_shadow_word_pain : AuraScript
         return ValidateSpellInfo(SpellIds.TwilightEquilibriumShadow);
     }
 
-    void OnApply(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void OnApply(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         _damageMultiplier = 1.0f;
         Unit caster = GetCaster();
@@ -3590,12 +3590,12 @@ class spell_pri_vampiric_embrace : AuraScript
         if (damageInfo == null || damageInfo.GetDamage() == 0)
             return;
 
-        int selfHeal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-        int teamHeal = selfHeal / 2;
+        double selfHeal = MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+        double teamHeal = selfHeal / 2;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, teamHeal);
-        args.AddSpellMod(SpellValueMod.BasePoint1, selfHeal);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, teamHeal);
+        args.AddSpellMod(SpellValueModFloat.BasePoint1, selfHeal);
         GetTarget().CastSpell(null, SpellIds.VampiricEmbraceHeal, args);
     }
 

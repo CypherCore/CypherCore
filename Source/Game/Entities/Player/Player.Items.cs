@@ -3316,7 +3316,7 @@ namespace Game.Entities
                 price = (ulong)Math.Floor(price * GetReputationPriceDiscount(creature));
                 price = pProto.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
 
-                int priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
+                float priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                 if (priceMod != 0)
                     price -= MathFunctions.CalculatePct(price, priceMod);
 
@@ -5289,7 +5289,7 @@ namespace Game.Entities
                                 continue;
 
                             if (powerAura.HasEffect(auraEffect.GetEffIndex()))
-                                auraEffect.ChangeAmount((int)(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.GetSpellEffectInfo().CalcValue()));
+                                auraEffect.ChangeAmount(artifactPowerRank.AuraPointsOverride != 0 ? artifactPowerRank.AuraPointsOverride : auraEffect.GetSpellEffectInfo().CalcValue());
                         }
                     }
                     else
@@ -5302,7 +5302,7 @@ namespace Game.Entities
                     if (artifactPowerRank.AuraPointsOverride != 0)
                     {
                         foreach (var spellEffectInfo in spellInfo.GetEffects())
-                            args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, (int)artifactPowerRank.AuraPointsOverride);
+                            args.AddSpellMod(SpellValueModFloat.BasePoint0 + (int)spellEffectInfo.EffectIndex, (int)artifactPowerRank.AuraPointsOverride);
                     }
 
                     CastSpell(this, artifactPowerRank.SpellID, args);
@@ -5397,7 +5397,7 @@ namespace Game.Entities
                         if (apply)
                         {
                             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                            args.AddSpellMod(SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription);
+                            args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription);
                             CastSpell(this, PlayerConst.SpellIdHeartEssenceActionBarOverride, args);
                         }
                         else

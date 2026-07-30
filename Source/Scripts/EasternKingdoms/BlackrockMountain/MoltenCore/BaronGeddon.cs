@@ -84,7 +84,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.MoltenCore.BaronGeddon
             int[] damageForTick = { 500, 500, 1000, 1000, 2000, 2000, 3000, 5000 };
             CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
             args.TriggeringAura = aurEff;
-            args.AddSpellMod(SpellValueMod.BasePoint0, damageForTick[aurEff.GetTickNumber() - 1]);
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, damageForTick[aurEff.GetTickNumber() - 1]);
             GetTarget().CastSpell((WorldObject)null, SpellIds.InfernoDmg, args);
         }
 

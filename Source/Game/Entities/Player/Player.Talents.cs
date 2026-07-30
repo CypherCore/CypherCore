@@ -949,7 +949,7 @@ namespace Game.Entities
 
             if (withCastTime)
             {
-                CastSpell(this, TraitMgr.COMMIT_COMBAT_TRAIT_CONFIG_CHANGES_SPELL_ID, new CastSpellExtraArgs(SpellValueMod.BasePoint0, savedConfigId).SetCustomArg(newConfig));
+                CastSpell(this, TraitMgr.COMMIT_COMBAT_TRAIT_CONFIG_CHANGES_SPELL_ID, new CastSpellExtraArgs(SpellValueModFloat.BasePoint0, savedConfigId).SetCustomArg(newConfig));
                 return;
             }
 

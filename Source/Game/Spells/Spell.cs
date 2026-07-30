@@ -4248,9 +4248,9 @@ namespace Game.Spells
             return ammoDisplayID;
         }
 
-        static (int, SpellHealPredictionType) CalcPredictedHealing(SpellInfo spellInfo, Unit unitCaster, Unit target, uint castItemEntry, int castItemLevel, Spell spell, bool withPeriodic)
+        static (double, SpellHealPredictionType) CalcPredictedHealing(SpellInfo spellInfo, Unit unitCaster, Unit target, uint castItemEntry, int castItemLevel, Spell spell, bool withPeriodic)
         {
-            int points = 0;
+            double points = 0;
             SpellHealPredictionType type = SpellHealPredictionType.Target;
             foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
             {
@@ -4258,7 +4258,7 @@ namespace Game.Spells
                 {
                     case SpellEffectName.Heal:
                     case SpellEffectName.HealPct:
-                        points += unitCaster.SpellHealingBonusDone(target, spellInfo, spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell);
+                        points += unitCaster.SpellHealingBonusDone(target, spellInfo, (int)spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell);
 
                         if (target != unitCaster && (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster || spellEffectInfo.TargetB.GetTarget() == Targets.UnitCaster))
                             type = SpellHealPredictionType.TargetAndCaster;    // Binding Heal-like spells
@@ -4275,7 +4275,7 @@ namespace Game.Spells
                     {
                         case AuraType.PeriodicHeal:
                         case AuraType.ObsModHealth:
-                            points += (int)(unitCaster.SpellHealingBonusDone(target, spellInfo, spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell) * spellEffectInfo.GetPeriodicTickCount());
+                            points += unitCaster.SpellHealingBonusDone(target, spellInfo, (int)spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell) * spellEffectInfo.GetPeriodicTickCount();
                             break;
                         case AuraType.PeriodicTriggerSpell:
                             SpellInfo triggered = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty);
@@ -5000,7 +5000,7 @@ namespace Game.Spells
             destTarget = m_destTargets[spellEffectInfo.EffectIndex].Position;
             effectInfo = spellEffectInfo;
 
-            damage = CalculateDamage(spellEffectInfo, unitTarget, out variance);
+            effectValue = CalculateDamage(spellEffectInfo, unitTarget, out variance);
 
             bool preventDefault = CallScriptEffectHandlers(spellEffectInfo.EffectIndex, mode);
 
@@ -5777,7 +5777,7 @@ namespace Game.Spells
                             PetSaveMode? petSlot = null;
                             if (spellEffectInfo.MiscValue == 0)
                             {
-                                petSlot = (PetSaveMode)spellEffectInfo.CalcValue();
+                                petSlot = (PetSaveMode)spellEffectInfo.CalcValueAsInt();
 
                                 // No pet can be summoned if any pet is dead
                                 foreach (var activePet in playerCaster.GetPetStable().ActivePets)
@@ -6117,7 +6117,7 @@ namespace Game.Spells
                             if (target.GetOwner() != null && target.GetOwner().IsTypeId(TypeId.Player))
                                 return SpellCastResult.TargetIsPlayerControlled;
 
-                            int damage = CalculateDamage(spellEffectInfo, target);
+                            double damage = CalculateDamage(spellEffectInfo, target);
                             if (damage != 0 && target.GetLevelForTarget(m_caster) > damage)
                                 return SpellCastResult.Highlevel;
                         }
@@ -6915,7 +6915,7 @@ namespace Game.Spells
                                 if (itemTemplate == null)
                                     return SpellCastResult.ItemNotFound;
 
-                                uint createCount = (uint)Math.Clamp(spellEffectInfo.CalcValue(), 1u, itemTemplate.GetMaxStackSize());
+                                uint createCount = (uint)Math.Clamp(spellEffectInfo.CalcValueAsInt(), 1u, itemTemplate.GetMaxStackSize());
 
                                 List<ItemPosCount> dest = new();
                                 InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, spellEffectInfo.ItemType, createCount);
@@ -6938,7 +6938,7 @@ namespace Game.Spells
                                             return SpellCastResult.DontReport;
                                         }
                                         else if (m_spellInfo.GetEffects().Count > 1)
-                                            player.CastSpell(player, (uint)m_spellInfo.GetEffect(1).CalcValue(), new CastSpellExtraArgs()
+                                            player.CastSpell(player, (uint)m_spellInfo.GetEffect(1).CalcValueAsInt(), new CastSpellExtraArgs()
                                                 .SetTriggeringSpell(this));        // move this to anywhere
                                         return SpellCastResult.DontReport;
                                     }
@@ -7273,13 +7273,13 @@ namespace Game.Spells
 
             //check pushback reduce
             int delaytime = 500;                                  // spellcasting delay is normally 500ms
-            int delayReduce = 100;                                // must be initialized to 100 for percent modifiers
+            float delayReduce = 100.0f;                                // must be initialized to 100 for percent modifiers
 
             Player player = unitCaster.GetSpellModOwner();
             if (player != null)
                 player.ApplySpellMod(m_spellInfo, SpellModOp.ResistPushback, ref delayReduce, this);
 
-            delayReduce += unitCaster.GetTotalAuraModifier(AuraType.ReducePushback) - 100;
+            delayReduce += unitCaster.GetTotalAuraModifier(AuraType.ReducePushback) - 100.0f;
             if (delayReduce >= 100)
                 return;
 
@@ -7317,13 +7317,13 @@ namespace Game.Spells
             int duration = ((m_channelDuration > 0) ? m_channelDuration : m_spellInfo.GetDuration());
 
             int delaytime = MathFunctions.CalculatePct(duration, 25); // channeling delay is normally 25% of its time per hit
-            int delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
+            float delayReduce = 100.0f;                                    // must be initialized to 100 for percent modifiers
 
             Player player = unitCaster.GetSpellModOwner();
             if (player != null)
                 player.ApplySpellMod(m_spellInfo, SpellModOp.ResistPushback, ref delayReduce, this);
 
-            delayReduce += unitCaster.GetTotalAuraModifier(AuraType.ReducePushback) - 100;
+            delayReduce += unitCaster.GetTotalAuraModifier(AuraType.ReducePushback) - 100.0f;
             if (delayReduce >= 100)
                 return;
 
@@ -7458,7 +7458,7 @@ namespace Game.Spells
                         return false;
                     if (!target.GetCharmerGUID().IsEmpty())
                         return false;
-                    int damage = CalculateDamage(spellEffectInfo, target);
+                    double damage = CalculateDamage(spellEffectInfo, target);
                     if (damage != 0)
                         if (target.GetLevelForTarget(m_caster) > damage)
                             return false;
@@ -7835,7 +7835,7 @@ namespace Game.Spells
                             // skill bonus provided by casting spell (mostly item spells)
                             // add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
                             if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget || effect.TargetB.GetTarget() == Targets.GameobjectItemTarget)
-                                skillValue += effect.CalcValue();
+                                skillValue += effect.CalcValueAsInt();
 
                             if (skillValue < reqSkillValue)
                                 return SpellCastResult.LowCastlevel;
@@ -7859,10 +7859,10 @@ namespace Game.Spells
 
         public void SetSpellValue(CastSpellExtraArgsInit.SpellValueOverride value)
         {
-            if (value.Type >= (int)SpellValueMod.BasePoint0 && value.Type < (int)SpellValueMod.BasePointEnd)
+            if (value.Type >= (int)SpellValueModFloat.BasePoint0 && value.Type < (int)SpellValueModFloat.BasePointEnd)
             {
-                m_spellValue.EffectBasePoints[value.Type - (int)SpellValueMod.BasePoint0] = value.IntValue;
-                m_spellValue.CustomBasePointsMask |= 1u << (value.Type - (int)SpellValueMod.BasePoint0);
+                m_spellValue.EffectBasePoints[value.Type - (int)SpellValueModFloat.BasePoint0] = value.FloatValue;
+                m_spellValue.CustomBasePointsMask |= 1u << (value.Type - (int)SpellValueModFloat.BasePoint0);
                 return;
             }
 
@@ -7888,13 +7888,13 @@ namespace Game.Spells
             switch ((SpellValueModFloat)value.Type)
             {
                 case SpellValueModFloat.RadiusMod:
-                    m_spellValue.RadiusMod = value.FloatValue;
+                    m_spellValue.RadiusMod = (float)value.FloatValue;
                     break;
                 case SpellValueModFloat.CritChance:
-                    m_spellValue.CriticalChance = value.FloatValue;
+                    m_spellValue.CriticalChance = (float)value.FloatValue;
                     break;
                 case SpellValueModFloat.DurationPct:
-                    m_spellValue.DurationMul = value.FloatValue / 100.0f;
+                    m_spellValue.DurationMul = (float)(value.FloatValue / 100.0);
                     break;
                 default:
                     break;
@@ -8333,9 +8333,9 @@ namespace Game.Spells
                 {
                     // calculate the chance using spell base amount, because aura amount is not updated on combo-points change
                     // this possibly needs fixing
-                    int auraBaseAmount = aurEff.GetBaseAmount();
+                    double auraBaseAmount = aurEff.GetBaseAmount();
                     // proc chance is stored in effect amount
-                    int chance = unitCaster.CalculateSpellDamage(null, aurEff.GetSpellEffectInfo(), auraBaseAmount);
+                    int chance = aurEff.GetSpellEffectInfo().CalcValueAsInt(unitCaster, auraBaseAmount);
                     chance *= aurEff.GetBase().GetStackAmount();
 
                     // build trigger and add to the list
@@ -8460,15 +8460,16 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
+        public double CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target)
         {
             return CalculateDamage(spellEffectInfo, target, out _);
         }
 
-        int CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target, out float variance)
+        double CalculateDamage(SpellEffectInfo spellEffectInfo, Unit target, out float variance)
         {
             bool needRecalculateBasePoints = (m_spellValue.CustomBasePointsMask & (1 << (int)spellEffectInfo.EffectIndex)) == 0;
-            return m_caster.CalculateSpellDamage(out variance, target, spellEffectInfo, needRecalculateBasePoints ? null : m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex], m_castItemEntry, m_castItemLevel);
+            double? basePoints = needRecalculateBasePoints ? null : m_spellValue.EffectBasePoints[spellEffectInfo.EffectIndex];
+            return spellEffectInfo.CalcValue(out variance, m_caster, basePoints, target, m_castItemEntry, m_castItemLevel);
         }
 
         public SpellState GetState()
@@ -8581,6 +8582,8 @@ namespace Game.Spells
 
         public int GetTimer() { return m_timer; }
 
+        public int GetEffectValueAsInt() { return (int)effectValue; }
+
         #region Fields
         Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();
         PathGenerator m_preGeneratedPath;
@@ -8643,7 +8646,7 @@ namespace Game.Spells
         public GameObject gameObjTarget;
         public Corpse corpseTarget;
         public WorldLocation destTarget;
-        public int damage;
+        public double effectValue;
         public SpellMissInfo targetMissInfo;
         public float variance;
         SpellEffectHandleMode effectHandleMode;
@@ -8888,7 +8891,7 @@ namespace Game.Spells
         // info set at PreprocessTarget, used by DoTargetSpellHit
         public DiminishingGroup DRGroup;
         public int AuraDuration;
-        public int[] AuraBasePoints = new int[SpellConst.MaxEffects];
+        public double[] AuraBasePoints = new double[SpellConst.MaxEffects];
         public UnitAura HitAura;
         public ProcFlagsHit ProcHitMask;
 
@@ -9298,7 +9301,7 @@ namespace Game.Spells
             DurationMul = 1;
         }
 
-        public int[] EffectBasePoints = new int[SpellConst.MaxEffects];
+        public double[] EffectBasePoints = new double[SpellConst.MaxEffects];
         public uint CustomBasePointsMask;
         public uint MaxAffectedTargets;
         public float RadiusMod;
@@ -9346,7 +9349,7 @@ namespace Game.Spells
 
     public class SpellPctModifierByClassMask : SpellModifierByClassMask
     {
-        public int value;
+        public float value;
 
         public SpellPctModifierByClassMask(SpellModOp _op, uint _spellId, Aura _ownerAura, FlagArray128 _mask) : base(_op, SpellModType.Pct, _spellId, _ownerAura, _mask) { }
     }
@@ -9884,14 +9887,14 @@ namespace Game.Spells
                 Type = (int)mod;
                 IntValue = val;
             }
-            public SpellValueOverride(SpellValueModFloat mod, float val)
+            public SpellValueOverride(SpellValueModFloat mod, double val)
             {
                 Type = (int)mod;
                 FloatValue = val;
             }
 
             public int Type;
-            public float FloatValue;
+            public double FloatValue;
             public int IntValue;
         }
     }
@@ -9938,7 +9941,7 @@ namespace Game.Spells
             SpellValueOverrides.Add(new SpellValueOverride(mod, val));
         }
 
-        public CastSpellExtraArgs(SpellValueModFloat mod, float val)
+        public CastSpellExtraArgs(SpellValueModFloat mod, double val)
         {
             SpellValueOverrides.Add(new SpellValueOverride(mod, val));
         }
@@ -9998,7 +10001,7 @@ namespace Game.Spells
             return this;
         }
 
-        public CastSpellExtraArgs AddSpellMod(SpellValueModFloat mod, float val)
+        public CastSpellExtraArgs AddSpellMod(SpellValueModFloat mod, double val)
         {
             SpellValueOverrides.Add(new SpellValueOverride(mod, val));
             return this;

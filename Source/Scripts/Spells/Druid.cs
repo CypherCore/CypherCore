@@ -218,12 +218,12 @@ class spell_dru_astral_smolder : AuraScript
         PreventDefaultAction();
 
         SpellEffectInfo astralSmolderDmg = Global.SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, GetCastDifficulty()).GetEffect(0);
-        int pct = aurEff.GetAmount();
+        double pct = aurEff.GetAmount();
 
-        int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / astralSmolderDmg.GetPeriodicTickCount());
+        double amount = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / astralSmolderDmg.GetPeriodicTickCount();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.AstralSmolderDamage, args);
     }
 
@@ -304,7 +304,7 @@ class spell_dru_brambles : AuraScript
         Unit target = GetTarget();
         Unit attacker = dmgInfo.GetAttacker();
         if (attacker != null)
-            target.CastSpell(attacker, SpellIds.BramblesReflect, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)absorbAmount));
+            target.CastSpell(attacker, SpellIds.BramblesReflect, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, (int)absorbAmount));
     }
 
     public override void Register()
@@ -331,7 +331,7 @@ class spell_dru_bristling_fur : AuraScript
             Unit target = GetTarget();
             int rage = (int)(target.GetMaxPower(PowerType.Rage) * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
             if (rage > 0)
-                target.CastSpell(target, SpellIds.BristlingFurGainRage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, rage));
+                target.CastSpell(target, SpellIds.BristlingFurGainRage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, rage));
         }
     }
 
@@ -410,7 +410,7 @@ class spell_dru_cultivation : AuraScript
         Unit target = GetTarget();
         AuraEffect cultivationEffect = caster.GetAuraEffect(SpellIds.Cultivation, 0);
         if (cultivationEffect != null)
-            if (target.HealthBelowPct(cultivationEffect.GetAmount()))
+            if (target.HealthBelowPct((float)cultivationEffect.GetAmount()))
                 caster.CastSpell(target, SpellIds.CultivationHeal, new CastSpellExtraArgs().SetTriggeringAura(aurEff));
     }
 
@@ -423,7 +423,7 @@ class spell_dru_cultivation : AuraScript
 [Script] // 1850 - Dash
 class spell_dru_dash : AuraScript
 {
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         // do not set speed if not in cat form
         if (GetUnitOwner().GetShapeshiftForm() != ShapeShiftForm.CatForm)
@@ -517,7 +517,7 @@ class spell_dru_eclipse_aura : AuraScript
             return;
 
         uint spellId = GetSpellInfo().Id == SpellIds.EclipseSolarAura ? SpellIds.EclipseLunarSpellCnt : SpellIds.EclipseSolarSpellCnt;
-        spell_dru_eclipse_common.SetSpellCount(GetTarget(), spellId, (uint)auraEffDummy.GetAmount());
+        spell_dru_eclipse_common.SetSpellCount(GetTarget(), spellId, (uint)auraEffDummy.GetAmountAsInt());
     }
 
     public override void Register()
@@ -559,7 +559,7 @@ class spell_dru_eclipse_dummy : AuraScript
     void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         // counters are applied with a delay
-        GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
+        GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmountAsInt()), TimeSpan.FromSeconds(1));
     }
 
     void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -630,8 +630,8 @@ class spell_dru_eclipse_ooc : AuraScript
         if (!owner.IsInCombat() && (!owner.HasAura(SpellIds.EclipseSolarSpellCnt) || !owner.HasAura(SpellIds.EclipseLunarSpellCnt)))
         {
             // Restore 2 stacks to each spell when out of combat
-            spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseSolarSpellCnt, (uint)auraEffDummy.GetAmount());
-            spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseLunarSpellCnt, (uint)auraEffDummy.GetAmount());
+            spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseSolarSpellCnt, (uint)auraEffDummy.GetAmountAsInt());
+            spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseLunarSpellCnt, (uint)auraEffDummy.GetAmountAsInt());
         }
     }
 
@@ -834,7 +834,7 @@ class spell_dru_ferocious_bite : SpellScript
 
     void HandleHitTargetBurn(uint effIndex)
     {
-        int newValue = (int)((float)GetEffectValue() * _damageMultiplier);
+        double newValue = GetEffectValue() * _damageMultiplier;
         SetEffectValue(newValue);
     }
 
@@ -848,17 +848,17 @@ class spell_dru_ferocious_bite : SpellScript
     {
         Unit caster = GetCaster();
 
-        int maxExtraConsumedPower = GetEffectValue();
+        double maxExtraConsumedPower = GetEffectValue();
 
         AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.IncarnationKingOfTheJungle, 1);
         if (auraEffect != null)
         {
-            float multiplier = 1.0f + (float)auraEffect.GetAmount() / 100.0f;
-            maxExtraConsumedPower = (int)((float)maxExtraConsumedPower * multiplier);
+            double multiplier = 1.0 + auraEffect.GetAmount() / 100.0;
+            maxExtraConsumedPower = maxExtraConsumedPower * multiplier;
             SetEffectValue(maxExtraConsumedPower);
         }
 
-        _damageMultiplier = MathF.Min(caster.GetPower(PowerType.Energy), maxExtraConsumedPower) / maxExtraConsumedPower;
+        _damageMultiplier = (float)(Math.Min(caster.GetPower(PowerType.Energy), maxExtraConsumedPower) / maxExtraConsumedPower);
     }
 
     public override void Register()
@@ -1108,7 +1108,7 @@ class spell_dru_innervate : SpellScript
                 caster.CastSpell(caster, SpellIds.Innervate,
                     new CastSpellExtraArgs(TriggerCastFlags.IgnoreSpellAndCategoryCD | TriggerCastFlags.IgnoreCastInProgress)
                     .SetTriggeringSpell(GetSpell())
-                    .AddSpellMod(SpellValueMod.BasePoint0, -innervateR2.GetAmount()));
+                    .AddSpellMod(SpellValueModFloat.BasePoint0, -innervateR2.GetAmount()));
         }
 
     }
@@ -1404,7 +1404,7 @@ class spell_dru_natures_grace : AuraScript
     {
         caster.CastSpell(caster, SpellIds.Dreamstate, new CastSpellExtraArgs()
         {
-            SpellValueOverrides = { new(SpellValueMod.AuraStack, naturesGraceEffect.GetAmount()) }
+            SpellValueOverrides = { new(SpellValueMod.AuraStack, naturesGraceEffect.GetAmountAsInt()) }
         });
 
     }
@@ -1530,7 +1530,7 @@ class spell_dru_power_of_the_archdruid : AuraScript
         Unit procTarget = eventInfo.GetActionTarget();
 
         // range is 0's BasePoints.
-        float spellRange = aurEff.GetAmount();
+        float spellRange = (float)aurEff.GetAmount();
 
         List<Unit> targetList = new();
         WorldObjectSpellAreaTargetCheck checker = new(spellRange, procTarget, druid, druid, eventInfo.GetSpellInfo(), SpellTargetCheckTypes.Ally, null, SpellTargetObjectTypes.Unit);
@@ -1544,7 +1544,7 @@ class spell_dru_power_of_the_archdruid : AuraScript
         AuraEffect powerOfTheArchdruidEffect = druid.GetAuraEffect(SpellIds.PowerOfTheArchdruid, 0);
 
         // max. targets is SpellIds.PowerOfTheArchdruid's 0 BasePoints.
-        int maxTargets = powerOfTheArchdruidEffect.GetAmount();
+        int maxTargets = powerOfTheArchdruidEffect.GetAmountAsInt();
 
         targetList.RandomResize((uint)maxTargets);
 
@@ -1589,7 +1589,7 @@ class spell_dru_rip : AuraScript
         return caster != null && caster.IsPlayer();
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = false;
 
@@ -1611,7 +1611,7 @@ class spell_dru_rip : AuraScript
                     amount += cp * auraEffIdolOfWorship.GetAmount();
             }
 
-            amount += (int)MathFunctions.CalculatePct(caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), cp);
+            amount += MathFunctions.CalculatePct(caster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), cp);
         }
     }
 
@@ -1813,7 +1813,7 @@ class spell_dru_starfall_dummy : SpellScript
         if (caster.HasUnitState(UnitState.Controlled))
             return;
 
-        caster.CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+        caster.CastSpell(GetHitUnit(), (uint)GetEffectValueAsInt(), true);
     }
 
     public override void Register()
@@ -1914,7 +1914,7 @@ class spell_dru_swift_flight_passive : AuraScript
         return GetCaster().IsPlayer();
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player caster = GetCaster().ToPlayer();
         if (caster != null && caster.GetSkillValue(SkillType.Riding) >= 375)
@@ -1967,9 +1967,9 @@ class spell_dru_t3_8p_bonus : AuraScript
         if (!manaCost.HasValue)
             return;
 
-        int amount = MathFunctions.CalculatePct(manaCost.Value, aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(manaCost.Value, aurEff.GetAmount());
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         caster.CastSpell(null, SpellIds.Exhilarate, args);
     }
 
@@ -2021,12 +2021,12 @@ class spell_dru_t10_balance_4p_bonus : AuraScript
         Unit target = eventInfo.GetProcTarget();
 
         SpellEffectInfo spellEffect = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty()).GetEffect(0);
-        int amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
 
-        amount /= (int)spellEffect.GetPeriodicTickCount();
+        amount /= spellEffect.GetPeriodicTickCount();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         caster.CastSpell(target, SpellIds.Languish, args);
     }
 
@@ -2108,7 +2108,7 @@ class spell_dru_t10_restoration_4p_bonus_dummy : AuraScript
         PreventDefaultAction();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)eventInfo.GetHealInfo().GetHeal());
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)eventInfo.GetHealInfo().GetHeal());
         eventInfo.GetActor().CastSpell(null, SpellIds.RejuvenationT10_Proc, args);
     }
 
@@ -2340,7 +2340,7 @@ class spell_dru_tiger_dash_aura : AuraScript
         AuraEffect effRunSpeed = GetEffect(0);
         if (effRunSpeed != null)
         {
-            int reduction = aurEff.GetAmount();
+            double reduction = aurEff.GetAmount();
             effRunSpeed.ChangeAmount(effRunSpeed.GetAmount() - reduction);
         }
     }
@@ -2442,12 +2442,12 @@ class spell_dru_ursocs_fury : AuraScript
             return;
 
         Unit caster = eventInfo.GetActor();
-        int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
 
         caster.CastSpell(caster, SpellIds.UrsocsFuryShield, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
         });
     }
 
@@ -2468,11 +2468,11 @@ class spell_dru_wild_growth : SpellScript
     void FilterTargets(List<WorldObject> targets)
     {
         Unit caster = GetCaster();
-        int maxTargets = GetEffectInfo(1).CalcValue(caster);
+        int maxTargets = GetEffectInfo(1).CalcValueAsInt(caster);
 
         AuraEffect treeOfLife = caster.GetAuraEffect(SpellIds.TreeOfLife, 2);
         if (treeOfLife != null)
-            maxTargets += treeOfLife.GetAmount();
+            maxTargets += treeOfLife.GetAmountAsInt();
 
         // Note: Wild Growth became a smart heal which prioritizes players and their pets in their group before any unit outside their group.
         SelectRandomInjuredTargets(targets, (uint)maxTargets, true, caster);
@@ -2499,17 +2499,17 @@ class spell_dru_wild_growth_aura : AuraScript
             return;
 
         // calculate from base damage, not from aurEff.GetAmount() (already modified)
-        float damage = caster.CalculateSpellDamage(GetUnitOwner(), aurEff.GetSpellEffectInfo());
+        double damage = aurEff.GetSpellEffectInfo().CalcValue(caster, null, GetUnitOwner());
 
         // Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick
         float reduction = 2.0f;
         AuraEffect bonus = caster.GetAuraEffect(SpellIds.RestorationT10_2PBonus, 0);
         if (bonus != null)
             reduction -= MathFunctions.CalculatePct(reduction, bonus.GetAmount());
-        reduction *= (aurEff.GetTickNumber() - 1);
+        reduction *= aurEff.GetTickNumber() - 1;
 
         MathFunctions.AddPct(ref damage, 6.0f - reduction);
-        aurEff.SetAmount((int)damage);
+        aurEff.SetAmount(damage);
     }
 
     public override void Register()
@@ -2528,12 +2528,12 @@ class spell_dru_yseras_gift : AuraScript
 
     void HandleEffectPeriodic(AuraEffect aurEff)
     {
-        int healAmount = (int)GetTarget().CountPctFromMaxHealth(aurEff.GetAmount());
+        double healAmount = GetTarget().CountPctFromMaxHealth((float)aurEff.GetAmount());
 
         if (!GetTarget().IsFullHealth())
-            GetTarget().CastSpell(GetTarget(), SpellIds.YserasGiftHealSelf, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+            GetTarget().CastSpell(GetTarget(), SpellIds.YserasGiftHealSelf, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueModFloat.BasePoint0, healAmount));
         else
-            GetTarget().CastSpell(GetTarget(), SpellIds.YserasGiftHealParty, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, healAmount));
+            GetTarget().CastSpell(GetTarget(), SpellIds.YserasGiftHealParty, new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueModFloat.BasePoint0, healAmount));
     }
 
 

@@ -507,8 +507,8 @@ namespace Game.Entities
                             effectInfo[key] = new AuraLoadEffectInfo();
 
                         AuraLoadEffectInfo info = effectInfo[key];
-                        info.Amounts[effectIndex] = effectResult.Read<int>(5);
-                        info.BaseAmounts[effectIndex] = effectResult.Read<int>(6);
+                        info.Amounts[effectIndex] = effectResult.Read<double>(5);
+                        info.BaseAmounts[effectIndex] = effectResult.Read<double>(6);
                     }
                 }
                 while (effectResult.NextRow());

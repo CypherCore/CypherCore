@@ -392,7 +392,17 @@ namespace Framework.Constants
 
     public enum SpellValueMod
     {
-        BasePoint0,
+        MaxTargets,
+        AuraStack,
+        Duration,
+        ParentSpellTargetCount,
+        ParentSpellTargetIndex,
+        IntEnd
+    }
+
+    public enum SpellValueModFloat
+    {
+        BasePoint0 = SpellValueMod.IntEnd,
         BasePoint1,
         BasePoint2,
         BasePoint3,
@@ -426,17 +436,7 @@ namespace Framework.Constants
         BasePoint31,
         BasePointEnd,
 
-        MaxTargets = BasePointEnd,
-        AuraStack,
-        Duration,
-        ParentSpellTargetCount,
-        ParentSpellTargetIndex,
-        IntEnd,
-    }
-
-    public enum SpellValueModFloat
-    {
-        RadiusMod = SpellValueMod.IntEnd,
+        RadiusMod = BasePointEnd,
         CritChance,
         DurationPct,
     }

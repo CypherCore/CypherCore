@@ -149,15 +149,15 @@ class spell_pal_ardent_defender : AuraScript
     {
         PreventDefaultAction();
 
-        int targetHealthPercent = GetEffectInfo(1).CalcValue(GetTarget());
-        ulong targetHealth = GetTarget().CountPctFromMaxHealth(targetHealthPercent);
-        if (GetTarget().HealthBelowPct(targetHealthPercent))
+        double targetHealthPercent = GetEffectInfo(1).CalcValue(GetTarget());
+        ulong targetHealth = GetTarget().CountPctFromMaxHealth((float)targetHealthPercent);
+        if (GetTarget().HealthBelowPct((float)targetHealthPercent))
         {
             // we are currently below desired health
             // absorb everything and heal up
             GetTarget().CastSpell(GetTarget(), SpellIds.ArdentDefenderHeal,
                 new CastSpellExtraArgs(aurEff)
-                .AddSpellMod(SpellValueMod.BasePoint0, (int)(targetHealth - GetTarget().GetHealth())));
+                .AddSpellMod(SpellValueModFloat.BasePoint0, (int)(targetHealth - GetTarget().GetHealth())));
         }
         else
         {
@@ -449,7 +449,7 @@ class spell_pal_crusader_might : AuraScript
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromSeconds(aurEff.GetAmount()));
+        GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShock, TimeSpan.FromSeconds(aurEff.GetAmountAsInt()));
     }
 
     public override void Register()
@@ -735,7 +735,7 @@ class spell_pal_execution_sentence_aura : AuraScript
 
     void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
-        int amount = aurEff.GetAmount();
+        double amount = aurEff.GetAmount();
         if (amount == 0 || GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
             return;
 
@@ -745,7 +745,7 @@ class spell_pal_execution_sentence_aura : AuraScript
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
                 TriggeringAura = aurEff,
-                SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+                SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
             });
     }
 
@@ -821,7 +821,7 @@ class spell_pal_fist_of_justice : AuraScript
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        int value = aurEff.GetAmount() / 10;
+        int value = aurEff.GetAmountAsInt() / 10;
 
         GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, TimeSpan.FromSeconds(-value));
     }
@@ -1320,7 +1320,7 @@ class spell_pal_light_s_beacon : AuraScript
         if (healInfo == null || healInfo.GetHeal() == 0)
             return;
 
-        uint heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+        double heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
         var auras = GetCaster().GetSingleCastAuras();
         foreach (var aura in auras)
@@ -1331,7 +1331,7 @@ class spell_pal_light_s_beacon : AuraScript
                 if (!applications.Empty())
                 {
                     CastSpellExtraArgs args = new(aurEff);
-                    args.AddSpellMod(SpellValueMod.BasePoint0, (int)heal);
+                    args.AddSpellMod(SpellValueModFloat.BasePoint0, heal);
                     eventInfo.GetActor().CastSpell(applications.First().GetTarget(), SpellIds.BeaconOfLightHeal, args);
                 }
                 return;
@@ -1423,7 +1423,7 @@ class spell_pal_righteous_protector : AuraScript
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        int value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
+        int value = aurEff.GetAmountAsInt() * 100 * _baseHolyPowerCost.Amount;
 
         GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, TimeSpan.FromSeconds(-value));
         GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAncientKings, TimeSpan.FromSeconds(-value));
@@ -1495,14 +1495,14 @@ class spell_pal_shield_of_the_righteous : SpellScript
 [Script] // 184662 - Shield of Vengeance
 class spell_pal_shield_of_vengeance : AuraScript
 {
-    int _initialAmount = 0;
+    double _initialAmount = 0;
 
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellInfo(SpellIds.ShieldOfVengeanceDamage) && ValidateSpellEffect((spellInfo.Id, 1));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         amount = (int)MathFunctions.CalculatePct(GetUnitOwner().GetMaxHealth(), GetEffectInfo(1).CalcValue());
         Player player = GetUnitOwner().ToPlayer();
@@ -1515,7 +1515,7 @@ class spell_pal_shield_of_vengeance : AuraScript
     void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
         GetTarget().CastSpell(GetTarget(), SpellIds.ShieldOfVengeanceDamage,
-           new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, _initialAmount - aurEff.GetAmount()));
+           new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, _initialAmount - aurEff.GetAmount()));
     }
 
     public override void Register()
@@ -1540,7 +1540,7 @@ class spell_pal_steed_of_liberty : AuraScript
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.Duration, aurEff.GetAmount()) }
+            SpellValueOverrides = { new(SpellValueMod.Duration, aurEff.GetAmountAsInt()) }
         });
     }
 
@@ -1638,12 +1638,12 @@ class spell_pal_t8_2p_bonus : AuraScript
         Unit target = eventInfo.GetProcTarget();
 
         SpellEffectInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty()).GetEffect(0);
-        int amount = MathFunctions.CalculatePct((int)(healInfo.GetHeal()), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
-        amount /= (int)spellInfo.GetPeriodicTickCount();
+        amount /= spellInfo.GetPeriodicTickCount();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         caster.CastSpell(target, SpellIds.HolyMending, args);
     }
 
@@ -1668,11 +1668,11 @@ class spell_pal_t30_2p_protection_bonus : AuraScript
 
         Unit caster = procInfo.GetActor();
         uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.T30_2PHeartfireDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
-        uint damage = MathFunctions.CalculatePct(procInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
+        double damage = MathFunctions.CalculatePct(procInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
 
         caster.CastSpell(procInfo.GetActionTarget(), SpellIds.T30_2PHeartfireDamage, new CastSpellExtraArgs(aurEff)
             .SetTriggeringSpell(procInfo.GetProcSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, damage));
     }
 
     public override void Register()
@@ -1698,7 +1698,7 @@ class spell_pal_t30_2p_protection_bonus_heal : AuraScript
     {
         GetTarget().CastSpell(GetTarget(), SpellIds.T30_2PHeartfireHeal, new CastSpellExtraArgs(aurEff)
             .SetTriggeringSpell(procInfo.GetProcSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)procInfo.GetDamageInfo().GetOriginalDamage()));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, (int)procInfo.GetDamageInfo().GetOriginalDamage()));
     }
 
     public override void Register()
@@ -1747,7 +1747,7 @@ class spell_pal_zeal : AuraScript
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
         Unit target = GetTarget();
-        target.CastSpell(target, SpellIds.ZealAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, aurEff.GetAmount()));
+        target.CastSpell(target, SpellIds.ZealAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, aurEff.GetAmountAsInt()));
 
         PreventDefaultAction();
     }

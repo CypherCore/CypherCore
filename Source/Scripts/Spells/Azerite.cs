@@ -39,7 +39,7 @@ class spell_azerite_gen_aura_calc_from_2nd_effect_triggered_spell : AuraScript
         return ValidateSpellEffect((spellInfo.Id, 1)) && ValidateSpellInfo(spellInfo.GetEffect(1).TriggerSpell);
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Unit caster = GetCaster();
         if (caster != null)
@@ -95,7 +95,7 @@ class spell_item_strength_in_numbers : SpellScript
             long enemies = GetUnitTargetCountForEffect(0);
             if (enemies != 0)
                 GetCaster().CastSpell(GetCaster(), SpellIds.StrengthInNumbersBuff, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                    .AddSpellMod(SpellValueMod.BasePoint0, trait.GetAmount())
+                    .AddSpellMod(SpellValueModFloat.BasePoint0, trait.GetAmount())
                     .AddSpellMod(SpellValueMod.AuraStack, (int)enemies));
         }
     }
@@ -124,7 +124,7 @@ class spell_item_blessed_portents : AuraScript
                 AuraEffect trait = caster.GetAuraEffect(SpellIds.BlessedPortentsTrait, 0, caster.GetGUID());
                 if (trait != null)
                     caster.CastSpell(GetTarget(), SpellIds.BlessedPortentsHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
-                        .AddSpellMod(SpellValueMod.BasePoint0, trait.GetAmount()));
+                        .AddSpellMod(SpellValueModFloat.BasePoint0, trait.GetAmount()));
             }
         }
         else
@@ -184,7 +184,7 @@ class spell_item_bracing_chill_proc : AuraScript
         AuraEffect trait = caster.GetAuraEffect(SpellIds.BracingChillTrait, 0, caster.GetGUID());
         if (trait != null)
             caster.CastSpell(procInfo.GetProcTarget(), SpellIds.BracingChillHeal,
-                new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, trait.GetAmount()));
+                new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, trait.GetAmount()));
 
         if (GetStackAmount() > 1)
             caster.CastSpell(null, SpellIds.BracingChillSearchJumpTarget,
@@ -358,7 +358,7 @@ class spell_item_tradewinds : AuraScript
         AuraEffect trait = GetTarget().GetAuraEffect(GetEffectInfo(1).TriggerSpell, 1);
         if (trait != null)
             GetTarget().CastSpell(null, SpellIds.TradewindsAllyBuff,
-                new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueMod.BasePoint0, trait.GetAmount()));
+                new CastSpellExtraArgs(aurEff).AddSpellMod(SpellValueModFloat.BasePoint0, trait.GetAmount()));
     }
 
     public override void Register()
@@ -432,7 +432,7 @@ class spell_item_echoing_blades_damage : SpellScript
     {
         AuraEffect trait = GetCaster().GetAuraEffect(SpellIds.EchoingBladesTrait, 2);
         if (trait != null)
-            damage = trait.GetAmount() * 2;
+            damage = trait.GetAmountAsInt() * 2;
     }
 
     void ForceCritical(Unit victim, ref float critChance)
@@ -565,7 +565,7 @@ class spell_item_corruption_grasping_tendrils : AuraScript
         return GetUnitOwner().IsPlayer();
     }
 
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Player player = GetUnitOwner().ToPlayer();
         amount = (int)Math.Clamp(10.0f + player.GetRatingBonusValue(CombatRating.Corruption) - player.GetRatingBonusValue(CombatRating.CorruptionResistance), 0.0f, 99.0f);

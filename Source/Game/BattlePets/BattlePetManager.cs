@@ -796,7 +796,7 @@ namespace Game.BattlePets
             if (summonSpellId == 0)
             {
                 summonSpellId = SharedConst.SpellSummonBattlePet;
-                args.AddSpellMod(SpellValueMod.BasePoint0, (int)speciesEntry.CreatureID);
+                args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)speciesEntry.CreatureID);
             }
             player.CastSpell(_owner.GetPlayer(), summonSpellId, args);
         }

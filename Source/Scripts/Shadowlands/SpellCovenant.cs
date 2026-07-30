@@ -20,7 +20,7 @@ namespace Scripts.Shadowlands
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            if (!procInfo.GetProcTarget().HealthBelowPct(aurEff.GetAmount()))
+            if (!procInfo.GetProcTarget().HealthBelowPct((float)aurEff.GetAmount()))
                 return false;
 
             if (procInfo.GetProcTarget().HasAura(SpellSulfuricEmissionCooldownAura))

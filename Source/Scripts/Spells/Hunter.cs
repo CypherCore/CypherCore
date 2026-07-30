@@ -292,7 +292,7 @@ class spell_hun_bullseye : AuraScript
 {
     bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetActionTarget().HealthBelowPct(aurEff.GetAmount());
+        return eventInfo.GetActionTarget().HealthBelowPct((float)aurEff.GetAmount());
     }
 
     public override void Register()
@@ -508,7 +508,7 @@ class spell_hun_last_stand_pet : SpellScript
     {
         Unit caster = GetCaster();
         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(30));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)caster.CountPctFromMaxHealth(30));
         caster.CastSpell(caster, SpellIds.PetLastStandTriggered, args);
     }
 
@@ -680,12 +680,12 @@ class spell_hun_master_marksman : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.MasterMarksman, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
-        int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / ticks);
+        double damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / ticks;
 
         eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.MasterMarksman, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, damage) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, damage) }
         });
     }
 
@@ -701,7 +701,7 @@ class spell_hun_masters_call : SpellScript
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellEffect((spellInfo.Id, 0))
-            && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValue());
+            && ValidateSpellInfo(SpellIds.MastersCallTriggered, (uint)spellInfo.GetEffect(0).CalcValueAsInt());
     }
 
     public override bool Load()
@@ -744,7 +744,7 @@ class spell_hun_masters_call : SpellScript
 
     void HandleDummy(uint effIndex)
     {
-        GetCaster().ToPlayer().GetPet().CastSpell(GetHitUnit(), (uint)GetEffectValue(), true);
+        GetCaster().ToPlayer().GetPet().CastSpell(GetHitUnit(), (uint)GetEffectValueAsInt(), true);
     }
 
     void HandleScriptEffect(uint effIndex)
@@ -834,13 +834,13 @@ class spell_hun_multi_shot : SpellScript
 [Script] // 459783 - Penetrating Shots
 class spell_hun_penetrating_shots : AuraScript
 {
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         AuraEffect amountHolder = GetEffect(1);
         if (amountHolder != null)
         {
             float critChanceDone = GetUnitOwner().GetUnitCriticalChanceDone(WeaponAttackType.BaseAttack);
-            amount = (int)MathFunctions.CalculatePct(critChanceDone, amountHolder.GetAmount());
+            amount = MathFunctions.CalculatePct(critChanceDone, amountHolder.GetAmount());
         }
     }
 
@@ -882,7 +882,7 @@ class spell_hun_pet_heart_of_the_phoenix : SpellScript
             if (!caster.HasAura(SpellIds.PetHeartOfThePhoenixDebuff))
             {
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.AddSpellMod(SpellValueMod.BasePoint0, 100);
+                args.AddSpellMod(SpellValueModFloat.BasePoint0, 100);
                 owner.CastSpell(caster, SpellIds.PetHeartOfThePhoenixTriggered, args);
                 caster.CastSpell(caster, SpellIds.PetHeartOfThePhoenixDebuff, true);
             }
@@ -997,12 +997,12 @@ class spell_hun_rejuvenating_wind : AuraScript
         Unit caster = GetTarget();
 
         uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.RejuvenatingWindHeal, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
-        int heal = (int)(MathFunctions.CalculatePct(caster.GetMaxHealth(), aurEff.GetAmount()) / ticks);
+        double heal = MathFunctions.CalculatePct(caster.GetMaxHealth(), aurEff.GetAmount()) / ticks;
 
         caster.CastSpell(caster, SpellIds.RejuvenatingWindHeal, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, heal) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, heal) }
         });
     }
 
@@ -1037,7 +1037,7 @@ class spell_hun_roar_of_sacrifice : AuraScript
         PreventDefaultAction();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
         eventInfo.GetActor().CastSpell(GetCaster(), SpellIds.RoarOfSacrificeTriggered, args);
     }
 
@@ -1110,7 +1110,7 @@ class spell_hun_scrappy : AuraScript
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         foreach (uint spellId in AffectedSpellIds)
-            GetTarget().GetSpellHistory().ModifyCooldown(spellId, -TimeSpan.FromSeconds(aurEff.GetAmount()));
+            GetTarget().GetSpellHistory().ModifyCooldown(spellId, -TimeSpan.FromMilliseconds(aurEff.GetAmountAsInt()));
     }
 
     public override void Register()
@@ -1166,7 +1166,7 @@ class spell_hun_steady_shot : SpellScript
         });
 
         if (GetCaster().HasAura(SpellIds.MarksmanshipHunterAura))
-            GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.AimedShot, TimeSpan.FromSeconds(-GetEffectInfo(1).CalcValue()));
+            GetCaster().GetSpellHistory().ModifyCooldown(SpellIds.AimedShot, TimeSpan.FromMilliseconds(-GetEffectInfo(1).CalcValueAsInt()));
     }
 
     public override void Register()
@@ -1397,11 +1397,11 @@ class spell_hun_t29_2p_marksmanship_bonus : AuraScript
 
         Unit caster = eventInfo.GetActor();
         uint ticks = Global.SpellMgr.GetSpellInfo(SpellIds.T29_2PMarksmanshipDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount();
-        uint damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
+        double damage = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetOriginalDamage(), aurEff.GetAmount()) / ticks;
 
         caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.T29_2PMarksmanshipDamage, new CastSpellExtraArgs(aurEff)
             .SetTriggeringSpell(eventInfo.GetProcSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)damage));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, damage));
     }
 
     public override void Register()
@@ -1413,7 +1413,7 @@ class spell_hun_t29_2p_marksmanship_bonus : AuraScript
 [Script] // Called by 136 - Mend Pet
 class spell_hun_wilderness_medicine : AuraScript
 {
-    int _dispelChance = 0;
+    double _dispelChance = 0;
 
     public override bool Validate(SpellInfo spellInfo)
     {

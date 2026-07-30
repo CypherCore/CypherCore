@@ -72,7 +72,7 @@ class spell_evo_azure_strike : SpellScript
     void FilterTargets(List<WorldObject> targets)
     {
         targets.Remove(GetExplTargetUnit());
-        targets.RandomResize((uint)GetEffectInfo(0).CalcValue(GetCaster()) - 1);
+        targets.RandomResize((uint)GetEffectInfo(0).CalcValueAsInt(GetCaster()) - 1);
         targets.Add(GetExplTargetUnit());
     }
 
@@ -283,7 +283,7 @@ class spell_evo_emerald_blossom_heal : SpellScript
 
     void FilterTargets(List<WorldObject> targets)
     {
-        uint maxTargets = (uint)GetSpellInfo().GetEffect(1).CalcValue(GetCaster());
+        uint maxTargets = (uint)GetSpellInfo().GetEffect(1).CalcValueAsInt(GetCaster());
         SelectRandomInjuredTargets(targets, maxTargets, true);
     }
 
@@ -336,7 +336,7 @@ class spell_evo_fire_breath : SpellScript
 
     void OnComplete(int completedStageCount)
     {
-        int dotTicks = 10 - (completedStageCount - 1) * 3;
+        double dotTicks = 10 - (completedStageCount - 1) * 3;
         AuraEffect blastFurnace = GetCaster().GetAuraEffect(SpellIds.BlastFurnace, 0);
         if (blastFurnace != null)
             dotTicks += blastFurnace.GetAmount() / 2;

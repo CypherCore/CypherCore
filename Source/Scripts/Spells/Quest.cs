@@ -1333,7 +1333,7 @@ class spell_q12919_gymers_grab : SpellScript
             return;
 
         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-        args.AddSpellMod(SpellValueMod.BasePoint0, 2);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, 2);
         GetHitCreature().CastSpell(GetCaster(), SpellIds.RideGymer, args);
         GetHitCreature().CastSpell(GetHitCreature(), SpellIds.Grabbed, true);
     }

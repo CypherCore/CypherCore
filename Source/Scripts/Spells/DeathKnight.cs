@@ -116,8 +116,8 @@ class spell_dk_advantage_t10_4p : AuraScript
 [Script] // 48707 - Anti-Magic Shell
 class spell_dk_anti_magic_shell : AuraScript
 {
-    int absorbPct;
-    int maxHealth;
+    double absorbPct;
+    ulong maxHealth;
     uint absorbedAmount;
 
     public override bool Validate(SpellInfo spellInfo)
@@ -129,12 +129,12 @@ class spell_dk_anti_magic_shell : AuraScript
     public override bool Load()
     {
         absorbPct = GetEffectInfo(1).CalcValue(GetCaster());
-        maxHealth = (int)GetCaster().GetMaxHealth();
+        maxHealth = GetCaster().GetMaxHealth();
         absorbedAmount = 0;
         return true;
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         amount = MathFunctions.CalculatePct(maxHealth, absorbPct);
         AuraEffect antiMagicBarrier = GetCaster().GetAuraEffect(SpellIds.AntiMagicBarrier, 2);
@@ -151,7 +151,7 @@ class spell_dk_anti_magic_shell : AuraScript
         absorbedAmount += absorbAmount;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
         GetTarget().CastSpell(GetTarget(), SpellIds.RunicPowerEnergize, args);
     }
 
@@ -185,7 +185,7 @@ class spell_dk_apply_bone_shield : SpellScript
     void HandleHitTarget(uint effIndex)
     {
         Unit caster = GetCaster();
-        for (int i = 0; i < GetEffectValue(); ++i)
+        for (int i = 0; i < GetEffectValueAsInt(); ++i)
             caster.CastSpell(caster, SpellIds.BoneShield, new CastSpellExtraArgs()
                 .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
                 .SetTriggeringSpell(GetSpell()));
@@ -450,13 +450,13 @@ class spell_dk_dark_simulacrum : AuraScript
         caster.CastSpell(caster, SpellIds.DarkSimulacrumBuff, new CastSpellExtraArgs()
             .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
             .SetTriggeringSpell(eventInfo.GetProcSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)eventInfo.GetSpellInfo().Id));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, (int)eventInfo.GetSpellInfo().Id));
 
         caster.CastSpell(caster, SpellIds.DarkSimulacrumSpellpowerBuff, new CastSpellExtraArgs()
             .SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError)
             .SetTriggeringSpell(eventInfo.GetProcSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, GetTarget().SpellBaseDamageBonusDone(SpellSchoolMask.Magic))
-            .AddSpellMod(SpellValueMod.BasePoint1, (int)GetTarget().SpellBaseHealingBonusDone(SpellSchoolMask.Magic)));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, GetTarget().SpellBaseDamageBonusDone(SpellSchoolMask.Magic))
+            .AddSpellMod(SpellValueModFloat.BasePoint1, (int)GetTarget().SpellBaseHealingBonusDone(SpellSchoolMask.Magic)));
     }
 
     public override void Register()
@@ -471,7 +471,7 @@ class spell_dk_dark_simulacrum_buff : AuraScript
 {
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return aurEff.GetAmount() == eventInfo.GetSpellInfo().Id;
+        return aurEff.GetAmountAsInt() == eventInfo.GetSpellInfo().Id;
     }
 
     public override void Register()
@@ -538,7 +538,7 @@ class spell_dk_death_gate : SpellScript
         PreventHitDefaultEffect(effIndex);
         Unit target = GetHitUnit();
         if (target != null)
-            target.CastSpell(target, (uint)GetEffectValue(), false);
+            target.CastSpell(target, (uint)GetEffectValueAsInt(), false);
     }
 
     public override void Register()
@@ -590,11 +590,11 @@ class spell_dk_death_pact : AuraScript
         return ValidateSpellEffect((spellInfo.Id, 2));
     }
 
-    void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void HandleCalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Unit caster = GetCaster();
         if (caster != null)
-            amount = (int)caster.CountPctFromMaxHealth(GetEffectInfo(2).CalcValue(caster));
+            amount = caster.CountPctFromMaxHealth((float)GetEffectInfo(2).CalcValue(caster));
     }
 
     public override void Register()
@@ -619,16 +619,16 @@ class spell_dk_death_strike : SpellScript
         if (enabler != null)
         {
             // Heals you for 25% of all damage taken in the last 5 sec,
-            int heal = MathFunctions.CalculatePct(enabler.CalculateAmount(GetCaster()), GetEffectInfo(1).CalcValue(GetCaster()));
+            double heal = MathFunctions.CalculatePct(enabler.CalculateAmount(GetCaster()), GetEffectInfo(1).CalcValue(GetCaster()));
             // minimum 7.0% of maximum health.
-            int pctOfMaxHealth = MathFunctions.CalculatePct(GetEffectInfo(2).CalcValue(GetCaster()), caster.GetMaxHealth());
+            double pctOfMaxHealth = MathFunctions.CalculatePct(GetEffectInfo(2).CalcValue(GetCaster()), caster.GetMaxHealth());
             heal = Math.Max(heal, pctOfMaxHealth);
 
-            caster.CastSpell(caster, SpellIds.DeathStrikeHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, heal));
+            caster.CastSpell(caster, SpellIds.DeathStrikeHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, heal));
 
             AuraEffect aurEff = caster.GetAuraEffect(SpellIds.BloodShieldMastery, 0);
             if (aurEff != null)
-                caster.CastSpell(caster, SpellIds.BloodShieldAbsorb, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount())));
+                caster.CastSpell(caster, SpellIds.BloodShieldAbsorb, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount())));
 
             if (caster.HasAura(SpellIds.Frost))
                 caster.CastSpell(GetHitUnit(), SpellIds.DeathStrikeOffhand, true);
@@ -667,10 +667,10 @@ class spell_dk_death_strike_enabler : AuraScript
         _damagePerSecond[0] = 0;
     }
 
-    void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void HandleCalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = true;
-        amount = (int)_damagePerSecond.Aggregate(0u, (a, b) => a += b);
+        amount = _damagePerSecond.Aggregate(0u, (a, b) => a += b);
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -697,7 +697,7 @@ class spell_dk_festering_strike : SpellScript
 
     void HandleScriptEffect(uint effIndex)
     {
-        GetCaster().CastSpell(GetHitUnit(), SpellIds.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValue()));
+        GetCaster().CastSpell(GetHitUnit(), SpellIds.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValueAsInt()));
     }
 
     public override void Register()
@@ -711,7 +711,7 @@ class spell_dk_frost_fever_proc : AuraScript
 {
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return RandomHelper.randChance(aurEff.GetAmount());
+        return RandomHelper.randChance((float)aurEff.GetAmount());
     }
 
     public override void Register()
@@ -730,7 +730,7 @@ class spell_dk_ghoul_explode : SpellScript
 
     void HandleDamage(uint effIndex)
     {
-        SetHitDamage((int)GetCaster().CountPctFromMaxHealth(GetEffectInfo(2).CalcValue(GetCaster())));
+        SetHitDamage((int)GetCaster().CountPctFromMaxHealth((float)GetEffectInfo(2).CalcValue(GetCaster())));
     }
 
     void Suicide(uint effIndex)
@@ -908,13 +908,13 @@ class spell_dk_improved_death_strike : AuraScript
             && ValidateSpellEffect((spellInfo.Id, 4));
     }
 
-    void CalcHealIncrease(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcHealIncrease(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         if (GetUnitOwner().HasAura(SpellIds.Blood))
             amount = GetEffectInfo(3).CalcValue(GetCaster());
     }
 
-    void CalcPowerCostReduction(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcPowerCostReduction(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         if (GetUnitOwner().HasAura(SpellIds.Blood))
             amount = GetEffectInfo(4).CalcValue(GetCaster());
@@ -1007,7 +1007,7 @@ class spell_dk_permafrost : AuraScript
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
         GetTarget().CastSpell(GetTarget(), SpellIds.FrostShield, args);
     }
 
@@ -1168,7 +1168,7 @@ class spell_dk_rime : AuraScript
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        float chance = (float)GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
+        double chance = GetSpellInfo().GetEffect(1).CalcValue(GetTarget());
         if (eventInfo.GetSpellInfo().Id == SpellIds.FrostScythe)
             chance /= 2.0f;
 
@@ -1205,7 +1205,7 @@ class spell_dk_soul_reaper : AuraScript
         if (caster == null)
             return;
 
-        if (!_healthLimitEffectIndex.HasValue || target.GetHealthPct() < (float)GetEffectInfo(_healthLimitEffectIndex.Value).CalcValue(caster))
+        if (!_healthLimitEffectIndex.HasValue || target.GetHealthPct() < GetEffectInfo(_healthLimitEffectIndex.Value).CalcValue(caster))
         {
             caster.CastSpell(target, SpellIds.SoulReaperDamage, new CastSpellExtraArgs()
             {
@@ -1237,7 +1237,6 @@ class spell_dk_soul_reaper : AuraScript
         OnEffectPeriodic.Add(new(HandleOnTick, _auraEffectIndex, AuraType.PeriodicDummy));
         AfterEffectRemove.Add(new(RemoveEffect, _auraEffectIndex, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
     }
-
 
     byte _auraEffectIndex;
     uint? _healthLimitEffectIndex;
@@ -1321,9 +1320,9 @@ class spell_dk_t20_2p_rune_empowered : AuraScript
 [Script] // 55233 - Vampiric Blood
 class spell_dk_vampiric_blood : AuraScript
 {
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
-        amount = (int)GetUnitOwner().CountPctFromMaxHealth(amount);
+        amount = GetUnitOwner().CountPctFromMaxHealth((float)amount);
     }
 
     public override void Register()
@@ -1387,7 +1386,7 @@ class at_dk_death_and_decay(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger
             AuraEffect cleavingStrikes = unit.GetAuraEffect(SpellIds.CleavingStrikes, 3);
             if (cleavingStrikes != null)
 
-                deathAndDecay.SetDuration(cleavingStrikes.GetAmount());
+                deathAndDecay.SetDuration(cleavingStrikes.GetAmountAsInt());
         }
 
         unit.RemoveAurasDueToSpell(SpellIds.SanguineGround);

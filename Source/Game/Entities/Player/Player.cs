@@ -2371,7 +2371,7 @@ namespace Game.Entities
                 !HasAuraType(AuraType.Fly) && !IsImmunedToDamage(SpellSchoolMask.Normal))
             {
                 //Safe fall, fall height reduction
-                int safe_fall = GetTotalAuraModifier(AuraType.SafeFall);
+                float safe_fall = GetTotalAuraModifier(AuraType.SafeFall);
 
                 float damageperc = 0.018f * (z_diff - safe_fall) - 0.2426f;
 
@@ -7572,7 +7572,7 @@ namespace Game.Entities
                 newDrunkValue = 100;
 
             // select drunk percent or total SPELL_AURA_MOD_FAKE_INEBRIATE amount, whichever is higher for visibility updates
-            int drunkPercent = Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
+            int drunkPercent = (int)Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
             if (drunkPercent != 0)
             {
                 m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);

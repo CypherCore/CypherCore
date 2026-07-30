@@ -354,7 +354,7 @@ namespace Game.Entities
             }
         }
 
-        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, int amount, Dictionary<SpellGroup, int> groups)
+        public bool AddSameEffectStackRuleSpellGroups(SpellInfo spellInfo, AuraType auraType, double amount, Dictionary<SpellGroup, double> groups)
         {
             uint spellId = spellInfo.GetFirstRankSpell().Id;
             var spellGroupList = GetSpellSpellGroupMapBounds(spellId);
@@ -373,7 +373,7 @@ namespace Game.Entities
                         groups.Add(group, amount);
                     else
                     {
-                        int curr_amount = groups[group];
+                        double curr_amount = groups[group];
                         // Take absolute value because this also counts for the highest negative aura
                         if (Math.Abs(curr_amount) < Math.Abs(amount))
                             groups[group] = amount;
@@ -833,7 +833,7 @@ namespace Game.Entities
                     {
                         case SpellEffectName.Skill:
                             dbc_node.skill = (SkillType)spellEffectInfo.MiscValue;
-                            dbc_node.step = (ushort)spellEffectInfo.CalcValue();
+                            dbc_node.step = (ushort)spellEffectInfo.CalcValueAsInt();
                             dbc_node.value = 0;
                             dbc_node.maxvalue = 0;
                             break;
@@ -1567,7 +1567,7 @@ namespace Game.Entities
                             break;
                         // proc auras with another aura reducing hit chance (eg 63767) only proc on missed attack
                         case AuraType.ModHitChance:
-                            if (spellEffectInfo.CalcValue() <= -100)
+                            if (spellEffectInfo.CalcValueAsInt() <= -100)
                                 procEntry.HitMask = ProcFlagsHit.Miss;
                             break;
                         case AuraType.ProcTriggerSpell:
@@ -1794,7 +1794,7 @@ namespace Game.Entities
                 {
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (spellEffectInfo.CalcValue() == Math.Abs(effect))
+                        if (spellEffectInfo.CalcValueAsInt() == Math.Abs(effect))
                             Log.outError(LogFilter.Sql, $"The spell {Math.Abs(trigger)} Effect: {Math.Abs(effect)} listed in `spell_linked_spell` has same bp{spellEffectInfo.EffectIndex} like effect (possible hack)");
                     }
                 }
@@ -2879,7 +2879,7 @@ namespace Game.Entities
                                 default:
                                 {
                                     // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
-                                    if (spellEffectInfo.CalcValue() == 0 && !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
+                                    if (spellEffectInfo.CalcValueAsInt() == 0 && !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
                                         break;
 
                                     // Sindragosa Frost Breath
@@ -5260,7 +5260,7 @@ namespace Game.Entities
             damage = 0;
         }
 
-        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, int _damage)
+        public PetAura(uint petEntry, uint aura, bool _removeOnChangePet, double _damage)
         {
             removeOnChangePet = _removeOnChangePet;
             damage = _damage;
@@ -5291,14 +5291,14 @@ namespace Game.Entities
             return removeOnChangePet;
         }
 
-        public int GetDamage()
+        public double GetDamage()
         {
             return damage;
         }
 
         Dictionary<uint, uint> auras = new();
         bool removeOnChangePet;
-        int damage;
+        double damage;
     }
 
     public class SpellEnchantProcEntry

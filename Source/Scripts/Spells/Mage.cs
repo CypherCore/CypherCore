@@ -189,7 +189,7 @@ class spell_mage_arcane_barrage : SpellScript
         {
             AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.ArcaneBarrageR3, 0, caster.GetGUID());
             if (auraEffect != null)
-                caster.CastSpell(caster, SpellIds.ArcaneBarrageEnergize, new CastSpellExtraArgs(SpellValueMod.BasePoint0, arcaneCharges * auraEffect.GetAmount() / 100));
+                caster.CastSpell(caster, SpellIds.ArcaneBarrageEnergize, new CastSpellExtraArgs(SpellValueModFloat.BasePoint0, arcaneCharges * auraEffect.GetAmount() / 100));
         }
     }
 
@@ -289,12 +289,12 @@ class spell_mage_blazing_barrier : AuraScript
         return ValidateSpellInfo(SpellIds.BlazingBarrierTrigger);
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = false;
         Unit caster = GetCaster();
         if (caster != null)
-            amount = (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f);
+            amount = caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -411,7 +411,7 @@ class spell_mage_cauterize_AuraScript : AuraScript
             return;
         }
 
-        GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth(aura.GetAmount()));
+        GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth((float)aura.GetAmount()));
         GetTarget().CastSpell(GetTarget(), GetEffectInfo(2).TriggerSpell, TriggerCastFlags.FullMask);
         GetTarget().CastSpell(GetTarget(), SpellIds.CauterizeDot, TriggerCastFlags.FullMask);
         GetTarget().CastSpell(GetTarget(), SpellIds.Cauterized, TriggerCastFlags.FullMask);
@@ -616,7 +616,7 @@ class spell_mage_ethereal_blink_triggered : SpellScript
 
     void TriggerSlow(uint effIndex)
     {
-        int effectivenessPct = 100;
+        double effectivenessPct = 100;
         AuraEffect effectivenessEffect = GetCaster().GetAuraEffect(SpellIds.EtherealBlink, 1);
         if (effectivenessEffect != null)
             effectivenessPct = effectivenessEffect.GetAmount();
@@ -625,7 +625,7 @@ class spell_mage_ethereal_blink_triggered : SpellScript
         MathFunctions.ApplyPct(ref slowPct, effectivenessPct);
 
         GetCaster().CastSpell(GetHitUnit(), SpellIds.Slow, new CastSpellExtraArgs(GetSpell())
-            .AddSpellMod(SpellValueMod.BasePoint0, (int)slowPct));
+            .AddSpellMod(SpellValueModFloat.BasePoint0, (int)slowPct));
     }
 
     public override void Register()
@@ -643,7 +643,7 @@ class spell_mage_feel_the_burn : AuraScript
         return ValidateSpellInfo(SpellIds.FeelTheBurn);
     }
 
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Unit caster = GetCaster();
         if (caster != null)
@@ -804,10 +804,10 @@ class spell_mage_flame_on : AuraScript
            && ValidateSpellEffect((spellInfo.Id, 2));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = false;
-        amount = (int)(-MathFunctions.GetPctOf(GetEffectInfo(2).CalcValue() * Time.InMilliseconds, CliDB.SpellCategoryStorage.LookupByKey(Global.SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime));
+        amount = -MathFunctions.GetPctOf((float)GetEffectInfo(2).CalcValue() * Time.InMilliseconds, CliDB.SpellCategoryStorage.LookupByKey(Global.SpellMgr.GetSpellInfo(SpellIds.FireBlast, Difficulty.None).ChargeCategoryId).ChargeRecoveryTime);
     }
 
     public override void Register()
@@ -896,7 +896,7 @@ class spell_mage_flurry : SpellScript
 
     void EffectHit(uint effIndex)
     {
-        GetCaster().m_Events.AddEventAtOffset(new FlurryEvent(GetCaster(), GetHitUnit().GetGUID(), GetSpell().m_castId, GetEffectValue() - 1), RandomHelper.RandTime(TimeSpan.FromSeconds(300), TimeSpan.FromSeconds(400)));
+        GetCaster().m_Events.AddEventAtOffset(new FlurryEvent(GetCaster(), GetHitUnit().GetGUID(), GetSpell().m_castId, GetEffectValueAsInt() - 1), RandomHelper.RandTime(TimeSpan.FromSeconds(300), TimeSpan.FromSeconds(400)));
     }
 
     public override void Register()
@@ -1094,10 +1094,10 @@ class spell_mage_ice_barrier : AuraScript
         return ValidateSpellInfo(SpellIds.Chilled);
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = false;
-        amount = (int)MathFunctions.CalculatePct(GetUnitOwner().GetMaxHealth(), GetEffectInfo(1).CalcValue());
+        amount = MathFunctions.CalculatePct(GetUnitOwner().GetMaxHealth(), GetEffectInfo(1).CalcValue());
         Player player = GetUnitOwner().ToPlayer();
         if (player != null)
             MathFunctions.AddPct(ref amount, player.GetRatingBonusValue(CombatRating.VersatilityDamageDone) + player.GetTotalAuraModifier(AuraType.ModVersatility));
@@ -1178,7 +1178,7 @@ class spell_mage_ice_lance : SpellScript
             {
                 Aura icyVeins = caster.GetAura(SpellIds.IcyVeins);
                 if (icyVeins != null)
-                    icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoid.GetSpellInfo().GetEffect(0).CalcValue(caster) * Time.InMilliseconds);
+                    icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoid.GetSpellInfo().GetEffect(0).CalcValueAsInt(caster) * Time.InMilliseconds);
             }
 
             // Chain Reaction
@@ -1189,7 +1189,7 @@ class spell_mage_ice_lance : SpellScript
         // put target index for chain value multiplier into 1 base points, otherwise triggered spell doesn't know which damage multiplier to apply
         CastSpellExtraArgs args = new();
         args.TriggerFlags = TriggerCastFlags.FullMask;
-        args.AddSpellMod(SpellValueMod.BasePoint1, index);
+        args.AddSpellMod(SpellValueModFloat.BasePoint1, index);
         caster.CastSpell(target, SpellIds.IceLanceTrigger, args);
     }
 
@@ -1241,15 +1241,15 @@ class spell_mage_ignite : AuraScript
         PreventDefaultAction();
 
         SpellEffectInfo igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, GetCastDifficulty()).GetEffect(0);
-        int pct = aurEff.GetAmount();
+        double pct = aurEff.GetAmount();
 
         if (spell_mage_hot_streak_ignite_marker.IsActive(eventInfo.GetProcSpell()))
             pct *= 2;
 
-        int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetPeriodicTickCount());
+        double amount = MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetPeriodicTickCount();
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueMod.BasePoint0, amount);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
         GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.Ignite, args);
     }
 
@@ -1313,7 +1313,7 @@ class spell_mage_improved_combustion : AuraScript
         return GetUnitOwner().HasAura(SpellIds.ImprovedCombustion);
     }
 
-    void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalcAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         AuraEffect amountHolder = GetEffect(2);
         if (amountHolder != null)
@@ -1347,7 +1347,7 @@ class spell_mage_improved_scorch : AuraScript
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget().HealthBelowPct(aurEff.GetAmount()) || eventInfo.GetActor().HasAura(SpellIds.HeatShimmer);
+        return eventInfo.GetProcTarget().HealthBelowPct((float)aurEff.GetAmount()) || eventInfo.GetActor().HasAura(SpellIds.HeatShimmer);
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1417,7 +1417,7 @@ class spell_mage_living_bomb : SpellScript
     void HandleDummy(uint effIndex)
     {
         PreventHitDefaultEffect(effIndex);
-        GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 1));
+        GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint2, 1));
     }
 
     public override void Register()
@@ -1442,7 +1442,7 @@ class spell_mage_living_bomb_explosion : SpellScript
     void HandleSpread(uint effIndex)
     {
         if (GetSpellValue().EffectBasePoints[0] > 0)
-            GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 0));
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint2, 0));
     }
 
     public override void Register()
@@ -1467,7 +1467,7 @@ class spell_mage_living_bomb_periodic : AuraScript
 
         Unit caster = GetCaster();
         if (caster != null)
-            caster.CastSpell(GetTarget(), SpellIds.LivingBombExplosion, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount()));
+            caster.CastSpell(GetTarget(), SpellIds.LivingBombExplosion, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, aurEff.GetAmount()));
     }
 
     public override void Register()
@@ -1539,7 +1539,7 @@ class spell_mage_molten_fury : AuraScript
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        if (!eventInfo.GetActionTarget().HealthAbovePct(aurEff.GetAmount()))
+        if (!eventInfo.GetActionTarget().HealthAbovePct((float)aurEff.GetAmount()))
             eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.MoltenFury, new CastSpellExtraArgs()
             {
                 TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
@@ -1599,12 +1599,12 @@ class spell_mage_prismatic_barrier : AuraScript
         return ValidateSpellEffect((spellInfo.Id, 5));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         canBeRecalculated = false;
         Unit caster = GetCaster();
         if (caster != null)
-            amount = (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetEffectInfo(5).CalcValue(caster));
+            amount = MathFunctions.CalculatePct(caster.GetMaxHealth(), GetEffectInfo(5).CalcValue(caster));
     }
 
     public override void Register()
@@ -1843,7 +1843,7 @@ class spell_mage_scald : SpellScript
     void CalculateDamage(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
     {
         Unit caster = GetCaster();
-        if (!victim.HealthBelowPct(GetEffectInfo(1).CalcValue(caster)) || !caster.HasAura(SpellIds.HeatShimmer))
+        if (!victim.HealthBelowPct((float)GetEffectInfo(1).CalcValue(caster)) || !caster.HasAura(SpellIds.HeatShimmer))
             return;
 
         AuraEffect aurEff = caster.GetAuraEffect(SpellIds.Scald, 0);
@@ -1945,12 +1945,12 @@ class spell_mage_tempest_barrier : AuraScript
     {
         PreventDefaultAction();
         Unit target = GetTarget();
-        int amount = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(target.GetMaxHealth(), aurEff.GetAmount());
         target.CastSpell(target, SpellIds.TempestBarrierAbsorb, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringAura = aurEff,
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
         });
     }
 
@@ -1975,22 +1975,22 @@ class spell_mage_touch_of_the_magi_aura : AuraScript
         {
             if (damageInfo.GetAttacker() == GetCaster() && damageInfo.GetVictim() == GetTarget())
             {
-                uint extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
+                double extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
                 if (extra > 0)
-                    aurEff.ChangeAmount((int)(aurEff.GetAmount() + extra));
+                    aurEff.ChangeAmount(aurEff.GetAmount() + extra);
             }
         }
     }
 
     void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
     {
-        int amount = aurEff.GetAmount();
+        double amount = aurEff.GetAmount();
         if (amount == 0 || GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
             return;
 
         Unit caster = GetCaster();
         if (caster != null)
-            caster.CastSpell(GetTarget(), SpellIds.TouchOfTheMagiExplode, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, amount));
+            caster.CastSpell(GetTarget(), SpellIds.TouchOfTheMagiExplode, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueModFloat.BasePoint0, amount));
     }
 
     public override void Register()
@@ -2033,7 +2033,7 @@ class spell_mage_wildfire_crit(AuraType auraType, uint effIndex) : AuraScript()
         return ValidateSpellEffect((SpellIds.WildfireTalent, effIndex));
     }
 
-    void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateAmount(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         Unit caster = GetCaster();
         if (caster == null)

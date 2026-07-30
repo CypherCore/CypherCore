@@ -61,6 +61,11 @@ namespace Framework.Database
             Parameters.Add(index, value);
         }
 
+        public void AddValue(int index, double value)
+        {
+            Parameters.Add(index, value);
+        }
+
         public void AddValue(int index, byte[] value)
         {
             Parameters.Add(index, value);

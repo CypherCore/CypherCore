@@ -94,7 +94,7 @@ namespace Scripts.World.DuelReset
 
                 applySpellMod(totalCooldown);
 
-                int cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
+                float cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
                 if (cooldownMod != 0)
                     totalCooldown += TimeSpan.FromMilliseconds(cooldownMod);
 

@@ -187,7 +187,7 @@ class spell_rog_backstab : SpellScript
         if (hitUnit.IsInBack(caster))
         {
             float currDamage = (float)GetHitDamage();
-            float newDamage = MathFunctions.AddPct(ref currDamage, (float)GetEffectInfo(3).CalcValue(caster));
+            float newDamage = MathFunctions.AddPct(ref currDamage, GetEffectInfo(3).CalcValue(caster));
             SetHitDamage((int)newDamage);
         }
     }
@@ -245,7 +245,7 @@ class spell_rog_blade_flurry : AuraScript
         if (damageInfo != null)
         {
             CastSpellExtraArgs args = new(aurEff);
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage());
+            args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)damageInfo.GetDamage());
             GetTarget().CastSpell(_procTarget, SpellIds.BladeFlurryExtraAttack, args);
         }
     }
@@ -284,7 +284,7 @@ class spell_rog_cheat_death : AuraScript
         target.CastSpell(target, SpellIds.CheatedDeath, TriggerCastFlags.DontReportCastError);
         target.CastSpell(target, SpellIds.CheatingDeath, TriggerCastFlags.DontReportCastError);
 
-        target.SetHealth(target.CountPctFromMaxHealth(GetEffectInfo(1).CalcValue(target)));
+        target.SetHealth(target.CountPctFromMaxHealth((float)GetEffectInfo(1).CalcValue(target)));
     }
 
     public override void Register()
@@ -315,13 +315,13 @@ class spell_rog_cloaked_in_shadows : SpellScript
         if (cloakedInShadows == null)
             return;
 
-        int amount = (int)caster.CountPctFromMaxHealth(cloakedInShadows.GetAmount());
+        double amount = caster.CountPctFromMaxHealth((float)cloakedInShadows.GetAmount());
 
         caster.CastSpell(caster, SpellIds.CloakedInShadowsAbsorb, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringSpell = GetSpell(),
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, amount) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, amount) }
         });
     }
 
@@ -397,7 +397,7 @@ class spell_rog_envenom : SpellScript
 
         AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T5_2PSetBonus, 0);
         if (t5 != null)
-            flatMod += t5.GetAmount();
+            flatMod += t5.GetAmountAsInt();
     }
 
     public override void Register()
@@ -415,7 +415,7 @@ class spell_rog_eviscerate : SpellScript
 
         AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T5_2PSetBonus, 0);
         if (t5 != null)
-            flatMod += t5.GetAmount();
+            flatMod += t5.GetAmountAsInt();
     }
 
     public override void Register()
@@ -441,7 +441,7 @@ class spell_rog_grand_melee : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
         Spell procSpell = procInfo.GetProcSpell();
-        int amount = aurEff.GetAmount() * procSpell.GetPowerTypeCostAmount(PowerType.ComboPoints).Value * 1000;
+        int amount = aurEff.GetAmountAsInt() * procSpell.GetPowerTypeCostAmount(PowerType.ComboPoints).Value * 1000;
 
         Unit target = GetTarget();
         if (target != null)
@@ -541,7 +541,7 @@ class spell_rog_improved_garrote_damage : AuraScript
         return ValidateSpellInfo(SpellIds.ImprovedGarroteAfterStealth, SpellIds.ImprovedGarroteStealth, SpellIds.ImprovedGarroteTalent);
     }
 
-    void CalculateBonus(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+    void CalculateBonus(AuraEffect aurEff, ref double amount, ref bool canBeRecalculated)
     {
         _pctMod = 1.0f;
         Unit caster = GetCaster();
@@ -896,11 +896,11 @@ class spell_rog_restless_blades : AuraScript
         var spentCp = procInfo.GetProcSpell()?.GetPowerTypeCostAmount(PowerType.ComboPoints);
         if (spentCp.HasValue)
         {
-            int cdExtra = -(int)((float)(aurEff.GetAmount() * spentCp.Value) * 0.1f);
+            TimeSpan cdExtra = -TimeSpan.FromSeconds(aurEff.GetAmount() * spentCp.Value * 0.1);
 
             SpellHistory history = GetTarget().GetSpellHistory();
             foreach (uint spellId in Spells)
-                history.ModifyCooldown(spellId, TimeSpan.FromSeconds(cdExtra), true);
+                history.ModifyCooldown(spellId, cdExtra, true);
         }
     }
 
@@ -1051,12 +1051,12 @@ class spell_rog_shadowstrike : SpellScript
                 {
                     AuraEffect auraEff = premeditationPassive.GetEffect(1);
                     if (auraEff != null)
-                        SetHitDamage(GetHitDamage() + auraEff.GetAmount());
+                        SetHitDamage(GetHitDamage() + auraEff.GetAmountAsInt());
                 }
             }
 
             // Grant 10 seconds of slice and dice
-            int duration = Global.SpellMgr.GetSpellInfo(SpellIds.PremeditationPassive, Difficulty.None).GetEffect(0).CalcValue(GetCaster());
+            int duration = Global.SpellMgr.GetSpellInfo(SpellIds.PremeditationPassive, Difficulty.None).GetEffect(0).CalcValueAsInt(GetCaster());
 
             CastSpellExtraArgs args = new();
             args.TriggerFlags = TriggerCastFlags.FullMask;
@@ -1168,7 +1168,7 @@ class spell_rog_shuriken_storm : SpellScript
         {
             TriggerFlags = TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError,
             TriggeringSpell = GetSpell(),
-            SpellValueOverrides = { new(SpellValueMod.BasePoint0, (int)GetUnitTargetCountForEffect(effIndex)) }
+            SpellValueOverrides = { new(SpellValueModFloat.BasePoint0, GetUnitTargetCountForEffect(effIndex)) }
         });
     }
 
@@ -1214,7 +1214,7 @@ class spell_rog_sinister_strike : SpellScript
         int damagePerCombo = GetHitDamage();
         AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T5_2PSetBonus, 0);
         if (t5 != null)
-            damagePerCombo += t5.GetAmount();
+            damagePerCombo += t5.GetAmountAsInt();
 
         int finalDamage = damagePerCombo;
         var comboPointCost = GetSpell().GetPowerTypeCostAmount(PowerType.ComboPoints);
@@ -1491,7 +1491,7 @@ class spell_rog_venomous_wounds : AuraScript
 {
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        int extraEnergy = aurEff.GetAmount();
+        int extraEnergy = aurEff.GetAmountAsInt();
         GetTarget().ModifyPower(PowerType.Energy, extraEnergy);
     }
 
