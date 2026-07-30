@@ -1071,13 +1071,12 @@ namespace Game.Entities
 
         public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
-            ZLiquidStatus oldLiquidStatus = GetLiquidStatus();
             base.ProcessPositionDataChanged(data);
-            ProcessTerrainStatusUpdate(oldLiquidStatus, data.LiquidInfo);
+            UpdateLiquidStatusOnPositionChange(data.LiquidInfo);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CurrentAreaID), data.AreaId);
         }
 
-        public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
+        public void UpdateLiquidStatusOnPositionChange(LiquidData newLiquidData)
         {
             if (!IsControlledByPlayer())
                 return;
@@ -1097,18 +1096,13 @@ namespace Game.Entities
                 if (_lastLiquid != null && _lastLiquid.SpellID != 0)
                     RemoveAurasDueToSpell(_lastLiquid.SpellID);
 
-                Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
-
                 // Set _lastLiquid before casting liquid spell to avoid infinite loops
                 _lastLiquid = curLiquid;
 
+                Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (curLiquid != null && curLiquid.SpellID != 0 && (player == null || !player.IsGameMaster()))
                     CastSpell(this, curLiquid.SpellID, true);
             }
-
-            // mount capability depends on liquid state change
-            if (oldLiquidStatus != GetLiquidStatus())
-                UpdateMountCapability();
         }
 
         public bool SetWalk(bool enable)

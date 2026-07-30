@@ -42,6 +42,11 @@ namespace Game.DataStorage
         public ushort UwIntroSound;
         public ushort AreaTableID;
         public int Flags;
+
+        public bool HasFlag(WMOAreaTableFlags flag)
+        {
+            return (Flags & (int)flag) != 0;
+        }
     }
 
     public sealed class WorldEffectRecord

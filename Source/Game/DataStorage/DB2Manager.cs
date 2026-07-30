@@ -2292,13 +2292,13 @@ namespace Game.DataStorage
             return _uiMapPhases.Contains(phaseId);
         }
 
-        public WMOAreaTableRecord GetWMOAreaTable(int rootId, int adtId, int groupId)
+        public WMOAreaTableRecord GetWMOAreaTable(int rootId, int adtId, int groupId, bool allowGroupFallback)
         {
-            var wmoAreaTable = _wmoAreaTableLookup.LookupByKey(Tuple.Create((short)rootId, (sbyte)adtId, groupId));
-            if (wmoAreaTable != null)
-                return wmoAreaTable;
+            var wmoAreaTableEntry = _wmoAreaTableLookup.LookupByKey(Tuple.Create((short)rootId, (sbyte)adtId, groupId));
+            if (wmoAreaTableEntry == null && allowGroupFallback)
+                wmoAreaTableEntry = _wmoAreaTableLookup.LookupByKey(Tuple.Create((short)rootId, (sbyte)adtId, -1));
 
-            return null;
+            return wmoAreaTableEntry;
         }
 
         public List<uint> GetPVPStatIDsForMap(uint mapId)

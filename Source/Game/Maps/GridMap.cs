@@ -533,32 +533,27 @@ namespace Game.Maps
             int idx = (x_int >> 3) * 16 + (y_int >> 3);
             LiquidHeaderTypeFlags type = _liquidFlags != null ? (LiquidHeaderTypeFlags)_liquidFlags[idx] : _liquidGlobalFlags;
             uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
-            LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
-            if (liquidEntry != null)
+            if (CliDB.LiquidTypeStorage.HasRecord(entry))
             {
                 type &= LiquidHeaderTypeFlags.DarkWater;
-                uint liqTypeIdx = liquidEntry.SoundBank;
                 if (entry < 21)
                 {
                     var area = CliDB.AreaTableStorage.LookupByKey(GetArea(x, y));
                     if (area != null)
                     {
-                        uint overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                        uint overrideLiquid = area.LiquidTypeID[(entry - 1) & 3];
                         if (overrideLiquid == 0 && area.ParentAreaID == 0)
                         {
                             area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                             if (area != null)
-                                overrideLiquid = area.LiquidTypeID[liquidEntry.SoundBank];
+                                overrideLiquid = area.LiquidTypeID[(entry - 1) & 3];
                         }
-                        var liq = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-                        if (liq != null)
-                        {
+
+                        if (CliDB.LiquidTypeStorage.HasRecord(overrideLiquid))
                             entry = overrideLiquid;
-                            liqTypeIdx = liq.SoundBank;
-                        }
                     }
                 }
-                type |= (LiquidHeaderTypeFlags)(1 << (int)liqTypeIdx);
+                type |= (LiquidHeaderTypeFlags)Global.DB2Mgr.GetLiquidFlags(entry);
             }
 
             if (type == LiquidHeaderTypeFlags.NoWater)

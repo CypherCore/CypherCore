@@ -99,6 +99,7 @@ namespace Game.DataStorage
 
         public bool HasFlag(VehicleSeatFlags flag) { return (Flags & (int)flag) != 0; }
         public bool HasFlag(VehicleSeatFlagsB flag) { return (FlagsB & (int)flag) != 0; }
+        public bool HasFlag(VehicleSeatFlagsC flag) { return (FlagsC & (int)flag) != 0; }
 
         public bool CanEnterOrExit()
         {

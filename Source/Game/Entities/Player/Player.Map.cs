@@ -644,11 +644,20 @@ namespace Game.Entities
             return (instanceLock.GetData().CompletedEncountersMask & (1u << dungeonEncounter.Bit)) != 0;
         }
 
-        public override void ProcessTerrainStatusUpdate(ZLiquidStatus oldLiquidStatus, LiquidData newLiquidData)
+        public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
-            // process liquid auras using generic unit code
-            base.ProcessTerrainStatusUpdate(oldLiquidStatus, newLiquidData);
+            ZLiquidStatus oldLiquidStatus = GetLiquidStatus();
+            base.ProcessPositionDataChanged(data);
 
+            UpdateLiquidMirrorTimerFlagsOnPositionChange(data.LiquidInfo);
+
+            // mount capability depends on liquid state change
+            if (oldLiquidStatus != GetLiquidStatus())
+                UpdateMountCapability();
+        }
+
+        void UpdateLiquidMirrorTimerFlagsOnPositionChange(LiquidData newLiquidData)
+        {
             m_MirrorTimerFlags &= ~(PlayerUnderwaterState.InWater | PlayerUnderwaterState.InLava | PlayerUnderwaterState.InSlime | PlayerUnderwaterState.InDarkWater);
 
             // player specific logic for mirror timers
@@ -661,7 +670,27 @@ namespace Game.Entities
 
                 // Fatigue bar state (if not on flight path or transport)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) && !IsInFlight() && GetTransport() == null)
-                    m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
+                {
+                    bool ignoreFatigue = false;
+                    WmoLocation wmoLocation = GetCurrentWmo();
+                    if (wmoLocation != null)
+                    {
+                        WMOAreaTableRecord wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoLocation.RootId, wmoLocation.NameSetId, wmoLocation.GroupId, true);
+                        if (wmoEntry != null && wmoEntry.HasFlag(WMOAreaTableFlags.IgnoreFatigue))
+                            ignoreFatigue = true;
+                    }
+
+                    Vehicle vehicle = GetVehicle();
+                    if (vehicle != null)
+                    {
+                        VehicleSeatRecord vehicleSeat = vehicle.GetSeatForPassenger(this);
+                        if (vehicleSeat != null && vehicleSeat.HasFlag(VehicleSeatFlagsC.NoFatigue))
+                            ignoreFatigue = true;
+                    }
+
+                    if (!ignoreFatigue)
+                        m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
+                }
 
                 // Lava state (any contact)
                 if (newLiquidData.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Magma))

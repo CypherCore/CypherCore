@@ -5,6 +5,7 @@ using System;
 
 namespace Framework.Constants
 {
+    [Flags]
     public enum VehicleSeatFlags : uint
     {
         HasLowerAnimForEnter = 0x01,
@@ -41,6 +42,7 @@ namespace Framework.Constants
         AllowsInteraction = 0x80000000
     }
 
+    [Flags]
     public enum VehicleSeatFlagsB : uint
     {
         None = 0x00,
@@ -55,6 +57,13 @@ namespace Framework.Constants
         CanSwitch = 0x4000000,
         VehiclePlayerframeUi = 0x80000000            // Lua_Unithasvehicleplayerframeui - Actually Checked For Flagsb &~ 0x80000000
     }
+
+    [Flags]
+    public enum VehicleSeatFlagsC
+    {
+        NoFatigue = 0x40
+    }
+
 
     public enum SpellClickCastFlags
     {

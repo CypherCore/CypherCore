@@ -502,19 +502,17 @@ namespace Game.Maps
             {
                 if (wmoData.areaInfo != null)
                 {
-                    data.wmoLocation = new(wmoData.areaInfo.AdtId, wmoData.areaInfo.RootId, wmoData.areaInfo.GroupId, wmoData.areaInfo.MogpFlags);
                     // wmo found
-                    var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.RootId, wmoData.areaInfo.AdtId, wmoData.areaInfo.GroupId);
-                    if (wmoEntry == null)
-                        wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.RootId, wmoData.areaInfo.AdtId, -1);
-
+                    data.wmoLocation = new(wmoData.areaInfo.GroupId, wmoData.areaInfo.AdtId, wmoData.areaInfo.RootId, wmoData.areaInfo.UniqueId);
                     data.outdoors = (wmoData.areaInfo.MogpFlags & 0x8) != 0;
+
+                    WMOAreaTableRecord wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.RootId, wmoData.areaInfo.AdtId, wmoData.areaInfo.GroupId, true);
                     if (wmoEntry != null)
                     {
                         data.AreaId = wmoEntry.AreaTableID;
-                        if ((wmoEntry.Flags & 4) != 0)
+                        if (wmoEntry.HasFlag(WMOAreaTableFlags.ForceOutdoors))
                             data.outdoors = true;
-                        else if ((wmoEntry.Flags & 2) != 0)
+                        else if (wmoEntry.HasFlag(WMOAreaTableFlags.ForceIndoors))
                             data.outdoors = false;
                     }
 
@@ -546,34 +544,27 @@ namespace Game.Maps
                 if (GetId() == 530 && liquidType == 2) // gotta love hacks
                     liquidType = 15;
 
-                uint liquidFlagType = 0;
-                var liquidData = CliDB.LiquidTypeStorage.LookupByKey(liquidType);
-                if (liquidData != null)
-                    liquidFlagType = liquidData.SoundBank;
-
                 if (liquidType != 0 && liquidType < 21 && areaEntry != null)
                 {
-                    uint overrideLiquid = areaEntry.LiquidTypeID[liquidFlagType];
+                    uint overrideLiquid = areaEntry.LiquidTypeID[(liquidType - 1) & 3];
                     if (overrideLiquid == 0 && areaEntry.ParentAreaID != 0)
                     {
                         var zoneEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
                         if (zoneEntry != null)
-                            overrideLiquid = zoneEntry.LiquidTypeID[liquidFlagType];
+                            overrideLiquid = zoneEntry.LiquidTypeID[(liquidType - 1) & 3];
                     }
 
-                    var overrideData = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-                    if (overrideData != null)
-                    {
+                    if (CliDB.LiquidTypeStorage.HasRecord(overrideLiquid))
                         liquidType = overrideLiquid;
-                        liquidFlagType = overrideData.SoundBank;
-                    }
                 }
 
-                data.LiquidInfo = new();
-                data.LiquidInfo.level = wmoData.liquidInfo.Level;
-                data.LiquidInfo.depth_level = wmoData.floorZ;
-                data.LiquidInfo.entry = liquidType;
-                data.LiquidInfo.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
+                data.LiquidInfo = new()
+                {
+                    level = wmoData.liquidInfo.Level,
+                    depth_level = wmoData.floorZ,
+                    entry = liquidType,
+                    type_flags = (LiquidHeaderTypeFlags)Global.DB2Mgr.GetLiquidFlags(liquidType)
+                };
 
                 float delta = wmoData.liquidInfo.Level - z;
                 ZLiquidStatus status = ZLiquidStatus.AboveWater;
@@ -628,30 +619,21 @@ namespace Game.Maps
                     if (GetId() == 530 && vmapData.liquidInfo.LiquidType == 2)
                         vmapData.liquidInfo.LiquidType = 15;
 
-                    uint liquidFlagType = 0;
-                    var liq = CliDB.LiquidTypeStorage.LookupByKey(vmapData.liquidInfo.LiquidType);
-                    if (liq != null)
-                        liquidFlagType = liq.SoundBank;
-
                     if (vmapData.liquidInfo.LiquidType != 0 && vmapData.liquidInfo.LiquidType < 21)
                     {
                         var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId(phaseShift, mapId, x, y, z));
                         if (area != null)
                         {
-                            uint overrideLiquid = area.LiquidTypeID[liquidFlagType];
+                            uint overrideLiquid = area.LiquidTypeID[(vmapData.liquidInfo.LiquidType - 1) & 3];
                             if (overrideLiquid == 0 && area.ParentAreaID != 0)
                             {
                                 area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                                 if (area != null)
-                                    overrideLiquid = area.LiquidTypeID[liquidFlagType];
+                                    overrideLiquid = area.LiquidTypeID[(vmapData.liquidInfo.LiquidType - 1) & 3];
                             }
 
-                            var liq1 = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
-                            if (liq1 != null)
-                            {
+                            if (CliDB.LiquidTypeStorage.HasRecord(overrideLiquid))
                                 vmapData.liquidInfo.LiquidType = overrideLiquid;
-                                liquidFlagType = liq1.SoundBank;
-                            }
                         }
                     }
 
@@ -659,7 +641,7 @@ namespace Game.Maps
                     data.depth_level = vmapData.floorZ;
 
                     data.entry = vmapData.liquidInfo.LiquidType;
-                    data.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
+                    data.type_flags = (LiquidHeaderTypeFlags)Global.DB2Mgr.GetLiquidFlags(vmapData.liquidInfo.LiquidType);
 
                     float delta = vmapData.liquidInfo.Level - z;
 
@@ -791,7 +773,7 @@ namespace Game.Maps
             if (hasVmapArea && MathFunctions.fuzzyGe(z, vmapZ - MapConst.GroundHeightTolerance) && (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || vmapZ > gridMapHeight))
             {
                 // wmo found
-                var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(rootId, adtId, groupId);
+                var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(rootId, adtId, groupId, false);
                 if (wmoEntry != null)
                     areaId = wmoEntry.AreaTableID;
 

@@ -3239,6 +3239,19 @@ namespace Framework.Constants
         IsDefault = 0x10
     }
 
+    [Flags]
+    public enum WMOAreaTableFlags
+    {
+        RenderMinimap = 0x01,
+        ForceIndoors = 0x02,
+        ForceOutdoors = 0x04,
+        GenerateSingleExteriorMap = 0x08,
+        Stormwind = 0x10,
+        ChunkUsesTerrainForMinimap = 0x20,
+        IgnoreForMinimapAndEffects = 0x40,
+        IgnoreFatigue = 0x80
+    }
+
     public enum WorldMapTransformsFlags
     {
         Dungeon = 0x04
