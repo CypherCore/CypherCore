@@ -4416,7 +4416,7 @@ namespace Game.Spells
             if (target.GetTarget() == Targets.DestCasterRandom ||
                 target.GetTarget() == Targets.DestTargetRandom ||
                 target.GetTarget() == Targets.DestDestRandom)
-                radius += (entry.RadiusMax - radius) * RandomHelper.NextSingle();
+                radius += (entry.RadiusMax - radius) * MathF.Sqrt(RandomHelper.NextSingle());
             else if (radius == 0.0f)
                 radius = entry.RadiusMax;
 
