@@ -2847,6 +2847,7 @@ namespace Game.Entities
                 if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.Self && victim.HasAuraType(AuraType.SchoolAbsorbOverkill))
                 {
                     var vAbsorbOverkill = victim.GetAuraEffectsByType(AuraType.SchoolAbsorbOverkill);
+                    vAbsorbOverkill.Sort(new AbsorbAuraOrderPred());
                     DamageInfo damageInfo = new(attacker, victim, damageTaken, spellProto, damageSchoolMask, damagetype, cleanDamage != null ? cleanDamage.attackType : WeaponAttackType.BaseAttack);
 
                     foreach (var absorbAurEff in vAbsorbOverkill)
@@ -2860,7 +2861,12 @@ namespace Game.Entities
                             continue;
 
                         // cannot absorb over limit
-                        if (damageTaken >= victim.CountPctFromMaxHealth(100 + absorbAurEff.GetMiscValueB()))
+                        if (absorbAurEff.GetAmount() > 0)
+                        {
+                            if (damageTaken > absorbAurEff.GetAmount())
+                                continue;
+                        }
+                        else if (damageTaken >= victim.GetMaxHealth() * 2)
                             continue;
 
                         // absorb all damage by default
@@ -3825,6 +3831,7 @@ namespace Game.Entities
                 return;
 
             var vHealAbsorb = new List<AuraEffect>(healInfo.GetTarget().GetAuraEffectsByType(AuraType.SchoolHealAbsorb));
+            vHealAbsorb.Sort(new AbsorbAuraOrderPred());
             for (var i = 0; i < vHealAbsorb.Count && healInfo.GetHeal() > 0; ++i)
             {
                 AuraEffect absorbAurEff = vHealAbsorb[i];

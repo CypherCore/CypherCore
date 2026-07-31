@@ -6296,40 +6296,7 @@ namespace Game.Spells
     {
         public override int Compare(AuraEffect aurEffA, AuraEffect aurEffB)
         {
-            SpellInfo spellProtoA = aurEffA.GetSpellInfo();
-            SpellInfo spellProtoB = aurEffB.GetSpellInfo();
-
-            // Fel Blossom
-            if (spellProtoA.Id == 28527)
-                return 1;
-            if (spellProtoB.Id == 28527)
-                return 0;
-
-            // Ice Barrier
-            if (spellProtoA.GetCategory() == 471)
-                return 1;
-            if (spellProtoB.GetCategory() == 471)
-                return 0;
-
-            // Sacrifice
-            if (spellProtoA.Id == 7812)
-                return 1;
-            if (spellProtoB.Id == 7812)
-                return 0;
-
-            // Cauterize (must be last)
-            if (spellProtoA.Id == 86949)
-                return 0;
-            if (spellProtoB.Id == 86949)
-                return 1;
-
-            // Spirit of Redemption (must be last)
-            if (spellProtoA.Id == 20711)
-                return 0;
-            if (spellProtoB.Id == 20711)
-                return 1;
-
-            return 0;
+            return aurEffA.GetMiscValueB().CompareTo(aurEffB.GetMiscValueB());
         }
     }
 }
