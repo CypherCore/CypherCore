@@ -5314,6 +5314,7 @@ namespace Game.Entities
             displayPlayerChoice.KeepOpenAfterChoice = playerChoice.KeepOpenAfterChoice;
             displayPlayerChoice.ShowChoicesAsList = playerChoice.ShowChoicesAsList;
             displayPlayerChoice.ForceDontShowChoicesAsList = playerChoice.ForceDontShowChoicesAsList;
+            displayPlayerChoice.RequiresSelection = playerChoice.RequiresSelection;
 
             for (var i = 0; i < playerChoice.Responses.Count && (playerChoice.MaxResponses == 0 || displayPlayerChoice.Responses.Count < playerChoice.MaxResponses); ++i)
             {

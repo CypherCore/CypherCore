@@ -936,6 +936,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(KeepOpenAfterChoice);
             _worldPacket.WriteBit(ShowChoicesAsList);
             _worldPacket.WriteBit(ForceDontShowChoicesAsList);
+            _worldPacket.WriteBit(RequiresSelection);
             _worldPacket.FlushBits();
 
             foreach (PlayerChoiceResponse response in Responses)
@@ -960,6 +961,7 @@ namespace Game.Networking.Packets
         public bool KeepOpenAfterChoice;
         public bool ShowChoicesAsList;
         public bool ForceDontShowChoicesAsList;
+        public bool RequiresSelection;
     }
 
     class ChoiceResponse : ClientPacket

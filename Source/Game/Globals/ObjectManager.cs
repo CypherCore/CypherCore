@@ -10131,8 +10131,8 @@ namespace Game
 
             //                                               0         1               2           3                4         5         6
             SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, " +
-                //7              8                   9                    10                 11                          12            13
-                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, ForceDontShowChoicesAsList, MaxResponses, ScriptName FROM playerchoice");
+                //7              8                   9                    10                 11                          12                 13            14
+                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, ForceDontShowChoicesAsList, RequiresSelection, MaxResponses, ScriptName FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -10162,11 +10162,12 @@ namespace Game
                 choice.KeepOpenAfterChoice = choiceResult.Read<bool>(9);
                 choice.ShowChoicesAsList = choiceResult.Read<bool>(10);
                 choice.ForceDontShowChoicesAsList = choiceResult.Read<bool>(11);
+                choice.RequiresSelection = choiceResult.Read<bool>(12);
 
-                if (!choiceResult.IsNull(12))
-                    choice.MaxResponses = choiceResult.Read<uint>(12);
+                if (!choiceResult.IsNull(13))
+                    choice.MaxResponses = choiceResult.Read<uint>(13);
 
-                choice.ScriptId = GetScriptId(choiceResult.Read<string>(13));
+                choice.ScriptId = GetScriptId(choiceResult.Read<string>(14));
 
                 _playerChoices[choice.ChoiceId] = choice;
 

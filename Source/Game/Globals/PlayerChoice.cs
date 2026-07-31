@@ -106,6 +106,7 @@ namespace Game
         public bool KeepOpenAfterChoice;
         public bool ShowChoicesAsList;
         public bool ForceDontShowChoicesAsList;
+        public bool RequiresSelection;
 
         public uint MaxResponses;
 
