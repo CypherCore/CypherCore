@@ -388,7 +388,25 @@ namespace Framework.Constants
         LangEarthen = 2884,
         SupplyShipments = 2886,
         RacialEarthen = 2895,
-        AllWarbands = 2902
+        AllWarbands = 2902,
+        MidnightAlchemy = 2906,
+        MidnightBlacksmithing = 2907,
+        MidnightCooking = 2908,
+        MidnightEnchanting = 2909,
+        MidnightEngineering = 2910,
+        MidnightFishing = 2911,
+        MidnightHerbalism = 2912,
+        MidnightInscription = 2913,
+        MidnightJewelcrafting = 2914,
+        MidnightLeatherworking = 2915,
+        MidnightMining = 2916,
+        MidnightSkinning = 2917,
+        MidnightTailoring = 2918,
+        RacialHaranir = 2930,
+        AlchemyResearch = 2950,
+        PetExoticWhiptail = 2961,
+        DyeCrafting = 2984,
+        LangHarani = 2987
     }
 
     public enum SkillState
