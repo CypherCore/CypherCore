@@ -52,6 +52,7 @@ namespace Framework.Constants
         Earthen = 304,
         Nerubian = 307,
         TonguesOfSanctuary = 308,
+        Harani = 309,
     }
 
     public enum CypherStrings
