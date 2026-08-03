@@ -222,20 +222,6 @@ namespace Game.Combat
                     return;
             }
 
-            // If victim is personal spawn, redirect all aggro to summoner
-            if (target.IsPrivateObject() && (!GetOwner().IsPrivateObject() || !GetOwner().CheckPrivateObjectOwnerVisibility(target)))
-            {
-                if (ignoreRedirects)
-                    return;
-
-                Unit privateObjectOwner = Global.ObjAccessor.GetUnit(GetOwner(), target.GetPrivateObjectOwner());
-                if (privateObjectOwner != null)
-                {
-                    AddThreat(privateObjectOwner, amount, spell, ignoreModifiers, ignoreRedirects);
-                    amount = 0.0f;
-                }
-            }
-
             // if we cannot actually have a threat list, we instead just set combat state and avoid creating threat refs altogether
             if (!CanHaveThreatList())
             {

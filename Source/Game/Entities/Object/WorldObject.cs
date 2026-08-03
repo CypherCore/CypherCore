@@ -425,7 +425,7 @@ namespace Game.Entities
             if (obj.IsAlwaysVisibleFor(this) || CanAlwaysSee(obj))
                 return true;
 
-            if (!args.IncludeAnyPrivateObject && !obj.CheckPrivateObjectOwnerVisibility(this))
+            if (!args.IncludeAnyPrivateObject && (!obj.CheckPrivateObjectOwnerVisibility(this) || !CheckPrivateObjectOwnerVisibility(obj)))
                 return false;
 
             SmoothPhasing smoothPhasing = obj.GetSmoothPhasing();
