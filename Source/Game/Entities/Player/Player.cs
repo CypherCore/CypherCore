@@ -282,6 +282,13 @@ namespace Game.Entities
                 m_actionButtons[action.button] = ab;
             }
 
+            ChrSpecializationRecord defaultSpec = DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
+            if (defaultSpec != null)
+            {
+                SetActiveTalentGroup(defaultSpec.OrderIndex);
+                SetPrimarySpecialization(defaultSpec.Id);
+            }
+
             EquipTransmogOutfit(0, TransmogSituationTrigger.Manual, false);
 
             // original items
@@ -318,13 +325,6 @@ namespace Game.Entities
                 }
             }
             // all item positions resolved
-
-            ChrSpecializationRecord defaultSpec = DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
-            if (defaultSpec != null)
-            {
-                SetActiveTalentGroup(defaultSpec.OrderIndex);
-                SetPrimarySpecialization(defaultSpec.Id);
-            }
 
             GetThreatManager().Initialize();
 
