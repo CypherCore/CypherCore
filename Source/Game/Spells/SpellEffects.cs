@@ -1586,7 +1586,7 @@ namespace Game.Spells
                             if (unitCaster == null)
                                 return;
 
-                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id);
+                            summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                             break;
                         }
                         case SummonTitle.LightWell:
@@ -1676,11 +1676,9 @@ namespace Game.Spells
 
                     // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker
                     // to cast a ride vehicle spell on the summoned unit.
-                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id);
+                    summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                     if (summon == null || !summon.IsVehicle())
                         return;
-
-                    summon.SetPrivateObjectOwner(privateObjectOwner);
 
                     // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
                     uint spellId = SharedConst.VehicleSpellRideHardcoded;
