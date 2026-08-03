@@ -1781,21 +1781,25 @@ class spell_mage_ring_of_frost_freeze : SpellScript
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze)
-            && ValidateSpellEffect((SpellIds.RingOfFrostSummon, 0));
+            && ValidateSpellEffect((SpellIds.RingOfFrostSummon, 2));
     }
 
     void FilterTargets(List<WorldObject> targets)
     {
         WorldLocation dest = GetExplTargetDest();
-        float outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius(null, SpellTargetIndex.TargetB);
-        float inRadius = 6.5f;
+        SpellEffectInfo spellEffectInfo = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(2);
+        SpellRange radius = new()
+        {
+            Min = spellEffectInfo.CalcRadius(null, SpellTargetIndex.TargetA).Max,
+            Max = spellEffectInfo.CalcRadius(null, SpellTargetIndex.TargetB).Max
+        };
 
         targets.RemoveAll(target =>
         {
             Unit unit = target.ToUnit();
             if (unit == null)
                 return true;
-            return unit.HasAura(SpellIds.RingOfFrostDummy) || unit.HasAura(SpellIds.RingOfFrostFreeze) || unit.GetExactDist(dest) > outRadius || unit.GetExactDist(dest) < inRadius;
+            return unit.HasAura(SpellIds.RingOfFrostDummy) || unit.HasAura(SpellIds.RingOfFrostFreeze) || !unit.IsInRange3d(dest, radius.Min, radius.Max);
         });
     }
 

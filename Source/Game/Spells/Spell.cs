@@ -664,7 +664,7 @@ namespace Game.Spells
                                     dest = new(st.GetPosition());
                                 else
                                 {
-                                    float randomRadius1 = spellEffectInfo.CalcRadius(m_caster, targetIndex);
+                                    float randomRadius1 = spellEffectInfo.CalcRadius(m_caster, targetIndex).Max;
                                     if (randomRadius1 > 0.0f)
                                         MovePosition(dest.Position, m_caster, randomRadius1, targetType.CalcDirectionAngle());
                                 }
@@ -690,7 +690,7 @@ namespace Game.Spells
                     {
                         target = m_caster;
                         // radius is only meant to be randomized when using caster fallback
-                        randomRadius = spellEffectInfo.CalcRadius(m_caster, targetIndex);
+                        randomRadius = spellEffectInfo.CalcRadius(m_caster, targetIndex).Max;
                     }
                     break;
                 default:
@@ -792,15 +792,15 @@ namespace Game.Spells
             SpellTargetCheckTypes selectionType = targetType.GetCheckType();
 
             var condList = spellEffectInfo.ImplicitTargetConditions;
-            float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
+            SpellRange radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
 
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask != 0)
             {
-                float extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
+                float extraSearchRadius = radius.Max > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                 var spellCone = new WorldObjectSpellConeTargetCheck(m_caster, MathFunctions.DegToRad(coneAngle), m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
                 var searcher = new WorldObjectListSearcher(m_caster, targets, spellCone, containerTypeMask);
-                SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius + extraSearchRadius);
+                SearchTargets(searcher, containerTypeMask, m_caster, m_caster.GetPosition(), radius.Max + extraSearchRadius);
 
                 CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);
 
@@ -878,7 +878,7 @@ namespace Game.Spells
                     return;
             }
 
-            float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
+            SpellRange radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
             List<WorldObject> targets = new();
             switch (targetType.GetTarget())
             {
@@ -1061,7 +1061,7 @@ namespace Game.Spells
                     if (unitCaster == null)
                         break;
 
-                    float dist = spellEffectInfo.CalcRadius(unitCaster, targetIndex);
+                    float dist = spellEffectInfo.CalcRadius(unitCaster, targetIndex).Max;
                     float angle = targetType.CalcDirectionAngle();
                     if (targetType.GetTarget() == Targets.DestCasterMovementDirection)
                     {
@@ -1132,10 +1132,10 @@ namespace Game.Spells
                 }
                 case Targets.DestNearbyDb:
                 {
-                    var radiusBounds = spellEffectInfo.CalcRadiusBounds(m_caster, targetIndex, this);
+                    SpellRange radius = spellEffectInfo.CalcRadius(m_caster, targetIndex, this);
                     List<WorldLocation> positionsInRange = new();
                     foreach (var position in Global.SpellMgr.GetSpellTargetPositions(m_spellInfo.Id, spellEffectInfo.EffectIndex))
-                        if (m_caster.GetMapId() == position.GetMapId() && (radiusBounds == default || (!m_caster.IsInDist(position, radiusBounds.Item1) && m_caster.IsInDist(position, radiusBounds.Item2))))
+                        if (m_caster.GetMapId() == position.GetMapId() && m_caster.IsInRange3d(position, radius.Min, radius.Max))
                             positionsInRange.Add(position);
 
                     if (positionsInRange.Empty())
@@ -1151,7 +1151,7 @@ namespace Game.Spells
                 }
                 default:
                 {
-                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
+                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex).Max;
                     float angle = targetType.CalcDirectionAngle();
                     float objSize = m_caster.GetCombatReach();
 
@@ -1213,7 +1213,7 @@ namespace Game.Spells
                 default:
                 {
                     float angle = targetType.CalcDirectionAngle();
-                    float dist = spellEffectInfo.CalcRadius(null, targetIndex);
+                    float dist = spellEffectInfo.CalcRadius(null, targetIndex).Max;
 
                     Position pos = new(dest.Position);
                     MovePosition(pos, target, dist, angle);
@@ -1252,7 +1252,7 @@ namespace Game.Spells
                     break;
                 case Targets.DestDestTargetTowardsCaster:
                 {
-                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
+                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex).Max;
                     Position pos = dest.Position;
                     float angle = pos.GetAbsoluteAngle(m_caster) - m_caster.GetOrientation();
 
@@ -1265,7 +1265,7 @@ namespace Game.Spells
                 default:
                 {
                     float angle = targetType.CalcDirectionAngle();
-                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex);
+                    float dist = spellEffectInfo.CalcRadius(m_caster, targetIndex).Max;
 
                     Position pos = new(m_targets.GetDstPos());
                     MovePosition(pos, m_caster, dist, angle);
@@ -1544,14 +1544,14 @@ namespace Game.Spells
             }
 
             var condList = spellEffectInfo.ImplicitTargetConditions;
-            float radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
+            SpellRange radius = spellEffectInfo.CalcRadius(m_caster, targetIndex) * m_spellValue.RadiusMod;
 
             GridMapTypeMask containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask != 0)
             {
                 WorldObjectSpellLineTargetCheck check = new(m_caster, dst, m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
                 WorldObjectListSearcher searcher = new(m_caster, targets, check, containerTypeMask);
-                SearchTargets(searcher, containerTypeMask, m_caster, m_caster, radius);
+                SearchTargets(searcher, containerTypeMask, m_caster, m_caster, radius.Max);
 
                 CallScriptObjectAreaTargetSelectHandlers(targets, spellEffectInfo.EffectIndex, targetType);
 
@@ -1762,17 +1762,17 @@ namespace Game.Spells
             return searcher.GetResult();
         }
 
-        void SearchAreaTargets(List<WorldObject> targets, SpellEffectInfo spellEffectInfo, float range, Position position, WorldObject referer,
+        void SearchAreaTargets(List<WorldObject> targets, SpellEffectInfo spellEffectInfo, SpellRange range, Position position, WorldObject referer,
             SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectionType, List<Condition> condList, WorldObjectSpellAreaTargetSearchReason searchReason)
         {
             var containerTypeMask = GetSearcherTypeMask(m_spellInfo, spellEffectInfo, objectType, condList);
             if (containerTypeMask == 0)
                 return;
 
-            float extraSearchRadius = range > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
+            float extraSearchRadius = range.Max > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
             var check = new WorldObjectSpellAreaTargetCheck(range, position, m_caster, referer, m_spellInfo, selectionType, condList, objectType, searchReason);
             var searcher = new WorldObjectListSearcher(PhasingHandler.GetAlwaysVisiblePhaseShift(), targets, check, containerTypeMask);
-            SearchTargets(searcher, containerTypeMask, m_caster, position, range + extraSearchRadius);
+            SearchTargets(searcher, containerTypeMask, m_caster, position, range.Max + extraSearchRadius);
         }
 
         void SearchChainTargets(List<WorldObject> targets, uint chainTargets, WorldObject target, SpellTargetObjectTypes objectType, SpellTargetCheckTypes selectType, SpellEffectInfo spellEffectInfo, bool isChainHeal)
@@ -1814,7 +1814,7 @@ namespace Game.Spells
 
             WorldObject chainSource = m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster) ? m_caster : target;
             List<WorldObject> tempTargets = new();
-            SearchAreaTargets(tempTargets, spellEffectInfo, searchRadius, chainSource, m_caster, objectType, selectType, spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Chain);
+            SearchAreaTargets(tempTargets, spellEffectInfo, new() { Max = searchRadius }, chainSource, m_caster, objectType, selectType, spellEffectInfo.ImplicitTargetConditions, WorldObjectSpellAreaTargetSearchReason.Chain);
             tempTargets.Remove(target);
 
             // remove targets which are always invalid for chain spells
@@ -6616,14 +6616,16 @@ namespace Game.Spells
             return unit.HasUnitMovementFlag(MovementFlag.Forward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight | MovementFlag.Falling) && !unit.IsWalking();
         }
 
-        public (float Min, float Max) GetMinMaxRange(bool strict)
+        public SpellRange GetMinMaxRange(bool strict)
         {
             float rangeMod = 0.0f;
-            float minRange = 0.0f;
-            float maxRange = 0.0f;
+            SpellRange range = new();
 
             if (strict && m_spellInfo.IsNextMeleeSwingSpell())
-                return (0.0f, 100.0f);
+            {
+                range = new() { Min = 0.0f, Max = 100.0f };
+                return range;
+            }
 
             Unit unitCaster = m_caster.ToUnit();
             if (m_spellInfo.RangeEntry != null)
@@ -6645,15 +6647,15 @@ namespace Game.Spells
                             meleeRange = unitCaster.GetMeleeRange(target != null ? target : unitCaster);
                     }
 
-                    (minRange, maxRange) = m_caster.GetSpellMinMaxRangeForTarget(target, m_spellInfo);
-                    minRange += meleeRange;
+                    range = m_caster.GetSpellMinMaxRangeForTarget(target, m_spellInfo);
+                    range.Min += meleeRange;
 
                     if (target != null || m_targets.GetCorpseTarget() != null)
                     {
                         rangeMod = m_caster.GetCombatReach() + (target != null ? target.GetCombatReach() : m_caster.GetCombatReach());
 
-                        if (minRange > 0.0f && !m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Ranged))
-                            minRange += rangeMod;
+                        if (range.Min > 0.0f && !m_spellInfo.RangeEntry.HasFlag(SpellRangeFlag.Ranged))
+                            range.Min += rangeMod;
                     }
                 }
 
@@ -6666,16 +6668,16 @@ namespace Game.Spells
             {
                 Item ranged = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.RangedAttack, true);
                 if (ranged != null)
-                    maxRange *= ranged.GetTemplate().GetRangedModRange() * 0.01f;
+                    range.Max *= ranged.GetTemplate().GetRangedModRange() * 0.01f;
             }
 
             Player modOwner = m_caster.GetSpellModOwner();
             if (modOwner != null)
-                modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Range, ref maxRange, this);
+                modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Range, ref range.Max, this);
 
-            maxRange += rangeMod;
+            range.Max += rangeMod;
 
-            return (minRange, maxRange);
+            return range;
         }
 
         SpellCastResult CheckPower()
@@ -8834,6 +8836,35 @@ namespace Game.Spells
         public bool AutoLearned;    // This marks the spell as automatically learned from another source that - will only be used for unlearning
     }
 
+    public struct SpellRange
+    {
+        public float Min;
+        public float Max;
+
+        public void Deconstruct(out float Min, out float Max)
+        {
+            Min = this.Min;
+            Max = this.Max;
+        }
+
+        public static SpellRange operator *(SpellRange range, float mul) => new() { Min = range.Min * mul, Max = range.Max * mul };
+
+        public static bool operator ==(SpellRange a, SpellRange b) => ValueType.Equals(a, b);
+        public static bool operator !=(SpellRange a, SpellRange b) => !ValueType.Equals(a, b);
+
+        public override int GetHashCode() => Min.GetHashCode() ^ Max.GetHashCode();
+
+        public override bool Equals(object obj)
+        {
+            if (obj is SpellRange)
+            {
+                SpellRange r = (SpellRange)obj;
+                return (Min == r.Min) && (Max == r.Max);
+            }
+            return false;
+        }
+    }
+
     public class SpellDestination
     {
         public SpellDestination() { }
@@ -9539,11 +9570,11 @@ namespace Game.Spells
 
     public class WorldObjectSpellAreaTargetCheck : WorldObjectSpellTargetCheck
     {
-        float _range;
+        SpellRange _range;
         Position _position;
         WorldObjectSpellAreaTargetSearchReason _searchReason;
 
-        public WorldObjectSpellAreaTargetCheck(float range, Position position, WorldObject caster, WorldObject referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType,
+        public WorldObjectSpellAreaTargetCheck(SpellRange range, Position position, WorldObject caster, WorldObject referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType,
             WorldObjectSpellAreaTargetSearchReason searchReason = WorldObjectSpellAreaTargetSearchReason.Area)
             : base(caster, referer, spellInfo, selectionType, condList, objectType)
         {
@@ -9558,13 +9589,14 @@ namespace Game.Spells
             if (gameObjectTarget != null)
             {
                 // isInRange including the dimension of the GO
-                bool isInRange = gameObjectTarget.IsInRange(_position.GetPositionX(), _position.GetPositionY(), _position.GetPositionZ(), _range);
+                bool isInRange = gameObjectTarget.IsInRange(_position.GetPositionX(), _position.GetPositionY(), _position.GetPositionZ(), _range.Max)
+                    && (_range.Min <= 0.0f || !gameObjectTarget.IsInRange(_position.GetPositionX(), _position.GetPositionY(), _position.GetPositionZ(), _range.Min));
                 if (!isInRange)
                     return false;
             }
             else
             {
-                bool isInsideCylinder = target.IsWithinDist2d(_position, _range) && Math.Abs(target.GetPositionZ() - _position.GetPositionZ()) <= _range;
+                bool isInsideCylinder = target.IsInRange2d(_position, _range.Min, _range.Max) && Math.Abs(target.GetPositionZ() - _position.GetPositionZ()) <= _range.Max;
                 if (!isInsideCylinder)
                     return false;
 
@@ -9597,7 +9629,7 @@ namespace Game.Spells
         float _coneAngle;
         float _lineWidth;
 
-        public WorldObjectSpellConeTargetCheck(Position coneSrc, float coneAngle, float lineWidth, float range, WorldObject caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+        public WorldObjectSpellConeTargetCheck(Position coneSrc, float coneAngle, float lineWidth, SpellRange range, WorldObject caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
             : base(range, caster.GetPosition(), caster, caster, spellInfo, selectionType, condList, objectType)
         {
             _coneSrc = coneSrc;
@@ -9659,7 +9691,7 @@ namespace Game.Spells
         Position _position;
         float _lineWidth;
 
-        public WorldObjectSpellLineTargetCheck(Position srcPosition, Position dstPosition, float lineWidth, float range, WorldObject caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+        public WorldObjectSpellLineTargetCheck(Position srcPosition, Position dstPosition, float lineWidth, SpellRange range, WorldObject caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
             : base(range, caster, caster, caster, spellInfo, selectionType, condList, objectType)
         {
             _position = srcPosition;

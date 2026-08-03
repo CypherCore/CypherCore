@@ -2819,7 +2819,7 @@ namespace Game.Spells
                 List<Unit> units = new();
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
-                float radius = spellEffectInfo.CalcRadius(refe);
+                var radius = spellEffectInfo.CalcRadius(refe);
                 float extraSearchRadius = 0.0f;
 
                 SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
@@ -2837,7 +2837,7 @@ namespace Game.Spells
                         break;
                     case SpellEffectName.ApplyAreaAuraEnemy:
                         selectionType = SpellTargetCheckTypes.Enemy;
-                        extraSearchRadius = radius > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
+                        extraSearchRadius = radius.Max > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                         break;
                     case SpellEffectName.ApplyAreaAuraPet:
                         if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(unitOwner, refe, condList))
@@ -2847,10 +2847,9 @@ namespace Game.Spells
                     case SpellEffectName.ApplyAreaAuraOwner:
                     {
                         Unit owner = unitOwner.GetCharmerOrOwner();
-                        if (owner != null)
-                            if (unitOwner.IsWithinDistInMap(owner, radius))
-                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
-                                    units.Add(owner);
+                        if (owner != null && owner.IsInWorld && unitOwner.InSamePhase(owner) && unitOwner.IsInRange3d(owner, radius.Min, radius.Max))
+                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
+                                units.Add(owner);
                         break;
                     }
                     case SpellEffectName.ApplyAuraOnPet:
@@ -2877,7 +2876,7 @@ namespace Game.Spells
                     {
                         WorldObjectSpellAreaTargetCheck check = new(radius, unitOwner, refe, unitOwner, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
                         UnitListSearcher searcher = new(PhasingHandler.GetAlwaysVisiblePhaseShift(), units, check);
-                        Spell.SearchTargets(searcher, containerTypeMask, unitOwner, unitOwner, radius + extraSearchRadius);
+                        Spell.SearchTargets(searcher, containerTypeMask, unitOwner, unitOwner, radius.Max + extraSearchRadius);
 
                         // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
                         units.RemoveAll(unit => !unit.IsSelfOrInSameMap(unitOwner));
@@ -2985,7 +2984,7 @@ namespace Game.Spells
                 List<Unit> targetList = new();
                 var condList = spellEffectInfo.ImplicitTargetConditions;
 
-                WorldObjectSpellAreaTargetCheck check = new(radius, dynObjOwner, dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                WorldObjectSpellAreaTargetCheck check = new(new SpellRange() { Max = radius }, dynObjOwner, dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
                 UnitListSearcher searcher = new(dynObjOwner, targetList, check);
                 Cell.VisitAllObjects(dynObjOwner, searcher, radius);
 

@@ -2292,7 +2292,7 @@ class spell_sha_molten_assault : SpellScript
 
         float range = 10.0f;
         List<WorldObject> targets = new();
-        WorldObjectSpellAreaTargetCheck check = new(range, lavaLashTarget, caster, caster, Global.SpellMgr.GetSpellInfo(SpellIds.FlameShock, Difficulty.None),
+        WorldObjectSpellAreaTargetCheck check = new(new() { Max = range }, lavaLashTarget, caster, caster, Global.SpellMgr.GetSpellInfo(SpellIds.FlameShock, Difficulty.None),
          SpellTargetCheckTypes.Enemy, null, SpellTargetObjectTypes.Unit, WorldObjectSpellAreaTargetSearchReason.Area);
         WorldObjectListSearcher searcher = new(caster, targets, check, GridMapTypeMask.Creature | GridMapTypeMask.Player);
         Cell.VisitAllObjects(lavaLashTarget, searcher, range + SharedConst.ExtraCellSearchRadius);

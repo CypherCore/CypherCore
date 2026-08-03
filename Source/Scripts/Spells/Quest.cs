@@ -2,15 +2,11 @@
 // Licensed under the Gnu General Public License. See License file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
-using Game.AI;
 using Game.Entities;
-using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Scripts.Spells.Quest;
 
@@ -1216,7 +1212,7 @@ class spell_q12308_escape_from_silverbrook_summon_worgen : SpellScript
 {
     void ModDest(ref SpellDestination dest)
     {
-        float dist = GetEffectInfo(0).CalcRadius(GetCaster());
+        float dist = GetEffectInfo(0).CalcRadius(GetCaster()).Max;
         float angle = RandomHelper.FRand(0.75f, 1.25f) * MathF.PI;
 
         Position pos = GetCaster().GetNearPosition(dist, angle);

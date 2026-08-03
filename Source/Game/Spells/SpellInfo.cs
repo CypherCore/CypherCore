@@ -2610,21 +2610,21 @@ namespace Game.Spells
             return range;
         }
 
-        public (float Min, float Max) GetMinMaxRange(bool positive = false, WorldObject caster = null, Spell spell = null)
+        public SpellRange GetMinMaxRange(bool positive = false, WorldObject caster = null, Spell spell = null)
         {
+            SpellRange range = new();
             if (RangeEntry == null)
-                return (0.0f, 0.0f);
+                return range;
 
-            float minRange = RangeEntry.RangeMin[positive ? 1 : 0];
-            float maxRange = RangeEntry.RangeMax[positive ? 1 : 0];
+            range = new() { Min = RangeEntry.RangeMin[positive ? 1 : 0], Max = RangeEntry.RangeMax[positive ? 1 : 0] };
             if (caster != null)
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(this, SpellModOp.Range, ref maxRange, spell);
+                    modOwner.ApplySpellMod(this, SpellModOp.Range, ref range.Max, spell);
             }
 
-            return (minRange, maxRange);
+            return range;
         }
 
         public int CalcDuration(WorldObject caster = null)
@@ -4410,7 +4410,7 @@ namespace Game.Spells
             }
         }
 
-        public float CalcRadius(WorldObject caster = null, SpellTargetIndex targetIndex = SpellTargetIndex.TargetA, Spell spell = null)
+        public SpellRange CalcRadius(WorldObject caster = null, SpellTargetIndex targetIndex = SpellTargetIndex.TargetA, Spell spell = null)
         {
             // TargetA -> TargetARadiusEntry
             // TargetB -> TargetBRadiusEntry
@@ -4423,72 +4423,40 @@ namespace Game.Spells
                 entry = TargetBRadiusEntry;
             }
 
+            SpellRange radius = new();
             if (entry == null)
-                return 0.0f;
+                return radius;
 
-            float radius = entry.RadiusMin;
+            radius = new() { Min = entry.RadiusMin, Max = entry.RadiusMax };
+
+            if (caster != null)
+            {
+                Unit casterUnit = caster.ToUnit();
+                if (casterUnit != null)
+                    radius.Max = Math.Min(entry.Radius + entry.RadiusPerLevel * casterUnit.GetLevel(), radius.Max);
+
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref radius.Max, spell);
+
+                if (!_spellInfo.HasAttribute(SpellAttr9.NoMovementRadiusBonus))
+                {
+                    if (casterUnit != null && Spell.CanIncreaseRangeByMovement(casterUnit))
+                    {
+                        radius.Min = Math.Max(radius.Min - 2.0f, 0.0f);
+                        radius.Max += 2.0f;
+                    }
+                }
+            }
 
             // Random targets use random value between RadiusMin and RadiusMax
             // For other cases, client uses RadiusMax if RadiusMin is 0
             if (target.GetTarget() == Targets.DestCasterRandom ||
                 target.GetTarget() == Targets.DestTargetRandom ||
                 target.GetTarget() == Targets.DestDestRandom)
-                radius += (entry.RadiusMax - radius) * MathF.Sqrt(RandomHelper.NextSingle());
-            else if (radius == 0.0f)
-                radius = entry.RadiusMax;
-
-            if (caster != null)
-            {
-                Unit casterUnit = caster.ToUnit();
-                if (casterUnit != null)
-                    radius += entry.RadiusPerLevel * casterUnit.GetLevel();
-
-                radius = Math.Min(radius, entry.RadiusMax);
-                Player modOwner = caster.GetSpellModOwner();
-                if (modOwner != null)
-                    modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref radius, spell);
-
-                if (!_spellInfo.HasAttribute(SpellAttr9.NoMovementRadiusBonus))
-                    if (casterUnit != null && Spell.CanIncreaseRangeByMovement(casterUnit))
-                        radius += 2.0f;
-            }
+                radius.Max = (radius.Max - radius.Min) * MathF.Sqrt(RandomHelper.NextSingle());
 
             return radius;
-        }
-
-        public (float, float) CalcRadiusBounds(WorldObject caster, SpellTargetIndex targetIndex, Spell spell)
-        {
-            // TargetA -> TargetARadiusEntry
-            // TargetB -> TargetBRadiusEntry
-            // Aura effects have TargetARadiusEntry == TargetBRadiusEntry (mostly)
-            SpellRadiusRecord entry = TargetARadiusEntry;
-            if (targetIndex == SpellTargetIndex.TargetB && HasRadius(targetIndex))
-                entry = TargetBRadiusEntry;
-
-            (float, float) bounds = default;
-            if (entry == null)
-                return bounds;
-
-            bounds = (entry.RadiusMin, entry.RadiusMax);
-
-            if (caster != null)
-            {
-                Player modOwner = caster.GetSpellModOwner();
-                if (modOwner != null)
-                    modOwner.ApplySpellMod(_spellInfo, SpellModOp.Radius, ref bounds.Item2, spell);
-
-                if (!_spellInfo.HasAttribute(SpellAttr9.NoMovementRadiusBonus))
-                {
-                    Unit casterUnit = caster.ToUnit(); ;
-                    if (casterUnit != null && Spell.CanIncreaseRangeByMovement(casterUnit))
-                    {
-                        bounds.Item1 = Math.Max(bounds.Item1 - 2.0f, 0.0f);
-                        bounds.Item2 += 2.0f;
-                    }
-                }
-            }
-
-            return bounds;
         }
 
         public SpellCastTargetFlags GetProvidedTargetMask()

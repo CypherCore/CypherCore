@@ -1325,12 +1325,12 @@ class spell_dru_luxuriant_soil : AuraScript
         Unit rejuvCaster = GetTarget();
 
         // let's use the ProcSpell's max. range.
-        float spellRange = eventInfo.GetSpellInfo().GetMaxRange();
+        SpellRange spellRange = eventInfo.GetSpellInfo().GetMinMaxRange();
 
         List<Unit> targetList = new();
         WorldObjectSpellAreaTargetCheck check = new(spellRange, rejuvCaster, rejuvCaster, rejuvCaster, eventInfo.GetSpellInfo(), SpellTargetCheckTypes.Ally, null, SpellTargetObjectTypes.Unit);
         UnitListSearcher searcher = new(rejuvCaster, targetList, check);
-        Cell.VisitAllObjects(rejuvCaster, searcher, spellRange);
+        Cell.VisitAllObjects(rejuvCaster, searcher, spellRange.Max);
 
         if (targetList.Empty())
             return;
@@ -1533,7 +1533,7 @@ class spell_dru_power_of_the_archdruid : AuraScript
         float spellRange = (float)aurEff.GetAmount();
 
         List<Unit> targetList = new();
-        WorldObjectSpellAreaTargetCheck checker = new(spellRange, procTarget, druid, druid, eventInfo.GetSpellInfo(), SpellTargetCheckTypes.Ally, null, SpellTargetObjectTypes.Unit);
+        WorldObjectSpellAreaTargetCheck checker = new(new() { Max = spellRange }, procTarget, druid, druid, eventInfo.GetSpellInfo(), SpellTargetCheckTypes.Ally, null, SpellTargetObjectTypes.Unit);
         UnitListSearcher searcher = new(procTarget, targetList, checker);
         Cell.VisitAllObjects(procTarget, searcher, spellRange);
         targetList.Remove(procTarget);

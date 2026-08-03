@@ -1069,7 +1069,7 @@ namespace Game.Entities
             return null;
         }
 
-        public (float Min, float Max) GetSpellMinMaxRangeForTarget(Unit target, SpellInfo spellInfo)
+        public SpellRange GetSpellMinMaxRangeForTarget(Unit target, SpellInfo spellInfo)
         {
             bool positive = target != null ? !IsHostileTo(target) : true;
             return spellInfo.GetMinMaxRange(positive);
@@ -2355,7 +2355,7 @@ namespace Game.Entities
             Position thisOrTransport = this;
             Position objOrObjTransport = obj;
 
-            if (GetTransport() != null && obj.GetTransport() != null && obj.GetTransport().GetTransportGUID() == GetTransport().GetTransportGUID())
+            if (GetTransport() != null && GetTransport() == obj.GetTransport())
             {
                 thisOrTransport = m_movementInfo.transport.pos;
                 objOrObjTransport = obj.m_movementInfo.transport.pos;
@@ -2541,6 +2541,42 @@ namespace Game.Entities
             }
 
             float sizefactor = GetCombatReach() + obj.GetCombatReach();
+
+            // check only for real range
+            if (minRange > 0.0f)
+            {
+                float mindist = minRange + sizefactor;
+                if (distsq < mindist * mindist)
+                    return false;
+            }
+
+            float maxdist = maxRange + sizefactor;
+            return distsq < maxdist * maxdist;
+        }
+
+        public bool IsInRange2d(Position pos, float minRange, float maxRange)
+        {
+            float distsq = GetExactDist2dSq(pos);
+
+            float sizefactor = GetCombatReach();
+
+            // check only for real range
+            if (minRange > 0.0f)
+            {
+                float mindist = minRange + sizefactor;
+                if (distsq < mindist * mindist)
+                    return false;
+            }
+
+            float maxdist = maxRange + sizefactor;
+            return distsq < maxdist * maxdist;
+        }
+
+        public bool IsInRange3d(Position pos, float minRange, float maxRange)
+        {
+            float distsq = GetExactDistSq(pos);
+
+            float sizefactor = GetCombatReach();
 
             // check only for real range
             if (minRange > 0.0f)

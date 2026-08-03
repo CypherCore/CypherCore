@@ -232,10 +232,10 @@ class spell_pri_angelic_feather_trigger : SpellScript
     void HandleEffectDummy(uint effIndex)
     {
         Position destPos = GetHitDest().GetPosition();
-        float radius = GetEffectInfo().CalcRadius();
+        SpellRange radius = GetEffectInfo().CalcRadius();
 
         // Caster is prioritary
-        if (GetCaster().IsWithinDist2d(destPos, radius))
+        if (GetCaster().IsInRange2d(destPos, radius.Min, radius.Max))
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.AngelicFeatherAura, true);
         }

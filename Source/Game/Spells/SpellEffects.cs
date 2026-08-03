@@ -1157,7 +1157,7 @@ namespace Game.Spells
             {
                 SpellEffectInfo spellEffectInfo = m_spellInfo.GetEffect(i);
                 if (spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura))
-                    radius = Math.Max(radius, spellEffectInfo.CalcRadius(unitCaster));
+                    radius = Math.Max(radius, spellEffectInfo.CalcRadius(unitCaster).Max);
             }
 
             DynamicObject dynObj = new(false);
@@ -1622,7 +1622,7 @@ namespace Game.Spells
                         }
                         default:
                         {
-                            float radius = effectInfo.CalcRadius();
+                            SpellRange radius = effectInfo.CalcRadius();
 
                             TempSummonType summonType = TempSummonType.TimedDespawn;
                             if (duration == TimeSpan.Zero)
@@ -1639,7 +1639,7 @@ namespace Game.Spells
                                     pos = destTarget.GetPosition();
                                 else
                                     // randomize position for multiple summons
-                                    pos = caster.GetRandomPoint(destTarget, radius);
+                                    pos = caster.GetRandomPoint(destTarget, radius.Max, radius.Min);
 
                                 summon = caster.GetMap().SummonCreature(entry, pos, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                                 if (summon == null)
@@ -1936,7 +1936,7 @@ namespace Game.Spells
             if (player == null)
                 return;
 
-            float radius = effectInfo.CalcRadius();
+            float radius = effectInfo.CalcRadius().Max;
             int duration = m_spellInfo.CalcDuration(m_caster);
             // Caster not in world, might be spell triggered from aura removal
             if (!player.IsInWorld)
@@ -2794,7 +2794,7 @@ namespace Game.Spells
                         case 45151:
                         {
                             //Workaround for Range ... should be global for every ScriptEffect
-                            float radius = effectInfo.CalcRadius(null, SpellTargetIndex.TargetB);
+                            float radius = effectInfo.CalcRadius(null, SpellTargetIndex.TargetB).Max;
                             if (unitTarget != null && unitTarget.IsTypeId(TypeId.Player) && unitTarget.GetDistance(m_caster) >= radius && !unitTarget.HasAura(46394) && unitTarget != m_caster)
                                 unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(this));
 
@@ -2806,9 +2806,9 @@ namespace Game.Spells
                             if (!m_targets.HasDst())
                                 return;
 
-                            float radius = effectInfo.CalcRadius();
+                            SpellRange radius = effectInfo.CalcRadius();
                             for (byte i = 0; i < 15; ++i)
-                                m_caster.CastSpell(m_caster.GetRandomPoint(destTarget, radius), 54522, new CastSpellExtraArgs(this));
+                                m_caster.CastSpell(m_caster.GetRandomPoint(destTarget, radius.Max, radius.Min), 54522, new CastSpellExtraArgs(this));
                             break;
                         }
                         case 52173: // Coyote Spirit Despawn
@@ -4185,7 +4185,7 @@ namespace Game.Spells
             //FIXME: this can be better check for most objects but still hack
             else if (effectInfo.HasRadius(SpellTargetIndex.TargetA) && m_spellInfo.Speed == 0)
             {
-                float dis = effectInfo.CalcRadius(unitCaster);
+                float dis = effectInfo.CalcRadius(unitCaster).Min;
                 unitCaster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);
                 fo = unitCaster.GetOrientation();
             }
