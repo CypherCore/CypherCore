@@ -737,7 +737,10 @@ namespace Game.Entities
 
         public void AddQuest(Quest quest, WorldObject questGiver)
         {
-            ushort logSlot = FindQuestSlot(0);
+            ushort logSlot = 0;
+            while (GetQuestSlotQuestId(logSlot) != 0 && logSlot < SharedConst.MaxQuestLogSize)
+                ++logSlot;
+
             if (logSlot >= SharedConst.MaxQuestLogSize) // Player does not have any free slot in the quest log
                 return;
 
@@ -1392,8 +1395,9 @@ namespace Game.Entities
         public bool SatisfyQuestLog(bool msg)
         {
             // exist free slot
-            if (FindQuestSlot(0) < SharedConst.MaxQuestLogSize)
-                return true;
+            for (ushort log_slot = 0; log_slot < SharedConst.MaxQuestLogSize; ++log_slot)
+                if (GetQuestSlotQuestId(log_slot) == 0)
+                    return true;
 
             if (msg)
                 SendPacket(new QuestLogFull());
@@ -2341,7 +2345,9 @@ namespace Game.Entities
         {
             var playerData = m_values.ModifyValue(m_playerData);
             var questLogField = playerData.ModifyValue(m_playerData.QuestLog, slot);
-            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
+            var questLogQuestIdField = questLogField.ModifyValue(questLogField.QuestID);
+            uint oldQuestId = questLogQuestIdField.GetValue();
+            SetUpdateFieldValue(questLogQuestIdField, quest_id);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), (ushort)0);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.ObjectiveFlags), 0u);
@@ -2351,8 +2357,8 @@ namespace Game.Entities
 
             if (quest_id != 0)
                 SetUpdateFieldValue(ref playerData.ModifyValue(m_playerData.QuestLogQuestIdToIndex, (int)quest_id), slot);
-            else
-                RemoveMapUpdateFieldValue(playerData.ModifyValue(m_playerData.QuestLogQuestIdToIndex), (int)quest_id);
+            if (oldQuestId != 0)
+                RemoveMapUpdateFieldValue(playerData.ModifyValue(m_playerData.QuestLogQuestIdToIndex), (int)oldQuestId);
         }
 
         public void SetQuestSlotCounter(ushort slot, byte counter, ushort count)
