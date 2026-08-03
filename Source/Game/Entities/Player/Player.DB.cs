@@ -3921,6 +3921,11 @@ namespace Game.Entities
             // Load spell locations - must be after loading auras
             _LoadStoredAuraTeleportLocations(holder.GetResult(PlayerLoginQueryLoad.AuraStoredLocations));
 
+            _LoadEquipmentSets(holder.GetResult(PlayerLoginQueryLoad.EquipmentSets));
+            _LoadTransmogCustomSets(holder.GetResult(PlayerLoginQueryLoad.TransmogOutfits));
+            _LoadTransmogOutfits(holder.GetResult(PlayerLoginQueryLoad.TransmogOutfit), holder.GetResult(PlayerLoginQueryLoad.TransmogOutfitSituation),
+                holder.GetResult(PlayerLoginQueryLoad.TransmogOutfitSlot), transmogOutfitEquippedId, transmogOutfitLocked);
+
             // after spell load, learn rewarded spell if need also
             _LoadQuestStatus(holder.GetResult(PlayerLoginQueryLoad.QuestStatus));
             _LoadQuestStatusObjectives(holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectives));
@@ -4096,11 +4101,6 @@ namespace Game.Entities
                 SetDynamicFlag(UnitDynFlags.ReferAFriend);
 
             _LoadDeclinedNames(holder.GetResult(PlayerLoginQueryLoad.DeclinedNames));
-
-            _LoadEquipmentSets(holder.GetResult(PlayerLoginQueryLoad.EquipmentSets));
-            _LoadTransmogCustomSets(holder.GetResult(PlayerLoginQueryLoad.TransmogOutfits));
-            _LoadTransmogOutfits(holder.GetResult(PlayerLoginQueryLoad.TransmogOutfit), holder.GetResult(PlayerLoginQueryLoad.TransmogOutfitSituation),
-                holder.GetResult(PlayerLoginQueryLoad.TransmogOutfitSlot), transmogOutfitEquippedId, transmogOutfitLocked);
 
             _LoadCUFProfiles(holder.GetResult(PlayerLoginQueryLoad.CufProfiles));
 

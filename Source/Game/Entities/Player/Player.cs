@@ -282,6 +282,8 @@ namespace Game.Entities
                 m_actionButtons[action.button] = ab;
             }
 
+            EquipTransmogOutfit(0, TransmogSituationTrigger.Manual, false);
+
             // original items
             foreach (PlayerCreateInfoItem initialItem in info.item)
                 StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount, info.itemContext);
@@ -325,8 +327,6 @@ namespace Game.Entities
             }
 
             GetThreatManager().Initialize();
-
-            EquipTransmogOutfit(0, TransmogSituationTrigger.Manual, false);
 
             return true;
         }
