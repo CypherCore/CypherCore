@@ -342,10 +342,13 @@ namespace Game.DataStorage
 
             foreach (MapDifficultyRecord entry in MapDifficultyStorage.Values)
             {
-                if (!_mapDifficulties.ContainsKey(entry.MapID))
-                    _mapDifficulties[entry.MapID] = new Dictionary<int, MapDifficultyRecord>();
+                if (MapStorage.HasRecord(entry.MapID))
+                {
+                    if (!_mapDifficulties.ContainsKey(entry.MapID))
+                        _mapDifficulties[entry.MapID] = new Dictionary<int, MapDifficultyRecord>();
 
-                _mapDifficulties[entry.MapID][entry.DifficultyID] = entry;
+                    _mapDifficulties[entry.MapID][entry.DifficultyID] = entry;
+                }
             }
 
             List<MapDifficultyXConditionRecord> mapDifficultyConditions = [.. MapDifficultyXConditionStorage.Values];
@@ -1391,6 +1394,15 @@ namespace Game.DataStorage
             }
 
             return 0.0f;
+        }
+
+        public string GetDifficultyName(Difficulty difficulty)
+        {
+            DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(difficulty);
+            if (difficultyEntry != null)
+                return difficultyEntry.Name[Global.WorldMgr.GetDefaultDbcLocale()];
+
+            return "None";
         }
 
         public EmotesTextSoundRecord GetTextSoundEmoteFor(uint emote, Race race, Gender gender, Class class_)

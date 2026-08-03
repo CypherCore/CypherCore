@@ -72,7 +72,7 @@ namespace Game.Entities
             // some instances only have one difficulty
             Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
 
-            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {difficulty}");
+            Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {Global.DB2Mgr.GetDifficultyName(difficulty)}");
 
             InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock, lfgDungeonsId);
             Cypher.Assert(map.IsDungeon());
@@ -233,7 +233,7 @@ namespace Game.Entities
                     Global.OutdoorPvPMgr.CreateOutdoorPvPForMap(map);
                     Global.BattleFieldMgr.CreateBattlefieldsForMap(map);
                 }
-                
+
                 return map;
             }
         }

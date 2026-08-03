@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.DataStorage;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -180,7 +179,7 @@ namespace Game.Maps
 
         uint GetDifficultyId() { return (uint)_instance.instance.GetDifficultyID(); }
 
-        string GetDifficultyName() { return CliDB.DifficultyStorage.LookupByKey(_instance.instance.GetDifficultyID()).Name; }
+        string GetDifficultyName() { return Global.DB2Mgr.GetDifficultyName(_instance.instance.GetDifficultyID()); }
     }
 
     class InstanceScriptDataWriter

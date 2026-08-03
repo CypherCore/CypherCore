@@ -140,6 +140,7 @@ namespace Game.DataStorage
         public int WorldStateExpressionID;
         public uint MapID;
 
+        public Difficulty GetDifficultyID() { return (Difficulty)DifficultyID; }
         public bool HasResetSchedule() { return ResetInterval != MapDifficultyResetInterval.Anytime; }
         public bool IsUsingEncounterLocks() { return HasFlag(MapDifficultyFlags.UseLootBasedLockInsteadOfInstanceLock); }
         public bool IsRestoringDungeonState() { return HasFlag(MapDifficultyFlags.ResumeDungeonProgressBasedOnLockout); }

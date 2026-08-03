@@ -35,7 +35,7 @@ namespace Game.DataStorage
     public sealed class DifficultyRecord
     {
         public uint Id;
-        public string Name;
+        public LocalizedString Name;
         public MapTypes InstanceType;
         public byte OrderIndex;
         public sbyte OldEnumValue;

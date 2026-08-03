@@ -1,7 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
@@ -182,7 +181,7 @@ namespace Game.Maps
 
             _temporaryInstanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
             Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new temporary instance lock for {playerGuid} in instance {instanceId}");
+                $"{entries.MapDifficulty.DifficultyID}-{Global.DB2Mgr.GetDifficultyName(entries.MapDifficulty.GetDifficultyID())}] Created new temporary instance lock for {playerGuid} in instance {instanceId}");
             return instanceLock;
         }
 
@@ -210,7 +209,7 @@ namespace Game.Maps
                                 _temporaryInstanceLocksByPlayer.Remove(playerGuid);
 
                             Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                                $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
+                                $"{entries.MapDifficulty.DifficultyID}-{Global.DB2Mgr.GetDifficultyName(entries.MapDifficulty.GetDifficultyID())}] Promoting temporary lock to permanent for {playerGuid} in instance {updateEvent.InstanceId}");
                         }
                     }
                 }
@@ -235,7 +234,7 @@ namespace Game.Maps
                     _instanceLocksByPlayer[playerGuid][entries.GetKey()] = instanceLock;
 
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
+                    $"{entries.MapDifficulty.DifficultyID}-{Global.DB2Mgr.GetDifficultyName(entries.MapDifficulty.GetDifficultyID())}] Created new instance lock for {playerGuid} in instance {updateEvent.InstanceId}");
             }
             else
             {
@@ -256,7 +255,7 @@ namespace Game.Maps
             {
                 instanceLock.GetData().CompletedEncountersMask |= 1u << updateEvent.CompletedEncounter.Bit;
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] " +
+                    $"{entries.MapDifficulty.DifficultyID}-{Global.DB2Mgr.GetDifficultyName(entries.MapDifficulty.GetDifficultyID())}] " +
                     $"Instance lock for {playerGuid} in instance {updateEvent.InstanceId} gains completed encounter [{updateEvent.CompletedEncounter.Id}-{updateEvent.CompletedEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]}]");
             }
 
@@ -272,7 +271,7 @@ namespace Game.Maps
                 instanceLock.SetExpiryTime(GetNextResetTime(entries));
                 instanceLock.SetExtended(false);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
+                    $"{entries.MapDifficulty.DifficultyID}-{Global.DB2Mgr.GetDifficultyName(entries.MapDifficulty.GetDifficultyID())}] Expired instance lock for {playerGuid} in instance {updateEvent.InstanceId} is now active");
             }
 
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_INSTANCE_LOCK);
@@ -354,7 +353,7 @@ namespace Game.Maps
                 stmt.AddValue(3, entries.MapDifficulty.LockID);
                 DB.Characters.Execute(stmt);
                 Log.outDebug(LogFilter.Instance, $"[{entries.Map.Id}-{entries.Map.MapName[Global.WorldMgr.GetDefaultDbcLocale()]} | " +
-                    $"{entries.MapDifficulty.DifficultyID}-{CliDB.DifficultyStorage.LookupByKey(entries.MapDifficulty.DifficultyID).Name}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
+                    $"{entries.MapDifficulty.DifficultyID}-{Global.DB2Mgr.GetDifficultyName(entries.MapDifficulty.GetDifficultyID())}] Instance lock for {playerGuid} is {(extended ? "now" : "no longer")} extended");
                 return Tuple.Create(oldExpiryTime, instanceLock.GetEffectiveExpiryTime());
             }
 
@@ -439,24 +438,24 @@ namespace Game.Maps
             switch (entries.MapDifficulty.ResetInterval)
             {
                 case MapDifficultyResetInterval.Daily:
-                    {
-                        if (dateTime.Hour >= resetHour)
-                            day++;
+                {
+                    if (dateTime.Hour >= resetHour)
+                        day++;
 
-                        hour = resetHour;
-                        break;
-                    }
+                    hour = resetHour;
+                    break;
+                }
                 case MapDifficultyResetInterval.Weekly:
-                    {
-                        int resetDay = WorldConfig.GetIntValue(WorldCfg.ResetScheduleWeekDay);
-                        int daysAdjust = resetDay - (int)dateTime.DayOfWeek;
-                        if (dateTime.Day > resetDay || (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
-                            daysAdjust += 7; // passed it for current week, grab time from next week
+                {
+                    int resetDay = WorldConfig.GetIntValue(WorldCfg.ResetScheduleWeekDay);
+                    int daysAdjust = resetDay - (int)dateTime.DayOfWeek;
+                    if (dateTime.Day > resetDay || (dateTime.Day == resetDay && dateTime.Hour >= resetHour))
+                        daysAdjust += 7; // passed it for current week, grab time from next week
 
-                        hour = resetHour;
-                        day += daysAdjust;
-                        break;
-                    }
+                    hour = resetHour;
+                    day += daysAdjust;
+                    break;
+                }
                 default:
                     break;
             }

@@ -6226,7 +6226,7 @@ namespace Game.Entities
             {
                 Difficulty mapDifficulty = GetMap().GetDifficultyID();
                 var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
-                SendRaidDifficulty(difficulty.HasFlag(DifficultyFlags.Legacy), (int)mapDifficulty);
+                SendRaidDifficulty(difficulty != null && difficulty.HasFlag(DifficultyFlags.Legacy), (int)mapDifficulty);
             }
             else if (GetMap().IsNonRaidDungeon())
                 SendDungeonDifficulty((int)GetMap().GetDifficultyID());
