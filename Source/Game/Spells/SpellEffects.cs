@@ -1680,6 +1680,8 @@ namespace Game.Spells
                     if (summon == null || !summon.IsVehicle())
                         return;
 
+                    summon.SetPrivateObjectOwner(privateObjectOwner);
+
                     // The spell that this effect will trigger. It has SPELL_AURA_CONTROL_VEHICLE
                     uint spellId = SharedConst.VehicleSpellRideHardcoded;
                     double basePoints = effectInfo.CalcValue();
