@@ -277,7 +277,10 @@ namespace Game.Entities
             Cypher.Assert(accessory != null);
 
             if (minion)
+            {
                 accessory.AddUnitTypeMask(UnitTypeMask.Accessory);
+                accessory.GetThreatManager().Initialize(); // reinitialize CanHaveThreatList cached value
+            }
 
             if (rideSpellId.HasValue)
                 _me.HandleSpellClick(accessory, seatId, rideSpellId.Value);
@@ -720,7 +723,7 @@ namespace Game.Entities
             Passenger.GetMotionMaster().LaunchMoveSpline(initializer, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
 
             foreach (var (_, threatRef) in Passenger.GetThreatManager().GetThreatenedByMeList())
-                threatRef.GetOwner().GetThreatManager().AddThreat(Target.GetBase(), threatRef.GetThreat(), null, true, true);
+                threatRef.GetOwner().GetThreatManager().AddThreat(Target.GetBase(), 0.0f, null, true, true);
 
             Creature creature = Target.GetBase().ToCreature();
             if (creature != null)

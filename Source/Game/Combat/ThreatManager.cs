@@ -55,6 +55,10 @@ namespace Game.Combat
                         return false;
             }
 
+            // accessories are fully treated as components of the parent and cannot have threat
+            if (cWho.HasUnitTypeMask(UnitTypeMask.Accessory))
+                return false;
+
             return true;
         }
 
@@ -218,19 +222,12 @@ namespace Game.Combat
                     return;
             }
 
-            // while riding a vehicle, all threat goes to the vehicle, not the pilot
-            Unit vehicle = target.GetVehicleBase();
-            if (vehicle != null)
-            {
-                AddThreat(vehicle, amount, spell, ignoreModifiers, ignoreRedirects);
-                if (target.HasUnitTypeMask(UnitTypeMask.Accessory)) // accessories are fully treated as components of the parent and cannot have threat
-                    return;
-                amount = 0.0f;
-            }
-
             // If victim is personal spawn, redirect all aggro to summoner
             if (target.IsPrivateObject() && (!GetOwner().IsPrivateObject() || !GetOwner().CheckPrivateObjectOwnerVisibility(target)))
             {
+                if (ignoreRedirects)
+                    return;
+
                 Unit privateObjectOwner = Global.ObjAccessor.GetUnit(GetOwner(), target.GetPrivateObjectOwner());
                 if (privateObjectOwner != null)
                 {
