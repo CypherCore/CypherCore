@@ -3660,7 +3660,7 @@ namespace Game
                         data.unit_flags2 = data.unit_flags2 & (uint)UnitFlags2.Allowed;
                     }
 
-                    if ((data.unit_flags2.Value & (uint)UnitFlags2.FeignDeath) != 0 && (!data.unit_flags.HasValue || (data.unit_flags.Value & (uint)(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc)) == 0))
+                    if ((data.unit_flags2.Value & (uint)UnitFlags2.FeignDeath) != 0 && (!data.unit_flags.HasValue || (data.unit_flags.Value & (uint)(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc)) == 0) && (cInfo.UnitFlags & (UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc)) == 0)
                     {
                         Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) has UNIT_FLAG2_FEIGN_DEATH set without IMMUNE_TO_PC | IMMUNE_TO_NPC, removing incorrect flag.");
                         data.unit_flags2 = data.unit_flags2 & ~(uint)UnitFlags2.FeignDeath;
@@ -3676,7 +3676,7 @@ namespace Game
                         data.unit_flags3 = data.unit_flags3 & (uint)UnitFlags3.Allowed;
                     }
 
-                    if ((data.unit_flags3.Value & (uint)UnitFlags3.FakeDead) != 0 && (data.unit_flags.Value & (uint)(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc)) == 0)
+                    if ((data.unit_flags3.Value & (uint)UnitFlags3.FakeDead) != 0 && (!data.unit_flags.HasValue || (data.unit_flags.Value & (uint)(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc)) == 0) && (cInfo.UnitFlags & (UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc)) == 0)
                     {
                         Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) has UNIT_FLAG3_FAKE_DEAD set without IMMUNE_TO_PC | IMMUNE_TO_NPC, removing incorrect flag.");
                         data.unit_flags3 = data.unit_flags3 & ~(uint)UnitFlags3.FakeDead;
