@@ -2681,7 +2681,8 @@ namespace Framework.Constants
         Visible = 1,
         Granted = 2,
         Increased = 3,
-        DisplayError = 4
+        DisplayError = 4,
+        RanksAllowed = 5,
     }
 
     public enum TraitConfigType
