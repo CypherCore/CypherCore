@@ -654,9 +654,12 @@ namespace Game
                 if (condition.TraitNodeGroupID != 0 || condition.TraitNodeID != 0 || condition.TraitNodeEntryID != 0)
                 {
                     TraitNodeRankCounts ranks = CountTraitNodeRanks(traitConfig, condition.TraitNodeGroupID, condition.TraitNodeID, condition.TraitNodeEntryID);
-                    if (ranks.Group != condition.SpentAmountRequired
-                        && ranks.Node != condition.SpentAmountRequired
-                        && ranks.Entry != condition.SpentAmountRequired)
+                    if (condition.SpentAmountRequired != 0
+                        && ranks.Group < condition.SpentAmountRequired
+                        && ranks.Node < condition.SpentAmountRequired
+                        && ranks.Entry < condition.SpentAmountRequired)
+                        return false;
+                    if (condition.SpentAmountRequired == 0 && ranks.Group != 0 && ranks.Node != 0 && ranks.Entry != 0)
                         return false;
                 }
             }
