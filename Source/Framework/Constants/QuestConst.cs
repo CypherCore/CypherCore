@@ -183,7 +183,8 @@ namespace Framework.Constants
         Delve = 288,
         WorldBoss = 289,
         Hidden = 291,
-        ImportantQuestNoAbandon = 292
+        ImportantQuestNoAbandon = 292,
+        PreyWorldQuest = 295
     }
 
     public enum QuestSort
