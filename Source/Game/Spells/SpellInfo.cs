@@ -2610,6 +2610,23 @@ namespace Game.Spells
             return range;
         }
 
+        public (float Min, float Max) GetMinMaxRange(bool positive = false, WorldObject caster = null, Spell spell = null)
+        {
+            if (RangeEntry == null)
+                return (0.0f, 0.0f);
+
+            float minRange = RangeEntry.RangeMin[positive ? 1 : 0];
+            float maxRange = RangeEntry.RangeMax[positive ? 1 : 0];
+            if (caster != null)
+            {
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(this, SpellModOp.Range, ref maxRange, spell);
+            }
+
+            return (minRange, maxRange);
+        }
+
         public int CalcDuration(WorldObject caster = null)
         {
             int duration = GetDuration();

@@ -185,8 +185,12 @@ namespace Game.AI
                 Log.outError(LogFilter.Server, $"TurretAI set for creature with spell1=0. AI will do nothing ({creature.GetGUID()})");
 
             var spellInfo = Global.SpellMgr.GetSpellInfo(creature.m_spells[0], creature.GetMap().GetDifficultyID());
-            _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
-            creature.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
+            {
+                var (minRange, maxRange) = spellInfo.GetMinMaxRange(false);
+                _minRange = minRange;
+                creature.m_CombatDistance = maxRange;
+            }
+
             creature.m_SightDistance = creature.m_CombatDistance;
             creature.SetCanMelee(false);
         }

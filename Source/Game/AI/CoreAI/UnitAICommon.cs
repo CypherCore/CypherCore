@@ -2,12 +2,10 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Combat;
 using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.AI
 {
@@ -119,8 +117,9 @@ namespace Game.AI
                         meleeRange = Math.Max(meleeRange, SharedConst.NominalMeleeRange);
                     }
 
-                    minRange = _caster.GetSpellMinRangeForTarget(target, _spellInfo) + meleeRange;
-                    maxRange = _caster.GetSpellMaxRangeForTarget(target, _spellInfo);
+                    var (min, max) = _caster.GetSpellMinMaxRangeForTarget(target, _spellInfo);
+                    minRange = min + meleeRange;
+                    maxRange = max;
 
                     rangeMod = _caster.GetCombatReach();
                     rangeMod += target.GetCombatReach();
@@ -136,15 +135,12 @@ namespace Game.AI
 
             maxRange += rangeMod;
 
-            minRange *= minRange;
-            maxRange *= maxRange;
-
             if (target != _caster)
             {
-                if (_caster.GetExactDistSq(target) > maxRange)
+                if (!_caster.IsInDist(target, maxRange))
                     return false;
 
-                if (minRange > 0.0f && _caster.GetExactDistSq(target) < minRange)
+                if (minRange > 0.0f && _caster.IsInDist(target, minRange))
                     return false;
             }
 

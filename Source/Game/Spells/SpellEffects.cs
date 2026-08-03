@@ -4192,8 +4192,7 @@ namespace Game.Spells
             else
             {
                 //GO is always friendly to it's creator, get range for friends
-                float min_dis = m_spellInfo.GetMinRange(true);
-                float max_dis = m_spellInfo.GetMaxRange(true);
+                var (min_dis, max_dis) = m_spellInfo.GetMinMaxRange(true);
                 float dis = RandomHelper.NextSingle() * (max_dis - min_dis) + min_dis;
 
                 unitCaster.GetClosePoint(out fx, out fy, out fz, SharedConst.DefaultPlayerBoundingRadius, dis);

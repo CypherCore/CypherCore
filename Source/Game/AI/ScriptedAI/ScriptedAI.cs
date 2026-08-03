@@ -306,14 +306,15 @@ namespace Game.AI
                     continue;
 
                 //Check if the spell meets our range requirements
-                if (rangeMin != 0 && me.GetSpellMinRangeForTarget(target, tempSpell) < rangeMin)
+                var (minRange, maxRange) = me.GetSpellMinMaxRangeForTarget(target, tempSpell);
+                if (rangeMin != 0 && minRange < rangeMin)
                     continue;
 
-                if (rangeMax != 0 && me.GetSpellMaxRangeForTarget(target, tempSpell) > rangeMax)
+                if (rangeMax != 0 && maxRange > rangeMax)
                     continue;
 
                 //Check if our target is in range
-                if (me.IsWithinDistInMap(target, me.GetSpellMinRangeForTarget(target, tempSpell)) || !me.IsWithinDistInMap(target, me.GetSpellMaxRangeForTarget(target, tempSpell)))
+                if (me.IsWithinDistInMap(target, minRange) || !me.IsWithinDistInMap(target, maxRange))
                     continue;
 
                 //All good so lets add it to the spell list

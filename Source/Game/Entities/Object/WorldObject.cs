@@ -1069,32 +1069,10 @@ namespace Game.Entities
             return null;
         }
 
-        public float GetSpellMaxRangeForTarget(Unit target, SpellInfo spellInfo)
+        public (float Min, float Max) GetSpellMinMaxRangeForTarget(Unit target, SpellInfo spellInfo)
         {
-            if (spellInfo.RangeEntry == null)
-                return 0.0f;
-
-            if (spellInfo.RangeEntry.RangeMax[0] == spellInfo.RangeEntry.RangeMax[1])
-                return spellInfo.GetMaxRange();
-
-            if (target == null)
-                return spellInfo.GetMaxRange(true);
-
-            return spellInfo.GetMaxRange(!IsHostileTo(target));
-        }
-
-        public float GetSpellMinRangeForTarget(Unit target, SpellInfo spellInfo)
-        {
-            if (spellInfo.RangeEntry == null)
-                return 0.0f;
-
-            if (spellInfo.RangeEntry.RangeMin[0] == spellInfo.RangeEntry.RangeMin[1])
-                return spellInfo.GetMinRange();
-
-            if (target == null)
-                return spellInfo.GetMinRange(true);
-
-            return spellInfo.GetMinRange(!IsHostileTo(target));
+            bool positive = target != null ? !IsHostileTo(target) : true;
+            return spellInfo.GetMinMaxRange(positive);
         }
 
         public double ApplyEffectModifiers(SpellInfo spellInfo, uint effIndex, double value)

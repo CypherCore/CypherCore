@@ -1023,8 +1023,7 @@ namespace Game.Spells
                     break;
                 case Targets.DestCasterFishing:
                 {
-                    float minDist = m_spellInfo.GetMinRange(true);
-                    float maxDist = m_spellInfo.GetMaxRange(true);
+                    var (minDist, maxDist) = m_spellInfo.GetMinMaxRange(true);
                     float dis = RandomHelper.NextSingle() * (maxDist - minDist) + minDist;
                     float x, y, z;
                     float angle = RandomHelper.NextSingle() * (MathF.PI * 35.0f / 180.0f) - (MathF.PI * 17.5f / 180.0f);
@@ -1807,7 +1806,7 @@ namespace Game.Spells
 
             float searchRadius;
             if (m_spellInfo.HasAttribute(SpellAttr2.ChainFromCaster))
-                searchRadius = GetMinMaxRange(false).maxRange;
+                searchRadius = GetMinMaxRange(false).Max;
             else if (spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.ChainFromInitialTarget))
                 searchRadius = jumpRadius;
             else
@@ -6617,7 +6616,7 @@ namespace Game.Spells
             return unit.HasUnitMovementFlag(MovementFlag.Forward | MovementFlag.StrafeLeft | MovementFlag.StrafeRight | MovementFlag.Falling) && !unit.IsWalking();
         }
 
-        public (float minRange, float maxRange) GetMinMaxRange(bool strict)
+        public (float Min, float Max) GetMinMaxRange(bool strict)
         {
             float rangeMod = 0.0f;
             float minRange = 0.0f;
@@ -6646,8 +6645,8 @@ namespace Game.Spells
                             meleeRange = unitCaster.GetMeleeRange(target != null ? target : unitCaster);
                     }
 
-                    minRange = m_caster.GetSpellMinRangeForTarget(target, m_spellInfo) + meleeRange;
-                    maxRange = m_caster.GetSpellMaxRangeForTarget(target, m_spellInfo);
+                    (minRange, maxRange) = m_caster.GetSpellMinMaxRangeForTarget(target, m_spellInfo);
+                    minRange += meleeRange;
 
                     if (target != null || m_targets.GetCorpseTarget() != null)
                     {

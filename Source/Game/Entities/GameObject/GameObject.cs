@@ -2861,7 +2861,7 @@ namespace Game.Entities
                 float maxRange = spell.GetMaxRange(spell.IsPositive());
 
                 if (GetGoType() == GameObjectTypes.SpellFocus)
-                    return maxRange * maxRange >= GetExactDistSq(player);
+                    return IsInDist(player, maxRange);
 
                 if (CliDB.GameObjectDisplayInfoStorage.ContainsKey(GetGoInfo().displayId))
                     return IsAtInteractDistance(player, maxRange);

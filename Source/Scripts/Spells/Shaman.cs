@@ -2468,7 +2468,7 @@ class spell_sha_primordial_wave : SpellScript
     {
         Unit shaman = GetCaster();
         List<Unit> targets = new();
-        FireNovaTargetCheck check = new() { MaxSearchRange = GetSpell().GetMinMaxRange(false).maxRange, Shaman = shaman };
+        FireNovaTargetCheck check = new() { MaxSearchRange = GetSpell().GetMinMaxRange(false).Max, Shaman = shaman };
         UnitListSearcher searcher = new(shaman, targets, check);
         Cell.VisitAllObjects(shaman, searcher, check.MaxSearchRange);
 
