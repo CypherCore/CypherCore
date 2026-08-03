@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Miscellaneous;
 using System;
@@ -1701,7 +1700,7 @@ namespace Game.Networking.Packets
         public uint ItemID;
         public uint AchievementLogic;
         public List<uint> AchievementsRequired = new();
-        public RaceMask<ulong> RaceMask;
+        public RaceMask<int> RaceMask = new(2);
         public int MinGuildLevel;
         public int MinGuildRep;
         public ulong Cost;
@@ -1711,7 +1710,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(ItemID);
             data.WriteUInt32(AchievementLogic);
             data.WriteInt32(AchievementsRequired.Count);
-            data.WriteUInt64(RaceMask.RawValue);
+            foreach (int raceMask in RaceMask.RawValue)
+                data.WriteInt32(raceMask);
             data.WriteInt32(MinGuildLevel);
             data.WriteInt32(MinGuildRep);
             data.WriteUInt64(Cost);

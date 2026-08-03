@@ -6090,12 +6090,9 @@ namespace Game
                     if (items.Empty())
                         continue;
 
-                    var raceMask = new RaceMask<long>(characterLoadout.RaceMask);
-
                     foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                     {
-
-                        if (!raceMask.HasRace((Race)race.Id))
+                        if (!characterLoadout.RaceMask.HasRace((Race)race.Id))
                             continue;
 
                         var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race.Id, (Class)characterLoadout.ChrClassID));
@@ -6204,10 +6201,9 @@ namespace Game
                 {
                     if (rcInfo.Availability == 1)
                     {
-                        var raceMask = new RaceMask<long>(rcInfo.RaceMask);
                         foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                         {
-                            if (raceMask.IsEmpty() || raceMask.HasRace((Race)race.Id))
+                            if (rcInfo.RaceMask.IsEmpty() || rcInfo.RaceMask.HasRace((Race)race.Id))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
@@ -6240,7 +6236,7 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        RaceMask<ulong> raceMask = new(result.Read<ulong>(0));
+                        RaceMask<ulong> raceMask = new([result.Read<ulong>(0)]);
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
 
@@ -6298,7 +6294,7 @@ namespace Game
 
                     do
                     {
-                        RaceMask<ulong> raceMask = new(result.Read<ulong>(0));
+                        RaceMask<ulong> raceMask = new([result.Read<ulong>(0)]);
                         uint classMask = result.Read<uint>(1);
                         uint spellId = result.Read<uint>(2);
                         sbyte playerCreateMode = result.Read<sbyte>(3);
@@ -7517,12 +7513,12 @@ namespace Game
                     }
                 }
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
-                if (qinfo.AllowableRaces.RawValue != 0xFFFFFFFFFFFFFFFF)
+                if (qinfo.AllowableRaces != RaceMask.All_V<int>(2))
                 {
-                    if (!qinfo.AllowableRaces.IsEmpty() && (qinfo.AllowableRaces & RaceMask.AllPlayable).IsEmpty())
+                    if (!qinfo.AllowableRaces.IsEmpty() && (qinfo.AllowableRaces & RaceMask.AllPlayable_V<int>(2)).IsEmpty())
                     {
-                        Log.outError(LogFilter.Sql, "Quest {0} does not contain any playable races in `RequiredRaces` ({1}), value set to 0 (all races).", qinfo.Id, qinfo.AllowableRaces);
-                        qinfo.AllowableRaces = new(0xFFFFFFFFFFFFFFFF);
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} does not contain any playable races in `AllowableRaces` (0x{qinfo.AllowableRaces.RawValue[1]:X}{qinfo.AllowableRaces.RawValue[0]:08X}), value set to -1 (all races).");
+                        qinfo.AllowableRaces = RaceMask.All_V<int>(2);
                     }
                 }
                 // RequiredSkillId, can be 0
@@ -9762,7 +9758,7 @@ namespace Game
             do
             {
                 byte level = result.Read<byte>(0);
-                RaceMask<ulong> raceMask = new(result.Read<ulong>(1));
+                RaceMask<ulong> raceMask = new([result.Read<ulong>(1)]);
                 uint mailTemplateId = result.Read<uint>(2);
                 uint senderEntry = result.Read<uint>(3);
 

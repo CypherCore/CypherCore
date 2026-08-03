@@ -2270,11 +2270,8 @@ namespace Game.Entities
 
         public ushort FindQuestSlot(uint quest_id)
         {
-            for (ushort i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-                if (GetQuestSlotQuestId(i) == quest_id)
-                    return i;
-
-            return SharedConst.MaxQuestLogSize;
+            var statusData = m_QuestStatus.LookupByKey(quest_id);
+            return statusData != null ? statusData.Slot : (ushort)SharedConst.MaxQuestLogSize;
         }
 
         public uint GetQuestSlotQuestId(ushort slot)
@@ -2342,7 +2339,8 @@ namespace Game.Entities
 
         public void SetQuestSlot(ushort slot, uint quest_id)
         {
-            var questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
+            var playerData = m_values.ModifyValue(m_playerData);
+            var questLogField = playerData.ModifyValue(m_playerData.QuestLog, slot);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), (ushort)0);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
@@ -2351,6 +2349,10 @@ namespace Game.Entities
             for (int i = 0; i < SharedConst.MaxQuestCounts; ++i)
                 SetUpdateFieldValue(ref questLogField.ModifyValue(questLogField.ObjectiveProgress, i), (ushort)0);
 
+            if (quest_id != 0)
+                SetUpdateFieldValue(ref playerData.ModifyValue(m_playerData.QuestLogQuestIdToIndex, (int)quest_id), slot);
+            else
+                RemoveMapUpdateFieldValue(playerData.ModifyValue(m_playerData.QuestLogQuestIdToIndex), (int)quest_id);
         }
 
         public void SetQuestSlotCounter(ushort slot, byte counter, ushort count)

@@ -180,7 +180,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt64(Info.TimeAllowed);
 
                 _worldPacket.WriteInt32(Info.Objectives.Count);
-                _worldPacket.WriteUInt64(Info.AllowableRaces.RawValue);
+                foreach (int allowableRaces in Info.AllowableRaces.RawValue)
+                    _worldPacket.WriteInt32(allowableRaces);
                 _worldPacket.WriteInt32(Info.TreasurePickerID.Count);
                 _worldPacket.WriteInt32(Info.NonDisplayableTreasurePickerIDs.Count);
                 _worldPacket.WriteInt32(Info.Expansion);
@@ -1188,7 +1189,7 @@ namespace Game.Networking.Packets
         public float POIx;
         public float POIy;
         public uint POIPriority;
-        public RaceMask<ulong> AllowableRaces = new(0xFFFFFFFFFFFFFFFF);
+        public RaceMask<int> AllowableRaces = new(2);
         public string LogTitle;
         public string LogDescription;
         public string QuestDescription;

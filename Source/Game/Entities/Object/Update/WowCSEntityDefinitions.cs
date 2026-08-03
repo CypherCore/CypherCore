@@ -12,7 +12,7 @@ namespace Game.Entities
         FEntityPosition = 1,
         CGObject = 2, //  UPDATEABLE, INDIRECT,
         FTransportLink = 5,
-        FPlayerOwnershipLink = 13, //  INDIRECT,
+        FPlayerOwnershipLink = 13,
         CActor = 15, //  INDIRECT,
         FVendor_C = 17, //  UPDATEABLE,
         FMirroredObject_C = 18,
@@ -23,7 +23,6 @@ namespace Game.Entities
         FHousingPlayerHouse_C = 23, //  UPDATEABLE,
         FJamHousingCornerstone_C = 27, //  UPDATEABLE,
         FHousingDecorActor_C = 28,
-        FHousingPlotAreaTrigger_C = 29, //  UPDATEABLE,
         FNeighborhoodMirrorData_C = 30, //  UPDATEABLE,
         FMirroredPositionData_C = 31, //  UPDATEABLE,
         PlayerHouseInfoComponent_C = 32, //  UPDATEABLE, INDIRECT,
@@ -54,6 +53,7 @@ namespace Game.Entities
         Tag_MeshObject = 221, //  TAG,
         Tag_HouseExteriorPiece = 224, //  TAG,
         Tag_HouseExteriorRoot = 225, //  TAG,
+        Tag_HousingDecorProxyGameObject = 226, //  TAG,
         End = 255,
     }
 
@@ -186,7 +186,6 @@ namespace Game.Entities
                 || frag == EntityFragment.FHousingRoomComponentMesh_C
                 || frag == EntityFragment.FHousingPlayerHouse_C
                 || frag == EntityFragment.FJamHousingCornerstone_C
-                || frag == EntityFragment.FHousingPlotAreaTrigger_C
                 || frag == EntityFragment.FNeighborhoodMirrorData_C
                 || frag == EntityFragment.FMirroredPositionData_C
                 || frag == EntityFragment.PlayerHouseInfoComponent_C
@@ -198,7 +197,6 @@ namespace Game.Entities
         public static bool IsIndirectFragment(EntityFragment frag)
         {
             return frag == EntityFragment.CGObject
-                || frag == EntityFragment.FPlayerOwnershipLink
                 || frag == EntityFragment.CActor
                 || frag == EntityFragment.PlayerHouseInfoComponent_C
                 || frag == EntityFragment.PlayerInitiativeComponent_C;

@@ -2013,7 +2013,7 @@ namespace Game.Entities
                 spellArea.questEndStatus = result.Read<uint>(4);
                 spellArea.questEnd = result.Read<uint>(5);
                 spellArea.auraSpell = result.Read<int>(6);
-                spellArea.raceMask = new RaceMask<ulong>(result.Read<ulong>(7));
+                spellArea.raceMask = new RaceMask<ulong>([result.Read<ulong>(7)]);
                 spellArea.gender = (Gender)result.Read<uint>(8);
                 spellArea.flags = (SpellAreaFlag)result.Read<byte>(9);
 

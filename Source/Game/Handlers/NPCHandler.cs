@@ -474,12 +474,19 @@ namespace Game
                         continue;
                     }
 
-                    ulong price = (ulong)Math.Floor(itemTemplate.GetBuyPrice() * discountMod);
-                    price = itemTemplate.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
+                    ulong basePrice = itemTemplate.GetBuyPrice();
+                    ItemExtendedCostRecord iece = CliDB.ItemExtendedCostStorage.LookupByKey(vendorItem.ExtendedCost);
+                    if (iece != null)
+                        basePrice = iece.Money;
+
+                    ulong price = (ulong)Math.Floor(basePrice * discountMod);
 
                     float priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                     if (priceMod != 0)
                         price -= MathFunctions.CalculatePct(price, priceMod);
+
+                    if (basePrice > 0)
+                        price = Math.Max(1ul, price);
 
                     item.MuID = (int)slot + 1;
                     item.ExtendedCostID = (int)vendorItem.ExtendedCost;
@@ -507,6 +514,8 @@ namespace Game
 
                     if (vendorItem.ExtendedCost == 0)
                         continue; // there's no price defined for currencies, only extendedcost is used
+
+
 
                     item.MuID = (int)slot + 1; // client expects counting to start at 1
                     item.ExtendedCostID = (int)vendorItem.ExtendedCost;

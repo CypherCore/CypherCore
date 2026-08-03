@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Miscellaneous;
 using Game.Networking;
 using System;
 using System.Collections;
@@ -463,6 +462,9 @@ namespace Game.DataStorage
                 _powerTypes[powerType.PowerTypeEnum] = powerType;
             }
 
+            foreach (PvpStatRecord pvpStat in PvpStatStorage.Values)
+                _pvpStatIdsByMap.Add(pvpStat.MapID, pvpStat.Id);
+
             foreach (PvpTalentSlotUnlockRecord talentUnlock in PvpTalentSlotUnlockStorage.Values)
             {
                 Cypher.Assert(talentUnlock.Slot < (1 << PlayerConst.MaxPvpTalentSlots));
@@ -703,9 +705,6 @@ namespace Game.DataStorage
                 if (uiMapId == 985 || uiMapId == 986)
                     OldContinentsNodesMask[field] |= submask;
             }
-
-            foreach (PvpStatRecord pvpStat in PvpStatStorage.Values)
-                _pvpStatIdsByMap.Add(pvpStat.MapID, pvpStat.Id);
 
             Log.outInfo(LogFilter.ServerLoading, $"Indexed DB2 data stores in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
@@ -1944,8 +1943,7 @@ namespace Game.DataStorage
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
             foreach (var skllRaceClassInfo in bounds)
             {
-                var raceMask = new RaceMask<long>(skllRaceClassInfo.RaceMask);
-                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
+                if (!skllRaceClassInfo.RaceMask.IsEmpty() && !skllRaceClassInfo.RaceMask.HasRace(race))
                     continue;
                 if (skllRaceClassInfo.ClassMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.ClassMask & (1 << ((byte)class_ - 1))))
                     continue;

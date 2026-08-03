@@ -15,6 +15,25 @@ namespace Framework.Database
                 "ig.gemItemId1, ig.gemBonuses1, ig.gemContext1, ig.gemScalingLevel1, ig.gemItemId2, ig.gemBonuses2, ig.gemContext2, ig.gemScalingLevel2, ig.gemItemId3, ig.gemBonuses3, ig.gemContext3, ig.gemScalingLevel3, " +
                 "im.fixedScalingLevel, im.artifactKnowledgeLevel";
 
+            string CharacterSelectEquipmentSlot(string table_alias, string slot_name)
+            {
+                return "{table_alias}{slot_name}EquippedItemID, {table_alias}{slot_name}VisibleItemID," +
+                    "{table_alias}{slot_name}Subclass, {table_alias}{slot_name}InvType," +
+                    "{table_alias}{slot_name}DisplayID, { table_alias}{slot_name}DisplayEnchantID," +
+                    "{table_alias}{slot_name}SecondaryItemModifiedAppearanceID, {table_alias}{slot_name}SheatheCategory";
+            }
+
+            string CharacterSelectEquipment(string table_alias)
+            {
+                return CharacterSelectEquipmentSlot(table_alias, "head") + "," + CharacterSelectEquipmentSlot(table_alias, "neck") + "," + CharacterSelectEquipmentSlot(table_alias, "shoulder") + "," +
+                    CharacterSelectEquipmentSlot(table_alias, "body") + "," + CharacterSelectEquipmentSlot(table_alias, "chest") + "," + CharacterSelectEquipmentSlot(table_alias, "waist") + "," +
+                    CharacterSelectEquipmentSlot(table_alias, "legs") + "," + CharacterSelectEquipmentSlot(table_alias, "feet") + "," + CharacterSelectEquipmentSlot(table_alias, "wrists") + "," +
+                    CharacterSelectEquipmentSlot(table_alias, "hands") + "," + CharacterSelectEquipmentSlot(table_alias, "finger1") + "," + CharacterSelectEquipmentSlot(table_alias, "finger2") + "," +
+                    CharacterSelectEquipmentSlot(table_alias, "trinket1") + ", " + CharacterSelectEquipmentSlot(table_alias, "trinket2") + ", " + CharacterSelectEquipmentSlot(table_alias, "back") + "," +
+                    CharacterSelectEquipmentSlot(table_alias, "mainHand") + "," + CharacterSelectEquipmentSlot(table_alias, "offHand") + "," + CharacterSelectEquipmentSlot(table_alias, "ranged") + "," +
+                    CharacterSelectEquipmentSlot(table_alias, "tabard");
+            }
+
             PrepareStatement(CharStatements.DEL_POOL_QUEST_SAVE, "DELETE FROM pool_quest_save WHERE pool_id = ?");
             PrepareStatement(CharStatements.INS_POOL_QUEST_SAVE, "INSERT INTO pool_quest_save (pool_id, quest_id) VALUES (?, ?)");
             PrepareStatement(CharStatements.DEL_NONEXISTENT_GUILD_BANK_ITEM, "DELETE FROM guild_bank_item WHERE guildid = ? AND TabId = ? AND SlotId = ?");
@@ -35,30 +54,42 @@ namespace Framework.Database
                 "subject, deliver_time, expire_time, money, has_items FROM mail WHERE receiver = ? ");
             PrepareStatement(CharStatements.SEL_MAIL_LIST_ITEMS, "SELECT itemEntry,count FROM item_instance WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_ENUM, "SELECT c.guid, c.name, c.race, c.class, c.gender, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, " +
-                "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, c.equipmentCache, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
-                "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor " +
+                "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
+                "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor, " +
+                CharacterSelectEquipment("ceq.") + " " +
                 "FROM characters AS c LEFT JOIN character_pet AS cp ON c.summonedPetNumber = cp.id LEFT JOIN guild_member AS gm ON c.guid = gm.guid " +
                 "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 " +
+                "LEFT JOIN character_select_screen_equipment_cache ceq ON c.guid = ceq.guid " +
                 "WHERE c.account = ? AND c.deleteInfos_Name IS NULL");
             PrepareStatement(CharStatements.SEL_ENUM_DECLINED_NAME, "SELECT c.guid, c.name, c.race, c.class, c.gender, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, " +
-                "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, c.equipmentCache, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
-                "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor, cd.genitive " +
+                     "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
+                     "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor, " +
+                     CharacterSelectEquipment("ceq.") + ", " +
+                     "cd.genitive " +
                 "FROM characters AS c LEFT JOIN character_pet AS cp ON c.summonedPetNumber = cp.id LEFT JOIN guild_member AS gm ON c.guid = gm.guid " +
-                "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 LEFT JOIN character_declinedname AS cd ON c.guid = cd.guid " +
+                "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 " +
+                "LEFT JOIN character_select_screen_equipment_cache ceq ON c.guid = ceq.guid " +
+                "LEFT JOIN character_declinedname AS cd ON c.guid = cd.guid " +
                 "WHERE c.account = ? AND c.deleteInfos_Name IS NULL");
             PrepareStatement(CharStatements.SEL_ENUM_CUSTOMIZATIONS, "SELECT cc.guid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM character_customizations cc " +
                 "LEFT JOIN characters c ON cc.guid = c.guid WHERE c.account = ? AND c.deleteInfos_Name IS NULL ORDER BY cc.guid, cc.chrCustomizationOptionID");
             PrepareStatement(CharStatements.SEL_UNDELETE_ENUM, "SELECT c.guid, c.deleteInfos_Name, c.race, c.class, c.gender, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, " +
-                "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, c.equipmentCache, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
-                "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor " +
+                "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
+                "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor, " +
+                CharacterSelectEquipment("ceq.") + " " +
                 "FROM characters AS c LEFT JOIN character_pet AS cp ON c.summonedPetNumber = cp.id LEFT JOIN guild_member AS gm ON c.guid = gm.guid " +
                 "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 " +
+                "LEFT JOIN character_select_screen_equipment_cache ceq ON c.guid = ceq.guid " +
                 "WHERE c.deleteInfos_Account = ? AND c.deleteInfos_Name IS NOT NULL");
             PrepareStatement(CharStatements.SEL_UNDELETE_ENUM_DECLINED_NAME, "SELECT c.guid, c.deleteInfos_Name, c.race, c.class, c.gender, c.level, c.zone, c.map, c.position_x, c.position_y, c.position_z, " +
-                 "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level AS cpLevel, c.equipmentCache, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
-                 "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor, cd.genitive" +
+                "gm.guildid, c.playerFlags, c.at_login, cp.entry, cp.modelid, cp.level as cpLevel, cb.guid AS cbGuid, c.slot, c.createTime, c.logout_time, c.activeTalentGroup, c.lastLoginBuild, " +
+                "c.personalTabardEmblemStyle, c.personalTabardEmblemColor, c.personalTabardBorderStyle, c.personalTabardBorderColor, c.personalTabardBackgroundColor, " +
+                CharacterSelectEquipment("ceq.") + ", " +
+                "cd.genitive " +
                  "FROM characters AS c LEFT JOIN character_pet AS cp ON c.summonedPetNumber = cp.id LEFT JOIN guild_member AS gm ON c.guid = gm.guid " +
-                 "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1 LEFT JOIN character_declinedname AS cd ON c.guid = cd.guid " +
+                 "LEFT JOIN character_banned AS cb ON c.guid = cb.guid AND cb.active = 1" +
+                 "LEFT JOIN character_select_screen_equipment_cache ceq ON c.guid = ceq.guid " +
+                 "LEFT JOIN character_declinedname AS cd ON c.guid = cd.guid " +
                  "WHERE c.deleteInfos_Account = ? AND c.deleteInfos_Name IS NOT NULL");
             PrepareStatement(CharStatements.SEL_UNDELETE_ENUM_CUSTOMIZATIONS, "SELECT cc.guid, cc.chrCustomizationOptionID, cc.chrCustomizationChoiceID FROM character_customizations cc " +
                 "LEFT JOIN characters c ON cc.guid = c.guid WHERE c.deleteInfos_Account = ? AND c.deleteInfos_Name IS NOT NULL ORDER BY cc.guid, cc.chrCustomizationOptionID");
@@ -132,7 +163,7 @@ namespace Framework.Database
                 "appearance17, appearance18, mainHandEnchant, offHandEnchant FROM character_transmog_outfits WHERE guid = ? ORDER BY setindex");
             PrepareStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT, "SELECT transmogOutfitId, name, icon, situationsEnabled FROM character_transmog_outfit WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT_SITUATION, "SELECT transmogOutfitId, situationID, specID, loadoutID, equipmentSetID FROM character_transmog_outfit_situation WHERE guid = ?");
-            PrepareStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT_SLOT, "SELECT transmogOutfitId, slot, slotOption, itemModifiedAppearanceID, appearanceDisplayType, spellItemEnchantmentID, illusionDisplayType, flags FROM character_transmog_outfit_slot WHERE guid = ? ORDER BY transmogOutfitId, slot, slotOption");
+            PrepareStatement(CharStatements.SEL_CHARACTER_TRANSMOG_OUTFIT_SLOT, "SELECT transmogOutfitId, slot, slotOption, sheatheCategory, itemModifiedAppearanceID, appearanceDisplayType, spellItemEnchantmentID, illusionDisplayType, flags FROM character_transmog_outfit_slot WHERE guid = ? ORDER BY transmogOutfitId, slot, slotOption");
             PrepareStatement(CharStatements.SEL_CHARACTER_BGDATA, "SELECT instanceId, team, joinX, joinY, joinZ, joinO, joinMapId, taxiStart, taxiEnd, mountSpell, queueId FROM character_battleground_data WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_GLYPHS, "SELECT talentGroup, glyphId FROM character_glyphs WHERE guid = ?");
             PrepareStatement(CharStatements.SEL_CHARACTER_TALENTS, "SELECT talentId, talentGroup FROM character_talent WHERE guid = ?");
@@ -342,8 +373,7 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_TRANSMOG_OUTFIT_2, "DELETE FROM character_transmog_outfit WHERE guid = ? AND transmogOutfitId = ?");
             PrepareStatement(CharStatements.INS_TRANSMOG_OUTFIT_SITUATION, "INSERT INTO character_transmog_outfit_situation (guid, transmogOutfitId, situationID, specID, loadoutID, equipmentSetID) VALUES (?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_TRANSMOG_OUTFIT_SITUATION, "DELETE FROM character_transmog_outfit_situation WHERE guid = ? AND transmogOutfitId = ?");
-            PrepareStatement(CharStatements.INS_TRANSMOG_OUTFIT_SLOT, "INSERT INTO character_transmog_outfit_slot (guid, transmogOutfitId, slot, slotOption, itemModifiedAppearanceID, appearanceDisplayType, spellItemEnchantmentID, " +
-                "illusionDisplayType, flags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            PrepareStatement(CharStatements.INS_TRANSMOG_OUTFIT_SLOT, "INSERT INTO character_transmog_outfit_slot (guid, transmogOutfitId, slot, slotOption, sheatheCategory, itemModifiedAppearanceID, appearanceDisplayType, spellItemEnchantmentID, illusionDisplayType, flags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_TRANSMOG_OUTFIT_SLOT, "DELETE FROM character_transmog_outfit_slot WHERE guid = ? AND transmogOutfitId = ?");
 
             // Auras
@@ -465,16 +495,16 @@ namespace Framework.Database
                 "map, instance_id, dungeonDifficulty, raidDifficulty, legacyRaidDifficulty, position_x, position_y, position_z, orientation, trans_x, trans_y, trans_z, trans_o, transguid, " +
                 "taximask, createTime, createMode, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, primarySpecialization, " +
                 "extra_flags, summonedPetNumber, at_login, death_expire_time, taxi_path, totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk, health, " +
-                "power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, latency, activeTalentGroup, lootSpecId, exploredZones, equipmentCache, knownTitles, actionBars, lastLoginBuild, " +
+                "power1, power2, power3, power4, power5, power6, power7, power8, power9, power10, latency, activeTalentGroup, lootSpecId, exploredZones, knownTitles, actionBars, lastLoginBuild, " +
                 "personalTabardEmblemStyle, personalTabardEmblemColor, personalTabardBorderStyle, personalTabardBorderColor, personalTabardBackgroundColor, transmogOutfitEquippedId, transmogOutfitLocked) VALUES " +
-                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
             PrepareStatement(CharStatements.UPD_CHARACTER, "UPDATE characters SET name=?,race=?,class=?,gender=?,level=?,xp=?,money=?,inventorySlots=?,inventoryBagFlags=?,bagSlotFlags1=?,bagSlotFlags2=?,bagSlotFlags3=?,bagSlotFlags4=?,bagSlotFlags5=?," +
                 "bankSlots=?,bankTabs=?,bankBagFlags=?,restState=?,playerFlags=?,playerFlagsEx=?," +
                 "map=?,instance_id=?,dungeonDifficulty=?,raidDifficulty=?,legacyRaidDifficulty=?,position_x=?,position_y=?,position_z=?,orientation=?,trans_x=?,trans_y=?,trans_z=?,trans_o=?,transguid=?,taximask=?,cinematic=?,totaltime=?,leveltime=?,rest_bonus=?," +
                 "logout_time=?,is_logout_resting=?,resettalents_cost=?,resettalents_time=?,numRespecs=?,primarySpecialization=?,extra_flags=?,summonedPetNumber=?,at_login=?,zone=?,death_expire_time=?,taxi_path=?," +
                 "totalKills=?,todayKills=?,yesterdayKills=?,chosenTitle=?," +
                 "watchedFaction=?,drunk=?,health=?,power1=?,power2=?,power3=?,power4=?,power5=?,power6=?,power7=?,power8=?,power9=?,power10=?,latency=?,activeTalentGroup=?,lootSpecId=?,exploredZones=?," +
-                "equipmentCache=?,knownTitles=?,actionBars=?,online=?,honor=?,honorLevel=?,honorRestState=?,honorRestBonus=?,lastLoginBuild=?," +
+                "knownTitles=?,actionBars=?,online=?,honor=?,honorLevel=?,honorRestState=?,honorRestBonus=?,lastLoginBuild=?," +
                 "personalTabardEmblemStyle=?,personalTabardEmblemColor=?,personalTabardBorderStyle=?,personalTabardBorderColor=?,personalTabardBackgroundColor=?,transmogOutfitEquippedId=?,transmogOutfitLocked=? WHERE guid=?");
 
             PrepareStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG, "UPDATE characters SET at_login = at_login | ? WHERE guid = ?");
@@ -486,6 +516,9 @@ namespace Framework.Database
             PrepareStatement(CharStatements.UPD_ACCOUNT_ONLINE, "UPDATE characters SET online = 0 WHERE account = ?");
             PrepareStatement(CharStatements.INS_CHARACTER_CUSTOMIZATION, "INSERT INTO character_customizations (guid, chrCustomizationOptionID, chrCustomizationChoiceID) VALUES (?, ?, ?)");
             PrepareStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS, "DELETE FROM character_customizations WHERE guid = ?");
+            PrepareStatement(CharStatements.INS_CHARACTER_SELECT_EQUIPMENT_CACHE_CUSTOMIZATIONS, "INSERT INTO character_select_screen_equipment_cache (guid," + CharacterSelectEquipment("") + ") VALUES" +
+                "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+            PrepareStatement(CharStatements.DEL_CHARACTER_SELECT_EQUIPMENT_CACHE_CUSTOMIZATIONS, "DELETE FROM character_select_screen_equipment_cache WHERE guid = ?");
             PrepareStatement(CharStatements.INS_GROUP, "INSERT INTO `groups` (guid, leaderGuid, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raidDifficulty, legacyRaidDifficulty, masterLooterGuid, pingRestriction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.INS_GROUP_MEMBER, "INSERT INTO group_member (guid, memberGuid, memberFlags, subgroup, roles) VALUES(?, ?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_GROUP_MEMBER, "DELETE FROM group_member WHERE memberGuid = ?");
@@ -1149,6 +1182,8 @@ namespace Framework.Database
         UPD_ACCOUNT_ONLINE,
         INS_CHARACTER_CUSTOMIZATION,
         DEL_CHARACTER_CUSTOMIZATIONS,
+        INS_CHARACTER_SELECT_EQUIPMENT_CACHE_CUSTOMIZATIONS,
+        DEL_CHARACTER_SELECT_EQUIPMENT_CACHE_CUSTOMIZATIONS,
         INS_GROUP,
         INS_GROUP_MEMBER,
         DEL_GROUP_MEMBER,

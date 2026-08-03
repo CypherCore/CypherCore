@@ -94,7 +94,7 @@ namespace Game
             {
                 uint oldMSTime = Time.GetMSTime();
 
-                                                        //          0          1       2             3              4              5              6
+                //          0          1       2             3              4              5              6
                 SQLResult result = DB.Characters.Query("SELECT g.guildid, g.name, g.leaderguid, g.EmblemStyle, g.EmblemColor, g.BorderStyle, g.BorderColor, " +
                     //   7                  8       9       10            11          12
                     "g.BackgroundColor, g.info, g.motd, g.createdate, g.BankMoney, COUNT(gbt.guildid) " +
@@ -162,7 +162,7 @@ namespace Game
                 DB.Characters.DirectExecute("DELETE gm FROM guild_member gm LEFT JOIN guild g ON gm.guildId = g.guildId WHERE g.guildId IS NULL");
                 DB.Characters.DirectExecute("DELETE gm FROM guild_member_withdraw gm LEFT JOIN guild_member g ON gm.guid = g.guid WHERE g.guid IS NULL");
 
-                                                      //           0           1        2     3      4        5       6       7       8       9       10
+                //           0           1        2     3      4        5       6       7       8       9       10
                 SQLResult result = DB.Characters.Query("SELECT gm.guildid, gm.guid, `rank`, pnote, offnote, w.tab0, w.tab1, w.tab2, w.tab3, w.tab4, w.tab5, " +
                     //  11      12      13       14      15       16      17       18        19      20         21
                     "w.tab6, w.tab7, w.money, c.name, c.level, c.race, c.class, c.gender, c.zone, c.account, c.logout_time " +
@@ -230,7 +230,7 @@ namespace Game
 
                 DB.Characters.DirectExecute("DELETE FROM guild_eventlog WHERE LogGuid > {0}", GuildConst.EventLogMaxRecords);
 
-                                                        //          0        1        2          3            4            5        6
+                //          0        1        2          3            4            5        6
                 SQLResult result = DB.Characters.Query("SELECT guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog ORDER BY TimeStamp DESC, LogGuid DESC");
 
                 if (result.IsEmpty())
@@ -263,7 +263,7 @@ namespace Game
                 // Remove log entries that exceed the number of allowed entries per guild
                 DB.Characters.DirectExecute("DELETE FROM guild_bank_eventlog WHERE LogGuid > {0}", GuildConst.BankLogMaxRecords);
 
-                                                        //          0        1      2        3          4           5            6               7          8
+                //          0        1      2        3          4           5            6               7          8
                 SQLResult result = DB.Characters.Query("SELECT guildid, TabId, LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog ORDER BY TimeStamp DESC, LogGuid DESC");
 
                 if (result.IsEmpty())
@@ -295,7 +295,7 @@ namespace Game
 
                 DB.Characters.DirectExecute("DELETE FROM guild_newslog WHERE LogGuid > {0}", GuildConst.NewsLogMaxRecords);
 
-                                                            //      0        1        2          3           4      5      6
+                //      0        1        2          3           4      5      6
                 SQLResult result = DB.Characters.Query("SELECT guildid, LogGuid, EventType, PlayerGuid, Flags, Value, Timestamp FROM guild_newslog ORDER BY TimeStamp DESC, LogGuid DESC");
 
                 if (result.IsEmpty())
@@ -325,7 +325,7 @@ namespace Game
 
                 // Delete orphaned guild bank tab entries before loading the valid ones
                 DB.Characters.DirectExecute("DELETE gbt FROM guild_bank_tab gbt LEFT JOIN guild g ON gbt.guildId = g.guildId WHERE g.guildId IS NULL");
-                
+
                 //                                              0        1      2        3        4
                 SQLResult result = DB.Characters.Query("SELECT guildid, TabId, TabName, TabIcon, TabText FROM guild_bank_tab ORDER BY guildid ASC, TabId ASC");
                 if (result.IsEmpty())
@@ -437,7 +437,8 @@ namespace Game
 
                 reward.ItemID = result.Read<uint>(0);
                 reward.MinGuildRep = result.Read<byte>(1);
-                reward.RaceMask = new RaceMask<ulong>(result.Read<ulong>(2));
+                ulong rawValue = result.Read<ulong>(2);
+                reward.RaceMask = new RaceMask<int>([(int)(rawValue & 0xFFFFFFFF), (int)(rawValue >> 32)]);
                 reward.Cost = result.Read<ulong>(3);
 
                 if (Global.ObjectMgr.GetItemTemplate(reward.ItemID) == null)
@@ -482,7 +483,7 @@ namespace Game
             DB.Characters.Execute(CharacterDatabase.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBER_WITHDRAW));
 
             foreach (var guild in GuildStore.Values)
-                    guild.ResetTimes(week);
+                guild.ResetTimes(week);
         }
 
         public void SetNextGuildId(uint Id) { NextGuildId = Id; }
@@ -500,7 +501,7 @@ namespace Game
     {
         public uint ItemID;
         public byte MinGuildRep;
-        public RaceMask<ulong> RaceMask;
+        public RaceMask<int> RaceMask = new(2);
         public ulong Cost;
         public List<uint> AchievementsRequired = new();
     }

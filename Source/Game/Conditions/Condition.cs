@@ -178,7 +178,7 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.Race:
                     if (unit != null)
-                        condMeets = new RaceMask<uint>(ConditionValue1).HasRace(unit.GetRace());
+                        condMeets = new RaceMask<uint>([ConditionValue1]).HasRace(unit.GetRace());
                     break;
                 case ConditionTypes.Gender:
                     if (player != null)
@@ -752,7 +752,7 @@ namespace Game.Conditions
                 mConditionMap = target.GetMap();
         }
 
-        public ConditionSourceInfo(Map map) 
+        public ConditionSourceInfo(Map map)
         {
             mConditionMap = map;
         }

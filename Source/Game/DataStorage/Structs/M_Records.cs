@@ -250,6 +250,7 @@ namespace Game.DataStorage
     public sealed class MovieRecord
     {
         public uint Id;
+        public LocalizedString Summary;
         public byte Volume;
         public byte KeyID;
         public uint AudioFileDataID;

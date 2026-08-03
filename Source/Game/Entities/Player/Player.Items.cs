@@ -3033,6 +3033,7 @@ namespace Game.Entities
                 return false;
             }
 
+            ulong price = 0;
             uint stacks = count / crItem.maxcount;
             ItemExtendedCostRecord iece;
             if (crItem.ExtendedCost != 0)
@@ -3042,6 +3043,23 @@ namespace Game.Entities
                 {
                     Log.outError(LogFilter.Player, "Currency {0} have wrong ExtendedCost field value {1}", currency, crItem.ExtendedCost);
                     return false;
+                }
+
+                if (iece.Money != 0)
+                {
+                    ulong maxStacks = PlayerConst.MaxMoneyAmount / crItem.maxcount;
+                    if (stacks > maxStacks)
+                    {
+                        Log.outError(LogFilter.Player, $"Player::BuyCurrencyFromVendorSlot: Player '{GetName()}' ({GetGUID()}) tried to buy currency (ItemID: {currency}, Count: {count}), causing money overflow");
+                        count = (uint)(maxStacks * crItem.maxcount);
+                        stacks = (uint)maxStacks;
+                    }
+                    price = iece.Money * count; //it should not exceed MAX_MONEY_AMOUNT
+                    if (!HasEnoughMoney(price))
+                    {
+                        SendBuyError(BuyResult.NotEnoughtMoney, creature, currency);
+                        return false;
+                    }
                 }
 
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
@@ -3113,6 +3131,8 @@ namespace Game.Entities
             AddCurrency(currency, count, CurrencyGainSource.Vendor);
             if (iece != null)
             {
+                ModifyMoney(-(long)price);
+
                 for (byte i = 0; i < ItemConst.MaxItemExtCostItems; ++i)
                 {
                     if (iece.ItemID[i] == 0)
@@ -3223,6 +3243,8 @@ namespace Game.Entities
                 return false;
             }
 
+
+            ulong basePrice = pProto.GetBuyPrice();
             if (crItem.ExtendedCost != 0)
             {
                 // Can only buy full stacks for extended cost
@@ -3298,12 +3320,14 @@ namespace Game.Entities
                     SendEquipError(InventoryResult.VendorMissingTurnins); // Find correct error
                     return false;
                 }
+
+                basePrice = iece.Money;
             }
 
             ulong price = 0;
-            if (pProto.GetBuyPrice() > 0) //Assume price cannot be negative (do not know why it is int32)
+            if (basePrice > 0) //Assume price cannot be negative (do not know why it is int32)
             {
-                float buyPricePerItem = (float)pProto.GetBuyPrice() / pProto.GetBuyCount();
+                double buyPricePerItem = basePrice / pProto.GetBuyCount();
                 ulong maxCount = (ulong)(PlayerConst.MaxMoneyAmount / buyPricePerItem);
                 if (count > maxCount)
                 {
@@ -3314,7 +3338,8 @@ namespace Game.Entities
 
                 // reputation discount
                 price = (ulong)Math.Floor(price * GetReputationPriceDiscount(creature));
-                price = pProto.GetBuyPrice() > 0 ? Math.Max(1ul, price) : price;
+                if (basePrice > 0)
+                    price = Math.Max(1ul, price);
 
                 float priceMod = GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                 if (priceMod != 0)
@@ -5517,7 +5542,8 @@ namespace Game.Entities
         public void SetVisibleItemSlot(uint slot, Item item)
         {
             void setVisibleItemSlot(uint slot, uint itemId, uint secondaryItemModifiedAppearanceId, int conditionalItemAppearanceId,
-                ushort itemAppearanceModId, ushort itemVisual, uint itemModifiedAppearanceId, TransmogOutfitSlotOption transmogSlotOption, bool hasTransmog, bool hasIllusion)
+                ushort itemAppearanceModId, ushort itemVisual, uint itemModifiedAppearanceId, TransmogOutfitSlotOption transmogSlotOption,
+                TransmogOutfitSlotOptionSheatheCategory sheatheCategory, bool hasTransmog, bool hasIllusion)
             {
                 var itemField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VisibleItems, (int)slot);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemID), itemId);
@@ -5527,6 +5553,7 @@ namespace Game.Entities
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemVisual), itemVisual);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.ItemModifiedAppearanceID), itemModifiedAppearanceId);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.TransmogSlotOption), (byte)transmogSlotOption);
+                SetUpdateFieldValue(itemField.ModifyValue(itemField.SheatheCategory), (byte)sheatheCategory);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.HasTransmog), hasTransmog);
                 SetUpdateFieldValue(itemField.ModifyValue(itemField.HasIllusion), hasIllusion);
 
@@ -5549,6 +5576,7 @@ namespace Game.Entities
                 ushort itemAppearanceModId = item.GetVisibleAppearanceModId(this);
                 ushort itemVisual = item.GetVisibleItemVisual(this);
                 uint itemModifiedAppearanceId = item.GetVisibleModifiedAppearanceId(this);
+                TransmogOutfitSlotOptionSheatheCategory sheatheCategory = TransmogOutfitSlotOptionSheatheCategory.Default;
                 bool hasTransmog = false;
                 bool hasIllusion = false;
 
@@ -5588,6 +5616,7 @@ namespace Game.Entities
                                     itemId = itemModifiedAppearance.ItemID;
                                     itemAppearanceModId = (ushort)itemModifiedAppearance.ItemAppearanceModifierID;
                                     itemModifiedAppearanceId = itemModifiedAppearance.Id;
+                                    sheatheCategory = (TransmogOutfitSlotOptionSheatheCategory)(byte)transmogOutfitItem.SheatheCategory;
                                     hasTransmog = true;
                                 }
                             }
@@ -5641,10 +5670,10 @@ namespace Game.Entities
                 }
 
                 setVisibleItemSlot(slot, itemId, secondaryItemModifiedAppearanceId, conditionalItemAppearanceId, itemAppearanceModId,
-                    itemVisual, itemModifiedAppearanceId, transmogSlotOption, hasTransmog, hasIllusion);
+                    itemVisual, itemModifiedAppearanceId, transmogSlotOption, sheatheCategory, hasTransmog, hasIllusion);
             }
             else
-                setVisibleItemSlot(slot, 0, 0, 0, 0, 0, 0, TransmogOutfitSlotOption.None, false, false);
+                setVisibleItemSlot(slot, 0, 0, 0, 0, 0, 0, TransmogOutfitSlotOption.None, TransmogOutfitSlotOptionSheatheCategory.Default, false, false);
         }
 
         void VisualizeItem(uint slot, Item pItem)

@@ -711,6 +711,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Reason);
             _worldPacket.WriteXYZ(MovementOffset);
             _worldPacket.WriteInt32(Counter);
+            _worldPacket.WriteUInt64(InstanceID);
         }
 
         public uint MapID;
@@ -718,6 +719,7 @@ namespace Game.Networking.Packets
         public TeleportLocation Loc = new();
         public Position MovementOffset;    // Adjusts all pending movement events by this offset
         public int Counter;
+        public ulong InstanceID;                          // Required for damageMeterResetOnNewInstance cvar to function
     }
 
     public class WorldPortResponse : ClientPacket

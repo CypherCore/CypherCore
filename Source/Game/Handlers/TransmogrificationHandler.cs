@@ -410,7 +410,7 @@ namespace Game
 
             _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
 
-            if (_player.m_activePlayerData.TransmogOutfits.Get(transmogOutfitUpdateSituations.OutfitID).Item1 == null)
+            if (_player.m_activePlayerData.TransmogOutfits.Get(transmogOutfitUpdateSituations.OutfitID) == null)
             {
                 Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSituations - player does not have outfit {transmogOutfitUpdateSituations.OutfitID}.");
                 return;
@@ -451,7 +451,7 @@ namespace Game
             _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
 
             var transmogOutfit = _player.m_activePlayerData.TransmogOutfits.Get(transmogOutfitUpdateSlots.OutfitID);
-            if (transmogOutfit.Item1 == null)
+            if (transmogOutfit == null)
             {
                 Log.outError(LogFilter.Cheat, $"{GetPlayerInfo()} HandleTransmogOutfitUpdateSlots - player does not have outfit {transmogOutfitUpdateSlots.OutfitID}.");
                 return;
@@ -516,11 +516,11 @@ namespace Game
             {
                 foreach (var slot in transmogOutfitUpdateSlots.Slots)
                 {
-                    int oldSlotIndex = transmogOutfit.Item1.Slots.FindIndexIf(p => p.Slot == (sbyte)slot.Slot && p.SlotOption == (byte)slot.SlotOption);
+                    int oldSlotIndex = transmogOutfit.Slots.FindIndexIf(p => p.Slot == (sbyte)slot.Slot && p.SlotOption == (byte)slot.SlotOption);
 
                     var transmogOutfitSlotAndOptionInfo = Global.TransmogMgr.GetSlotAndOption(slot.Slot, slot.SlotOption);
 
-                    if (slot.AppearanceDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Item1.Slots[oldSlotIndex].ItemModifiedAppearanceID != slot.ItemModifiedAppearanceID)
+                    if (slot.AppearanceDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Slots[oldSlotIndex].ItemModifiedAppearanceID != slot.ItemModifiedAppearanceID)
                     {
                         ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(slot.ItemModifiedAppearanceID);
                         if (itemModifiedAppearance == null || !CliDB.TransmogHolidayStorage.HasRecord(itemModifiedAppearance.ItemID))
@@ -533,7 +533,7 @@ namespace Game
                         }
                     }
 
-                    if (slot.IllusionDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Item1.Slots[oldSlotIndex].SpellItemEnchantmentID != slot.SpellItemEnchantmentID)
+                    if (slot.IllusionDisplayType == TransmogOutfitDisplayType.Assigned && transmogOutfit.Slots[oldSlotIndex].SpellItemEnchantmentID != slot.SpellItemEnchantmentID)
                     {
                         if (transmogOutfitSlotAndOptionInfo.Slot != null)
                             cost = (ulong)Math.Floor(baseCost * transmogOutfitSlotAndOptionInfo.Slot.IllusionCostMultiplier) + cost;

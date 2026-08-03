@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Spells;
@@ -74,7 +73,7 @@ namespace Game.Chat.Commands
             [Command("debug", CypherStrings.CommandLearnAllDebugHelp, RBACPermissions.CommandLearn)]
             static bool HandleLearnDebugSpellsCommand(CommandHandler handler)
             {
-                Player  player = handler.GetPlayer();
+                Player player = handler.GetPlayer();
                 player.LearnSpell(63364, false); /* 63364 - Saronite Barrier (reduces damage taken by 99%) */
                 player.LearnSpell(1908, false);  /*  1908 - Uber Heal Over Time (heals target to full constantly) */
                 player.LearnSpell(27680, false); /* 27680 - Berserk (+500% damage, +150% speed, 10m duration) */
@@ -243,7 +242,7 @@ namespace Game.Chat.Commands
                         continue;
 
                     // skip racial skills
-                    if (skillLine.RaceMask != 0)
+                    if (!skillLine.RaceMask.IsEmpty())
                         continue;
 
                     // skip wrong class skills

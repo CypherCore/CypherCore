@@ -139,8 +139,8 @@ namespace Game
 
             long configCount = _player.m_activePlayerData.TraitConfigs.GetValues().Count(traitConfig =>
             {
-                return (TraitConfigType)(int)traitConfig.Item1.Type == TraitConfigType.Combat
-                    && ((TraitCombatConfigFlags)(int)traitConfig.Item1.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None;
+                return (TraitConfigType)(int)traitConfig.value.Type == TraitConfigType.Combat
+                    && ((TraitCombatConfigFlags)(int)traitConfig.value.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None;
             });
             if (configCount >= TraitMgr.MAX_COMBAT_TRAIT_CONFIGS)
                 return;

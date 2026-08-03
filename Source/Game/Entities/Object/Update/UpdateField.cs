@@ -411,7 +411,7 @@ namespace Game.Entities
 
     public class MapUpdateField<K, V> where V : new()
     {
-        Dictionary<K, (V, MapUpdateFieldState)> _values = new();
+        public Dictionary<K, Value> _values = new();
         public int BlockBit;
         public int Bit;
 
@@ -434,7 +434,7 @@ namespace Game.Entities
         public void TryAdd(K key)
         {
             if (!_values.ContainsKey(key))
-                _values[key] = (new V(), MapUpdateFieldState.Changed);
+                _values[key] = new() { state = MapUpdateFieldState.Changed };
         }
 
         public void Remove(K key)
@@ -445,33 +445,33 @@ namespace Game.Entities
         public bool MarkKeyForRemoval(K key)
         {
             var itr = _values.LookupByKey(key);
-            if (itr.Item1 != null)
+            if (itr != null)
             {
-                itr.Item2 = MapUpdateFieldState.Deleted;
+                itr.state = MapUpdateFieldState.Deleted;
                 return true;
             }
 
             return false;
         }
 
-        public (V, MapUpdateFieldState) Get(K key)
+        public V Get(K key)
         {
             if (_values.TryGetValue(key, out var value))
-                return value;
+                return value.value;
 
             return default;
         }
 
         public (K, V) FindIf(Predicate<V> predicate)
         {
-            var itr = _values.First(pair => { return predicate(pair.Value.Item1); });
+            var itr = _values.First(pair => { return predicate(pair.Value.value); });
             if (itr.Key != null)
-                return (itr.Key, itr.Value.Item1);
+                return (itr.Key, itr.Value.value);
 
             return default;
         }
 
-        public IEnumerator<KeyValuePair<K, (V, MapUpdateFieldState)>> GetEnumerator()
+        public IEnumerator<KeyValuePair<K, Value>> GetEnumerator()
         {
             foreach (var obj in _values)
                 yield return obj;
@@ -479,7 +479,13 @@ namespace Game.Entities
 
         public List<K> GetKeys() { return _values.Keys.ToList(); }
 
-        public List<(V, MapUpdateFieldState)> GetValues() { return _values.Values.ToList(); }
+        public List<Value> GetValues() { return _values.Values.ToList(); }
+
+        public class Value
+        {
+            public V value;
+            public MapUpdateFieldState state;
+        }
     }
 
     public class VariantUpdateField(int blockBit, int bit)
@@ -574,8 +580,8 @@ namespace Game.Entities
         {
             foreach (var key in field.GetKeys())
             {
-                var value = field.Get(key);
-                switch (value.Item2)
+                var value = field._values[key];
+                switch (value.state)
                 {
                     case MapUpdateFieldState.Unchanged:
                         break;
@@ -584,9 +590,9 @@ namespace Game.Entities
                             ((IHasChangesMask)key).ClearChangesMask();
 
                         if (typeof(HasChangesMask).IsAssignableFrom(typeof(V)))
-                            ((IHasChangesMask)value.Item1).ClearChangesMask();
+                            ((IHasChangesMask)value).ClearChangesMask();
 
-                        value.Item2 = MapUpdateFieldState.Unchanged;
+                        value.state = MapUpdateFieldState.Unchanged;
                         break;
                     case MapUpdateFieldState.Deleted:
                         field.Remove(key);
@@ -672,11 +678,11 @@ namespace Game.Entities
             return updateField;
         }
 
-        public V ModifyValue<K, V>(MapUpdateField<K, V> updateField, K key) where V : new()
+        public ref V ModifyValue<K, V>(MapUpdateField<K, V> updateField, K key) where V : new()
         {
             MarkChanged(updateField);
             updateField.TryAdd(key);
-            return updateField.Get(key).Item1;
+            return ref updateField._values[key].value;
         }
 
         public OptionalUpdateField<U> ModifyValue<U>(OptionalUpdateField<U> updateField) where U : new()
@@ -837,7 +843,7 @@ namespace Game.Entities
         public void WriteMapFieldCreate<K, V, T>(MapUpdateField<K, V> map, WorldPacket data, Player receiver, T owner) where V : new()
         {
             data.WriteInt32(map.Size());
-            foreach (var (k, (v, _)) in map)
+            foreach (var (k, v) in map)
             {
                 if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(K)))
                     ((IsUpdateFieldStructure<T>)k).WriteCreate(data, receiver, owner);
@@ -861,9 +867,9 @@ namespace Game.Entities
                 ushort changesCount = 0;
                 WorldPacket tempBuffer = new();
 
-                foreach (var (k, (v, state)) in map)
+                foreach (var (k, v) in map)
                 {
-                    if (state == MapUpdateFieldState.Unchanged)
+                    if (v.state == MapUpdateFieldState.Unchanged)
                         continue;
 
                     ++changesCount;
@@ -873,8 +879,8 @@ namespace Game.Entities
                     else
                         tempBuffer.Write(k);
 
-                    tempBuffer.WriteUInt8((byte)state);
-                    if (state == MapUpdateFieldState.Deleted)
+                    tempBuffer.WriteUInt8((byte)v.state);
+                    if (v.state == MapUpdateFieldState.Deleted)
                         continue;
 
                     if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))

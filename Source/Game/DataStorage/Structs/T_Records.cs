@@ -79,7 +79,7 @@ namespace Game.DataStorage
     {
         public Vector3 Loc;
         public uint Id;
-        public ushort PathID;
+        public uint PathID;
         public int NodeIndex;
         public ushort ContinentID;
         public int Flags;
@@ -394,6 +394,7 @@ namespace Game.DataStorage
         public int Flags;
         public byte SetType;
         public float OverrideCostModifier;
+        public int OutfitIndex;
 
         public TransmogOutfitEntrySource GetSource() { return (TransmogOutfitEntrySource)Source; }
         public bool HasFlag(TransmogOutfitEntryFlags flag) { return ((TransmogOutfitEntryFlags)Flags).HasFlag(flag); }

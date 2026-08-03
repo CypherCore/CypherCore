@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Miscellaneous;
 using System;
@@ -56,7 +55,7 @@ namespace Game.Networking.Packets
         public uint Token;
         public byte Origin;   // 1 = Social, 2 = Chat, 3 = Item
         public bool IsAddon;
-        public List<int> Areas= new();
+        public List<int> Areas = new();
     }
 
     public class WhoResponsePkt : ServerPacket
@@ -96,7 +95,8 @@ namespace Game.Networking.Packets
         {
             MinLevel = data.ReadInt32();
             MaxLevel = data.ReadInt32();
-            RaceFilter = new RaceMask<long>(data.ReadInt64());
+            for (int i = 0; i < RaceFilter.Size; ++i)
+                RaceFilter.RawValue[i] = data.ReadInt32();
             ClassFilter = data.ReadInt32();
 
             uint nameLength = data.ReadBits<uint>(6);
@@ -134,7 +134,7 @@ namespace Game.Networking.Packets
         public string VirtualRealmName;
         public string Guild;
         public string GuildVirtualRealmName;
-        public RaceMask<long> RaceFilter;
+        public RaceMask<int> RaceFilter = new(2);
         public int ClassFilter = -1;
         public List<string> Words = new();
         public bool ShowEnemies;

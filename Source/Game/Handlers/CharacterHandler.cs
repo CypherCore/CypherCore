@@ -176,8 +176,7 @@ namespace Game
             if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
                 return false;
 
-            var raceMask = new RaceMask<long>(req.RaceMask);
-            if (race != Race.None && !raceMask.IsEmpty() && raceMask.RawValue != -1 && !raceMask.HasRace(race))
+            if (race != Race.None && !req.RaceMask.IsEmpty() && req.RaceMask != RaceMask.All_V<long>() && !req.RaceMask.HasRace(race))
                 return false;
 
             if (req.AchievementID != 0 /*&& !HasAchieved(req->AchievementID)*/)
@@ -381,7 +380,7 @@ namespace Game
                     return;
                 }
 
-                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                RaceMask<ulong> raceMaskDisabled = new([WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask)]);
                 if (raceMaskDisabled.HasRace(charCreate.CreateInfo.RaceId))
                 {
                     SendCharCreate(ResponseCodes.CharCreateDisabled);
@@ -1820,7 +1819,7 @@ namespace Game
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))
             {
-                RaceMask<ulong> raceMaskDisabled = new(WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask));
+                RaceMask<ulong> raceMaskDisabled = new([WorldConfig.GetUInt64Value(WorldCfg.CharacterCreatingDisabledRacemask)]);
                 if (raceMaskDisabled.HasRace(factionChangeInfo.RaceID))
                 {
                     SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
@@ -2153,8 +2152,8 @@ namespace Game
                         var questTemplates = Global.ObjectMgr.GetQuestTemplates();
                         foreach (Quest quest in questTemplates.Values)
                         {
-                            RaceMask<ulong> newRaceMask = newTeamId == BattleGroundTeamId.Alliance ? RaceMask.Alliance : RaceMask.Horde;
-                            if (quest.AllowableRaces.RawValue != unchecked((ulong)-1) && (quest.AllowableRaces & newRaceMask).IsEmpty())
+                            RaceMask<int> newRaceMask = newTeamId == BattleGroundTeamId.Alliance ? RaceMask.Alliance_V<int>(2) : RaceMask.Horde_V<int>(2);
+                            if (quest.AllowableRaces != RaceMask.All_V<int>(2) && (quest.AllowableRaces & newRaceMask).IsEmpty())
                             {
                                 stmt = CharacterDatabase.GetPreparedStatement(CharStatements.UPD_CHAR_QUESTSTATUS_REWARDED_ACTIVE_BY_QUEST);
                                 stmt.AddValue(0, lowGuid);

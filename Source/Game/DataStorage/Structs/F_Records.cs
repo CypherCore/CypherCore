@@ -2,13 +2,14 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Miscellaneous;
 
 namespace Game.DataStorage
 {
     public sealed class FactionRecord
     {
         public uint Id;
-        public long[] ReputationRaceMask = new long[4];
+        public RaceMask<long> ReputationRaceMask = new(4);
         public LocalizedString Name;
         public string Description;
         public short ReputationIndex;
@@ -25,6 +26,10 @@ namespace Game.DataStorage
         public int[] ReputationMax = new int[4];
         public float[] ParentFactionMod = new float[2];                        // Faction outputs rep * ParentFactionModOut as spillover reputation
         public byte[] ParentFactionCap = new byte[2];                        // The highest rank the faction will profit from incoming spillover
+        public RaceMask<int> ReputationRaceMask1_ = new(2);
+        public RaceMask<int> ReputationRaceMask2_ = new(2);
+        public RaceMask<int> ReputationRaceMask3_ = new(2);
+        public RaceMask<int> ReputationRaceMask4_ = new(2);
 
         // helpers
         public bool CanHaveReputation()

@@ -312,6 +312,7 @@ namespace Game.Entities
         public uint GetId() { return BasicData.Id; }
         public ItemClass GetClass() { return (ItemClass)BasicData.ClassID; }
         public uint GetSubClass() { return BasicData.SubclassID; }
+        public ItemSheatheType GetSheatheType() { return (ItemSheatheType)BasicData.SheatheType; }
         public ItemQuality GetQuality() { return (ItemQuality)ExtendedData.OverallQualityID; }
         public uint GetOtherFactionItemId() { return ExtendedData.FactionRelated; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
@@ -321,7 +322,7 @@ namespace Game.Entities
         public uint GetSellPrice() { return ExtendedData.SellPrice; }
         public InventoryType GetInventoryType() { return ExtendedData.inventoryType; }
         public int GetAllowableClass() { return ExtendedData.AllowableClass; }
-        public RaceMask<long> GetAllowableRace() { return new RaceMask<long>(ExtendedData.AllowableRace); }
+        public RaceMask<long> GetAllowableRace() { return ExtendedData.AllowableRace; }
         public uint GetBaseItemLevel() { return ExtendedData.ItemLevel; }
         public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
         public uint GetRequiredSkill() { return ExtendedData.RequiredSkill; }

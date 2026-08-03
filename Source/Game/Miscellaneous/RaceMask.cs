@@ -2,60 +2,113 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Game.Miscellaneous
 {
     public struct RaceMask
     {
-        public static RaceMask<ulong> AllPlayable = new RaceMask<ulong>((ulong)(
-            RaceMask<ulong>.GetMaskForRace(Race.Human) | RaceMask<ulong>.GetMaskForRace(Race.Orc) | RaceMask<ulong>.GetMaskForRace(Race.Dwarf) | RaceMask<ulong>.GetMaskForRace(Race.NightElf) |
-            RaceMask<ulong>.GetMaskForRace(Race.Undead) | RaceMask<ulong>.GetMaskForRace(Race.Tauren) | RaceMask<ulong>.GetMaskForRace(Race.Gnome) | RaceMask<ulong>.GetMaskForRace(Race.Troll) |
-            RaceMask<ulong>.GetMaskForRace(Race.BloodElf) | RaceMask<ulong>.GetMaskForRace(Race.Draenei) | RaceMask<ulong>.GetMaskForRace(Race.Goblin) | RaceMask<ulong>.GetMaskForRace(Race.Worgen) |
-            RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral) | RaceMask<ulong>.GetMaskForRace(Race.PandarenAlliance) | RaceMask<ulong>.GetMaskForRace(Race.PandarenHorde) | RaceMask<ulong>.GetMaskForRace(Race.Nightborne) |
-            RaceMask<ulong>.GetMaskForRace(Race.HighmountainTauren) | RaceMask<ulong>.GetMaskForRace(Race.VoidElf) | RaceMask<ulong>.GetMaskForRace(Race.LightforgedDraenei) | RaceMask<ulong>.GetMaskForRace(Race.ZandalariTroll) |
-            RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.Vulpera) | RaceMask<ulong>.GetMaskForRace(Race.MagharOrc) |
-            RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrHorde) | RaceMask<ulong>.GetMaskForRace(Race.EarthenDwarfHorde) |
-            RaceMask<ulong>.GetMaskForRace(Race.EarthenDwarfAlliance) | RaceMask<ulong>.GetMaskForRace(Race.HaranirAlliance)) | RaceMask<ulong>.GetMaskForRace(Race.HaranirHorde));
+        public static RaceMask<T> All_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> => ~new RaceMask<T>(size);
 
-        public static RaceMask<ulong> Neutral = new RaceMask<ulong>((ulong)RaceMask<ulong>.GetMaskForRace(Race.PandarenNeutral));
+        public static RaceMask<T> AllPlayable_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> =>
+            RaceMask<T>.GetMaskForRace(Race.Human, size) | RaceMask<T>.GetMaskForRace(Race.Orc, size) | RaceMask<T>.GetMaskForRace(Race.Dwarf, size) | RaceMask<T>.GetMaskForRace(Race.NightElf, size) |
+            RaceMask<T>.GetMaskForRace(Race.Undead, size) | RaceMask<T>.GetMaskForRace(Race.Tauren, size) | RaceMask<T>.GetMaskForRace(Race.Gnome, size) | RaceMask<T>.GetMaskForRace(Race.Troll, size) |
+            RaceMask<T>.GetMaskForRace(Race.BloodElf, size) | RaceMask<T>.GetMaskForRace(Race.Draenei, size) | RaceMask<T>.GetMaskForRace(Race.Goblin, size) | RaceMask<T>.GetMaskForRace(Race.Worgen, size) |
+            RaceMask<T>.GetMaskForRace(Race.PandarenNeutral, size) | RaceMask<T>.GetMaskForRace(Race.PandarenAlliance, size) | RaceMask<T>.GetMaskForRace(Race.PandarenHorde, size) | RaceMask<T>.GetMaskForRace(Race.Nightborne, size) |
+            RaceMask<T>.GetMaskForRace(Race.HighmountainTauren, size) | RaceMask<T>.GetMaskForRace(Race.VoidElf, size) | RaceMask<T>.GetMaskForRace(Race.LightforgedDraenei, size) | RaceMask<T>.GetMaskForRace(Race.ZandalariTroll, size) |
+            RaceMask<T>.GetMaskForRace(Race.KulTiran, size) | RaceMask<T>.GetMaskForRace(Race.DarkIronDwarf, size) | RaceMask<T>.GetMaskForRace(Race.Vulpera, size) | RaceMask<T>.GetMaskForRace(Race.MagharOrc, size) |
+            RaceMask<T>.GetMaskForRace(Race.MechaGnome, size) | RaceMask<T>.GetMaskForRace(Race.DracthyrAlliance, size) | RaceMask<T>.GetMaskForRace(Race.DracthyrHorde, size) | RaceMask<T>.GetMaskForRace(Race.EarthenDwarfHorde, size) |
+            RaceMask<T>.GetMaskForRace(Race.EarthenDwarfAlliance, size) | RaceMask<T>.GetMaskForRace(Race.HaranirAlliance, size) | RaceMask<T>.GetMaskForRace(Race.HaranirHorde, size);
 
-        public static RaceMask<ulong> Alliance = new RaceMask<ulong>((ulong)(
-           RaceMask<ulong>.GetMaskForRace(Race.Human) | RaceMask<ulong>.GetMaskForRace(Race.Dwarf) | RaceMask<ulong>.GetMaskForRace(Race.NightElf) |
-           RaceMask<ulong>.GetMaskForRace(Race.Gnome) | RaceMask<ulong>.GetMaskForRace(Race.Draenei) | RaceMask<ulong>.GetMaskForRace(Race.Worgen) |
-           RaceMask<ulong>.GetMaskForRace(Race.PandarenAlliance) | RaceMask<ulong>.GetMaskForRace(Race.VoidElf) | RaceMask<ulong>.GetMaskForRace(Race.LightforgedDraenei) |
-           RaceMask<ulong>.GetMaskForRace(Race.KulTiran) | RaceMask<ulong>.GetMaskForRace(Race.DarkIronDwarf) | RaceMask<ulong>.GetMaskForRace(Race.MechaGnome) | RaceMask<ulong>.GetMaskForRace(Race.DracthyrAlliance) |
-           RaceMask<ulong>.GetMaskForRace(Race.EarthenDwarfAlliance) | RaceMask<ulong>.GetMaskForRace(Race.HaranirAlliance)));
+        public static RaceMask<T> Neutral_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> => RaceMask<T>.GetMaskForRace(Race.PandarenNeutral, size);
 
-        public static RaceMask<ulong> Horde = new RaceMask<ulong>((ulong)(AllPlayable.RawValue & (~(Neutral | Alliance).RawValue)));
+        public static RaceMask<T> Alliance_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> =>
+           RaceMask<T>.GetMaskForRace(Race.Human, size) | RaceMask<T>.GetMaskForRace(Race.Dwarf, size) | RaceMask<T>.GetMaskForRace(Race.NightElf, size) |
+           RaceMask<T>.GetMaskForRace(Race.Gnome, size) | RaceMask<T>.GetMaskForRace(Race.Draenei, size) | RaceMask<T>.GetMaskForRace(Race.Worgen, size) |
+           RaceMask<T>.GetMaskForRace(Race.PandarenAlliance, size) | RaceMask<T>.GetMaskForRace(Race.VoidElf, size) | RaceMask<T>.GetMaskForRace(Race.LightforgedDraenei, size) |
+           RaceMask<T>.GetMaskForRace(Race.KulTiran, size) | RaceMask<T>.GetMaskForRace(Race.DarkIronDwarf, size) | RaceMask<T>.GetMaskForRace(Race.MechaGnome, size) | RaceMask<T>.GetMaskForRace(Race.DracthyrAlliance, size) |
+           RaceMask<T>.GetMaskForRace(Race.EarthenDwarfAlliance, size) | RaceMask<T>.GetMaskForRace(Race.HaranirAlliance, size);
+
+        public static RaceMask<T> Horde_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> => AllPlayable_V<T>(size) & ~(Neutral_V<T>(size) | Alliance_V<T>(size));
+
+        public static RaceMask<ulong> All = All_V<ulong>();
+        public static RaceMask<ulong> AllPlayable = AllPlayable_V<ulong>();
+        public static RaceMask<ulong> Neutral = Neutral_V<ulong>();
+        public static RaceMask<ulong> Alliance = Alliance_V<ulong>();
+        public static RaceMask<ulong> Horde = Horde_V<ulong>();
     }
 
-    public struct RaceMask<T>
+    public class RaceMask<T> where T : INumber<T>, IBitwiseOperators<T, T, T>
     {
-        public dynamic RawValue;
+        public T[] RawValue;
+        public int Size;
 
-        public RaceMask(T rawValue)
+        public RaceMask(T[] rawValue)
         {
             RawValue = rawValue;
         }
 
+        /*public RaceMask(ulong rawValue)
+        {
+            RawValue = [T.CreateChecked(rawValue & 0xFFFFFFFF), T.CreateChecked(rawValue >> 32)];
+        }
+
+        public RaceMask(long rawValue)
+        {
+            RawValue = [T.CreateChecked(rawValue & 0xFFFFFFFF), T.CreateChecked(rawValue >> 32)];
+        }*/
+
+        public RaceMask(int size = 1)
+        {
+            Size = size;
+            RawValue = new T[size];
+        }
+
         public bool HasRace(Race raceId)
         {
-            return (RawValue & GetMaskForRace(raceId)) != 0;
+            int raceBit = GetRaceBit(raceId);
+            return raceBit >= 0 && raceBit < Marshal.SizeOf<T>() * 8 * RawValue.Length
+                && (RawValue[raceBit / (Marshal.SizeOf<T>() * 8)] & T.CreateChecked(1 << (raceBit % (Marshal.SizeOf<T>() * 8)))) != T.Zero;
+        }
+
+        public static RaceMask<T> GetMaskForRace(Race raceId, int size)
+        {
+            RaceMask<T> result = new(size);
+            int raceBit = GetRaceBit(raceId);
+            if (raceBit >= 0 && raceBit < Marshal.SizeOf<T>() * 8 * size)
+                result.RawValue[raceBit / (Marshal.SizeOf<T>() * 8)] = T.CreateChecked(1 << (raceBit % (Marshal.SizeOf<T>() * 8)));
+            return result;
         }
 
         public bool IsEmpty()
         {
-            return RawValue == 0;
+            foreach (T rawValue in RawValue)
+                if (rawValue != T.Zero)
+                    return false;
+            return true;
         }
 
-        public static RaceMask<T> operator &(RaceMask<T> left, RaceMask<T> right) { return new RaceMask<T>(left.RawValue & right.RawValue); }
-        public static RaceMask<T> operator |(RaceMask<T> left, RaceMask<T> right) { return new RaceMask<T>(left.RawValue | right.RawValue); }
-
-        public static dynamic GetMaskForRace(Race raceId)
+        public static RaceMask<T> operator &(RaceMask<T> left, RaceMask<T> right)
         {
-            int raceBit = GetRaceBit(raceId);
-            return (T)(dynamic)(raceBit >= 0 && (uint)raceBit < Marshal.SizeOf<T>() * 8 ? (1 << raceBit) : 0);
+            RaceMask<T> result = new RaceMask<T>(left.Size);
+            for (int i = 0; i < left.Size; ++i)
+                result.RawValue[i] = left.RawValue[i] & right.RawValue[i];
+            return result;
+        }
+        public static RaceMask<T> operator |(RaceMask<T> left, RaceMask<T> right)
+        {
+            RaceMask<T> result = new(left.Size);
+            for (int i = 0; i < left.Size; ++i)
+                result.RawValue[i] = left.RawValue[i] | right.RawValue[i];
+            return result;
+        }
+        public static RaceMask<T> operator ~(RaceMask<T> value)
+        {
+            var result = new RaceMask<T>(value.Size);
+            for (int i = 0; i < value.Size; ++i)
+                result.RawValue[i] = ~value.RawValue[i];
+            return result;
         }
 
         static int GetRaceBit(Race raceId)

@@ -50,7 +50,7 @@ namespace Game
 
             return rank;
         }
-        
+
         public FactionState GetState(FactionRecord factionEntry)
         {
             return factionEntry.CanHaveReputation() ? GetState(factionEntry.ReputationIndex) : null;
@@ -146,7 +146,7 @@ namespace Game
 
             return ReputationRankThresholds.LastOrDefault();
         }
-        
+
         public int GetReputation(FactionRecord factionEntry)
         {
             // Faction without recorded reputation. Just ignore.
@@ -184,7 +184,7 @@ namespace Game
 
             return false;
         }
-        
+
         public int GetParagonLevel(uint paragonFactionId)
         {
             return GetParagonLevel(CliDB.FactionStorage.LookupByKey(paragonFactionId));
@@ -250,7 +250,7 @@ namespace Game
 
             return 0;
         }
-        
+
         public void ApplyForceReaction(uint faction_id, ReputationRank rank, bool apply)
         {
             if (apply)
@@ -384,7 +384,7 @@ namespace Game
         {
             return SetReputation(factionEntry, standing, false, false, false);
         }
-        
+
         public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental, bool spillOverOnly, bool noSpillover)
         {
             Global.ScriptMgr.OnPlayerReputationChange(_player, factionEntry.Id, standing, incremental);
@@ -593,7 +593,7 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!(new RaceMask<long>(factionEntry.ReputationRaceMask[1]).HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
+                if (!(factionEntry.ReputationRaceMask2_.HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
                     SetVisible(factionEntry);
         }
 
@@ -800,10 +800,18 @@ namespace Game
 
             short classMask = (short)_player.GetClassMask();
 
+            RaceMask<int>[] reputationRaceMask =
+            [
+                factionEntry.ReputationRaceMask1_,
+                factionEntry.ReputationRaceMask2_,
+                factionEntry.ReputationRaceMask3_,
+                factionEntry.ReputationRaceMask4_
+            ];
+
             for (int i = 0; i < 4; i++)
             {
-                var raceMask = new RaceMask<long>(factionEntry.ReputationRaceMask[i]);
-                if ((raceMask.HasRace(_player.GetRace()) || (raceMask.IsEmpty() && factionEntry.ReputationClassMask[i] != 0)) && (factionEntry.ReputationClassMask[i].HasAnyFlag(classMask) || factionEntry.ReputationClassMask[i] == 0))
+                if ((reputationRaceMask[i].IsEmpty() || reputationRaceMask[i].HasRace(_player.GetRace()))
+                    && (factionEntry.ReputationClassMask[i] == 0 || (factionEntry.ReputationClassMask[i] & classMask) != 0))
                     return i;
             }
 
@@ -828,7 +836,7 @@ namespace Game
 
             return _player.GetLevel() >= _player.GetQuestMinLevel(quest);
         }
-        
+
         public byte GetVisibleFactionCount() { return _visibleFactionCount; }
 
         public byte GetHonoredFactionCount() { return _honoredFactionCount; }
@@ -863,10 +871,17 @@ namespace Game
 
             uint classMask = (1u << ((int)playerClass - 1));
 
+            RaceMask<int>[] reputationRaceMask =
+            [
+                factionEntry.ReputationRaceMask1_,
+                factionEntry.ReputationRaceMask2_,
+                factionEntry.ReputationRaceMask3_,
+                factionEntry.ReputationRaceMask4_
+            ];
+
             for (int i = 0; i < 4; i++)
             {
-                var raceMask = new RaceMask<long>(factionEntry.ReputationRaceMask[i]);
-                if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask)) && (raceMask.IsEmpty() || raceMask.HasRace(race)))
+                if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask)) && (reputationRaceMask[i].IsEmpty() || reputationRaceMask[i].HasRace(race)))
                     return factionEntry.ReputationBase[i];
             }
 

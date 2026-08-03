@@ -3609,15 +3609,15 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerHasAtLeastProfPathRanks: // 355
                 {
                     uint ranks = 0;
-                    foreach (var (_, (traitConfig, _)) in referencePlayer.m_activePlayerData.TraitConfigs)
+                    foreach (var (_, traitConfig) in referencePlayer.m_activePlayerData.TraitConfigs)
                     {
-                        if ((TraitConfigType)(int)traitConfig.Type != TraitConfigType.Profession)
+                        if ((TraitConfigType)(int)traitConfig.value.Type != TraitConfigType.Profession)
                             continue;
 
-                        if (traitConfig.SkillLineID != secondaryAsset)
+                        if (traitConfig.value.SkillLineID != secondaryAsset)
                             continue;
 
-                        foreach (TraitEntry traitEntry in traitConfig.Entries)
+                        foreach (TraitEntry traitEntry in traitConfig.value.Entries)
                             if (CliDB.TraitNodeEntryStorage.LookupByKey(traitEntry.TraitNodeEntryID)?.GetNodeEntryType() == TraitNodeEntryType.ProfPath)
                                 ranks += (uint)(traitEntry.Rank + traitEntry.GrantedRanks);
                     }

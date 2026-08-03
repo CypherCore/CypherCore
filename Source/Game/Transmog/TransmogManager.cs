@@ -41,6 +41,23 @@ namespace Game
 
         public static uint DefaultOutfitIcon = 134400;
 
+        ItemSheatheType[][] TransmogSheatheMappingByCategoryAndSheatheType =
+        [
+            [ ItemSheatheType.None,                   ItemSheatheType.None,              ItemSheatheType.None, ItemSheatheType.None    ],
+            [ ItemSheatheType.Shoulder,               ItemSheatheType.Shoulder,          ItemSheatheType.None, ItemSheatheType.ShoulderInvis],
+            [ ItemSheatheType.Inverted,               ItemSheatheType.Inverted,          ItemSheatheType.None, ItemSheatheType.InvertedInvis          ],
+            [ ItemSheatheType.Hip,                    ItemSheatheType.Shoulder,          ItemSheatheType.Hip,  ItemSheatheType.HipInvis               ],
+            [ ItemSheatheType.Shield,                 ItemSheatheType.Shield,            ItemSheatheType.None, ItemSheatheType.ShieldInvis            ],
+            [ ItemSheatheType.Crossbow,               ItemSheatheType.Crossbow,          ItemSheatheType.None, ItemSheatheType.CrossbowInvis          ],
+            [ ItemSheatheType.ShoulderInvis,          ItemSheatheType.Shoulder,          ItemSheatheType.None, ItemSheatheType.ShoulderInvis          ],
+            [ ItemSheatheType.InvertedInvis,          ItemSheatheType.Inverted,          ItemSheatheType.None, ItemSheatheType.InvertedInvis          ],
+            [ ItemSheatheType.HipInvis,               ItemSheatheType.Shoulder,          ItemSheatheType.Hip,  ItemSheatheType.HipInvis               ],
+            [ ItemSheatheType.ShieldInvis,            ItemSheatheType.Shield,            ItemSheatheType.None, ItemSheatheType.ShieldInvis            ],
+            [ ItemSheatheType.CrossbowInvis,          ItemSheatheType.Crossbow,          ItemSheatheType.None, ItemSheatheType.CrossbowInvis          ],
+            [ ItemSheatheType.InvertedDualWield,      ItemSheatheType.InvertedDualWield, ItemSheatheType.None, ItemSheatheType.InvertedDualWieldInvis ],
+            [ ItemSheatheType.InvertedDualWieldInvis, ItemSheatheType.InvertedDualWield, ItemSheatheType.None, ItemSheatheType.InvertedDualWieldInvis ]
+        ];
+
         TransmogManager() { }
 
         public bool IsArtifactTransmogOutfitSlotOption(TransmogOutfitSlotOption option)
@@ -304,7 +321,7 @@ namespace Game
             TransmogOutfitEntryRecord lastOwnedOutfit = null;
             foreach (var (id, transmogOutfit) in player.m_activePlayerData.TransmogOutfits)
             {
-                TransmogOutfitEntryRecord transmogOutfitEntry = CliDB.TransmogOutfitEntryStorage.LookupByKey(transmogOutfit.Item1.Id);
+                TransmogOutfitEntryRecord transmogOutfitEntry = CliDB.TransmogOutfitEntryStorage.LookupByKey(transmogOutfit.value.Id);
                 if (transmogOutfitEntry == null || transmogOutfitEntry.GetSource() != source)
                     continue;
 
@@ -371,6 +388,9 @@ namespace Game
                 if (slot.SlotOption >= TransmogOutfitSlotOption.Max)
                     return false;
 
+                if (slot.SheatheCategory >= TransmogOutfitSlotOptionSheatheCategory.Max)
+                    return false;
+
                 if (slot.AppearanceDisplayType >= TransmogOutfitDisplayType.Max)
                     return false;
 
@@ -395,6 +415,10 @@ namespace Game
 
                     TransmogOutfitSlotOption appearanceSlotOption = itemTemplate.GetWeaponTransmogOutfitSlotOption();
                     if (appearanceSlotOption != slot.SlotOption && (slot.SlotOption != TransmogOutfitSlotOption.FuryTwoHandedWeapon || appearanceSlotOption != TransmogOutfitSlotOption.TwoHandedWeapon))
+                        return false;
+
+                    if (slot.SheatheCategory != TransmogOutfitSlotOptionSheatheCategory.Default && (itemTemplate.GetSheatheType() >= ItemSheatheType.Max ||
+                        TransmogSheatheMappingByCategoryAndSheatheType[(int)itemTemplate.GetSheatheType()][(int)slot.SheatheCategory] == ItemSheatheType.None))
                         return false;
                 }
 

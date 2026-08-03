@@ -1769,6 +1769,25 @@ namespace Framework.Constants
         LegacyInactive = 0x01,
     }
 
+    public enum ItemSheatheType : byte
+    {
+        None = 0,
+        Shoulder = 1,
+        Inverted = 2,
+        Hip = 3,
+        Shield = 4,
+        Crossbow = 5,
+        ShoulderInvis = 6,
+        InvertedInvis = 7,
+        HipInvis = 8,
+        ShieldInvis = 9,
+        CrossbowInvis = 10,
+        InvertedDualWield = 11,
+        InvertedDualWieldInvis = 12,
+
+        Max
+    }
+
     public enum ItemSpecStat : byte
     {
         Intellect = 0,
@@ -3318,6 +3337,16 @@ namespace Framework.Constants
         IllusionNotAllowed = 0x01,
         DynamicOptionName = 0x02,
         DisablesOffhandSlot = 0x04
+    }
+
+    public enum TransmogOutfitSlotOptionSheatheCategory : byte
+    {
+        Default = 0,
+        Back = 1,
+        Side = 2,
+        Hide = 3,
+
+        Max
     }
 
     public enum TransmogSituation : sbyte

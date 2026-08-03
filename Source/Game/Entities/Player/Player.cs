@@ -2613,7 +2613,7 @@ namespace Game.Entities
 
         public bool UpdateTransmogOutfit(uint id, Networking.Packets.TransmogOutfitDataInfo outfitData)
         {
-            if (m_activePlayerData.TransmogOutfits.Get(id).Item1 == null)
+            if (m_activePlayerData.TransmogOutfits.Get(id) == null)
                 return false;
 
             var transmogOutfits = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
@@ -2655,7 +2655,7 @@ namespace Game.Entities
         public void UpdateTransmogOutfitSlots(uint id, Span<Networking.Packets.TransmogOutfitSlotData> slots)
         {
             var transmogOutfit = m_activePlayerData.TransmogOutfits.Get(id);
-            if (transmogOutfit.Item1 == null)
+            if (transmogOutfit == null)
                 return;
 
             var outfit = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
@@ -2663,13 +2663,14 @@ namespace Game.Entities
             uint outfitSlotIndex = 0;
             foreach (var slot in slots)
             {
-                while (((sbyte)transmogOutfit.Item1.Slots[(int)outfitSlotIndex].Slot, (byte)transmogOutfit.Item1.Slots[(int)outfitSlotIndex].SlotOption).CompareTo(((sbyte)slot.Slot, (byte)slot.SlotOption)) > 0)
-                    if (++outfitSlotIndex >= transmogOutfit.Item1.Slots.Size())
+                while (((sbyte)transmogOutfit.Slots[(int)outfitSlotIndex].Slot, (byte)transmogOutfit.Slots[(int)outfitSlotIndex].SlotOption).CompareTo(((sbyte)slot.Slot, (byte)slot.SlotOption)) > 0)
+                    if (++outfitSlotIndex >= transmogOutfit.Slots.Size())
                         return;
 
                 TransmogOutfitSlotData viewedOutfitSlot = outfit.ModifyValue(outfit.Slots, (int)outfitSlotIndex);
                 SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.Slot), (sbyte)slot.Slot);
                 SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SlotOption), (byte)slot.SlotOption);
+                SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SheatheCategory), (byte)slot.SheatheCategory);
                 SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.ItemModifiedAppearanceID), slot.ItemModifiedAppearanceID);
                 SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.AppearanceDisplayType), (byte)slot.AppearanceDisplayType);
                 SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SpellItemEnchantmentID), slot.SpellItemEnchantmentID);
@@ -2693,12 +2694,13 @@ namespace Game.Entities
             TransmogOutfitData viewedOutfit = activePlayerData.ModifyValue(m_activePlayerData.ViewedOutfit);
 
             var transmogOutfit = m_activePlayerData.TransmogOutfits.Get(id);
-            if (transmogOutfit.Item1 != null)
+            if (transmogOutfit != null)
             {
-                foreach (var slot in transmogOutfit.Item1.Slots)
+                foreach (var slot in transmogOutfit.Slots)
                 {
                     uint slotIndex = TransmogMgr.GetSlotAndOption((TransmogOutfitSlot)(sbyte)slot.Slot, (TransmogOutfitSlotOption)(byte)slot.SlotOption).SlotIndex;
                     TransmogOutfitSlotData viewedOutfitSlot = viewedOutfit.ModifyValue(viewedOutfit.Slots, (int)slotIndex);
+                    SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SheatheCategory), slot.SheatheCategory);
                     if ((TransmogOutfitDisplayType)(byte)slot.AppearanceDisplayType != TransmogOutfitDisplayType.Unassigned)
                     {
                         SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.ItemModifiedAppearanceID), slot.ItemModifiedAppearanceID);
@@ -2721,6 +2723,7 @@ namespace Game.Entities
 
                     TransmogOutfitSlotOption slotOption = slotInfo.SlotOption != null ? slotInfo.SlotOption.GetOption() : TransmogOutfitSlotOption.None;
                     SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SlotOption), (byte)slotOption);
+                    SetUpdateFieldValue(viewedOutfitSlot.ModifyValue(viewedOutfitSlot.SheatheCategory), (byte)TransmogOutfitSlotOptionSheatheCategory.Default);
 
                     Item item = GetItemByPos(InventorySlots.Bag0, (byte)slotInfo.Slot.InventorySlotEnum);
                     if (item != null)
@@ -2757,119 +2760,6 @@ namespace Game.Entities
 
             for (byte equipSlot = EquipmentSlot.Start; equipSlot < EquipmentSlot.End; ++equipSlot)
                 SetVisibleItemSlot(equipSlot, GetItemByPos(InventorySlots.Bag0, equipSlot));
-        }
-
-        string GetCharacterSelectOutfit()
-        {
-            List<TransmogOutfitData> outfits = [];
-            foreach (var (_, transmogOutfit) in m_activePlayerData.TransmogOutfits)
-            {
-                if (!transmogOutfit.Item1.OutfitInfo.GetValue().SituationsEnabled)
-                    continue;
-
-                bool isCharacterSelect = transmogOutfit.Item1.Situations.FindIndexIf(situation => CliDB.TransmogSituationStorage.LookupByKey(situation.SituationID).GetSituation() == TransmogSituation.LocationCharacterSelect) >= 0;
-
-                if (!isCharacterSelect)
-                    continue;
-
-                outfits.Add(transmogOutfit.Item1);
-            }
-
-            TransmogOutfitData outfit = m_activePlayerData.ViewedOutfit;
-            if (!outfits.Empty())
-                outfit = outfits.SelectRandom();
-
-            bool isTransmogDisplayed(TransmogOutfitDisplayType displayType) => displayType == TransmogOutfitDisplayType.Assigned || displayType == TransmogOutfitDisplayType.Hidden;
-
-            string result = "";
-            for (int i = EquipmentSlot.Start; i < EquipmentSlot.End; i = i + 1)
-            {
-                TransmogOutfitSlotOption transmogSlotOption = TransmogOutfitSlotOption.None;
-                switch (i)
-                {
-                    case EquipmentSlot.MainHand:
-                        transmogSlotOption = (TransmogOutfitSlotOption)m_activePlayerData.TransmogMetadata.GetValue().StampedOptionMainHand;
-                        break;
-                    case EquipmentSlot.OffHand:
-                        transmogSlotOption = (TransmogOutfitSlotOption)m_activePlayerData.TransmogMetadata.GetValue().StampedOptionOffHand;
-                        break;
-                    default:
-                        break;
-                }
-
-                var slotInfo = TransmogMgr.GetSlotAndOption((uint)i, transmogSlotOption);
-                if (slotInfo != null)
-                {
-                    var transmogOutfitSlot = outfit.Slots[(int)slotInfo.SlotIndex];
-
-                    uint itemModifiedAppearanceId = transmogOutfitSlot.ItemModifiedAppearanceID;
-                    if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.AppearanceDisplayType))
-                        itemModifiedAppearanceId = m_playerData.VisibleItems[i].ItemModifiedAppearanceID;
-
-                    InventoryType inventoryType = InventoryType.NonEquip;
-                    uint displayId = 0;
-                    ushort itemVisual = 0;
-                    byte subClass = 0;
-                    uint secondaryItemModifiedAppearanceId = 0;
-                    ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
-                    if (itemModifiedAppearance != null)
-                    {
-                        TransmogHolidayRecord transmogHoliday = CliDB.TransmogHolidayStorage.LookupByKey(itemModifiedAppearance.ItemID);
-                        if (transmogHoliday == null || Global.GameEventMgr.IsHolidayActive((HolidayIds)transmogHoliday.RequiredTransmogHoliday))
-                        {
-                            ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
-                            if (item != null)
-                            {
-                                subClass = item.SubclassID;
-                                inventoryType = item.inventoryType;
-                            }
-
-                            ItemAppearanceRecord itemAppearance = CliDB.ItemAppearanceStorage.LookupByKey(itemModifiedAppearance.ItemAppearanceID);
-                            if (itemAppearance != null)
-                                displayId = itemAppearance.ItemDisplayInfoID;
-                        }
-                    }
-
-                    SpellItemEnchantmentRecord spellItemEnchantment = CliDB.SpellItemEnchantmentStorage.LookupByKey(transmogOutfitSlot.SpellItemEnchantmentID);
-                    if (spellItemEnchantment != null)
-                        itemVisual = spellItemEnchantment.ItemVisual;
-
-                    if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)transmogOutfitSlot.IllusionDisplayType))
-                        itemVisual = m_playerData.VisibleItems[i].ItemVisual;
-
-                    TransmogOutfitSlotInfoRecord secondarySlot = CliDB.TransmogOutfitSlotInfoStorage.LookupByKey(slotInfo.Slot.SecondarySlotID);
-                    if (secondarySlot != null)
-                    {
-                        var secondarySlotInfo = TransmogMgr.GetSlotAndOption(secondarySlot.GetSlot(), transmogSlotOption);
-                        if (secondarySlotInfo != null)
-                        {
-                            var secondaryTransmogOutfitSlot = outfit.Slots[(int)secondarySlotInfo.SlotIndex];
-
-                            secondaryItemModifiedAppearanceId = secondaryTransmogOutfitSlot.ItemModifiedAppearanceID;
-                            if (!isTransmogDisplayed((TransmogOutfitDisplayType)(byte)secondaryTransmogOutfitSlot.AppearanceDisplayType))
-                                secondaryItemModifiedAppearanceId = m_playerData.VisibleItems[i].SecondaryItemModifiedAppearanceID;
-
-                            itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(secondaryItemModifiedAppearanceId);
-                            if (itemModifiedAppearance != null)
-                            {
-                                TransmogHolidayRecord transmogHoliday = CliDB.TransmogHolidayStorage.LookupByKey(itemModifiedAppearance.ItemID);
-                                if (transmogHoliday != null)
-                                    if (!Global.GameEventMgr.IsHolidayActive((HolidayIds)transmogHoliday.RequiredTransmogHoliday))
-                                        secondaryItemModifiedAppearanceId = 0;
-                            }
-                        }
-                    }
-
-                    result += $"{inventoryType} {displayId} {itemVisual} {subClass} {secondaryItemModifiedAppearanceId} ";
-                }
-                else
-                    result += "0 0 0 0 0 ";
-            }
-
-            for (uint i = EquipmentSlot.End; i < InventorySlots.ReagentBagEnd; ++i)
-                result += "0 0 0 0 0 ";
-
-            return result;
         }
 
         public override void OnPhaseChange()
@@ -8014,8 +7904,7 @@ namespace Game.Entities
             foreach (var _spell_idx in bounds)
             {
                 // skip wrong race skills
-                var raceMask = new RaceMask<long>(_spell_idx.RaceMask);
-                if (!raceMask.IsEmpty() && !raceMask.HasRace(GetRace()))
+                if (!_spell_idx.RaceMask.IsEmpty() && !_spell_idx.RaceMask.HasRace(GetRace()))
                     continue;
 
                 // skip wrong class skills

@@ -663,6 +663,12 @@ namespace Framework.Constants
         Unk653 = 653,
         Unk654 = 654,
         ModTransmogOutfitUpdateCost = 655,
+        Unk656 = 656,
+        Unk657 = 657,
+        Unk658 = 658,
+        Unk659 = 659,
+        Unk660 = 660,
+        AlteredFormInCombat = 661,
 
         Total
     }

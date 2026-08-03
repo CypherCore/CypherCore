@@ -265,6 +265,7 @@ namespace Game.Networking.Packets
     {
         public TransmogOutfitSlot Slot;
         public TransmogOutfitSlotOption SlotOption;
+        public TransmogOutfitSlotOptionSheatheCategory SheatheCategory;
         public TransmogOutfitDisplayType AppearanceDisplayType;
         public TransmogOutfitDisplayType IllusionDisplayType;
         public uint ItemModifiedAppearanceID;
@@ -275,6 +276,7 @@ namespace Game.Networking.Packets
         {
             Slot = (TransmogOutfitSlot)data.ReadInt8();
             SlotOption = (TransmogOutfitSlotOption)data.ReadUInt8();
+            SheatheCategory = (TransmogOutfitSlotOptionSheatheCategory)data.ReadUInt8();
             ItemModifiedAppearanceID = data.ReadUInt32();
             AppearanceDisplayType = (TransmogOutfitDisplayType)data.ReadUInt8();
             SpellItemEnchantmentID = data.ReadUInt32();
@@ -286,6 +288,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt8((sbyte)Slot);
             data.WriteUInt8((byte)SlotOption);
+            data.WriteUInt8((byte)SheatheCategory);
             data.WriteUInt32(ItemModifiedAppearanceID);
             data.WriteUInt8((byte)AppearanceDisplayType);
             data.WriteUInt32(SpellItemEnchantmentID);

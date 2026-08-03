@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.Miscellaneous;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -91,10 +92,11 @@ namespace Game.DataStorage
     public sealed class CharacterLoadoutRecord
     {
         public uint Id;
-        public long RaceMask;
+        public RaceMask<long> RaceMask;
         public sbyte ChrClassID;
         public int Purpose;
         public byte ItemContext;
+        public RaceMask<int> RaceMask_ = new(2);
 
         public bool IsForNewCharacter() { return Purpose == 9; }
     }
@@ -244,7 +246,7 @@ namespace Game.DataStorage
     public sealed class ChrCustomizationReqRecord
     {
         public uint Id;
-        public long RaceMask;
+        public RaceMask<long> RaceMask;
         public string ReqSource;
         public int Flags;
         public int ClassMask;
@@ -253,6 +255,7 @@ namespace Game.DataStorage
         public int QuestID;
         public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
         public uint ItemModifiedAppearanceID;
+        public RaceMask<int> RaceMask_ = new(2);
 
         public bool HasFlag(ChrCustomizationReqFlag chrCustomizationReqFlag) { return (Flags & (int)chrCustomizationReqFlag) != 0; }
     }

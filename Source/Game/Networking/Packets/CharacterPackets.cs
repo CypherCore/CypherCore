@@ -1,7 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Game.Entities;
@@ -121,10 +120,10 @@ namespace Game.Networking.Packets
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Rename))
                     Flags |= CharacterFlags.Rename;
 
-                if (fields.Read<uint>(18) != 0)
+                if (fields.Read<uint>(17) != 0)
                     Flags |= CharacterFlags.LockedByBilling;
 
-                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(29)))
+                if (WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed) && !string.IsNullOrEmpty(fields.Read<string>(180)))
                     Flags |= CharacterFlags.Declined;
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Customize))
@@ -166,33 +165,35 @@ namespace Game.Networking.Packets
                 ProfessionIds[0] = 0;
                 ProfessionIds[1] = 0;
 
-                StringArray equipment = new(fields.Read<string>(17), ' ');
-                ListPosition = fields.Read<byte>(19);
-                CreateTime = fields.Read<long>(20);
-                LastActiveTime = fields.Read<long>(21);
+                ListPosition = fields.Read<byte>(18);
+                CreateTime = fields.Read<long>(19);
+                LastActiveTime = fields.Read<long>(20);
 
-                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(22));
+                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
                 if (spec != null)
                     SpecID = (short)spec.Id;
 
-                LastLoginVersion = fields.Read<int>(23);
+                LastLoginVersion = fields.Read<int>(22);
 
-                PersonalTabard.EmblemStyle = fields.Read<int>(24);
-                PersonalTabard.EmblemColor = fields.Read<int>(25);
-                PersonalTabard.BorderStyle = fields.Read<int>(26);
-                PersonalTabard.BorderColor = fields.Read<int>(27);
-                PersonalTabard.BackgroundColor = fields.Read<int>(28);
+                PersonalTabard.EmblemStyle = fields.Read<int>(23);
+                PersonalTabard.EmblemColor = fields.Read<int>(24);
+                PersonalTabard.BorderStyle = fields.Read<int>(25);
+                PersonalTabard.BorderColor = fields.Read<int>(26);
+                PersonalTabard.BackgroundColor = fields.Read<int>(27);
 
-                int equipmentFieldsPerSlot = 5;
-
-                for (var slot = 0; slot < VisualItems.Length && (slot + 1) * equipmentFieldsPerSlot <= equipment.Length; ++slot)
+                for (var slot = 0; slot < VisualItems.Length; ++slot)
                 {
-                    int visualBase = slot * equipmentFieldsPerSlot;
-                    VisualItems[slot].InvType = byte.Parse(equipment[visualBase + 0]);
-                    VisualItems[slot].DisplayId = uint.Parse(equipment[visualBase + 1]);
-                    VisualItems[slot].DisplayEnchantId = uint.Parse(equipment[visualBase + 2]);
-                    VisualItems[slot].Subclass = byte.Parse(equipment[visualBase + 3]);
-                    VisualItems[slot].SecondaryItemModifiedAppearanceID = uint.Parse(equipment[visualBase + 4]);
+                    int equipmentFieldsPerSlot = 8;
+
+                    int visualBase = 28 + slot * equipmentFieldsPerSlot;
+                    VisualItems[slot].ItemID = fields.Read<uint>(visualBase + 0);
+                    VisualItems[slot].TransmogrifiedItemID = fields.Read<uint>(visualBase + 1);
+                    VisualItems[slot].Subclass = fields.Read<byte>(visualBase + 2);
+                    VisualItems[slot].InvType = fields.Read<byte>(visualBase + 3);
+                    VisualItems[slot].DisplayId = fields.Read<uint>(visualBase + 4);
+                    VisualItems[slot].DisplayEnchantId = fields.Read<uint>(visualBase + 5);
+                    VisualItems[slot].SecondaryItemModifiedAppearanceID = fields.Read<uint>(visualBase + 6);
+                    VisualItems[slot].SheatheCategory = fields.Read<byte>(visualBase + 7);
                 }
             }
 
@@ -302,12 +303,14 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(DisplayId);
                     data.WriteUInt32(DisplayEnchantId);
                     data.WriteUInt32(SecondaryItemModifiedAppearanceID);
+                    data.WriteUInt8(SheatheCategory);
                 }
 
                 public uint ItemID;
                 public uint TransmogrifiedItemID;
                 public byte Subclass;
                 public byte InvType;
+                public byte SheatheCategory;
                 public uint DisplayId;
                 public uint DisplayEnchantId;
                 public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value

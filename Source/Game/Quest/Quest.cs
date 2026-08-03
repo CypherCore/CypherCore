@@ -101,7 +101,8 @@ namespace Game
             SoundTurnIn = fields.Read<uint>(101);
             AreaGroupID = fields.Read<uint>(102);
             LimitTime = fields.Read<uint>(103);
-            AllowableRaces = new(fields.Read<ulong>(104));
+            var rawValue = fields.Read<ulong>(104);
+            AllowableRaces = new([(int)(rawValue & 0xFFFFFFFF), (int)(rawValue >> 32)]);
             ResetByScheduler = fields.Read<bool>(105);
             Expansion = fields.Read<int>(106);
             ManagedWorldStateID = fields.Read<int>(107);
@@ -948,7 +949,7 @@ namespace Game
         public uint SoundTurnIn { get; set; }
         public uint AreaGroupID;
         public long LimitTime;
-        public RaceMask<ulong> AllowableRaces { get; set; }
+        public RaceMask<int> AllowableRaces { get; set; } = new(2);
         public List<int> TreasurePickerID = new();
         public int Expansion;
         public int ManagedWorldStateID;

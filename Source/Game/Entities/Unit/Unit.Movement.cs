@@ -479,11 +479,61 @@ namespace Game.Entities
             return true;
         }
 
-        bool SetEnableFullSpeedTurning(bool enable)
+        bool SetStrafingDisabled(bool disable)
         {
-            if (!IsPlayer())
+            if (disable == HasUnitMovementFlag2(MovementFlag2.NoStrafe))
                 return false;
 
+            if (disable)
+                AddUnitMovementFlag2(MovementFlag2.NoStrafe);
+            else
+                RemoveUnitMovementFlag2(MovementFlag2.NoStrafe);
+
+
+            Player playerMover = GetPlayerMovingMe();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableStrafing : ServerOpcodes.MoveEnableStrafing);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
+        bool SetJumpingDisabled(bool disable)
+        {
+            if (disable == HasUnitMovementFlag2(MovementFlag2.NoJumping))
+                return false;
+
+            if (disable)
+                AddUnitMovementFlag2(MovementFlag2.NoJumping);
+            else
+                RemoveUnitMovementFlag2(MovementFlag2.NoJumping);
+
+            Player playerMover = GetPlayerMovingMe();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableJumping : ServerOpcodes.MoveEnableJumping);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
+        bool SetEnableFullSpeedTurning(bool enable)
+        {
             if (enable == HasUnitMovementFlag2(MovementFlag2.FullSpeedTurning))
                 return false;
 
@@ -492,11 +542,62 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
 
-            ServerOpcodes[] fullSpeedTurningOpcodeTable = [ServerOpcodes.MoveDisableFullSpeedTurning, ServerOpcodes.MoveEnableFullSpeedTurning];
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
-                MoveSetFlag packet = new(fullSpeedTurningOpcodeTable[enable ? 1 : 0]);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableFullSpeedTurning : ServerOpcodes.MoveDisableFullSpeedTurning);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
+        bool SetEnableFullSpeedPitching(bool enable)
+        {
+            if (enable == HasUnitMovementFlag2(MovementFlag2.FullSpeedPitching))
+                return false;
+
+            if (enable)
+                AddUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+            else
+                RemoveUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+
+            Player playerMover = GetPlayerMovingMe();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableFullSpeedPitching : ServerOpcodes.MoveDisableFullSpeedPitching);
+                packet.MoverGUID = GetGUID();
+                packet.SequenceIndex = m_movementCounter++;
+                playerMover.SendPacket(packet);
+
+                MoveUpdate moveUpdate = new();
+                moveUpdate.Status = m_movementInfo;
+                SendMessageToSet(moveUpdate, playerMover);
+            }
+
+            return true;
+        }
+
+        bool SetAlwaysAllowPitching(bool enable)
+        {
+            if (enable == HasUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching))
+                return false;
+
+            if (enable)
+                AddUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
+            else
+                RemoveUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
+
+            Player playerMover = GetPlayerMovingMe();
+            if (playerMover != null)
+            {
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetAlwaysAllowPitching : ServerOpcodes.MoveUnsetAlwaysAllowPitching);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);

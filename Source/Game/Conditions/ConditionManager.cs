@@ -1346,10 +1346,10 @@ namespace Game
                 }
                 case ConditionTypes.Race:
                 {
-                    RaceMask<ulong> invalidRaceMask = new RaceMask<ulong>(cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
+                    RaceMask<ulong> invalidRaceMask = new RaceMask<ulong>([cond.ConditionValue1]) & ~RaceMask.AllPlayable;
                     if (!invalidRaceMask.IsEmpty()) // uint32 works thanks to weird index remapping in racemask
                     {
-                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~RaceMask.AllPlayable.RawValue);
+                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), invalidRaceMask.RawValue[0]);
                         return false;
                     }
                     break;
@@ -1980,8 +1980,7 @@ namespace Game
                 }
             }
 
-            var raceMask = new RaceMask<long>(condition.RaceMask);
-            if (!raceMask.IsEmpty() && raceMask.HasRace(player.GetRace()))
+            if (!condition.RaceMask.IsEmpty() && condition.RaceMask.HasRace(player.GetRace()))
                 return false;
 
             if (condition.ClassMask != 0 && !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))
@@ -2409,14 +2408,14 @@ namespace Game
                     {
                         foreach (var (_, traitConfig) in player.m_activePlayerData.TraitConfigs)
                         {
-                            if ((TraitConfigType)(int)traitConfig.Item1.Type == TraitConfigType.Combat)
+                            if ((TraitConfigType)(int)traitConfig.value.Type == TraitConfigType.Combat)
                             {
-                                if (player.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.Item1.ID
-                                || !((TraitCombatConfigFlags)(int)traitConfig.Item1.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
+                                if (player.m_activePlayerData.ActiveCombatTraitConfigID != traitConfig.value.ID
+                                || !((TraitCombatConfigFlags)(int)traitConfig.value.CombatConfigFlags).HasFlag(TraitCombatConfigFlags.ActiveForSpec))
                                     continue;
                             }
 
-                            foreach (TraitEntry traitEntry in traitConfig.Item1.Entries)
+                            foreach (TraitEntry traitEntry in traitConfig.value.Entries)
                                 if (traitEntry.TraitNodeEntryID == traitNodeEntryId)
                                     return (ushort)traitEntry.Rank;
                         }

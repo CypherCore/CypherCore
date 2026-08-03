@@ -757,7 +757,7 @@ namespace Game.Networking.Packets
             EventType = data.ReadUInt8();
             TextureID = data.ReadInt32();
             Time.Read(data);
-            Flags = data.ReadUInt32();
+            Flags = data.ReadUInt16();
             var InviteCount = data.ReadUInt32();
 
             byte titleLength = data.ReadBits<byte>(8);
@@ -780,7 +780,7 @@ namespace Game.Networking.Packets
         public byte EventType;
         public int TextureID;
         public WowTime Time;
-        public uint Flags;
+        public ushort Flags;
         public CalendarAddEventInviteInfo[] Invites = new CalendarAddEventInviteInfo[(int)SharedConst.CalendarMaxInvites];
     }
 

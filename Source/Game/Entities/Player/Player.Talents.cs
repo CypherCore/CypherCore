@@ -873,7 +873,7 @@ namespace Game.Entities
         public void CreateTraitConfig(TraitConfigPacket traitConfig)
         {
             int configId = TraitMgr.GenerateNewTraitConfigId();
-            bool hasConfigId(int id) => m_activePlayerData.TraitConfigs.Get(id).Item1 != null;
+            bool hasConfigId(int id) => m_activePlayerData.TraitConfigs.Get(id) != null;
 
             while (hasConfigId(configId))
                 configId = TraitMgr.GenerateNewTraitConfigId();
@@ -938,12 +938,12 @@ namespace Game.Entities
 
         public TraitConfig GetTraitConfig(int configId)
         {
-            return m_activePlayerData.TraitConfigs.Get(configId).Item1;
+            return m_activePlayerData.TraitConfigs.Get(configId);
         }
 
         public void UpdateTraitConfig(TraitConfigPacket newConfig, int savedConfigId, bool withCastTime)
         {
-            var oldConfig = m_activePlayerData.TraitConfigs.Get(newConfig.ID).Item1;
+            var oldConfig = m_activePlayerData.TraitConfigs.Get(newConfig.ID);
             if (oldConfig == null)
                 return;
 
@@ -996,7 +996,7 @@ namespace Game.Entities
 
         void ApplyTraitEntryChanges(int editedConfigId, TraitConfigPacket newConfig, bool applyTraits, bool consumeCurrencies)
         {
-            var editedConfig = m_activePlayerData.TraitConfigs.Get(editedConfigId).Item1;
+            var editedConfig = m_activePlayerData.TraitConfigs.Get(editedConfigId);
             if (editedConfig == null)
                 return;
 
@@ -1147,7 +1147,7 @@ namespace Game.Entities
 
         public void RenameTraitConfig(int editedConfigId, string newName)
         {
-            TraitConfig editedConfig = m_activePlayerData.TraitConfigs.Get(editedConfigId).Item1;
+            TraitConfig editedConfig = m_activePlayerData.TraitConfigs.Get(editedConfigId);
             if (editedConfig == null
                 || (TraitConfigType)(int)editedConfig.Type != TraitConfigType.Combat
                 || ((TraitCombatConfigFlags)(int)editedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None)
@@ -1161,7 +1161,7 @@ namespace Game.Entities
 
         public void DeleteTraitConfig(int deletedConfigId)
         {
-            TraitConfig deletedConfig = m_activePlayerData.TraitConfigs.Get(deletedConfigId).Item1;
+            TraitConfig deletedConfig = m_activePlayerData.TraitConfigs.Get(deletedConfigId);
             if (deletedConfig == null
                 || (TraitConfigType)(int)deletedConfig.Type != TraitConfigType.Combat
                 || ((TraitCombatConfigFlags)(int)deletedConfig.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None)
@@ -1216,7 +1216,7 @@ namespace Game.Entities
 
         public void SetTraitConfigUseStarterBuild(int traitConfigId, bool useStarterBuild)
         {
-            TraitConfig config = m_activePlayerData.TraitConfigs.Get(traitConfigId).Item1;
+            TraitConfig config = m_activePlayerData.TraitConfigs.Get(traitConfigId);
             if (config == null
                 || (TraitConfigType)(int)config.Type != TraitConfigType.Combat
                 || ((TraitCombatConfigFlags)(int)config.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) == TraitCombatConfigFlags.None)
@@ -1242,7 +1242,7 @@ namespace Game.Entities
 
         public void SetTraitConfigUseSharedActionBars(int traitConfigId, bool usesSharedActionBars, bool isLastSelectedSavedConfig)
         {
-            TraitConfig config = m_activePlayerData.TraitConfigs.Get(traitConfigId).Item1;
+            TraitConfig config = m_activePlayerData.TraitConfigs.Get(traitConfigId);
             if (config == null
                 || (TraitConfigType)(int)config.Type != TraitConfigType.Combat
                 || ((TraitCombatConfigFlags)(int)config.CombatConfigFlags & TraitCombatConfigFlags.ActiveForSpec) != TraitCombatConfigFlags.None)

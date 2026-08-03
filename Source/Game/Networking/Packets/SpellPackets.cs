@@ -302,6 +302,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ClientLearnedSpellData.Count);
             _worldPacket.WriteUInt32(SpecializationID);
             _worldPacket.WriteBit(SuppressMessaging);
+            _worldPacket.WriteBit(TraitGrantedByAura);
             _worldPacket.FlushBits();
 
             foreach (LearnedSpellInfo spell in ClientLearnedSpellData)
@@ -311,6 +312,7 @@ namespace Game.Networking.Packets
         public List<LearnedSpellInfo> ClientLearnedSpellData = new();
         public uint SpecializationID;
         public bool SuppressMessaging;
+        public bool TraitGrantedByAura;
     }
 
     public class SpellFailure : ServerPacket
@@ -432,11 +434,13 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(spellId);
 
             _worldPacket.WriteBit(SuppressMessaging);
+            _worldPacket.WriteBit(TraitGrantedByAura);
             _worldPacket.FlushBits();
         }
 
         public List<uint> SpellID = new();
         public bool SuppressMessaging;
+        public bool TraitGrantedByAura;
     }
 
     public class CooldownEvent : ServerPacket
