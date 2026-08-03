@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Cache;
 using Game.DataStorage;
 using Game.Entities;
@@ -72,7 +71,7 @@ namespace Game.Chat
                 player = PlayerIdentifier.FromTarget(handler);
             if (player == null)
                 return false;
-            
+
             // check online security
             if (handler.HasLowerSecurity(null, player.GetGUID()))
                 return false;
@@ -516,7 +515,7 @@ namespace Game.Chat
                     HandleCharacterDeletedRestoreHelper(delInfo, handler);
                     return true;
                 }
-                
+
                 handler.SendSysMessage(CypherStrings.CharacterDeletedErrRename);
                 return false;
             }
@@ -605,11 +604,11 @@ namespace Game.Chat
 
                     if (handler.GetSession() == null)
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineConsole,
-                            info.guid.ToString(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
+                            info.guid.GetCounter(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
                             info.accountId, dateStr);
                     else
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineChat,
-                            info.guid.ToString(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
+                            info.guid.GetCounter(), info.name, info.accountName.IsEmpty() ? "<Not existed>" : info.accountName,
                             info.accountId, dateStr);
                 }
 
@@ -621,7 +620,7 @@ namespace Game.Chat
             {
                 if (delInfo.accountName.IsEmpty())                    // account not exist
                 {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipAccount, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipAccount, delInfo.name, delInfo.guid.GetCounter(), delInfo.accountId);
                     return;
                 }
 
@@ -629,13 +628,13 @@ namespace Game.Chat
                 uint charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
                 if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
                 {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.GetCounter(), delInfo.accountId);
                     return;
                 }
 
                 if (!Global.CharacterCacheStorage.GetCharacterGuidByName(delInfo.name).IsEmpty())
                 {
-                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipName, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
+                    handler.SendSysMessage(CypherStrings.CharacterDeletedSkipName, delInfo.name, delInfo.guid.GetCounter(), delInfo.accountId);
                     return;
                 }
 
@@ -702,7 +701,7 @@ namespace Game.Chat
                 stmt.AddValue(1, player.GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
-            
+
             if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including chr == NULL
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, handler.PlayerLink(player.GetName()), newlevel);
 
