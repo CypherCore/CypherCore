@@ -4959,6 +4959,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 352 SPELL_EFFECT_LEARN_HOUSE_ROOM_COMPONENT_TEXTURE
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.Dest), // 353 SPELL_EFFECT_CREATE_AREATRIGGER_2
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 354 SPELL_EFFECT_SET_NEIGHBORHOOD_INITIATIVE
+            new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 355 SPELL_EFFECT_LEARN_HOUSE_TYPE
         };
 
         #region Fields
