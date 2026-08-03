@@ -2608,32 +2608,23 @@ namespace Game.Entities
             return !HasInArc(2 * MathFunctions.PI - arc, target);
         }
 
-        public void GetRandomPoint(Position pos, float distance, out float rand_x, out float rand_y, out float rand_z)
+        public Position GetRandomPoint(Position srcPos, float distance, float minDistance = 0f)
         {
-            if (distance == 0)
+            srcPos.GetPosition(out float x, out float y, out float z);
+            if (distance != 0)
             {
-                pos.GetPosition(out rand_x, out rand_y, out rand_z);
-                return;
+                // angle to face `obj` to `this`
+                float angle = RandomHelper.NextSingle() * (2 * MathF.PI);
+                float new_dist = minDistance + (distance - minDistance) * MathF.Sqrt(RandomHelper.NextSingle());
+
+                x += new_dist * MathF.Cos(angle);
+                y += new_dist * MathF.Sin(angle);
+
+                GridDefines.NormalizeMapCoord(ref x);
+                GridDefines.NormalizeMapCoord(ref y);
+                UpdateGroundPositionZ(x, y, ref z);            // update to LOS height if available
             }
 
-            // angle to face `obj` to `this`
-            float angle = RandomHelper.NextSingle() * (2 * MathFunctions.PI);
-            float new_dist = RandomHelper.NextSingle() + RandomHelper.NextSingle();
-            new_dist = distance * (new_dist > 1 ? new_dist - 2 : new_dist);
-
-            rand_x = (pos.posX + new_dist * MathF.Cos(angle));
-            rand_y = (pos.posY + new_dist * MathF.Sin(angle));
-            rand_z = pos.posZ;
-
-            GridDefines.NormalizeMapCoord(ref rand_x);
-            GridDefines.NormalizeMapCoord(ref rand_y);
-            UpdateGroundPositionZ(rand_x, rand_y, ref rand_z);            // update to LOS height if available
-        }
-
-        public Position GetRandomPoint(Position srcPos, float distance)
-        {
-            float x, y, z;
-            GetRandomPoint(srcPos, distance, out x, out y, out z);
             return new Position(x, y, z, GetOrientation());
         }
 
@@ -2803,7 +2794,7 @@ namespace Game.Entities
         public Position GetRandomNearPosition(float radius)
         {
             var pos = GetPosition();
-            MovePosition(pos, radius * RandomHelper.NextSingle(), RandomHelper.NextSingle() * MathFunctions.PI * 2);
+            MovePosition(pos, radius * MathF.Sqrt(RandomHelper.NextSingle()), RandomHelper.NextSingle() * MathF.PI * 2);
             return pos;
         }
 
