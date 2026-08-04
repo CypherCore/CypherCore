@@ -20,9 +20,10 @@ namespace Game.Movement
         SpellEffectExtraData _spellEffectExtra;
         MovementWalkRunSpeedSelectionMode _speedSelectionMode;
         float? _closeEnoughDistance;
+        TimeSpan? _fadeObject;
 
         public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float? speed = null, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null,
-            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+            MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _movementId = id;
             _destination = new Position(x, y, z);
@@ -33,6 +34,7 @@ namespace Game.Movement
             _spellEffectExtra = spellEffectExtraData;
             _speedSelectionMode = speedSelectionMode;
             _closeEnoughDistance = closeEnoughDistance;
+            _fadeObject = fadeObject;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -97,6 +99,9 @@ namespace Game.Movement
 
             if (_finalOrient.HasValue)
                 init.SetFacing(_finalOrient.Value);
+
+            if (_fadeObject.HasValue)
+                init.SetFadeObject(_fadeObject.GetValueOrDefault(TimeSpan.FromSeconds(1)));
 
             switch (_speedSelectionMode)
             {

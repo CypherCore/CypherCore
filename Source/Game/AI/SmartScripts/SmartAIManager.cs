@@ -3551,7 +3551,7 @@ namespace Game.AI
         public struct Fall
         {
             public uint pointId;
-        }        
+        }
         public struct WpStart
         {
             public uint run;
@@ -3559,7 +3559,8 @@ namespace Game.AI
             public uint repeat;
             public uint quest;
             public uint despawnTime;
-            //public uint reactState; DO NOT REUSE
+            public uint reactState_Do_Not_Reuse;
+            public uint FadeObjectDuration;
         }
         public struct WpPause
         {
@@ -3682,6 +3683,7 @@ namespace Game.AI
             public uint transport;
             public uint disablePathfinding;
             public uint contactDistance;
+            public uint FadeObjectDuration;
         }
         public struct SendGossipMenu
         {
@@ -3744,6 +3746,7 @@ namespace Game.AI
         public struct MoveOffset
         {
             public uint PointId;
+            public uint FadeObjectDuration;
         }
         public struct RandomSound
         {

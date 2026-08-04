@@ -604,15 +604,17 @@ namespace Game.Movement
                 Add(new FleeingMovementGenerator(enemy.GetGUID(), scriptResult));
         }
 
-        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+            float? closeEnoughDistance = null, TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
-            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient, speed, speedSelectionMode, closeEnoughDistance, scriptResult);
+            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient, speed, speedSelectionMode, closeEnoughDistance, fadeObject, scriptResult);
         }
 
-        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default, float? closeEnoughDistance = null, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
+            float? closeEnoughDistance = null, TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePoint: '{_owner.GetGUID()}', targeted point Id: {id} (X: {x}, Y: {y}, Z: {z})");
-            Add(new PointMovementGenerator(id, x, y, z, generatePath, speed, finalOrient, null, null, speedSelectionMode, closeEnoughDistance, scriptResult));
+            Add(new PointMovementGenerator(id, x, y, z, generatePath, speed, finalOrient, null, null, speedSelectionMode, closeEnoughDistance, fadeObject, scriptResult));
         }
 
         public void MoveCloserAndStop(uint id, Unit target, float distance)
@@ -1052,7 +1054,7 @@ namespace Game.Movement
         }
 
         public void MovePath(uint pathId, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (pathId == 0)
             {
@@ -1065,23 +1067,23 @@ namespace Game.Movement
 
             if (_owner.GetTypeId() == TypeId.Unit)
                 Add(new WaypointMovementGenerator<Creature>(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd,
-                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
+                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, fadeObject, scriptResult), MovementSlot.Default);
             else
                 Add(new WaypointMovementGenerator<Player>(pathId, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd,
-                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult));
+                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, fadeObject, scriptResult));
         }
 
         public void MovePath(WaypointPath path, bool repeatable, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan, TimeSpan)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster::MovePath: '{_owner.GetGUID()}', starts moving over path Id: {path.Id} (repeatable: {repeatable})");
 
             if (_owner.GetTypeId() == TypeId.Unit)
                 Add(new WaypointMovementGenerator<Creature>(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd,
-                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult), MovementSlot.Default);
+                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, fadeObject, scriptResult), MovementSlot.Default);
             else
                 Add(new WaypointMovementGenerator<Player>(path, repeatable, duration, speed, speedSelectionMode, waitTimeRangeAtPathEnd,
-                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, scriptResult));
+                    wanderDistanceAtPathEnds, followPathBackwardsFromEndToStart, exactSplinePath, generatePath, fadeObject, scriptResult));
         }
 
         /// <summary>

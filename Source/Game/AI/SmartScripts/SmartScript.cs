@@ -1055,6 +1055,10 @@ namespace Game.AI
                 }
                 case SmartActions.MoveOffset:
                 {
+                    TimeSpan? fadeObject = null;
+                    if (e.Action.moveOffset.FadeObjectDuration != 0)
+                        fadeObject = TimeSpan.FromMilliseconds(e.Action.moveOffset.FadeObjectDuration);
+
                     MultiActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<MovementStopReason>>(e);
 
                     foreach (var target in targets)
@@ -1078,7 +1082,7 @@ namespace Game.AI
                         if (waitEvent != null)
                             scriptResult = ActionResult<MovementStopReason>.GetResultSetter(waitEvent.CreateAndGetResult());
 
-                        creatureTarget.GetMotionMaster().MovePoint(e.Action.moveOffset.PointId, x, y, z, true, null, null, MovementWalkRunSpeedSelectionMode.Default, null, scriptResult);
+                        creatureTarget.GetMotionMaster().MovePoint(e.Action.moveOffset.PointId, x, y, z, true, null, null, MovementWalkRunSpeedSelectionMode.Default, null, fadeObject, scriptResult);
                     }
 
                     if (waitEvent != null && !waitEvent.Results.Empty())
@@ -1341,7 +1345,7 @@ namespace Game.AI
                     if (waitEvent != null)
                         scriptResult = ActionResult<MovementStopReason>.GetResultSetter(waitEvent);
 
-                    _me.GetAI<SmartAI>().StartPath(entry, repeat, unit, 0, scriptResult);
+                    _me.GetAI<SmartAI>().StartPath(entry, repeat, unit, 0, e.Action.wpStart.FadeObjectDuration, scriptResult);
                     mTimedActionWaitEvent = waitEvent;
 
                     uint quest = e.Action.wpStart.quest;
@@ -1415,6 +1419,10 @@ namespace Game.AI
                     if (!targets.Empty())
                         target = targets.SelectRandom();
 
+                    TimeSpan? fadeObject = null;
+                    if (e.Action.moveToPos.FadeObjectDuration != 0)
+                        fadeObject = TimeSpan.FromMilliseconds(e.Action.moveToPos.FadeObjectDuration);
+
                     ActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MovementStopReason, ActionResult>(e);
                     ActionResultSetter<MovementStopReason> scriptResult = null;
                     if (waitEvent != null)
@@ -1426,7 +1434,7 @@ namespace Game.AI
                         target.GetPosition(out x, out y, out z);
                         if (e.Action.moveToPos.contactDistance > 0)
                             target.GetContactPoint(_me, out x, out y, out z, e.Action.moveToPos.contactDistance);
-                        _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, x + e.Target.x, y + e.Target.y, z + e.Target.z, e.Action.moveToPos.disablePathfinding == 0);
+                        _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, x + e.Target.x, y + e.Target.y, z + e.Target.z, e.Action.moveToPos.disablePathfinding == 0, null, null, MovementWalkRunSpeedSelectionMode.Default, null, fadeObject, scriptResult);
                         mTimedActionWaitEvent = waitEvent;
                     }
 
@@ -1441,7 +1449,7 @@ namespace Game.AI
                             dest = trans.GetPositionWithOffset(dest);
                     }
 
-                    _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0, null, null, MovementWalkRunSpeedSelectionMode.Default, null, scriptResult);
+                    _me.GetMotionMaster().MovePoint(e.Action.moveToPos.pointId, dest, e.Action.moveToPos.disablePathfinding == 0, null, null, MovementWalkRunSpeedSelectionMode.Default, null, fadeObject, scriptResult);
                     mTimedActionWaitEvent = waitEvent;
                     break;
                 }
@@ -2174,7 +2182,7 @@ namespace Game.AI
                                     if (waitEvent != null)
                                         actionResultSetter = ActionResult<MovementStopReason>.GetResultSetter(waitEvent.CreateAndGetResult());
 
-                                    creature.GetAI<SmartAI>().StartPath(closestPathId, true, null, closestWaypointId, actionResultSetter);
+                                    creature.GetAI<SmartAI>().StartPath(closestPathId, true, null, closestWaypointId, 0, actionResultSetter);
                                 }
                             }
                         }

@@ -6,6 +6,7 @@ using Game.Entities;
 using Game.Groups;
 using Game.Scripting.v2;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -69,7 +70,7 @@ namespace Game.AI
             return !_isCharmed;
         }
 
-        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 0, ActionResultSetter<MovementStopReason> scriptResult = null)
+        public void StartPath(uint pathId = 0, bool repeat = false, Unit invoker = null, uint nodeId = 0, uint fadeObjectDuration = 0, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (HasEscortState(SmartEscortState.Escorting))
                 StopPath();
@@ -95,7 +96,11 @@ namespace Game.AI
                 me.ReplaceAllNpcFlags(NPCFlags.None);
             }
 
-            me.GetMotionMaster().MovePath(path, _repeatWaypointPath, null, null, MovementWalkRunSpeedSelectionMode.Default, null, null, null, null, true, scriptResult);
+            TimeSpan? fadeObject = null;
+            if (fadeObjectDuration != 0)
+                fadeObject = TimeSpan.FromMilliseconds(fadeObjectDuration);
+
+            me.GetMotionMaster().MovePath(pathId, _repeatWaypointPath, null, null, MovementWalkRunSpeedSelectionMode.Default, null, null, null, null, true, fadeObject, scriptResult);
         }
 
         WaypointPath LoadPath(uint entry)

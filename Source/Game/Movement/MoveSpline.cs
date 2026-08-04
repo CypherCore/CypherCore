@@ -39,7 +39,7 @@ namespace Game.Movement
             spell_effect_extra = args.spellEffectExtra;
             turn = args.turnData;
             anim_tier = args.animTier;
-            splineIsFacingOnly = args.path.Count == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
+            splineIsFacingOnly = args.path.Count == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).LengthSquared() < 0.1f);
 
             velocity = args.velocity;
 
@@ -54,7 +54,7 @@ namespace Game.Movement
 
             // init parabolic / animation
             // spline initialized, duration known and i able to compute parabolic acceleration
-            if (args.flags.HasFlag(MoveSplineFlagEnum.Parabolic | MoveSplineFlagEnum.FadeObject) || args.animTier != null)
+            if (args.flags.HasFlag(MoveSplineFlagEnum.Parabolic) || args.animTier != null)
             {
                 int spline_duration = Duration();
                 effect_start_time = (int)spline.Length(spline.First() + args.effect_start_point);
@@ -70,6 +70,8 @@ namespace Game.Movement
                     }
                 }
             }
+            else if (args.flags.HasFlag(MoveSplineFlagEnum.FadeObject))
+                effect_start_time = Math.Max(Duration() - args.fade_object_duration_ms, 0);
         }
 
         void InitSpline(MoveSplineInitArgs args)

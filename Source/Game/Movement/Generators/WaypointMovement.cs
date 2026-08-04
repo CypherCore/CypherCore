@@ -26,6 +26,7 @@ namespace Game.Movement
         bool? _exactSplinePath;
         bool _repeating;
         bool _generatePath;
+        TimeSpan? _fadeObject;
 
         TimeTracker _moveTimer = new();
         TimeTracker _nextMoveTime = new();
@@ -36,7 +37,8 @@ namespace Game.Movement
         static TimeSpan SEND_NEXT_POINT_EARLY_DELTA = TimeSpan.FromMilliseconds(1500);
 
         public WaypointMovementGenerator(uint pathId = 0, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true,
+                TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _path = Global.WaypointMgr.GetPath(pathId);
@@ -48,6 +50,7 @@ namespace Game.Movement
             _followPathBackwardsFromEndToStart = followPathBackwardsFromEndToStart;
             _exactSplinePath = exactSplinePath;
             _generatePath = generatePath;
+            _fadeObject = fadeObject;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -60,7 +63,8 @@ namespace Game.Movement
         }
 
         public WaypointMovementGenerator(WaypointPath path, bool repeating = true, TimeSpan? duration = null, float? speed = null, MovementWalkRunSpeedSelectionMode speedSelectionMode = MovementWalkRunSpeedSelectionMode.Default,
-            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true, ActionResultSetter<MovementStopReason> scriptResult = null)
+            (TimeSpan min, TimeSpan max)? waitTimeRangeAtPathEnd = null, float? wanderDistanceAtPathEnds = null, bool? followPathBackwardsFromEndToStart = null, bool? exactSplinePath = null, bool generatePath = true,
+            TimeSpan? fadeObject = null, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             _nextMoveTime = new TimeTracker(0);
             _repeating = repeating;
@@ -72,6 +76,7 @@ namespace Game.Movement
             _followPathBackwardsFromEndToStart = followPathBackwardsFromEndToStart;
             _exactSplinePath = exactSplinePath;
             _generatePath = generatePath;
+            _fadeObject = fadeObject;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -475,6 +480,22 @@ namespace Game.Movement
             if (lastWaypointForSegment.Orientation.HasValue
                 && (lastWaypointForSegment.Delay != TimeSpan.Zero || (_isReturningToStart ? _currentNode == 0 : _currentNode == _path.Nodes.Count - 1)))
                 init.SetFacing(lastWaypointForSegment.Orientation.Value);
+
+            if (_fadeObject.HasValue && !_repeating)
+            {
+                int lastWaypointForPath = IsFollowingPathBackwardsFromEndToStart() ? 0 : _path.Nodes.Count - 1;
+                if (IsExactSplinePath())
+                {
+                    var (lastSegmentFirstNode, segmentLength) = _path.ContinuousSegments[IsFollowingPathBackwardsFromEndToStart() ? 0 : _path.ContinuousSegments.Count - 1];
+                    if (lastWaypointForPath >= lastSegmentFirstNode && lastWaypointForPath < lastSegmentFirstNode + segmentLength)
+                        init.SetFadeObject(_fadeObject.GetValueOrDefault(TimeSpan.FromSeconds(1)));
+                }
+                else
+                {
+                    if (lastWaypointForSegment.Id == _path.Nodes[lastWaypointForPath].Id)
+                        init.SetFadeObject(_fadeObject.GetValueOrDefault(TimeSpan.FromSeconds(1)));
+                }
+            }
 
             switch (lastWaypointForSegment.MoveType.GetValueOrDefault(_path.MoveType))
             {

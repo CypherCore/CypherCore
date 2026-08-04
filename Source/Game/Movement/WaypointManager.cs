@@ -383,6 +383,12 @@ namespace Game
             First = first;
             Last = last;
         }
+
+        public void Deconstruct(out int First, out int Last)
+        {
+            First = this.First;
+            Last = this.Last;
+        }
     }
 
     public enum WaypointMoveType

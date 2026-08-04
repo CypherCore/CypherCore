@@ -224,7 +224,7 @@ namespace Game.Movement
 
         public void SetFacing(float angle)
         {
-            TransportPathTransform transform =  new(unit, args.TransformForTransport);
+            TransportPathTransform transform = new(unit, args.TransformForTransport);
             args.facing.angle = Position.NormalizeOrientation(transform.Calc(angle));
             args.facing.type = MonsterMoveType.FacingAngle;
         }
@@ -314,6 +314,16 @@ namespace Game.Movement
             };
             if (tierTransitionId == 0)
                 args.flags.EnableAnimation();
+        }
+
+        public void SetFadeObject(TimeSpan fadeDuration)
+        {
+            if (fadeDuration == TimeSpan.Zero)
+                fadeDuration = TimeSpan.FromSeconds(1);
+
+            args.fade_object_duration_ms = (int)fadeDuration.TotalMilliseconds;
+            args.flags.SetUnsetFlag(MoveSplineFlagEnum.FadeObject, true);
+            args.animTier = null;
         }
 
         public void DisableTransportPathTransformations() { args.TransformForTransport = false; }

@@ -31,6 +31,7 @@ namespace Game.Movement
         public float velocity;
         public float parabolic_amplitude;
         public int effect_start_point;
+        public int fade_object_duration_ms;
         public uint splineId;
         public float initialOrientation;
         public SpellEffectExtraData spellEffectExtra;
