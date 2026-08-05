@@ -370,8 +370,19 @@ namespace Framework.Constants
         MetaQuests = 645,
         SecretsOfAzeroth = 646,
         Lorewalking = 647,
+        Midnight = 649,
+        Abundance = 650,
         DastardlyDuos = 651,
         Delves = 652,
+        AratorsJourney = 653,
+        Neighborhood = 655,
+        Prey = 656,
+        CatchUp = 657,
+        SiegeOfArathiHighlands = 658,
+        DepthDivers = 659,
+        CloakAndCapture = 661,
+        Haranir = 664,
+        DecorDuel = 665,
     }
 
     public enum QuestFailedReasons
