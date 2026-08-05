@@ -78,9 +78,7 @@ namespace Game
                 return;
             }
 
-            GetPlayer().ValidateMovementInfo(packet.Status);
-
-            if (vehicle_base.GetGUID() != packet.Status.Guid)
+            if (!ValidateMovementInfo(packet.Status))
                 return;
 
             vehicle_base.m_movementInfo = packet.Status;
@@ -208,7 +206,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetVehicleRecIdAck)]
         void HandleMoveSetVehicleRecAck(MoveSetVehicleRecIdAck setVehicleRecIdAck)
         {
-            GetPlayer().ValidateMovementInfo(setVehicleRecIdAck.Data.Status);
+            ValidateMovementInfo(setVehicleRecIdAck.Data.Status);
         }
     }
 }

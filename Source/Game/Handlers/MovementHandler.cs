@@ -56,23 +56,14 @@ namespace Game
 
         void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
         {
-            Unit mover = GetPlayer().GetUnitBeingMoved();
+            if (!ValidateMovementInfo(movementInfo))
+                return;
+
+            Unit mover = _player.GetUnitBeingMoved();
             Player plrMover = mover.ToPlayer();
 
             if (plrMover != null && plrMover.IsBeingTeleported())
                 return;
-
-            GetPlayer().ValidateMovementInfo(movementInfo);
-
-            if (movementInfo.Guid != mover.GetGUID())
-            {
-                Log.outError(LogFilter.Network, "HandleMovementOpcodes: guid error");
-                return;
-            }
-
-            if (!movementInfo.Pos.IsPositionValid())
-                return;
-
 
             if (!mover.MoveSpline.Finalized())
                 return;
@@ -228,6 +219,93 @@ namespace Game
                         break;
                 }
             }
+        }
+
+        public bool ValidateMovementInfo(MovementInfo mi)
+        {
+            //! Anti-cheat checks. Please keep them in seperate if () blocks to maintain a clear overview.
+            //! Might be subject to latency, so just remove improper flags.
+            var RemoveViolatingFlags = new Action<bool, MovementFlag>((check, maskToRemove) =>
+            {
+                if (check)
+                {
+                    Log.outDebug(LogFilter.Unit, "Player.ValidateMovementInfo: Violation of MovementFlags found ({0}). MovementFlags: {1}, MovementFlags2: {2} for player {3}. Mask {4} will be removed.",
+                        check, mi.GetMovementFlags(), mi.GetMovementFlags2(), GetPlayer().GetGUID(), maskToRemove);
+                    mi.RemoveMovementFlag(maskToRemove);
+                }
+            });
+
+            Unit mover = _player.GetUnitBeingMoved();
+
+            if (mover == null || mi.Guid != mover.GetGUID())
+                return false;
+
+            if (!mi.Pos.IsPositionValid())
+                return false;
+
+            if (GetPlayer().GetVehicleBase() == null || !GetPlayer().GetVehicle().GetVehicleInfo().HasFlag(VehicleFlags.FixedPosition))
+                RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root), MovementFlag.Root);
+
+            /*! This must be a packet spoofing attempt. MOVEMENTFLAG_ROOT sent from the client is not valid
+                in conjunction with any of the moving movement flags such as MOVEMENTFLAG_FORWARD.
+                It will freeze clients that receive this player's movement info.
+            */
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Root) && mi.HasMovementFlag(MovementFlag.MaskMoving), MovementFlag.MaskMoving);
+
+            //! Cannot hover without SPELL_AURA_HOVER
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Hover) && !mover.HasAuraType(AuraType.Hover),
+                MovementFlag.Hover);
+
+            //! Cannot ascend and descend at the same time
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Ascending) && mi.HasMovementFlag(MovementFlag.Descending),
+                MovementFlag.Ascending | MovementFlag.Descending);
+
+            //! Cannot move left and right at the same time
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Left) && mi.HasMovementFlag(MovementFlag.Right),
+                MovementFlag.Left | MovementFlag.Right);
+
+            //! Cannot strafe left and right at the same time
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.StrafeLeft) && mi.HasMovementFlag(MovementFlag.StrafeRight),
+                MovementFlag.StrafeLeft | MovementFlag.StrafeRight);
+
+            //! Cannot pitch up and down at the same time
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.PitchUp) && mi.HasMovementFlag(MovementFlag.PitchDown),
+                MovementFlag.PitchUp | MovementFlag.PitchDown);
+
+            //! Cannot move forwards and backwards at the same time
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Forward) && mi.HasMovementFlag(MovementFlag.Backward),
+                MovementFlag.Forward | MovementFlag.Backward);
+
+            //! Cannot walk on water without SPELL_AURA_WATER_WALK except for ghosts
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.WaterWalk) &&
+                !mover.HasAuraType(AuraType.WaterWalk) && !mover.HasAuraType(AuraType.Ghost), MovementFlag.WaterWalk);
+
+            //! Cannot feather fall without SPELL_AURA_FEATHER_FALL
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.FallingSlow) && !mover.HasAuraType(AuraType.FeatherFall),
+                MovementFlag.FallingSlow);
+
+            /*! Cannot fly if no fly auras present. Exception is being a GM.
+                Note that we check for account level instead of Player.IsGameMaster() because in some
+                situations it may be feasable to use .gm fly on as a GM without having .gm on,
+                e.g. aerial combat.
+            */
+
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Flying | MovementFlag.CanFly) && GetSecurity() == AccountTypes.Player &&
+                !mover.HasAuraType(AuraType.Fly) &&
+                !mover.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) &&
+                !mover.HasAuraType(AuraType.AdvFlying),
+                MovementFlag.Flying | MovementFlag.CanFly);
+
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.DisableGravity | MovementFlag.CanFly) && mi.HasMovementFlag(MovementFlag.Falling),
+                MovementFlag.Falling);
+
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.SplineElevation) && MathFunctions.fuzzyEq(mi.stepUpStartElevation, 0.0f), MovementFlag.SplineElevation);
+
+            // Client first checks if spline elevation != 0, then verifies flag presence
+            if (MathFunctions.fuzzyNe(mi.stepUpStartElevation, 0.0f))
+                mi.AddMovementFlag(MovementFlag.SplineElevation);
+
+            return true;
         }
 
         [WorldPacketHandler(ClientOpcodes.WorldPortResponse, Status = SessionStatus.Transfer)]
@@ -543,10 +621,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveForceWalkSpeedChangeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleForceSpeedChangeAck(MovementSpeedAck packet)
         {
-            GetPlayer().ValidateMovementInfo(packet.Ack.Status);
-
-            // now can skip not our packet
-            if (GetPlayer().GetGUID() != packet.Ack.Status.Guid)
+            if (!ValidateMovementInfo(packet.Ack.Status))
                 return;
 
             /*----------------*/
@@ -626,7 +701,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingSurfaceFrictionAck)]
         void HandleSetAdvFlyingSpeedAck(MovementSpeedAck speedAck)
         {
-            GetPlayer().ValidateMovementInfo(speedAck.Ack.Status);
+            ValidateMovementInfo(speedAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingBankingRateAck)]
@@ -635,7 +710,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingTurnVelocityThresholdAck)]
         void HandleSetAdvFlyingSpeedRangeAck(MovementSpeedRangeAck speedRangeAck)
         {
-            GetPlayer().ValidateMovementInfo(speedRangeAck.Ack.Status);
+            ValidateMovementInfo(speedRangeAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetActiveMover)]
@@ -651,9 +726,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveKnockBackAck(MoveKnockBackAck movementAck)
         {
-            GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
-
-            if (GetPlayer().GetUnitBeingMoved().GetGUID() != movementAck.Ack.Status.Guid)
+            if (!ValidateMovementInfo(movementAck.Ack.Status))
                 return;
 
             movementAck.Ack.Status.Time = AdjustClientMovementTime(movementAck.Ack.Status.Time);
@@ -678,7 +751,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveWaterWalkAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMovementAckMessage(MovementAckMessage movementAck)
         {
-            GetPlayer().ValidateMovementInfo(movementAck.Ack.Status);
+            ValidateMovementInfo(movementAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.SummonResponse)]
@@ -693,23 +766,16 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetCollisionHeightAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleSetCollisionHeightAck(MoveSetCollisionHeightAck packet)
         {
-            GetPlayer().ValidateMovementInfo(packet.Data.Status);
+            ValidateMovementInfo(packet.Data.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveApplyMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
         {
-            Unit mover = _player.GetUnitBeingMoved();
-            Cypher.Assert(mover != null);
-            _player.ValidateMovementInfo(moveApplyMovementForceAck.Ack.Status);
-
-            // prevent tampered movement data
-            if (moveApplyMovementForceAck.Ack.Status.Guid != mover.GetGUID())
-            {
-                Log.outError(LogFilter.Network, $"HandleMoveApplyMovementForceAck: guid error, expected {mover.GetGUID()}, got {moveApplyMovementForceAck.Ack.Status.Guid}");
+            if (!ValidateMovementInfo(moveApplyMovementForceAck.Ack.Status))
                 return;
-            }
 
+            Unit mover = _player.GetUnitBeingMoved();
             moveApplyMovementForceAck.Ack.Status.Time = AdjustClientMovementTime(moveApplyMovementForceAck.Ack.Status.Time);
 
             MoveUpdateApplyMovementForce updateApplyMovementForce = new();
@@ -721,17 +787,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveRemoveMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
         {
-            Unit mover = _player.GetUnitBeingMoved();
-            Cypher.Assert(mover != null);
-            _player.ValidateMovementInfo(moveRemoveMovementForceAck.Ack.Status);
-
-            // prevent tampered movement data
-            if (moveRemoveMovementForceAck.Ack.Status.Guid != mover.GetGUID())
-            {
-                Log.outError(LogFilter.Network, $"HandleMoveRemoveMovementForceAck: guid error, expected {mover.GetGUID()}, got {moveRemoveMovementForceAck.Ack.Status.Guid}");
+            if (!ValidateMovementInfo(moveRemoveMovementForceAck.Ack.Status))
                 return;
-            }
 
+            Unit mover = _player.GetUnitBeingMoved();
             moveRemoveMovementForceAck.Ack.Status.Time = AdjustClientMovementTime(moveRemoveMovementForceAck.Ack.Status.Time);
 
             MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
@@ -743,16 +802,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetModMovementForceMagnitudeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
         {
-            Unit mover = _player.GetUnitBeingMoved();
-            Cypher.Assert(mover != null);                      // there must always be a mover
-            _player.ValidateMovementInfo(setModMovementForceMagnitudeAck.Ack.Status);
-
-            // prevent tampered movement data
-            if (setModMovementForceMagnitudeAck.Ack.Status.Guid != mover.GetGUID())
-            {
-                Log.outError(LogFilter.Network, $"HandleSetModMovementForceMagnitudeAck: guid error, expected {mover.GetGUID()}, got {setModMovementForceMagnitudeAck.Ack.Status.Guid}");
+            if (!ValidateMovementInfo(setModMovementForceMagnitudeAck.Ack.Status))
                 return;
-            }
+
+            Unit mover = _player.GetUnitBeingMoved();
 
             // skip all except last
             if (_player.m_movementForceModMagnitudeChanges > 0)
@@ -810,8 +863,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {
-            MovementInfo movementInfo = moveSplineDone.Status;
-            _player.ValidateMovementInfo(movementInfo);
+            if (!ValidateMovementInfo(moveSplineDone.Status))
+                return;
 
             // in taxi flight packet received in 2 case:
             // 1) end taxi path in far (multi-node) flight

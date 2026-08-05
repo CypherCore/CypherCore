@@ -1466,7 +1466,7 @@ namespace Game.Entities
             foreach (SpellInfo spellInfo in mSpellInfoMap.Values)
             {
                 // Data already present in DB, overwrites default proc
-                if (mSpellProcMap.ContainsKey((spellInfo.Id, spellInfo.Difficulty)))
+                if (GetSpellProcEntry(spellInfo) != null)
                     continue;
 
                 // Nothing to do if no flags set

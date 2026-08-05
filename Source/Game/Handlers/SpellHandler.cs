@@ -595,7 +595,7 @@ namespace Game
 
             if (packet.Status != null)
             {
-                GetPlayer().ValidateMovementInfo(packet.Status);
+                ValidateMovementInfo(packet.Status);
                 /*public uint opcode;
                 recvPacket >> opcode;
                 recvPacket.SetOpcode(CMSG_MOVE_STOP); // always set to CMSG_MOVE_STOP in client SetOpcode
