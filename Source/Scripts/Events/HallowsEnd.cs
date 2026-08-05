@@ -67,7 +67,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 
@@ -130,7 +130,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -155,7 +155,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -176,7 +176,7 @@ namespace Scripts.Events.HallowsEnd
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 

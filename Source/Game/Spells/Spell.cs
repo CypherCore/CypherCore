@@ -1008,7 +1008,7 @@ namespace Game.Spells
                     if (st != null)
                     {
                         // @todo fix this check
-                        if (spellEffectInfo.IsEffect(SpellEffectName.TeleportUnits) || spellEffectInfo.IsEffect(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen) || spellEffectInfo.IsEffect(SpellEffectName.Bind))
+                        if (spellEffectInfo.IsEffect(SpellEffects.TeleportUnits) || spellEffectInfo.IsEffect(SpellEffects.TeleportWithSpellVisualKitLoadingScreen) || spellEffectInfo.IsEffect(SpellEffects.Bind))
                             dest = new(st);
                         else if (st.GetMapId() == m_caster.GetMapId())
                             dest = new(st.GetPosition());
@@ -1586,8 +1586,8 @@ namespace Game.Spells
             // special case for SPELL_EFFECT_SUMMON_RAF_FRIEND and SPELL_EFFECT_SUMMON_PLAYER, queue them on map for later execution
             switch (spellEffectInfo.Effect)
             {
-                case SpellEffectName.SummonRafFriend:
-                case SpellEffectName.SummonPlayer:
+                case SpellEffects.SummonRafFriend:
+                case SpellEffects.SummonPlayer:
                     if (m_caster.IsTypeId(TypeId.Player) && !m_caster.ToPlayer().GetTarget().IsEmpty())
                     {
                         WorldObject rafTarget = Global.ObjAccessor.FindPlayer(m_caster.ToPlayer().GetTarget());
@@ -2359,7 +2359,7 @@ namespace Game.Spells
 
                 // unit is immune to aura if it was diminished to 0 duration
                 if (!hitInfo.Positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref hitInfo.AuraDuration, origCaster, diminishLevel))
-                    if (m_spellInfo.GetEffects().All(effInfo => !effInfo.IsEffect() || effInfo.IsEffect(SpellEffectName.ApplyAura)))
+                    if (m_spellInfo.GetEffects().All(effInfo => !effInfo.IsEffect() || effInfo.IsEffect(SpellEffects.ApplyAura)))
                         return SpellMissInfo.Immune;
             }
 
@@ -2521,7 +2521,7 @@ namespace Game.Spells
             uint channelTargetEffectMask = m_channelTargetEffectMask;
             uint channelAuraMask = 0;
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
-                if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                if (spellEffectInfo.IsEffect(SpellEffects.ApplyAura))
                     channelAuraMask |= 1u << (int)spellEffectInfo.EffectIndex;
 
             channelAuraMask &= channelTargetEffectMask;
@@ -3404,7 +3404,7 @@ namespace Game.Spells
         {
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
-                if (m_spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                if (m_spellInfo.HasEffect(SpellEffects.AddExtraAttacks))
                     unitCaster.SetLastExtraAttackSpell(m_spellInfo.Id);
 
             // Handle procs on finish
@@ -3616,7 +3616,7 @@ namespace Game.Spells
             if (result != SpellCastResult.SpellCastOk)
             {
                 // on failure (or manual cancel) send TraitConfigCommitFailed to revert talent UI saved config selection
-                if (m_caster.IsPlayer() && m_spellInfo.HasEffect(SpellEffectName.ChangeActiveCombatTraitConfig))
+                if (m_caster.IsPlayer() && m_spellInfo.HasEffect(SpellEffects.ChangeActiveCombatTraitConfig))
                     if (m_customArg is TraitConfig)
                         m_caster.ToPlayer().SendPacket(new TraitConfigCommitFailed((m_customArg as TraitConfig).ID));
 
@@ -4273,8 +4273,8 @@ namespace Game.Spells
             {
                 switch (spellEffectInfo.Effect)
                 {
-                    case SpellEffectName.Heal:
-                    case SpellEffectName.HealPct:
+                    case SpellEffects.Heal:
+                    case SpellEffects.HealPct:
                         points += unitCaster.SpellHealingBonusDone(target, spellInfo, (int)spellEffectInfo.CalcValue(unitCaster, null, target, castItemEntry, castItemLevel), DamageEffectType.Direct, spellEffectInfo, 1, spell);
 
                         if (target != unitCaster && (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster || spellEffectInfo.TargetB.GetTarget() == Targets.UnitCaster))
@@ -4368,7 +4368,7 @@ namespace Game.Spells
             _executeLogEffects.Clear();
         }
 
-        public SpellLogEffect GetExecuteLogEffect(SpellEffectName effect)
+        public SpellLogEffect GetExecuteLogEffect(SpellEffects effect)
         {
             var spellLogEffect = _executeLogEffects.LookupByKey(effect);
             if (spellLogEffect != null)
@@ -4380,7 +4380,7 @@ namespace Game.Spells
             return executeLogEffect;
         }
 
-        void ExecuteLogEffectTakeTargetPower(SpellEffectName effect, Unit target, PowerType powerType, uint points, float amplitude)
+        void ExecuteLogEffectTakeTargetPower(SpellEffects effect, Unit target, PowerType powerType, uint points, float amplitude)
         {
             SpellLogEffectPowerDrainParams spellLogEffectPowerDrainParams;
 
@@ -4392,7 +4392,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).PowerDrainTargets.Add(spellLogEffectPowerDrainParams);
         }
 
-        void ExecuteLogEffectExtraAttacks(SpellEffectName effect, Unit victim, uint numAttacks)
+        void ExecuteLogEffectExtraAttacks(SpellEffects effect, Unit victim, uint numAttacks)
         {
             SpellLogEffectExtraAttacksParams spellLogEffectExtraAttacksParams;
             spellLogEffectExtraAttacksParams.Victim = victim.GetGUID();
@@ -4412,7 +4412,7 @@ namespace Game.Spells
             m_caster.SendMessageToSet(data, true);
         }
 
-        void ExecuteLogEffectDurabilityDamage(SpellEffectName effect, Unit victim, int itemId, int amount)
+        void ExecuteLogEffectDurabilityDamage(SpellEffects effect, Unit victim, int itemId, int amount)
         {
             SpellLogEffectDurabilityDamageParams spellLogEffectDurabilityDamageParams;
             spellLogEffectDurabilityDamageParams.Victim = victim.GetGUID();
@@ -4422,7 +4422,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).DurabilityDamageTargets.Add(spellLogEffectDurabilityDamageParams);
         }
 
-        void ExecuteLogEffectOpenLock(SpellEffectName effect, WorldObject obj)
+        void ExecuteLogEffectOpenLock(SpellEffects effect, WorldObject obj)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
@@ -4430,7 +4430,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectCreateItem(SpellEffectName effect, uint entry)
+        void ExecuteLogEffectCreateItem(SpellEffects effect, uint entry)
         {
             SpellLogEffectTradeSkillItemParams spellLogEffectTradeSkillItemParams;
             spellLogEffectTradeSkillItemParams.ItemID = (int)entry;
@@ -4438,7 +4438,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).TradeSkillTargets.Add(spellLogEffectTradeSkillItemParams);
         }
 
-        void ExecuteLogEffectDestroyItem(SpellEffectName effect, uint entry)
+        void ExecuteLogEffectDestroyItem(SpellEffects effect, uint entry)
         {
             SpellLogEffectFeedPetParams spellLogEffectFeedPetParams;
             spellLogEffectFeedPetParams.ItemID = (int)entry;
@@ -4446,7 +4446,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).FeedPetTargets.Add(spellLogEffectFeedPetParams);
         }
 
-        void ExecuteLogEffectSummonObject(SpellEffectName effect, WorldObject obj)
+        void ExecuteLogEffectSummonObject(SpellEffects effect, WorldObject obj)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
@@ -4454,7 +4454,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectUnsummonObject(SpellEffectName effect, WorldObject obj)
+        void ExecuteLogEffectUnsummonObject(SpellEffects effect, WorldObject obj)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
@@ -4462,7 +4462,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectResurrect(SpellEffectName effect, Unit target)
+        void ExecuteLogEffectResurrect(SpellEffects effect, Unit target)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = target.GetGUID();
@@ -4551,7 +4551,7 @@ namespace Game.Spells
                 }
 
                 foreach (var spellEffectInfo in m_spellInfo.GetEffects())
-                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura && (explicitTargetEffectMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0)
+                    if (spellEffectInfo.Effect == SpellEffects.ApplyAura && (explicitTargetEffectMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0)
                         channelAuraMask |= 1u << (int)spellEffectInfo.EffectIndex;
 
                 foreach (TargetInfo target in m_UniqueTargetInfo)
@@ -5067,7 +5067,7 @@ namespace Game.Spells
                         // These two auras check SpellFamilyName defined by db2 class data instead of current spell SpellFamilyName
                         if (playerCaster.HasAuraType(AuraType.DisableCastingExceptAbilities)
                             && !m_spellInfo.HasAttribute(SpellAttr0.UsesRangedSlot)
-                            && !m_spellInfo.HasEffect(SpellEffectName.Attack)
+                            && !m_spellInfo.HasEffect(SpellEffects.Attack)
                             && !m_spellInfo.HasAttribute(SpellAttr12.IgnoreCastingDisabled)
                             && !playerCaster.HasAuraTypeWithFamilyFlags(AuraType.DisableCastingExceptAbilities, CliDB.ChrClassesStorage.LookupByKey(playerCaster.GetClass()).SpellClassSet, m_spellInfo.SpellFamilyFlags))
                             return SpellCastResult.CantDoThatRightNow;
@@ -5080,11 +5080,11 @@ namespace Game.Spells
                                     || m_spellInfo.IsNextMeleeSwingSpell()
                                     || m_spellInfo.HasAttribute(SpellAttr1.InitiatesCombatEnablesAutoAttack)
                                     || m_spellInfo.HasAttribute(SpellAttr2.InitiateCombatPostCastEnablesAutoAttack)
-                                    || m_spellInfo.HasEffect(SpellEffectName.Attack)
-                                    || m_spellInfo.HasEffect(SpellEffectName.NormalizedWeaponDmg)
-                                    || m_spellInfo.HasEffect(SpellEffectName.WeaponDamageNoSchool)
-                                    || m_spellInfo.HasEffect(SpellEffectName.WeaponPercentDamage)
-                                    || m_spellInfo.HasEffect(SpellEffectName.WeaponDamage))
+                                    || m_spellInfo.HasEffect(SpellEffects.Attack)
+                                    || m_spellInfo.HasEffect(SpellEffects.NormalizedWeaponDmg)
+                                    || m_spellInfo.HasEffect(SpellEffects.WeaponDamageNoSchool)
+                                    || m_spellInfo.HasEffect(SpellEffects.WeaponPercentDamage)
+                                    || m_spellInfo.HasEffect(SpellEffects.WeaponDamage))
                                     return SpellCastResult.CantDoThatRightNow;
                             }
                         }
@@ -5437,7 +5437,7 @@ namespace Game.Spells
                 // for effects of spells that have only one target
                 switch (spellEffectInfo.Effect)
                 {
-                    case SpellEffectName.Dummy:
+                    case SpellEffects.Dummy:
                     {
                         if (m_spellInfo.Id == 19938)          // Awaken Peon
                         {
@@ -5457,7 +5457,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.LearnSpell:
+                    case SpellEffects.LearnSpell:
                     {
                         if (spellEffectInfo.TargetA.GetTarget() != Targets.UnitPet)
                             break;
@@ -5476,7 +5476,7 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.UnlockGuildVaultTab:
+                    case SpellEffects.UnlockGuildVaultTab:
                     {
                         if (!m_caster.IsTypeId(TypeId.Player))
                             return SpellCastResult.BadTargets;
@@ -5486,7 +5486,7 @@ namespace Game.Spells
                                 return SpellCastResult.CantDoThatRightNow;
                         break;
                     }
-                    case SpellEffectName.LearnPetSpell:
+                    case SpellEffects.LearnPetSpell:
                     {
                         // check target only for unit target case
                         Unit target = m_targets.GetUnitTarget();
@@ -5508,7 +5508,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.ApplyGlyph:
+                    case SpellEffects.ApplyGlyph:
                     {
                         if (!m_caster.IsTypeId(TypeId.Player))
                             return SpellCastResult.GlyphNoSpec;
@@ -5572,7 +5572,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.FeedPet:
+                    case SpellEffects.FeedPet:
                     {
                         if (!m_caster.IsTypeId(TypeId.Player))
                             return SpellCastResult.BadTargets;
@@ -5596,7 +5596,7 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.Charge:
+                    case SpellEffects.Charge:
                     {
                         if (unitCaster == null)
                             return SpellCastResult.BadTargets;
@@ -5633,7 +5633,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.Skinning:
+                    case SpellEffects.Skinning:
                     {
                         if (!m_caster.IsTypeId(TypeId.Player) || m_targets.GetUnitTarget() == null || !m_targets.GetUnitTarget().IsTypeId(TypeId.Unit))
                             return SpellCastResult.BadTargets;
@@ -5648,7 +5648,7 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.OpenLock:
+                    case SpellEffects.OpenLock:
                     {
                         if (spellEffectInfo.TargetA.GetTarget() != Targets.GameobjectTarget &&
                             spellEffectInfo.TargetA.GetTarget() != Targets.GameobjectItemTarget)
@@ -5706,7 +5706,7 @@ namespace Game.Spells
                             return res;
                         break;
                     }
-                    case SpellEffectName.ResurrectPet:
+                    case SpellEffects.ResurrectPet:
                     {
                         Player playerCaster = m_caster.ToPlayer();
                         if (playerCaster == null || playerCaster.GetPetStable() == null)
@@ -5728,7 +5728,7 @@ namespace Game.Spells
                         break;
                     }
                     // This is generic summon effect
-                    case SpellEffectName.Summon:
+                    case SpellEffects.Summon:
                     {
                         if (unitCaster == null)
                             break;
@@ -5750,7 +5750,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.CreateTamedPet:
+                    case SpellEffects.CreateTamedPet:
                     {
                         if (m_targets.GetUnitTarget() != null)
                         {
@@ -5761,7 +5761,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.SummonPet:
+                    case SpellEffects.SummonPet:
                     {
                         if (unitCaster == null)
                             return SpellCastResult.BadTargets;
@@ -5834,7 +5834,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.DismissPet:
+                    case SpellEffects.DismissPet:
                     {
                         Player playerCaster = m_caster.ToPlayer();
                         if (playerCaster == null)
@@ -5849,7 +5849,7 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.SummonPlayer:
+                    case SpellEffects.SummonPlayer:
                     {
                         if (!m_caster.IsTypeId(TypeId.Player))
                             return SpellCastResult.BadTargets;
@@ -5881,7 +5881,7 @@ namespace Game.Spells
                         break;
                     }
                     // RETURN HERE
-                    case SpellEffectName.SummonRafFriend:
+                    case SpellEffects.SummonRafFriend:
                     {
                         if (!m_caster.IsTypeId(TypeId.Player))
                             return SpellCastResult.BadTargets;
@@ -5898,8 +5898,8 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.Leap:
-                    case SpellEffectName.TeleportUnitsFaceCaster:
+                    case SpellEffects.Leap:
+                    case SpellEffects.TeleportUnitsFaceCaster:
                     {
                         //Do not allow to cast it before BG starts.
                         if (m_caster.IsTypeId(TypeId.Player))
@@ -5911,14 +5911,14 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.StealBeneficialBuff:
+                    case SpellEffects.StealBeneficialBuff:
                     {
                         if (m_targets.GetUnitTarget() == null || m_targets.GetUnitTarget() == m_caster)
                             return SpellCastResult.BadTargets;
 
                         break;
                     }
-                    case SpellEffectName.LeapBack:
+                    case SpellEffects.LeapBack:
                     {
                         if (unitCaster == null)
                             return SpellCastResult.BadTargets;
@@ -5932,8 +5932,8 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.Jump:
-                    case SpellEffectName.JumpDest:
+                    case SpellEffects.Jump:
+                    case SpellEffects.JumpDest:
                     {
                         if (unitCaster == null)
                             return SpellCastResult.BadTargets;
@@ -5942,7 +5942,7 @@ namespace Game.Spells
                             return SpellCastResult.Rooted;
                         break;
                     }
-                    case SpellEffectName.TalentSpecSelect:
+                    case SpellEffects.TalentSpecSelect:
                     {
                         ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(m_misc.SpecializationId);
                         Player playerCaster = m_caster.ToPlayer();
@@ -5966,7 +5966,7 @@ namespace Game.Spells
                                 return SpellCastResult.NotInBattleground;
                         break;
                     }
-                    case SpellEffectName.RemoveTalent:
+                    case SpellEffects.RemoveTalent:
                     {
                         Player playerCaster = m_caster.ToPlayer();
                         if (playerCaster == null)
@@ -5983,7 +5983,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.CreateHeirloomItem:
+                    case SpellEffects.CreateHeirloomItem:
                     {
                         if (!m_caster.IsPlayer())
                             return SpellCastResult.BadTargets;
@@ -5993,8 +5993,8 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.GiveArtifactPower:
-                    case SpellEffectName.GiveArtifactPowerNoBonus:
+                    case SpellEffects.GiveArtifactPower:
+                    case SpellEffects.GiveArtifactPowerNoBonus:
                     {
                         Player playerCaster = m_caster.ToPlayer();
                         if (playerCaster == null)
@@ -6008,7 +6008,7 @@ namespace Game.Spells
                         if (artifact == null)
                             return SpellCastResult.NoArtifactEquipped;
 
-                        if (spellEffectInfo.Effect == SpellEffectName.GiveArtifactPower)
+                        if (spellEffectInfo.Effect == SpellEffects.GiveArtifactPower)
                         {
                             ArtifactRecord artifactEntry = CliDB.ArtifactStorage.LookupByKey(artifact.GetTemplate().GetArtifactID());
                             if (artifactEntry == null || artifactEntry.ArtifactCategoryID != spellEffectInfo.MiscValue)
@@ -6016,9 +6016,9 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.ChangeBattlepetQuality:
-                    case SpellEffectName.GrantBattlepetLevel:
-                    case SpellEffectName.GrantBattlepetExperience:
+                    case SpellEffects.ChangeBattlepetQuality:
+                    case SpellEffects.GrantBattlepetLevel:
+                    case SpellEffects.GrantBattlepetExperience:
                     {
                         Player playerCaster = m_caster.ToPlayer();
                         if (playerCaster == null || m_targets.GetUnitTarget() == null || !m_targets.GetUnitTarget().IsCreature())
@@ -6048,7 +6048,7 @@ namespace Game.Spells
                                         if ((battlePetType & (1 << battlePetSpecies.PetTypeEnum)) == 0)
                                             return SpellCastResult.WrongBattlePetType;
 
-                                    if (spellEffectInfo.Effect == SpellEffectName.ChangeBattlepetQuality)
+                                    if (spellEffectInfo.Effect == SpellEffects.ChangeBattlepetQuality)
                                     {
                                         var qualityRecord = CliDB.BattlePetBreedQualityStorage.Values.FirstOrDefault(a1 => a1.MaxQualityRoll < spellEffectInfo.CalcBaseValue(m_caster, creature, m_castItemEntry, m_castItemLevel));
 
@@ -6061,7 +6061,7 @@ namespace Game.Spells
 
                                     }
 
-                                    if (spellEffectInfo.Effect == SpellEffectName.GrantBattlepetLevel || spellEffectInfo.Effect == SpellEffectName.GrantBattlepetExperience)
+                                    if (spellEffectInfo.Effect == SpellEffects.GrantBattlepetLevel || spellEffectInfo.Effect == SpellEffects.GrantBattlepetExperience)
                                         if (battlePet.PacketInfo.Level >= SharedConst.MaxBattlePetLevel)
                                             return SpellCastResult.GrantPetLevelFail;
 
@@ -6761,7 +6761,7 @@ namespace Game.Spells
                         if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitPet)
                             continue;
 
-                        if (spellEffectInfo.Effect == SpellEffectName.Heal)
+                        if (spellEffectInfo.Effect == SpellEffects.Heal)
                         {
                             if (m_targets.GetUnitTarget().IsFullHealth())
                             {
@@ -6776,7 +6776,7 @@ namespace Game.Spells
                         }
 
                         // Mana Potion, Rage Potion, Thistle Tea(Rogue), ...
-                        if (spellEffectInfo.Effect == SpellEffectName.Energize)
+                        if (spellEffectInfo.Effect == SpellEffects.Energize)
                         {
                             if (spellEffectInfo.MiscValue < 0 || spellEffectInfo.MiscValue >= (int)PowerType.Max)
                             {
@@ -6909,8 +6909,8 @@ namespace Game.Spells
             {
                 switch (spellEffectInfo.Effect)
                 {
-                    case SpellEffectName.CreateItem:
-                    case SpellEffectName.CreateLoot:
+                    case SpellEffects.CreateItem:
+                    case SpellEffects.CreateLoot:
                     {
                         // m_targets.GetUnitTarget() means explicit cast, otherwise we dont check for possible equip error
                         Unit target = m_targets.GetUnitTarget() ?? player;
@@ -6919,7 +6919,7 @@ namespace Game.Spells
 
                             // SPELL_EFFECT_CREATE_ITEM_2 differs from SPELL_EFFECT_CREATE_ITEM in that it picks the random item to create from a pool of potential items,
                             // so we need to make sure there is at least one free space in the player's inventory
-                            if (spellEffectInfo.Effect == SpellEffectName.CreateLoot)
+                            if (spellEffectInfo.Effect == SpellEffects.CreateLoot)
                             {
                                 if (target.ToPlayer().GetFreeInventorySlotCount(ItemSearchLocation.Inventory) == 0)
                                 {
@@ -6966,7 +6966,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.EnchantItem:
+                    case SpellEffects.EnchantItem:
                         if (spellEffectInfo.ItemType != 0 && m_targets.GetItemTarget() != null && m_targets.GetItemTarget().IsVellum())
                         {
                             // cannot enchant vellum for other player
@@ -6983,8 +6983,8 @@ namespace Game.Spells
                                 return SpellCastResult.DontReport;
                             }
                         }
-                        goto case SpellEffectName.EnchantItemPrismatic;
-                    case SpellEffectName.EnchantItemPrismatic:
+                        goto case SpellEffects.EnchantItemPrismatic;
+                    case SpellEffects.EnchantItemPrismatic:
                     {
                         Item targetItem = m_targets.GetItemTarget();
                         if (targetItem == null)
@@ -7000,7 +7000,7 @@ namespace Game.Spells
                             if (requiredLevel < m_spellInfo.BaseLevel)
                                 return SpellCastResult.Lowlevel;
                         }
-                        if ((m_CastItem != null || spellEffectInfo.IsEffect(SpellEffectName.EnchantItemPrismatic))
+                        if ((m_CastItem != null || spellEffectInfo.IsEffect(SpellEffects.EnchantItemPrismatic))
                             && m_spellInfo.MaxLevel > 0 && targetItem.GetItemLevel(targetItem.GetOwner()) > m_spellInfo.MaxLevel)
                             return SpellCastResult.Highlevel;
 
@@ -7051,7 +7051,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.EnchantItemTemporary:
+                    case SpellEffects.EnchantItemTemporary:
                     {
                         Item item = m_targets.GetItemTarget();
                         if (item == null)
@@ -7081,10 +7081,10 @@ namespace Game.Spells
                             return SpellCastResult.Highlevel;
                         break;
                     }
-                    case SpellEffectName.EnchantHeldItem:
+                    case SpellEffects.EnchantHeldItem:
                         // check item existence in effect code (not output errors at offhand hold item effect to main hand for example
                         break;
-                    case SpellEffectName.Disenchant:
+                    case SpellEffects.Disenchant:
                     {
                         Item item = m_targets.GetItemTarget();
                         if (item == null)
@@ -7105,7 +7105,7 @@ namespace Game.Spells
                             return SpellCastResult.CantBeSalvagedSkill;
                         break;
                     }
-                    case SpellEffectName.Prospecting:
+                    case SpellEffects.Prospecting:
                     {
                         Item item = m_targets.GetItemTarget();
                         if (item == null)
@@ -7133,7 +7133,7 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.Milling:
+                    case SpellEffects.Milling:
                     {
                         Item item = m_targets.GetItemTarget();
                         if (item == null)
@@ -7161,8 +7161,8 @@ namespace Game.Spells
 
                         break;
                     }
-                    case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoSchool:
+                    case SpellEffects.WeaponDamage:
+                    case SpellEffects.WeaponDamageNoSchool:
                     {
                         if (m_attackType != WeaponAttackType.RangedAttack)
                             break;
@@ -7190,7 +7190,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.RechargeItem:
+                    case SpellEffects.RechargeItem:
                     {
                         uint itemId = spellEffectInfo.ItemType;
 
@@ -7207,7 +7207,7 @@ namespace Game.Spells
                         }
                         break;
                     }
-                    case SpellEffectName.RespecAzeriteEmpoweredItem:
+                    case SpellEffects.RespecAzeriteEmpoweredItem:
                     {
                         Item item = m_targets.GetItemTarget();
                         if (item == null)
@@ -7504,7 +7504,7 @@ namespace Game.Spells
             //Check targets for LOS visibility
             switch (spellEffectInfo.Effect)
             {
-                case SpellEffectName.SkinPlayerCorpse:
+                case SpellEffects.SkinPlayerCorpse:
                 {
                     if (m_targets.GetCorpseTargetGUID().IsEmpty())
                     {
@@ -7562,9 +7562,9 @@ namespace Game.Spells
 
             switch (spellEffectInfo.Effect)
             {
-                case SpellEffectName.GameObjectDamage:
-                case SpellEffectName.GameobjectRepair:
-                case SpellEffectName.GameobjectSetDestructionState:
+                case SpellEffects.GameObjectDamage:
+                case SpellEffects.GameobjectRepair:
+                case SpellEffects.GameobjectSetDestructionState:
                     if (target.GetGoType() != GameObjectTypes.DestructibleBuilding)
                         return false;
                     break;
@@ -7689,7 +7689,7 @@ namespace Game.Spells
                 targetInfo.MissCondition = SpellMissInfo.Immune;
 
             // This will only cause combat - the target will engage once the projectile hits (in Spell::TargetInfo::PreprocessTarget)
-            if (m_originalCaster != null && targetInfo.MissCondition != SpellMissInfo.Evade && !m_originalCaster.IsFriendlyTo(targetUnit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || targetUnit.IsEngaged()))
+            if (m_originalCaster != null && targetInfo.MissCondition != SpellMissInfo.Evade && !m_originalCaster.IsFriendlyTo(targetUnit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffects.Dispel)) && (m_spellInfo.HasInitialAggro() || targetUnit.IsEngaged()))
                 m_originalCaster.SetInCombatWith(targetUnit, true);
 
             Unit unit = null;
@@ -7737,7 +7737,7 @@ namespace Game.Spells
 
             if (m_originalCaster != null && m_damage > 0)
             {
-                bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura);
+                bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffects.PersistentAreaAura);
                 if (isAoeTarget || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect) || m_spellInfo.HasAttribute(SpellAttr7.TreatAsNpcAoe))
                 {
                     m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, !m_originalCaster.IsControlledByPlayer() || m_spellInfo.HasAttribute(SpellAttr7.TreatAsNpcAoe));
@@ -7760,7 +7760,7 @@ namespace Game.Spells
 
             if (m_originalCaster != null && m_healing > 0)
             {
-                bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffectName.PersistentAreaAura);
+                bool isAoeTarget = spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect() || spellEffectInfo.IsEffect(SpellEffects.PersistentAreaAura);
                 if (isAoeTarget || m_spellInfo.HasAttribute(SpellAttr5.TreatAsAreaEffect))
                 {
                     if (m_originalCaster.IsPlayer())
@@ -8604,7 +8604,7 @@ namespace Game.Spells
         public int GetEffectValueAsInt() { return (int)effectValue; }
 
         #region Fields
-        Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();
+        Dictionary<SpellEffects, SpellLogEffect> _executeLogEffects = new();
         PathGenerator m_preGeneratedPath;
 
         public SpellInfo m_spellInfo;
@@ -8965,7 +8965,7 @@ namespace Game.Spells
             else if (MissCondition == SpellMissInfo.Reflect && ReflectResult == SpellMissInfo.None)
                 _spellHitTarget = spell.GetCaster().ToUnit();
 
-            if (spell.GetOriginalCaster() != null && MissCondition != SpellMissInfo.Evade && !spell.GetOriginalCaster().IsFriendlyTo(unit) && (!spell.m_spellInfo.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (spell.m_spellInfo.HasInitialAggro() || unit.IsEngaged()))
+            if (spell.GetOriginalCaster() != null && MissCondition != SpellMissInfo.Evade && !spell.GetOriginalCaster().IsFriendlyTo(unit) && (!spell.m_spellInfo.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffects.Dispel)) && (spell.m_spellInfo.HasInitialAggro() || unit.IsEngaged()))
                 unit.SetInCombatWith(spell.GetOriginalCaster());
 
             // if target is flagged for pvp also flag caster if a player
@@ -9195,7 +9195,7 @@ namespace Game.Spells
                 spell.m_procSpellType |= procSpellType;
 
                 // _spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
-                if (MissCondition != SpellMissInfo.Evade && _spellHitTarget != null && !spell.GetCaster().IsFriendlyTo(unit) && (!spell.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)))
+                if (MissCondition != SpellMissInfo.Evade && _spellHitTarget != null && !spell.GetCaster().IsFriendlyTo(unit) && (!spell.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffects.Dispel)))
                 {
                     Unit unitCaster = spell.GetCaster().ToUnit();
                     if (unitCaster != null)

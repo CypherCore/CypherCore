@@ -2933,7 +2933,7 @@ namespace Game.Entities
                     if (spell != null)
                     {
                         foreach (var effect in spell.GetEffects())
-                            if (effect.Effect == SpellEffectName.OpenLock && effect.MiscValue == lockEntry.Index[i])
+                            if (effect.Effect == SpellEffects.OpenLock && effect.MiscValue == lockEntry.Index[i])
                                 if (effect.CalcValueAsInt(player) >= lockEntry.Skill[i])
                                     return spell;
                     }

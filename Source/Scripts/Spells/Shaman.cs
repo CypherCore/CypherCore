@@ -492,7 +492,7 @@ class spell_sha_artifact_gathering_storms : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(TriggerBuff, 0, SpellEffectName.SchoolDamage));
+        OnEffectHit.Add(new(TriggerBuff, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -588,8 +588,8 @@ class spell_sha_chain_lightning_crash_lightning : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(HandleCooldownReduction, 2, SpellEffectName.Dummy));
-        OnEffectLaunch.Add(new(HandleDamageBuff, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunch.Add(new(HandleCooldownReduction, 2, SpellEffects.Dummy));
+        OnEffectLaunch.Add(new(HandleDamageBuff, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -621,7 +621,7 @@ class spell_sha_chain_lightning_energize : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -653,7 +653,7 @@ class spell_sha_chain_lightning_overload : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -685,7 +685,7 @@ class spell_sha_converging_storms : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(TriggerBuff, 0, SpellEffectName.SchoolDamage));
+        OnEffectHit.Add(new(TriggerBuff, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -724,7 +724,7 @@ class spell_sha_crash_lightning : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(TriggerCleaveBuff, 0, SpellEffectName.SchoolDamage));
+        OnEffectHit.Add(new(TriggerCleaveBuff, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1173,7 +1173,7 @@ class spell_sha_earthquake : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(SnapshotDamageMultiplier, 2, SpellEffectName.CreateAreaTrigger));
+        OnEffectLaunch.Add(new(SnapshotDamageMultiplier, 2, SpellEffects.CreateAreaTrigger));
     }
 }
 
@@ -1353,7 +1353,7 @@ class spell_sha_fire_nova : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(TriggerDamage, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(TriggerDamage, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1416,7 +1416,7 @@ class spell_sha_flametongue_weapon : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1594,7 +1594,7 @@ class spell_sha_ice_strike : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(EnergizeMaelstrom, 3, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(EnergizeMaelstrom, 3, SpellEffects.Dummy));
     }
 }
 
@@ -1861,7 +1861,7 @@ class spell_sha_lava_burst : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.TriggerMissile));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.TriggerMissile));
         AfterCast.Add(new(EnsureLavaSurgeCanBeImmediatelyConsumed));
     }
 }
@@ -2026,7 +2026,7 @@ class spell_sha_lightning_bolt : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -2053,7 +2053,7 @@ class spell_sha_lightning_bolt_overload : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunch.Add(new(HandleScript, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -2086,7 +2086,7 @@ class spell_sha_liquid_magma_totem : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(HandleTargetSelect, 0, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2266,7 +2266,7 @@ class spell_sha_mastery_elemental_overload_proc : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(ApplyDamageModifier, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(ApplyDamageModifier, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -2315,7 +2315,7 @@ class spell_sha_molten_assault : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(TriggerFlameShocks, 2, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(TriggerFlameShocks, 2, SpellEffects.Dummy));
     }
 }
 
@@ -2452,7 +2452,7 @@ class spell_sha_path_of_flames_spread : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.Dummy));
     }
 }
 
@@ -2501,13 +2501,13 @@ class spell_sha_primordial_wave : SpellScript
                 specialization = caster.GetPrimarySpecialization();
         }
 
-        OnEffectHitTarget.Add(new(TriggerDamage, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(TriggerDamage, 0, SpellEffects.Dummy));
 
         if (specialization != ChrSpecialization.ShamanElemental)
-            OnEffectLaunch.Add(new(PreventLavaSurge, 5, SpellEffectName.TriggerSpell));
+            OnEffectLaunch.Add(new(PreventLavaSurge, 5, SpellEffects.TriggerSpell));
 
         if (specialization == ChrSpecialization.None || specialization == ChrSpecialization.ShamanEnhancement)
-            OnEffectHitTarget.Add(new(EnergizeMaelstrom, 4, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(EnergizeMaelstrom, 4, SpellEffects.Dummy));
     }
 }
 
@@ -2522,7 +2522,7 @@ class spell_sha_restorative_mists : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHeal, 0, SpellEffectName.Heal));
+        OnEffectHitTarget.Add(new(HandleHeal, 0, SpellEffects.Heal));
     }
 }
 
@@ -2717,8 +2717,8 @@ class spell_sha_stormflurry : SpellScript
     {
         return ValidateSpellInfo(_stormflurrySpellId, _mainHandDamageSpellId, _offHandDamageSpellId)
             && ValidateSpellEffect((spellInfo.Id, 1))
-            && spellInfo.GetEffect(0).IsEffect(SpellEffectName.TriggerSpell)
-            && spellInfo.GetEffect(1).IsEffect(SpellEffectName.TriggerSpell);
+            && spellInfo.GetEffect(0).IsEffect(SpellEffects.TriggerSpell)
+            && spellInfo.GetEffect(1).IsEffect(SpellEffects.TriggerSpell);
     }
 
     public override bool Load()
@@ -2748,7 +2748,7 @@ class spell_sha_stormflurry : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleProc, 1, SpellEffectName.TriggerSpell));
+        OnEffectHitTarget.Add(new(HandleProc, 1, SpellEffects.TriggerSpell));
     }
 }
 
@@ -2881,7 +2881,7 @@ class spell_sha_thorims_invocation_primer : SpellScript
     {
         return ValidateSpellInfo(SpellIds.ThorimsInvocation, SpellIds.LightningBolt, SpellIds.ChainLightning)
             && ValidateSpellEffect((spellInfo.Id, 0))
-            && spellInfo.GetEffect(0).IsEffect(SpellEffectName.SchoolDamage);
+            && spellInfo.GetEffect(0).IsEffect(SpellEffects.SchoolDamage);
     }
 
     void UpdateThorimsInvocationSpell()
@@ -2947,7 +2947,7 @@ class spell_sha_thorims_invocation_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(TriggerLightningSpell, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(TriggerLightningSpell, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -3301,7 +3301,7 @@ class spell_sha_unrelenting_storms : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(Trigger, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(Trigger, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -3335,8 +3335,8 @@ class spell_sha_voltaic_blaze : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(ApplyFlameShock, 0, SpellEffectName.SchoolDamage));
-        OnEffectHitTarget.Add(new(EnergizeMaelstrom, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(ApplyFlameShock, 0, SpellEffects.SchoolDamage));
+        OnEffectHitTarget.Add(new(EnergizeMaelstrom, 1, SpellEffects.Dummy));
     }
 }
 
@@ -3405,7 +3405,7 @@ class spell_sha_windfury_weapon : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffects.Dummy));
     }
 }
 

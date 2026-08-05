@@ -267,7 +267,7 @@ namespace Game.Spells
                 _effects[i].EffectIndex = (uint)i;
         }
 
-        public bool HasEffect(SpellEffectName effect)
+        public bool HasEffect(SpellEffects effect)
         {
             foreach (var effectInfo in _effects)
                 if (effectInfo.IsEffect(effect))
@@ -300,14 +300,14 @@ namespace Game.Spells
             {
                 switch (effectInfo.Effect)
                 {
-                    case SpellEffectName.WeaponDamage:
-                    case SpellEffectName.WeaponDamageNoSchool:
-                    case SpellEffectName.NormalizedWeaponDmg:
-                    case SpellEffectName.WeaponPercentDamage:
-                    case SpellEffectName.SchoolDamage:
-                    case SpellEffectName.EnvironmentalDamage:
-                    case SpellEffectName.HealthLeech:
-                    case SpellEffectName.DamageFromMaxHealthPCT:
+                    case SpellEffects.WeaponDamage:
+                    case SpellEffects.WeaponDamageNoSchool:
+                    case SpellEffects.NormalizedWeaponDmg:
+                    case SpellEffects.WeaponPercentDamage:
+                    case SpellEffects.SchoolDamage:
+                    case SpellEffects.EnvironmentalDamage:
+                    case SpellEffects.HealthLeech:
+                    case SpellEffects.DamageFromMaxHealthPCT:
                         continue;
                     default:
                         return false;
@@ -322,22 +322,22 @@ namespace Game.Spells
             if (GetEffects().Count < 2)
                 return false;
 
-            return ((GetEffect(0).Effect == SpellEffectName.CreateRandomItem
-                || GetEffect(0).Effect == SpellEffectName.CreateLoot)
-                && GetEffect(1).Effect == SpellEffectName.ScriptEffect)
+            return ((GetEffect(0).Effect == SpellEffects.CreateRandomItem
+                || GetEffect(0).Effect == SpellEffects.CreateLoot)
+                && GetEffect(1).Effect == SpellEffects.ScriptEffect)
                 || Id == 64323;
         }
 
         public bool IsLootCrafting()
         {
-            return HasEffect(SpellEffectName.CreateRandomItem) || HasEffect(SpellEffectName.CreateLoot);
+            return HasEffect(SpellEffects.CreateRandomItem) || HasEffect(SpellEffects.CreateLoot);
         }
 
         public bool IsProfession()
         {
             foreach (var effectInfo in _effects)
             {
-                if (effectInfo.IsEffect(SpellEffectName.Skill))
+                if (effectInfo.IsEffect(SpellEffects.Skill))
                 {
                     uint skill = (uint)effectInfo.MiscValue;
 
@@ -351,7 +351,7 @@ namespace Game.Spells
         public bool IsPrimaryProfession()
         {
             foreach (var effectInfo in _effects)
-                if (effectInfo.IsEffect(SpellEffectName.Skill) && Global.SpellMgr.IsPrimaryProfessionSkill((uint)effectInfo.MiscValue))
+                if (effectInfo.IsEffect(SpellEffects.Skill) && Global.SpellMgr.IsPrimaryProfessionSkill((uint)effectInfo.MiscValue))
                     return true;
 
             return false;
@@ -376,7 +376,7 @@ namespace Game.Spells
         public bool IsAffectingArea()
         {
             foreach (var effectInfo in _effects)
-                if (effectInfo.IsEffect() && (effectInfo.IsTargetingArea() || effectInfo.IsEffect(SpellEffectName.PersistentAreaAura) || effectInfo.IsAreaAuraEffect()))
+                if (effectInfo.IsEffect() && (effectInfo.IsTargetingArea() || effectInfo.IsEffect(SpellEffects.PersistentAreaAura) || effectInfo.IsAreaAuraEffect()))
                     return true;
 
             return false;
@@ -452,12 +452,12 @@ namespace Game.Spells
                 {
                     case SpellFamilyNames.Paladin:
                         // Paladin aura Spell
-                        if (effectInfo.Effect == SpellEffectName.ApplyAreaAuraRaid)
+                        if (effectInfo.Effect == SpellEffects.ApplyAreaAuraRaid)
                             return false;
                         break;
                     case SpellFamilyNames.Druid:
                         // Druid form Spell
-                        if (effectInfo.Effect == SpellEffectName.ApplyAura &&
+                        if (effectInfo.Effect == SpellEffects.ApplyAura &&
                             effectInfo.ApplyAuraName == AuraType.ModShapeshift)
                             return false;
                         break;
@@ -468,7 +468,7 @@ namespace Game.Spells
 
         public bool IsPassiveStackableWithRanks()
         {
-            return IsPassive() && !HasEffect(SpellEffectName.ApplyAura);
+            return IsPassive() && !HasEffect(SpellEffects.ApplyAura);
         }
 
         public bool IsMultiSlotAura()
@@ -1182,7 +1182,7 @@ namespace Game.Spells
                 return SpellCastResult.TargetAurastate;
 
             if (unitTarget.HasAuraType(AuraType.PreventResurrection) && !HasAttribute(SpellAttr7.BypassNoResurrectAura))
-                if (HasEffect(SpellEffectName.SelfResurrect) || HasEffect(SpellEffectName.Resurrect))
+                if (HasEffect(SpellEffects.SelfResurrect) || HasEffect(SpellEffects.Resurrect))
                     return SpellCastResult.TargetCannotBeResurrected;
 
             if (HasAttribute(SpellAttr8.EnforceInCombatRessurectionLimit))
@@ -1281,7 +1281,7 @@ namespace Game.Spells
                 {
                     foreach (var effectInfo in _effects)
                     {
-                        if (!effectInfo.IsEffect(SpellEffectName.Summon))
+                        if (!effectInfo.IsEffect(SpellEffects.Summon))
                             continue;
 
                         var props = CliDB.SummonPropertiesStorage.LookupByKey(effectInfo.MiscValueB);
@@ -1642,7 +1642,7 @@ namespace Game.Spells
 
             foreach (var effectInfo in _effects)
             {
-                if (effectInfo.IsEffect(SpellEffectName.ApplyAura))
+                if (effectInfo.IsEffect(SpellEffects.ApplyAura))
                 {
                     switch (effectInfo.ApplyAuraName)
                     {
@@ -2170,7 +2170,7 @@ namespace Game.Spells
                             dispelImmunityMask |= creatureImmunities.DispelType.ToUInt();
                             mechanicImmunityMask |= creatureImmunities.Mechanic.ToUInt();
                             otherImmunityMask |= (byte)creatureImmunities.Other;
-                            foreach (SpellEffectName effectType in creatureImmunities.Effect)
+                            foreach (SpellEffects effectType in creatureImmunities.Effect)
                                 immuneInfo.SpellEffectImmune.Add(effectType);
                             foreach (AuraType aura in creatureImmunities.Aura)
                                 immuneInfo.AuraTypeImmune.Add(aura);
@@ -2211,7 +2211,7 @@ namespace Game.Spells
                     }
                     case AuraType.EffectImmunity:
                     {
-                        immuneInfo.SpellEffectImmune.Add((SpellEffectName)miscVal);
+                        immuneInfo.SpellEffectImmune.Add((SpellEffects)miscVal);
                         break;
                     }
                     case AuraType.StateImmunity:
@@ -2436,7 +2436,7 @@ namespace Game.Spells
                     target.RemoveAurasByType(auraType, aurApp => CanDispelAura(aurApp.GetBase().GetSpellInfo()));
             }
 
-            foreach (SpellEffectName effectType in immuneInfo.SpellEffectImmune)
+            foreach (SpellEffects effectType in immuneInfo.SpellEffectImmune)
                 target.ApplySpellImmune(Id, SpellImmunity.Effect, effectType, apply);
 
             byte otherImmuneMask = immuneInfo.OtherImmuneMask;
@@ -3126,9 +3126,9 @@ namespace Game.Spells
             foreach (var effectInfo in GetEffects())
             {
                 if (IsPositiveEffect(effectInfo.EffectIndex) &&
-                    (effectInfo.IsEffect(SpellEffectName.ApplyAura) ||
-                    effectInfo.IsEffect(SpellEffectName.ApplyAreaAuraParty) ||
-                    effectInfo.IsEffect(SpellEffectName.ApplyAreaAuraRaid)) &&
+                    (effectInfo.IsEffect(SpellEffects.ApplyAura) ||
+                    effectInfo.IsEffect(SpellEffects.ApplyAreaAuraParty) ||
+                    effectInfo.IsEffect(SpellEffects.ApplyAreaAuraRaid)) &&
                     effectInfo.Scaling.Coefficient != 0)
                 {
                     needRankSelection = true;
@@ -3373,12 +3373,12 @@ namespace Game.Spells
             {
                 switch (otherEffect.Effect)
                 {
-                    case SpellEffectName.Heal:
-                    case SpellEffectName.LearnSpell:
-                    case SpellEffectName.SkillStep:
-                    case SpellEffectName.HealPct:
+                    case SpellEffects.Heal:
+                    case SpellEffects.LearnSpell:
+                    case SpellEffects.SkillStep:
+                    case SpellEffects.HealPct:
                         return true;
-                    case SpellEffectName.Instakill:
+                    case SpellEffects.Instakill:
                         if (otherEffect.EffectIndex != effect.EffectIndex && // for spells like 38044: instakill effect is negative but auras on target must count as buff
                             otherEffect.TargetA.GetTarget() == effect.TargetA.GetTarget() &&
                             otherEffect.TargetB.GetTarget() == effect.TargetB.GetTarget())
@@ -3408,41 +3408,41 @@ namespace Game.Spells
 
             switch (effect.Effect)
             {
-                case SpellEffectName.WeaponDamage:
-                case SpellEffectName.WeaponDamageNoSchool:
-                case SpellEffectName.NormalizedWeaponDmg:
-                case SpellEffectName.WeaponPercentDamage:
-                case SpellEffectName.SchoolDamage:
-                case SpellEffectName.EnvironmentalDamage:
-                case SpellEffectName.HealthLeech:
-                case SpellEffectName.Instakill:
-                case SpellEffectName.PowerDrain:
-                case SpellEffectName.StealBeneficialBuff:
-                case SpellEffectName.InterruptCast:
-                case SpellEffectName.Pickpocket:
-                case SpellEffectName.GameObjectDamage:
-                case SpellEffectName.DurabilityDamage:
-                case SpellEffectName.DurabilityDamagePct:
-                case SpellEffectName.ApplyAreaAuraEnemy:
-                case SpellEffectName.Tamecreature:
-                case SpellEffectName.Distract:
+                case SpellEffects.WeaponDamage:
+                case SpellEffects.WeaponDamageNoSchool:
+                case SpellEffects.NormalizedWeaponDmg:
+                case SpellEffects.WeaponPercentDamage:
+                case SpellEffects.SchoolDamage:
+                case SpellEffects.EnvironmentalDamage:
+                case SpellEffects.HealthLeech:
+                case SpellEffects.Instakill:
+                case SpellEffects.PowerDrain:
+                case SpellEffects.StealBeneficialBuff:
+                case SpellEffects.InterruptCast:
+                case SpellEffects.Pickpocket:
+                case SpellEffects.GameObjectDamage:
+                case SpellEffects.DurabilityDamage:
+                case SpellEffects.DurabilityDamagePct:
+                case SpellEffects.ApplyAreaAuraEnemy:
+                case SpellEffects.Tamecreature:
+                case SpellEffects.Distract:
                     return false;
-                case SpellEffectName.Energize:
-                case SpellEffectName.EnergizePct:
-                case SpellEffectName.HealPct:
-                case SpellEffectName.HealMaxHealth:
-                case SpellEffectName.HealMechanical:
+                case SpellEffects.Energize:
+                case SpellEffects.EnergizePct:
+                case SpellEffects.HealPct:
+                case SpellEffects.HealMaxHealth:
+                case SpellEffects.HealMechanical:
                     return true;
-                case SpellEffectName.KnockBack:
-                case SpellEffectName.Charge:
-                case SpellEffectName.PersistentAreaAura:
-                case SpellEffectName.AttackMe:
-                case SpellEffectName.PowerBurn:
+                case SpellEffects.KnockBack:
+                case SpellEffects.Charge:
+                case SpellEffects.PersistentAreaAura:
+                case SpellEffects.AttackMe:
+                case SpellEffects.PowerBurn:
                     // check targets
                     if (!_isPositiveTarget(effect))
                         return false;
                     break;
-                case SpellEffectName.Dispel:
+                case SpellEffects.Dispel:
                     // non-positive dispel
                     switch ((DispelType)effect.MiscValue)
                     {
@@ -3458,7 +3458,7 @@ namespace Game.Spells
                     if (!_isPositiveTarget(effect))
                         return false;
                     break;
-                case SpellEffectName.DispelMechanic:
+                case SpellEffects.DispelMechanic:
                     if (!_isPositiveTarget(effect))
                     {
                         // non-positive mechanic dispel on negative target
@@ -3474,8 +3474,8 @@ namespace Game.Spells
                         }
                     }
                     break;
-                case SpellEffectName.Threat:
-                case SpellEffectName.ModifyThreatPercent:
+                case SpellEffects.Threat:
+                case SpellEffects.ModifyThreatPercent:
                     // check targets AND basepoints
                     if (!_isPositiveTarget(effect) && bp > 0)
                         return false;
@@ -4015,7 +4015,7 @@ namespace Game.Spells
             if (effect != null)
             {
                 EffectIndex = (uint)effect.EffectIndex;
-                Effect = (SpellEffectName)effect.Effect;
+                Effect = (SpellEffects)effect.Effect;
                 ApplyAuraName = (AuraType)effect.EffectAura;
                 ApplyAuraPeriod = effect.EffectAuraPeriod;
                 BasePoints = effect.EffectBasePoints;
@@ -4054,14 +4054,14 @@ namespace Game.Spells
             return Effect != 0;
         }
 
-        public bool IsEffect(SpellEffectName effectName)
+        public bool IsEffect(SpellEffects effectName)
         {
             return Effect == effectName;
         }
 
         public bool IsAura()
         {
-            return (IsUnitOwnedAuraEffect() || Effect == SpellEffectName.PersistentAreaAura) && ApplyAuraName != 0;
+            return (IsUnitOwnedAuraEffect() || Effect == SpellEffects.PersistentAreaAura) && ApplyAuraName != 0;
         }
 
         public bool IsAura(AuraType aura)
@@ -4076,21 +4076,21 @@ namespace Game.Spells
 
         public bool IsAreaAuraEffect()
         {
-            if (Effect == SpellEffectName.ApplyAreaAuraParty ||
-                Effect == SpellEffectName.ApplyAreaAuraRaid ||
-                Effect == SpellEffectName.ApplyAreaAuraFriend ||
-                Effect == SpellEffectName.ApplyAreaAuraEnemy ||
-                Effect == SpellEffectName.ApplyAreaAuraPet ||
-                Effect == SpellEffectName.ApplyAreaAuraOwner ||
-                Effect == SpellEffectName.ApplyAreaAuraSummons ||
-                Effect == SpellEffectName.ApplyAreaAuraPartyNonrandom)
+            if (Effect == SpellEffects.ApplyAreaAuraParty ||
+                Effect == SpellEffects.ApplyAreaAuraRaid ||
+                Effect == SpellEffects.ApplyAreaAuraFriend ||
+                Effect == SpellEffects.ApplyAreaAuraEnemy ||
+                Effect == SpellEffects.ApplyAreaAuraPet ||
+                Effect == SpellEffects.ApplyAreaAuraOwner ||
+                Effect == SpellEffects.ApplyAreaAuraSummons ||
+                Effect == SpellEffects.ApplyAreaAuraPartyNonrandom)
                 return true;
             return false;
         }
 
         public bool IsUnitOwnedAuraEffect()
         {
-            return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura || Effect == SpellEffectName.ApplyAuraOnPet;
+            return IsAreaAuraEffect() || Effect == SpellEffects.ApplyAura || Effect == SpellEffects.ApplyAuraOnPet;
         }
 
         public uint GetPeriodicTickCount()
@@ -4221,31 +4221,31 @@ namespace Game.Spells
 
             switch (Effect)
             {
-                case SpellEffectName.SchoolDamage:
-                case SpellEffectName.EnvironmentalDamage:
-                case SpellEffectName.HealthLeech:
-                case SpellEffectName.Heal:
-                case SpellEffectName.WeaponDamageNoSchool:
-                case SpellEffectName.WeaponPercentDamage:
-                case SpellEffectName.WeaponDamage:
-                case SpellEffectName.HealMaxHealth:
-                case SpellEffectName.HealMechanical:
-                case SpellEffectName.NormalizedWeaponDmg:
-                case SpellEffectName.PowerDrain:
-                case SpellEffectName.Energize:
-                case SpellEffectName.PowerBurn:
+                case SpellEffects.SchoolDamage:
+                case SpellEffects.EnvironmentalDamage:
+                case SpellEffects.HealthLeech:
+                case SpellEffects.Heal:
+                case SpellEffects.WeaponDamageNoSchool:
+                case SpellEffects.WeaponPercentDamage:
+                case SpellEffects.WeaponDamage:
+                case SpellEffects.HealMaxHealth:
+                case SpellEffects.HealMechanical:
+                case SpellEffects.NormalizedWeaponDmg:
+                case SpellEffects.PowerDrain:
+                case SpellEffects.Energize:
+                case SpellEffects.PowerBurn:
                     value = Math.Round(value);
                     break;
-                case SpellEffectName.ApplyAura:
-                case SpellEffectName.PersistentAreaAura:
-                case SpellEffectName.ApplyAreaAuraParty:
-                case SpellEffectName.ApplyAreaAuraRaid:
-                case SpellEffectName.ApplyAreaAuraPet:
-                case SpellEffectName.ApplyAreaAuraFriend:
-                case SpellEffectName.ApplyAreaAuraEnemy:
-                case SpellEffectName.ApplyAreaAuraOwner:
-                case SpellEffectName.ApplyAuraOnPet:
-                case SpellEffectName.ApplyAreaAuraSummons:
+                case SpellEffects.ApplyAura:
+                case SpellEffects.PersistentAreaAura:
+                case SpellEffects.ApplyAreaAuraParty:
+                case SpellEffects.ApplyAreaAuraRaid:
+                case SpellEffects.ApplyAreaAuraPet:
+                case SpellEffects.ApplyAreaAuraFriend:
+                case SpellEffects.ApplyAreaAuraEnemy:
+                case SpellEffects.ApplyAreaAuraOwner:
+                case SpellEffects.ApplyAuraOnPet:
+                case SpellEffects.ApplyAreaAuraSummons:
                     switch (ApplyAuraName)
                     {
                         case AuraType.PeriodicDamage:
@@ -4502,33 +4502,33 @@ namespace Game.Spells
         {
             switch (Effect)
             {
-                case SpellEffectName.SchoolDamage:
-                case SpellEffectName.EnvironmentalDamage:
-                case SpellEffectName.HealthLeech:
-                case SpellEffectName.WeaponDamageNoSchool:
-                case SpellEffectName.WeaponDamage:
+                case SpellEffects.SchoolDamage:
+                case SpellEffects.EnvironmentalDamage:
+                case SpellEffects.HealthLeech:
+                case SpellEffects.WeaponDamageNoSchool:
+                case SpellEffects.WeaponDamage:
                     return ExpectedStatType.CreatureSpellDamage;
-                case SpellEffectName.Heal:
-                case SpellEffectName.HealMechanical:
+                case SpellEffects.Heal:
+                case SpellEffects.HealMechanical:
                     return ExpectedStatType.PlayerHealth;
-                case SpellEffectName.Energize:
-                case SpellEffectName.PowerBurn:
+                case SpellEffects.Energize:
+                case SpellEffects.PowerBurn:
                     if (MiscValue == (int)PowerType.Mana)
                         return ExpectedStatType.PlayerMana;
                     return ExpectedStatType.None;
-                case SpellEffectName.PowerDrain:
+                case SpellEffects.PowerDrain:
                     return ExpectedStatType.PlayerMana;
-                case SpellEffectName.ApplyAura:
-                case SpellEffectName.PersistentAreaAura:
-                case SpellEffectName.ApplyAreaAuraParty:
-                case SpellEffectName.ApplyAreaAuraRaid:
-                case SpellEffectName.ApplyAreaAuraPet:
-                case SpellEffectName.ApplyAreaAuraFriend:
-                case SpellEffectName.ApplyAreaAuraEnemy:
-                case SpellEffectName.ApplyAreaAuraOwner:
-                case SpellEffectName.ApplyAuraOnPet:
-                case SpellEffectName.ApplyAreaAuraSummons:
-                case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                case SpellEffects.ApplyAura:
+                case SpellEffects.PersistentAreaAura:
+                case SpellEffects.ApplyAreaAuraParty:
+                case SpellEffects.ApplyAreaAuraRaid:
+                case SpellEffects.ApplyAreaAuraPet:
+                case SpellEffects.ApplyAreaAuraFriend:
+                case SpellEffects.ApplyAreaAuraEnemy:
+                case SpellEffects.ApplyAreaAuraOwner:
+                case SpellEffects.ApplyAuraOnPet:
+                case SpellEffects.ApplyAreaAuraSummons:
+                case SpellEffects.ApplyAreaAuraPartyNonrandom:
                     switch (ApplyAuraName)
                     {
                         case AuraType.PeriodicDamage:
@@ -4601,7 +4601,7 @@ namespace Game.Spells
             public SpellTargetObjectTypes UsedTargetObjectType; // defines valid target object type for spell effect
         }
 
-        static StaticData[] _data = new StaticData[(int)SpellEffectName.TotalSpellEffects]
+        static StaticData[] _data = new StaticData[(int)SpellEffects.TotalSpellEffects]
         {
             // implicit target type           used target object type
             new StaticData(SpellEffectImplicitTargetTypes.None,     SpellTargetObjectTypes.None), // 0
@@ -4966,7 +4966,7 @@ namespace Game.Spells
         SpellInfo _spellInfo;
         public uint EffectIndex;
 
-        public SpellEffectName Effect;
+        public SpellEffects Effect;
         public AuraType ApplyAuraName;
         public uint ApplyAuraPeriod;
         public float BasePoints;
@@ -5359,7 +5359,7 @@ namespace Game.Spells
         public byte OtherImmuneMask;
 
         public List<AuraType> AuraTypeImmune = new();
-        public List<SpellEffectName> SpellEffectImmune = new();
+        public List<SpellEffects> SpellEffectImmune = new();
     }
 }
 

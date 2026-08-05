@@ -217,7 +217,7 @@ namespace Scripts.EasternKingdoms.BaradinHold.Occuthar
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 

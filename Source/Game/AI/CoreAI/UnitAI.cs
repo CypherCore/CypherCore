@@ -349,7 +349,7 @@ namespace Game.AI
                                 AIInfo.target = AITarget.Enemy;
                         }
 
-                        if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                        if (spellEffectInfo.IsEffect(SpellEffects.ApplyAura))
                         {
                             if (targetType == Targets.UnitTargetEnemy)
                             {
@@ -420,21 +420,21 @@ namespace Game.AI
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyFriend - 1);
 
                     // Make sure that this spell includes a damage effect.
-                    if (spellEffectInfo.Effect == SpellEffectName.SchoolDamage ||
-                        spellEffectInfo.Effect == SpellEffectName.Instakill ||
-                        spellEffectInfo.Effect == SpellEffectName.EnvironmentalDamage ||
-                        spellEffectInfo.Effect == SpellEffectName.HealthLeech)
+                    if (spellEffectInfo.Effect == SpellEffects.SchoolDamage ||
+                        spellEffectInfo.Effect == SpellEffects.Instakill ||
+                        spellEffectInfo.Effect == SpellEffects.EnvironmentalDamage ||
+                        spellEffectInfo.Effect == SpellEffects.HealthLeech)
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Damage - 1);
 
                     // Make sure that this spell includes a healing effect (or an apply aura with a periodic heal).
-                    if (spellEffectInfo.Effect == SpellEffectName.Heal ||
-                        spellEffectInfo.Effect == SpellEffectName.HealMaxHealth ||
-                        spellEffectInfo.Effect == SpellEffectName.HealMechanical ||
-                        (spellEffectInfo.Effect == SpellEffectName.ApplyAura && spellEffectInfo.ApplyAuraName == AuraType.PeriodicHeal))
+                    if (spellEffectInfo.Effect == SpellEffects.Heal ||
+                        spellEffectInfo.Effect == SpellEffects.HealMaxHealth ||
+                        spellEffectInfo.Effect == SpellEffects.HealMechanical ||
+                        (spellEffectInfo.Effect == SpellEffects.ApplyAura && spellEffectInfo.ApplyAuraName == AuraType.PeriodicHeal))
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Healing - 1);
 
                     // Make sure that this spell applies an aura.
-                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
+                    if (spellEffectInfo.Effect == SpellEffects.ApplyAura)
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Aura - 1);
                 }
 

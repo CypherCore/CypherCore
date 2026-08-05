@@ -411,7 +411,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -431,7 +431,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockCaverns
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
         }
     }
 

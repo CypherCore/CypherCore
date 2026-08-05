@@ -166,7 +166,7 @@ class spell_mage_alter_time_active : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(RemoveAlterTimeAura, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(RemoveAlterTimeAura, 0, SpellEffects.Dummy));
     }
 }
 
@@ -206,8 +206,8 @@ class spell_mage_arcane_barrage : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
-        OnEffectLaunchTarget.Add(new(MarkPrimaryTarget, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.SchoolDamage));
+        OnEffectLaunchTarget.Add(new(MarkPrimaryTarget, 1, SpellEffects.Dummy));
         AfterCast.Add(new(ConsumeArcaneCharges));
     }
 
@@ -229,7 +229,7 @@ class spell_mage_arcane_charge_clear : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(RemoveArcaneCharge, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(RemoveArcaneCharge, 0, SpellEffects.Dummy));
     }
 }
 
@@ -244,7 +244,7 @@ class spell_mage_arcane_explosion : SpellScript
         if (!ValidateSpellEffect((spellInfo.Id, 1)))
             return false;
 
-        return spellInfo.GetEffect(1).IsEffect(SpellEffectName.SchoolDamage);
+        return spellInfo.GetEffect(1).IsEffect(SpellEffects.SchoolDamage);
     }
 
     void CheckRequiredAuraForBaselineEnergize(uint effIndex)
@@ -276,8 +276,8 @@ class spell_mage_arcane_explosion : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(CheckRequiredAuraForBaselineEnergize, 0, SpellEffectName.Energize));
-        OnEffectHitTarget.Add(new(HandleReverberate, 2, SpellEffectName.Energize));
+        OnEffectHitTarget.Add(new(CheckRequiredAuraForBaselineEnergize, 0, SpellEffects.Energize));
+        OnEffectHitTarget.Add(new(HandleReverberate, 2, SpellEffects.Energize));
     }
 }
 
@@ -352,7 +352,7 @@ class spell_mage_blizzard_damage : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleSlow, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleSlow, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -385,7 +385,7 @@ class spell_mage_cauterize : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(SuppressSpeedBuff, 2, SpellEffectName.TriggerSpell));
+        OnEffectLaunch.Add(new(SuppressSpeedBuff, 2, SpellEffects.TriggerSpell));
     }
 }
 
@@ -443,7 +443,7 @@ class spell_mage_cold_snap : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.ScriptEffect));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -462,7 +462,7 @@ class spell_mage_comet_storm : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(EffectHit, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(EffectHit, 0, SpellEffects.Dummy));
     }
 
     class CometStormEvent(Unit caster, ObjectGuid originalCastId, Position dest) : BasicEvent
@@ -501,7 +501,7 @@ class spell_mage_comet_storm_damage : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleEffectHitTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -520,7 +520,7 @@ class spell_mage_cone_of_cold : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleSlow, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleSlow, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -547,7 +547,7 @@ class spell_mage_conjure_refreshment : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -631,7 +631,7 @@ class spell_mage_ethereal_blink_triggered : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(TriggerSlow, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(TriggerSlow, 0, SpellEffects.Dummy));
     }
 }
 
@@ -901,7 +901,7 @@ class spell_mage_flurry : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(EffectHit, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(EffectHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -920,7 +920,7 @@ class spell_mage_flurry_damage : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1195,8 +1195,8 @@ class spell_mage_ice_lance : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(IndexTarget, 0, SpellEffectName.ScriptEffect));
-        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.ScriptEffect));
+        OnEffectLaunchTarget.Add(new(IndexTarget, 0, SpellEffects.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1217,7 +1217,7 @@ class spell_mage_ice_lance_damage : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(ApplyDamageMultiplier, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(ApplyDamageMultiplier, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1422,7 +1422,7 @@ class spell_mage_living_bomb : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1448,7 +1448,7 @@ class spell_mage_living_bomb_explosion : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleSpread, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleSpread, 1, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1495,7 +1495,7 @@ class spell_mage_meteor : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(EffectHit, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(EffectHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1587,7 +1587,7 @@ class spell_mage_polymorph_visual : SpellScript
     public override void Register()
     {
         // add dummy effect spell handler to Polymorph visual
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1889,7 +1889,7 @@ class spell_mage_scorch : SpellScript
     public override void Register()
     {
         OnCalcCritChance.Add(new(CalcCritChance));
-        OnEffectHitTarget.Add(new(HandleFreneticSpeed, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleFreneticSpeed, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1933,7 +1933,7 @@ class spell_mage_supernova : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffects.SchoolDamage));
     }
 }
 

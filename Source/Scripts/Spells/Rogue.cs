@@ -151,7 +151,7 @@ class spell_rog_airborne_irritant : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleHit, 0, SpellEffectName.ApplyAura));
+        OnEffectHit.Add(new(HandleHit, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -194,7 +194,7 @@ class spell_rog_backstab : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitDamage, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHitDamage, 1, SpellEffects.SchoolDamage));
     }
 }
 
@@ -354,7 +354,7 @@ class spell_rog_deadly_poison : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(HandleInstantDamage, 0, SpellEffectName.ApplyAura));
+        OnEffectLaunchTarget.Add(new(HandleInstantDamage, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -593,7 +593,7 @@ class spell_rog_improved_shiv : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -671,7 +671,7 @@ class spell_rog_killing_spree : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffects.Dummy));
     }
 }
 
@@ -740,7 +740,7 @@ class spell_rog_night_terrors : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEnergize, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleEnergize, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -803,7 +803,7 @@ class spell_rog_poisoned_knife : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -959,7 +959,7 @@ class spell_rog_roll_the_bones : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -1068,7 +1068,7 @@ class spell_rog_shadowstrike : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(HandleCheckCast));
-        OnEffectHitTarget.Add(new(HandleEnergize, 1, SpellEffectName.Energize));
+        OnEffectHitTarget.Add(new(HandleEnergize, 1, SpellEffects.Energize));
     }
 }
 
@@ -1174,7 +1174,7 @@ class spell_rog_shuriken_storm : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEnergize, 0, SpellEffectName.SchoolDamage));
+        OnEffectHit.Add(new(HandleEnergize, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1226,7 +1226,7 @@ class spell_rog_sinister_strike : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 2, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 2, SpellEffects.Dummy));
     }
 }
 
@@ -1318,7 +1318,7 @@ class spell_rog_symbols_of_death : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -1463,7 +1463,7 @@ class spell_rog_vanish : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(OnLaunchTarget, 1, SpellEffectName.TriggerSpell));
+        OnEffectLaunchTarget.Add(new(OnLaunchTarget, 1, SpellEffects.TriggerSpell));
     }
 }
 

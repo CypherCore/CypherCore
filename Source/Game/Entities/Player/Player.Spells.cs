@@ -2368,7 +2368,7 @@ namespace Game.Entities
 
             if (m_canTitanGrip)
             {
-                if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffectName.TitanGrip))
+                if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffects.TitanGrip))
                 {
                     RemoveAurasDueToSpell(m_titanGripPenaltySpellId);
                     SetCanTitanGrip(false);
@@ -2377,7 +2377,7 @@ namespace Game.Entities
 
             if (CanDualWield())
             {
-                if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffectName.DualWield))
+                if (spellInfo != null && spellInfo.IsPassive() && spellInfo.HasEffect(SpellEffects.DualWield))
                     SetCanDualWield(false);
             }
 
@@ -2686,7 +2686,7 @@ namespace Game.Entities
 
             // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
             // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
-            if (!loading && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffectName.LearnSpell))
+            if (!loading && spellInfo.HasAttribute(SpellCustomAttributes.IsTalent) && spellInfo.HasEffect(SpellEffects.LearnSpell))
             {
                 // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
                 castSpell = true;
@@ -2694,7 +2694,7 @@ namespace Game.Entities
             // also cast passive spells (including all talents without SPELL_EFFECT_LEARN_SPELL) with additional checks
             else if (spellInfo.IsPassive())
                 castSpell = HandlePassiveSpellLearn(spellInfo);
-            else if (spellInfo.HasEffect(SpellEffectName.SkillStep))
+            else if (spellInfo.HasEffect(SpellEffects.SkillStep))
                 castSpell = true;
             else if (spellInfo.HasAttribute(SpellAttr1.CastWhenLearned))
                 castSpell = true;
@@ -2702,7 +2702,7 @@ namespace Game.Entities
             if (castSpell)
             {
                 CastSpell(this, spellId, true);
-                if (spellInfo.HasEffect(SpellEffectName.SkillStep))
+                if (spellInfo.HasEffect(SpellEffects.SkillStep))
                     return false;
             }
 

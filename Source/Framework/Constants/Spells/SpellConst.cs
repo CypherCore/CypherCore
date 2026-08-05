@@ -2391,7 +2391,7 @@ namespace Framework.Constants
     #endregion
 
     //Effects
-    public enum SpellEffectName
+    public enum SpellEffects
     {
         Any = -1,
         None = 0,

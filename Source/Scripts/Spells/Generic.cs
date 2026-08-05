@@ -1060,7 +1060,7 @@ class spell_gen_bonked : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1135,7 +1135,7 @@ class spell_gen_break_shield : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1197,7 +1197,7 @@ class spell_gen_cannibalize : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         OnCheckCast.Add(new(CheckIfCorpseNear));
     }
 }
@@ -1245,7 +1245,7 @@ class spell_gen_chaos_blast : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1260,7 +1260,7 @@ class spell_clear_all : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1277,13 +1277,13 @@ class spell_gen_clone : SpellScript
     {
         if (m_scriptSpellId == SpellIds.NightmareFigmentMirrorImage)
         {
-            OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.Dummy));
-            OnEffectHitTarget.Add(new(HandleScriptEffect, 2, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffects.Dummy));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 2, SpellEffects.Dummy));
         }
         else
         {
-            OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
-            OnEffectHitTarget.Add(new(HandleScriptEffect, 2, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffects.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScriptEffect, 2, SpellEffects.ScriptEffect));
         }
     }
 }
@@ -1299,7 +1299,7 @@ class spell_gen_clone_weapon : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1464,7 +1464,7 @@ class spell_gen_create_lance : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1513,7 +1513,7 @@ class spell_gen_dalaran_disguise : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1687,13 +1687,13 @@ class spell_gen_despawn_self : SpellScript
 
     void HandleDummy(uint effIndex)
     {
-        if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
+        if (GetEffectInfo().IsEffect(SpellEffects.Dummy) || GetEffectInfo().IsEffect(SpellEffects.ScriptEffect))
             GetCaster().ToCreature().DespawnOrUnsummon();
     }
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, SpellConst.EffectAll, SpellEffectName.Any));
+        OnEffectHitTarget.Add(new(HandleDummy, SpellConst.EffectAll, SpellEffects.Any));
     }
 }
 
@@ -1702,7 +1702,7 @@ class spell_gen_despawn_target : SpellScript
 {
     void HandleDespawn(uint effIndex)
     {
-        if (GetEffectInfo().IsEffect(SpellEffectName.Dummy) || GetEffectInfo().IsEffect(SpellEffectName.ScriptEffect))
+        if (GetEffectInfo().IsEffect(SpellEffects.Dummy) || GetEffectInfo().IsEffect(SpellEffects.ScriptEffect))
         {
             Creature target = GetHitCreature();
             if (target != null)
@@ -1712,7 +1712,7 @@ class spell_gen_despawn_target : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDespawn, SpellConst.EffectAll, SpellEffectName.Any));
+        OnEffectHitTarget.Add(new(HandleDespawn, SpellConst.EffectAll, SpellEffects.Any));
     }
 }
 
@@ -1736,7 +1736,7 @@ class spell_gen_divine_storm_cd_reset : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1763,7 +1763,7 @@ class spell_gen_ds_flush_knockback : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1814,7 +1814,7 @@ class spell_ethereal_pet_onsummon : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1833,7 +1833,7 @@ class spell_ethereal_pet_aura_remove : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1909,7 +1909,7 @@ class spell_gen_feast : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2131,7 +2131,7 @@ class spell_gen_5000_gold : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2163,7 +2163,7 @@ class spell_gen_fishing : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2189,7 +2189,7 @@ class spell_gen_gadgetzan_transporter_backfire : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2240,7 +2240,7 @@ class spell_gen_gnomish_transporter : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2286,7 +2286,7 @@ class spell_gen_hate_to_zero : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2304,7 +2304,7 @@ class spell_gen_hate_to_zero_caster_target : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2319,7 +2319,7 @@ class spell_gen_hate_to_50 : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2334,7 +2334,7 @@ class spell_gen_hate_to_75 : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2376,7 +2376,7 @@ class spell_gen_increase_stats_buff : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2512,11 +2512,11 @@ class spell_gen_mounted_charge : SpellScript
     {
         SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
 
-        if (spell.HasEffect(SpellEffectName.ScriptEffect))
-            OnEffectHitTarget.Add(new(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));
+        if (spell.HasEffect(SpellEffects.ScriptEffect))
+            OnEffectHitTarget.Add(new(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffects.ScriptEffect));
 
-        if (spell.GetEffect(0).IsEffect(SpellEffectName.Charge))
-            OnEffectHitTarget.Add(new(HandleChargeEffect, 0, SpellEffectName.Charge));
+        if (spell.GetEffect(0).IsEffect(SpellEffects.Charge))
+            OnEffectHitTarget.Add(new(HandleChargeEffect, 0, SpellEffects.Charge));
     }
 }
 
@@ -2579,7 +2579,7 @@ class spell_gen_netherbloom : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2606,7 +2606,7 @@ class spell_gen_nightmare_vine : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2719,7 +2719,7 @@ class spell_gen_oracle_wolvar_reputation : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2747,7 +2747,7 @@ class spell_gen_orc_disguise : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2813,7 +2813,7 @@ class spell_gen_player_say : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2924,7 +2924,7 @@ class spell_gen_pet_summoned : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2939,7 +2939,7 @@ class spell_gen_pet_wait : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHit.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -2989,7 +2989,7 @@ class spell_gen_profession_research : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckRequirement));
-        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3034,7 +3034,7 @@ class spell_gen_remove_flight_auras : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3048,7 +3048,7 @@ class spell_gen_remove_impairing_auras : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3316,7 +3316,7 @@ class spell_gen_two_forms : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(HandleTransform, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleTransform, 0, SpellEffects.Dummy));
     }
 }
 
@@ -3360,7 +3360,7 @@ class spell_gen_seaforium_blast : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(AchievementCredit, 1, SpellEffectName.GameObjectDamage));
+        OnEffectHitTarget.Add(new(AchievementCredit, 1, SpellEffects.GameObjectDamage));
     }
 }
 
@@ -3377,7 +3377,7 @@ class spell_gen_spectator_cheer_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -3405,7 +3405,7 @@ class spell_gen_spirit_healer_res : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -3448,7 +3448,7 @@ class spell_gen_throw_shield : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3479,7 +3479,7 @@ class spell_gen_tournament_duel : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3523,7 +3523,7 @@ class spell_gen_teleporting : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3671,7 +3671,7 @@ class spell_gen_upper_deck_create_foam_sword : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3757,7 +3757,7 @@ class spell_gen_vendor_bark_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -3818,7 +3818,7 @@ class spell_gen_whisper_to_controller : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHit.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3852,7 +3852,7 @@ class spell_gen_whisper_to_controller_random(uint text) : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3897,7 +3897,7 @@ class spell_gen_eject_passenger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(EjectPassenger, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(EjectPassenger, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3918,7 +3918,7 @@ class spell_gen_eject_passenger_with_seatId(sbyte seatId) : SpellScript()
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(EjectPassenger, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(EjectPassenger, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -3994,7 +3994,7 @@ class spell_gen_stand : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4215,7 +4215,7 @@ class spell_gen_landmine_knockback_achievement : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4237,7 +4237,7 @@ class spell_gen_clear_debuffs : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4398,7 +4398,7 @@ class spell_freezing_circle : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffects.SchoolDamage));
     }
 }
 
@@ -4444,7 +4444,7 @@ class spell_gen_cannon_blast : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4460,7 +4460,7 @@ class spell_gen_submerged : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4476,7 +4476,7 @@ class spell_gen_decimatus_transformation_sickness : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4490,7 +4490,7 @@ class spell_gen_anetheron_summon_towering_infernal : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -4555,7 +4555,7 @@ class spell_gen_azgalor_rain_of_fire_hellfire_citadel : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -4698,7 +4698,7 @@ class spell_defender_of_azeroth_death_gate_selector : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 
     struct BindLocation
@@ -4740,7 +4740,7 @@ class spell_defender_of_azeroth_speak_with_mograine : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -4767,7 +4767,7 @@ class spell_summon_battle_pet : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleSummon, 0, SpellEffectName.Summon));
+        OnEffectHit.Add(new(HandleSummon, 0, SpellEffects.Summon));
     }
 }
 
@@ -4823,7 +4823,7 @@ class spell_gen_anchor_here : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4908,7 +4908,7 @@ class spell_gen_eject_passengers_3_8 : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4924,7 +4924,7 @@ class spell_gen_reverse_cast_target_to_caster_triggered : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4948,7 +4948,7 @@ class spell_gen_despawn_all_summons_owned_by_caster : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -4998,7 +4998,7 @@ class spell_gen_skinning : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleSkinningEffect, 0, SpellEffectName.Skinning));
+        OnEffectHitTarget.Add(new(HandleSkinningEffect, 0, SpellEffects.Skinning));
     }
 }
 
@@ -5052,7 +5052,7 @@ class spell_gen_bloodlust(uint exhaustionSpellId) : SpellScript()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitCasterAreaRaid));
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitCasterAreaRaid));
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -5224,7 +5224,7 @@ class spell_gen_random_aggro_taunt : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(SelectRandomTarget, 0, Targets.UnitSrcAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleTauntEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleTauntEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -5247,7 +5247,7 @@ class spell_gen_set_health(ulong health) : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -5408,7 +5408,7 @@ class spell_gen_spatial_rift : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -5490,6 +5490,6 @@ class spell_gen_abandon_vehicle : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleHitTarget, SpellConst.EffectFirstFound, SpellEffects.ScriptEffect));
     }
 }

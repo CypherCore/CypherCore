@@ -1148,7 +1148,7 @@ namespace Game.AI
                         {
                             foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
                             {
-                                if (spellEffectInfo.IsEffect(SpellEffectName.Summon))
+                                if (spellEffectInfo.IsEffect(SpellEffects.Summon))
                                 {
                                     var summonProps = CliDB.SummonPropertiesStorage.LookupByKey(spellEffectInfo.MiscValueB);
                                     if (summonProps != null)

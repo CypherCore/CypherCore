@@ -1036,7 +1036,7 @@ namespace Game.Chat
                 return false;
             Spell = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             Skill = CliDB.SkillLineStorage.LookupByKey(skillId);
-            if (Spell == null || !Spell.HasEffect(SpellEffectName.TradeSkill) || Skill == null)
+            if (Spell == null || !Spell.HasEffect(SpellEffects.TradeSkill) || Skill == null)
                 return false;
             return true;
         }

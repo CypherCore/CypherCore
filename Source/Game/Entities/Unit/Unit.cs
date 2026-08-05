@@ -4023,7 +4023,7 @@ namespace Game.Entities
 
             if (APbonus != 0)                                       // Can be negative
             {
-                bool normalized = spellProto != null && spellProto.HasEffect(SpellEffectName.NormalizedWeaponDmg);
+                bool normalized = spellProto != null && spellProto.HasEffect(SpellEffects.NormalizedWeaponDmg);
                 DoneFlatBenefit += (int)(APbonus / 3.5f * GetAPMultiplier(attType, normalized));
             }
 

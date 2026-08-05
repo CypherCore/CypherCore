@@ -405,7 +405,7 @@ namespace Game.Entities
             if (Convert.ToBoolean(cInfo.FlagsExtra & CreatureFlagsExtra.NoTaunt))
             {
                 ApplySpellImmune(0, SpellImmunity.State, AuraType.ModTaunt, true);
-                ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
+                ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.AttackMe, true);
             }
 
             SetIsCombatDisallowed(cInfo.FlagsExtra.HasFlag(CreatureFlagsExtra.CannotEnterCombat));
@@ -914,8 +914,8 @@ namespace Game.Entities
 
             if (cinfo.FlagsExtra.HasAnyFlag(CreatureFlagsExtra.ImmunityKnockback))
             {
-                ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
-                ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBackDest, true);
+                ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.KnockBack, true);
+                ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.KnockBackDest, true);
             }
 
             GetThreatManager().Initialize();
@@ -2269,7 +2269,7 @@ namespace Game.Entities
                     if (immunities.Mechanic[i])
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, (uint)i, apply);
 
-                foreach (SpellEffectName effect in immunities.Effect)
+                foreach (SpellEffects effect in immunities.Effect)
                     ApplySpellImmune(placeholderSpellId, SpellImmunity.Effect, effect, apply);
 
                 foreach (AuraType aura in immunities.Aura)
@@ -2297,7 +2297,7 @@ namespace Game.Entities
 
         public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster, bool requireImmunityPurgesEffectAttribute = false)
         {
-            if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && spellEffectInfo.IsEffect(SpellEffectName.Heal))
+            if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && spellEffectInfo.IsEffect(SpellEffects.Heal))
                 return true;
 
             return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);

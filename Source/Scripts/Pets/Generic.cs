@@ -127,7 +127,7 @@ namespace Scripts.Pets.Generic
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -148,7 +148,7 @@ namespace Scripts.Pets.Generic
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -245,7 +245,7 @@ namespace Scripts.Pets.Generic
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 }

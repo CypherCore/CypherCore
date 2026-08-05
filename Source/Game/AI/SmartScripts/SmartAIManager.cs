@@ -1508,7 +1508,7 @@ namespace Game.AI
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, Difficulty.None);
                     foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (spellEffectInfo.IsEffect(SpellEffectName.KillCredit) || spellEffectInfo.IsEffect(SpellEffectName.KillCredit2))
+                        if (spellEffectInfo.IsEffect(SpellEffects.KillCredit) || spellEffectInfo.IsEffect(SpellEffects.KillCredit2))
                         {
                             if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
                                 Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {e.Action.cast.spell} targetA: {spellEffectInfo.TargetA.GetTarget()} - targetB: {spellEffectInfo.TargetB.GetTarget()}) has invalid target for this Action");
@@ -1645,7 +1645,7 @@ namespace Game.AI
 
                         bool propertiesFound = Global.SpellMgr.GetSpellInfo(e.Action.summonCreature.createdBySpell, Difficulty.None).GetEffects().Any(spellEffectInfo =>
                         {
-                            return spellEffectInfo.IsEffect(SpellEffectName.Summon) && CliDB.SummonPropertiesStorage.HasRecord((uint)spellEffectInfo.MiscValueB);
+                            return spellEffectInfo.IsEffect(SpellEffects.Summon) && CliDB.SummonPropertiesStorage.HasRecord((uint)spellEffectInfo.MiscValueB);
                         });
 
                         if (!propertiesFound)

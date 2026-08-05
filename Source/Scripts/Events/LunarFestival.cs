@@ -239,7 +239,7 @@ namespace Scripts.Events.LunarFestival
 
             SpellInfo spellInfo = SpellMgr.GetSpellInfo(spellId, Difficulty.None);
 
-            if (spellInfo != null && spellInfo.GetEffect(0).Effect == SpellEffectName.SummonObjectWild)
+            if (spellInfo != null && spellInfo.GetEffect(0).Effect == SpellEffects.SummonObjectWild)
                 return (uint)spellInfo.GetEffect(0).MiscValue;
 
             return 0;
@@ -449,7 +449,7 @@ namespace Scripts.Events.LunarFestival
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.Dummy));
         }
     }
 }

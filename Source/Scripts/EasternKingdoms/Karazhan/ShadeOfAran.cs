@@ -475,7 +475,7 @@ namespace Scripts.EasternKingdoms.Karazhan.ShadeOfAran
         public override void SpellHit(WorldObject caster, SpellInfo spellInfo)
         {
             //We only care about interrupt effects and only if they are durring a spell currently being cast
-            if (!spellInfo.HasEffect(SpellEffectName.InterruptCast) || !me.IsNonMeleeSpellCast(false))
+            if (!spellInfo.HasEffect(SpellEffects.InterruptCast) || !me.IsNonMeleeSpellCast(false))
                 return;
 
             //Interrupt effect

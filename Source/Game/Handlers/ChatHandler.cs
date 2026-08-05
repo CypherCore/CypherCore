@@ -577,7 +577,7 @@ namespace Game
                 return;
             }
 
-            Global.ScriptMgr.OnPlayerTextEmote(GetPlayer(), (uint)packet.SoundIndex, (uint)packet.EmoteID, packet.Target);
+            Global.ScriptMgr.OnPlayerTextEmote(GetPlayer(), (uint)packet.EmoteID, (uint)packet.SoundIndex, packet.Target);
 
             EmotesTextRecord em = CliDB.EmotesTextStorage.LookupByKey(packet.EmoteID);
             if (em == null)
@@ -618,12 +618,9 @@ namespace Game
             GetPlayer().UpdateCriteria(CriteriaType.DoEmote, (uint)packet.EmoteID, 0, 0, unit);
 
             // Send scripted event call
-            if (unit != null)
-            {
-                Creature creature = unit.ToCreature();
-                if (creature != null)
-                    creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.EmoteID);
-            }
+            Creature creature = unit?.ToCreature();
+            if (creature != null)
+                creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.EmoteID);
 
             if (emote != Emote.OneshotNone)
                 _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Anim);

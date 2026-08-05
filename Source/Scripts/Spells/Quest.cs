@@ -266,19 +266,19 @@ struct MiscConst
     public const uint Talk1 = 1;
 }
 
-[Script("spell_q55_sacred_cleansing", SpellEffectName.Dummy, 1, CreatureIds.Morbent, CreatureIds.WeakenedMorbent, true)] // 8913 - Sacred Cleansing
-[Script("spell_q10255_administer_antidote", SpellEffectName.Dummy, 0, CreatureIds.Helboar, CreatureIds.Dreadtusk, true)] // 34665 - Administer Antidote
-[Script("spell_q11515_fel_siphon_dummy", SpellEffectName.Dummy, 0, CreatureIds.FelbloodInitiate, CreatureIds.EmaciatedFelblood, true)] // 44936 - Quest - Fel Siphon Dummy
+[Script("spell_q55_sacred_cleansing", SpellEffects.Dummy, 1, CreatureIds.Morbent, CreatureIds.WeakenedMorbent, true)] // 8913 - Sacred Cleansing
+[Script("spell_q10255_administer_antidote", SpellEffects.Dummy, 0, CreatureIds.Helboar, CreatureIds.Dreadtusk, true)] // 34665 - Administer Antidote
+[Script("spell_q11515_fel_siphon_dummy", SpellEffects.Dummy, 0, CreatureIds.FelbloodInitiate, CreatureIds.EmaciatedFelblood, true)] // 44936 - Quest - Fel Siphon Dummy
 class spell_generic_quest_update_entry : SpellScript
 {
-    SpellEffectName _spellEffect;
+    SpellEffects _spellEffect;
     uint _effIndex;
     uint _originalEntry;
     uint _newEntry;
     bool _shouldAttack;
     TimeSpan _despawnTime;
 
-    public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, TimeSpan despawnTime)
+    public spell_generic_quest_update_entry(SpellEffects spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack, TimeSpan despawnTime)
     {
         _spellEffect = spellEffect;
         _effIndex = effIndex;
@@ -288,7 +288,7 @@ class spell_generic_quest_update_entry : SpellScript
         _despawnTime = despawnTime;
     }
 
-    public spell_generic_quest_update_entry(SpellEffectName spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack)
+    public spell_generic_quest_update_entry(SpellEffects spellEffect, uint effIndex, uint originalEntry, uint newEntry, bool shouldAttack)
     {
         _spellEffect = spellEffect;
         _effIndex = effIndex;
@@ -384,7 +384,7 @@ class spell_q6124_6129_apply_salve : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -430,7 +430,7 @@ class spell_q11396_11399_scourging_crystal_controller : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -452,7 +452,7 @@ class spell_q11396_11399_scourging_crystal_controller_dummy : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -495,7 +495,7 @@ class spell_q11730_ultrasonic_screwdriver : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -527,7 +527,7 @@ class spell_q12459_seeds_of_natures_wrath : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -555,7 +555,7 @@ class spell_q12634_despawn_fruit_tosser : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -619,7 +619,7 @@ class spell_q12659_ahunaes_knife : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -645,7 +645,7 @@ class spell_q12805_lifeblood_dummy : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -676,7 +676,7 @@ class spell_q13280_13283_plant_battle_standard : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -712,7 +712,7 @@ class spell_q12066_bunny_kill_credit : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -726,7 +726,7 @@ class spell_q12372_cast_from_gossip_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -757,7 +757,7 @@ class spell_q12372_destabilize_azure_dragonshrine_dummy : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -791,7 +791,7 @@ class spell_q11010_q11102_q11023_aggro_check : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -831,7 +831,7 @@ class spell_q11010_q11102_q11023_choose_loc : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -875,7 +875,7 @@ class spell_q12527_zuldrak_rat : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -933,7 +933,7 @@ class spell_q13291_q13292_q13239_q13261_frostbrood_skytalon_grab_decoy : SpellSc
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -988,7 +988,7 @@ class spell_q13086_cannons_target : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1019,7 +1019,7 @@ class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59576 : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1111,7 +1111,7 @@ class spell_q13264_q13276_q13288_q13289_area_restrict_abom : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1133,7 +1133,7 @@ class spell_q13264_q13276_q13288_q13289_assign_credit_to_master : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1183,8 +1183,8 @@ class spell_q12690_burst_at_the_seams_52510 : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleKnockBack, 1, SpellEffectName.KnockBack));
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleKnockBack, 1, SpellEffects.KnockBack));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1203,7 +1203,7 @@ class spell_q12308_escape_from_silverbrook : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1260,7 +1260,7 @@ class spell_q12641_death_comes_from_on_high : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1280,7 +1280,7 @@ class spell_q12641_recall_eye_of_acherus : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1311,7 +1311,7 @@ class spell_q12619_emblazon_runeblade_effect : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHit.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1336,7 +1336,7 @@ class spell_q12919_gymers_grab : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1359,7 +1359,7 @@ class spell_q12919_gymers_throw : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1384,7 +1384,7 @@ class spell_q13400_illidan_kill_master : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1405,7 +1405,7 @@ class spell_q14100_q14111_make_player_destroy_totems : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1487,7 +1487,7 @@ class spell_q12414_hand_over_reins : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1503,7 +1503,7 @@ class spell_q13665_q13790_bested_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1523,7 +1523,7 @@ class spell_q11306_mixing_blood : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffect, 1, SpellEffectName.SendEvent));
+        OnEffectHit.Add(new(HandleEffect, 1, SpellEffects.SendEvent));
     }
 }
 
@@ -1554,7 +1554,7 @@ class spell_q11306_mixing_vrykul_blood : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffects.Dummy));
     }
 }
 
@@ -1574,7 +1574,7 @@ class spell_q11306_failed_mix_43376 : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffect, 1, SpellEffectName.SendEvent));
+        OnEffectHit.Add(new(HandleEffect, 1, SpellEffects.SendEvent));
     }
 }
 
@@ -1594,7 +1594,7 @@ class spell_q11306_failed_mix_43378 : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffect, 2, SpellEffectName.SendEvent));
+        OnEffectHit.Add(new(HandleEffect, 2, SpellEffects.SendEvent));
     }
 }
 
@@ -1616,7 +1616,7 @@ class spell_q11896_weakness_to_lightning_46444 : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1697,7 +1697,7 @@ class spell_quest_portal_with_condition : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1759,7 +1759,7 @@ class spell_quest_uther_grom_tribute : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHit.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1782,6 +1782,6 @@ class spell_q14386_call_attack_mastiffs : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffect, 1, SpellEffectName.SendEvent));
+        OnEffectHit.Add(new(HandleEffect, 1, SpellEffects.SendEvent));
     }
 }

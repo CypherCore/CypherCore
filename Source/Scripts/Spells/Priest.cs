@@ -250,7 +250,7 @@ class spell_pri_angelic_feather_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -657,7 +657,7 @@ class spell_pri_benediction : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Heal));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.Heal));
     }
 }
 
@@ -779,7 +779,7 @@ class spell_pri_dark_indulgence : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1079,7 +1079,7 @@ class spell_pri_divine_star_shadow : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, 2, SpellEffectName.Energize));
+        OnEffectHitTarget.Add(new(HandleHitTarget, 2, SpellEffects.Energize));
     }
 }
 
@@ -1306,7 +1306,7 @@ class spell_pri_evangelism : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1434,7 +1434,7 @@ class spell_pri_halo_shadow : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, 1, SpellEffectName.Energize));
+        OnEffectHitTarget.Add(new(HandleHitTarget, 1, SpellEffects.Energize));
     }
 }
 
@@ -1580,7 +1580,7 @@ class spell_pri_holy_word_salvation : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleApplyBuffs, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleApplyBuffs, 1, SpellEffects.Dummy));
     }
 
     SpellInfo _spellInfoHeal = null;
@@ -1661,7 +1661,7 @@ class spell_pri_leap_of_faith_effect_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1680,7 +1680,7 @@ class spell_pri_levitate : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1779,7 +1779,7 @@ class spell_pri_mind_devourer : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1843,7 +1843,7 @@ class spell_pri_mind_devourer_buff : SpellScript
     public override void Register()
     {
         CalcDamage.Add(new(CalculateDamage));
-        OnEffectHitTarget.Add(new(ModifyAuraValueAndRemoveBuff, 1, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(ModifyAuraValueAndRemoveBuff, 1, SpellEffects.ApplyAura));
     }
 }
 
@@ -1904,7 +1904,7 @@ class spell_pri_pain_transformation : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -1958,7 +1958,7 @@ class spell_pri_penance(uint damageSpellId, uint healingSpellId) : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1994,7 +1994,7 @@ class spell_pri_phantasm : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleEffectHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2185,7 +2185,7 @@ class spell_pri_power_word_radiance : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaAlly));
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2357,7 +2357,7 @@ class spell_pri_power_word_solace : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(RestoreMana, 1, SpellEffectName.Dummy));
+        OnEffectLaunch.Add(new(RestoreMana, 1, SpellEffects.Dummy));
     }
 }
 
@@ -2409,7 +2409,7 @@ class spell_pri_prayer_of_mending_dummy : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2488,7 +2488,7 @@ class spell_pri_prayer_of_mending : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -2541,7 +2541,7 @@ class spell_pri_prayer_of_mending_jump : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaAlly));
-        OnEffectHitTarget.Add(new(HandleJump, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleJump, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2645,7 +2645,7 @@ class spell_pri_holy_10_1_class_set_2pc_chooser : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEntry));
-        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2665,7 +2665,7 @@ class spell_pri_holy_10_1_class_set_4pc : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2735,7 +2735,7 @@ class spell_pri_assured_safety : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -2759,7 +2759,7 @@ class spell_pri_purge_the_wicked : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2830,7 +2830,7 @@ class spell_pri_purge_the_wicked_dummy : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 1, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffects.Dummy));
     }
 }
 
@@ -2908,7 +2908,7 @@ class spell_pri_rapture : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectDummy, 0, SpellEffects.Dummy));
         AfterCast.Add(new(HandleAfterCast));
     }
 }
@@ -2929,7 +2929,7 @@ class spell_pri_schism : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -3008,7 +3008,7 @@ class spell_pri_sanctuary_trigger : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleEffectHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -3174,9 +3174,9 @@ class spell_pri_shadow_word_death : SpellScript
     {
         return ValidateSpellInfo(SpellIds.ShadowWordDeathDamage)
             && ValidateSpellEffect((spellInfo.Id, 5))
-            && spellInfo.GetEffect(2).IsEffect(SpellEffectName.Dummy)
-            && spellInfo.GetEffect(3).IsEffect(SpellEffectName.ScriptEffect)
-            && spellInfo.GetEffect(5).IsEffect(SpellEffectName.Dummy);
+            && spellInfo.GetEffect(2).IsEffect(SpellEffects.Dummy)
+            && spellInfo.GetEffect(3).IsEffect(SpellEffects.ScriptEffect)
+            && spellInfo.GetEffect(5).IsEffect(SpellEffects.Dummy);
     }
 
     void HandleDamageCalculation(SpellEffectInfo spellEffectInfo, Unit victim, ref int damage, ref int flatMod, ref float pctMod)
@@ -3666,7 +3666,7 @@ class spell_pri_whispering_shadows : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleEffectHitTarget, 2, SpellEffectName.TriggerMissile));
+        OnEffectHit.Add(new(HandleEffectHitTarget, 2, SpellEffects.TriggerMissile));
     }
 }
 
@@ -3719,7 +3719,7 @@ class spell_pri_whispering_shadows_effect : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.Dummy));
     }
 }
 

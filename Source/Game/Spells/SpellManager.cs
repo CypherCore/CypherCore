@@ -102,8 +102,8 @@ namespace Game.Entities
                         continue;
 
                     // craft spell for crafting non-existed item (break client recipes list show)
-                    case SpellEffectName.CreateItem:
-                    case SpellEffectName.CreateLoot:
+                    case SpellEffects.CreateItem:
+                    case SpellEffects.CreateLoot:
                     {
                         if (spellEffectInfo.ItemType == 0)
                         {
@@ -137,7 +137,7 @@ namespace Game.Entities
                         needCheckReagents = true;
                         break;
                     }
-                    case SpellEffectName.LearnSpell:
+                    case SpellEffects.LearnSpell:
                     {
                         SpellInfo spellInfo2 = GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
                         if (!IsSpellValid(spellInfo2, player, msg))
@@ -831,13 +831,13 @@ namespace Game.Entities
                     SpellLearnSkillNode dbc_node = new();
                     switch (spellEffectInfo.Effect)
                     {
-                        case SpellEffectName.Skill:
+                        case SpellEffects.Skill:
                             dbc_node.skill = (SkillType)spellEffectInfo.MiscValue;
                             dbc_node.step = (ushort)spellEffectInfo.CalcValueAsInt();
                             dbc_node.value = 0;
                             dbc_node.maxvalue = 0;
                             break;
-                        case SpellEffectName.DualWield:
+                        case SpellEffects.DualWield:
                             dbc_node.skill = SkillType.DualWield;
                             dbc_node.step = 1;
                             dbc_node.value = 1;
@@ -913,7 +913,7 @@ namespace Game.Entities
 
                 foreach (var spellEffectInfo in entry.GetEffects())
                 {
-                    if (spellEffectInfo.Effect == SpellEffectName.LearnSpell)
+                    if (spellEffectInfo.Effect == SpellEffects.LearnSpell)
                     {
                         var dbc_node = new SpellLearnSpellNode();
                         dbc_node.SourceSpell = entry.Id;
@@ -928,7 +928,7 @@ namespace Game.Entities
                         // talent or passive spells or skill-step spells auto-cast and not need dependent learning,
                         // pet teaching spells must not be dependent learning (cast)
                         // other required explicit dependent learning
-                        dbc_node.AutoLearned = spellEffectInfo.TargetA.GetTarget() == Targets.UnitPet || entry.HasAttribute(SpellCustomAttributes.IsTalent) || entry.IsPassive() || entry.HasEffect(SpellEffectName.SkillStep);
+                        dbc_node.AutoLearned = spellEffectInfo.TargetA.GetTarget() == Targets.UnitPet || entry.HasAttribute(SpellCustomAttributes.IsTalent) || entry.IsPassive() || entry.HasEffect(SpellEffects.SkillStep);
 
                         var db_node_bounds = GetSpellLearnSpellMapBounds(entry.Id);
 
@@ -1700,7 +1700,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (spellInfo.GetEffect(eff).Effect != SpellEffectName.Dummy && (spellInfo.GetEffect(eff).Effect != SpellEffectName.ApplyAura || spellInfo.GetEffect(eff).ApplyAuraName != AuraType.Dummy))
+                    if (spellInfo.GetEffect(eff).Effect != SpellEffects.Dummy && (spellInfo.GetEffect(eff).Effect != SpellEffects.ApplyAura || spellInfo.GetEffect(eff).ApplyAuraName != AuraType.Dummy))
                     {
                         Log.outError(LogFilter.Spells, "Spell {0} listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
                         continue;
@@ -1904,7 +1904,7 @@ namespace Game.Entities
 
                 foreach (var spellEffectInfo in spellEntry.GetEffects())
                 {
-                    if (spellEffectInfo.Effect == SpellEffectName.Summon || spellEffectInfo.Effect == SpellEffectName.SummonPet)
+                    if (spellEffectInfo.Effect == SpellEffects.Summon || spellEffectInfo.Effect == SpellEffects.SummonPet)
                     {
                         int creature_id = spellEffectInfo.MiscValue;
                         CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate((uint)creature_id);
@@ -2203,14 +2203,14 @@ namespace Game.Entities
             foreach (var effect in CliDB.SpellEffectStorage.Values)
             {
                 Cypher.Assert(effect.EffectIndex < SpellConst.MaxEffects, $"MAX_SPELL_EFFECTS must be at least {effect.EffectIndex}");
-                Cypher.Assert(effect.Effect < (int)SpellEffectName.TotalSpellEffects, $"TOTAL_SPELL_EFFECTS must be at least {effect.Effect}");
+                Cypher.Assert(effect.Effect < (int)SpellEffects.TotalSpellEffects, $"TOTAL_SPELL_EFFECTS must be at least {effect.Effect}");
                 Cypher.Assert(effect.EffectAura < (int)AuraType.Total, $"TOTAL_AURAS must be at least {effect.EffectAura}");
                 Cypher.Assert(effect.ImplicitTarget[0] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[0]}");
                 Cypher.Assert(effect.ImplicitTarget[1] < (int)Targets.TotalSpellTargets, $"TOTAL_SPELL_TARGETS must be at least {effect.ImplicitTarget[1]}");
 
                 GetLoadHelper(effect.SpellID, effect.DifficultyID).Effects[effect.EffectIndex] = effect;
 
-                if (effect.Effect == (int)SpellEffectName.Summon)
+                if (effect.Effect == (int)SpellEffects.Summon)
                 {
                     var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
                     if (summonProperties != null)
@@ -2224,7 +2224,7 @@ namespace Game.Entities
                     }
                 }
 
-                if (effect.Effect == (int)SpellEffectName.Language)
+                if (effect.Effect == (int)SpellEffects.Language)
                     Global.LanguageMgr.LoadSpellEffectLanguage(effect);
 
                 switch ((AuraType)effect.EffectAura)
@@ -2509,7 +2509,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    if (effect.Effect >= (uint)SpellEffectName.TotalSpellEffects)
+                    if (effect.Effect >= (uint)SpellEffects.TotalSpellEffects)
                     {
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid effect type {effect.Effect} at index {effect.EffectIndex}, skipped");
                         continue;
@@ -2697,7 +2697,7 @@ namespace Game.Entities
                     {
                         if (attributes.HasAnyFlag((uint)SpellCustomAttributes.ShareDamage))
                         {
-                            if (!spellInfo.HasEffect(SpellEffectName.SchoolDamage))
+                            if (!spellInfo.HasEffect(SpellEffects.SchoolDamage))
                             {
                                 Log.outError(LogFilter.Sql, "Spell {0} listed in table `spell_custom_attr` with SPELL_ATTR0_CU_SHARE_DAMAGE has no SPELL_EFFECT_SCHOOL_DAMAGE, ignored.", spellId);
                                 continue;
@@ -2755,55 +2755,55 @@ namespace Game.Entities
 
                     switch (spellEffectInfo.Effect)
                     {
-                        case SpellEffectName.SchoolDamage:
-                        case SpellEffectName.HealthLeech:
-                        case SpellEffectName.Heal:
-                        case SpellEffectName.WeaponDamageNoSchool:
-                        case SpellEffectName.WeaponPercentDamage:
-                        case SpellEffectName.WeaponDamage:
-                        case SpellEffectName.PowerBurn:
-                        case SpellEffectName.HealMechanical:
-                        case SpellEffectName.NormalizedWeaponDmg:
-                        case SpellEffectName.HealPct:
-                        case SpellEffectName.DamageFromMaxHealthPCT:
+                        case SpellEffects.SchoolDamage:
+                        case SpellEffects.HealthLeech:
+                        case SpellEffects.Heal:
+                        case SpellEffects.WeaponDamageNoSchool:
+                        case SpellEffects.WeaponPercentDamage:
+                        case SpellEffects.WeaponDamage:
+                        case SpellEffects.PowerBurn:
+                        case SpellEffects.HealMechanical:
+                        case SpellEffects.NormalizedWeaponDmg:
+                        case SpellEffects.HealPct:
+                        case SpellEffects.DamageFromMaxHealthPCT:
                             spellInfo.AttributesCu |= SpellCustomAttributes.CanCrit;
                             break;
                     }
 
                     switch (spellEffectInfo.Effect)
                     {
-                        case SpellEffectName.SchoolDamage:
-                        case SpellEffectName.WeaponDamage:
-                        case SpellEffectName.WeaponDamageNoSchool:
-                        case SpellEffectName.NormalizedWeaponDmg:
-                        case SpellEffectName.WeaponPercentDamage:
-                        case SpellEffectName.Heal:
+                        case SpellEffects.SchoolDamage:
+                        case SpellEffects.WeaponDamage:
+                        case SpellEffects.WeaponDamageNoSchool:
+                        case SpellEffects.NormalizedWeaponDmg:
+                        case SpellEffects.WeaponPercentDamage:
+                        case SpellEffects.Heal:
                             spellInfo.AttributesCu |= SpellCustomAttributes.DirectDamage;
                             break;
-                        case SpellEffectName.PowerDrain:
-                        case SpellEffectName.PowerBurn:
-                        case SpellEffectName.HealMaxHealth:
-                        case SpellEffectName.HealthLeech:
-                        case SpellEffectName.HealPct:
-                        case SpellEffectName.EnergizePct:
-                        case SpellEffectName.Energize:
-                        case SpellEffectName.HealMechanical:
+                        case SpellEffects.PowerDrain:
+                        case SpellEffects.PowerBurn:
+                        case SpellEffects.HealMaxHealth:
+                        case SpellEffects.HealthLeech:
+                        case SpellEffects.HealPct:
+                        case SpellEffects.EnergizePct:
+                        case SpellEffects.Energize:
+                        case SpellEffects.HealMechanical:
                             spellInfo.AttributesCu |= SpellCustomAttributes.NoInitialThreat;
                             break;
-                        case SpellEffectName.Charge:
-                        case SpellEffectName.ChargeDest:
-                        case SpellEffectName.Jump:
-                        case SpellEffectName.JumpDest:
-                        case SpellEffectName.LeapBack:
+                        case SpellEffects.Charge:
+                        case SpellEffects.ChargeDest:
+                        case SpellEffects.Jump:
+                        case SpellEffects.JumpDest:
+                        case SpellEffects.LeapBack:
                             spellInfo.AttributesCu |= SpellCustomAttributes.Charge;
                             break;
-                        case SpellEffectName.Pickpocket:
+                        case SpellEffects.Pickpocket:
                             spellInfo.AttributesCu |= SpellCustomAttributes.PickPocket;
                             break;
-                        case SpellEffectName.EnchantItem:
-                        case SpellEffectName.EnchantItemTemporary:
-                        case SpellEffectName.EnchantItemPrismatic:
-                        case SpellEffectName.EnchantHeldItem:
+                        case SpellEffects.EnchantItem:
+                        case SpellEffects.EnchantItemTemporary:
+                        case SpellEffects.EnchantItemPrismatic:
+                        case SpellEffects.EnchantHeldItem:
                         {
                             // only enchanting profession enchantments procs can stack
                             if (IsPartOfSkillLine(SkillType.Enchanting, spellInfo.Id))
@@ -2846,25 +2846,25 @@ namespace Game.Entities
                         {
                             switch (spellEffectInfo.Effect)
                             {
-                                case SpellEffectName.SchoolDamage:
-                                case SpellEffectName.WeaponDamage:
-                                case SpellEffectName.WeaponDamageNoSchool:
-                                case SpellEffectName.NormalizedWeaponDmg:
-                                case SpellEffectName.WeaponPercentDamage:
-                                case SpellEffectName.TriggerSpell:
-                                case SpellEffectName.TriggerSpellWithValue:
+                                case SpellEffects.SchoolDamage:
+                                case SpellEffects.WeaponDamage:
+                                case SpellEffects.WeaponDamageNoSchool:
+                                case SpellEffects.NormalizedWeaponDmg:
+                                case SpellEffects.WeaponPercentDamage:
+                                case SpellEffects.TriggerSpell:
+                                case SpellEffects.TriggerSpellWithValue:
                                     break;
-                                case SpellEffectName.PersistentAreaAura:
-                                case SpellEffectName.ApplyAura:
-                                case SpellEffectName.ApplyAreaAuraParty:
-                                case SpellEffectName.ApplyAreaAuraRaid:
-                                case SpellEffectName.ApplyAreaAuraFriend:
-                                case SpellEffectName.ApplyAreaAuraEnemy:
-                                case SpellEffectName.ApplyAreaAuraPet:
-                                case SpellEffectName.ApplyAreaAuraOwner:
-                                case SpellEffectName.ApplyAuraOnPet:
-                                case SpellEffectName.ApplyAreaAuraSummons:
-                                case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                                case SpellEffects.PersistentAreaAura:
+                                case SpellEffects.ApplyAura:
+                                case SpellEffects.ApplyAreaAuraParty:
+                                case SpellEffects.ApplyAreaAuraRaid:
+                                case SpellEffects.ApplyAreaAuraFriend:
+                                case SpellEffects.ApplyAreaAuraEnemy:
+                                case SpellEffects.ApplyAreaAuraPet:
+                                case SpellEffects.ApplyAreaAuraOwner:
+                                case SpellEffects.ApplyAuraOnPet:
+                                case SpellEffects.ApplyAreaAuraSummons:
+                                case SpellEffects.ApplyAreaAuraPartyNonrandom:
                                 {
                                     if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage ||
                                         spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamagePercent ||
@@ -2879,7 +2879,7 @@ namespace Game.Entities
                                 default:
                                 {
                                     // No value and not interrupt cast or crowd control without SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY flag
-                                    if (spellEffectInfo.CalcValueAsInt() == 0 && !((spellEffectInfo.Effect == SpellEffectName.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
+                                    if (spellEffectInfo.CalcValueAsInt() == 0 && !((spellEffectInfo.Effect == SpellEffects.InterruptCast || spellInfo.HasAttribute(SpellCustomAttributes.AuraCC)) && !spellInfo.HasAttribute(SpellAttr0.NoImmunities)))
                                         break;
 
                                     // Sindragosa Frost Breath
@@ -3214,7 +3214,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.None;
+                    spellEffectInfo.Effect = SpellEffects.None;
                 });
             });
 
@@ -3550,7 +3550,7 @@ namespace Game.Entities
                 //! HACK: This spell break quest complete for alliance and on retail not used
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.None;
+                    spellEffectInfo.Effect = SpellEffects.None;
                 });
             });
 
@@ -3717,7 +3717,7 @@ namespace Game.Entities
                 // Remove self-damage from passive aura on learn
                 ApplySpellEffectFix(spellInfo, 3, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.Dummy;
+                    spellEffectInfo.Effect = SpellEffects.Dummy;
                 });
             });
 
@@ -3931,7 +3931,7 @@ namespace Game.Entities
                 // this spell initially granted Shadow damage immunity, however it was removed but the data was left in client
                 ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.None;
+                    spellEffectInfo.Effect = SpellEffects.None;
                 });
             });
 
@@ -3963,7 +3963,7 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.ApplyAura; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
+                    spellEffectInfo.Effect = SpellEffects.ApplyAura; // for an unknown reason this was SPELL_EFFECT_APPLY_AREA_AURA_RAID
                 });
             });
 
@@ -3973,7 +3973,7 @@ namespace Game.Entities
                 // THIS IS HERE BECAUSE COOLDOWN ON CREATURE PROCS WERE NOT IMPLEMENTED WHEN THE SCRIPT WAS WRITTEN
                 ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.None;
+                    spellEffectInfo.Effect = SpellEffects.None;
                 });
             });
 
@@ -4364,7 +4364,7 @@ namespace Game.Entities
                 // Until we figure out what it's actually used for we disable it.
                 ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.None;
+                    spellEffectInfo.Effect = SpellEffects.None;
                 });
             });
 
@@ -4427,15 +4427,15 @@ namespace Game.Entities
             {
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                    spellEffectInfo.Effect = SpellEffects.ApplyAura;
                 });
                 ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                    spellEffectInfo.Effect = SpellEffects.ApplyAura;
                 });
                 ApplySpellEffectFix(spellInfo, 2, spellEffectInfo =>
                 {
-                    spellEffectInfo.Effect = SpellEffectName.ApplyAura;
+                    spellEffectInfo.Effect = SpellEffects.ApplyAura;
                 });
             });
 
@@ -4499,11 +4499,11 @@ namespace Game.Entities
 
                     switch (spellEffectInfo.Effect)
                     {
-                        case SpellEffectName.Charge:
-                        case SpellEffectName.ChargeDest:
-                        case SpellEffectName.Jump:
-                        case SpellEffectName.JumpDest:
-                        case SpellEffectName.LeapBack:
+                        case SpellEffects.Charge:
+                        case SpellEffects.ChargeDest:
+                        case SpellEffects.Jump:
+                        case SpellEffects.JumpDest:
+                        case SpellEffects.LeapBack:
                             if (spellInfo.Speed == 0 && spellInfo.SpellFamilyName == 0 && !spellInfo.HasAttribute(SpellAttr9.MissileSpeedIsDelayInSec))
                                 spellInfo.Speed = MotionMaster.SPEED_CHARGE;
                             break;
@@ -4617,8 +4617,8 @@ namespace Game.Entities
 
                     foreach (string token in result.Read<string>(4).Split(',', StringSplitOptions.RemoveEmptyEntries))
                     {
-                        if (uint.TryParse(token, out uint effect) && effect != 0 && effect < (int)SpellEffectName.TotalSpellEffects)
-                            immunities.Effect.Add((SpellEffectName)effect);
+                        if (uint.TryParse(token, out uint effect) && effect != 0 && effect < (int)SpellEffects.TotalSpellEffects)
+                            immunities.Effect.Add((SpellEffects)effect);
                         else
                             Log.outError(LogFilter.Sql, $"Invalid effect type in `Effects` {token} for creature immunities {id}, skipped");
                     }
@@ -4930,12 +4930,12 @@ namespace Game.Entities
         }
 
         //Extra Shit
-        public SpellEffectHandler GetSpellEffectHandler(SpellEffectName eff)
+        public SpellEffectHandler GetSpellEffectHandler(SpellEffects eff)
         {
             if (!SpellEffectsHandlers.ContainsKey(eff))
             {
                 Log.outError(LogFilter.Spells, "No defined handler for SpellEffect {0}", eff);
-                return SpellEffectsHandlers[SpellEffectName.None];
+                return SpellEffectsHandlers[SpellEffects.None];
             }
 
             return SpellEffectsHandlers[eff];
@@ -5056,7 +5056,7 @@ namespace Game.Entities
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
         Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new();
         public delegate void SpellEffectHandler(Spell spell);
-        Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new();
+        Dictionary<SpellEffects, SpellEffectHandler> SpellEffectsHandlers = new();
 
         public MultiMap<uint, uint> PetFamilySpellsStorage = new();
         #endregion
@@ -5076,12 +5076,12 @@ namespace Game.Entities
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class SpellEffectHandlerAttribute : Attribute
     {
-        public SpellEffectHandlerAttribute(SpellEffectName effectName)
+        public SpellEffectHandlerAttribute(SpellEffects effectName)
         {
             EffectName = effectName;
         }
 
-        public SpellEffectName EffectName { get; set; }
+        public SpellEffects EffectName { get; set; }
     }
 
     public class SpellInfoLoadHelper
@@ -5314,7 +5314,7 @@ namespace Game.Entities
         public BitSet School = new((int)SpellSchools.Max);
         public BitSet DispelType = new((int)Framework.Constants.DispelType.Max);
         public BitSet Mechanic = new((int)Mechanics.Max);
-        public List<SpellEffectName> Effect = new();
+        public List<SpellEffects> Effect = new();
         public List<AuraType> Aura = new();
         public SpellOtherImmunity Other;
     }

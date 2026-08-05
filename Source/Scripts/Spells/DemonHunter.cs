@@ -324,7 +324,7 @@ class spell_dh_chaos_strike_initial : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -840,7 +840,7 @@ class spell_dh_demon_spikes : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleArmor, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleArmor, 0, SpellEffects.Dummy));
     }
 }
 
@@ -856,7 +856,7 @@ class spell_dh_elysian_decree(uint primarySpellId) : SpellScript
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellEffect((primarySpellId, 2))
-            && Global.SpellMgr.GetSpellInfo(primarySpellId, Difficulty.None).GetEffect(2).IsEffect(SpellEffectName.Dummy);
+            && Global.SpellMgr.GetSpellInfo(primarySpellId, Difficulty.None).GetEffect(2).IsEffect(SpellEffects.Dummy);
     }
 
     public override bool Load()
@@ -880,7 +880,7 @@ class spell_dh_elysian_decree(uint primarySpellId) : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(CreateLesserSoulFragments, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(CreateLesserSoulFragments, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -911,7 +911,7 @@ class spell_dh_essence_break : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDebuff, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDebuff, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1049,7 +1049,7 @@ class spell_dh_felblade : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleCharge, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleCharge, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1072,7 +1072,7 @@ class spell_dh_felblade_charge : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.Charge));
+        OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffects.Charge));
     }
 }
 
@@ -1116,7 +1116,7 @@ class spell_dh_fiery_brand : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDamage, 1, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1516,7 +1516,7 @@ class spell_dh_repeat_decree_conduit : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(PreventHitDefaultEffect, 1, SpellEffectName.TriggerSpell));
+        OnEffectLaunch.Add(new(PreventHitDefaultEffect, 1, SpellEffects.TriggerSpell));
     }
 }
 
@@ -1687,7 +1687,7 @@ class spell_dh_sigil_of_chains : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffectHitTarget, 0, SpellEffects.Dummy));
     }
 }
 

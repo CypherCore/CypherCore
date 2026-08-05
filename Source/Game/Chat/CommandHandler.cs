@@ -66,7 +66,7 @@ namespace Game.Chat
         }
 
         public virtual bool IsHumanReadable() { return true; }
-        
+
         public virtual bool HasPermission(RBACPermissions permission) { return _session.HasPermission(permission); }
 
         public string ExtractKeyFromLink(StringArguments args, params string[] linkType)
@@ -212,32 +212,32 @@ namespace Game.Chat
             switch (type)
             {
                 case 0:
-                    {
-                        guidHigh = HighGuid.Player;
-                        if (!ObjectManager.NormalizePlayerName(ref idS))
-                            return 0;
+                {
+                    guidHigh = HighGuid.Player;
+                    if (!ObjectManager.NormalizePlayerName(ref idS))
+                        return 0;
 
-                        Player player = Global.ObjAccessor.FindPlayerByName(idS);
-                        if (player != null)
-                            return player.GetGUID().GetCounter();
+                    Player player = Global.ObjAccessor.FindPlayerByName(idS);
+                    if (player != null)
+                        return player.GetGUID().GetCounter();
 
-                        ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
-                        return guid.GetCounter();
-                    }
+                    ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
+                    return guid.GetCounter();
+                }
                 case 1:
-                    {
-                        guidHigh = HighGuid.Creature;
-                        if (!ulong.TryParse(idS, out ulong lowguid))
-                            return 0;
-                        return lowguid;
-                    }
+                {
+                    guidHigh = HighGuid.Creature;
+                    if (!ulong.TryParse(idS, out ulong lowguid))
+                        return 0;
+                    return lowguid;
+                }
                 case 2:
-                    {
-                        guidHigh = HighGuid.GameObject;
-                        if (!ulong.TryParse(idS, out ulong lowguid))
-                            return 0;
-                        return lowguid;
-                    }
+                {
+                    guidHigh = HighGuid.GameObject;
+                    if (!ulong.TryParse(idS, out ulong lowguid))
+                        return 0;
+                    return lowguid;
+                }
             }
 
             // unknown type?
@@ -264,35 +264,35 @@ namespace Game.Chat
                 return 0;
 
             if (!uint.TryParse(idS, out uint id))
-                return 0;               
+                return 0;
 
             switch (type)
             {
                 case 0:
                     return id;
                 case 1:
-                    {
-                        // talent
-                        TalentRecord talentEntry = CliDB.TalentStorage.LookupByKey(id);
-                        if (talentEntry == null)
-                            return 0;
+                {
+                    // talent
+                    TalentRecord talentEntry = CliDB.TalentStorage.LookupByKey(id);
+                    if (talentEntry == null)
+                        return 0;
 
-                        return talentEntry.SpellID;
-                    }
+                    return talentEntry.SpellID;
+                }
                 case 2:
                 case 3:
                     return id;
                 case 4:
-                    {
-                        if (!uint.TryParse(param1Str, out uint glyph_prop_id))
-                            glyph_prop_id = 0;
+                {
+                    if (!uint.TryParse(param1Str, out uint glyph_prop_id))
+                        glyph_prop_id = 0;
 
-                        GlyphPropertiesRecord glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
-                        if (glyphPropEntry == null)
-                            return 0;
+                    GlyphPropertiesRecord glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
+                    if (glyphPropEntry == null)
+                        return 0;
 
-                        return glyphPropEntry.SpellID;
-                    }
+                    return glyphPropEntry.SpellID;
+                }
             }
 
             // unknown type?
@@ -540,7 +540,7 @@ namespace Game.Chat
             {
                 messageChat.Initialize(ChatMsg.System, Language.Universal, null, null, lines[i]);
                 _session.SendPacket(messageChat);
-            }            
+            }
         }
 
         public void SendNotification(CypherStrings str, params object[] args)
@@ -670,18 +670,18 @@ namespace Game.Chat
 
         void SendAck() // a Command acknowledged, no body
         {
-            Send($"a{echo:4}\0");
+            Send($"a{echo:5}\0");
             hadAck = true;
         }
 
         void SendOK() // o Command OK, no body
         {
-            Send($"o{echo:4}\0");
+            Send($"o{echo:5}\0");
         }
 
         void SendFailed() // f Command failed, no body
         {
-            Send($"f{echo:4}\0");
+            Send($"f{echo:5}\0");
         }
 
         public override void SendSysMessage(string str, bool escapeCharacters)
@@ -690,7 +690,7 @@ namespace Game.Chat
                 SendAck();
 
             StringBuilder msg = new("m");
-            msg.Append(echo, 0, 4);
+            msg.Append(echo, 0, 5);
             string body = str;
             if (escapeCharacters)
                 body.Replace("|", "||");
@@ -764,7 +764,7 @@ namespace Game.Chat
     {
         Action<string> _reportToRA;
 
-        public RemoteAccessHandler(Action<string> reportToRA) : base() 
+        public RemoteAccessHandler(Action<string> reportToRA) : base()
         {
             _reportToRA = reportToRA;
         }

@@ -730,7 +730,7 @@ namespace Scripts.BrokenIsles.ZoneMardum
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHitTarget, 3, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHitTarget, 3, SpellEffects.Dummy));
         }
     }
 

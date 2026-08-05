@@ -652,7 +652,7 @@ class spell_dru_efflorescence : SpellScript
 
     void InitSummon()
     {
-        foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffectName.Summon).GenericVictimTargets)
+        foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffects.Summon).GenericVictimTargets)
         {
             Unit summon = ObjectAccessor.GetCreature(GetCaster(), summonedObject.Victim);
             if (summon != null)
@@ -663,7 +663,7 @@ class spell_dru_efflorescence : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(RemoveOldAreaTrigger, 2, SpellEffectName.CreateAreaTrigger));
+        OnEffectLaunch.Add(new(RemoveOldAreaTrigger, 2, SpellEffects.CreateAreaTrigger));
         AfterCast.Add(new(InitSummon));
     }
 }
@@ -763,7 +763,7 @@ class spell_dru_embrace_of_the_dream_effect : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaAlly));
-        OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffects.Dummy));
     }
 }
 
@@ -863,9 +863,9 @@ class spell_dru_ferocious_bite : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 1, SpellEffectName.PowerBurn));
-        OnEffectHitTarget.Add(new(HandleHitTargetBurn, 1, SpellEffectName.PowerBurn));
-        OnEffectHitTarget.Add(new(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 1, SpellEffects.PowerBurn));
+        OnEffectHitTarget.Add(new(HandleHitTargetBurn, 1, SpellEffects.PowerBurn));
+        OnEffectHitTarget.Add(new(HandleHitTargetDmg, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1387,7 +1387,7 @@ class spell_dru_moonfire : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1744,7 +1744,7 @@ class spell_dru_skull_bash : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1764,7 +1764,7 @@ class spell_dru_spring_blossoms : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.Heal));
+        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffects.Heal));
     }
 }
 
@@ -1819,7 +1819,7 @@ class spell_dru_starfall_dummy : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1877,7 +1877,7 @@ class spell_dru_sunfire : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -2140,7 +2140,7 @@ class spell_dru_thrash : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleOnHitTarget, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleOnHitTarget, 0, SpellEffects.SchoolDamage));
     }
 }
 

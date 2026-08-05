@@ -20,7 +20,7 @@ namespace Game.Chat
 
         public void LoadSpellEffectLanguage(SpellEffectRecord spellEffect)
         {
-            Cypher.Assert(spellEffect != null && spellEffect.Effect == (uint)SpellEffectName.Language);
+            Cypher.Assert(spellEffect != null && spellEffect.Effect == (uint)SpellEffects.Language);
 
             uint languageId = (uint)spellEffect.EffectMiscValue[0];
             _langsMap.Add(languageId, new LanguageDesc(spellEffect.SpellID, 0)); // register without a skill id for now

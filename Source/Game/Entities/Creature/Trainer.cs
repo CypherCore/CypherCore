@@ -16,7 +16,7 @@ namespace Game.Entities
         public Array<uint> ReqAbility = new(3);
         public byte ReqLevel;
 
-        public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell); }
+        public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffects.LearnSpell); }
     }
 
     public class Trainer
@@ -139,7 +139,7 @@ namespace Game.Entities
 
             foreach (SpellEffectInfo effect in trainerSpellInfo.GetEffects())
             {
-                if (!effect.IsEffect(SpellEffectName.LearnSpell))
+                if (!effect.IsEffect(SpellEffects.LearnSpell))
                     continue;
 
                 SpellInfo learnedSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
@@ -176,7 +176,7 @@ namespace Game.Entities
             bool knowsAllLearnedSpells = true;
             foreach (var spellEffectInfo in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
             {
-                if (!spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
+                if (!spellEffectInfo.IsEffect(SpellEffects.LearnSpell))
                     continue;
 
                 hasLearnSpellEffect = true;

@@ -2573,7 +2573,7 @@ namespace Game.Spells
                 case TypeId.DynamicObject:
                     foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
-                        if (spellEffectInfo.Effect == SpellEffectName.PersistentAreaAura)
+                        if (spellEffectInfo.Effect == SpellEffects.PersistentAreaAura)
                             effMask |= (1u << (int)spellEffectInfo.EffectIndex);
                     }
                     break;
@@ -2813,7 +2813,7 @@ namespace Game.Spells
                     continue;
 
                 // area auras only
-                if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
+                if (spellEffectInfo.Effect == SpellEffects.ApplyAura)
                     continue;
 
                 List<Unit> units = new();
@@ -2825,26 +2825,26 @@ namespace Game.Spells
                 SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
                 switch (spellEffectInfo.Effect)
                 {
-                    case SpellEffectName.ApplyAreaAuraParty:
-                    case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                    case SpellEffects.ApplyAreaAuraParty:
+                    case SpellEffects.ApplyAreaAuraPartyNonrandom:
                         selectionType = SpellTargetCheckTypes.Party;
                         break;
-                    case SpellEffectName.ApplyAreaAuraRaid:
+                    case SpellEffects.ApplyAreaAuraRaid:
                         selectionType = SpellTargetCheckTypes.Raid;
                         break;
-                    case SpellEffectName.ApplyAreaAuraFriend:
+                    case SpellEffects.ApplyAreaAuraFriend:
                         selectionType = SpellTargetCheckTypes.Ally;
                         break;
-                    case SpellEffectName.ApplyAreaAuraEnemy:
+                    case SpellEffects.ApplyAreaAuraEnemy:
                         selectionType = SpellTargetCheckTypes.Enemy;
                         extraSearchRadius = radius.Max > 0.0f ? SharedConst.ExtraCellSearchRadius : 0.0f;
                         break;
-                    case SpellEffectName.ApplyAreaAuraPet:
+                    case SpellEffects.ApplyAreaAuraPet:
                         if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(unitOwner, refe, condList))
                             units.Add(unitOwner);
-                        goto case SpellEffectName.ApplyAreaAuraOwner;
+                        goto case SpellEffects.ApplyAreaAuraOwner;
                     /* fallthrough */
-                    case SpellEffectName.ApplyAreaAuraOwner:
+                    case SpellEffects.ApplyAreaAuraOwner:
                     {
                         Unit owner = unitOwner.GetCharmerOrOwner();
                         if (owner != null && owner.IsInWorld && unitOwner.InSamePhase(owner) && unitOwner.IsInRange3d(owner, radius.Min, radius.Max))
@@ -2852,7 +2852,7 @@ namespace Game.Spells
                                 units.Add(owner);
                         break;
                     }
-                    case SpellEffectName.ApplyAuraOnPet:
+                    case SpellEffects.ApplyAuraOnPet:
                     {
                         Unit pet = Global.ObjAccessor.GetUnit(unitOwner, unitOwner.GetPetGUID());
                         if (pet != null)
@@ -2860,7 +2860,7 @@ namespace Game.Spells
                                 units.Add(pet);
                         break;
                     }
-                    case SpellEffectName.ApplyAreaAuraSummons:
+                    case SpellEffects.ApplyAreaAuraSummons:
                     {
                         if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(unitOwner, refe, condList))
                             units.Add(unitOwner);
@@ -2898,7 +2898,7 @@ namespace Game.Spells
             // only valid for non-area auras
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffects.ApplyAura))
                     effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
             }
 

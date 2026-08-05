@@ -164,7 +164,7 @@ namespace Scripts.Events
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 
@@ -215,7 +215,7 @@ namespace Scripts.Events
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
         }
     }
 
@@ -273,7 +273,7 @@ namespace Scripts.Events
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
         }
     }
 
@@ -389,7 +389,7 @@ namespace Scripts.Events
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 

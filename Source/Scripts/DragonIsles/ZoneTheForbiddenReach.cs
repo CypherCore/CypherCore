@@ -44,7 +44,7 @@ namespace Scripts.DragonIsles.ZoneTheForbiddenReach
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleTeleport, 0, SpellEffectName.TeleportUnits));
+            OnEffectHitTarget.Add(new(HandleTeleport, 0, SpellEffects.TeleportUnits));
         }
     }
 

@@ -100,7 +100,7 @@ namespace Game.Entities
 
             // search for spells that the talent teaches and unlearn them
             foreach (var spellEffectInfo in spellInfo.GetEffects())
-                if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
+                if (spellEffectInfo.IsEffect(SpellEffects.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                     RemoveSpell(spellEffectInfo.TriggerSpell);
 
             if (talent.OverridesSpellID != 0)
@@ -324,7 +324,7 @@ namespace Game.Entities
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
-                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
+                    if (spellEffectInfo.IsEffect(SpellEffects.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                         RemoveSpell(spellEffectInfo.TriggerSpell);
 
                 if (talentInfo.OverridesSpellID != 0)
@@ -341,7 +341,7 @@ namespace Game.Entities
 
                 // search for spells that the talent teaches and unlearn them
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
-                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
+                    if (spellEffectInfo.IsEffect(SpellEffects.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
                         RemoveSpell(spellEffectInfo.TriggerSpell);
 
                 if (talentInfo.OverridesSpellID != 0)

@@ -120,7 +120,7 @@ namespace Game.AI
                             }
                         }
 
-                        if (spellInfo.HasEffect(SpellEffectName.JumpDest))
+                        if (spellInfo.HasEffect(SpellEffects.JumpDest))
                         {
                             if (!spellUsed)
                                 spell.Dispose();

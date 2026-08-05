@@ -937,16 +937,16 @@ namespace Game
 
                         switch (spellEffectInfo.Effect)
                         {
-                            case SpellEffectName.PersistentAreaAura:
-                            case SpellEffectName.ApplyAreaAuraParty:
-                            case SpellEffectName.ApplyAreaAuraRaid:
-                            case SpellEffectName.ApplyAreaAuraFriend:
-                            case SpellEffectName.ApplyAreaAuraEnemy:
-                            case SpellEffectName.ApplyAreaAuraPet:
-                            case SpellEffectName.ApplyAreaAuraOwner:
-                            case SpellEffectName.ApplyAuraOnPet:
-                            case SpellEffectName.ApplyAreaAuraSummons:
-                            case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                            case SpellEffects.PersistentAreaAura:
+                            case SpellEffects.ApplyAreaAuraParty:
+                            case SpellEffects.ApplyAreaAuraRaid:
+                            case SpellEffects.ApplyAreaAuraFriend:
+                            case SpellEffects.ApplyAreaAuraEnemy:
+                            case SpellEffects.ApplyAreaAuraPet:
+                            case SpellEffects.ApplyAreaAuraOwner:
+                            case SpellEffects.ApplyAuraOnPet:
+                            case SpellEffects.ApplyAreaAuraSummons:
+                            case SpellEffects.ApplyAreaAuraPartyNonrandom:
                                 continue;
                             default:
                                 break;

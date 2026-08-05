@@ -1006,7 +1006,7 @@ namespace Game.Entities
         {
             ItemTemplate proto = GetTemplate();
 
-            bool isEnchantSpell = spellInfo.HasEffect(SpellEffectName.EnchantItem) || spellInfo.HasEffect(SpellEffectName.EnchantItemTemporary) || spellInfo.HasEffect(SpellEffectName.EnchantItemPrismatic);
+            bool isEnchantSpell = spellInfo.HasEffect(SpellEffects.EnchantItem) || spellInfo.HasEffect(SpellEffects.EnchantItemTemporary) || spellInfo.HasEffect(SpellEffects.EnchantItemPrismatic);
             if ((int)spellInfo.EquippedItemClass != -1)                 // -1 == any item class
             {
                 if (isEnchantSpell && proto.HasFlag(ItemFlags3.CanStoreEnchants))

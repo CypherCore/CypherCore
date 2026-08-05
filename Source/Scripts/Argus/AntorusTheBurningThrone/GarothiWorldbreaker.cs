@@ -543,7 +543,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new(HandleWarningEffect, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleWarningEffect, 0, SpellEffects.Dummy));
         }
     }
 
@@ -607,7 +607,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.Dummy));
         }
     }
 
@@ -635,7 +635,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.Dummy));
         }
     }
 
@@ -668,7 +668,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.Dummy));
         }
     }
 
@@ -734,7 +734,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.Dummy));
         }
     }
 
@@ -757,7 +757,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHit, 1, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 1, SpellEffects.Dummy));
         }
     }
 
@@ -847,7 +847,7 @@ namespace Scripts.Argus.AntorusTheBurningThrone.Argus
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummyEffect, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummyEffect, 0, SpellEffects.Dummy));
         }
     }
 }

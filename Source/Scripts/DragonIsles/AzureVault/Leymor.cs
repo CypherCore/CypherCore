@@ -320,7 +320,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHit.Add(new(HandleHit, 0, SpellEffects.Dummy));
         }
     }
 
@@ -360,7 +360,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffects.Dummy));
         }
     }
 
@@ -401,7 +401,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleHit, 0, SpellEffectName.ApplyAura));
+            OnEffectHit.Add(new(HandleHit, 0, SpellEffects.ApplyAura));
         }
     }
 
@@ -458,7 +458,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+            OnEffectHit.Add(new(HandleHit, 0, SpellEffects.Dummy));
         }
     }
 
@@ -472,7 +472,7 @@ namespace Scripts.DragonIsles.AzureVault.Leymor
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHitTarget, 2, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleHitTarget, 2, SpellEffects.ScriptEffect));
         }
     }
 }

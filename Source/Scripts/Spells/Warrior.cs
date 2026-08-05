@@ -225,7 +225,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleRemoveImpairingAuras, 5, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleRemoveImpairingAuras, 5, SpellEffects.ScriptEffect));
         }
     }
 
@@ -252,7 +252,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(CastHeal, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(CastHeal, 0, SpellEffects.SchoolDamage));
         }
     }
 
@@ -309,7 +309,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 
@@ -370,7 +370,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new(HandleCharge, 0, SpellEffectName.Charge));
+            OnEffectLaunchTarget.Add(new(HandleCharge, 0, SpellEffects.Charge));
         }
     }
 
@@ -401,7 +401,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(CastGushingWound, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(CastGushingWound, 0, SpellEffects.SchoolDamage));
         }
     }
 
@@ -509,7 +509,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDeftExperience, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleDeftExperience, 0, SpellEffects.SchoolDamage));
         }
     }
 
@@ -728,7 +728,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleAfterCast, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleAfterCast, 0, SpellEffects.Dummy));
         }
     }
 
@@ -940,7 +940,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHit, 1, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHit, 1, SpellEffects.Dummy));
         }
     }
 
@@ -1000,7 +1000,7 @@ namespace Scripts.Spells.Warrior
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new(HandleRoot, 0, SpellEffectName.KnockBack));
+            OnEffectHitTarget.Add(new(HandleRoot, 0, SpellEffects.KnockBack));
         }
     }
 
@@ -1077,7 +1077,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleMortalWounds, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleMortalWounds, 0, SpellEffects.SchoolDamage));
         }
     }
 
@@ -1115,7 +1115,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleResetCooldown, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleResetCooldown, 0, SpellEffects.Dummy));
         }
     }
 
@@ -1142,7 +1142,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.Dummy));
         }
     }
 
@@ -1177,7 +1177,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleCooldownReduction, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleCooldownReduction, 1, SpellEffects.ScriptEffect));
         }
     }
 
@@ -1196,7 +1196,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffects.Dummy));
         }
     }
 
@@ -1215,7 +1215,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 
@@ -1238,7 +1238,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleStun, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleStun, 0, SpellEffects.SchoolDamage));
         }
     }
 
@@ -1257,7 +1257,7 @@ namespace Scripts.Spells.Warrior
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new(HandleOnHit, 0, SpellEffects.SchoolDamage));
         }
     }
 

@@ -710,7 +710,7 @@ namespace Game.Spells
                     SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
                     if (triggeredSpellInfo != null)
                     {
-                        if (triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                        if (triggeredSpellInfo.HasEffect(SpellEffects.AddExtraAttacks))
                         {
                             uint lastExtraAttackSpell = eventInfo.GetActor().GetLastExtraAttackSpell();
 
@@ -950,16 +950,10 @@ namespace Game.Spells
 
         public bool IsPeriodic() { return m_isPeriodic; }
         public void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
-        bool HasSpellClassMask() { return GetSpellEffectInfo().SpellClassMask; }
+        public bool HasSpellClassMask() { return GetSpellEffectInfo().SpellClassMask; }
 
         public SpellEffectInfo GetSpellEffectInfo() { return _effectInfo; }
 
-        public bool IsEffect() { return _effectInfo.Effect != 0; }
-        public bool IsEffect(SpellEffectName effectName) { return _effectInfo.Effect == effectName; }
-        public bool IsAreaAuraEffect()
-        {
-            return _effectInfo.IsAreaAuraEffect();
-        }
 
         #region Fields
         Aura auraBase;
@@ -2232,7 +2226,7 @@ namespace Game.Spells
 
                         //some spell has one aura of mount and one of vehicle
                         foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
-                            if (effect.IsEffect(SpellEffectName.Summon) && effect.MiscValue == GetMiscValue())
+                            if (effect.IsEffect(SpellEffects.Summon) && effect.MiscValue == GetMiscValue())
                                 displayId = 0;
                     }
 
@@ -4871,14 +4865,14 @@ namespace Game.Spells
             if (triggeredSpellInfo == null)
                 return;
 
-            Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCaster() : target;
-            if (caster == null)
-                return;
-
             if (mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 if (apply)
                 {
+                    Unit caster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCaster() : target;
+                    if (caster == null)
+                        return;
+
                     CastSpellExtraArgs args = new(this);
                     if (GetAmount() != 0) // If amount avalible cast with basepoints (Crypt Fever for example)
                         args.AddSpellMod(SpellValueModFloat.BasePoint0, GetAmount());
@@ -5223,7 +5217,7 @@ namespace Game.Spells
 
             // Consecrate ticks can miss and will not show up in the combat log
             // dynobj auras must always have a caster
-            if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
+            if (GetSpellEffectInfo().IsEffect(SpellEffects.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false, true) != SpellMissInfo.None)
                 return;
 
@@ -5298,7 +5292,7 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffects.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
                     damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
             }
 
@@ -5350,7 +5344,7 @@ namespace Game.Spells
             }
 
             // dynobj auras must always have a caster
-            if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
+            if (GetSpellEffectInfo().IsEffect(SpellEffects.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false, true) != SpellMissInfo.None)
                 return;
 
@@ -5380,7 +5374,7 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.IgnoreDamageTakenModifiers))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffects.PersistentAreaAura) || GetSpellInfo().HasAttribute(SpellAttr5.TreatAsAreaEffect) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe))
                     damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, (caster != null && !caster.IsControlledByPlayer()) || GetSpellInfo().HasAttribute(SpellAttr7.TreatAsNpcAoe));
             }
 
@@ -5541,7 +5535,7 @@ namespace Game.Spells
                 return;
             }
 
-            if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
+            if (GetSpellEffectInfo().IsEffect(SpellEffects.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false, true) != SpellMissInfo.None)
                 return;
 
@@ -6020,7 +6014,7 @@ namespace Game.Spells
                 List<uint> summonedEntries = new();
                 foreach (var spellEffectInfo in triggerSpellInfo.GetEffects())
                 {
-                    if (spellEffectInfo.IsEffect(SpellEffectName.Summon))
+                    if (spellEffectInfo.IsEffect(SpellEffects.Summon))
                     {
                         uint summonEntry = (uint)spellEffectInfo.MiscValue;
                         if (summonEntry != 0)

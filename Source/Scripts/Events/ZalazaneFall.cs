@@ -364,7 +364,7 @@ namespace Scripts.Events.ZalazaneFall
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 }

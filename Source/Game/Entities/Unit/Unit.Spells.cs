@@ -601,7 +601,7 @@ namespace Game.Entities
                         DoneTotal = 0;
                         break;
                 }
-                if (otherSpellEffectInfo.IsEffect(SpellEffectName.HealthLeech))
+                if (otherSpellEffectInfo.IsEffect(SpellEffects.HealthLeech))
                     DoneTotal = 0;
             }
 
@@ -1420,7 +1420,7 @@ namespace Game.Entities
             ApplySpellImmune(spellId, op, (uint)type, apply);
         }
 
-        public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellEffectName type, bool apply)
+        public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellEffects type, bool apply)
         {
             ApplySpellImmune(spellId, op, (uint)type, apply);
         }

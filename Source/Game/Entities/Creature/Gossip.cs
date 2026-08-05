@@ -517,7 +517,7 @@ namespace Game.Misc
             if (spellInfo != null)
             {
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
-                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
+                    if (spellEffectInfo.IsEffect(SpellEffects.LearnSpell))
                         packet.LearnSpells.Add(spellEffectInfo.TriggerSpell);
             }
 

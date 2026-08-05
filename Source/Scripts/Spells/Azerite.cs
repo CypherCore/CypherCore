@@ -70,7 +70,7 @@ class spell_item_azerite_fortification : AuraScript
         return procSpell.GetSpellInfo().HasAura(AuraType.ModStun)
             || procSpell.GetSpellInfo().HasAura(AuraType.ModRoot)
             || procSpell.GetSpellInfo().HasAura(AuraType.ModRoot2)
-            || procSpell.GetSpellInfo().HasEffect(SpellEffectName.KnockBack);
+            || procSpell.GetSpellInfo().HasEffect(SpellEffects.KnockBack);
     }
 
     public override void Register()
@@ -232,7 +232,7 @@ class spell_item_bracing_chill_search_jump_target : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTarget, 0, Targets.UnitDestAreaAlly));
-        OnEffectHitTarget.Add(new(MoveAura, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(MoveAura, 0, SpellEffects.Dummy));
     }
 }
 

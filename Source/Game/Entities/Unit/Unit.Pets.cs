@@ -205,7 +205,7 @@ namespace Game.Entities
                     {
                         foreach (var spellEffectInfo in spInfo.GetEffects())
                         {
-                            if (spellEffectInfo == null || !spellEffectInfo.IsEffect(SpellEffectName.Summon))
+                            if (spellEffectInfo == null || !spellEffectInfo.IsEffect(SpellEffects.Summon))
                                 continue;
 
                             RemoveAllMinionsByEntry((uint)spellEffectInfo.MiscValue);

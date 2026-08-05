@@ -1462,7 +1462,7 @@ namespace Game
                 }
 
                 //check for correct spellEffect
-                if (spellInfo.GetEffect(spellEffIndex).Effect == 0 || (spellInfo.GetEffect(spellEffIndex).Effect != SpellEffectName.ScriptEffect && spellInfo.GetEffect(spellEffIndex).Effect != SpellEffectName.Dummy))
+                if (spellInfo.GetEffect(spellEffIndex).Effect == 0 || (spellInfo.GetEffect(spellEffIndex).Effect != SpellEffects.ScriptEffect && spellInfo.GetEffect(spellEffIndex).Effect != SpellEffects.Dummy))
                     Log.outError(LogFilter.Sql, $"Table `spell_scripts` - spell {spellId} effect {spellEffIndex} is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY");
             }
         }
@@ -1477,7 +1477,7 @@ namespace Game
 
             // Load all possible event ids from spells
             foreach (var spellEffect in CliDB.SpellEffectStorage.Values)
-                if (spellEffect.Effect == (uint)SpellEffectName.SendEvent && spellEffect.EffectMiscValue[0] != 0)
+                if (spellEffect.Effect == (uint)SpellEffects.SendEvent && spellEffect.EffectMiscValue[0] != 0)
                     _eventStorage.Add((uint)spellEffect.EffectMiscValue[0]);
 
             // Load all possible event ids from taxi path nodes
@@ -1531,7 +1531,7 @@ namespace Game
             foreach (var script in sEventScripts)
             {
                 if (!IsValidEvent(script.Key))
-                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffectName.SendEvent}");
+                    Log.outError(LogFilter.Sql, $"Table `event_scripts` has script (Id: {script.Key}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffects.SendEvent}");
             }
 
             uint oldMSTime = Time.GetMSTime();
@@ -1552,7 +1552,7 @@ namespace Game
 
                 if (!IsValidEvent(eventId))
                 {
-                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffectName.SendEvent}");
+                    Log.outError(LogFilter.Sql, $"Event (ID: {eventId}) not referring to any gameobject_template (data field referencing GameEvent), any taxi path node, any criteria asset or any spell effect {SpellEffects.SendEvent}");
                     continue;
                 }
                 _eventScriptStorage[eventId] = GetScriptId(scriptName);

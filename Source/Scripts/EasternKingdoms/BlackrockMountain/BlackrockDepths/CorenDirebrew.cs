@@ -385,7 +385,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -426,7 +426,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitSrcAreaEntry));
-            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffects.Dummy));
         }
     }
 
@@ -445,7 +445,7 @@ namespace Scripts.EasternKingdoms.BlackrockMountain.BlackrockDepths.CorenDirebre
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
         }
     }
 

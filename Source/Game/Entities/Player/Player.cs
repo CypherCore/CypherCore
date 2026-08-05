@@ -1727,10 +1727,10 @@ namespace Game.Entities
         {
             UpdateActionButtons packet = new();
 
-            foreach (var pair in m_actionButtons)
+            foreach (var (i, button) in m_actionButtons)
             {
-                if (pair.Value.uState != ActionButtonUpdateState.Deleted && pair.Key < packet.ActionButtons.Length)
-                    packet.ActionButtons[pair.Key] = pair.Value.packedData;
+                if (button.uState != ActionButtonUpdateState.Deleted && i < packet.ActionButtons.Length)
+                    packet.ActionButtons[i] = button.packedData;
             }
 
             packet.Reason = (byte)state;
@@ -3728,7 +3728,7 @@ namespace Game.Entities
             if (spellEffectInfo.IsAura(AuraType.ModTaunt))
                 return true;
 
-            if (spellEffectInfo.IsEffect(SpellEffectName.AttackMe))
+            if (spellEffectInfo.IsEffect(SpellEffects.AttackMe))
                 return true;
 
             return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster, requireImmunityPurgesEffectAttribute);

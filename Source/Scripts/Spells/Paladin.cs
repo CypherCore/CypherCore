@@ -304,7 +304,7 @@ class spell_pal_blade_of_vengeance : SpellScript
     {
         return ValidateSpellInfo(SpellIds.BladeOfVengeance)
             && ValidateSpellEffect((spellInfo.Id, 2))
-            && spellInfo.GetEffect(2).IsEffect(SpellEffectName.TriggerSpell);
+            && spellInfo.GetEffect(2).IsEffect(SpellEffects.TriggerSpell);
     }
 
     public override bool Load()
@@ -380,7 +380,7 @@ class spell_pal_blinding_light : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -713,7 +713,7 @@ class spell_pal_execution_sentence : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleVisual, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleVisual, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -798,7 +798,7 @@ class spell_pal_final_verdict : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 1, SpellEffects.Dummy));
     }
 }
 
@@ -894,7 +894,7 @@ class spell_pal_hammer_of_the_righteous : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleAoEHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleAoEHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1050,7 +1050,7 @@ class spell_pal_holy_prism : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1111,8 +1111,8 @@ class spell_pal_holy_prism_selector : SpellScript
 
         OnObjectAreaTargetSelect.Add(new(ShareTargets, 2, Targets.UnitDestAreaEntry));
 
-        OnEffectHitTarget.Add(new(SaveTargetGuid, 0, SpellEffectName.Any));
-        OnEffectHitTarget.Add(new(HandleScript, 2, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(SaveTargetGuid, 0, SpellEffects.Any));
+        OnEffectHitTarget.Add(new(HandleScript, 2, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1163,7 +1163,7 @@ class spell_pal_holy_shock : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1356,7 +1356,7 @@ class spell_pal_light_hammer_init_summon : SpellScript
 
     void InitSummon()
     {
-        foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffectName.Summon).GenericVictimTargets)
+        foreach (var summonedObject in GetSpell().GetExecuteLogEffect(SpellEffects.Summon).GenericVictimTargets)
         {
             Unit hammer = Global.ObjAccessor.GetUnit(GetCaster(), summonedObject.Victim);
             if (hammer != null)
@@ -1565,7 +1565,7 @@ class spell_pal_templar_s_verdict : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1732,7 +1732,7 @@ class spell_pal_wake_of_ashes : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffects.SchoolDamage));
     }
 }
 

@@ -105,7 +105,7 @@ namespace Game.Entities
             bool found = false;
             foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
-                if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && !HasSpell(spellEffectInfo.TriggerSpell))
+                if (spellEffectInfo.IsEffect(SpellEffects.LearnSpell) && !HasSpell(spellEffectInfo.TriggerSpell))
                 {
                     found = true;
                     break;

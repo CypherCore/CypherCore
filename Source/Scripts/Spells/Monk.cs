@@ -232,7 +232,7 @@ class spell_monk_life_cocoon : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(CalculateAbsorb, 2, SpellEffectName.Dummy));
+        OnEffectLaunch.Add(new(CalculateAbsorb, 2, SpellEffects.Dummy));
     }
 }
 
@@ -264,7 +264,7 @@ class spell_monk_mists_of_life : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEffectApply, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleEffectApply, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -333,7 +333,7 @@ class spell_monk_pressure_points : SpellScript
     {
         return ValidateSpellInfo(SpellIds.PressurePoints)
             && ValidateSpellEffect((spellInfo.Id, 2))
-            && spellInfo.GetEffect(2).IsEffect(SpellEffectName.Dispel);
+            && spellInfo.GetEffect(2).IsEffect(SpellEffects.Dispel);
     }
 
     public override bool Load()
@@ -391,7 +391,7 @@ class spell_monk_provoke : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckExplicitTarget));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -419,7 +419,7 @@ class spell_monk_rising_sun_kick : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(HandleOnHit, 0, SpellEffectName.TriggerSpell));
+        OnEffectLaunchTarget.Add(new(HandleOnHit, 0, SpellEffects.TriggerSpell));
     }
 }
 
@@ -447,7 +447,7 @@ class spell_monk_roll : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -763,6 +763,6 @@ class spell_monk_tigers_lust : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleRemoveImpairingAuras, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleRemoveImpairingAuras, 0, SpellEffects.ApplyAura));
     }
 }

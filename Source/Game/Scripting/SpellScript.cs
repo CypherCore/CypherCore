@@ -246,10 +246,10 @@ namespace Game.Scripting
 
         public class EffectHandler : EffectHook
         {
-            SpellEffectName _effName;
+            SpellEffects _effName;
             SpellEffectFnType _callImpl;
 
-            public EffectHandler(SpellEffectFnType callImpl, uint effIndex, SpellEffectName effName) : base(effIndex)
+            public EffectHandler(SpellEffectFnType callImpl, uint effIndex, SpellEffects effName) : base(effIndex)
             {
                 _callImpl = callImpl;
                 _effName = effName;
@@ -265,7 +265,7 @@ namespace Game.Scripting
                     return true;
                 if (spellEffectInfo.Effect == 0)
                     return false;
-                return (_effName == SpellEffectName.Any) || (spellEffectInfo.Effect == _effName);
+                return (_effName == SpellEffects.Any) || (spellEffectInfo.Effect == _effName);
             }
 
             public void Call(uint effIndex)
@@ -480,22 +480,22 @@ namespace Game.Scripting
 
             if (!CalcDamage.Empty())
             {
-                if (!entry.HasEffect(SpellEffectName.SchoolDamage)
-                    && !entry.HasEffect(SpellEffectName.PowerDrain)
-                    && !entry.HasEffect(SpellEffectName.HealthLeech)
-                    && !entry.HasEffect(SpellEffectName.WeaponDamage)
-                    && !entry.HasEffect(SpellEffectName.WeaponDamageNoSchool)
-                    && !entry.HasEffect(SpellEffectName.NormalizedWeaponDmg)
-                    && !entry.HasEffect(SpellEffectName.WeaponPercentDamage))
+                if (!entry.HasEffect(SpellEffects.SchoolDamage)
+                    && !entry.HasEffect(SpellEffects.PowerDrain)
+                    && !entry.HasEffect(SpellEffects.HealthLeech)
+                    && !entry.HasEffect(SpellEffects.WeaponDamage)
+                    && !entry.HasEffect(SpellEffects.WeaponDamageNoSchool)
+                    && !entry.HasEffect(SpellEffects.NormalizedWeaponDmg)
+                    && !entry.HasEffect(SpellEffects.WeaponPercentDamage))
                     Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - handler bound to hook `CalcDamage` of SpellScript won't be executed");
             }
 
             if (!CalcHealing.Empty())
             {
-                if (!entry.HasEffect(SpellEffectName.Heal)
-                    && !entry.HasEffect(SpellEffectName.HealPct)
-                    && !entry.HasEffect(SpellEffectName.HealMechanical)
-                    && !entry.HasEffect(SpellEffectName.HealthLeech))
+                if (!entry.HasEffect(SpellEffects.Heal)
+                    && !entry.HasEffect(SpellEffects.HealPct)
+                    && !entry.HasEffect(SpellEffects.HealMechanical)
+                    && !entry.HasEffect(SpellEffects.HealthLeech))
                     Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` script `{m_scriptName}` does not have a damage effect - handler bound to hook `CalcHealing` of SpellScript won't be executed");
             }
 
@@ -1559,15 +1559,15 @@ namespace Game.Scripting
         public override bool _Validate(SpellInfo entry)
         {
             foreach (var _ in DoCheckAreaTarget)
-                if (!entry.HasAreaAuraEffect() && !entry.HasEffect(SpellEffectName.PersistentAreaAura) && !entry.HasEffect(SpellEffectName.ApplyAura))
+                if (!entry.HasAreaAuraEffect() && !entry.HasEffect(SpellEffects.PersistentAreaAura) && !entry.HasEffect(SpellEffects.ApplyAura))
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoCheckAreaTarget` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var _ in OnDispel)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
+                if (!entry.HasEffect(SpellEffects.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `OnDispel` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var _ in AfterDispel)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
+                if (!entry.HasEffect(SpellEffects.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `AfterDispel` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var eff in OnEffectApply)
@@ -1635,7 +1635,7 @@ namespace Game.Scripting
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectSplit` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
 
             foreach (var _ in DoCheckProc)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
+                if (!entry.HasEffect(SpellEffects.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoCheckProc` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var eff in DoCheckEffectProc)
@@ -1643,15 +1643,15 @@ namespace Game.Scripting
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoCheckEffectProc` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
 
             foreach (var _ in DoPrepareProc)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
+                if (!entry.HasEffect(SpellEffects.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `DoPrepareProc` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var _ in OnProc)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
+                if (!entry.HasEffect(SpellEffects.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `OnProc` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var _ in AfterProc)
-                if (!entry.HasEffect(SpellEffectName.ApplyAura) && !entry.HasAreaAuraEffect())
+                if (!entry.HasEffect(SpellEffects.ApplyAura) && !entry.HasAreaAuraEffect())
                     Log.outError(LogFilter.Scripts, "Spell `{0}` of script `{1}` does not have apply aura effect - handler bound to hook `AfterProc` of AuraScript won't be executed", entry.Id, m_scriptName);
 
             foreach (var eff in OnEffectProc)

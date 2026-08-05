@@ -116,7 +116,7 @@ class spell_warl_absolute_corruption : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleApply, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleApply, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -192,7 +192,7 @@ class spell_warl_bilescourge_bombers : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleHit, 0, SpellEffectName.CreateAreaTrigger));
+        OnEffectHit.Add(new(HandleHit, 0, SpellEffects.CreateAreaTrigger));
     }
 }
 
@@ -292,7 +292,7 @@ class spell_warl_cataclysm : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -391,7 +391,7 @@ class spell_warl_channel_demonfire_selector : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitDestAreaEnemy));
-        OnEffectLaunchTarget.Add(new(HandleDamage, 0, SpellEffectName.Dummy));
+        OnEffectLaunchTarget.Add(new(HandleDamage, 0, SpellEffects.Dummy));
     }
 }
 
@@ -415,7 +415,7 @@ class spell_warl_chaos_bolt : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.SchoolDamage));
         OnCalcCritChance.Add(new(CalcCritChance));
     }
 }
@@ -465,7 +465,7 @@ class spell_warl_conflagrate : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleAfterCast, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleAfterCast, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -489,7 +489,7 @@ class spell_warl_create_healthstone : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -714,7 +714,7 @@ class spell_warl_devour_magic : SpellScript
 
     public override void Register()
     {
-        OnEffectSuccessfulDispel.Add(new(OnSuccessfulDispel, 0, SpellEffectName.Dispel));
+        OnEffectSuccessfulDispel.Add(new(OnSuccessfulDispel, 0, SpellEffects.Dispel));
     }
 }
 
@@ -870,7 +870,7 @@ class spell_warl_immolate : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleOnEffectHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleOnEffectHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -991,7 +991,7 @@ class spell_warl_random_sayaad : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1019,7 +1019,7 @@ class spell_warl_roaring_blaze : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1079,7 +1079,7 @@ class spell_warl_seduction : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ApplyAura));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ApplyAura));
     }
 }
 
@@ -1098,7 +1098,7 @@ class spell_warl_seed_of_corruption : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1408,7 +1408,7 @@ class spell_warl_soul_fire : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(HandleTriggers, 0, SpellEffectName.SchoolDamage));
+        OnEffectLaunchTarget.Add(new(HandleTriggers, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1428,7 +1428,7 @@ class spell_warl_soul_swap : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1481,7 +1481,7 @@ class spell_warl_soul_swap_dot_marker : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1549,7 +1549,7 @@ class spell_warl_soul_swap_exhale : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(OnEffectHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(OnEffectHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1572,7 +1572,7 @@ class spell_warl_soulshatter : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1594,7 +1594,7 @@ class spell_warl_strengthen_pact_succubus : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1616,7 +1616,7 @@ class spell_warl_strengthen_pact_incubus : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1635,7 +1635,7 @@ class spell_warl_summon_sayaad : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1727,7 +1727,7 @@ class spell_warl_vile_taint : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.Dummy));
     }
 }
 

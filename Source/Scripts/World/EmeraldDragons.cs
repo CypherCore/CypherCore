@@ -521,7 +521,7 @@ namespace Scripts.World.Achievements
         public override void Register()
         {
             OnObjectAreaTargetSelect.Add(new(FilterTargets, 0, Targets.UnitSrcAreaEnemy));
-            OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffectName.ApplyAura));
+            OnEffectHitTarget.Add(new(HandleEffect, 0, SpellEffects.ApplyAura));
         }
     }
 }

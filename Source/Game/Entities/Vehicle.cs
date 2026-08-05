@@ -113,16 +113,16 @@ namespace Game.Entities
             // This couldn't be done in DB, because some spells have MECHANIC_NONE
 
             // Vehicles should be immune on Knockback ...
-            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBack, true);
-            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBackDest, true);
+            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.KnockBack, true);
+            _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.KnockBackDest, true);
 
             // Mechanical units & vehicles ( which are not Bosses, they have own immunities in DB ) should be also immune on healing ( exceptions in switch below )
             if (_me.IsTypeId(TypeId.Unit) && _me.ToCreature().GetCreatureTemplate().CreatureType == CreatureType.Mechanical && !_me.ToCreature().IsWorldBoss())
             {
                 // Heal & dispel ...
-                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.Heal, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.HealPct, true);
-                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.Dispel, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.Heal, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.HealPct, true);
+                _me.ApplySpellImmune(0, SpellImmunity.Effect, SpellEffects.Dispel, true);
                 _me.ApplySpellImmune(0, SpellImmunity.State, AuraType.PeriodicHeal, true);
 
                 // ... Shield & Immunity grant spells ...

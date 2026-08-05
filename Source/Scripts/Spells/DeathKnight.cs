@@ -193,7 +193,7 @@ class spell_dk_apply_bone_shield : SpellScript
 
     public override void Register()
     {
-        OnEffectHit.Add(new(HandleHitTarget, _effIndex, SpellEffectName.Dummy));
+        OnEffectHit.Add(new(HandleHitTarget, _effIndex, SpellEffects.Dummy));
     }
 }
 
@@ -239,7 +239,7 @@ class spell_dk_army_transform : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -515,7 +515,7 @@ class spell_dk_death_coil : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -544,7 +544,7 @@ class spell_dk_death_gate : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckClass));
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -578,7 +578,7 @@ class spell_dk_death_grip_initial : SpellScript
     public override void Register()
     {
         OnCheckCast.Add(new(CheckCast));
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -642,7 +642,7 @@ class spell_dk_death_strike : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunch.Add(new(HandleDummy, 1, SpellEffectName.Dummy));
+        OnEffectLaunch.Add(new(HandleDummy, 1, SpellEffects.Dummy));
         AfterCast.Add(new(TriggerRecentlyUsedDeathStrike));
     }
 }
@@ -702,7 +702,7 @@ class spell_dk_festering_strike : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffects.Dummy));
     }
 }
 
@@ -745,8 +745,8 @@ class spell_dk_ghoul_explode : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.SchoolDamage));
-        OnEffectHitTarget.Add(new(Suicide, 1, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffects.SchoolDamage));
+        OnEffectHitTarget.Add(new(Suicide, 1, SpellEffects.SchoolDamage));
     }
 }
 
@@ -782,7 +782,7 @@ class spell_dk_glyph_of_scourge_strike_script : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -809,7 +809,7 @@ class spell_dk_heartbreaker : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleEnergize, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleEnergize, 0, SpellEffects.Dummy));
     }
 }
 
@@ -828,7 +828,7 @@ class spell_dk_howling_blast : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleFrostFever, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleFrostFever, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1119,7 +1119,7 @@ class spell_dk_raise_dead : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -1154,7 +1154,7 @@ class spell_dk_reaper_of_souls : SpellScript
     public override void Register()
     {
         OnObjectTargetSelect.Add(new(HandleDefault, 1, Targets.UnitTargetEnemy));
-        OnEffectLaunch.Add(new(HandleReaperOfSouls, 3, SpellEffectName.TriggerSpell));
+        OnEffectLaunch.Add(new(HandleReaperOfSouls, 3, SpellEffects.TriggerSpell));
     }
 }
 
@@ -1268,9 +1268,9 @@ class spell_dk_subduing_grasp : SpellScript
     public override void Register()
     {
         if (m_scriptSpellId == SpellIds.GorefiendsGrasp)
-            OnEffectHitTarget.Add(new(HandleSubduingGrasp, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleSubduingGrasp, 1, SpellEffects.ScriptEffect));
         else
-            OnEffectHitTarget.Add(new(HandleSubduingGrasp, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleSubduingGrasp, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -1356,7 +1356,7 @@ class spell_dk_voracious : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.SchoolDamage));
     }
 }
 

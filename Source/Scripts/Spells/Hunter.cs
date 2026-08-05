@@ -346,7 +346,7 @@ class spell_hun_concussive_shot : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDuration, SpellConst.EffectFirstFound, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleDuration, SpellConst.EffectFirstFound, SpellEffects.SchoolDamage));
     }
 }
 
@@ -514,7 +514,7 @@ class spell_hun_last_stand_pet : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 
@@ -756,8 +756,8 @@ class spell_hun_masters_call : SpellScript
     {
         OnCheckCast.Add(new(DoCheckCast));
 
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
-        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
+        OnEffectHitTarget.Add(new(HandleScriptEffect, 1, SpellEffects.ScriptEffect));
     }
 }
 
@@ -891,7 +891,7 @@ class spell_hun_pet_heart_of_the_phoenix : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+        OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
     }
 }
 
@@ -977,7 +977,7 @@ class spell_hun_rapid_fire_damage : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffectName.SchoolDamage));
+        OnEffectHitTarget.Add(new(HandleHit, 0, SpellEffects.SchoolDamage));
     }
 }
 
@@ -1067,7 +1067,7 @@ class spell_hun_scatter_shot : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
     }
 }
 

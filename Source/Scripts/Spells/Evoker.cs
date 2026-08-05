@@ -507,8 +507,8 @@ class spell_evo_living_flame : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.Dummy));
-        OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffects.Dummy));
+        OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -585,7 +585,7 @@ class spell_evo_pyre : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleDamage, 0, SpellEffects.Dummy));
     }
 }
 
@@ -597,7 +597,7 @@ class spell_evo_ruby_embers : SpellScript
     {
         return ValidateSpellInfo(SpellIds.RubyEmbers)
             && ValidateSpellEffect((spellInfo.Id, 1))
-            && spellInfo.GetEffect(1).IsEffect(SpellEffectName.ApplyAura)
+            && spellInfo.GetEffect(1).IsEffect(SpellEffects.ApplyAura)
             && spellInfo.GetEffect(1).ApplyAuraPeriod != 0;
     }
 
@@ -641,7 +641,7 @@ class spell_evo_scouring_flame : SpellScript
     public override void Register()
     {
         OnObjectAreaTargetSelect.Add(new(HandleScouringFlame, 3, Targets.UnitConeCasterToDestEnemy));
-        OnEffectHitTarget.Add(new(CalcDispelCount, 3, SpellEffectName.Dispel));
+        OnEffectHitTarget.Add(new(CalcDispelCount, 3, SpellEffects.Dispel));
     }
 }
 
@@ -712,7 +712,7 @@ class spell_evo_verdant_embrace : SpellScript
 
     public override void Register()
     {
-        OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 0, SpellEffectName.Dummy));
+        OnEffectLaunchTarget.Add(new(HandleLaunchTarget, 0, SpellEffects.Dummy));
     }
 }
 
@@ -735,6 +735,6 @@ class spell_evo_verdant_embrace_trigger_heal : SpellScript
 
     public override void Register()
     {
-        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffectName.Dummy));
+        OnEffectHitTarget.Add(new(HandleHitTarget, 0, SpellEffects.Dummy));
     }
 }

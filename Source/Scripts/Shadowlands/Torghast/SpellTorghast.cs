@@ -308,8 +308,8 @@ namespace Scripts.Shadowlands.Torghast
 
         public override void Register()
         {
-            OnEffectLaunchTarget.Add(new(SetValue, 0, SpellEffectName.Heal));
-            OnEffectHitTarget.Add(new(SetValue, 1, SpellEffectName.Energize));
+            OnEffectLaunchTarget.Add(new(SetValue, 0, SpellEffects.Heal));
+            OnEffectHitTarget.Add(new(SetValue, 1, SpellEffects.Energize));
         }
     }
 

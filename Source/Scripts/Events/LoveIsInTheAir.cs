@@ -91,7 +91,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHit.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -110,7 +110,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
         }
     }
 
@@ -224,7 +224,7 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHitTarget.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
         }
     }
 
@@ -245,8 +245,8 @@ namespace Scripts.Events.LoveIsInTheAir
 
         public override void Register()
         {
-            OnEffectHit.Add(new(HandleScript, 0, SpellEffectName.ScriptEffect));
-            OnEffectHit.Add(new(HandleScript, 1, SpellEffectName.ScriptEffect));
+            OnEffectHit.Add(new(HandleScript, 0, SpellEffects.ScriptEffect));
+            OnEffectHit.Add(new(HandleScript, 1, SpellEffects.ScriptEffect));
         }
     }
 }

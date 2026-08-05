@@ -139,8 +139,8 @@ namespace Game.Entities
         {
             // immune to all positive spells, except of stoneclaw totem absorb and sentry totem bind sight
             // totems positive spells have unit_caster target
-            if (spellEffectInfo.Effect != SpellEffectName.Dummy &&
-                spellEffectInfo.Effect != SpellEffectName.ScriptEffect &&
+            if (spellEffectInfo.Effect != SpellEffects.Dummy &&
+                spellEffectInfo.Effect != SpellEffects.ScriptEffect &&
                 spellInfo.IsPositive() && spellEffectInfo.TargetA.GetTarget() != Targets.UnitCaster &&
                 spellEffectInfo.TargetA.GetCheckType() != SpellTargetCheckTypes.Entry)
                 return true;
