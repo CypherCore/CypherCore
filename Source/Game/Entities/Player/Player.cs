@@ -501,15 +501,6 @@ namespace Game.Entities
             UpdateEnchantTime(diff);
             UpdateHomebindTime(diff);
 
-            if (!_instanceResetTimes.Empty())
-            {
-                foreach (var instance in _instanceResetTimes.ToList())
-                {
-                    if (instance.Value < now)
-                        _instanceResetTimes.Remove(instance.Key);
-                }
-            }
-
             Pet pet = GetPet();
             if (pet != null && !pet.IsWithinDistInMap(this, GetMap().GetVisibilityRange()) && !pet.IsPossessed())
                 RemovePet(pet, PetSaveMode.NotInSlot, true);

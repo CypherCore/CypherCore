@@ -3572,6 +3572,8 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), yesterdayKills);
 
             _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
+            UpdateInstanceEnterTimes();
+
             _LoadBGData(holder.GetResult(PlayerLoginQueryLoad.BgData));
 
             GetSession().SetPlayer(this);

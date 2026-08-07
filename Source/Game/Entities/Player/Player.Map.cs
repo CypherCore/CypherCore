@@ -484,10 +484,16 @@ namespace Game.Entities
             return true;
         }
 
-        public bool CheckInstanceCount(uint instanceId)
+        public bool UpdateAndCheckInstanceCount(uint instanceId)
         {
+            UpdateInstanceEnterTimes();
+
             if (_instanceResetTimes.Count < WorldConfig.GetIntValue(WorldCfg.MaxInstancesPerHour))
                 return true;
+
+            if (instanceId == 0)
+                return false;
+
             return _instanceResetTimes.ContainsKey(instanceId);
         }
 
@@ -495,6 +501,20 @@ namespace Game.Entities
         {
             if (!_instanceResetTimes.ContainsKey(instanceId))
                 _instanceResetTimes.Add(instanceId, enterTime + Time.Hour);
+        }
+
+        void UpdateInstanceEnterTimes()
+        {
+            if (_instanceResetTimes.Empty())
+                return;
+
+            var now = GameTime.GetGameTime();
+
+            foreach (var itr in _instanceResetTimes.ToList())
+            {
+                if (itr.Value < now)
+                    _instanceResetTimes.Remove(itr.Key);
+            }
         }
 
         public WorldSafeLocsEntry GetInstanceEntrance(uint targetMapId)

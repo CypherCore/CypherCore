@@ -1754,7 +1754,7 @@ namespace Game.Maps
                 }
 
                 // players are only allowed to enter 10 instances per hour
-                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.CheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.UpdateAndCheckInstanceCount(instanceIdToCheck) && !player.IsDead())
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
             }
 
