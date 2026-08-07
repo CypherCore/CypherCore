@@ -3829,11 +3829,11 @@ namespace Game.Entities
             if (RatesForPower[(int)power] != 0)
                 addvalue *= WorldConfig.GetFloatValue(RatesForPower[(int)power]);
 
-            // Mana regen calculated in Player.UpdateManaRegen()
-            if (power != PowerType.Mana)
+            // Mana regen calculated in Player::UpdateManaRegen(), energy regen calculated in Player::UpdateEnergyRegen()
+            if (power != PowerType.Mana && power != PowerType.Energy)
             {
                 addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
-                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * ((power != PowerType.Energy) ? m_regenTimerCount : RegenTimer) / (5 * Time.InMilliseconds);
+                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * (float)RegenTimer / (float)(5 * Time.InMilliseconds);
             }
 
             int minPower = powerType.MinPower;

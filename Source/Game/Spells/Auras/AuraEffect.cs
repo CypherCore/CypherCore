@@ -3552,6 +3552,8 @@ namespace Game.Spells
             // Update manaregen value
             if (GetMiscValue() == (int)PowerType.Mana)
                 target.ToPlayer().UpdateManaRegen();
+            else if (GetMiscValue() == (int)PowerType.Energy)
+                target.ToPlayer().UpdateEnergyRegen();
             else if (GetMiscValue() == (int)PowerType.Runes)
                 target.ToPlayer().UpdateAllRunesRegen();
             // other powers are not immediate effects - implemented in Player.Regenerate, Creature.Regenerate

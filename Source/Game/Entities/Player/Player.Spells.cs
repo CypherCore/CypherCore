@@ -3388,6 +3388,20 @@ namespace Game.Entities
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), 0.0f);
         }
 
+        public void UpdateEnergyRegen()
+        {
+            uint energyIndex = GetPowerIndex(PowerType.Energy);
+            if (energyIndex == (int)PowerType.Max)
+                return;
+
+            float regenPerSecond = 10.0f;   // +10 energy per second
+            regenPerSecond *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Energy);
+            regenPerSecond += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Energy) / (float)(5 * Time.InMilliseconds);
+
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)energyIndex), regenPerSecond - 10.0f);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)energyIndex), regenPerSecond - 10.0f);
+        }
+
         public void UpdateAllRunesRegen()
         {
             if (GetClass() != Class.DeathKnight)
