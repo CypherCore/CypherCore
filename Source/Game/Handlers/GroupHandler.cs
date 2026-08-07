@@ -557,7 +557,7 @@ namespace Game
             {
                 PartyMemberFullState partyMemberStats = new();
                 Player player = Global.ObjAccessor.FindConnectedPlayer(target);
-                if (player == null || player.GetGroup() == null || GetPlayer().GetGroup() == null || (player.GetGroup() != GetPlayer().GetGroup()))
+                if (player == null || !GetPlayer().IsInSameRaidWith(player))
                 {
                     partyMemberStats.MemberGuid = target;
                     partyMemberStats.MemberStats.Status = GroupMemberOnlineStatus.Offline;
