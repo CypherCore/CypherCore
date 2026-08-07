@@ -6028,14 +6028,14 @@ namespace Game.Entities
                 pItem.SetState(ItemUpdateState.Changed, this);
             }
         }
-        public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
+        public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool pushed = false, bool createdByPlayer = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast, pushed, createdByPlayer); }
 
-        void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool createdByPlayer = false)
+        void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false, bool pushed = false, bool createdByPlayer = false)
         {
             Loot loot = new(null, ObjectGuid.Empty, LootType.None, null);
             loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
 
-            loot.AutoStore(this, bag, slot, broadcast, createdByPlayer);
+            loot.AutoStore(this, bag, slot, broadcast, pushed, createdByPlayer);
             Unit.ProcSkillsAndAuras(this, null, new ProcFlagsInit(ProcFlags.Looted), new ProcFlagsInit(ProcFlags.None), ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 

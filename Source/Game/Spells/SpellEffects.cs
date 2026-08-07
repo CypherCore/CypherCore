@@ -1102,7 +1102,7 @@ namespace Game.Spells
             // Pick a random item from spell_loot_template
             if (m_spellInfo.IsLootCrafting())
             {
-                player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context, false, true);
+                player.AutoStoreLoot(m_spellInfo.Id, LootStorage.Spell, context, false, false, true);
                 if (m_CastItem == null)
                     player.UpdateCraftSkill(m_spellInfo);
             }

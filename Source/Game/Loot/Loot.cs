@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -581,28 +580,28 @@ namespace Game.Loots
             switch (vote)
             {
                 case RollVote.Pass:                                // Player choose pass
-                    {
-                        SendRoll(playerGuid, -1, RollVote.Pass, null);
-                        break;
-                    }
+                {
+                    SendRoll(playerGuid, -1, RollVote.Pass, null);
+                    break;
+                }
                 case RollVote.Need:                                // player choose Need
-                    {
-                        SendRoll(playerGuid, 0, RollVote.Need, null);
-                        player.UpdateCriteria(CriteriaType.RollAnyNeed, 1);
-                        break;
-                    }
+                {
+                    SendRoll(playerGuid, 0, RollVote.Need, null);
+                    player.UpdateCriteria(CriteriaType.RollAnyNeed, 1);
+                    break;
+                }
                 case RollVote.Greed:                               // player choose Greed
-                    {
-                        SendRoll(playerGuid, -1, RollVote.Greed, null);
-                        player.UpdateCriteria(CriteriaType.RollAnyGreed, 1);
-                        break;
-                    }
+                {
+                    SendRoll(playerGuid, -1, RollVote.Greed, null);
+                    player.UpdateCriteria(CriteriaType.RollAnyGreed, 1);
+                    break;
+                }
                 case RollVote.Disenchant:                          // player choose Disenchant
-                    {
-                        SendRoll(playerGuid, -1, RollVote.Disenchant, null);
-                        player.UpdateCriteria(CriteriaType.RollAnyGreed, 1);
-                        break;
-                    }
+                {
+                    SendRoll(playerGuid, -1, RollVote.Disenchant, null);
+                    player.UpdateCriteria(CriteriaType.RollAnyGreed, 1);
+                    break;
+                }
                 default:                                            // Roll removed case
                     return false;
             }
@@ -790,55 +789,55 @@ namespace Game.Loots
             switch (item.type)
             {
                 case LootStoreItemType.Item:
+                {
+                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
+                    if (proto == null)
+                        return;
+
+                    uint count = RandomHelper.URand(item.mincount, item.maxcount);
+                    uint stacks = (uint)(count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0));
+
+                    for (uint i = 0; i < stacks && items.Count < SharedConst.MaxNRLootItems; ++i)
                     {
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item.itemid);
-                        if (proto == null)
-                            return;
-
-                        uint count = RandomHelper.URand(item.mincount, item.maxcount);
-                        uint stacks = (uint)(count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0));
-
-                        for (uint i = 0; i < stacks && items.Count < SharedConst.MaxNRLootItems; ++i)
+                        LootItem generatedLoot = new(item)
                         {
-                            LootItem generatedLoot = new(item)
-                            {
-                                context = _itemContext,
-                                count = (byte)Math.Min(count, proto.GetMaxStackSize()),
-                                LootListId = (uint)items.Count
-                            };
-                            generatedLoot.BonusListIDs = ItemBonusMgr.GetBonusListsForItem(generatedLoot.itemid, new(_itemContext));
+                            context = _itemContext,
+                            count = (byte)Math.Min(count, proto.GetMaxStackSize()),
+                            LootListId = (uint)items.Count
+                        };
+                        generatedLoot.BonusListIDs = ItemBonusMgr.GetBonusListsForItem(generatedLoot.itemid, new(_itemContext));
 
-                            items.Add(generatedLoot);
-                            count -= proto.GetMaxStackSize();
-                        }
-                        break;
+                        items.Add(generatedLoot);
+                        count -= proto.GetMaxStackSize();
                     }
+                    break;
+                }
                 case LootStoreItemType.Currency:
+                {
+                    LootItem generatedLoot = new(item)
                     {
-                        LootItem generatedLoot = new(item)
-                        {
-                            count = RandomHelper.URand(item.mincount, item.maxcount),
-                            LootListId = (uint)items.Count
-                        };
-                        items.Add(generatedLoot);
-                        break;
-                    }
+                        count = RandomHelper.URand(item.mincount, item.maxcount),
+                        LootListId = (uint)items.Count
+                    };
+                    items.Add(generatedLoot);
+                    break;
+                }
                 case LootStoreItemType.TrackingQuest:
+                {
+                    LootItem generatedLoot = new(item)
                     {
-                        LootItem generatedLoot = new(item)
-                        {
-                            count = 1,
-                            LootListId = (uint)items.Count
-                        };
-                        items.Add(generatedLoot);
-                        break;
-                    }
+                        count = 1,
+                        LootListId = (uint)items.Count
+                    };
+                    items.Add(generatedLoot);
+                    break;
+                }
                 default:
                     break;
             }
         }
 
-        public bool AutoStore(Player player, byte bag, byte slot, bool broadcast = false, bool createdByPlayer = false)
+        public bool AutoStore(Player player, byte bag, byte slot, bool broadcast = false, bool pushed = false, bool createdByPlayer = false)
         {
             bool allLooted = true;
             for (uint i = 0; i < items.Count; ++i)
@@ -876,7 +875,7 @@ namespace Game.Loots
                         Item pItem = player.StoreNewItem(dest, lootItem.itemid, true, lootItem.randomBonusListId, null, lootItem.context, lootItem.BonusListIDs);
                         if (pItem != null)
                         {
-                            player.SendNewItem(pItem, lootItem.count, false, createdByPlayer, broadcast, GetDungeonEncounterId());
+                            player.SendNewItem(pItem, lootItem.count, pushed, createdByPlayer, broadcast, GetDungeonEncounterId());
                             player.ApplyItemLootedSpell(pItem, true);
                         }
                         else
@@ -982,10 +981,10 @@ namespace Game.Loots
                                 case LootMethod.MasterLoot:
                                 case LootMethod.GroupLoot:
                                 case LootMethod.NeedBeforeGreed:
-                                    {
-                                        item.is_blocked = true;
-                                        break;
-                                    }
+                                {
+                                    item.is_blocked = true;
+                                    break;
+                                }
                                 default:
                                     break;
                             }
@@ -1239,33 +1238,33 @@ namespace Game.Loots
                 switch (item.type)
                 {
                     case LootItemType.Item:
+                    {
+                        LootItemData lootItem = new()
                         {
-                            LootItemData lootItem = new()
-                            {
-                                LootListID = (byte)item.LootListId,
-                                UIType = uiType.Value,
-                                Type = (byte)item.type,
-                                Quantity = item.count,
-                                Loot = new(item)
-                            };
-                            packet.Items.Add(lootItem);
-                            break;
-                        }
+                            LootListID = (byte)item.LootListId,
+                            UIType = uiType.Value,
+                            Type = (byte)item.type,
+                            Quantity = item.count,
+                            Loot = new(item)
+                        };
+                        packet.Items.Add(lootItem);
+                        break;
+                    }
                     case LootItemType.Currency:
+                    {
+                        LootCurrency lootCurrency = new()
                         {
-                            LootCurrency lootCurrency = new()
-                            {
-                                CurrencyID = item.itemid,
-                                Quantity = item.count,
-                                LootListID = (byte)item.LootListId,
-                                UIType = (byte)uiType.Value
-                            };
+                            CurrencyID = item.itemid,
+                            Quantity = item.count,
+                            LootListID = (byte)item.LootListId,
+                            UIType = (byte)uiType.Value
+                        };
 
-                            // fake visible quantity for SPELL_AURA_MOD_CURRENCY_CATEGORY_GAIN_PCT - handled in Player::ModifyCurrency
-                            lootCurrency.Quantity = (uint)((float)lootCurrency.Quantity * viewer.GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyCategoryGainPct, CliDB.CurrencyTypesStorage.LookupByKey(item.itemid).CategoryID));
-                            packet.Currencies.Add(lootCurrency);
-                            break;
-                        }
+                        // fake visible quantity for SPELL_AURA_MOD_CURRENCY_CATEGORY_GAIN_PCT - handled in Player::ModifyCurrency
+                        lootCurrency.Quantity = (uint)((float)lootCurrency.Quantity * viewer.GetTotalAuraMultiplierByMiscValue(AuraType.ModCurrencyCategoryGainPct, CliDB.CurrencyTypesStorage.LookupByKey(item.itemid).CategoryID));
+                        packet.Currencies.Add(lootCurrency);
+                        break;
+                    }
                     default:
                         break;
                 }
