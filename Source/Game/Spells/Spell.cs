@@ -2800,8 +2800,7 @@ namespace Game.Spells
                     CancelGlobalCooldown();
                     goto case SpellState.Launched;
                 case SpellState.Launched:
-                    SendInterrupted(0);
-                    SendCastResult(SpellCastResult.Interrupted);
+                    SendInterrupted((byte)SpellCastResult.Interrupted);
                     break;
                 case SpellState.Channeling:
                 {
@@ -2824,8 +2823,7 @@ namespace Game.Spells
                 }
 
                 SendChannelUpdate(0, SpellCastResult.Interrupted);
-                SendInterrupted(0);
-                SendCastResult(SpellCastResult.Interrupted);
+                SendInterrupted((byte)SpellCastResult.Interrupted);
                 break;
                 default:
                     break;
