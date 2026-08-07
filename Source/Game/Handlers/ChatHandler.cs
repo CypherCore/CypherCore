@@ -265,8 +265,7 @@ namespace Game
                             return;
                     }
 
-                    if (group.IsLeader(GetPlayer().GetGUID()))
-                        type = ChatMsg.PartyLeader;
+                    type = group.IsLeader(GetPlayer().GetGUID()) ? ChatMsg.PartyLeader : ChatMsg.Party;
 
                     Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
