@@ -8,8 +8,6 @@ using Game.Accounts;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Game
 {
@@ -102,6 +100,10 @@ namespace Game
             DB.Characters.Execute(stmt);
 
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_BAN);
+            stmt.AddValue(0, accountId);
+            DB.Characters.Execute(stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ACCOUNT_INSTANCE_LOCK_TIMES);
             stmt.AddValue(0, accountId);
             DB.Characters.Execute(stmt);
 
