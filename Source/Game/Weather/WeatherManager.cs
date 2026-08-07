@@ -3,6 +3,7 @@
 
 using Framework.Database;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking.Packets;
 using System.Collections.Generic;
 
@@ -78,8 +79,9 @@ namespace Game
 
     public class Weather
     {
-        public Weather(uint zoneId, WeatherData weatherChances)
+        public Weather(Map map, uint zoneId, WeatherData weatherChances)
         {
+            m_map = map;
             m_zone = zoneId;
             m_weatherChances = weatherChances;
             m_timer.SetInterval(10 * Time.Minute * Time.InMilliseconds);
@@ -261,7 +263,7 @@ namespace Game
             WeatherPkt weather = new(state, m_intensity);
 
             //- Returns false if there were no players found to update
-            if (!Global.WorldMgr.SendZoneMessage(m_zone, weather))
+            if (!m_map.SendZoneMessage(m_zone, weather))
                 return false;
 
             // Log the event
@@ -366,6 +368,7 @@ namespace Game
         public uint GetZone() { return m_zone; }
         public uint GetScriptId() { return m_weatherChances.ScriptId; }
 
+        Map m_map;
         uint m_zone;
         WeatherType m_type;
         float m_intensity;

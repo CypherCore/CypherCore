@@ -2632,6 +2632,26 @@ namespace Game.Maps
                 pl.SendPacket(data);
         }
 
+        // Send a packet to all players (or players selected team) in the zone (except self if mentioned)
+        public bool SendZoneMessage(uint zone, ServerPacket packet, WorldSession self = null, Team? team = null)
+        {
+            bool foundPlayerToSend = false;
+
+            foreach (var player in GetPlayers())
+            {
+                if (player.IsInWorld &&
+                    player.GetZoneId() == zone &&
+                    player.GetSession() != self &&
+                    (!team.HasValue || player.GetTeam() == team))
+                {
+                    player.SendPacket(packet);
+                    foundPlayerToSend = true;
+                }
+            }
+
+            return foundPlayerToSend;
+        }
+
         public bool ActiveObjectsNearGrid(Grid grid)
         {
             var cell_min = new CellCoord(grid.GetX() * MapConst.MaxCells,
@@ -3109,6 +3129,14 @@ namespace Game.Maps
                 Weather.SendFineWeatherUpdateToPlayer(player);
         }
 
+        // Send a System Message to all players in the zone (except self if mentioned)
+        public void SendZoneText(uint zone, string text, WorldSession self = null, Team? team = null)
+        {
+            ChatPkt data = new();
+            data.Initialize(ChatMsg.System, Language.Universal, null, null, text);
+            SendZoneMessage(zone, data, self, team);
+        }
+
         public void SetZoneMusic(uint zoneId, uint musicId)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))
@@ -3116,15 +3144,7 @@ namespace Game.Maps
 
             _zoneDynamicInfo[zoneId].MusicId = musicId;
 
-            var players = GetPlayers();
-            if (!players.Empty())
-            {
-                PlayMusic playMusic = new(musicId);
-
-                foreach (var player in players)
-                    if (player.GetZoneId() == zoneId && !player.HasAuraType(AuraType.ForceWeather))
-                        player.SendPacket(playMusic);
-            }
+            SendZoneMessage(zoneId, new PlayMusic(musicId));
         }
 
         public Weather GetOrGenerateZoneDefaultWeather(uint zoneId)
@@ -3139,7 +3159,7 @@ namespace Game.Maps
             ZoneDynamicInfo info = _zoneDynamicInfo[zoneId];
             if (info.DefaultWeather == null)
             {
-                info.DefaultWeather = new Weather(zoneId, weatherData);
+                info.DefaultWeather = new Weather(this, zoneId, weatherData);
                 info.DefaultWeather.ReGenerate();
                 info.DefaultWeather.UpdateWeather();
             }
@@ -3178,7 +3198,7 @@ namespace Game.Maps
 
                 foreach (var player in players)
                 {
-                    if (player.GetZoneId() == zoneId)
+                    if (player.GetZoneId() == zoneId && !player.HasAuraType(AuraType.ForceWeather))
                         player.SendPacket(weather);
                 }
             }
@@ -3196,26 +3216,22 @@ namespace Game.Maps
             // set new override (if any)
             if (overrideLightId != 0)
             {
-                ZoneDynamicInfo.LightOverride lightOverride = new();
-                lightOverride.AreaLightId = areaLightId;
-                lightOverride.OverrideLightId = overrideLightId;
-                lightOverride.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
+                ZoneDynamicInfo.LightOverride lightOverride = new()
+                {
+                    AreaLightId = areaLightId,
+                    OverrideLightId = overrideLightId,
+                    TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds
+                };
                 info.LightOverrides.Add(lightOverride);
             }
 
-            var players = GetPlayers();
-
-            if (!players.Empty())
+            OverrideLight overrideLight = new()
             {
-                Networking.Packets.OverrideLight overrideLight = new();
-                overrideLight.AreaLightID = areaLightId;
-                overrideLight.OverrideLightID = overrideLightId;
-                overrideLight.TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds;
-
-                foreach (var player in players)
-                    if (player.GetZoneId() == zoneId)
-                        player.SendPacket(overrideLight);
-            }
+                AreaLightID = areaLightId,
+                OverrideLightID = overrideLightId,
+                TransitionMilliseconds = (uint)transitionTime.TotalMilliseconds
+            };
+            SendZoneMessage(zoneId, overrideLight);
         }
 
         public void UpdateAreaDependentAuras()

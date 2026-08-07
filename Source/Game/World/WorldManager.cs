@@ -1570,31 +1570,6 @@ namespace Game
             }
         }
 
-        // Send a packet to all players (or players selected team) in the zone (except self if mentioned)
-        public bool SendZoneMessage(uint zone, ServerPacket packet, WorldSession self = null, Team team = 0)
-        {
-            bool foundPlayerToSend = false;
-            foreach (var session in m_sessions.Values)
-            {
-                if (session != null && session.GetPlayer() != null && session.GetPlayer().IsInWorld &&
-                    session.GetPlayer().GetZoneId() == zone && session != self && (team == 0 || session.GetPlayer().GetTeam() == team))
-                {
-                    session.SendPacket(packet);
-                    foundPlayerToSend = true;
-                }
-            }
-
-            return foundPlayerToSend;
-        }
-
-        // Send a System Message to all players in the zone (except self if mentioned)
-        public void SendZoneText(uint zone, string text, WorldSession self = null, Team team = 0)
-        {
-            ChatPkt data = new();
-            data.Initialize(ChatMsg.System, Language.Universal, null, null, text);
-            SendZoneMessage(zone, data, self, team);
-        }
-
         public void KickAll()
         {
             m_QueuedPlayer.Clear();                                 // prevent send queue update packet and login queued sessions
