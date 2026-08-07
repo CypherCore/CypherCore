@@ -1148,7 +1148,10 @@ namespace Game.Entities
             UpdateParryPercentage();
             UpdateDodgePercentage();
             UpdateSpellDamageAndHealingBonus();
-            UpdateManaRegen();
+            UpdatePowerRegen(PowerType.Mana);
+            UpdatePowerRegen(PowerType.Rage);
+            UpdatePowerRegen(PowerType.Energy);
+            UpdatePowerRegen(PowerType.RunicPower);
             UpdateExpertise(WeaponAttackType.BaseAttack);
             UpdateExpertise(WeaponAttackType.OffAttack);
             RecalculateRating(CombatRating.ArmorPenetration);
@@ -1197,7 +1200,7 @@ namespace Game.Entities
 
             UpdateArmor();
             UpdateSpellDamageAndHealingBonus();
-            UpdateManaRegen();
+            UpdatePowerRegen(PowerType.Mana);
 
             return true;
         }
@@ -1305,27 +1308,126 @@ namespace Game.Entities
             UpdateCritPercentage(WeaponAttackType.RangedAttack);
         }
 
-        public void UpdateManaRegen()
+        WorldCfg[] PowerRegenInfo =
         {
-            uint manaIndex = GetPowerIndex(PowerType.Mana);
-            if (manaIndex == (int)PowerType.Max)
+            WorldCfg.RatePowerMana,
+            WorldCfg.RatePowerRageLoss,
+            WorldCfg.RatePowerFocus,
+            WorldCfg.RatePowerEnergy,
+            WorldCfg.RatePowerComboPointsLoss,
+            0, // runes
+            WorldCfg.RatePowerRunicPowerLoss,
+            WorldCfg.RatePowerSoulShards,
+            WorldCfg.RatePowerLunarPower,
+            WorldCfg.RatePowerHolyPower,
+            0, // alternate
+            WorldCfg.RatePowerMaelstrom,
+            WorldCfg.RatePowerChi,
+            WorldCfg.RatePowerInsanity,
+            0, // burning embers, unused
+            0, // demonic fury, unused
+            WorldCfg.RatePowerArcaneCharges,
+            WorldCfg.RatePowerFury,
+            WorldCfg.RatePowerPain,
+            WorldCfg.RatePowerEssence,
+            0, // runes
+            0, // runes
+            0, // runes
+            0, // alternate
+            0, // alternate
+            0, // alternate
+        };
+
+        public void UpdatePowerRegen(PowerType power)
+        {
+            uint powerIndex = GetPowerIndex(power);
+            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
-            // Get base of Mana Pool in sBaseMPGameTable
-            uint basemana;
-            Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out basemana);
-            float base_regen = basemana / 100.0f;
+            // TODO: updating haste should update UnitData::PowerRegenFlatModifier for certain power types
+            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
+            if (powerType == null)
+                return;
 
-            base_regen += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Mana);
+            float result_regen = powerType.RegenPeace;  // Out-of-combat / without last mana use effect
+            float result_regen_interrupted = powerType.RegenCombat; // In combat / with last mana use effect
+            float pct_modifier = 1.0f;                    // Config rate or any other modifiers
+            float flat_modifier = 0.0f;                    // other modifiers
 
-            // Apply PCT bonus from SPELL_AURA_MOD_POWER_REGEN_PERCENT
-            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Mana);
+            /// @todo possible use of miscvalueb instead of amount
+            if (HasAuraTypeWithValue(AuraType.PreventRegeneratePower, (int)power))
+            {
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)powerIndex), -powerType.RegenPeace);
+                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)powerIndex), -powerType.RegenCombat);
+                return;
+            }
 
-            // Apply PCT bonus from SPELL_AURA_MOD_MANA_REGEN_PCT
-            base_regen *= GetTotalAuraMultiplierByMiscValue(AuraType.ModManaRegenPct, (int)PowerType.Mana);
+            switch (power)
+            {
+                case PowerType.Mana:
+                {
+                    // Get base of Mana Pool in sBaseMPGameTable
+                    Global.ObjectMgr.GetPlayerClassLevelInfo(GetClass(), GetLevel(), out uint basemana);
+                    float base_regen = (float)basemana / 100.0f;
 
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)manaIndex), base_regen);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)manaIndex), base_regen);
+                    base_regen *= GetTotalAuraMultiplier(AuraType.ModManaRegenPct);
+
+                    result_regen += base_regen;
+                    result_regen_interrupted += base_regen;
+                    break;
+                }
+                case PowerType.Runes:
+                {
+                    float base_regen = (float)(1 * Time.InMilliseconds) / (float)GetRuneBaseCooldown();
+
+                    result_regen = base_regen;
+                    result_regen_interrupted = base_regen;
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            if (PowerRegenInfo[(int)power] != 0)
+                pct_modifier *= WorldConfig.GetFloatValue(PowerRegenInfo[(int)power]); // Config rate
+
+            pct_modifier *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
+            flat_modifier += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) / 5.0f;
+
+            result_regen *= pct_modifier;
+            result_regen_interrupted *= pct_modifier;
+
+            result_regen += flat_modifier;
+            result_regen_interrupted += flat_modifier;
+
+            // Unit fields contain an offset relative to the base power regeneration.
+            result_regen -= powerType.RegenPeace;
+            result_regen_interrupted -= powerType.RegenCombat;
+
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)powerIndex), result_regen);
+            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)powerIndex), result_regen_interrupted);
+        }
+
+        float GetPowerRegen(PowerType power)
+        {
+            uint powerIndex = GetPowerIndex(power);
+            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+                return 0.0f;
+
+            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
+            if (powerType == null)
+                return 0.0f;
+
+            if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMilliseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
+                return 0.0f;
+
+            bool interrupted = HasAuraType(AuraType.InterruptRegen) ||
+                                (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMilliseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now()) ||
+                                IsInCombat();
+
+            float regen = interrupted ? powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[(int)powerIndex] : powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex];
+
+            return regen;
         }
 
         public void UpdateSpellDamageAndHealingBonus()
@@ -1594,7 +1696,7 @@ namespace Game.Entities
                             ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
                             if (GetClass() == Class.DeathKnight)
-                                UpdateAllRunesRegen();
+                                UpdatePowerRegen(PowerType.Runes);
                             break;
                         case CombatRating.HasteRanged:
                             ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, oldVal, false);
@@ -2082,7 +2184,7 @@ namespace Game.Entities
         void ApplyManaRegenBonus(int amount, bool apply)
         {
             _ModifyUInt32(apply, ref m_baseManaRegen, ref amount);
-            UpdateManaRegen();
+            UpdatePowerRegen(PowerType.Mana);
         }
 
         void ApplyHealthRegenBonus(int amount, bool apply)

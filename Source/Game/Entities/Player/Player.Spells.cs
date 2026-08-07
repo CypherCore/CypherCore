@@ -3388,36 +3388,6 @@ namespace Game.Entities
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), 0.0f);
         }
 
-        public void UpdateEnergyRegen()
-        {
-            uint energyIndex = GetPowerIndex(PowerType.Energy);
-            if (energyIndex == (int)PowerType.Max)
-                return;
-
-            float regenPerSecond = 10.0f;   // +10 energy per second
-            regenPerSecond *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)PowerType.Energy);
-            regenPerSecond += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)PowerType.Energy) / (float)(5 * Time.InMilliseconds);
-
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)energyIndex), regenPerSecond - 10.0f);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)energyIndex), regenPerSecond - 10.0f);
-        }
-
-        public void UpdateAllRunesRegen()
-        {
-            if (GetClass() != Class.DeathKnight)
-                return;
-
-            uint runeIndex = GetPowerIndex(PowerType.Runes);
-            if (runeIndex == (int)PowerType.Max)
-                return;
-
-            PowerTypeRecord runeEntry = Global.DB2Mgr.GetPowerTypeEntry(PowerType.Runes);
-
-            uint cooldown = GetRuneBaseCooldown();
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenPeace);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), (float)(1 * Time.InMilliseconds) / cooldown - runeEntry.RegenCombat);
-        }
-
         public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
 
         public bool CanNoReagentCast(SpellInfo spellInfo)

@@ -3773,68 +3773,12 @@ namespace Game.Entities
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
-            // @todo possible use of miscvalueb instead of amount
-            if (HasAuraTypeWithValue(AuraType.PreventRegeneratePower, (int)power))
-                return;
-
-            int curValue = GetPower(power);
-
-            // TODO: updating haste should update UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER for certain power types
             PowerTypeRecord powerType = DB2Mgr.GetPowerTypeEntry(power);
             if (powerType == null)
                 return;
 
-            float addvalue;
-
-            if (!IsInCombat())
-            {
-                if (powerType.HasFlag(PowerTypeFlags.UseRegenInterrupt) && m_regenInterruptTimestamp + TimeSpan.FromMicroseconds(powerType.RegenInterruptTimeMS) >= GameTime.Now())
-                    return;
-
-                addvalue = (powerType.RegenPeace + m_unitData.PowerRegenFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
-            }
-            else
-                addvalue = (powerType.RegenCombat + m_unitData.PowerRegenInterruptedFlatModifier[(int)powerIndex]) * 0.001f * RegenTimer;
-
-            WorldCfg[] RatesForPower =
-            {
-                WorldCfg.RatePowerMana,
-                WorldCfg.RatePowerRageLoss,
-                WorldCfg.RatePowerFocus,
-                WorldCfg.RatePowerEnergy,
-                WorldCfg.RatePowerComboPointsLoss,
-                0, // runes
-                WorldCfg.RatePowerRunicPowerLoss,
-                WorldCfg.RatePowerSoulShards,
-                WorldCfg.RatePowerLunarPower,
-                WorldCfg.RatePowerHolyPower,
-                0, // alternate
-                WorldCfg.RatePowerMaelstrom,
-                WorldCfg.RatePowerChi,
-                WorldCfg.RatePowerInsanity,
-                0, // burning embers, unused
-                0, // demonic fury, unused
-                WorldCfg.RatePowerArcaneCharges,
-                WorldCfg.RatePowerFury,
-                WorldCfg.RatePowerPain,
-                WorldCfg.RatePowerEssence,
-                0, // runes
-                0, // runes
-                0, // runes
-                0, // alternate
-                0, // alternate
-                0, // alternate
-            };
-
-            if (RatesForPower[(int)power] != 0)
-                addvalue *= WorldConfig.GetFloatValue(RatesForPower[(int)power]);
-
-            // Mana regen calculated in Player::UpdateManaRegen(), energy regen calculated in Player::UpdateEnergyRegen()
-            if (power != PowerType.Mana && power != PowerType.Energy)
-            {
-                addvalue *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
-                addvalue += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) * (float)RegenTimer / (float)(5 * Time.InMilliseconds);
-            }
+            int curValue = GetPower(power);
+            float addvalue = GetPowerRegen(power) * 0.001f * RegenTimer;
 
             int minPower = powerType.MinPower;
             int maxPower = GetMaxPower(power);
