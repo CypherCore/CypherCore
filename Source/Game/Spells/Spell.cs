@@ -2045,11 +2045,14 @@ namespace Game.Spells
             // If target reflect spell back to caster
             if (targetInfo.MissCondition == SpellMissInfo.Reflect)
             {
-                // Calculate reflected spell result on caster (shouldn't be able to reflect gameobject spells)
+                // Shouldn't be able to reflect gameobject spells
                 Unit unitCaster = m_caster.ToUnit();
-                targetInfo.ReflectResult = unitCaster.SpellHitResult(unitCaster, m_spellInfo,
-                    false /*can't reflect twice*/,
-                    false /*immunity will be checked after complete EffectMask is known*/);
+                // Calculate reflected spell result on caster
+                targetInfo.ReflectResult = m_spellInfo.CheckTarget(target, unitCaster, Implicit) == SpellCastResult.SpellCastOk
+                    ? unitCaster.SpellHitResult(unitCaster, m_spellInfo,
+                        false /*can't reflect twice*/,
+                        false /*immunity will be checked after complete EffectMask is known*/)
+                    : SpellMissInfo.Immune;
 
                 if (targetInfo.ReflectResult == SpellMissInfo.Miss && target.HasAuraType(AuraType.ReflectSpells))
                     targetInfo.ReflectingSpellId = target.GetAuraEffectsByType(AuraType.ReflectSpells).First().GetId();
