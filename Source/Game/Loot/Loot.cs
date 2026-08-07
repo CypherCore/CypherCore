@@ -569,7 +569,7 @@ namespace Game.Loots
         public bool PlayerVote(Player player, RollVote vote)
         {
             ObjectGuid playerGuid = player.GetGUID();
-            if (!m_rollVoteMap.TryGetValue(playerGuid, out PlayerRollVote voter))
+            if (!m_rollVoteMap.TryGetValue(playerGuid, out PlayerRollVote voter) || voter.Vote != RollVote.NotEmitedYet)
                 return false;
 
             voter.Vote = vote;
