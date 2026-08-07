@@ -5061,7 +5061,9 @@ namespace Game.Spells
             if (target.GetTypeId() != TypeId.Player)
                 return;
 
-            target.ToPlayer().UpdatePowerRegen((PowerType)GetAmountAsInt()); /// @todo possible use of miscvalueb instead of amount
+            for (PowerType i = 0; i < PowerType.Max; ++i)
+                if ((GetMiscValue() & (1 << (int)i)) != 0)
+                    target.ToPlayer().UpdatePowerRegen(i);
         }
 
         [AuraEffectHandler(AuraType.SetVehicleId)]

@@ -1354,8 +1354,7 @@ namespace Game.Entities
             float pct_modifier = 1.0f;                    // Config rate or any other modifiers
             float flat_modifier = 0.0f;                    // other modifiers
 
-            /// @todo possible use of miscvalueb instead of amount
-            if (HasAuraTypeWithValue(AuraType.PreventRegeneratePower, (int)power))
+            if (GetAuraEffectsByType(AuraType.PreventRegeneratePower).Any(preventRegen => (preventRegen.GetMiscValue() & 1 << (int)power) != 0))
             {
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)powerIndex), -powerType.RegenPeace);
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)powerIndex), -powerType.RegenCombat);
