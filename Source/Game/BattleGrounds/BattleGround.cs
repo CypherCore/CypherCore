@@ -106,10 +106,7 @@ namespace Game.BattleGrounds
                     }
                     else
                     {
-                        if (Global.BattlegroundMgr.GetPrematureFinishTime() != 0 && (GetPlayersCountByTeam(Team.Alliance) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(Team.Horde) < GetMinPlayersPerTeam()))
-                            _ProcessProgress(diff);
-                        else if (m_PrematureCountDown)
-                            m_PrematureCountDown = false;
+                        _ProcessProgress(diff);
                     }
                     break;
                 case BattlegroundStatus.WaitLeave:
@@ -216,33 +213,40 @@ namespace Game.BattleGrounds
             // ***           Battleground BALLANCE SYSTEM            ***
             // *********************************************************
             // if less then minimum players are in on one side, then start premature finish timer
-            if (!m_PrematureCountDown)
+            bool broadcastStatusUpdate = false;
+            if (!Global.BattlegroundMgr.IsTesting() && Global.BattlegroundMgr.GetPrematureFinishTime() != 0 && (GetPlayersCountByTeam(Team.Alliance) < GetMinPlayersPerTeam() || GetPlayersCountByTeam(Team.Horde) < GetMinPlayersPerTeam()))
             {
-                m_PrematureCountDown = true;
-                m_PrematureCountDownTimer = Global.BattlegroundMgr.GetPrematureFinishTime();
+                if (!m_PrematureCountDown)
+                {
+                    m_PrematureCountDown = true;
+                    SetRemainingTime(Global.BattlegroundMgr.GetPrematureFinishTime());
+                    broadcastStatusUpdate = true;
+                }
+                else if ((m_EndTime -= (int)diff) < 0)
+                {
+                    // time's up!
+                    EndBattleground(GetPrematureWinner());
+                    m_PrematureCountDown = false;
+                }
             }
-            else if (m_PrematureCountDownTimer < diff)
+            else if (m_PrematureCountDown)
             {
-                // time's up!
-                EndBattleground(GetPrematureWinner());
                 m_PrematureCountDown = false;
+                SetRemainingTime(0);
+                broadcastStatusUpdate = true;
             }
-            else if (!Global.BattlegroundMgr.IsTesting())
+
+            if (broadcastStatusUpdate)
             {
-                uint newtime = m_PrematureCountDownTimer - diff;
-                // announce every Time.Minute
-                if (newtime > (Time.Minute * Time.InMilliseconds))
+                foreach (var (guid, playerData) in m_Players)
                 {
-                    if (newtime / (Time.Minute * Time.InMilliseconds) != m_PrematureCountDownTimer / (Time.Minute * Time.InMilliseconds))
-                        SendMessageToAll(CypherStrings.BattlegroundPrematureFinishWarning, ChatMsg.System, null, m_PrematureCountDownTimer / (Time.Minute * Time.InMilliseconds));
+                    Player player = _GetPlayer(guid, false, "_ProcessProgress");
+                    if (player != null)
+                    {
+                        Global.BattlegroundMgr.BuildBattlegroundStatusActive(out var battlefieldStatus, this, player, player.GetBattlegroundQueueIndex(playerData.queueTypeId), player.GetBattlegroundQueueJoinTime(playerData.queueTypeId), playerData.queueTypeId);
+                        player.SendPacket(battlefieldStatus);
+                    }
                 }
-                else
-                {
-                    //announce every 15 seconds
-                    if (newtime / (15 * Time.InMilliseconds) != m_PrematureCountDownTimer / (15 * Time.InMilliseconds))
-                        SendMessageToAll(CypherStrings.BattlegroundPrematureFinishWarningSecs, ChatMsg.System, null, m_PrematureCountDownTimer / Time.InMilliseconds);
-                }
-                m_PrematureCountDownTimer = newtime;
             }
         }
 
@@ -252,9 +256,6 @@ namespace Game.BattleGrounds
             // ***           Battleground STARTING SYSTEM            ***
             // *********************************************************
             ModifyStartDelayTime((int)diff);
-
-            if (!IsArena())
-                SetRemainingTime(300000);
 
             if (m_ResetStatTimer > 5000)
             {
@@ -376,9 +377,6 @@ namespace Game.BattleGrounds
                         Global.WorldMgr.SendWorldText(CypherStrings.BgStartedAnnounceWorld, GetName(), GetMinLevel(), GetMaxLevel());
                 }
             }
-
-            if (GetRemainingTime() > 0 && (m_EndTime -= (int)diff) > 0)
-                SetRemainingTime(GetRemainingTime() - diff);
         }
 
         void _ProcessLeave(uint diff)
@@ -1641,7 +1639,6 @@ namespace Game.BattleGrounds
         int m_StartDelayTime;
         bool m_IsRated;                                   // is this battle rated?
         bool m_PrematureCountDown;
-        uint m_PrematureCountDownTimer;
         uint m_LastPlayerPositionBroadcast;
 
         // Player lists

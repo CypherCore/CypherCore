@@ -766,11 +766,11 @@ namespace Framework.Constants
         DistArenaPointsEnd = 746, // 3.3.5 Reserved
         BgDisabled = 747,
         ArenaDisabled = 748,
-        //                                        = 749, See PinfoAccOs
-        BattlegroundPrematureFinishWarning = 750,       // "Not Enough Players. This Game Will Close In %U Mins."
-        BattlegroundPrematureFinishWarningSecs = 751,  // "Not Enough Players. This Game Will Close In %U Seconds."
-                                                       //                                        = 752, See PinfoAccIp
-                                                       // 753-755 - Free
+        //                                    = 749, see LANG_PINFO_ACC_OS
+        //                                    = 750,
+        //                                    = 751,
+        //                                    = 752, see LANG_PINFO_ACC_IP
+        // 753-755 - Free
 
         // Room For Bg/Arena                  = 773-784
         ArenaTesting = 785,
