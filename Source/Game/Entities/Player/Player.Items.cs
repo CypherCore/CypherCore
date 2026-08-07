@@ -3163,8 +3163,9 @@ namespace Game.Entities
                 count = 1;
 
             // cheating attempt
-            if (slot > ItemConst.MaxBagSize && slot != ItemConst.NullSlot)
-                return false;
+            if (slot != ItemConst.NullSlot)
+                if ((bag != InventorySlots.Bag0 && slot > ItemConst.MaxBagSize) || (bag == InventorySlots.Bag0 && slot >= InventorySlots.ItemEnd))
+                    return false;
 
             if (!IsAlive())
                 return false;
