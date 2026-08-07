@@ -1812,7 +1812,7 @@ namespace Game.Entities
                             level = (uint)Math.Min(Math.Max((ushort)level, levels.Value.MinLevel), levels.Value.MaxLevel);
                     }
 
-                    itemLevel = (uint)Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level);
+                    itemLevel = (uint)Math.Round(Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level));
                 }
             }
             else
@@ -1839,17 +1839,17 @@ namespace Game.Entities
                     uint currentBuild = ClientBuildHelper.GetMinorMajorBugfixVersionForBuild(currentRealm.Build);
 
                     // apply all squishes between items_squish and server_squish
-                    for (uint squishId = bonusData.ItemSquishEraID; squishId < CliDB.ItemSquishEraStorage.GetNumRows(); ++squishId)
+                    for (uint squishId = bonusData.ItemSquishEraID + 1; squishId < CliDB.ItemSquishEraStorage.GetNumRows(); ++squishId)
                     {
                         ItemSquishEraRecord squish = CliDB.ItemSquishEraStorage.LookupByKey(squishId);
-                        if (squish == null)
+                        if (squish == null || (squish.Flags & 0x1) != 0)
                             continue;
 
                         if (squish.Patch > currentBuild)
                             break;
 
                         if (squish.CurveID != 0)
-                            itemLevel = (uint)Global.DB2Mgr.GetCurveValueAt((uint)squish.CurveID, itemLevel);
+                            itemLevel = (uint)Math.Round(Global.DB2Mgr.GetCurveValueAt((uint)squish.CurveID, itemLevel));
                     }
                 }
             }
