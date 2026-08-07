@@ -604,12 +604,15 @@ namespace Game.Entities
         public void LeaveBattleground(bool teleportToEntryPoint = true)
         {
             Battleground bg = GetBattleground();
-            if (bg != null)
-            {
-                bg.RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
+            if (bg == null)
+                return;
 
-                // call after remove to be sure that player resurrected for correct cast
-                if (bg.IsBattleground() && !IsGameMaster() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundCastDeserter))
+            bg.RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
+
+            // call after remove to be sure that player resurrected for correct cast
+            if (bg.IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundCastDeserter))
+            {
+                if (!GetSession().HasPermission(RBACPermissions.NoBattleGroundDeserterDebuff))
                 {
                     if (bg.GetStatus() == BattlegroundStatus.InProgress || bg.GetStatus() == BattlegroundStatus.WaitJoin)
                     {
