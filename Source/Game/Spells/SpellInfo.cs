@@ -2154,6 +2154,7 @@ namespace Game.Spells
                 uint dispelImmunityMask = 0;
                 uint damageImmunityMask = 0;
                 byte otherImmunityMask = 0;
+                bool removeEffectsWithMechanic = false;
 
                 int miscVal = effect.MiscValue;
 
@@ -2185,6 +2186,7 @@ namespace Game.Spells
                             case 59752: // Every Man for Himself
                                 mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
                                 immuneInfo.AuraTypeImmune.Add(AuraType.UseNormalMovementSpeed);
+                                removeEffectsWithMechanic = true;
                                 break;
                             case 34471: // The Beast Within
                             case 19574: // Bestial Wrath
@@ -2196,6 +2198,7 @@ namespace Game.Spells
                             case 195710: // Honorable Medallion
                             case 208683: // Gladiator's Medallion
                                 mechanicImmunityMask |= (ulong)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                removeEffectsWithMechanic = true;
                                 break;
                             case 54508: // Demonic Empowerment
                                 mechanicImmunityMask |= (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root) | (1 << (int)Mechanics.Stun);
@@ -2207,6 +2210,10 @@ namespace Game.Spells
                                 mechanicImmunityMask |= 1ul << miscVal;
                                 break;
                         }
+
+                        // Special 100 ms duration spells - PvP trinket, Every Man for Himself and some other
+                        if (GetMaxDuration() == 100)
+                            removeEffectsWithMechanic = true;
                         break;
                     }
                     case AuraType.EffectImmunity:
@@ -2249,6 +2256,7 @@ namespace Game.Spells
                 immuneInfo.DispelImmuneMask = dispelImmunityMask;
                 immuneInfo.DamageSchoolMask = damageImmunityMask;
                 immuneInfo.OtherImmuneMask = otherImmunityMask;
+                immuneInfo.RemoveEffectsWithMechanic = removeEffectsWithMechanic;
 
                 _allowedMechanicMask |= immuneInfo.MechanicImmuneMask;
             }
@@ -2379,8 +2387,8 @@ namespace Game.Spells
                 {
                     // exception for purely snare mechanic (eg. hands of freedom)!
                     if (apply)
-                        target.RemoveAurasWithMechanic(mechanicImmunity, AuraRemoveMode.Default, Id);
-                    else
+                        target.RemoveAurasWithMechanic(mechanicImmunity, AuraRemoveMode.Default, Id, immuneInfo.RemoveEffectsWithMechanic);
+                    else if (!immuneInfo.RemoveEffectsWithMechanic)
                     {
                         List<Aura> aurasToUpdateTargets = new();
                         target.RemoveAppliedAuras(aurApp =>
@@ -5357,6 +5365,7 @@ namespace Game.Spells
         public uint DispelImmuneMask;
         public uint DamageSchoolMask;
         public byte OtherImmuneMask;
+        public bool RemoveEffectsWithMechanic;
 
         public List<AuraType> AuraTypeImmune = new();
         public List<SpellEffects> SpellEffectImmune = new();
