@@ -1816,6 +1816,13 @@ namespace Game
                 return;
             }
 
+            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
+            if (mapEntry != null && mapEntry.HasFlag(MapFlags.NoRaceChangeOnThisMap))
+            {
+                SendCharFactionChange(ResponseCodes.CharCreateRestrictedRaceclass, factionChangeInfo);
+                return;
+            }
+
             uint newTeamId = Player.TeamIdForRace(factionChangeInfo.RaceID);
             if (newTeamId == BattleGroundTeamId.Neutral)
             {
