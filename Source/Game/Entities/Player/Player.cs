@@ -517,9 +517,7 @@ namespace Game.Entities
                     m_hostileReferenceCheckTimer -= diff;
             }
 
-            //we should execute delayed teleports only for alive(!) players
-            //because we don't want player's ghost teleported from graveyard
-            if ((GetTeleportState() == TeleportState.DelayedTeleport || GetTeleportState() == TeleportState.DelayedWorldPort) && IsAlive())
+            if (GetTeleportState() == TeleportState.DelayedTeleport || GetTeleportState() == TeleportState.DelayedWorldPort)
             {
                 SetTeleportState(TeleportState.NotTeleporting); // skip state check inside TeleportTo
                 TeleportTo(teleportDest, m_teleport_options, m_teleportSpellId);
