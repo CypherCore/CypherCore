@@ -21,13 +21,14 @@ namespace Game.Entities
         public uint m_cinematicLength;
         public List<FlyByCamera> m_cinematicCamera;
         Position m_remoteSightPosition;
-        TempSummon m_CinematicObject;
+        ObjectGuid m_CinematicObjectGUID;
 
         public CinematicManager(Player playerref)
         {
             player = playerref;
             m_activeCinematicCameraIndex = -1;
             m_remoteSightPosition = new Position(0.0f, 0.0f, 0.0f);
+            m_CinematicObjectGUID = ObjectGuid.Empty;
         }
 
         public virtual void Dispose()
@@ -41,7 +42,7 @@ namespace Game.Entities
             m_activeCinematic = cinematic;
             m_activeCinematicCameraIndex = -1;
         }
-        
+
         public void NextCinematicCamera()
         {
             // Sanity check for active camera set
@@ -67,11 +68,12 @@ namespace Game.Entities
                         return;
 
                     player.GetMap().LoadGridForActiveObject(pos.GetPositionX(), pos.GetPositionY(), player);
-                    m_CinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
-                    if (m_CinematicObject != null)
+                    TempSummon cinematicObject = player.SummonCreature(1, pos.posX, pos.posY, pos.posZ, 0.0f, TempSummonType.TimedDespawn, TimeSpan.FromMinutes(5));
+                    if (cinematicObject != null)
                     {
-                        m_CinematicObject.SetActive(true);
-                        player.SetViewpoint(m_CinematicObject, true);
+                        m_CinematicObjectGUID = cinematicObject.GetGUID();
+                        cinematicObject.SetActive(true);
+                        player.SetViewpoint(cinematicObject, true);
                     }
 
                     // Get cinematic length
@@ -89,14 +91,16 @@ namespace Game.Entities
             m_cinematicCamera = null;
             m_activeCinematic = null;
             m_activeCinematicCameraIndex = -1;
-            if (m_CinematicObject != null)
+            if (!m_CinematicObjectGUID.IsEmpty())
             {
                 WorldObject vpObject = player.GetViewpoint();
                 if (vpObject != null)
-                    if (vpObject == m_CinematicObject)
-                        player.SetViewpoint(m_CinematicObject, false);
+                    if (vpObject.GetGUID() == m_CinematicObjectGUID)
+                        player.SetViewpoint(vpObject, false);
 
-                m_CinematicObject.AddObjectToRemoveList();
+                WorldObject cinematicObject = Global.ObjAccessor.GetWorldObject(player, m_CinematicObjectGUID);
+                if (cinematicObject != null)
+                    cinematicObject.AddObjectToRemoveList();
             }
         }
 
@@ -168,10 +172,17 @@ namespace Game.Entities
             Position interPosition = new(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)), lastPosition.posY +
                 (yDiff * ((float)interDiff / timeDiff)), lastPosition.posZ + (zDiff * ((float)interDiff / timeDiff)));
 
+            WorldObject vpObject = player != null ? player.GetViewpoint() : null;
+            if (vpObject == null || vpObject.GetGUID() != m_CinematicObjectGUID)
+            {
+                EndCinematic();
+                return;
+            }
+
             // Advance (at speed) to this position. The remote sight object is used
             // to send update information to player in cinematic
-            if (m_CinematicObject != null && interPosition.IsPositionValid())
-                m_CinematicObject.MonsterMoveWithSpeed(interPosition.posX, interPosition.posY, interPosition.posZ, 500.0f, false, true);
+            if (vpObject.IsCreature() && interPosition.IsPositionValid())
+                vpObject.ToCreature().MonsterMoveWithSpeed(interPosition.posX, interPosition.posY, interPosition.posZ, 500.0f, false, true);
 
             // If we never received an end packet 10 seconds after the final timestamp then force an end
             if (m_cinematicDiff > m_cinematicLength + 10 * Time.InMilliseconds)
