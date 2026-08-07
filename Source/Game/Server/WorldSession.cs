@@ -490,6 +490,68 @@ namespace Game
             tutorialsChanged &= ~TutorialsFlag.Changed;
         }
 
+        public void LoadInstanceTimeRestrictions(SQLResult result)
+        {
+            if (result.IsEmpty())
+                return;
+
+            var now = GameTime.GetSystemTime();
+            do
+            {
+                DateTime restrictionExpireTime = Time.UnixTimeToDateTime(result.Read<long>(1));
+                if (restrictionExpireTime > now)
+                    _instanceResetTimes.TryAdd(result.Read<uint>(0), restrictionExpireTime);
+            } while (result.NextRow());
+        }
+
+        public void SaveInstanceTimeRestrictions(SQLTransaction trans)
+        {
+            if (_instanceResetTimes.Empty())
+                return;
+
+            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ACCOUNT_INSTANCE_LOCK_TIMES);
+            stmt.AddValue(0, GetAccountId());
+            trans.Append(stmt);
+
+            foreach (var pair in _instanceResetTimes)
+            {
+                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ACCOUNT_INSTANCE_LOCK_TIMES);
+                stmt.AddValue(0, GetAccountId());
+                stmt.AddValue(1, pair.Key);
+                stmt.AddValue(2, Time.DateTimeToUnixTime(pair.Value));
+                trans.Append(stmt);
+            }
+        }
+
+        public bool UpdateAndCheckInstanceCount(uint instanceId)
+        {
+            UpdateInstanceEnterTimes();
+
+            if (_instanceResetTimes.Count < WorldConfig.GetIntValue(WorldCfg.MaxInstancesPerHour))
+                return true;
+
+            if (instanceId == 0)
+                return false;
+
+            return _instanceResetTimes.ContainsKey(instanceId);
+        }
+
+        public void AddInstanceEnterTime(uint instanceId, DateTime enterTime)
+        {
+            _instanceResetTimes.TryAdd(instanceId, enterTime + TimeSpan.FromHours(1));
+        }
+
+        public void UpdateInstanceEnterTimes()
+        {
+            var now = GameTime.GetSystemTime();
+
+            foreach (var itr in _instanceResetTimes.ToList())
+            {
+                if (itr.Value < now)
+                    _instanceResetTimes.Remove(itr.Key);
+            }
+        }
+
         void LoadPlayerDataAccount(SQLResult elementsResult, SQLResult flagsResult)
         {
             if (!elementsResult.IsEmpty())
@@ -956,6 +1018,7 @@ namespace Game
         {
             LoadAccountData(realmHolder.GetResult(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm), AccountDataTypes.GlobalCacheMask);
             LoadTutorialsData(realmHolder.GetResult(AccountInfoQueryLoad.TutorialsIndexPerRealm));
+            LoadInstanceTimeRestrictions(realmHolder.GetResult(AccountInfoQueryLoad.InstanceTimesPerRealm));
             _collectionMgr.LoadAccountToys(holder.GetResult(AccountInfoQueryLoad.GlobalAccountToys));
             _collectionMgr.LoadAccountHeirlooms(holder.GetResult(AccountInfoQueryLoad.GlobalAccountHeirlooms));
             _collectionMgr.LoadAccountMounts(holder.GetResult(AccountInfoQueryLoad.Mounts));
@@ -1141,6 +1204,8 @@ namespace Game
         uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
         TutorialsFlag tutorialsChanged;
 
+        Dictionary<uint /*instanceId*/, DateTime/*releaseTime*/> _instanceResetTimes;
+
         Array<byte> _realmListSecret = new(32);
         Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
         Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new();
@@ -1294,6 +1359,10 @@ namespace Game
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_TUTORIALS);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.TutorialsIndexPerRealm, stmt);
+
+            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_INSTANCELOCKTIMES);
+            stmt.AddValue(0, accountId);
+            SetQuery(AccountInfoQueryLoad.InstanceTimesPerRealm, stmt);
         }
     }
 
@@ -1360,6 +1429,7 @@ namespace Game
         ItemFavoriteAppearances,
         GlobalAccountDataIndexPerRealm,
         TutorialsIndexPerRealm,
+        InstanceTimesPerRealm,
         TransmogIllusions,
         TransmogOutfits,
         WarbandScenes,

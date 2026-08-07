@@ -1593,16 +1593,6 @@ namespace Game.Entities
             if (GetGroup() == null || !GetGroup().IsLeader(GetGUID()))
                 RemovePlayerFlag(PlayerFlags.GroupLeader);
         }
-        void _LoadInstanceTimeRestrictions(SQLResult result)
-        {
-            if (result.IsEmpty())
-                return;
-
-            do
-            {
-                _instanceResetTimes.Add(result.Read<uint>(0), result.Read<long>(1));
-            } while (result.NextRow());
-        }
         void _LoadEquipmentSets(SQLResult result)
         {
             if (result.IsEmpty())
@@ -3275,24 +3265,6 @@ namespace Game.Entities
                 trans.Append(stmt);
             }
         }
-        void _SaveInstanceTimeRestrictions(SQLTransaction trans)
-        {
-            if (_instanceResetTimes.Empty())
-                return;
-
-            PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_ACCOUNT_INSTANCE_LOCK_TIMES);
-            stmt.AddValue(0, GetSession().GetAccountId());
-            trans.Append(stmt);
-
-            foreach (var pair in _instanceResetTimes)
-            {
-                stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_ACCOUNT_INSTANCE_LOCK_TIMES);
-                stmt.AddValue(0, GetSession().GetAccountId());
-                stmt.AddValue(1, pair.Key);
-                stmt.AddValue(2, pair.Value);
-                trans.Append(stmt);
-            }
-        }
         void _SaveBGData(SQLTransaction trans)
         {
             PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_PLAYER_BGDATA);
@@ -3570,9 +3542,6 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), totalKills);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), todayKills);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.YesterdayHonorableKills), yesterdayKills);
-
-            _LoadInstanceTimeRestrictions(holder.GetResult(PlayerLoginQueryLoad.InstanceLockTimes));
-            UpdateInstanceEnterTimes();
 
             _LoadBGData(holder.GetResult(PlayerLoginQueryLoad.BgData));
 
@@ -4510,7 +4479,7 @@ namespace Game.Entities
             _SaveTransmogOutfits(characterTransaction);
             _SaveCharacterSelectOutfit(characterTransaction);
             GetSession().SaveTutorialsData(characterTransaction);                 // changed only while character in game
-            _SaveInstanceTimeRestrictions(characterTransaction);
+            GetSession().SaveInstanceTimeRestrictions(characterTransaction);
             _SaveCurrency(characterTransaction);
             _SaveCUFProfiles(characterTransaction);
             _SavePlayerData(characterTransaction);

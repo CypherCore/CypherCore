@@ -1754,7 +1754,7 @@ namespace Game.Maps
                 }
 
                 // players are only allowed to enter 10 instances per hour
-                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.UpdateAndCheckInstanceCount(instanceIdToCheck) && !player.IsDead())
+                if (!entry.HasFlag(MapFlags2.IgnoreInstanceFarmLimit) && entry.IsDungeon() && !player.GetSession().UpdateAndCheckInstanceCount(instanceIdToCheck) && !player.IsDead())
                     return new TransferAbortParams(TransferAbortReason.TooManyInstances);
             }
 
@@ -4985,7 +4985,7 @@ namespace Game.Maps
         public override bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
             // increase current instances (hourly limit)
-            player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
+            player.GetSession().AddInstanceEnterTime(GetInstanceId(), GameTime.GetSystemTime());
 
             MapDb2Entries entries = new(GetEntry(), GetMapDifficulty());
             if (entries.MapDifficulty.HasResetSchedule() && i_instanceLock != null && !i_instanceLock.IsNew())

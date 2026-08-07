@@ -67,7 +67,6 @@ namespace Game.Entities
         GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
         Dictionary<uint, uint> m_recentInstances = new();
-        Dictionary<uint, long> _instanceResetTimes = new();
         uint _pendingBindId;
         uint _pendingBindTimer;
         public bool m_InstanceValid;

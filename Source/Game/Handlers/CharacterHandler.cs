@@ -2929,10 +2929,6 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.QuestStatusRew, stmt);
 
-            stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_ACCOUNT_INSTANCELOCKTIMES);
-            stmt.AddValue(0, m_accountId);
-            SetQuery(PlayerLoginQueryLoad.InstanceLockTimes, stmt);
-
             stmt = CharacterDatabase.GetPreparedStatement(CharStatements.SEL_PLAYER_CURRENCY);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Currency, stmt);
@@ -3078,7 +3074,6 @@ namespace Game
         RandomBg,
         Banned,
         QuestStatusRew,
-        InstanceLockTimes,
         SeasonalQuestStatus,
         MonthlyQuestStatus,
         Currency,
