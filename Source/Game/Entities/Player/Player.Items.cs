@@ -227,17 +227,16 @@ namespace Game.Entities
         public void SetTradeData(TradeData data) { m_trade = data; }
         public Player GetTrader() { return m_trade?.GetTrader(); }
         public TradeData GetTradeData() { return m_trade; }
-        public void TradeCancel(bool sendback)
+        public void TradeCancel(bool sendback, TradeStatus status = TradeStatus.Cancelled)
         {
             if (m_trade != null)
             {
                 Player trader = m_trade.GetTrader();
 
-                // send yellow "Trade canceled" message to both traders
                 if (sendback)
-                    GetSession().SendCancelTrade();
+                    GetSession().SendCancelTrade(status);
 
-                trader.GetSession().SendCancelTrade();
+                trader.GetSession().SendCancelTrade(status);
 
                 // cleanup
                 m_trade = null;

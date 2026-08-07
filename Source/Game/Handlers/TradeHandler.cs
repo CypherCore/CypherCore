@@ -22,10 +22,16 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.IgnoreTrade)]
-        void HandleIgnoreTradeOpcode(IgnoreTrade packet) { }
+        void HandleIgnoreTradeOpcode(IgnoreTrade packet)
+        {
+            _player.TradeCancel(true, TradeStatus.PlayerIgnored);
+        }
 
         [WorldPacketHandler(ClientOpcodes.BusyTrade)]
-        void HandleBusyTradeOpcode(BusyTrade packet) { }
+        void HandleBusyTradeOpcode(BusyTrade packet)
+        {
+            _player.TradeCancel(true, TradeStatus.PlayerBusy);
+        }
 
         public void SendUpdateTrade(bool trader_data = true)
         {
@@ -127,7 +133,7 @@ namespace Game
                                 trader.GetName(), trader.GetSession().GetAccountId(), hisItems[i].GetTemplate().GetName(), hisItems[i].GetEntry(), hisItems[i].GetCount(),
                                 GetPlayer().GetName(), GetPlayer().GetSession().GetAccountId());
                         }
-                        
+
 
                         // adjust time (depends on /played)
                         if (hisItems[i].m_itemData.CreatePlayedTime != 0)
@@ -485,7 +491,7 @@ namespace Game
                             trader.GetName(), trader.GetSession().GetAccountId(), his_trade.GetMoney(), GetPlayer().GetName(), GetPlayer().GetSession().GetAccountId());
                     }
                 }
-                
+
 
                 // update money
                 GetPlayer().ModifyMoney(-(long)my_trade.GetMoney());
@@ -543,13 +549,13 @@ namespace Game
             SendTradeStatus(info);
         }
 
-        public void SendCancelTrade()
+        public void SendCancelTrade(TradeStatus status)
         {
             if (PlayerRecentlyLoggedOut() || PlayerLogout())
                 return;
 
             TradeStatusPkt info = new();
-            info.Status = TradeStatus.Cancelled;
+            info.Status = status;
             SendTradeStatus(info);
         }
 
@@ -648,14 +654,7 @@ namespace Game
                 return;
             }
 
-            if (pOther.GetSocial().HasIgnore(GetPlayer().GetGUID(), GetPlayer().GetSession().GetAccountGUID()))
-            {
-                info.Status = TradeStatus.PlayerIgnored;
-                SendTradeStatus(info);
-                return;
-            }
-
-            if ((pOther.GetTeam() != GetPlayer().GetTeam() || 
+            if ((pOther.GetTeam() != GetPlayer().GetTeam() ||
                 pOther.HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode) ||
                 GetPlayer().HasPlayerFlagEx(PlayerFlagsEx.MercenaryMode)) &&
                 (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideTrade) &&
