@@ -4175,8 +4175,7 @@ namespace Game.Entities
             // there must be SMSG.STOP_MIRROR_TIMER
 
             // the player cannot have a corpse already on current map, only bones which are not returned by GetCorpse
-            WorldLocation corpseLocation = GetCorpseLocation();
-            if (corpseLocation.GetMapId() == GetMapId())
+            if (GetCorpseLocation().GetMapId() == GetMapId())
             {
                 Log.outError(LogFilter.Player, "BuildPlayerRepop: player {0} ({1}) already has a corpse", GetName(), GetGUID().ToString());
                 return;

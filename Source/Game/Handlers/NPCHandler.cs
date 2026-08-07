@@ -271,9 +271,9 @@ namespace Game
 
             // get corpse nearest graveyard
             WorldSafeLocsEntry corpseGrave = null;
-            WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
             if (GetPlayer().HasCorpse())
             {
+                WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
                 corpseGrave = Global.ObjectMgr.GetClosestGraveyard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
             }
 
