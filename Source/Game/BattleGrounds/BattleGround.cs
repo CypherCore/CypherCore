@@ -1032,6 +1032,7 @@ namespace Game.BattleGrounds
                 group = new Group();
                 SetBgRaid(team, group);
                 group.Create(player);
+                Global.GroupMgr.AddGroup(group);
                 TimeSpan countdownMaxForBGType = TimeSpan.FromSeconds((int)StartDelayTimes[BattlegroundConst.EventIdFirst] / 1000);
                 if (_preparationStartTime != 0)
                     group.StartCountdown(CountdownTimerType.Pvp, countdownMaxForBGType, _preparationStartTime);
