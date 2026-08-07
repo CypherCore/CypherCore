@@ -309,10 +309,7 @@ namespace Game
                 return;
 
             if (GetPlayer().InBattleground())
-            {
-                SendPartyResult(PartyOperation.Invite, "", PartyResult.InviteRestricted);
                 return;
-            }
 
             /** error handling **/
             /********************/
