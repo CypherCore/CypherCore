@@ -248,12 +248,12 @@ namespace Game.Maps
             EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
             Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
 
-            if (!IsGridObjectDataLoaded(cell.GetGridX(), cell.GetGridY()))
+            if (!grid.IsGridObjectDataLoaded())
             {
                 Log.outDebug(LogFilter.Maps, "Loading grid[{0}, {1}] for map {2} instance {3}", cell.GetGridX(),
                     cell.GetGridY(), GetId(), i_InstanceId);
 
-                SetGridObjectDataLoaded(true, cell.GetGridX(), cell.GetGridY());
+                grid.SetGridObjectDataLoaded(true);
 
                 LoadGridObjects(grid, cell);
 
@@ -524,7 +524,8 @@ namespace Game.Maps
 
         public bool IsGridLoaded(GridCoord p)
         {
-            return (GetGrid(p.X_coord, p.Y_coord) != null && IsGridObjectDataLoaded(p.X_coord, p.Y_coord));
+            var grid = GetGrid(p.X_coord, p.Y_coord);
+            return grid != null && grid.IsGridObjectDataLoaded();
         }
 
         void VisitNearbyCellsOf(WorldObject obj, Visitor gridVisitor, Visitor worldVisitor)
@@ -3573,16 +3574,6 @@ namespace Game.Maps
             return i_grids[x][y];
         }
 
-        private bool IsGridObjectDataLoaded(uint x, uint y)
-        {
-            return GetGrid(x, y).IsGridObjectDataLoaded();
-        }
-
-        void SetGridObjectDataLoaded(bool pLoaded, uint x, uint y)
-        {
-            GetGrid(x, y).SetGridObjectDataLoaded(pLoaded);
-        }
-
         public AreaTrigger GetAreaTrigger(ObjectGuid guid)
         {
             if (!guid.IsAreaTrigger())
@@ -3708,11 +3699,12 @@ namespace Game.Maps
             uint cell_x = cell.GetCellX();
             uint cell_y = cell.GetCellY();
 
-            if (!cell.NoCreate() || IsGridLoaded(new GridCoord(x, y)))
-            {
+            if (!cell.NoCreate())
                 EnsureGridLoaded(cell);
-                GetGrid(x, y).VisitGrid(cell_x, cell_y, visitor);
-            }
+
+            var grid = GetGrid(x, y);
+            if (grid != null && grid.IsGridObjectDataLoaded())
+                grid.VisitGrid(cell_x, cell_y, visitor);
         }
 
         public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, TimeSpan duration = default, WorldObject summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default, SmoothPhasingInfo smoothPhasingInfo = null)
