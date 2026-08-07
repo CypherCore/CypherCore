@@ -3733,8 +3733,8 @@ namespace Game.Spells
                         return;
             }
 
-            // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT/STUN
-            if (unitTarget.HasUnitState(UnitState.Root | UnitState.Stunned))
+            // Spells with SPELL_EFFECT_KNOCK_BACK (like Thunderstorm) can't knockback target if target has ROOT
+            if (unitTarget.HasUnitState(UnitState.Root))
                 return;
 
             float ratio = 0.1f;
