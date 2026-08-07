@@ -5793,7 +5793,7 @@ namespace Game.Entities
                 SetPlayerFlag(PlayerFlags.AFK);
 
             // afk player not allowed in Battleground
-            if (!IsGameMaster() && IsAFK() && InBattleground() && !InArena())
+            if (!GetSession().HasPermission(RBACPermissions.CanAfkOnBattleGround) && IsAFK() && InBattleground() && !InArena())
                 LeaveBattleground();
         }
         public void ToggleDND()

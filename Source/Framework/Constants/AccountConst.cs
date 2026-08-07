@@ -103,6 +103,7 @@ namespace Framework.Constants
         MayCheckOwnEmail = 50,
         AllowTwoSideTrade = 51,
         NoBattleGroundDeserterDebuff = 52,
+        CanAfkOnBattleGround = 53,
 
         // Free Space For Core Permissions (Till 149)
         // Roles (Permissions With Delegated Permissions) Use 199 And Descending
