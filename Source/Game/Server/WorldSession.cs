@@ -153,7 +153,7 @@ namespace Game
                     guild.HandleMemberLogout(this);
 
                 // Remove pet
-                _player.RemovePet(null, PetSaveMode.AsCurrent, true);
+                _player.RemovePet(null, PetSaveMode.AsCurrent);
 
                 ///- Release battle pet journal lock
                 if (_battlePetMgr.HasJournalLock())
