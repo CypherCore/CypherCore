@@ -80,38 +80,6 @@ namespace Scripts.Events
 
     }
 
-    [Script("spell_gen_slow_roasted_turkey", SpellIds.WellFedApTrigger)]
-    [Script("spell_gen_cranberry_chutney", SpellIds.WellFedZmTrigger)]
-    [Script("spell_gen_spice_bread_stuffing", SpellIds.WellFedHitTrigger)]
-    [Script("spell_gen_pumpkin_pie", SpellIds.WellFedSpiritTrigger)]
-    [Script("spell_gen_candied_sweet_potato", SpellIds.WellFedHasteTrigger)]
-    class spell_pilgrims_bounty_buff_food : AuraScript
-    {
-        uint _triggeredSpellId;
-
-        public spell_pilgrims_bounty_buff_food(uint triggeredSpellId)
-        {
-            _triggeredSpellId = triggeredSpellId;
-        }
-
-        void HandleTriggerSpell(AuraEffect aurEff)
-        {
-            PreventDefaultAction();
-            if (_handled)
-                return;
-
-            _handled = true;
-            GetTarget().CastSpell(GetTarget(), _triggeredSpellId, true);
-        }
-
-        public override void Register()
-        {
-            OnEffectPeriodic.Add(new(HandleTriggerSpell, 2, AuraType.PeriodicTriggerSpell));
-        }
-
-        bool _handled;
-    }
-
     [Script]
     class spell_pilgrims_bounty_feast_on : SpellScript
     {

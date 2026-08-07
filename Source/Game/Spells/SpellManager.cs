@@ -4422,6 +4422,25 @@ namespace Game.Entities
                 spellInfo.Attributes |= SpellAttr0.NoImmunities;
             });
 
+            ApplySpellFix(
+            [
+                61874, // Noblegarden Chocolate
+                71068, // Sweet Surprise
+                71071, // Very Berry Cream
+                71073, // Dark Desire
+                71074  // Buttermilk Delight
+            ], spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 1, spellEffectInfo =>
+                {
+                    spellEffectInfo.Effect = SpellEffects.ApplyAura;
+                    spellEffectInfo.TargetA = new SpellImplicitTargetInfo(Targets.UnitCaster);
+                    spellEffectInfo.ApplyAuraName = AuraType.PeriodicTriggerSpell;
+                    spellEffectInfo.ApplyAuraPeriod = 10 * Time.InMilliseconds;
+                    spellEffectInfo.TriggerSpell = 24870;
+                });
+            });
+
             // Horde / Alliance switch (BG mercenary system)
             ApplySpellFix(new[] { 195838, 195843 }, spellInfo =>
             {
