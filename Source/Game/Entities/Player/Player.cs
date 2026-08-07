@@ -705,13 +705,6 @@ namespace Game.Entities
                 }
             }
 
-            if (m_DelayedOperations.HasAnyFlag(PlayerDelayedOperations.BGGroupRestore))
-            {
-                Group g = GetGroup();
-                if (g != null)
-                    g.SendUpdateToPlayer(GetGUID());
-            }
-
             //we have executed ALL delayed ops, so clear the flag
             m_DelayedOperations = 0;
         }
@@ -2233,7 +2226,6 @@ namespace Game.Entities
 
             ScheduleDelayedOperation(PlayerDelayedOperations.BGMountRestore);
             ScheduleDelayedOperation(PlayerDelayedOperations.BGTaxiRestore);
-            ScheduleDelayedOperation(PlayerDelayedOperations.BGGroupRestore);
             return TeleportTo(m_bgData.joinPos);
         }
 

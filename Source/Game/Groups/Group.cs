@@ -783,40 +783,47 @@ namespace Game.Groups
         public void SendUpdate()
         {
             foreach (var member in m_memberSlots)
-                SendUpdateToPlayer(member.guid, member);
+            {
+                Player player = Global.ObjAccessor.FindConnectedPlayer(member.guid);
+                if (player == null)
+                    continue;
+
+                SendUpdateToPlayer(player, member);
+            }
         }
 
-        public void SendUpdateToPlayer(ObjectGuid playerGUID, MemberSlot memberSlot = null)
+        public void SendUpdateToPlayer(Player player, MemberSlot memberSlot = null)
         {
-            Player player = Global.ObjAccessor.FindPlayer(playerGUID);
-
-            if (player == null || player.GetSession() == null || player.GetGroup() != this)
+            if (player.GetGroup() != this)
                 return;
 
             // if MemberSlot wasn't provided
             if (memberSlot == null)
             {
-                var slot = _getMemberSlot(playerGUID);
+                var slot = _getMemberSlot(player.GetGUID());
                 if (slot == null) // if there is no MemberSlot for such a player
                     return;
 
                 memberSlot = slot;
             }
-            PartyUpdate partyUpdate = new();
 
-            partyUpdate.PartyFlags = m_groupFlags;
-            partyUpdate.PartyIndex = (byte)m_groupCategory;
-            partyUpdate.PartyType = IsCreated() ? GroupType.Normal : GroupType.None;
+            PartyUpdate partyUpdate = new()
+            {
+                PartyFlags = m_groupFlags,
+                PartyIndex = (byte)m_groupCategory,
+                PartyType = IsCreated() ? GroupType.Normal : GroupType.None,
 
-            partyUpdate.PartyGUID = m_guid;
-            partyUpdate.LeaderGUID = m_leaderGuid;
-            partyUpdate.LeaderFactionGroup = m_leaderFactionGroup;
+                PartyGUID = m_guid,
+                LeaderGUID = m_leaderGuid,
+                LeaderFactionGroup = m_leaderFactionGroup,
 
-            partyUpdate.SequenceNum = player.NextGroupUpdateSequenceNumber(m_groupCategory);
+                SequenceNum = player.NextGroupUpdateSequenceNumber(m_groupCategory),
 
-            partyUpdate.PingRestriction = m_pingRestriction;
+                PingRestriction = m_pingRestriction,
 
-            partyUpdate.MyIndex = -1;
+                MyIndex = -1
+            };
+
             byte index = 0;
             for (var i = 0; i < m_memberSlots.Count; ++i, ++index)
             {
@@ -826,19 +833,20 @@ namespace Game.Groups
 
                 Player memberPlayer = Global.ObjAccessor.FindConnectedPlayer(member.guid);
 
-                PartyPlayerInfo playerInfos = new();
+                PartyPlayerInfo playerInfos = new()
+                {
+                    GUID = member.guid,
+                    Name = member.name,
+                    Class = member._class,
 
-                playerInfos.GUID = member.guid;
-                playerInfos.Name = member.name;
-                playerInfos.Class = member._class;
+                    FactionGroup = Player.GetFactionGroupForRace(member.race),
 
-                playerInfos.FactionGroup = Player.GetFactionGroupForRace(member.race);
+                    Connected = memberPlayer?.GetSession() != null && !memberPlayer.GetSession().PlayerLogout(),
 
-                playerInfos.Connected = memberPlayer?.GetSession() != null && !memberPlayer.GetSession().PlayerLogout();
-
-                playerInfos.Subgroup = member.group;         // groupid
-                playerInfos.Flags = (byte)member.flags;            // See enum GroupMemberFlags
-                playerInfos.RolesAssigned = (byte)member.roles;    // Lfg Roles
+                    Subgroup = member.group,         // groupid
+                    Flags = (byte)member.flags,            // See enum GroupMemberFlags
+                    RolesAssigned = (byte)member.roles    // Lfg Roles
+                };
 
                 partyUpdate.PlayerList.Add(playerInfos);
             }
@@ -846,11 +854,12 @@ namespace Game.Groups
             if (GetMembersCount() > 1)
             {
                 // LootSettings
-                PartyLootSettings lootSettings = new();
-
-                lootSettings.Method = (byte)m_lootMethod;
-                lootSettings.Threshold = (byte)m_lootThreshold;
-                lootSettings.LootMaster = m_lootMethod == LootMethod.MasterLoot ? m_masterLooterGuid : ObjectGuid.Empty;
+                PartyLootSettings lootSettings = new()
+                {
+                    Method = (byte)m_lootMethod,
+                    Threshold = (byte)m_lootThreshold,
+                    LootMaster = m_lootMethod == LootMethod.MasterLoot ? m_masterLooterGuid : ObjectGuid.Empty
+                };
 
                 partyUpdate.LootSettings = lootSettings;
 
@@ -901,13 +910,16 @@ namespace Game.Groups
 
         void SendUpdateDestroyGroupToPlayer(Player player)
         {
-            PartyUpdate partyUpdate = new();
-            partyUpdate.PartyFlags = GroupFlags.Destroyed;
-            partyUpdate.PartyIndex = (byte)m_groupCategory;
-            partyUpdate.PartyType = GroupType.None;
-            partyUpdate.PartyGUID = m_guid;
-            partyUpdate.MyIndex = -1;
-            partyUpdate.SequenceNum = player.NextGroupUpdateSequenceNumber(m_groupCategory);
+            PartyUpdate partyUpdate = new()
+            {
+                PartyFlags = GroupFlags.Destroyed,
+                PartyIndex = (byte)m_groupCategory,
+                PartyType = GroupType.None,
+                PartyGUID = m_guid,
+                MyIndex = -1,
+                SequenceNum = player.NextGroupUpdateSequenceNumber(m_groupCategory)
+            };
+
             player.SendPacket(partyUpdate);
         }
 
