@@ -35,7 +35,7 @@ namespace Game.Spells
     public enum AuraFlags
     {
         None = 0x00,
-        NoCaster = 0x01,
+        SelfCast = 0x01,
         Positive = 0x02,
         Duration = 0x04,
         Scalable = 0x08,
@@ -108,7 +108,7 @@ namespace Game.Spells
         void _InitFlags(Unit caster, uint effMask)
         {
             // mark as selfcasted if needed
-            _flags |= (GetBase().GetCasterGUID() == GetTarget().GetGUID()) ? AuraFlags.NoCaster : AuraFlags.None;
+            _flags |= (GetBase().GetCasterGUID() == GetTarget().GetGUID()) ? AuraFlags.SelfCast : AuraFlags.None;
 
             // aura is casted by self or an enemy
             // one negative effect and we know aura is negative
@@ -259,7 +259,7 @@ namespace Game.Spells
             auraData.Applications = aura.IsUsingStacks() ? aura.GetStackAmount() : aura.GetCharges();
             if (!aura.GetCasterGUID().IsUnit())
                 auraData.CastUnit = ObjectGuid.Empty; // optional data is filled in, but cast unit contains empty guid in packet
-            else if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
+            else if (!auraData.Flags.HasFlag(AuraFlags.SelfCast))
                 auraData.CastUnit = aura.GetCasterGUID();
 
             if (!aura.GetCastItemGUID().IsEmpty())
@@ -326,7 +326,7 @@ namespace Game.Spells
             return Convert.ToBoolean(_effectMask & (1 << (int)effect));
         }
         public bool IsPositive() { return _flags.HasAnyFlag(AuraFlags.Positive); }
-        bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.NoCaster); }
+        bool IsSelfcasted() { return _flags.HasAnyFlag(AuraFlags.SelfCast); }
         public uint GetEffectsToApply() { return _effectsToApply; }
 
         public void SetRemoveMode(AuraRemoveMode mode) { _removeMode = mode; }

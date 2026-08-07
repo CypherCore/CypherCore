@@ -708,6 +708,9 @@ namespace Game
                     return;
             }
 
+            if (petCastSpell.Cast.MoveUpdate != null)
+                HandleMovementOpcode(ClientOpcodes.MoveStop, petCastSpell.Cast.MoveUpdate);
+
             Spell spell = new(caster, spellInfo, triggerCastFlags);
             spell.m_fromClient = true;
             spell.m_misc.Data0 = petCastSpell.Cast.Misc[0];

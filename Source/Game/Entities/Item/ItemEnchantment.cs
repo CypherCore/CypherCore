@@ -141,6 +141,8 @@ namespace Game.Entities
                 case ItemQuality.Legendary:
                 case ItemQuality.Artifact:
                     return randPropPointsEntry.EpicF[propIndex];
+                default:
+                    break;
             }
 
             return 0;

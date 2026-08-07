@@ -3657,7 +3657,7 @@ namespace Game.Spells
                 unitCaster.AttackStop();
         }
 
-        static void FillSpellCastFailedArgs(dynamic packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, Player caster)
+        static void FillSpellCastFailedArgs(dynamic packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2)
         {
             packet.CastID = castId;
             packet.SpellID = (int)spellInfo.Id;
@@ -3706,30 +3706,26 @@ namespace Game.Spells
                     if (param1.HasValue)
                     {
                         packet.FailedArg1 = (int)param1;
-                        if (param2.HasValue)
-                            packet.FailedArg2 = (int)param2;
                     }
                     else
                     {
                         if (spellInfo.Totem[0] != 0)
                             packet.FailedArg1 = (int)spellInfo.Totem[0];
-                        if (spellInfo.Totem[1] != 0)
-                            packet.FailedArg2 = (int)spellInfo.Totem[1];
+                        else if (spellInfo.Totem[1] != 0)
+                            packet.FailedArg1 = (int)spellInfo.Totem[1];
                     }
                     break;
                 case SpellCastResult.TotemCategory:
                     if (param1.HasValue)
                     {
                         packet.FailedArg1 = (int)param1;
-                        if (param2.HasValue)
-                            packet.FailedArg2 = (int)param2;
                     }
                     else
                     {
                         if (spellInfo.TotemCategory[0] != 0)
                             packet.FailedArg1 = (int)spellInfo.TotemCategory[0];
-                        if (spellInfo.TotemCategory[1] != 0)
-                            packet.FailedArg2 = (int)spellInfo.TotemCategory[1];
+                        else if (spellInfo.TotemCategory[1] != 0)
+                            packet.FailedArg1 = (int)spellInfo.TotemCategory[1];
                     }
                     break;
                 case SpellCastResult.EquippedItemClass:
@@ -3749,61 +3745,34 @@ namespace Game.Spells
                 case SpellCastResult.TooManyOfItem:
                 {
                     if (param1.HasValue)
-                        packet.FailedArg1 = (int)param1;
-                    else
-                    {
-                        uint item = 0;
-                        foreach (var spellEffectInfo in spellInfo.GetEffects())
-                            if (spellEffectInfo.ItemType != 0)
-                                item = spellEffectInfo.ItemType;
-
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
-                        if (proto != null && proto.GetItemLimitCategory() != 0)
-                            packet.FailedArg1 = (int)proto.GetItemLimitCategory();
-                    }
+                        packet.FailedArg1 = (int)param1;                        // ItemLimitCategory id
                     break;
                 }
                 case SpellCastResult.PreventedByMechanic:
                     if (param1.HasValue)
                         packet.FailedArg1 = (int)param1;
-                    else
-                        packet.FailedArg1 = (int)spellInfo.GetAllEffectsMechanicMask();  // SpellMechanic.dbc id
                     break;
                 case SpellCastResult.NeedExoticAmmo:
                     if (param1.HasValue)
-                        packet.FailedArg1 = (int)param1;
-                    else
-                        packet.FailedArg1 = spellInfo.EquippedItemSubClassMask; // seems correct...
+                        packet.FailedArg1 = (int)param1;                        // weapon subclass id
                     break;
                 case SpellCastResult.NeedMoreItems:
                     if (param1.HasValue && param2.HasValue)
                     {
-                        packet.FailedArg1 = (int)param1;
-                        packet.FailedArg2 = (int)param2;
-                    }
-                    else
-                    {
-                        packet.FailedArg1 = 0;                              // Item id
-                        packet.FailedArg2 = 0;                              // Item count?
+                        packet.FailedArg1 = (int)param1;                        // Item id
+                        packet.FailedArg2 = (int)param2;                        // Item count
                     }
                     break;
                 case SpellCastResult.MinSkill:
                     if (param1.HasValue && param2.HasValue)
                     {
-                        packet.FailedArg1 = (int)param1;
-                        packet.FailedArg2 = (int)param2;
-                    }
-                    else
-                    {
-                        packet.FailedArg1 = 0;                              // SkillLine.dbc id
-                        packet.FailedArg2 = 0;                              // required skill value
+                        packet.FailedArg1 = (int)param1;                              // SkillLine.dbc id
+                        packet.FailedArg2 = (int)param2;                              // required skill value
                     }
                     break;
                 case SpellCastResult.FishingTooLow:
                     if (param1.HasValue)
-                        packet.FailedArg1 = (int)param1;
-                    else
-                        packet.FailedArg1 = 0;                              // required fishing skill
+                        packet.FailedArg1 = (int)param1;                              // required fishing skill
                     break;
                 case SpellCastResult.CustomError:
                     packet.FailedArg1 = (int)customError;
@@ -3815,43 +3784,9 @@ namespace Game.Spells
                         packet.FailedArg1 = 0;                              // Unknown
                     break;
                 case SpellCastResult.Reagents:
-                {
                     if (param1.HasValue)
                         packet.FailedArg1 = (int)param1;
-                    else
-                    {
-                        for (uint i = 0; i < SpellConst.MaxReagents; i++)
-                        {
-                            if (spellInfo.Reagent[i] <= 0)
-                                continue;
-
-                            uint itemid = (uint)spellInfo.Reagent[i];
-                            uint itemcount = spellInfo.ReagentCount[i];
-
-                            if (caster != null && !caster.HasItemCount(itemid, itemcount))
-                            {
-                                packet.FailedArg1 = (int)itemid;  // first missing item
-                                break;
-                            }
-                        }
-                    }
-
-                    if (param2.HasValue)
-                        packet.FailedArg2 = (int)param2;
-                    else if (!param1.HasValue)
-                    {
-                        foreach (var reagentsCurrency in spellInfo.ReagentsCurrency)
-                        {
-                            if (caster != null && !caster.HasCurrency(reagentsCurrency.CurrencyTypesID, reagentsCurrency.CurrencyCount))
-                            {
-                                packet.FailedArg1 = -1;
-                                packet.FailedArg2 = reagentsCurrency.CurrencyTypesID;
-                                break;
-                            }
-                        }
-                    }
                     break;
-                }
                 case SpellCastResult.CantUntalent:
                 {
                     Cypher.Assert(param1.HasValue);
@@ -3888,7 +3823,7 @@ namespace Game.Spells
 
             CastFailed castFailed = new();
             castFailed.Visual = m_SpellVisual;
-            FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
+            FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2);
             receiver.SendPacket(castFailed);
         }
 
@@ -3905,7 +3840,7 @@ namespace Game.Spells
                 result = SpellCastResult.DontReport;
 
             PetCastFailed petCastFailed = new();
-            FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, param1, param2, owner.ToPlayer());
+            FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, param1, param2);
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
@@ -3916,7 +3851,7 @@ namespace Game.Spells
 
             CastFailed packet = new();
             packet.Visual = spellVisual;
-            FillSpellCastFailedArgs(packet, castCount, spellInfo, result, customError, param1, param2, caster);
+            FillSpellCastFailedArgs(packet, castCount, spellInfo, result, customError, param1, param2);
             caster.SendPacket(packet);
         }
 

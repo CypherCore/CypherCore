@@ -2215,28 +2215,30 @@ namespace Game.Entities
             moveUpdateTeleport.Status = m_movementInfo;
             if (_movementForces != null)
                 moveUpdateTeleport.MovementForces = _movementForces.GetForces();
-            Unit broadcastSource = this;
 
             // should this really be the unit _being_ moved? not the unit doing the moving?
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
             {
-                MoveTeleport moveTeleport = new();
-                moveTeleport.MoverGUID = GetGUID();
-                moveTeleport.Pos = teleportLocation.Location;
-                moveTeleport.TransportGUID = teleportLocation.TransportGuid;
-                moveTeleport.Facing = teleportLocation.Location.GetOrientation();
-                moveTeleport.SequenceIndex = m_movementCounter++;
+                MoveTeleport moveTeleport = new()
+                {
+                    MoverGUID = GetGUID(),
+                    Pos = teleportLocation.Location,
+                    TransportGUID = teleportLocation.TransportGuid,
+                    Facing = teleportLocation.Location.GetOrientation(),
+                    SequenceIndex = m_movementCounter++
+                };
                 playerMover.SendPacket(moveTeleport);
 
-                broadcastSource = playerMover;
+                // Broadcast the packet to everyone except self.
+                SendMessageToSet(moveUpdateTeleport, playerMover);
             }
             else
             {
                 // This is the only packet sent for creatures which contains MovementInfo structure
                 // we do not update m_movementInfo for creatures so it needs to be done manually here
                 moveUpdateTeleport.Status.Guid = GetGUID();
-                moveUpdateTeleport.Status.Time = Time.GetMSTime();
+                moveUpdateTeleport.Status.Time = GameTime.GetGameTimeMS();
 
                 if (teleportLocation.TransportGuid.HasValue)
                 {
@@ -2252,10 +2254,9 @@ namespace Game.Entities
                     moveUpdateTeleport.Status.Pos.Relocate(teleportLocation.Location);
                     moveUpdateTeleport.Status.transport.Reset();
                 }
-            }
 
-            // Broadcast the packet to everyone except self.
-            broadcastSource.SendMessageToSet(moveUpdateTeleport, false);
+                SendMessageToSet(moveUpdateTeleport, true);
+            }
         }
     }
 }

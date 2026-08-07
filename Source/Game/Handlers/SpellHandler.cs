@@ -203,12 +203,12 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.CastSpell, Processing = PacketProcessing.ThreadSafe)]
-        void HandleCastSpell(CastSpell cast)
+        void HandleCastSpell(CastSpell castRequest)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, _player.GetMap().GetDifficultyID());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(castRequest.Cast.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Network, $"WorldSession::HandleCastSpellOpcode: attempted to cast a non-existing spell (Id: {cast.Cast.SpellID})");
+                Log.outError(LogFilter.Network, $"WorldSession::HandleCastSpellOpcode: attempted to cast a non-existing spell (Id: {castRequest.Cast.SpellID})");
                 return;
             }
 
@@ -228,13 +228,13 @@ namespace Game
                 castingUnit = GetPlayer();
             }
 
-            if (cast.Cast.MoveUpdate != null)
-                HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate);
+            if (castRequest.Cast.MoveUpdate != null)
+                HandleMovementOpcode(ClientOpcodes.MoveStop, castRequest.Cast.MoveUpdate);
 
             if (_player.CanRequestSpellCast(spellInfo, castingUnit))
-                _player.RequestSpellCast(new SpellCastRequest(cast.Cast, castingUnit.GetGUID()));
+                _player.RequestSpellCast(new SpellCastRequest(castRequest.Cast, castingUnit.GetGUID()));
             else
-                Spell.SendCastResult(_player, spellInfo, default, cast.Cast.CastID, SpellCastResult.SpellInProgress);
+                Spell.SendCastResult(_player, spellInfo, default, castRequest.Cast.CastID, SpellCastResult.SpellInProgress);
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelCast, Processing = PacketProcessing.ThreadSafe)]

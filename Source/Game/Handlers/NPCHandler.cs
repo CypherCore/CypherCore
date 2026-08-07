@@ -488,21 +488,23 @@ namespace Game
                     if (basePrice > 0)
                         price = Math.Max(1ul, price);
 
-                    item.MuID = (int)slot + 1;
-                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
+                    item.MuID = (int)slot + 1; // client expects counting to start at 1
                     item.Type = (int)vendorItem.Type;
-                    item.Quantity = leftInStock;
-                    item.StackCount = (int)itemTemplate.GetBuyCount();
-                    item.Price = (ulong)price;
-                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
-                    item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
 
                     item.Item.ItemID = vendorItem.item;
                     if (!vendorItem.BonusListIDs.Empty())
                     {
-                        item.Item.ItemBonus = new();
-                        item.Item.ItemBonus.BonusListIDs = vendorItem.BonusListIDs;
+                        item.Item.ItemBonus = new()
+                        {
+                            BonusListIDs = vendorItem.BonusListIDs
+                        };
                     }
+                    item.Quantity = leftInStock;
+                    item.Price = (ulong)price;
+                    item.StackCount = (int)itemTemplate.GetBuyCount();
+                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
+                    item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
+                    item.Refundable = itemTemplate.HasFlag(ItemFlags.ItemPurchaseRecord) && vendorItem.ExtendedCost != 0 && itemTemplate.GetMaxStackSize() == 1;
 
                     packet.Items.Add(item);
                 }
@@ -515,13 +517,11 @@ namespace Game
                     if (vendorItem.ExtendedCost == 0)
                         continue; // there's no price defined for currencies, only extendedcost is used
 
-
-
                     item.MuID = (int)slot + 1; // client expects counting to start at 1
-                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
-                    item.Item.ItemID = vendorItem.item;
                     item.Type = (int)vendorItem.Type;
+                    item.Item.ItemID = vendorItem.item;
                     item.StackCount = (int)vendorItem.maxcount;
+                    item.ExtendedCostID = (int)vendorItem.ExtendedCost;
                     item.DoNotFilterOnVendor = vendorItem.IgnoreFiltering;
 
                     packet.Items.Add(item);
