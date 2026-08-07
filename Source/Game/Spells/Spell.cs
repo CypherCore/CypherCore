@@ -5349,7 +5349,9 @@ namespace Game.Spells
                 if (!m_caster.IsUnit() || !m_caster.ToUnit().HasAuraTypeWithMiscvalue(AuraType.ProvideSpellFocus, (int)m_spellInfo.RequiresSpellFocus))
                 {
                     focusObject = SearchSpellFocus();
-                    if (focusObject == null)
+                    if (focusObject != null)
+                        m_focusObjectGUID = focusObject.GetGUID();
+                    else
                         return SpellCastResult.RequiresSpellFocus;
                 }
             }
@@ -7346,6 +7348,9 @@ namespace Game.Spells
                     m_originalCaster = null;
             }
 
+            if (!m_focusObjectGUID.IsEmpty())
+                focusObject = ObjectAccessor.GetGameObject(m_caster, m_focusObjectGUID);
+
             if (!m_castItemGUID.IsEmpty() && m_caster.IsTypeId(TypeId.Player))
             {
                 m_CastItem = m_caster.ToPlayer().GetItemByGuid(m_castItemGUID);
@@ -8623,6 +8628,7 @@ namespace Game.Spells
 
         // -------------------------------------------
         GameObject focusObject;
+        ObjectGuid m_focusObjectGUID;
 
         // Damage and healing in effects need just calculate
         public int m_damage;           // Damge   in effects count here
