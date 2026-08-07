@@ -243,7 +243,7 @@ namespace Game.Entities
 
             InitRunes();
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), GetClass() != Class.DeathKnight ? WorldConfig.GetUInt64Value(WorldCfg.StartPlayerMoney) : WorldConfig.GetUInt64Value(WorldCfg.StartDeathKnightPlayerMoney));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), GetStartMoney(createInfo.RaceId, createInfo.ClassId));
 
             // Played time
             m_Last_tick = GameTime.GetGameTime();
@@ -2252,6 +2252,35 @@ namespace Game.Entities
                 startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartGmLevel), startLevel);
 
             return startLevel;
+        }
+
+        public ulong GetStartMoney(Race race, Class playerClass)
+        {
+            ulong startMoney = 0;
+
+            switch (playerClass)
+            {
+                case Class.DeathKnight:
+                    if (race == Race.PandarenAlliance || race == Race.PandarenHorde)
+                        startMoney = WorldConfig.GetUInt64Value(WorldCfg.StartAlliedRaceMoney);
+                    else
+                        startMoney = WorldConfig.GetUInt64Value(WorldCfg.StartDeathKnightPlayerMoney);
+                    break;
+                case Class.DemonHunter:
+                    startMoney = WorldConfig.GetUInt64Value(WorldCfg.StartDemonHunterPlayerMoney);
+                    break;
+                case Class.Evoker:
+                    startMoney = WorldConfig.GetUInt64Value(WorldCfg.StartEvokerPlayerMoney);
+                    break;
+                default:
+                    startMoney = WorldConfig.GetUInt64Value(WorldCfg.StartPlayerMoney);
+                    break;
+            }
+
+            if (CliDB.ChrRacesStorage.LookupByKey(race).HasFlag(ChrRacesFlag.IsAlliedRace))
+                startMoney = WorldConfig.GetUInt64Value(WorldCfg.StartAlliedRaceMoney);
+
+            return startMoney;
         }
 
         public void HandleFall(MovementInfo movementInfo)
