@@ -716,8 +716,9 @@ namespace Game.Maps
         public bool IsEncounterCompleted(uint dungeonEncounterId)
         {
             foreach (var (_, boss) in bosses)
-                if (boss.DungeonEncounters.Any(p => p.Id == dungeonEncounterId))
-                    return boss.state == EncounterState.Done;
+                foreach (DungeonEncounterRecord dungeonEncounter in boss.DungeonEncounters)
+                    if (dungeonEncounter != null && dungeonEncounter.Id == dungeonEncounterId)
+                        return boss.state == EncounterState.Done;
 
             return false;
         }
