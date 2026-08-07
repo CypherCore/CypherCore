@@ -774,7 +774,8 @@ namespace Game.Chat
                     return false;
                 }
 
-                Global.AccountMgr.UpdateAccountAccess(null, accountId, (byte)securityLevel, realmID);
+                WorldSession session = Global.WorldMgr.FindSession(accountId);
+                Global.AccountMgr.UpdateAccountAccess(session != null ? session.GetRBACData() : null, accountId, securityLevel, realmID);
 
                 handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
                 return true;
