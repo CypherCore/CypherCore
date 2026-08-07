@@ -247,12 +247,6 @@ namespace Game
                 return;
             }
 
-            if (!_player.IsReagentBankUnlocked())
-            {
-                _player.SendEquipError(InventoryResult.ReagentBankLocked);
-                return;
-            }
-
             // query all reagents from player's inventory
             bool anyDeposited = false;
             foreach (Item item in _player.GetCraftingReagentItemsToDeposit())
