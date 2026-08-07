@@ -243,7 +243,7 @@ namespace Game.Entities
 
             InitRunes();
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), WorldConfig.GetUInt64Value(WorldCfg.StartPlayerMoney));
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), GetClass() != Class.DeathKnight ? WorldConfig.GetUInt64Value(WorldCfg.StartPlayerMoney) : WorldConfig.GetUInt64Value(WorldCfg.StartDeathKnightPlayerMoney));
 
             // Played time
             m_Last_tick = GameTime.GetGameTime();

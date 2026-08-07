@@ -316,6 +316,7 @@ namespace Game
             [
                 new() { Name = "CharacterCreating.Disabled.RaceMask", DefaultValue = 0, Index = WorldCfg.CharacterCreatingDisabledRacemask },
                 new() { Name = "StartPlayerMoney", DefaultValue = 0, Index = WorldCfg.StartPlayerMoney, Min = 0, Max = PlayerConst.MaxMoneyAmount },
+                new() { Name = "StartDeathKnightPlayerMoney", DefaultValue = 0, Index = WorldCfg.StartDeathKnightPlayerMoney, Min = 0, Max = PlayerConst.MaxMoneyAmount },
             ];
 
             ConfigOptionLoadDefinition<float>[] floats =

@@ -1884,6 +1884,7 @@ namespace Framework.Constants
         StartGmLevel,
         StartPlayerLevel,
         StartPlayerMoney,
+        StartDeathKnightPlayerMoney,
         StatsLimitsBlock,
         StatsLimitsCrit,
         StatsLimitsDodge,
