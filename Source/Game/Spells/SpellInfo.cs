@@ -487,6 +487,11 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr0.CooldownOnEvent))
                 return true;
 
+            return IsCooldownStartedOnEventAfterCombat();
+        }
+
+        public bool IsCooldownStartedOnEventAfterCombat()
+        {
             SpellCategoryRecord category = CliDB.SpellCategoryStorage.LookupByKey(CategoryId);
             return category != null && category.HasFlag(SpellCategoryFlags.CooldownEventOnLeaveCombat);
         }

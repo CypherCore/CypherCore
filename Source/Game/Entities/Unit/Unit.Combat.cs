@@ -48,6 +48,8 @@ namespace Game.Entities
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
 
+            GetSpellHistory().AtExitCombat();
+
             if (!IsInteractionAllowedInCombat())
                 UpdateNearbyPlayersInteractions();
         }

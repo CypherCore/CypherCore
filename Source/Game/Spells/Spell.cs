@@ -3081,10 +3081,6 @@ namespace Game.Spells
                     TakeReagents();
             }
 
-            // CAST SPELL
-            if (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
-                SendSpellCooldown();
-
             m_spellState = SpellState.Launched;
 
             if (m_spellInfo.LaunchDelay == 0)
@@ -3098,6 +3094,10 @@ namespace Game.Spells
 
             // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
             SendSpellGo();
+
+            // CAST SPELL
+            if (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
+                SendSpellCooldown();
 
             if (!m_spellInfo.IsChanneled())
                 if (creatureCaster != null)
@@ -3438,10 +3438,7 @@ namespace Game.Spells
             if (!m_caster.IsUnit())
                 return;
 
-            if (m_CastItem != null)
-                m_caster.ToUnit().GetSpellHistory().HandleCooldowns(m_spellInfo, m_CastItem, this);
-            else
-                m_caster.ToUnit().GetSpellHistory().HandleCooldowns(m_spellInfo, m_castItemEntry, this);
+            m_caster.ToUnit().GetSpellHistory().HandleCooldowns(m_spellInfo, m_castItemEntry, this);
 
             if (IsAutoRepeat())
                 m_caster.ToUnit().ResetAttackTimer(WeaponAttackType.RangedAttack);
@@ -3658,13 +3655,6 @@ namespace Game.Spells
                         unitCaster.SetDeathState(DeathState.JustDied);
                     return;
                 }
-            }
-
-            // potions disabled by client, send event "not in combat" if need
-            if (unitCaster.IsTypeId(TypeId.Player))
-            {
-                if (m_triggeredByAuraSpell == null)
-                    unitCaster.ToPlayer().UpdatePotionCooldown(this);
             }
 
             // Stop Attack for some spells
@@ -5046,10 +5036,6 @@ namespace Game.Spells
                             }
                         }
                     }
-
-                    // check if we are using a potion in combat for the 2nd+ time. Cooldown is added only after caster gets out of combat
-                    if (!IsIgnoringCooldowns() && playerCaster.GetLastPotionId() != 0 && m_CastItem != null && (m_CastItem.IsPotion() || m_spellInfo.IsCooldownStartedOnEvent()))
-                        return SpellCastResult.NotReady;
                 }
 
                 if (!IsIgnoringCooldowns() && m_caster.ToUnit() != null && (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart) || strict))

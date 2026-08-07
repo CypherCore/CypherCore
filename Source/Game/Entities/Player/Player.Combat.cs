@@ -4,11 +4,11 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Groups;
+using Game.Maps;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.Maps;
 
 namespace Game.Entities
 {
@@ -195,7 +195,7 @@ namespace Game.Entities
 
             return bonusValue;
         }
-        
+
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)
         {
             float baseExpertise = 7.5f;
@@ -327,7 +327,6 @@ namespace Game.Entities
         public override void AtExitCombat()
         {
             base.AtExitCombat();
-            UpdatePotionCooldown();
             m_regenInterruptTimestamp = GameTime.Now();
         }
 
@@ -341,7 +340,7 @@ namespace Game.Entities
 
             return Math.Min(blockArmor / (blockArmor + armorConstant), 0.85f);
         }
-        
+
         public void SetCanParry(bool value)
         {
             if (m_canParry == value)
@@ -580,7 +579,7 @@ namespace Game.Entities
                 }
             }
         }
-        
+
         public void UpdateContestedPvP(uint diff)
         {
             if (m_contestedPvPTimer == 0 || IsInCombat())
@@ -605,7 +604,7 @@ namespace Game.Entities
                 pvpInfo.EndTimer = 0;
                 RemovePlayerFlag(PlayerFlags.PVPTimer);
             }
-            
+
             UpdatePvP(false);
         }
 

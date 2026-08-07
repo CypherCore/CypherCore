@@ -175,11 +175,6 @@ namespace Game.Spells
             }
         }
 
-        public void HandleCooldowns(SpellInfo spellInfo, Item item, Spell spell = null)
-        {
-            HandleCooldowns(spellInfo, item != null ? item.GetEntry() : 0u, spell);
-        }
-
         public void HandleCooldowns(SpellInfo spellInfo, uint itemId, Spell spell = null)
         {
             if (spell != null && spell.IsIgnoringCooldowns())
@@ -190,25 +185,13 @@ namespace Game.Spells
             if (_owner.HasAuraTypeWithAffectMask(AuraType.IgnoreSpellCooldown, spellInfo))
                 return;
 
-            Player player = _owner.ToPlayer();
-            if (player != null)
-            {
-                // potions start cooldown until exiting combat
-                ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
-                if (itemTemplate != null)
-                {
-                    if (itemTemplate.IsPotion() || spellInfo.IsCooldownStartedOnEvent())
-                    {
-                        player.SetLastPotionId(itemId);
-                        return;
-                    }
-                }
-            }
-
-            if (spellInfo.IsCooldownStartedOnEvent() || spellInfo.IsPassive())
+            if (spellInfo.IsPassive())
                 return;
 
-            StartCooldown(spellInfo, itemId, spell);
+            StartCooldown(spellInfo, itemId, spell, spellInfo.IsCooldownStartedOnEvent());
+
+            if (spellInfo.IsCooldownStartedOnEventAfterCombat() && !_owner.IsInCombat())
+                SendCooldownEvent(spellInfo, itemId, spell, true);
         }
 
         public bool IsReady(SpellInfo spellInfo, uint itemId = 0)
@@ -1167,6 +1150,18 @@ namespace Game.Spells
             cooldown = tmpCooldown;
             categoryId = tmpCategoryId;
             categoryCooldown = tmpCategoryCooldown;
+        }
+
+        void AtExitCombat()
+        {
+            List<(uint, uint)> cooldownsToStart = [];
+
+            foreach (var (categoryId, cooldown) in _categoryCooldowns)
+                if (CliDB.SpellCategoryStorage.LookupByKey(categoryId).HasFlag(SpellCategoryFlags.CooldownEventOnLeaveCombat))
+                    cooldownsToStart.Add((cooldown.SpellId, cooldown.ItemId));
+
+            foreach (var (spellId, itemId) in cooldownsToStart)
+                SendCooldownEvent(Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None), itemId);
         }
 
         public void SaveCooldownStateBeforeDuel()

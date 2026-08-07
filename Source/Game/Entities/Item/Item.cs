@@ -2702,7 +2702,6 @@ namespace Game.Entities
 
         public override bool HasQuest(uint quest_id) { return GetTemplate().GetStartQuest() == quest_id; }
         public override bool HasInvolvedQuest(uint quest_id) { return false; }
-        public bool IsPotion() { return GetTemplate().IsPotion(); }
         public bool IsVellum() { return GetTemplate().IsVellum(); }
         public bool IsConjuredConsumable() { return GetTemplate().IsConjuredConsumable(); }
         public ItemQuality GetQuality() { return _bonusData.Quality; }

@@ -374,7 +374,6 @@ namespace Game.Entities
             return (ExtendedData.Stackable == 2147483647 || ExtendedData.Stackable <= 0) ? (0x7FFFFFFF - 1) : ExtendedData.Stackable;
         }
 
-        public bool IsPotion() { return GetClass() == ItemClass.Consumable && GetSubClass() == (uint)ItemSubClassConsumable.Potion; }
         public bool IsVellum() { return HasFlag(ItemFlags3.CanStoreEnchants); }
         public bool IsConjuredConsumable() { return GetClass() == ItemClass.Consumable && HasFlag(ItemFlags.Conjured); }
         public bool IsCraftingReagent() { return HasFlag(ItemFlags2.UsedInATradeskill); }

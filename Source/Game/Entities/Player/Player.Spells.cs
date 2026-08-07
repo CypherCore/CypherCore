@@ -977,40 +977,6 @@ namespace Game.Entities
             }
         }
 
-        public void UpdatePotionCooldown(Spell spell = null)
-        {
-            // no potion used i combat or still in combat
-            if (m_lastPotionId == 0 || IsInCombat())
-                return;
-
-            // Call not from spell cast, send cooldown event for item spells if no in combat
-            if (spell == null)
-            {
-                // spell/item pair let set proper cooldown (except not existed charged spell cooldown spellmods for potions)
-                ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(m_lastPotionId);
-                if (proto != null)
-                    for (byte idx = 0; idx < proto.Effects.Count; ++idx)
-                    {
-                        if (proto.Effects[idx].SpellID != 0 && proto.Effects[idx].TriggerType == ItemSpelltriggerType.OnUse)
-                        {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)proto.Effects[idx].SpellID, Difficulty.None);
-                            if (spellInfo != null)
-                                GetSpellHistory().SendCooldownEvent(spellInfo, m_lastPotionId);
-                        }
-                    }
-            }
-            // from spell cases (m_lastPotionId set in Spell.SendSpellCooldown)
-            else
-            {
-                if (spell.IsIgnoringCooldowns())
-                    return;
-                else
-                    GetSpellHistory().SendCooldownEvent(spell.m_spellInfo, m_lastPotionId, spell);
-            }
-
-            m_lastPotionId = 0;
-        }
-
         public bool CanUseMastery()
         {
             ChrSpecializationRecord chrSpec = GetPrimarySpecializationEntry();
@@ -1617,9 +1583,6 @@ namespace Game.Entities
                 }
             }
         }
-
-        public uint GetLastPotionId() { return m_lastPotionId; }
-        public void SetLastPotionId(uint item_id) { m_lastPotionId = item_id; }
 
         public void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
         {
