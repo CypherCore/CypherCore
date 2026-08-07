@@ -1538,7 +1538,7 @@ namespace Game.BattleGrounds
         public List<uint> GetPvpStatIds() { return _pvpStatIds; }
 
         void ModifyStartDelayTime(int diff) { m_StartDelayTime -= diff; }
-        void SetStartDelayTime(BattlegroundStartTimeIntervals Time) { m_StartDelayTime = (int)Time; }
+        public void SetStartDelayTime(BattlegroundStartTimeIntervals Time) { m_StartDelayTime = (int)Time; }
 
         public void DecreaseInvitedCount(Team team)
         {

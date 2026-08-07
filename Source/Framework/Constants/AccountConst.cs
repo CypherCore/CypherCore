@@ -749,6 +749,8 @@ namespace Framework.Constants
         CommandReloadVehicleTemplate = 881,
         CommandReloadSpellScriptNames = 882,
         CommandQuestObjectiveComplete = 883,
+        CommandBgStart = 884,
+        CommandBgStop = 885,
         // Custom Permissions 1000+
         Max
     }

@@ -478,6 +478,8 @@ namespace Framework.Constants
         CommandLearnAllRecipesHelp = 392,
         CommandLearnAllTalentsHelp = 393,
         CommandLearnAllPettalentHelp = 394,
+        CommandBgStartHelp = 395,
+        CommandBgStopHelp = 396,
         // Room For More Level 2                395-399 Not Used
 
         // Level 3 Chat
