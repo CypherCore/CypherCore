@@ -1033,39 +1033,17 @@ namespace Game.Spells
             }
             else
             {
-                if (!target.HasAuraType(AuraType.ModInvisibility))
-                {
-                    // if not have different invisibility auras.
-                    // always remove glow vision
+                if (!target.HasAuraTypeWithMiscvalue(AuraType.ModInvisibility, (int)type))
+                    target.m_invisibility.DelFlag(type);
+
+                // if not have invisibility auras of type INVISIBILITY_GENERAL
+                // remove glow vision
+                if (!target.m_invisibility.HasFlag(InvisibilityType.General))
                     if (playerTarget != null)
                         playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
 
-                    target.m_invisibility.DelFlag(type);
-                }
-                else
-                {
-                    bool found = false;
-                    var invisAuras = target.GetAuraEffectsByType(AuraType.ModInvisibility);
-                    foreach (var eff in invisAuras)
-                    {
-                        if (GetMiscValue() == eff.GetMiscValue())
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        // if not have invisibility auras of type INVISIBILITY_GENERAL
-                        // remove glow vision
-                        if (playerTarget != null && type == InvisibilityType.General)
-                            playerTarget.RemoveAuraVision(PlayerFieldByte2Flags.InvisibilityGlow);
-
-                        target.m_invisibility.DelFlag(type);
-
-                        target.RemoveVisFlag(UnitVisFlags.Invisible);
-                    }
-                }
+                if (!target.HasAuraType(AuraType.ModInvisibility))
+                    target.RemoveVisFlag(UnitVisFlags.Invisible);
 
                 target.m_invisibility.AddValue(type, -GetAmountAsInt());
             }

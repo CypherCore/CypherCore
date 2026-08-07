@@ -322,10 +322,7 @@ namespace Game
             }
 
             if (destroyItem.Count != 0)
-            {
-                uint i_count = destroyItem.Count;
-                _player.DestroyItemCount(pItem, ref i_count, true);
-            }
+                _player.DestroyItemCount(pItem, ref destroyItem.Count, true);
             else
                 _player.DestroyItem(destroyItem.ContainerId, destroyItem.SlotNum, true);
         }
