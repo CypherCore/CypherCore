@@ -4057,7 +4057,8 @@ namespace Game.Entities
             {
                 case EnviromentalDamage.Lava:
                 case EnviromentalDamage.Slime:
-                    DamageInfo dmgInfo = new(this, this, damage, null, type == EnviromentalDamage.Lava ? SpellSchoolMask.Fire : SpellSchoolMask.Nature, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
+                case EnviromentalDamage.Fire:
+                    DamageInfo dmgInfo = new(this, this, damage, null, type == EnviromentalDamage.Slime ? SpellSchoolMask.Nature : SpellSchoolMask.Fire, DamageEffectType.Direct, WeaponAttackType.BaseAttack);
                     CalcAbsorbResist(dmgInfo);
                     absorb = dmgInfo.GetAbsorb();
                     resist = dmgInfo.GetResist();
