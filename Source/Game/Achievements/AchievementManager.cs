@@ -669,6 +669,7 @@ namespace Game.Achievements
                 achievementEarned.AchievementID = achievement.Id;
                 achievementEarned.Time = GameTime.GetUtcWowTime();
                 achievementEarned.Time += receiver.GetSession().GetTimezoneOffset();
+                achievementEarned.Initial = receiver.HasAtLoginFlag(AtLoginFlags.FirstLogin);
                 receiver.SendPacket(achievementEarned);
             };
 
