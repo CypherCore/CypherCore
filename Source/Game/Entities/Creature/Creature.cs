@@ -2122,7 +2122,10 @@ namespace Game.Entities
 
                 InitializeMovementAI();
                 base.SetDeathState(DeathState.Alive);
-                LoadCreaturesAddon();
+
+                if (!IsPet())
+                    LoadCreaturesAddon();
+
                 LoadCreaturesSparringHealth();
             }
         }
