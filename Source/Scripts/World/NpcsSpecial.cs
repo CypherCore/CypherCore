@@ -619,9 +619,6 @@ namespace Scripts.World.NpcsSpecial
                     Creature patient = me.SummonCreature(patientEntry, point, TempSummonType.TimedDespawnOutOfCombat, TimeSpan.FromSeconds(5));
                     if (patient != null)
                     {
-                        //303, this flag appear to be required for client side item.spell to work (TargetSingleFriend)
-                        patient.SetUnitFlag(UnitFlags.PlayerControlled);
-
                         Patients.Add(patient.GetGUID());
 
                         var patientAI = patient.GetAI<npc_injured_patient>();
@@ -1090,105 +1087,105 @@ namespace Scripts.World.NpcsSpecial
             {
                 case TournamentPennantIds.NpcArgentSteedAspirant:
                 case TournamentPennantIds.NpcStormwindSteed:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionStormwind))
-                            return TournamentPennantIds.SpellStormwindChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfStormwind) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfStormwind))
-                            return TournamentPennantIds.SpellStormwindValiant;
-                        else
-                            return TournamentPennantIds.SpellStormwindAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionStormwind))
+                        return TournamentPennantIds.SpellStormwindChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfStormwind) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfStormwind))
+                        return TournamentPennantIds.SpellStormwindValiant;
+                    else
+                        return TournamentPennantIds.SpellStormwindAspirant;
+                }
                 case TournamentPennantIds.NpcGnomereganMechanostrider:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionGnomeregan))
-                            return TournamentPennantIds.SpellGnomereganChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfGnomeregan) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfGnomeregan))
-                            return TournamentPennantIds.SpellGnomereganValiant;
-                        else
-                            return TournamentPennantIds.SpellGnomereganAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionGnomeregan))
+                        return TournamentPennantIds.SpellGnomereganChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfGnomeregan) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfGnomeregan))
+                        return TournamentPennantIds.SpellGnomereganValiant;
+                    else
+                        return TournamentPennantIds.SpellGnomereganAspirant;
+                }
                 case TournamentPennantIds.NpcDarkSpearRaptor:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionSenJin))
-                            return TournamentPennantIds.SpellSenJinChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSenJin) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSenJin))
-                            return TournamentPennantIds.SpellSenJinValiant;
-                        else
-                            return TournamentPennantIds.SpellSenJinAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionSenJin))
+                        return TournamentPennantIds.SpellSenJinChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSenJin) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSenJin))
+                        return TournamentPennantIds.SpellSenJinValiant;
+                    else
+                        return TournamentPennantIds.SpellSenJinAspirant;
+                }
                 case TournamentPennantIds.NpcArgentHawkstriderAspirant:
                 case TournamentPennantIds.NpcSilvermoonHawkstrider:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionSilvermoon))
-                            return TournamentPennantIds.SpellSilvermoonChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSilvermoon) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSilvermoon))
-                            return TournamentPennantIds.SpellSilvermoonValiant;
-                        else
-                            return TournamentPennantIds.SpellSilvermoonAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionSilvermoon))
+                        return TournamentPennantIds.SpellSilvermoonChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfSilvermoon) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfSilvermoon))
+                        return TournamentPennantIds.SpellSilvermoonValiant;
+                    else
+                        return TournamentPennantIds.SpellSilvermoonAspirant;
+                }
                 case TournamentPennantIds.NpcDarnassianNightsaber:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionDarnassus))
-                            return TournamentPennantIds.SpellDarnassusChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfDarnassus) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfDarnassus))
-                            return TournamentPennantIds.SpellDarnassusValiant;
-                        else
-                            return TournamentPennantIds.SpellDarnassusAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionDarnassus))
+                        return TournamentPennantIds.SpellDarnassusChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfDarnassus) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfDarnassus))
+                        return TournamentPennantIds.SpellDarnassusValiant;
+                    else
+                        return TournamentPennantIds.SpellDarnassusAspirant;
+                }
                 case TournamentPennantIds.NpcExodarElekk:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionTheExodar))
-                            return TournamentPennantIds.SpellExodarChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfTheExodar) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfTheExodar))
-                            return TournamentPennantIds.SpellExodarValiant;
-                        else
-                            return TournamentPennantIds.SpellExodarAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionTheExodar))
+                        return TournamentPennantIds.SpellExodarChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfTheExodar) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfTheExodar))
+                        return TournamentPennantIds.SpellExodarValiant;
+                    else
+                        return TournamentPennantIds.SpellExodarAspirant;
+                }
                 case TournamentPennantIds.NpcIronforgeRam:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionIronforge))
-                            return TournamentPennantIds.SpellIronforgeChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfIronforge) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfIronforge))
-                            return TournamentPennantIds.SpellIronforgeValiant;
-                        else
-                            return TournamentPennantIds.SpellIronforgeAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionIronforge))
+                        return TournamentPennantIds.SpellIronforgeChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfIronforge) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfIronforge))
+                        return TournamentPennantIds.SpellIronforgeValiant;
+                    else
+                        return TournamentPennantIds.SpellIronforgeAspirant;
+                }
                 case TournamentPennantIds.NpcForsakenWarhorse:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionUndercity))
-                            return TournamentPennantIds.SpellUndercityChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfUndercity) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfUndercity))
-                            return TournamentPennantIds.SpellUndercityValiant;
-                        else
-                            return TournamentPennantIds.SpellUndercityAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionUndercity))
+                        return TournamentPennantIds.SpellUndercityChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfUndercity) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfUndercity))
+                        return TournamentPennantIds.SpellUndercityValiant;
+                    else
+                        return TournamentPennantIds.SpellUndercityAspirant;
+                }
                 case TournamentPennantIds.NpcOrgrimmarWolf:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionOrgrimmar))
-                            return TournamentPennantIds.SpellOrgrimmarChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfOrgrimmar) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfOrgrimmar))
-                            return TournamentPennantIds.SpellOrgrimmarValiant;
-                        else
-                            return TournamentPennantIds.SpellOrgrimmarAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionOrgrimmar))
+                        return TournamentPennantIds.SpellOrgrimmarChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfOrgrimmar) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfOrgrimmar))
+                        return TournamentPennantIds.SpellOrgrimmarValiant;
+                    else
+                        return TournamentPennantIds.SpellOrgrimmarAspirant;
+                }
                 case TournamentPennantIds.NpcThunderBluffKodo:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionThunderBluff))
-                            return TournamentPennantIds.SpellThunderBluffChapion;
-                        else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfThunderBluff) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfThunderBluff))
-                            return TournamentPennantIds.SpellThunderBluffValiant;
-                        else
-                            return TournamentPennantIds.SpellThunderBluffAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionThunderBluff))
+                        return TournamentPennantIds.SpellThunderBluffChapion;
+                    else if (player.GetQuestRewardStatus(TournamentPennantIds.QuestValiantOfThunderBluff) || player.GetQuestRewardStatus(TournamentPennantIds.QuestAValiantOfThunderBluff))
+                        return TournamentPennantIds.SpellThunderBluffValiant;
+                    else
+                        return TournamentPennantIds.SpellThunderBluffAspirant;
+                }
                 case TournamentPennantIds.NpcArgentWarhorse:
-                    {
-                        if (player.HasAchieved(TournamentPennantIds.AchievementChapionAlliance) || player.HasAchieved(TournamentPennantIds.AchievementChapionHorde))
-                            return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeChapion : TournamentPennantIds.SpellArgentCrusadeChapion;
-                        else if (player.HasAchieved(TournamentPennantIds.AchievementArgentValor))
-                            return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeValiant : TournamentPennantIds.SpellArgentCrusadeValiant;
-                        else
-                            return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeAspirant : TournamentPennantIds.SpellArgentCrusadeAspirant;
-                    }
+                {
+                    if (player.HasAchieved(TournamentPennantIds.AchievementChapionAlliance) || player.HasAchieved(TournamentPennantIds.AchievementChapionHorde))
+                        return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeChapion : TournamentPennantIds.SpellArgentCrusadeChapion;
+                    else if (player.HasAchieved(TournamentPennantIds.AchievementArgentValor))
+                        return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeValiant : TournamentPennantIds.SpellArgentCrusadeValiant;
+                    else
+                        return player.GetClass() == Class.DeathKnight ? TournamentPennantIds.SpellEbonBladeAspirant : TournamentPennantIds.SpellArgentCrusadeAspirant;
+                }
                 default:
                     return 0;
             }
@@ -1726,40 +1723,40 @@ namespace Scripts.World.NpcsSpecial
             switch (gossipListId)
             {
                 case ArgentSquireIds.GossipOptionBank:
-                    {
-                        me.SetVendor(NPCFlags.VendorMask, false);
-                        me.RemoveNpcFlag(NPCFlags.Mailbox);
-                        uint _bankAura = IsArgentSquire() ? ArgentSquireIds.AuraBankS : ArgentSquireIds.AuraBankG;
-                        if (!me.HasAura(_bankAura))
-                            DoCastSelf(_bankAura);
+                {
+                    me.SetVendor(NPCFlags.VendorMask, false);
+                    me.RemoveNpcFlag(NPCFlags.Mailbox);
+                    uint _bankAura = IsArgentSquire() ? ArgentSquireIds.AuraBankS : ArgentSquireIds.AuraBankG;
+                    if (!me.HasAura(_bankAura))
+                        DoCastSelf(_bankAura);
 
-                        if (!player.HasAura(ArgentSquireIds.SpellTiredPlayer))
-                            player.CastSpell(player, ArgentSquireIds.SpellTiredPlayer, true);
-                        break;
-                    }
+                    if (!player.HasAura(ArgentSquireIds.SpellTiredPlayer))
+                        player.CastSpell(player, ArgentSquireIds.SpellTiredPlayer, true);
+                    break;
+                }
                 case ArgentSquireIds.GossipOptionShop:
-                    {
-                        me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox);
-                        uint _shopAura = IsArgentSquire() ? ArgentSquireIds.AuraShopS : ArgentSquireIds.AuraShopG;
-                        if (!me.HasAura(_shopAura))
-                            DoCastSelf(_shopAura);
+                {
+                    me.RemoveNpcFlag(NPCFlags.Banker | NPCFlags.Mailbox);
+                    uint _shopAura = IsArgentSquire() ? ArgentSquireIds.AuraShopS : ArgentSquireIds.AuraShopG;
+                    if (!me.HasAura(_shopAura))
+                        DoCastSelf(_shopAura);
 
-                        if (!player.HasAura(ArgentSquireIds.SpellTiredPlayer))
-                            player.CastSpell(player, ArgentSquireIds.SpellTiredPlayer, true);
-                        break;
-                    }
+                    if (!player.HasAura(ArgentSquireIds.SpellTiredPlayer))
+                        player.CastSpell(player, ArgentSquireIds.SpellTiredPlayer, true);
+                    break;
+                }
                 case ArgentSquireIds.GossipOptionMail:
-                    {
-                        me.SetVendor(NPCFlags.VendorMask, false);
-                        me.RemoveNpcFlag(NPCFlags.Banker);
-                        uint _mailAura = IsArgentSquire() ? ArgentSquireIds.AuraPostmanS : ArgentSquireIds.AuraPostmanG;
-                        if (!me.HasAura(_mailAura))
-                            DoCastSelf(_mailAura);
+                {
+                    me.SetVendor(NPCFlags.VendorMask, false);
+                    me.RemoveNpcFlag(NPCFlags.Banker);
+                    uint _mailAura = IsArgentSquire() ? ArgentSquireIds.AuraPostmanS : ArgentSquireIds.AuraPostmanG;
+                    if (!me.HasAura(_mailAura))
+                        DoCastSelf(_mailAura);
 
-                        if (!player.HasAura(ArgentSquireIds.SpellTiredPlayer))
-                            player.CastSpell(player, ArgentSquireIds.SpellTiredPlayer, true);
-                        break;
-                    }
+                    if (!player.HasAura(ArgentSquireIds.SpellTiredPlayer))
+                        player.CastSpell(player, ArgentSquireIds.SpellTiredPlayer, true);
+                    break;
+                }
                 case ArgentSquireIds.GossipOptionDarnassusSenjinPennant:
                 case ArgentSquireIds.GossipOptionExodarUndercityPennant:
                 case ArgentSquireIds.GossipOptionGnomereganOrgrimmarPennant:
