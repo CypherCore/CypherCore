@@ -2059,7 +2059,8 @@ namespace Game.Spells
                 // Shouldn't be able to reflect gameobject spells
                 Unit unitCaster = m_caster.ToUnit();
                 // Calculate reflected spell result on caster
-                targetInfo.ReflectResult = m_spellInfo.CheckTarget(target, unitCaster, Implicit) == SpellCastResult.SpellCastOk
+                SpellCastResult castResult = m_spellInfo.CheckTarget(target, unitCaster, Implicit);
+                targetInfo.ReflectResult = castResult == SpellCastResult.SpellCastOk || castResult == SpellCastResult.TargetAurastate
                     ? unitCaster.SpellHitResult(unitCaster, m_spellInfo,
                         false /*can't reflect twice*/,
                         false /*immunity will be checked after complete EffectMask is known*/)
