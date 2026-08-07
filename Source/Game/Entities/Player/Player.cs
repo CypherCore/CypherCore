@@ -7194,7 +7194,7 @@ namespace Game.Entities
                 return;
             }
 
-            MathFunctions.AddPct(ref m_auraBasePctMod[(int)modGroup], pct);
+            m_auraBasePctMod[(int)modGroup] += MathFunctions.CalculatePct(1.0f, pct);
             UpdateBaseModGroup(modGroup);
         }
 
