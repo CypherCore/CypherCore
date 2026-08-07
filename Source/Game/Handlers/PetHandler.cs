@@ -715,7 +715,7 @@ namespace Game
             spell.m_fromClient = true;
             spell.m_misc.Data0 = petCastSpell.Cast.Misc[0];
             spell.m_misc.Data1 = petCastSpell.Cast.Misc[1];
-            spell.m_targets = targets;
+            spell.InitExplicitTargets(targets);
 
             SpellCastResult result = spell.CheckPetCast(null);
 

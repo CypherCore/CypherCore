@@ -133,7 +133,7 @@ namespace Game.Spells
                 Cypher.Assert(m_caster.ToPlayer().m_spellModTakingSpell != this);
         }
 
-        void InitExplicitTargets(SpellCastTargets targets)
+        public void InitExplicitTargets(SpellCastTargets targets)
         {
             m_targets = targets;
 
@@ -173,7 +173,7 @@ namespace Game.Spells
                         unit = m_caster.ToUnit().GetVictim();
 
                     // didn't find anything - let's use self as target
-                    if (unit == null && neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitRaid | SpellCastTargetFlags.UnitParty | SpellCastTargetFlags.UnitAlly))
+                    if (unit == null && (neededTargets & (SpellCastTargetFlags.UnitEnemy | SpellCastTargetFlags.UnitDead | SpellCastTargetFlags.UnitMinipet | SpellCastTargetFlags.UnitPassenger)) == 0)
                         unit = m_caster.ToUnit();
 
                     m_targets.SetUnitTarget(unit);
