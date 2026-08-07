@@ -5823,9 +5823,6 @@ namespace Game.Spells
                             if (mapLock != null)
                                 if (Global.InstanceLockMgr.CanJoinInstanceLock(target.GetGUID(), new MapDb2Entries(mapId, difficulty), mapLock) != TransferAbortReason.None)
                                     return SpellCastResult.TargetLockedToRaidInstance;
-
-                            if (!target.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapId, difficulty), mapId))
-                                return SpellCastResult.BadTargets;
                         }
                         break;
                     }
