@@ -242,7 +242,7 @@ namespace Game.Spells
             // select targets for cast phase
             SelectExplicitTargets();
 
-            uint processedAreaEffectsMask = 0;
+            uint processedEffectsMaskForSpell = 0;
             foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
                 // not call for empty effect.
@@ -257,8 +257,10 @@ namespace Game.Spells
                 if (Convert.ToBoolean(implicitTargetMask & (SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.GameobjectItem)))
                     m_targets.SetTargetFlag(SpellCastTargetFlags.Gameobject);
 
-                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetA, SpellTargetIndex.TargetA, ref processedAreaEffectsMask);
-                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetB, SpellTargetIndex.TargetB, ref processedAreaEffectsMask);
+                uint currentlyProcessedEffectMask = processedEffectsMaskForSpell;
+                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetA, SpellTargetIndex.TargetA, ref processedEffectsMaskForSpell);
+                SelectEffectImplicitTargets(spellEffectInfo, spellEffectInfo.TargetB, SpellTargetIndex.TargetB, ref processedEffectsMaskForSpell);
+                currentlyProcessedEffectMask = processedEffectsMaskForSpell & ~currentlyProcessedEffectMask;
 
                 // Select targets of effect based on effect type
                 // those are used when no valid target could be added for spell effect based on spell target type
@@ -270,14 +272,15 @@ namespace Game.Spells
                 if (m_targets.HasDst())
                     AddDestTarget(m_targets.GetDst(), spellEffectInfo.EffectIndex);
 
-                if (spellEffectInfo.TargetA.GetObjectType() == SpellTargetObjectTypes.Unit
-                    || spellEffectInfo.TargetA.GetObjectType() == SpellTargetObjectTypes.UnitAndDest
-                    || spellEffectInfo.TargetB.GetObjectType() == SpellTargetObjectTypes.Unit
-                    || spellEffectInfo.TargetB.GetObjectType() == SpellTargetObjectTypes.UnitAndDest)
+                if (currentlyProcessedEffectMask != 0
+                    && (spellEffectInfo.TargetA.GetObjectType() == SpellTargetObjectTypes.Unit
+                        || spellEffectInfo.TargetA.GetObjectType() == SpellTargetObjectTypes.UnitAndDest
+                        || spellEffectInfo.TargetB.GetObjectType() == SpellTargetObjectTypes.Unit
+                        || spellEffectInfo.TargetB.GetObjectType() == SpellTargetObjectTypes.UnitAndDest))
                 {
                     if (m_spellInfo.HasAttribute(SpellAttr1.RequireAllTargets))
                     {
-                        bool noTargetFound = !m_UniqueTargetInfo.Any(target => (target.EffectMask & 1 << (int)spellEffectInfo.EffectIndex) != 0);
+                        bool noTargetFound = !m_UniqueTargetInfo.Any(target => (target.EffectMask & currentlyProcessedEffectMask) != 0);
 
                         if (noTargetFound)
                         {
@@ -405,47 +408,48 @@ namespace Game.Spells
             if (targetType.GetTarget() == 0)
                 return;
 
-            uint effectMask = (1u << (int)spellEffectInfo.EffectIndex);
+            uint effectMask = 1u << (int)spellEffectInfo.EffectIndex;
+
+            // targets for effect already selected
+            if ((effectMask & processedEffectMask) != 0)
+                return;
+
             // set the same target list for all effects
             // some spells appear to need this, however this requires more research
-            switch (targetType.GetSelectionCategory())
+            var effects = GetSpellInfo().GetEffects();
+            // choose which targets we can select at once
+            for (int j = (int)spellEffectInfo.EffectIndex + 1; j < effects.Count; ++j)
             {
-                case SpellTargetSelectionCategories.Nearby:
-                case SpellTargetSelectionCategories.Cone:
-                case SpellTargetSelectionCategories.Area:
-                case SpellTargetSelectionCategories.Line:
+                if (effects[j].IsEffect() &&
+                    spellEffectInfo.TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
+                    spellEffectInfo.TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
+                    spellEffectInfo.ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
+                    spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly) == effects[j].EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly) &&
+                    CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, (uint)j))
                 {
-                    // targets for effect already selected
-                    if (Convert.ToBoolean(effectMask & processedEffectMask))
-                        return;
-
-                    var effects = GetSpellInfo().GetEffects();
-                    // choose which targets we can select at once
-                    for (int j = (int)spellEffectInfo.EffectIndex + 1; j < effects.Count; ++j)
+                    switch (targetType.GetSelectionCategory())
                     {
-                        if (effects[j].IsEffect() &&
-                            spellEffectInfo.TargetA.GetTarget() == effects[j].TargetA.GetTarget() &&
-                            spellEffectInfo.TargetB.GetTarget() == effects[j].TargetB.GetTarget() &&
-                            spellEffectInfo.ImplicitTargetConditions == effects[j].ImplicitTargetConditions &&
-                            spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetA) == effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetA) &&
-                            spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetB) == effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetB) &&
-                            spellEffectInfo.EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly) == effects[j].EffectAttributes.HasFlag(SpellEffectAttributes.PlayersOnly) &&
-                            CheckScriptEffectImplicitTargets(spellEffectInfo.EffectIndex, (uint)j))
-                        {
-                            effectMask |= 1u << j;
-                        }
+                        case SpellTargetSelectionCategories.Nearby:
+                        case SpellTargetSelectionCategories.Cone:
+                        case SpellTargetSelectionCategories.Area:
+                        case SpellTargetSelectionCategories.Line:
+                            if (spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetA) != effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetA) ||
+                                spellEffectInfo.CalcRadius(m_caster, SpellTargetIndex.TargetB) != effects[j].CalcRadius(m_caster, SpellTargetIndex.TargetB))
+                                continue;
+                            break;
+                        default:
+                            break;
                     }
-                    processedEffectMask |= effectMask;
-                    break;
+                    effectMask |= 1u << j;
                 }
-                default:
-                    break;
             }
+
+            processedEffectMask |= effectMask;
 
             switch (targetType.GetSelectionCategory())
             {
                 case SpellTargetSelectionCategories.Channel:
-                    SelectImplicitChannelTargets(spellEffectInfo, targetType);
+                    SelectImplicitChannelTargets(spellEffectInfo, targetType, effectMask);
                     break;
                 case SpellTargetSelectionCategories.Nearby:
                     SelectImplicitNearbyTargets(spellEffectInfo, targetType, targetIndex, effectMask);
@@ -500,10 +504,10 @@ namespace Game.Spells
                             switch (targetType.GetReferenceType())
                             {
                                 case SpellTargetReferenceTypes.Caster:
-                                    SelectImplicitCasterObjectTargets(spellEffectInfo, targetType);
+                                    SelectImplicitCasterObjectTargets(spellEffectInfo, targetType, effectMask);
                                     break;
                                 case SpellTargetReferenceTypes.Target:
-                                    SelectImplicitTargetObjectTargets(spellEffectInfo, targetType);
+                                    SelectImplicitTargetObjectTargets(spellEffectInfo, targetType, effectMask);
                                     break;
                                 default:
                                     Cypher.Assert(false, "Spell.SelectEffectImplicitTargets: received not implemented select target reference type for TARGET_TYPE_OBJECT");
@@ -521,7 +525,7 @@ namespace Game.Spells
             }
         }
 
-        void SelectImplicitChannelTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType)
+        void SelectImplicitChannelTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
         {
             if (targetType.GetReferenceType() != SpellTargetReferenceTypes.Caster)
             {
@@ -545,9 +549,8 @@ namespace Game.Spells
                         WorldObject target = Global.ObjAccessor.GetUnit(m_caster, channelTarget);
                         CallScriptObjectTargetSelectHandlers(ref target, spellEffectInfo.EffectIndex, targetType);
                         // unit target may be no longer avalible - teleported out of map for example
-                        Unit unitTarget = target?.ToUnit();
-                        if (unitTarget != null)
-                            AddUnitTarget(unitTarget, 1u << (int)spellEffectInfo.EffectIndex);
+                        if (target != null && target.IsUnit())
+                            AddUnitTarget(target.ToUnit(), effMask);
                         else
                             Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell target for spell ID {0}, effect {1}", m_spellInfo.Id, spellEffectInfo.EffectIndex);
                     }
@@ -1282,7 +1285,7 @@ namespace Game.Spells
             m_targets.ModDst(dest);
         }
 
-        void SelectImplicitCasterObjectTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType)
+        void SelectImplicitCasterObjectTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
         {
             WorldObject target = null;
             bool checkIfValid = true;
@@ -1351,15 +1354,15 @@ namespace Game.Spells
             if (target != null)
             {
                 if (target.IsUnit())
-                    AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, checkIfValid);
+                    AddUnitTarget(target.ToUnit(), effMask, checkIfValid);
                 else if (target.IsGameObject())
-                    AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddGOTarget(target.ToGameObject(), effMask);
                 else if (target.IsCorpse())
-                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddCorpseTarget(target.ToCorpse(), effMask);
             }
         }
 
-        void SelectImplicitTargetObjectTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType)
+        void SelectImplicitTargetObjectTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, uint effMask)
         {
             WorldObject target = m_targets.GetObjectTarget();
 
@@ -1369,17 +1372,17 @@ namespace Game.Spells
             if (target != null)
             {
                 if (target.IsUnit())
-                    AddUnitTarget(target.ToUnit(), 1u << (int)spellEffectInfo.EffectIndex, true, false);
+                    AddUnitTarget(target.ToUnit(), effMask, true, false);
                 else if (target.IsGameObject())
-                    AddGOTarget(target.ToGameObject(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddGOTarget(target.ToGameObject(), effMask);
                 else if (target.IsCorpse())
-                    AddCorpseTarget(target.ToCorpse(), 1u << (int)spellEffectInfo.EffectIndex);
+                    AddCorpseTarget(target.ToCorpse(), effMask);
 
-                SelectImplicitChainTargets(spellEffectInfo, targetType, target, 1u << (int)spellEffectInfo.EffectIndex);
+                SelectImplicitChainTargets(spellEffectInfo, targetType, target, effMask);
             }
             // Script hook can remove object target and we would wrongly land here
             else if (item != null)
-                AddItemTarget(item, 1u << (int)spellEffectInfo.EffectIndex);
+                AddItemTarget(item, effMask);
         }
 
         void SelectImplicitChainTargets(SpellEffectInfo spellEffectInfo, SpellImplicitTargetInfo targetType, WorldObject target, uint effMask)
