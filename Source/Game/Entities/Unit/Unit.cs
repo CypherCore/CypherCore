@@ -3031,7 +3031,7 @@ namespace Game.Entities
             }
 
             // make player victims stand up automatically
-            if (victim.GetStandState() != 0 && victim.IsPlayer())
+            if (victim.GetStandState() != 0 && victim.IsPlayer() && damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.DOT)
                 victim.SetStandState(UnitStandStateType.Stand);
 
             return damageTaken;
