@@ -1795,11 +1795,24 @@ namespace Game
             AtLoginFlags atLoginFlags = (AtLoginFlags)result.Read<ushort>(0);
             string knownTitlesStr = result.Read<string>(1);
             uint groupId = !result.IsNull(2) ? result.Read<uint>(2) : 0;
+            uint mapId = result.Read<ushort>(3);
 
             AtLoginFlags usedLoginFlag = (factionChangeInfo.FactionChange ? AtLoginFlags.ChangeFaction : AtLoginFlags.ChangeRace);
             if (!atLoginFlags.HasAnyFlag(usedLoginFlag))
             {
                 SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
+                return;
+            }
+
+            if (level < 10)
+            {
+                SendCharFactionChange(ResponseCodes.CharCreateError, factionChangeInfo);
+                return;
+            }
+
+            if (playerClass == Class.DeathKnight && (level < 60 || mapId == 609))
+            {
+                SendCharFactionChange(ResponseCodes.CharCreateRestrictedRaceclass, factionChangeInfo);
                 return;
             }
 

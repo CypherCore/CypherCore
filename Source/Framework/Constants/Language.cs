@@ -480,7 +480,9 @@ namespace Framework.Constants
         CommandLearnAllPettalentHelp = 394,
         CommandBgStartHelp = 395,
         CommandBgStopHelp = 396,
-        // Room For More Level 2                395-399 Not Used
+        ChangeFactionNotEligible10 = 397,
+        ChangeFactionNotEligible60 = 398,
+        // Room For More Level 2                399 Not Used
 
         // Level 3 Chat
         ScriptsReloaded = 400,

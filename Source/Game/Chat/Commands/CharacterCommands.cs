@@ -312,6 +312,22 @@ namespace Game.Chat
             if (player == null)
                 return false;
 
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(player.GetGUID());
+            if (characterInfo == null)
+                return false;
+
+            if (characterInfo.Level < 10)
+            {
+                handler.SendSysMessage(CypherStrings.ChangeFactionNotEligible10);
+                return false;
+            }
+
+            if (characterInfo.ClassId == Class.DeathKnight && characterInfo.Level < 60)
+            {
+                handler.SendSysMessage(CypherStrings.ChangeFactionNotEligible60);
+                return false;
+            }
+
             Player target = player.GetConnectedPlayer();
             if (target != null)
             {
