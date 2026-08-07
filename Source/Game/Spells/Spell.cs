@@ -2798,7 +2798,8 @@ namespace Game.Spells
             {
                 case SpellState.Preparing:
                     CancelGlobalCooldown();
-                    goto case SpellState.Launched;
+                    SendCastResult(SpellCastResult.Interrupted);
+                    break;
                 case SpellState.Launched:
                     SendInterrupted((byte)SpellCastResult.Interrupted);
                     break;
