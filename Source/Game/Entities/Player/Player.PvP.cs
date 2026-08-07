@@ -601,7 +601,7 @@ namespace Game.Entities
             return m_bgData.bgTeam != 0 ? m_bgData.bgTeam : GetTeam();
         }
 
-        public void LeaveBattleground(bool teleportToEntryPoint = true)
+        public void LeaveBattleground(bool teleportToEntryPoint = true, bool withoutDeserterDebuff = false)
         {
             Battleground bg = GetBattleground();
             if (bg == null)
@@ -612,7 +612,7 @@ namespace Game.Entities
             // call after remove to be sure that player resurrected for correct cast
             if (bg.IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundCastDeserter))
             {
-                if (!GetSession().HasPermission(RBACPermissions.NoBattleGroundDeserterDebuff))
+                if (!withoutDeserterDebuff && !GetSession().HasPermission(RBACPermissions.NoBattleGroundDeserterDebuff))
                 {
                     if (bg.GetStatus() == BattlegroundStatus.InProgress || bg.GetStatus() == BattlegroundStatus.WaitJoin)
                     {

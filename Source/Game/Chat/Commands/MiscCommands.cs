@@ -55,16 +55,6 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.CannotGoToBgGm, chrNameLink);
                         return false;
                     }
-                    // if both players are in different bgs
-                    else if (_player.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
-                        _player.LeaveBattleground(false); // Note: should be changed so _player gets no Deserter debuff
-
-                    // all's well, set bg id
-                    // when porting out from the bg, it will be reset to 0
-                    _player.SetBattlegroundId(target.GetBattlegroundId(), target.GetBattlegroundTypeId());
-                    // remember current position as entry point for return at bg end teleportation
-                    if (!_player.GetMap().IsBattlegroundOrArena())
-                        _player.SetBattlegroundEntryPoint();
                 }
                 else if (map.IsDungeon())
                 {
@@ -101,6 +91,19 @@ namespace Game.Chat
 
                 handler.SendSysMessage(CypherStrings.AppearingAt, chrNameLink);
 
+                if (_player.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
+                    _player.LeaveBattleground(false, true);
+
+                if (map.IsBattlegroundOrArena())
+                {
+                    // all's well, set bg id
+                    // when porting out from the bg, it will be reset to 0
+                    _player.SetBattlegroundId(target.GetBattlegroundId(), target.GetBattlegroundTypeId());
+                    // remember current position as entry point for return at bg end teleportation
+                    if (!_player.GetMap().IsBattlegroundOrArena())
+                        _player.SetBattlegroundEntryPoint();
+                }
+
                 // stop flight if need
                 if (_player.IsInFlight())
                     _player.FinishTaxiFlight();
@@ -129,6 +132,9 @@ namespace Game.Chat
                 WorldLocation loc;
                 if (!Player.LoadPositionFromDB(out loc, out _, targetGuid))
                     return false;
+
+                if (_player.GetBattlegroundId() != 0)
+                    _player.LeaveBattleground(false, true);
 
                 // stop flight if need
                 if (_player.IsInFlight())
@@ -1633,16 +1639,6 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.CannotGoToBgGm, nameLink);
                         return false;
                     }
-                    // if both players are in different bgs
-                    else if (target.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
-                        target.LeaveBattleground(false); // Note: should be changed so target gets no Deserter debuff
-
-                    // all's well, set bg id
-                    // when porting out from the bg, it will be reset to 0
-                    target.SetBattlegroundId(_player.GetBattlegroundId(), _player.GetBattlegroundTypeId());
-                    // remember current position as entry point for return at bg end teleportation
-                    if (!target.GetMap().IsBattlegroundOrArena())
-                        target.SetBattlegroundEntryPoint();
                 }
                 else if (map.IsDungeon())
                 {
@@ -1674,6 +1670,19 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.Summoning, nameLink, "");
                 if (handler.NeedReportToTarget(target))
                     target.SendSysMessage(CypherStrings.SummonedBy, handler.PlayerLink(_player.GetName()));
+
+                if (target.GetBattlegroundId() != 0 && _player.GetBattlegroundId() != target.GetBattlegroundId())
+                    target.LeaveBattleground(false, true);
+
+                if (map.IsBattlegroundOrArena())
+                {
+                    // all's well, set bg id
+                    // when porting out from the bg, it will be reset to 0
+                    target.SetBattlegroundId(_player.GetBattlegroundId(), _player.GetBattlegroundTypeId());
+                    // remember current position as entry point for return at bg end teleportation
+                    if (!target.GetMap().IsBattlegroundOrArena())
+                        target.SetBattlegroundEntryPoint();
+                }
 
                 // stop flight if need
                 if (_player.IsInFlight())
