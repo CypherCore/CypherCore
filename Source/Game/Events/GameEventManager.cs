@@ -119,7 +119,7 @@ namespace Game
                 {
                     mGameEvent[event_id].start = GameTime.GetGameTime();
                     if (data.end <= data.start)
-                        data.end = data.start + data.length;
+                        data.end = data.start + data.length * Time.Minute;
                 }
 
                 return false;
@@ -161,7 +161,7 @@ namespace Game
             {
                 data.start = GameTime.GetGameTime() - data.length * Time.Minute;
                 if (data.end <= data.start)
-                    data.end = data.start + data.length;
+                    data.end = data.start + data.length * Time.Minute;
             }
             else if (serverwide_evt)
             {
