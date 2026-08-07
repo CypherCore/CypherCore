@@ -3011,7 +3011,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.TalentMaster:
                     PlayerTalkClass.SendCloseGossip();
-                    SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.Talents);
+                    SendRespecWipeConfirm(guid, GetNextResetTalentsCost(), SpecResetType.Talents);
                     break;
                 case GossipOptionNpc.Stablemaster:
                     SetStableMaster(guid);
@@ -3019,7 +3019,7 @@ namespace Game.Entities
                     break;
                 case GossipOptionNpc.PetSpecializationMaster:
                     PlayerTalkClass.SendCloseGossip();
-                    SendRespecWipeConfirm(guid, WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost) ? 0 : GetNextResetTalentsCost(), SpecResetType.PetTalents);
+                    SendRespecWipeConfirm(guid, GetNextResetTalentsCost(), SpecResetType.PetTalents);
                     break;
                 case GossipOptionNpc.GuildBanker:
                     Guild guild = GetGuild();

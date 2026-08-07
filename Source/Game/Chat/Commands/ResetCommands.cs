@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.Achievements;
 using Game.DataStorage;
 using Game.Entities;
@@ -178,13 +177,12 @@ namespace Game.Chat
                 target.ResetTalents(true);
                 target.ResetTalentSpecialization();
                 target.SendTalentsInfoData();
-                target.SendSysMessage(CypherStrings.ResetTalents);
                 if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)
                     handler.SendSysMessage(CypherStrings.ResetTalentsOnline, handler.GetNameLink(target));
 
                 /* TODO: 6.x remove/update pet talents
                 Pet* pet = target.GetPet();
-                Pet.resetTalentsForAllPetsOf(target, pet);
+                Pet.resetTalentsForAllPetsOf(target, pet, true);
                 if (pet != null)
                     target.SendTalentsInfoData(true);
                 */

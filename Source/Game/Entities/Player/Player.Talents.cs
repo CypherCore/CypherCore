@@ -537,6 +537,9 @@ namespace Game.Entities
 
         public uint GetNextResetTalentsCost()
         {
+            if (WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost))
+                return 0;
+
             // The first time reset costs 1 gold
             if (GetTalentResetCost() < 1 * MoneyConstants.Gold)
                 return 1 * MoneyConstants.Gold;
@@ -568,25 +571,24 @@ namespace Game.Entities
             }
         }
 
-        public bool ResetTalents(bool noCost = false)
+        public void IncreaseResetTalentsCostAndCounters(uint lastResetTalentsCost)
         {
-            Global.ScriptMgr.OnPlayerTalentsReset(this, noCost);
+            if (lastResetTalentsCost > 0) // We don't want to reset the accumulated talent reset cost if we decide to temporarily enable CONFIG_NO_RESET_TALENT_COST
+                SetTalentResetCost(lastResetTalentsCost);
+
+            SetTalentResetTime(GameTime.GetGameTime());
+
+            UpdateCriteria(CriteriaType.MoneySpentOnRespecs, lastResetTalentsCost);
+            UpdateCriteria(CriteriaType.TotalRespecs, 1);
+        }
+
+        public bool ResetTalents(bool involuntarily = false)
+        {
+            Global.ScriptMgr.OnPlayerTalentsReset(this, involuntarily);
 
             // not need after this call
             if (HasAtLoginFlag(AtLoginFlags.ResetTalents))
                 RemoveAtLoginFlag(AtLoginFlags.ResetTalents, true);
-
-            uint cost = 0;
-            if (!noCost && !WorldConfig.GetBoolValue(WorldCfg.NoResetTalentCost))
-            {
-                cost = GetNextResetTalentsCost();
-
-                if (!HasEnoughMoney(cost))
-                {
-                    SendBuyError(BuyResult.NotEnoughtMoney, null, 0);
-                    return false;
-                }
-            }
 
             RemovePet(null, PetSaveMode.NotInSlot, true);
 
@@ -610,15 +612,8 @@ namespace Game.Entities
             _SaveSpells(trans);
             DB.Characters.CommitTransaction(trans);
 
-            if (!noCost)
-            {
-                ModifyMoney(-cost);
-                UpdateCriteria(CriteriaType.MoneySpentOnRespecs, cost);
-                UpdateCriteria(CriteriaType.TotalRespecs, 1);
-
-                SetTalentResetCost(cost);
-                SetTalentResetTime(GameTime.GetGameTime());
-            }
+            if (involuntarily)
+                SendPacket(new TalentsInvoluntarilyReset(false));
 
             return true;
         }

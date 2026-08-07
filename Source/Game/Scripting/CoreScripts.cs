@@ -629,7 +629,7 @@ namespace Game.Scripting
         public virtual void OnFreeTalentPointsChanged(Player player, uint points) { }
 
         // Called when a player's talent points are reset (right before the reset is done)
-        public virtual void OnTalentsReset(Player player, bool noCost) { }
+        public virtual void OnTalentsReset(Player player, bool involuntarily) { }
 
         // Called when a player's money is modified (before the modification is done)
         public virtual void OnMoneyChanged(Player player, long amount) { }

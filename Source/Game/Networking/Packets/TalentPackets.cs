@@ -97,6 +97,22 @@ namespace Game.Networking.Packets
         public SpecResetType RespecType;
     }
 
+    class TalentsInvoluntarilyReset : ServerPacket
+    {
+        bool IsPetTalents;
+
+        public TalentsInvoluntarilyReset(bool isPetTalents) : base(ServerOpcodes.TalentsInvoluntarilyReset)
+        {
+            IsPetTalents = isPetTalents;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(IsPetTalents);
+            _worldPacket.FlushBits();
+        }
+    }
+
     class LearnTalentFailed : ServerPacket
     {
         public LearnTalentFailed() : base(ServerOpcodes.LearnTalentFailed) { }

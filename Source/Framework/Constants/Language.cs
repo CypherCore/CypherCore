@@ -289,7 +289,7 @@ namespace Framework.Constants
         ResetTalentsOnline = 213,
         ResetTalentsOffline = 214,
         ResetSpells = 215,
-        ResetTalents = 216,
+        //Unused = 216,
 
         ResetallUnknownCase = 217,
         ResetallSpells = 218,
@@ -928,7 +928,7 @@ namespace Framework.Constants
         NoPetFound = 1123,
         WrongPetType = 1124,
         CommandLearnPetTalents = 1125,
-        ResetPetTalents = 1126,
+        // Unused = 1126,
         ResetPetTalentsOnline = 1127,
         TaxinodeEntryListChat = 1128,
         TaxinodeEntryListConsole = 1129,

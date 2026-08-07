@@ -1007,7 +1007,6 @@ namespace Game
                 pCurrChar.ResetTalents(true);
                 pCurrChar.ResetTalentSpecialization();
                 pCurrChar.SendTalentsInfoData();              // original talents send already in to SendInitialPacketsBeforeAddToMap, resend reset state
-                SendNotification(CypherStrings.ResetTalents);
             }
 
             bool firstLogin = pCurrChar.HasAtLoginFlag(AtLoginFlags.FirstLogin);

@@ -20,7 +20,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Reflection;
 
@@ -808,9 +807,9 @@ namespace Game.Scripting
         {
             ForEach<PlayerScript>(p => p.OnFreeTalentPointsChanged(player, newPoints));
         }
-        public void OnPlayerTalentsReset(Player player, bool noCost)
+        public void OnPlayerTalentsReset(Player player, bool involuntarily)
         {
-            ForEach<PlayerScript>(p => p.OnTalentsReset(player, noCost));
+            ForEach<PlayerScript>(p => p.OnTalentsReset(player, involuntarily));
         }
         public void OnPlayerMoneyChanged(Player player, long amount)
         {

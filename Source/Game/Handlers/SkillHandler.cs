@@ -6,7 +6,6 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
-using System;
 
 namespace Game
 {
@@ -83,14 +82,24 @@ namespace Game
             if (!unit.CanResetTalents(_player))
                 return;
 
+            long cost = _player.GetNextResetTalentsCost();
+            if (!_player.HasEnoughMoney(cost))
+                return; // // silently return, client should display the error by itself
+
             // remove fake death
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             if (!GetPlayer().ResetTalents())
+            {
+                _player.SendRespecWipeConfirm(ObjectGuid.Empty, 0, (SpecResetType)confirmRespecWipe.RespecType);
                 return;
+            }
 
+            _player.ModifyMoney(-cost);
+            _player.IncreaseResetTalentsCostAndCounters((uint)cost);
             GetPlayer().SendTalentsInfoData();
+
             unit.CastSpell(GetPlayer(), 14867, true);                  //spell: "Untalent Visual Effect"
         }
 
