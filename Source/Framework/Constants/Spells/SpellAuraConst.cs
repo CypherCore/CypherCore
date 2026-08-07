@@ -342,7 +342,7 @@ namespace Framework.Constants
         OverrideActionbarSpells = 332,
         OverrideActionbarSpellsTriggered = 333, // Spells cast with this override have no cast time or power cost
         ModAutoAttackCritChance = 334,
-        Unk335 = 335,
+        DetectVisibleWhileInvisible = 335,
         MountRestrictions = 336,
         ModVendorItemsPrices = 337,
         ModDurabilityLoss = 338,
