@@ -2786,7 +2786,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public void Cancel(SpellCastResult result = SpellCastResult.Interrupted, SpellCastResult? resultOther = null)
+        public void Cancel(SpellCastResult result = SpellCastResult.Interrupted, SpellCastResult? resultOther = null, ObjectGuid failedBy = default)
         {
             if (m_spellState == SpellState.Finished)
                 return;
@@ -2799,11 +2799,11 @@ namespace Game.Spells
             {
                 case SpellState.Preparing:
                     CancelGlobalCooldown();
-                    SendCastResult(result);
-                    SendInterrupted(result, resultOther);
+                    SendCastResult(result, null, null, failedBy);
+                    SendInterrupted(result, resultOther, failedBy);
                     break;
                 case SpellState.Launched:
-                    SendInterrupted(result, resultOther);
+                    SendInterrupted(result, resultOther, failedBy);
                     break;
                 case SpellState.Channeling:
                 {
@@ -2825,8 +2825,8 @@ namespace Game.Spells
                     SetExecutedCurrently(executed);
                 }
 
-                SendChannelUpdate(0, SpellCastResult.Interrupted);
-                SendInterrupted(result, resultOther);
+                SendChannelUpdate(0, SpellCastResult.Interrupted, failedBy);
+                SendInterrupted(result, resultOther, failedBy);
                 break;
                 default:
                     break;
@@ -3672,7 +3672,7 @@ namespace Game.Spells
                 unitCaster.AttackStop();
         }
 
-        static void FillSpellCastFailedArgs(dynamic packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2)
+        static void FillSpellCastFailedArgs(dynamic packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, ObjectGuid failedBy)
         {
             packet.CastID = castId;
             packet.SpellID = (int)spellInfo.Id;
@@ -3808,13 +3808,16 @@ namespace Game.Spells
                     packet.FailedArg1 = (int)param1;
                     break;
                 }
+                case SpellCastResult.InterruptedCombat:
+                    packet.FailedBy = failedBy;
+                    break;
                 // TODO: SPELL_FAILED_NOT_STANDING
                 default:
                     break;
             }
         }
 
-        public void SendCastResult(SpellCastResult result, int? param1 = null, int? param2 = null)
+        public void SendCastResult(SpellCastResult result, int? param1 = null, int? param2 = null, ObjectGuid failedBy = default)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -3838,7 +3841,7 @@ namespace Game.Spells
 
             CastFailed castFailed = new();
             castFailed.Visual = m_SpellVisual;
-            FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2);
+            FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, failedBy);
             receiver.SendPacket(castFailed);
         }
 
@@ -3855,7 +3858,7 @@ namespace Game.Spells
                 result = SpellCastResult.DontReport;
 
             PetCastFailed petCastFailed = new();
-            FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, param1, param2);
+            FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, param1, param2, ObjectGuid.Empty);
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
@@ -3866,7 +3869,7 @@ namespace Game.Spells
 
             CastFailed packet = new();
             packet.Visual = spellVisual;
-            FillSpellCastFailedArgs(packet, castCount, spellInfo, result, customError, param1, param2);
+            FillSpellCastFailedArgs(packet, castCount, spellInfo, result, customError, param1, param2, ObjectGuid.Empty);
             caster.SendPacket(packet);
         }
 
@@ -4420,7 +4423,7 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void SendInterrupted(SpellCastResult result, SpellCastResult? resultOther = null)
+        void SendInterrupted(SpellCastResult result, SpellCastResult? resultOther = null, ObjectGuid failedBy = default)
         {
             SpellFailure failurePacket = new();
             failurePacket.CasterUnit = m_caster.GetGUID();
@@ -4428,6 +4431,7 @@ namespace Game.Spells
             failurePacket.SpellID = m_spellInfo.Id;
             failurePacket.Visual = m_SpellVisual;
             failurePacket.Reason = (ushort)result;
+            failurePacket.FailedBy = failedBy;
             m_caster.SendMessageToSet(failurePacket, true);
 
             SpellFailedOther failedPacket = new();
@@ -4436,10 +4440,11 @@ namespace Game.Spells
             failedPacket.SpellID = m_spellInfo.Id;
             failedPacket.Visual = m_SpellVisual;
             failedPacket.Reason = (byte)resultOther.GetValueOrDefault(result);
+            failedPacket.FailedBy = failedBy;
             m_caster.SendMessageToSet(failedPacket, true);
         }
 
-        public void SendChannelUpdate(uint time, SpellCastResult? result = null)
+        public void SendChannelUpdate(uint time, SpellCastResult? result = null, ObjectGuid failedBy = default)
         {
             // GameObjects don't channel
             Unit unitCaster = m_caster.ToUnit();
@@ -4461,6 +4466,7 @@ namespace Game.Spells
                 spellEmpowerUpdate.CastID = m_castId;
                 spellEmpowerUpdate.CasterGUID = unitCaster.GetGUID();
                 spellEmpowerUpdate.TimeRemaining = TimeSpan.FromMilliseconds(time);
+                spellEmpowerUpdate.FailedBy = failedBy;
                 if (time > 0)
                     spellEmpowerUpdate.StageDurations.AddRange(m_empower.StageDurations);
                 else if (result.HasValue && result != SpellCastResult.SpellCastOk)
@@ -4475,6 +4481,7 @@ namespace Game.Spells
                 SpellChannelUpdate spellChannelUpdate = new();
                 spellChannelUpdate.CasterGUID = unitCaster.GetGUID();
                 spellChannelUpdate.TimeRemaining = (int)time;
+                spellChannelUpdate.FailedBy = failedBy;
                 unitCaster.SendMessageToSet(spellChannelUpdate, true);
             }
         }
