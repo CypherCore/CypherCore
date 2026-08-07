@@ -20,10 +20,6 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseItem, Processing = PacketProcessing.Inplace)]
         void HandleUseItem(UseItem packet)
         {
-            // ignore for remote control state
-            if (_player.GetUnitBeingMoved() != _player)
-                return;
-
             // Skip casting invalid spells right away
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
@@ -44,7 +40,7 @@ namespace Game
             Player player = GetPlayer();
 
             // ignore for remote control state
-            if (player.GetUnitBeingMoved() != player)
+            if (player.IsCharmed())
                 return;
 
             // additional check, client outputs message on its own
@@ -177,8 +173,8 @@ namespace Game
             if (obj != null)
             {
                 // ignore for remote control state
-                if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
-                    if (!(GetPlayer().IsOnVehicle(GetPlayer().GetUnitBeingMoved()) || GetPlayer().IsMounted()) && !obj.GetGoInfo().IsUsableMounted())
+                if (GetPlayer().IsCharmed())
+                    if (!(GetPlayer().IsOnVehicle(GetPlayer().GetCharmed()) || GetPlayer().IsMounted()) && !obj.GetGoInfo().IsUsableMounted())
                         return;
 
                 obj.Use(GetPlayer());
@@ -189,7 +185,7 @@ namespace Game
         void HandleGameobjectReportUse(GameObjReportUse packet)
         {
             // ignore for remote control state
-            if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
+            if (GetPlayer().IsCharmed())
                 return;
 
             GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
@@ -212,27 +208,11 @@ namespace Game
                 return;
             }
 
-            // ignore for remote control state (for player case)
-            Unit mover = _player.GetUnitBeingMoved();
-            if (mover != _player && mover.IsPlayer())
-                return;
-
-            Unit castingUnit = mover;
-            if (castingUnit.IsCreature() && !castingUnit.ToCreature().HasSpell(spellInfo.Id))
-            {
-                // If the vehicle creature does not have the spell but it allows the passenger to cast own spells
-                // change caster to player and let him cast
-                if (!GetPlayer().IsOnVehicle(castingUnit) || spellInfo.CheckVehicle(GetPlayer()) != SpellCastResult.SpellCastOk)
-                    return;
-
-                castingUnit = GetPlayer();
-            }
-
             if (castRequest.Cast.MoveUpdate != null)
                 HandleMovementOpcode(ClientOpcodes.MoveStop, castRequest.Cast.MoveUpdate);
 
-            if (_player.CanRequestSpellCast(spellInfo, castingUnit))
-                _player.RequestSpellCast(new SpellCastRequest(castRequest.Cast, castingUnit.GetGUID()));
+            if (_player.CanRequestSpellCast(spellInfo, _player))
+                _player.RequestSpellCast(new SpellCastRequest(castRequest.Cast, _player.GetGUID()));
             else
                 Spell.SendCastResult(_player, spellInfo, default, castRequest.Cast.CastID, SpellCastResult.SpellInProgress);
         }
@@ -240,6 +220,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CancelCast, Processing = PacketProcessing.ThreadSafe)]
         void HandleCancelCast(CancelCast packet)
         {
+            if (_player.IsCharmed())
+                return;
+
             if (_player.IsNonMeleeSpellCast(false))
             {
                 _player.InterruptNonMeleeSpells(false, packet.SpellID, false);
@@ -361,7 +344,7 @@ namespace Game
         {
             // ignore for remote control state (for player case)
             Unit mover = _player.GetUnitBeingMoved();
-            if (mover != _player && mover.IsTypeId(TypeId.Player))
+            if (mover == null)
                 return;
 
             var spellInfo = Global.SpellMgr.GetSpellInfo((uint)cancelChanneling.ChannelSpell, mover.GetMap().GetDifficultyID());
@@ -390,7 +373,7 @@ namespace Game
         {
             // ignore for remote control state (for player case)
             Unit mover = _player.GetUnitBeingMoved();
-            if (mover != _player && mover.IsPlayer())
+            if (mover == null)
                 return;
 
             Spell spell = mover.GetCurrentSpell(CurrentSpellTypes.Channeled);
@@ -405,7 +388,7 @@ namespace Game
         {
             // ignore for remote control state (for player case)
             Unit mover = _player.GetUnitBeingMoved();
-            if (mover != _player && mover.IsPlayer())
+            if (mover == null)
                 return;
 
             Spell spell = mover.GetCurrentSpell(CurrentSpellTypes.Channeled);
@@ -419,7 +402,7 @@ namespace Game
         void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
         {
             // ignore for remote control state
-            if (GetPlayer().GetUnitBeingMoved() != GetPlayer())
+            if (GetPlayer().IsCharmed())
                 return;
 
             byte slotId = totemDestroyed.Slot;

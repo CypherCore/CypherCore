@@ -6238,15 +6238,8 @@ namespace Game.Spells
             // Get unit state
             UnitFlags unitflag = (UnitFlags)(uint)unitCaster.m_unitData.Flags;
 
-            // this check should only be done when player does cast directly
-            // (ie not when it's called from a script) Breaks for example PlayerAI when charmed
-            /*if (!unitCaster.GetCharmerGUID().IsEmpty())
-            {
-                Unit charmer = unitCaster.GetCharmer();
-                if (charmer != null)
-                    if (charmer.GetUnitBeingMoved() != unitCaster && !CheckSpellCancelsCharm(ref param1))
-                        result = SpellCastResult.Charmed;
-            }*/
+            if (m_fromClient && unitCaster.IsCharmed() && unitCaster.IsPlayer() && !CheckSpellCancelsCharm(ref param1))
+                result = SpellCastResult.Charmed;
 
             // spell has attribute usable while having a cc state, check if caster has allowed mechanic auras, another mechanic types must prevent cast spell
             SpellCastResult mechanicCheck(AuraType auraType, ref int _param1)
