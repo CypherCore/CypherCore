@@ -4972,39 +4972,12 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
 
-            Unit target = aurApp.GetTarget();
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
 
-            if (apply)
-            {
-                target.m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);
-                target.m_invisibilityDetect.AddValue(InvisibilityType.Drunk, GetAmountAsInt());
-
-                Player playerTarget = target.ToPlayer();
-                if (playerTarget != null)
-                    playerTarget.ApplyModFakeInebriation(GetAmountAsInt(), true);
-            }
-            else
-            {
-                bool removeDetect = !target.HasAuraType(AuraType.ModFakeInebriate);
-
-                target.m_invisibilityDetect.AddValue(InvisibilityType.Drunk, -GetAmountAsInt());
-
-                Player playerTarget = target.ToPlayer();
-                if (playerTarget != null)
-                {
-                    playerTarget.ApplyModFakeInebriation(GetAmountAsInt(), false);
-
-                    if (removeDetect)
-                        removeDetect = playerTarget.GetDrunkValue() == 0;
-                }
-
-                if (removeDetect)
-                    target.m_invisibilityDetect.DelFlag(InvisibilityType.Drunk);
-            }
-
-            // call functions which may have additional effects after changing state of unit
-            if (target.IsInWorld)
-                target.UpdateObjectVisibility();
+            target.ApplyModFakeDrunkValue(GetAmountAsInt(), apply);
+            target.UpdateInvisibilityDrunkDetect();
         }
 
         [AuraEffectHandler(AuraType.OverrideSpells)]

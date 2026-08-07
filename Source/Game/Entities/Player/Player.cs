@@ -7306,29 +7306,22 @@ namespace Game.Entities
         }
 
         public byte GetDrunkValue() { return m_playerData.Inebriation; }
+        public int GetFakeDrunkValue() { return m_playerData.FakeInebriation; }
+
+        public void ApplyModFakeDrunkValue(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FakeInebriation), mod, apply); }
+
         public void SetDrunkValue(byte newDrunkValue, uint itemId = 0)
         {
-            bool isSobering = newDrunkValue < GetDrunkValue();
+            newDrunkValue = Math.Min(newDrunkValue, (byte)100);
+            if (newDrunkValue == GetDrunkValue())
+                return;
+
             DrunkenState oldDrunkenState = GetDrunkenstateByValue(GetDrunkValue());
-            if (newDrunkValue > 100)
-                newDrunkValue = 100;
-
-            // select drunk percent or total SPELL_AURA_MOD_FAKE_INEBRIATE amount, whichever is higher for visibility updates
-            int drunkPercent = (int)Math.Max(newDrunkValue, GetTotalAuraModifier(AuraType.ModFakeInebriate));
-            if (drunkPercent != 0)
-            {
-                m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);
-                m_invisibilityDetect.SetValue(InvisibilityType.Drunk, drunkPercent);
-            }
-            else if (!HasAuraType(AuraType.ModFakeInebriate) && newDrunkValue == 0)
-                m_invisibilityDetect.DelFlag(InvisibilityType.Drunk);
-
             DrunkenState newDrunkenState = GetDrunkenstateByValue(newDrunkValue);
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Inebriation), newDrunkValue);
-            UpdateObjectVisibility();
+            UpdateInvisibilityDrunkDetect();
 
-            if (!isSobering)
-                m_drunkTimer = 0;   // reset sobering timer
+            m_drunkTimer = 0; // reset sobering timer
 
             if (newDrunkenState == oldDrunkenState)
                 return;
@@ -7350,6 +7343,25 @@ namespace Game.Entities
             if (value != 0)
                 return DrunkenState.Tipsy;
             return DrunkenState.Sober;
+        }
+
+        public void UpdateInvisibilityDrunkDetect()
+        {
+            // select drunk percent or total SPELL_AURA_MOD_FAKE_INEBRIATE amount, whichever is higher for visibility updates
+            byte drunkValue = GetDrunkValue();
+            int fakeDrunkValue = GetFakeDrunkValue();
+            int maxDrunkValue = Math.Max(drunkValue, fakeDrunkValue);
+
+            if (maxDrunkValue != 0)
+            {
+                m_invisibilityDetect.AddFlag(InvisibilityType.Drunk);
+                m_invisibilityDetect.SetValue(InvisibilityType.Drunk, maxDrunkValue);
+            }
+            else
+                m_invisibilityDetect.DelFlag(InvisibilityType.Drunk);
+
+            if (IsInWorld)
+                UpdateObjectVisibility();
         }
 
         public uint GetDeathTimer() { return m_deathTimer; }
@@ -8078,7 +8090,6 @@ namespace Game.Entities
         public override void SetNativeGender(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
         public void SetPvpTitle(byte pvpTitle) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PvpTitle), pvpTitle); }
         public void SetArenaFaction(byte arenaFaction) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.ArenaFaction), arenaFaction); }
-        public void ApplyModFakeInebriation(int mod, bool apply) { ApplyModUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.FakeInebriation), mod, apply); }
         public void SetVirtualPlayerRealm(uint virtualRealmAddress) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.VirtualPlayerRealm), virtualRealmAddress); }
         public void SetCurrentBattlePetBreedQuality(byte battlePetBreedQuality) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.CurrentBattlePetBreedQuality), battlePetBreedQuality); }
 
