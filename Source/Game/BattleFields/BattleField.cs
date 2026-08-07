@@ -227,11 +227,8 @@ namespace Game.BattleFields
             if (player.IsInFlight())
                 return;
 
-            if (player.InArena() || player.GetBattleground() != null)
-            {
-                m_PlayersInQueue[player.GetTeamId()].Remove(player.GetGUID());
+            if (player.GetBattleground() == null)
                 return;
-            }
 
             // If the player does not match minimal level requirements for the battlefield, kick him
             if (player.GetLevel() < m_MinLevel)
