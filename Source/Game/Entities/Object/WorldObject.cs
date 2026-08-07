@@ -2320,7 +2320,7 @@ namespace Game.Entities
         public virtual float GetCollisionHeight() { return 0.0f; }
         public float GetMidsectionHeight() { return GetCollisionHeight() / 2.0f; }
 
-        public virtual bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects = false) { return !IsInWorld || IsDestroyedObject(); }
+        public virtual bool IsNeverVisibleFor(WorldObject seer, bool allowServersideObjects) { return !IsInWorld || IsDestroyedObject(); }
         public virtual bool IsAlwaysVisibleFor(WorldObject seer) { return false; }
         public virtual bool IsInvisibleDueToDespawn(WorldObject seer) { return false; }
         public virtual bool IsAlwaysDetectableFor(WorldObject seer) { return false; }
