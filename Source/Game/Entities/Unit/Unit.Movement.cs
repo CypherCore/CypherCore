@@ -1733,7 +1733,7 @@ namespace Game.Entities
         public bool CanFreeMove()
         {
             return !HasUnitState(UnitState.Confused | UnitState.Fleeing | UnitState.InFlight |
-                 UnitState.Root | UnitState.Stunned | UnitState.Distracted) && GetOwnerGUID().IsEmpty();
+                 UnitState.Root | UnitState.Stunned | UnitState.Distracted);
         }
 
         public void Mount(uint mount, uint VehicleId = 0, uint creatureEntry = 0)
