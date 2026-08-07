@@ -102,7 +102,6 @@ namespace Scripts.World.DuelReset
                     applySpellMod(categoryCooldown);
 
                 return remainingCooldown > TimeSpan.FromMilliseconds(0)
-                    && !cooldown.OnHold
                     && totalCooldown < TimeSpan.FromMinutes(10)
                     && categoryCooldown < TimeSpan.FromMinutes(10)
                     && remainingCooldown < TimeSpan.FromMinutes(10)

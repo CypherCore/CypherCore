@@ -155,13 +155,13 @@ namespace Game.Spells
             DateTime now = GameTime.GetSystemTime();
             foreach (var pair in _categoryCooldowns.ToList())
             {
-                if (pair.Value.CategoryEnd < now)
+                if (pair.Value.CategoryEnd < now && !pair.Value.OnHold)
                     _categoryCooldowns.Remove(pair.Key);
             }
 
             foreach (var (spellId, cooldown) in _spellCooldowns.ToList())
             {
-                if (cooldown.CooldownEnd < now)
+                if (cooldown.CooldownEnd < now && !cooldown.OnHold)
                 {
                     _categoryCooldowns.Remove(cooldown.CategoryId);
                     _spellCooldowns.Remove(spellId);
@@ -315,9 +315,6 @@ namespace Game.Spells
             TimeSpan cooldown = TimeSpan.Zero;
             TimeSpan categoryCooldown = TimeSpan.Zero;
 
-            DateTime curTime = GameTime.GetSystemTime();
-            DateTime catrecTime;
-            DateTime recTime;
             bool needsCooldownPacket = false;
 
             if (!forcedCooldown.HasValue)
@@ -326,13 +323,7 @@ namespace Game.Spells
                 cooldown = forcedCooldown.Value;
 
             // overwrite time for selected category
-            if (onHold)
-            {
-                // use +MONTH as infinite cooldown marker
-                catrecTime = categoryCooldown > TimeSpan.Zero ? (curTime + PlayerConst.InfinityCooldownDelay) : curTime;
-                recTime = cooldown > TimeSpan.Zero ? (curTime + PlayerConst.InfinityCooldownDelay) : catrecTime;
-            }
-            else
+            if (!onHold)
             {
                 if (!forcedCooldown.HasValue)
                 {
@@ -441,10 +432,11 @@ namespace Game.Spells
                 // no cooldown after applying spell mods
                 if (cooldown == TimeSpan.Zero && categoryCooldown == TimeSpan.Zero)
                     return;
-
-                catrecTime = categoryCooldown != TimeSpan.Zero ? curTime + categoryCooldown : curTime;
-                recTime = cooldown != TimeSpan.Zero ? curTime + cooldown : catrecTime;
             }
+
+            DateTime curTime = GameTime.GetSystemTime();
+            DateTime catrecTime = categoryCooldown != TimeSpan.Zero ? curTime + categoryCooldown : curTime;
+            DateTime recTime = cooldown != TimeSpan.Zero ? curTime + cooldown : catrecTime;
 
             // self spell cooldown
             if (recTime != curTime)
@@ -519,7 +511,7 @@ namespace Game.Spells
         public void ModifySpellCooldown(uint spellId, TimeSpan cooldownMod, bool withoutCategoryCooldown)
         {
             var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
-            if (cooldownEntry == null)
+            if (cooldownEntry == null || cooldownEntry.OnHold)
                 return;
 
             ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
@@ -563,7 +555,7 @@ namespace Game.Spells
         {
             foreach (var cooldownEntry in _spellCooldowns.Values)
             {
-                if (predicate(cooldownEntry))
+                if (!cooldownEntry.OnHold && predicate(cooldownEntry))
                     UpdateCooldownRecoveryRate(cooldownEntry, modChange, apply);
             }
         }
@@ -613,7 +605,7 @@ namespace Game.Spells
         {
             foreach (var cooldownEntry in _spellCooldowns.Values.ToList())
             {
-                if (predicate(cooldownEntry))
+                if (!cooldownEntry.OnHold && predicate(cooldownEntry))
                     ModifySpellCooldown(cooldownEntry, cooldownMod, withoutCategoryCooldown);
             }
         }
@@ -621,7 +613,7 @@ namespace Game.Spells
         public void ResetCooldown(uint spellId, bool update = false)
         {
             var entry = _spellCooldowns.LookupByKey(spellId);
-            if (entry == null)
+            if (entry == null || entry.OnHold)
                 return;
 
             if (update)
@@ -646,7 +638,7 @@ namespace Game.Spells
             List<uint> resetCooldowns = new();
             foreach (var pair in _spellCooldowns)
             {
-                if (predicate(pair.Value))
+                if (!pair.Value.OnHold && predicate(pair.Value))
                 {
                     resetCooldowns.Add(pair.Key);
                     ResetCooldown(pair.Key, false);
@@ -659,18 +651,7 @@ namespace Game.Spells
 
         public void ResetAllCooldowns()
         {
-            Player playerOwner = GetPlayerOwner();
-            if (playerOwner != null)
-            {
-                List<uint> cooldowns = new();
-                foreach (var id in _spellCooldowns.Keys)
-                    cooldowns.Add(id);
-
-                SendClearCooldowns(cooldowns);
-            }
-
-            _categoryCooldowns.Clear();
-            _spellCooldowns.Clear();
+            ResetCooldowns((CooldownEntry entry) => true, true);
         }
 
         public bool HasCooldown(uint spellId, uint itemId = 0)
@@ -706,12 +687,20 @@ namespace Game.Spells
             DateTime end;
             var entry = _spellCooldowns.LookupByKey(spellInfo.Id);
             if (entry != null)
+            {
+                if (entry.OnHold)
+                    return TimeSpan.MaxValue;
+
                 end = entry.CooldownEnd;
+            }
             else
             {
                 var cooldownEntry = _categoryCooldowns.LookupByKey(spellInfo.GetCategory());
                 if (cooldownEntry == null)
                     return TimeSpan.Zero;
+
+                if (cooldownEntry.OnHold)
+                    return TimeSpan.MaxValue;
 
                 end = cooldownEntry.CategoryEnd;
             }
@@ -729,6 +718,9 @@ namespace Game.Spells
             var cooldownEntry = _categoryCooldowns.LookupByKey(categoryId);
             if (cooldownEntry == null)
                 return TimeSpan.Zero;
+
+            if (cooldownEntry.OnHold)
+                return TimeSpan.MaxValue;
 
             DateTime end = cooldownEntry.CategoryEnd;
 
@@ -1053,7 +1045,8 @@ namespace Game.Spells
             TimeSpan pausedDuration = GameTime.GetSystemTime().TimeOfDay - _pauseTime.Value;
 
             foreach (var itr in _spellCooldowns)
-                itr.Value.CooldownEnd += pausedDuration;
+                if (!itr.Value.OnHold)
+                    itr.Value.CooldownEnd += pausedDuration;
 
             foreach (var itr in _categoryCharges.Keys)
             {
@@ -1152,7 +1145,7 @@ namespace Game.Spells
             categoryCooldown = tmpCategoryCooldown;
         }
 
-        void AtExitCombat()
+        public void AtExitCombat()
         {
             List<(uint, uint)> cooldownsToStart = [];
 

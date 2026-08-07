@@ -30,7 +30,6 @@ namespace Framework.Constants
 
         public const int MaxDailyQuests = 25;
 
-        public static TimeSpan InfinityCooldownDelay = TimeSpan.FromSeconds(Time.Month);  // used for set "infinity cooldowns" for spells and check
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
