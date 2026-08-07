@@ -557,14 +557,14 @@ namespace Game
             {
                 PartyMemberFullState partyMemberStats = new();
                 Player player = Global.ObjAccessor.FindConnectedPlayer(target);
-                if (player != null)
-                {
-                    partyMemberStats.Initialize(player);
-                }
-                else
+                if (player == null || player.GetGroup() == null || GetPlayer().GetGroup() == null || (player.GetGroup() != GetPlayer().GetGroup()))
                 {
                     partyMemberStats.MemberGuid = target;
                     partyMemberStats.MemberStats.Status = GroupMemberOnlineStatus.Offline;
+                }
+                else
+                {
+                    partyMemberStats.Initialize(player);
                 }
                 SendPacket(partyMemberStats);
             }
