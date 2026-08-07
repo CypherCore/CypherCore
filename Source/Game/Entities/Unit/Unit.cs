@@ -2486,7 +2486,7 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StandState), (byte)state);
 
-            if (IsStandState())
+            if (state == UnitStandStateType.Stand)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Standing);
 
             if (IsTypeId(TypeId.Player))

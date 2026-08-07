@@ -4274,7 +4274,7 @@ namespace Game.Entities
                 return;
 
             // Sitdown on apply aura req seated
-            if (aura.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing) && IsStandState())
+            if (aura.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing) && GetStandState() == UnitStandStateType.Stand)
                 SetStandState(UnitStandStateType.Sit);
 
             Unit caster = aura.GetCaster();
