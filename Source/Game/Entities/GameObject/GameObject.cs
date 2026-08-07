@@ -325,6 +325,31 @@ namespace Game.Entities
                         m_invisibility.AddFlag(InvisibilityType.Trap);
                         m_invisibility.AddValue(InvisibilityType.Trap, 300);
                     }
+
+                    m_goValue.Trap.TargetSearcherCheckType = SpellTargetCheckTypes.Enemy;
+                    SpellInfo trapSpell = Global.SpellMgr.GetSpellInfo(goInfo.Trap.spell, map.GetDifficultyID());
+                    if (trapSpell != null)
+                    {
+                        // positive spells may require enemy targets
+                        if (trapSpell.IsPositive())
+                        {
+                            bool targetsAlly = false;
+                            bool targetsEnemy = false;
+                            bool isAllyTarget(SpellImplicitTargetInfo targetInfo) => targetInfo.GetObjectType() == SpellTargetObjectTypes.Unit && targetInfo.GetCheckType() == SpellTargetCheckTypes.Ally;
+                            bool isEnemyTarget(SpellImplicitTargetInfo targetInfo) => targetInfo.GetObjectType() == SpellTargetObjectTypes.Unit && targetInfo.GetCheckType() == SpellTargetCheckTypes.Enemy;
+
+                            foreach (SpellEffectInfo spellEffectInfo in trapSpell.GetEffects())
+                            {
+                                if (!spellEffectInfo.IsEffect())
+                                    continue;
+
+                                targetsAlly = targetsAlly || isAllyTarget(spellEffectInfo.TargetA) || isAllyTarget(spellEffectInfo.TargetB);
+                                targetsEnemy = targetsEnemy || isEnemyTarget(spellEffectInfo.TargetA) || isEnemyTarget(spellEffectInfo.TargetB);
+                            }
+                            if (targetsAlly)
+                                m_goValue.Trap.TargetSearcherCheckType = targetsEnemy ? SpellTargetCheckTypes.Default : SpellTargetCheckTypes.Ally;
+                        }
+                    }
                     break;
                 case GameObjectTypes.ControlZone:
                     m_goTypeImpl = new ControlZone(this);
@@ -638,11 +663,22 @@ namespace Game.Entities
                             // @todo this hack with search required until GO casting not implemented
                             if (GetOwner() != null || goInfo.Trap.Checkallunits != 0)
                             {
-                                // Hunter trap: Search units which are unfriendly to the trap's owner
-                                var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, radius);
-                                var searcher = new UnitLastSearcher(this, checker);
-                                Cell.VisitAllObjects(this, searcher, radius);
-                                target = searcher.GetResult();
+                                // summoned traps: Search targets fit to trap spell data
+                                SpellInfo trapSpell = Global.SpellMgr.GetSpellInfo(goInfo.Trap.spell, GetMap().GetDifficultyID());
+                                if (trapSpell != null)
+                                {
+                                    WorldObjectSpellNearbyTargetCheck checker = new(radius, this, trapSpell, m_goValue.Trap.TargetSearcherCheckType, null, SpellTargetObjectTypes.Unit);
+                                    WorldObjectLastSearcher searcher = new(this, checker, GridMapTypeMask.Creature | GridMapTypeMask.Player);
+                                    Cell.VisitAllObjects(this, searcher, radius);
+                                    target = searcher.GetResult()?.ToUnit();
+                                }
+                                else
+                                {
+                                    NearestAttackableNoTotemUnitInObjectRangeCheck checker = new(this, radius);
+                                    UnitLastSearcher searcher = new(this, checker);
+                                    Cell.VisitAllObjects(this, searcher, radius);
+                                    target = searcher.GetResult();
+                                }
                             }
                             else
                             {
@@ -4107,6 +4143,8 @@ namespace Game.Entities
 
     public struct GameObjectValue
     {
+        public trap Trap;
+
         public transport Transport;
 
         public fishinghole FishingHole;
@@ -4114,6 +4152,12 @@ namespace Game.Entities
         public building Building;
 
         public capturePoint CapturePoint;
+
+        //6 GAMEOBJECT_TYPE_TRAP
+        public struct trap
+        {
+            public SpellTargetCheckTypes TargetSearcherCheckType;
+        }
 
         //11 GAMEOBJECT_TYPE_TRANSPORT
         public struct transport
