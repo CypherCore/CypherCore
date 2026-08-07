@@ -2656,7 +2656,7 @@ namespace Game.Spells
                         unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
                         m_UniqueTargetInfo.Find(p => p.TargetGUID == unitTarget.GetGUID()).ProcHitMask |= ProcFlagsHit.Interrupt;
                         SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
-                        unitTarget.InterruptSpell(i, false);
+                        unitTarget.InterruptSpell(i, false, false, SpellCastResult.Interrupted, SpellCastResult.DontReport);
                     }
                 }
             }

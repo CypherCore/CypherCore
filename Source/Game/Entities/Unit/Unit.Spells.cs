@@ -2752,7 +2752,7 @@ namespace Game.Entities
             if (GetCurrentSpell(CurrentSpellTypes.Channeled) != null && (spell_id == 0 || m_currentSpells[CurrentSpellTypes.Channeled].m_spellInfo.Id == spell_id))
                 InterruptSpell(CurrentSpellTypes.Channeled, true, true);
         }
-        public void InterruptSpell(CurrentSpellTypes spellType, bool withDelayed = true, bool withInstant = true)
+        public void InterruptSpell(CurrentSpellTypes spellType, bool withDelayed = true, bool withInstant = true, SpellCastResult result = SpellCastResult.Interrupted, SpellCastResult? resultOther = null)
         {
             Cypher.Assert(spellType < CurrentSpellTypes.Max);
 
@@ -2772,7 +2772,7 @@ namespace Game.Entities
                         ToPlayer().SendAutoRepeatCancel(this);
 
                 if (spell.GetState() != SpellState.Finished)
-                    spell.Cancel();
+                    spell.Cancel(result, resultOther);
                 else
                 {
                     m_currentSpells[spellType] = null;

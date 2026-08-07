@@ -2785,7 +2785,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public void Cancel()
+        public void Cancel(SpellCastResult result = SpellCastResult.Interrupted, SpellCastResult? resultOther = null)
         {
             if (m_spellState == SpellState.Finished)
                 return;
@@ -2798,10 +2798,11 @@ namespace Game.Spells
             {
                 case SpellState.Preparing:
                     CancelGlobalCooldown();
-                    SendCastResult(SpellCastResult.Interrupted);
+                    SendCastResult(result);
+                    SendInterrupted(result, resultOther);
                     break;
                 case SpellState.Launched:
-                    SendInterrupted((byte)SpellCastResult.Interrupted);
+                    SendInterrupted(result, resultOther);
                     break;
                 case SpellState.Channeling:
                 {
@@ -2824,7 +2825,7 @@ namespace Game.Spells
                 }
 
                 SendChannelUpdate(0, SpellCastResult.Interrupted);
-                SendInterrupted((byte)SpellCastResult.Interrupted);
+                SendInterrupted(result, resultOther);
                 break;
                 default:
                     break;
@@ -2929,7 +2930,7 @@ namespace Game.Spells
                 void cleanupSpell(SpellCastResult result, int? param1 = null, int? param2 = null)
                 {
                     SendCastResult(result, param1, param2);
-                    SendInterrupted(0);
+                    SendInterrupted(result);
 
                     if (modOwner != null)
                         modOwner.SetSpellModTakingSpell(this, false);
@@ -3014,7 +3015,7 @@ namespace Game.Spells
             // Spell may be finished after target map check
             if (m_spellState == SpellState.Finished)
             {
-                SendInterrupted(0);
+                SendInterrupted(SpellCastResult.DontReport);
 
                 if (m_caster.IsTypeId(TypeId.Player))
                     m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
@@ -4418,14 +4419,14 @@ namespace Game.Spells
             GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void SendInterrupted(byte result)
+        void SendInterrupted(SpellCastResult result, SpellCastResult? resultOther = null)
         {
             SpellFailure failurePacket = new();
             failurePacket.CasterUnit = m_caster.GetGUID();
             failurePacket.CastID = m_castId;
             failurePacket.SpellID = m_spellInfo.Id;
             failurePacket.Visual = m_SpellVisual;
-            failurePacket.Reason = result;
+            failurePacket.Reason = (ushort)result;
             m_caster.SendMessageToSet(failurePacket, true);
 
             SpellFailedOther failedPacket = new();
@@ -4433,7 +4434,7 @@ namespace Game.Spells
             failedPacket.CastID = m_castId;
             failedPacket.SpellID = m_spellInfo.Id;
             failedPacket.Visual = m_SpellVisual;
-            failedPacket.Reason = result;
+            failedPacket.Reason = (byte)resultOther.GetValueOrDefault(result);
             m_caster.SendMessageToSet(failedPacket, true);
         }
 
