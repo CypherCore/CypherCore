@@ -318,7 +318,11 @@ namespace Game
                         Log.outDebug(LogFilter.Maps, $"MAP: Player '{player.GetName()}' has corpse in instance {at.Loc.GetMapId()} and can enter.");
                     }
                     else
+                    {
                         Log.outDebug(LogFilter.Maps, $"Map::CanPlayerEnter - player '{player.GetName()}' is dead but does not have a corpse!");
+                        SendPacket(new AreaTriggerNoCorpse());
+                        return;
+                    }
                 }
 
                 TransferAbortParams denyReason = Map.PlayerCannotEnter(at.Loc.GetMapId(), player);
