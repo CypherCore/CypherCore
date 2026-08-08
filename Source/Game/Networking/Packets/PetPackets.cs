@@ -336,7 +336,21 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid UnitGUID;
-        public PetTalk Action;
+        public Framework.Constants.PetAction Action;
+    }
+
+    class PetDismissSound() : ServerPacket(ServerOpcodes.PetDismissSound)
+    {
+        public ObjectGuid UnitGUID;
+        public int CreatureDisplayInfoID;
+        public Position ModelPosition;
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(UnitGUID);
+            _worldPacket.WriteInt32(CreatureDisplayInfoID);
+            _worldPacket.Write(ModelPosition);
+        }
     }
 
     class PetTameFailure : ServerPacket

@@ -38,7 +38,7 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.PetAction)]
-        void HandlePetAction(PetAction packet)
+        void HandlePetAction(Networking.Packets.PetAction packet)
         {
             if (_player.IsMounted())
                 return;
@@ -195,8 +195,8 @@ namespace Game
                                         AI.AttackStart(TargetUnit);
 
                                     //10% chance to play special pet attack talk, else growl
-                                    if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != TargetUnit && RandomHelper.IRand(0, 100) < 10)
-                                        pet.SendPetTalk(PetTalk.Attack);
+                                    if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != TargetUnit && RandomHelper.randChance(10))
+                                        pet.SendPetActionSound(Framework.Constants.PetAction.Attack);
                                     else
                                     {
                                         // 90% chance for pet and 100% chance for charmed creature
@@ -228,7 +228,10 @@ namespace Game
                                     if (pet.ToPet().GetPetType() == PetType.Hunter)
                                         GetPlayer().RemovePet(pet.ToPet(), PetSaveMode.AsDeleted);
                                     else
+                                    {
+                                        pet.SendPetDismissSound();
                                         GetPlayer().RemovePet(pet.ToPet(), PetSaveMode.NotInSlot);
+                                    }
                                 }
                                 else if (pet.HasUnitTypeMask(UnitTypeMask.Minion))
                                 {
@@ -344,8 +347,8 @@ namespace Game
 
                         //10% chance to play special pet attack talk, else growl
                         //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                        if (pet.IsPet() && (pet.ToPet().GetPetType() == PetType.Summon) && (pet != unit_target) && (RandomHelper.IRand(0, 100) < 10))
-                            pet.SendPetTalk(PetTalk.SpecialSpell);
+                        if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != unit_target && RandomHelper.randChance(10))
+                            pet.SendPetActionSound(Framework.Constants.PetAction.SpecialSpell);
                         else
                         {
                             pet.SendPetAIReaction(guid1);
@@ -727,10 +730,10 @@ namespace Game
                     Pet pet = creature.ToPet();
                     if (pet != null)
                     {
-                        // 10% chance to play special pet attack talk, else growl
+                        // 10% chance to play special pet attack sound, else growl
                         // actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                        if (pet.GetPetType() == PetType.Summon && (RandomHelper.IRand(0, 100) < 10))
-                            pet.SendPetTalk(PetTalk.SpecialSpell);
+                        if (pet.GetPetType() == PetType.Summon && RandomHelper.randChance(10))
+                            pet.SendPetActionSound(Framework.Constants.PetAction.SpecialSpell);
                         else
                             pet.SendPetAIReaction(petCastSpell.PetGUID);
                     }

@@ -693,16 +693,23 @@ namespace Game.Entities
             owner.ToPlayer().SendPacket(petActionFeedback);
         }
 
-        public void SendPetTalk(PetTalk pettalk)
+        public void SendPetActionSound(Framework.Constants.PetAction pettalk)
         {
-            Unit owner = GetOwner();
-            if (owner == null || !owner.IsTypeId(TypeId.Player))
-                return;
+            PetActionSound petActionSound = new()
+            {
+                UnitGUID = GetGUID(),
+                Action = pettalk
+            };
+            SendMessageToSet(petActionSound, false);
+        }
 
-            PetActionSound petActionSound = new();
-            petActionSound.UnitGUID = GetGUID();
-            petActionSound.Action = pettalk;
-            owner.ToPlayer().SendPacket(petActionSound);
+        public void SendPetDismissSound()
+        {
+            PetDismissSound petDismissSound = new();
+            petDismissSound.UnitGUID = GetGUID();
+            petDismissSound.CreatureDisplayInfoID = (int)GetNativeDisplayId();
+            petDismissSound.ModelPosition = GetPosition();
+            SendMessageToSet(petDismissSound, false);
         }
 
         public void SendPetAIReaction(ObjectGuid guid)
@@ -767,7 +774,7 @@ namespace Game.Entities
 
             pet.SetCreatorGUID(GetGUID());
             pet.SetFaction(GetFaction());
-            pet.SetCreatedBySpell(spell_id);            
+            pet.SetCreatedBySpell(spell_id);
             pet.SetUnitFlag(UnitFlags.PlayerControlled);
 
             if (!pet.InitStatsForLevel(level))

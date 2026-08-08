@@ -63,7 +63,7 @@ namespace Framework.Constants
         NoPath = 4
     }
 
-    public enum PetTalk
+    public enum PetAction
     {
         SpecialSpell = 0,
         Attack = 1
