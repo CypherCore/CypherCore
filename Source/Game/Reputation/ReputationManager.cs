@@ -90,7 +90,12 @@ namespace Game
 
         public int GetBaseReputation(FactionRecord factionEntry)
         {
-            int dataIndex = GetFactionDataIndexForRaceAndClass(factionEntry);
+            return GetBaseReputation(factionEntry, _player.GetRace(), _player.GetClass());
+        }
+
+        public static int GetBaseReputation(FactionRecord factionEntry, Race race, Class playerClass)
+        {
+            int dataIndex = GetFactionDataIndexForRaceAndClass(factionEntry, race, playerClass);
             if (dataIndex < 0)
                 return 0;
 
@@ -795,10 +800,15 @@ namespace Game
 
         int GetFactionDataIndexForRaceAndClass(FactionRecord factionEntry)
         {
+            return GetFactionDataIndexForRaceAndClass(factionEntry, _player.GetRace(), _player.GetClass());
+        }
+
+        public static int GetFactionDataIndexForRaceAndClass(FactionRecord factionEntry, Race race, Class playerClass)
+        {
             if (factionEntry == null)
                 return -1;
 
-            short classMask = (short)_player.GetClassMask();
+            uint classMask = 1u << ((int)playerClass - 1);
 
             RaceMask<int>[] reputationRaceMask =
             [
@@ -810,7 +820,7 @@ namespace Game
 
             for (int i = 0; i < 4; i++)
             {
-                if ((reputationRaceMask[i].IsEmpty() || reputationRaceMask[i].HasRace(_player.GetRace()))
+                if ((reputationRaceMask[i].IsEmpty() || reputationRaceMask[i].HasRace(race))
                     && (factionEntry.ReputationClassMask[i] == 0 || (factionEntry.ReputationClassMask[i] & classMask) != 0))
                     return i;
             }
