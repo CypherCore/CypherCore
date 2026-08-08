@@ -1680,7 +1680,7 @@ class spell_sha_item_lightning_shield_trigger : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        GetTarget().CastSpell(GetTarget(), SpellIds.ItemLightningShieldDamage, new CastSpellExtraArgs()
+        eventInfo.GetActionTarget().CastSpell(eventInfo.GetActor(), SpellIds.ItemLightningShieldDamage, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.FullMask,
             TriggeringAura = aurEff
