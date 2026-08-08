@@ -3128,8 +3128,16 @@ namespace Game.Entities
             GetAI().OnLootStateChanged((uint)state, unit);
 
             // Start restock timer if the chest is partially looted or not looted at all
-            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated && GetGoInfo().Chest.chestRestockTime > 0 && m_restockTime == 0 && loot != null && loot.IsChanged())
-                m_restockTime = GameTime.GetGameTime() + GetGoInfo().Chest.chestRestockTime;
+            if (GetGoType() == GameObjectTypes.Chest && state == LootState.Activated)
+            {
+                GameObjectTemplate goInfo = GetGoInfo();
+                if (goInfo.Chest.chestRestockTime > 0 && m_restockTime == 0 && loot != null && loot.IsChanged())
+                    m_restockTime = GameTime.GetGameTime() + goInfo.Chest.chestRestockTime;
+
+                // If world chests were opened, despawn them after 5 minutes
+                if (goInfo.Chest.chestRestockTime == 0 && GetMap().IsWorldMap())
+                    DespawnOrUnsummon(TimeSpan.FromMinutes(5));
+            }
 
             // only set collision for doors on SetGoState
             if (GetGoType() == GameObjectTypes.Door)

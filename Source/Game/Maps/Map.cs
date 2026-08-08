@@ -3345,6 +3345,11 @@ namespace Game.Maps
             return i_mapRecord != null && i_mapRecord.Instanceable();
         }
 
+        public bool IsWorldMap()
+        {
+            return i_mapRecord != null && i_mapRecord.IsWorldMap();
+        }
+
         public bool IsDungeon()
         {
             return i_mapRecord != null && i_mapRecord.IsDungeon();
