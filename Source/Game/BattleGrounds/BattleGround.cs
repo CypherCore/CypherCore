@@ -52,6 +52,10 @@ namespace Game.BattleGrounds
                 m_Map = null;
             }
 
+            // Clear Group::m_bgGroup, Group might later reference it in its own destructor
+            foreach (Group bgRaid in m_BgRaids)
+                bgRaid?.SetBattlegroundGroup(null);
+
             // remove from bg free slot queue
             RemoveFromBGFreeSlotQueue();
         }
@@ -1122,6 +1126,8 @@ namespace Game.BattleGrounds
                 m_InBGFreeSlotQueue = false;
             }
         }
+
+        public void RemoveFromBGFreeSlotQueueOnShutdown() { m_InBGFreeSlotQueue = false; }
 
         // get the number of free slots for team
         // returns the number how many players can join Battleground to MaxPlayersPerTeam

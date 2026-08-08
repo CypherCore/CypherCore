@@ -24,7 +24,10 @@ namespace Game.BattleGrounds
         {
             foreach (var data in bgDataStore.Values.ToList())
                 while (!data.m_Battlegrounds.Empty())
+                {
+                    data.m_Battlegrounds.First().Value.RemoveFromBGFreeSlotQueueOnShutdown();
                     data.m_Battlegrounds.First().Value.Dispose();
+                }
 
             bgDataStore.Clear();
 
@@ -694,15 +697,9 @@ namespace Game.BattleGrounds
 
         public void RemoveFromBGFreeSlotQueue(uint mapId, uint instanceId)
         {
-            var queues = m_BGFreeSlotQueue[mapId];
-            foreach (var bg in queues)
-            {
-                if (bg.GetInstanceID() == instanceId)
-                {
-                    queues.Remove(bg);
-                    return;
-                }
-            }
+            var freeSlotQueue = m_BGFreeSlotQueue.LookupByKey(mapId);
+            if (freeSlotQueue != null)
+                freeSlotQueue.RemoveAll(bg => bg.GetInstanceID() == instanceId);
         }
 
         public void AddBattleground(Battleground bg)
