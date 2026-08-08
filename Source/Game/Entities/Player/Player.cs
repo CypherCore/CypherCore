@@ -568,8 +568,6 @@ namespace Game.Entities
 
                 InitializeSelfResurrectionSpells();
 
-                FailQuestsWithFlag(QuestFlags.CompletionNoDeath);
-
                 UpdateCriteria(CriteriaType.DieOnMap, 1);
                 UpdateCriteria(CriteriaType.DieAnywhere, 1);
                 UpdateCriteria(CriteriaType.DieInInstance, 1);
@@ -4122,6 +4120,8 @@ namespace Game.Entities
             if (HasSpell(20585))
                 CastSpell(this, 20584, true);
             CastSpell(this, 8326, true);
+
+            FailQuestsWithFlag(QuestFlags.CompletionNoDeath);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Release);
 
