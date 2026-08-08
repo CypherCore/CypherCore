@@ -649,7 +649,7 @@ class spell_hun_manhunter : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget().IsPlayer();
+        return eventInfo.GetActionTarget().IsPlayer();
     }
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)

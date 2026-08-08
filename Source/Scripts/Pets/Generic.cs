@@ -166,7 +166,7 @@ namespace Scripts.Pets.Generic
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            return eventInfo.GetProcTarget().IsPlayer();
+            return eventInfo.GetActionTarget().IsPlayer();
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

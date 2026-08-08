@@ -208,11 +208,6 @@ class spell_dru_astral_smolder : AuraScript
             && Global.SpellMgr.GetSpellInfo(SpellIds.AstralSmolderDamage, Difficulty.None).GetEffect(0).GetPeriodicTickCount() != 0;
     }
 
-    bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
-    {
-        return eventInfo.GetProcTarget() != null;
-    }
-
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
@@ -224,12 +219,11 @@ class spell_dru_astral_smolder : AuraScript
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
-        GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.AstralSmolderDamage, args);
+        GetTarget().CastSpell(eventInfo.GetActionTarget(), SpellIds.AstralSmolderDamage, args);
     }
 
     public override void Register()
     {
-        DoCheckEffectProc.Add(new(CheckProc, 0, AuraType.Dummy));
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
     }
 }
@@ -1938,7 +1932,7 @@ class spell_dru_t3_6p_bonus : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.BlessingOfTheClaw, aurEff);
+        eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.BlessingOfTheClaw, aurEff);
     }
 
     public override void Register()
@@ -2018,7 +2012,7 @@ class spell_dru_t10_balance_4p_bonus : AuraScript
             return;
 
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         SpellEffectInfo spellEffect = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty()).GetEffect(0);
         double amount = MathFunctions.CalculatePct((int)(damageInfo.GetDamage()), aurEff.GetAmount());
@@ -2100,7 +2094,7 @@ class spell_dru_t10_restoration_4p_bonus_dummy : AuraScript
         if (caster == null)
             return false;
 
-        return caster.GetGroup() != null || caster != eventInfo.GetProcTarget();
+        return caster.GetGroup() != null || caster != eventInfo.GetActionTarget();
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

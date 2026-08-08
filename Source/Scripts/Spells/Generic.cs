@@ -1772,7 +1772,7 @@ class spell_ethereal_pet_aura : AuraScript
 {
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        uint levelDiff = (uint)Math.Abs(GetTarget().GetLevel() - eventInfo.GetProcTarget().GetLevel());
+        uint levelDiff = (uint)Math.Abs(GetTarget().GetLevel() - eventInfo.GetActionTarget().GetLevel());
         return levelDiff <= 9;
     }
 
@@ -1786,7 +1786,7 @@ class spell_ethereal_pet_aura : AuraScript
             if (minion.IsAIEnabled())
             {
                 minion.GetAI().Talk(MiscConst.SayStealEssence);
-                minion.CastSpell(eventInfo.GetProcTarget(), SpellIds.StealEssenceVisual);
+                minion.CastSpell(eventInfo.GetActionTarget(), SpellIds.StealEssenceVisual);
             }
         }
     }
@@ -2350,7 +2350,7 @@ class spell_gen_interrupt : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.GenThrowInterrupt, aurEff);
+        GetTarget().CastSpell(eventInfo.GetActionTarget(), SpellIds.GenThrowInterrupt, aurEff);
     }
 
     public override void Register()

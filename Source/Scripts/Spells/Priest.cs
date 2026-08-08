@@ -346,24 +346,26 @@ class spell_pri_aq_3p_bonus : AuraScript
         return ValidateSpellInfo(SpellIds.OracularHeal);
     }
 
+    bool CheckProc(ProcEventInfo eventInfo)
+    {
+        if (eventInfo.GetActor() == eventInfo.GetActionTarget())
+            return false;
+
+        HealInfo healInfo = eventInfo.GetHealInfo();
+        return healInfo != null && healInfo.GetHeal() != 0;
+    }
+
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        Unit caster = eventInfo.GetActor();
-        if (caster == eventInfo.GetProcTarget())
-            return;
-
-        HealInfo healInfo = eventInfo.GetHealInfo();
-        if (healInfo == null || healInfo.GetHeal() == 0)
-            return;
-
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct((int)(healInfo.GetHeal()), 10));
-        caster.CastSpell(caster, SpellIds.OracularHeal, args);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, MathFunctions.CalculatePct((int)eventInfo.GetHealInfo().GetHeal(), 10));
+        eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.OracularHeal, args);
     }
 
     public override void Register()
     {
+        DoCheckProc.Add(new(CheckProc));
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
     }
 }
@@ -671,14 +673,12 @@ class spell_pri_blaze_of_light : AuraScript
 
     void HandleProc(ProcEventInfo eventInfo)
     {
-        Unit procTarget = eventInfo.GetProcTarget();
-        if (procTarget == null)
-            return;
+        Unit procTarget = eventInfo.GetActionTarget();
 
-        if (GetTarget().IsValidAttackTarget(procTarget))
-            GetTarget().CastSpell(procTarget, SpellIds.BlazeOfLightDecrease, (TriggerCastFlags.CastDirectly | TriggerCastFlags.IgnoreCastInProgress));
-        else
-            GetTarget().CastSpell(procTarget, SpellIds.BlazeOfLightIncrease, (TriggerCastFlags.CastDirectly | TriggerCastFlags.IgnoreCastInProgress));
+        GetTarget().CastSpell(procTarget, GetTarget().IsValidAttackTarget(procTarget)
+            ? SpellIds.BlazeOfLightDecrease
+            : SpellIds.BlazeOfLightIncrease,
+            TriggerCastFlags.CastDirectly | TriggerCastFlags.IgnoreCastInProgress);
     }
 
     public override void Register()
@@ -1467,12 +1467,12 @@ class spell_pri_holy_mending : AuraScript
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        return procInfo.GetProcTarget().HasAura(SpellIds.Renew, procInfo.GetActor().GetGUID());
+        return procInfo.GetActionTarget().HasAura(SpellIds.Renew, procInfo.GetActor().GetGUID());
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.HolyMendingHeal, new CastSpellExtraArgs(aurEff));
+        eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.HolyMendingHeal, new CastSpellExtraArgs(aurEff));
     }
 
     public override void Register()
@@ -2269,11 +2269,12 @@ class spell_pri_divine_aegis : AuraScript
         CastSpellExtraArgs args = new(aurEff);
         args.SetTriggerFlags(TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.DontReportCastError);
         args.AddSpellMod(SpellValueModFloat.BasePoint0, aegisAmount);
-        caster.CastSpell(eventInfo.GetProcTarget(), SpellIds.DivineAegisAbsorb, args);
+        caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.DivineAegisAbsorb, args);
     }
 
     public override void Register()
     {
+        DoCheckProc.Add(new(CheckProc));
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
     }
 }
@@ -2550,12 +2551,12 @@ class spell_pri_protective_light : AuraScript
 {
     bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() == GetCaster();
+        return eventInfo.GetActionTarget() == eventInfo.GetActor();
     }
 
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        GetCaster().CastSpell(GetCaster(), SpellIds.ProtectiveLightAura, aurEff);
+        eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.ProtectiveLightAura, aurEff);
     }
 
     public override void Register()
@@ -3256,7 +3257,7 @@ class spell_pri_t3_4p_bonus : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.ArmorOfFaith, aurEff);
+        eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.ArmorOfFaith, aurEff);
     }
 
     public override void Register()
@@ -3309,21 +3310,23 @@ class spell_pri_t10_heal_2p_bonus : AuraScript
             && Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
+    bool CheckProc(ProcEventInfo eventInfo)
+    {
+        HealInfo healInfo = eventInfo.GetHealInfo();
+        return healInfo != null && healInfo.GetHeal() != 0;
+    }
+
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
 
-        HealInfo healInfo = eventInfo.GetHealInfo();
-        if (healInfo == null || healInfo.GetHeal() == 0)
-            return;
-
         SpellEffectInfo hotEffect = Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, GetCastDifficulty()).GetEffect(0);
-        double amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
         amount /= hotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
@@ -3332,6 +3335,7 @@ class spell_pri_t10_heal_2p_bonus : AuraScript
 
     public override void Register()
     {
+        DoCheckProc.Add(new(CheckProc));
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
     }
 }
@@ -3504,7 +3508,7 @@ class spell_pri_twist_of_fate : AuraScript
 {
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget().GetHealthPct() < aurEff.GetAmount();
+        return eventInfo.GetActionTarget().GetHealthPct() < aurEff.GetAmount();
     }
 
     public override void Register()

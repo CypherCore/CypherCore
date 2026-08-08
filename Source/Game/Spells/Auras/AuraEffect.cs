@@ -5684,7 +5684,7 @@ namespace Game.Spells
         void HandleProcTriggerSpellAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit triggerCaster = aurApp.GetTarget();
-            Unit triggerTarget = eventInfo.GetProcTarget();
+            Unit triggerTarget = triggerCaster == eventInfo.GetActor() ? eventInfo.GetActionTarget() : eventInfo.GetActor();
             if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
                 triggerTarget = eventInfo.GetActor();
 
@@ -5710,7 +5710,7 @@ namespace Game.Spells
         void HandleProcTriggerSpellWithValueAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit triggerCaster = aurApp.GetTarget();
-            Unit triggerTarget = eventInfo.GetProcTarget();
+            Unit triggerTarget = triggerCaster == eventInfo.GetActor() ? eventInfo.GetActionTarget() : eventInfo.GetActor();
             if (GetSpellInfo().HasAttribute(SpellAttr8.TargetProcsOnCaster) && eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
                 triggerTarget = eventInfo.GetActor();
 
@@ -5738,7 +5738,7 @@ namespace Game.Spells
         void HandleProcTriggerDamageAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit target = aurApp.GetTarget();
-            Unit triggerTarget = eventInfo.GetProcTarget();
+            Unit triggerTarget = target == eventInfo.GetActor() ? eventInfo.GetActionTarget() : eventInfo.GetActor();
             if (triggerTarget.IsImmunedToDamage(target, GetSpellInfo(), GetSpellEffectInfo()))
             {
                 SendTickImmune(triggerTarget, target);

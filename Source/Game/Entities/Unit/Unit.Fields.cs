@@ -150,12 +150,11 @@ namespace Game.Entities
 
     public class ProcEventInfo
     {
-        public ProcEventInfo(Unit actor, Unit actionTarget, Unit procTarget, ProcFlagsInit typeMask, ProcFlagsSpellType spellTypeMask,
+        public ProcEventInfo(Unit actor, Unit actionTarget, ProcFlagsInit typeMask, ProcFlagsSpellType spellTypeMask,
             ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             _actor = actor;
             _actionTarget = actionTarget;
-            _procTarget = procTarget;
             _typeMask = typeMask;
             _spellTypeMask = spellTypeMask;
             _spellPhaseMask = spellPhaseMask;
@@ -167,7 +166,6 @@ namespace Game.Entities
 
         public Unit GetActor() { return _actor; }
         public Unit GetActionTarget() { return _actionTarget; }
-        public Unit GetProcTarget() { return _procTarget; }
 
         public ProcFlagsInit GetTypeMask() { return _typeMask; }
         public ProcFlagsSpellType GetSpellTypeMask() { return _spellTypeMask; }
@@ -204,7 +202,6 @@ namespace Game.Entities
 
         Unit _actor;
         Unit _actionTarget;
-        Unit _procTarget;
         ProcFlagsInit _typeMask;
         ProcFlagsSpellType _spellTypeMask;
         ProcFlagsSpellPhase _spellPhaseMask;

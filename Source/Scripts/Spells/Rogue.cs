@@ -233,7 +233,7 @@ class spell_rog_blade_flurry : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        _procTarget = GetTarget().SelectNearbyTarget(eventInfo.GetProcTarget());
+        _procTarget = GetTarget().SelectNearbyTarget(eventInfo.GetActionTarget());
         return _procTarget != null && eventInfo.GetDamageInfo() != null;
     }
 

@@ -1033,7 +1033,7 @@ class spell_sha_earthen_rage_passive : AuraScript
     void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        _procTargetGuid = eventInfo.GetProcTarget().GetGUID();
+        _procTargetGuid = eventInfo.GetActionTarget().GetGUID();
         eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.EarthenRagePeriodic, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.FullMask
@@ -1656,7 +1656,7 @@ class spell_sha_item_lightning_shield : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ItemLightningShield, new CastSpellExtraArgs()
+        GetTarget().CastSpell(eventInfo.GetActionTarget(), SpellIds.ItemLightningShield, new CastSpellExtraArgs()
         {
             TriggerFlags = TriggerCastFlags.FullMask,
             TriggeringAura = aurEff
@@ -2206,7 +2206,7 @@ class spell_sha_mastery_elemental_overload : AuraScript
 
         Unit caster = procInfo.GetActor();
 
-        var targets = new CastSpellTargetArg(procInfo.GetProcTarget());
+        var targets = new CastSpellTargetArg(procInfo.GetActionTarget());
         var overloadSpellId = GetTriggeredSpellId(procInfo.GetSpellInfo().Id);
         var originalCastId = procInfo.GetProcSpell().m_castId;
         caster.m_Events.AddEventAtOffset(() =>
@@ -2995,7 +2995,7 @@ class spell_sha_t3_6p_bonus : AuraScript
 
         uint spellId;
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         switch (target.GetClass())
         {
@@ -3074,7 +3074,7 @@ class spell_sha_t8_elemental_4p_bonus : AuraScript
         amount /= dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         caster.CastSpell(target, SpellIds.Electrified, new CastSpellExtraArgs()
         {
@@ -3113,7 +3113,7 @@ class spell_sha_t9_elemental_4p_bonus : AuraScript
         amount /= dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         caster.CastSpell(target, SpellIds.LavaBurstBonusDamage, new CastSpellExtraArgs()
         {
@@ -3137,7 +3137,7 @@ class spell_sha_t10_elemental_4p_bonus : AuraScript
         PreventDefaultAction();
 
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         // try to find spell Flame Shock on the target
         AuraEffect flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
@@ -3184,7 +3184,7 @@ class spell_sha_t10_restoration_4p_bonus : AuraScript
         amount /= dotEffect.GetPeriodicTickCount();
 
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         caster.CastSpell(target, SpellIds.ChainedHeal, new CastSpellExtraArgs()
         {

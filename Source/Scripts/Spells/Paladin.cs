@@ -1230,42 +1230,50 @@ class spell_pal_item_healing_discount : AuraScript
 [Script] // 40470 - Paladin Tier 6 Trinket
 class spell_pal_item_t6_trinket : AuraScript
 {
+    uint _triggeredSpellId;
+
     public override bool Validate(SpellInfo spellInfo)
     {
         return ValidateSpellInfo(SpellIds.EnduringLight, SpellIds.EnduringJudgement);
     }
 
-    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    bool CheckProc(ProcEventInfo eventInfo)
     {
-        PreventDefaultAction();
         SpellInfo spellInfo = eventInfo.GetSpellInfo();
         if (spellInfo == null)
-            return;
-
-        uint spellId;
-        int chance;
+            return false;
 
         // Holy Light & Flash of Light
         if ((spellInfo.SpellFamilyFlags[0] & 0xC0000000) != 0)
         {
-            spellId = SpellIds.EnduringLight;
-            chance = 15;
+            if (!RandomHelper.randChance(15))
+                return false;
+
+            _triggeredSpellId = SpellIds.EnduringLight;
+            return true;
         }
         // Judgements
         else if ((spellInfo.SpellFamilyFlags[0] & 0x00800000) != 0)
         {
-            spellId = SpellIds.EnduringJudgement;
-            chance = 50;
-        }
-        else
-            return;
+            if (!RandomHelper.randChance(50))
+                return false;
 
-        if (RandomHelper.randChance(chance))
-            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), spellId, aurEff);
+            _triggeredSpellId = SpellIds.EnduringJudgement;
+            return true;
+        }
+
+        return false;
+    }
+
+    void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+    {
+        PreventDefaultAction();
+        eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), _triggeredSpellId, aurEff);
     }
 
     public override void Register()
     {
+        DoCheckProc.Add(new(CheckProc));
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
     }
 }
@@ -1309,18 +1317,16 @@ class spell_pal_light_s_beacon : AuraScript
             return false;
         if (eventInfo.GetActionTarget().HasAura(SpellIds.BeaconOfLight, eventInfo.GetActor().GetGUID()))
             return false;
-        return true;
+
+        HealInfo healInfo = eventInfo.GetHealInfo();
+        return healInfo != null && healInfo.GetHeal() != 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
 
-        HealInfo healInfo = eventInfo.GetHealInfo();
-        if (healInfo == null || healInfo.GetHeal() == 0)
-            return;
-
-        double heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+        double heal = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
         var auras = GetCaster().GetSingleCastAuras();
         foreach (var aura in auras)
@@ -1583,7 +1589,7 @@ class spell_pal_t3_6p_bonus : AuraScript
 
         uint spellId;
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         switch (target.GetClass())
         {
@@ -1626,19 +1632,21 @@ class spell_pal_t8_2p_bonus : AuraScript
         && Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, Difficulty.None).GetEffect(0).GetPeriodicTickCount() > 0;
     }
 
+    bool CheckProc(ProcEventInfo eventInfo)
+    {
+        HealInfo healInfo = eventInfo.GetHealInfo();
+        return healInfo != null && healInfo.GetHeal() != 0;
+    }
+
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
 
-        HealInfo healInfo = eventInfo.GetHealInfo();
-        if (healInfo == null || healInfo.GetHeal() == 0)
-            return;
-
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         SpellEffectInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty()).GetEffect(0);
-        double amount = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+        double amount = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
 
         amount /= spellInfo.GetPeriodicTickCount();
 
@@ -1649,6 +1657,7 @@ class spell_pal_t8_2p_bonus : AuraScript
 
     public override void Register()
     {
+        DoCheckProc.Add(new(CheckProc));
         OnEffectProc.Add(new(HandleProc, 0, AuraType.Dummy));
     }
 }

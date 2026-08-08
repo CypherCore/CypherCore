@@ -1233,7 +1233,8 @@ class spell_mage_ignite : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() != null;
+        DamageInfo damageInfo = eventInfo.GetDamageInfo();
+        return damageInfo != null && damageInfo.GetDamage() != 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1250,7 +1251,7 @@ class spell_mage_ignite : AuraScript
 
         CastSpellExtraArgs args = new(aurEff);
         args.AddSpellMod(SpellValueModFloat.BasePoint0, amount);
-        GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.Ignite, args);
+        eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.Ignite, args);
     }
 
     public override void Register()
@@ -1347,7 +1348,7 @@ class spell_mage_improved_scorch : AuraScript
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget().HealthBelowPct((float)aurEff.GetAmount()) || eventInfo.GetActor().HasAura(SpellIds.HeatShimmer);
+        return eventInfo.GetActionTarget().HealthBelowPct((float)aurEff.GetAmount()) || eventInfo.GetActor().HasAura(SpellIds.HeatShimmer);
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1646,22 +1647,23 @@ class spell_mage_radiant_spark : AuraScript
 
     bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        return !procInfo.GetProcTarget().HasAura(SpellIds.RadiantSparkProcBlocker, GetCasterGUID());
+        return !procInfo.GetActor().HasAura(SpellIds.RadiantSparkProcBlocker, GetCasterGUID());
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        Aura vulnerability = procInfo.GetProcTarget().GetAura(aurEff.GetSpellEffectInfo().TriggerSpell, GetCasterGUID());
+        Aura vulnerability = procInfo.GetActionTarget().GetAura(aurEff.GetSpellEffectInfo().TriggerSpell, GetCasterGUID());
         if (vulnerability != null && vulnerability.GetStackAmount() == vulnerability.CalcMaxStackAmount())
         {
             PreventDefaultAction();
             vulnerability.Remove();
-            GetTarget().CastSpell(GetTarget(), SpellIds.RadiantSparkProcBlocker, true);
+            procInfo.GetActor().CastSpell(GetTarget(), SpellIds.RadiantSparkProcBlocker, true);
         }
     }
 
     public override void Register()
     {
+        DoCheckEffectProc.Add(new(CheckProc, 2, AuraType.ProcTriggerSpell));
         OnEffectProc.Add(new(HandleProc, 2, AuraType.ProcTriggerSpell));
     }
 }

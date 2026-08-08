@@ -1366,7 +1366,7 @@ namespace Scripts.Spells.Warrior
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            _procTarget = eventInfo.GetActor().SelectNearbyTarget(eventInfo.GetProcTarget());
+            _procTarget = eventInfo.GetActor().SelectNearbyTarget(eventInfo.GetActionTarget());
             return _procTarget != null;
         }
 

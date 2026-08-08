@@ -725,7 +725,7 @@ class spell_item_anger_capacitor(uint stacks) : AuraScript
     {
         PreventDefaultAction();
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         caster.CastSpell(null, SpellIds.MoteOfAnger, true);
         Aura motes = caster.GetAura(SpellIds.MoteOfAnger);
@@ -873,19 +873,16 @@ class spell_item_blessing_of_ancient_kings : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() != null;
+        HealInfo healInfo = eventInfo.GetHealInfo();
+        return healInfo != null && healInfo.GetHeal() != 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
 
-        HealInfo healInfo = eventInfo.GetHealInfo();
-        if (healInfo == null || healInfo.GetHeal() == 0)
-            return;
-
-        double absorb = MathFunctions.CalculatePct(healInfo.GetHeal(), 15.0);
-        AuraEffect protEff = eventInfo.GetProcTarget().GetAuraEffect(SpellIds.ProtectionOfAncientKings, 0, eventInfo.GetActor().GetGUID());
+        double absorb = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), 15.0);
+        AuraEffect protEff = eventInfo.GetActionTarget().GetAuraEffect(SpellIds.ProtectionOfAncientKings, 0, eventInfo.GetActor().GetGUID());
         if (protEff != null)
         {
             // The shield can grow to a maximum size of 20,000 damage absorbtion
@@ -898,7 +895,7 @@ class spell_item_blessing_of_ancient_kings : AuraScript
         {
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueModFloat.BasePoint0, absorb);
-            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ProtectionOfAncientKings, args);
+            eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.ProtectionOfAncientKings, args);
         }
     }
 
@@ -1700,19 +1697,20 @@ class spell_item_necrotic_touch : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() != null && eventInfo.GetProcTarget().IsAlive();
+        if (!eventInfo.GetActionTarget().IsAlive())
+            return false;
+
+        DamageInfo damageInfo = eventInfo.GetDamageInfo();
+        return damageInfo != null && damageInfo.GetDamage() != 0;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        DamageInfo damageInfo = eventInfo.GetDamageInfo();
-        if (damageInfo == null || damageInfo.GetDamage() == 0)
-            return;
 
         CastSpellExtraArgs args = new(aurEff);
-        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
-        GetTarget().CastSpell(null, SpellIds.ItemNecroticTouchProc, args);
+        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
+        eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.ItemNecroticTouchProc, args);
     }
 
     public override void Register()
@@ -1824,7 +1822,7 @@ class spell_item_persistent_shield : AuraScript
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
         double bp0 = MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), 15);
 
         // Scarab Brooch does not replace stronger shields
@@ -2205,15 +2203,14 @@ class spell_item_shadowmourne : AuraScript
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        if (GetTarget().HasAura(SpellIds.ShadowmourneChaosBaneBuff)) // cant collect shards while under effect of Chaos Bane buff
-            return false;
-        return eventInfo.GetProcTarget() != null && eventInfo.GetProcTarget().IsAlive();
+        // cant collect shards while under effect of Chaos Bane buff
+        return !eventInfo.GetActor().HasAura(SpellIds.ShadowmourneChaosBaneBuff) && eventInfo.GetActionTarget().IsAlive();
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
-        GetTarget().CastSpell(GetTarget(), SpellIds.ShadowmourneSoulFragment, aurEff);
+        eventInfo.GetActor().CastSpell(GetTarget(), SpellIds.ShadowmourneSoulFragment, aurEff);
 
         // this can't be handled in AuraScript of SoulFragments because we need to know victim
         Aura soulFragments = GetTarget().GetAura(SpellIds.ShadowmourneSoulFragment);
@@ -2221,7 +2218,7 @@ class spell_item_shadowmourne : AuraScript
         {
             if (soulFragments.GetStackAmount() >= 10)
             {
-                GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ShadowmourneChaosBaneDamage, aurEff);
+                eventInfo.GetActor().CastSpell(eventInfo.GetActionTarget(), SpellIds.ShadowmourneChaosBaneDamage, aurEff);
                 soulFragments.Remove();
             }
         }
@@ -3142,7 +3139,7 @@ class spell_item_shard_of_the_scale(uint HealProcSpellId, uint DamageProcSpellId
     {
         PreventDefaultAction();
         Unit caster = eventInfo.GetActor();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         if (eventInfo.GetTypeMask() & new ProcFlagsInit(ProcFlags.DealHelpfulSpell))
             caster.CastSpell(target, HealProcSpellId, aurEff);
@@ -3222,16 +3219,14 @@ class spell_item_sunwell_neck(uint Aldors, uint Scryers) : AuraScript()
 
     bool CheckProc(ProcEventInfo eventInfo)
     {
-        if (eventInfo.GetActor().GetTypeId() != TypeId.Player)
-            return false;
-        return true;
+        return eventInfo.GetActor().GetTypeId() == TypeId.Player;
     }
 
     void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
         PreventDefaultAction();
         Player player = eventInfo.GetActor().ToPlayer();
-        Unit target = eventInfo.GetProcTarget();
+        Unit target = eventInfo.GetActionTarget();
 
         // Aggression checks are in the spell system... just cast and forget
         if (player.GetReputationRank(MiscConst.FactionAldor) == ReputationRank.Exalted)
@@ -3961,7 +3956,7 @@ class spell_item_sephuzs_secret : AuraScript
         PreventDefaultAction();
 
         GetUnitOwner().CastSpell(GetUnitOwner(), SpellIds.SephuzsSecretCooldown, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
-        GetUnitOwner().CastSpell(procInfo.GetProcTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff).SetTriggeringSpell(procInfo.GetProcSpell()));
+        GetUnitOwner().CastSpell(GetUnitOwner(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff).SetTriggeringSpell(procInfo.GetProcSpell()));
     }
 
     public override void Register()
@@ -4069,7 +4064,7 @@ class spell_item_set_march_of_the_legion : AuraScript
 {
     bool IsDemon(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() != null && eventInfo.GetProcTarget().GetCreatureType() == CreatureType.Demon;
+        return eventInfo.GetActionTarget().GetCreatureType() == CreatureType.Demon;
     }
 
     public override void Register()
@@ -4089,7 +4084,7 @@ class spell_item_seal_of_darkshire_nobility : AuraScript
 
     bool CheckCooldownAura(ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() != null && !eventInfo.GetProcTarget().HasAura(GetEffectInfo(1).TriggerSpell, GetTarget().GetGUID());
+        return !eventInfo.GetActionTarget().HasAura(GetEffectInfo(1).TriggerSpell, GetTarget().GetGUID());
     }
 
     public override void Register()
@@ -4103,7 +4098,7 @@ class spell_item_lightblood_elixir : AuraScript
 {
     bool IsDemon(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        return eventInfo.GetProcTarget() != null && eventInfo.GetProcTarget().GetCreatureType() == CreatureType.Demon;
+        return eventInfo.GetActionTarget().GetCreatureType() == CreatureType.Demon;
     }
 
     public override void Register()
@@ -4150,7 +4145,7 @@ class spell_item_seeping_scourgewing : AuraScript
 
     void TriggerIsolatedStrikeCheck(AuraEffect aurEff, ProcEventInfo eventInfo)
     {
-        GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ShadowStrikeAoeCheck,
+        GetTarget().CastSpell(eventInfo.GetActionTarget(), SpellIds.ShadowStrikeAoeCheck,
             new CastSpellExtraArgs(aurEff).SetTriggeringSpell(eventInfo.GetProcSpell()));
     }
 
@@ -4227,8 +4222,8 @@ class spell_item_shiver_venom_weapon_proc(uint additionalProcSpellId) : AuraScri
 
     void HandleAdditionalProc(AuraEffect aurEff, ProcEventInfo procInfo)
     {
-        if (procInfo.GetProcTarget().HasAura(SpellIds.ShiverVenom))
-            procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), additionalProcSpellId, new CastSpellExtraArgs(aurEff)
+        if (procInfo.GetActionTarget().HasAura(SpellIds.ShiverVenom))
+            procInfo.GetActor().CastSpell(procInfo.GetActionTarget(), additionalProcSpellId, new CastSpellExtraArgs(aurEff)
                 .AddSpellMod(SpellValueModFloat.BasePoint0, aurEff.GetAmount())
                 .SetTriggeringSpell(procInfo.GetProcSpell()));
     }

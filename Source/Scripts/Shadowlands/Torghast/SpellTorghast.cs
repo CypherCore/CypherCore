@@ -17,10 +17,10 @@ namespace Scripts.Shadowlands.Torghast
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            if (_triggeredTargets.Contains(procInfo.GetProcTarget().GetGUID()))
+            if (_triggeredTargets.Contains(procInfo.GetActionTarget().GetGUID()))
                 return false;
 
-            _triggeredTargets.Add(procInfo.GetProcTarget().GetGUID());
+            _triggeredTargets.Add(procInfo.GetActionTarget().GetGUID());
             return true;
         }
 
@@ -44,7 +44,7 @@ namespace Scripts.Shadowlands.Torghast
         {
             PreventDefaultAction();
 
-            procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff)
+            procInfo.GetActor().CastSpell(procInfo.GetActionTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff)
                 .AddSpellMod(SpellValueModFloat.BasePoint0, (int)GetTarget().CountPctFromMaxHealth((float)aurEff.GetAmount()))
                 .SetTriggeringSpell(procInfo.GetProcSpell()));
         }
@@ -74,7 +74,7 @@ namespace Scripts.Shadowlands.Torghast
         {
             PreventDefaultAction();
 
-            procInfo.GetActor().CastSpell(procInfo.GetProcTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff)
+            procInfo.GetActor().CastSpell(procInfo.GetActionTarget(), aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff)
                 .AddSpellMod(SpellValueModFloat.BasePoint0, (int)GetTarget().CountPctFromMaxHealth((float)aurEff.GetAmount()))
                 .SetTriggeringSpell(procInfo.GetProcSpell()));
         }
