@@ -64,8 +64,8 @@ namespace Scripts.Battlegrounds.ArthiBasin
         NodeCapturedHorde = 8213,
         NodeAssaultedAlliance = 8212,
         NodeAssaultedHorde = 8174,
-        NearVictoryAlliance = 8456,
-        NearVictoryHorde = 8457
+        NearVictoryAlliance = 8457,
+        NearVictoryHorde = 8456
     }
 
     enum BroadcastTexts
