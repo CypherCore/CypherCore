@@ -97,7 +97,7 @@ namespace Framework.Constants
         ReceiveGlobalGmTextmessage = 44,
         SilentlyJoinChannel = 45,
         ChangeChannelNotModerator = 46,
-        CheckForLowerSecurity = 47,
+        CanIgnoreLowerSecurity = 47,
         CommandsPinfoCheckPersonalData = 48,
         EmailConfirmForPassChange = 49,
         MayCheckOwnEmail = 50,
