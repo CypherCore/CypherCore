@@ -4798,7 +4798,7 @@ namespace Game.Entities
                     break;
                 case InventoryType.Weapon2Hand:
                     slots[0] = EquipmentSlot.MainHand;
-                    if (CanDualWield() && CanTitanGrip())
+                    if (CanDualWield() && CanTitanGrip(item))
                         slots[1] = EquipmentSlot.OffHand;
                     break;
                 case InventoryType.Tabard:
@@ -5110,7 +5110,7 @@ namespace Game.Entities
                         }
                         else if (type == InventoryType.Weapon2Hand)
                         {
-                            if (!CanDualWield() || !CanTitanGrip())
+                            if (!CanDualWield() || !CanTitanGrip(pItem))
                                 return InventoryResult.TwoHandSkillNotFound;
                         }
 
@@ -5119,17 +5119,9 @@ namespace Game.Entities
                     }
 
                     // equip two-hand weapon case (with possible unequip 2 items)
-                    if (type == InventoryType.Weapon2Hand)
+                    if (eslot == EquipmentSlot.MainHand)
                     {
-                        if (eslot == EquipmentSlot.OffHand)
-                        {
-                            if (!CanTitanGrip())
-                                return InventoryResult.NotEquippable;
-                        }
-                        else if (eslot != EquipmentSlot.MainHand)
-                            return InventoryResult.NotEquippable;
-
-                        if (!CanTitanGrip())
+                        if (!CanTitanGrip(pItem))
                         {
                             // offhand item must can be stored in inventory for offhand item and it also must be unequipped
                             Item offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
@@ -5602,7 +5594,7 @@ namespace Game.Entities
             if (item != null)
             {
                 TransmogOutfitSlotOption transmogSlotOption = item.GetTemplate().GetWeaponTransmogOutfitSlotOption();
-                if (transmogSlotOption == TransmogOutfitSlotOption.TwoHandedWeapon && CanTitanGrip())
+                if (transmogSlotOption == TransmogOutfitSlotOption.TwoHandedWeapon && CanTitanGrip(item))
                     transmogSlotOption = TransmogOutfitSlotOption.FuryTwoHandedWeapon;
 
                 uint itemId = item.GetVisibleEntry(this);

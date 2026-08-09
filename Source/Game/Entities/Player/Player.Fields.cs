@@ -139,6 +139,8 @@ namespace Game.Entities
         bool m_canParry;
         bool m_canBlock;
         bool m_canTitanGrip;
+        uint m_titanGripWeaponSubclasses;
+        uint m_titanGripArmorSubclasses;
         uint m_titanGripPenaltySpellId;
         uint m_deathTimer;
         long m_deathExpireTime;

@@ -4681,7 +4681,7 @@ namespace Game.Spells
                 return;
 
             if (m_caster.IsTypeId(TypeId.Player))
-                m_caster.ToPlayer().SetCanTitanGrip(true, (uint)effectInfo.MiscValue);
+                m_caster.ToPlayer().SetCanTitanGrip(true, (uint)effectInfo.MiscValue, m_spellInfo.EquippedItemClass, (uint)m_spellInfo.EquippedItemSubClassMask);
         }
 
         [SpellEffectHandler(SpellEffects.RedirectThreat)]

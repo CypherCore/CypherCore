@@ -8014,8 +8014,12 @@ namespace Game.Entities
                 force = true;
 
             // need unequip offhand for 2h-weapon without TitanGrip (in any from hands)
-            if (!force && (CanTitanGrip() || (offtemplate.GetInventoryType() != InventoryType.Weapon2Hand && !IsTwoHandUsed())))
-                return;
+            if (!force && CanTitanGrip(offItem))
+            {
+                Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                if (mainItem == null || CanTitanGrip(mainItem))
+                    return;
+            }
 
             List<ItemPosCount> off_dest = new();
             InventoryResult off_msg = CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, off_dest, offItem, false);

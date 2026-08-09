@@ -67,8 +67,6 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
-        bool CanTitanGrip() { return m_canTitanGrip; }
-
         float GetRatingMultiplier(CombatRating cr)
         {
             GtCombatRatingsRecord Rating = CliDB.CombatRatingsGameTable.GetRow(GetLevel());
@@ -217,18 +215,51 @@ namespace Game.Entities
             return !IsInFeralForm() && (!mainhand || !HasUnitFlag(UnitFlags.Disarmed));
         }
 
-        public void SetCanTitanGrip(bool value, uint penaltySpellId = 0)
+        bool CanTitanGrip(Item item)
         {
-            if (value == m_canTitanGrip)
-                return;
+            if (!m_canTitanGrip)
+                return false;
 
+            ItemTemplate itemTemplate = item.GetTemplate();
+
+            uint subClassMask = itemTemplate.GetClass() switch
+            {
+                ItemClass.Weapon => m_titanGripWeaponSubclasses,
+                ItemClass.Armor => m_titanGripArmorSubclasses,
+                _ => 0
+            };
+
+            return subClassMask == 0 || (subClassMask & (1 << (int)itemTemplate.GetSubClass())) != 0;
+        }
+
+        public void SetCanTitanGrip(bool value, uint penaltySpellId = 0, ItemClass allowedItemClass = 0, uint allowedItemSubClassMask = 0)
+        {
             m_canTitanGrip = value;
+            if (value)
+            {
+                switch (allowedItemClass)
+                {
+                    case ItemClass.Weapon:
+                        m_titanGripWeaponSubclasses = allowedItemSubClassMask;
+                        break;
+                    case ItemClass.Armor:
+                        m_titanGripArmorSubclasses = allowedItemSubClassMask;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                m_titanGripWeaponSubclasses = 0;
+                m_titanGripArmorSubclasses = 0;
+            }
             m_titanGripPenaltySpellId = penaltySpellId;
         }
 
         void CheckTitanGripPenalty()
         {
-            if (!CanTitanGrip())
+            if (m_titanGripPenaltySpellId == 0)
                 return;
 
             bool apply = IsUsingTwoHandedWeaponInOneHand();
@@ -248,7 +279,7 @@ namespace Game.Entities
                 return false;
 
             ItemTemplate itemTemplate = mainItem.GetTemplate();
-            return (itemTemplate.GetInventoryType() == InventoryType.Weapon2Hand && !CanTitanGrip()) ||
+            return (itemTemplate.GetInventoryType() == InventoryType.Weapon2Hand && !CanTitanGrip(mainItem)) ||
                 itemTemplate.GetInventoryType() == InventoryType.Ranged ||
                 (itemTemplate.GetInventoryType() == InventoryType.RangedRight && itemTemplate.GetClass() == ItemClass.Weapon && (ItemSubClassWeapon)itemTemplate.GetSubClass() != ItemSubClassWeapon.Wand);
         }
