@@ -3031,7 +3031,7 @@ namespace Game.Spells
             {
                 if (m_spellInfo.HasAttribute(SpellAttr1.DismissPetFirst))
                 {
-                    Creature pet = ObjectAccessor.GetCreature(m_caster, unitCaster.GetPetGUID());
+                    Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(m_caster, unitCaster.GetPetGUID());
                     if (pet != null)
                         pet.DespawnOrUnsummon();
                 }
