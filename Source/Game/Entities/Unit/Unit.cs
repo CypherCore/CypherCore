@@ -9,6 +9,7 @@ using Game.Combat;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Maps;
+using Game.Miscellaneous;
 using Game.Movement;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -2027,7 +2028,10 @@ namespace Game.Entities
 
         public Race GetRace() { return (Race)(byte)m_unitData.Race; }
         public void SetRace(Race race) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Race), (byte)race); }
-        public ulong GetRaceMask() { return 1UL << ((int)GetRace() - 1); }
+        public ulong GetRaceMask()
+        {
+            return RaceMask<ulong>.GetMaskForRace(GetRace(), 1).RawValue[0];
+        }
         public Class GetClass() { return (Class)(byte)m_unitData.ClassId; }
         public void SetClass(Class classId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ClassId), (byte)classId); }
         public uint GetClassMask() { return (uint)(1 << ((int)GetClass() - 1)); }

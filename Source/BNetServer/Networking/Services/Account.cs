@@ -1,18 +1,15 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Bgs.Protocol.Account.V1;
-using Framework.Constants;
-using System.Collections.Generic;
-
 namespace BNetServer.Networking
 {
     public partial class Session
     {
+        /*
         [Service(OriginalHash.AccountService, 30)]
         BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
         {
-            if (!authed)
+            if (!IsAuthed())
                 return BattlenetRpcErrorCode.Denied;
 
             if (request.Options.FieldPrivacyInfo)
@@ -33,12 +30,12 @@ namespace BNetServer.Networking
         [Service(OriginalHash.AccountService, 31)]
         BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
         {
-            if (!authed)
+            if (!IsAuthed())
                 return BattlenetRpcErrorCode.Denied;
 
             if (request.Options.FieldGameLevelInfo)
             {
-                var gameAccountInfo = accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = _accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State = new GameAccountState();
@@ -58,7 +55,7 @@ namespace BNetServer.Networking
 
                 response.State.GameStatus = new GameStatus();
 
-                var gameAccountInfo = accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                var gameAccountInfo = _accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
                 if (gameAccountInfo != null)
                 {
                     response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;
@@ -72,5 +69,7 @@ namespace BNetServer.Networking
 
             return BattlenetRpcErrorCode.Ok;
         }
+
+        */
     }
 }

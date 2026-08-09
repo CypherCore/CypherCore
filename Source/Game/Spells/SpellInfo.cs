@@ -446,22 +446,21 @@ namespace Game.Spells
                 return false;
 
             // All stance spells. if any better way, change it.
-            foreach (var effectInfo in _effects)
+            switch (SpellFamilyName)
             {
-                switch (SpellFamilyName)
-                {
-                    case SpellFamilyNames.Paladin:
-                        // Paladin aura Spell
-                        if (effectInfo.Effect == SpellEffects.ApplyAreaAuraRaid)
-                            return false;
-                        break;
-                    case SpellFamilyNames.Druid:
-                        // Druid form Spell
-                        if (effectInfo.Effect == SpellEffects.ApplyAura &&
-                            effectInfo.ApplyAuraName == AuraType.ModShapeshift)
-                            return false;
-                        break;
-                }
+                case SpellFamilyNames.Paladin:
+                    // Paladin aura Spell
+                    if (HasEffect(SpellEffects.ApplyAreaAuraRaid))
+                        return false;
+                    // Seal of Righteousness
+                    if ((SpellFamilyFlags[1] & 0x20000000) != 0)
+                        return false;
+                    break;
+                case SpellFamilyNames.Druid:
+                    // Druid form Spell
+                    if (HasAura(AuraType.ModShapeshift))
+                        return false;
+                    break;
             }
             return true;
         }

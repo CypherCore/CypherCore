@@ -80,13 +80,9 @@ namespace BNetServer
         public BnetServiceHandler(MethodInfo info, ParameterInfo[] parameters)
         {
             requestType = parameters[0].ParameterType;
-            if (parameters.Length > 1)
-                responseType = parameters[1].ParameterType;
+            responseType = parameters[1].ParameterType;
 
-            if (responseType != null)
-                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[] { typeof(Session), requestType, responseType, info.ReturnType }));
-            else
-                methodCaller = info.CreateDelegate(Expression.GetDelegateType(new[] { typeof(Session), requestType, info.ReturnType }));
+            methodCaller = info.CreateDelegate(Expression.GetDelegateType([typeof(Session), requestType, responseType, typeof(Action<Session, BattlenetRpcErrorCode, IMessage>), info.ReturnType]));
         }
 
         public void Invoke(Session session, uint token, CodedInputStream stream)
@@ -94,24 +90,25 @@ namespace BNetServer
             var request = (IMessage)Activator.CreateInstance(requestType);
             request.MergeFrom(stream);
 
-            BattlenetRpcErrorCode status;
-            if (responseType != null)
-            {
-                var response = (IMessage)Activator.CreateInstance(responseType);
-                status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response);
-                Log.outDebug(LogFilter.ServiceProtobuf, $"{session.GetClientInfo()} Client called server Method: {nameof(request)} -> {request}) Returned: {nameof(response)} -> {response} Status: {status}.");
-                if (status == 0)
-                    session.SendResponse(token, response);
-                else
-                    session.SendResponse(token, status);
-            }
-            else
-            {
-                status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request);
-                Log.outDebug(LogFilter.ServiceProtobuf, $"{session.GetClientInfo()} Client called server Method:{nameof(request)} -> {request}) Status: {status}.");
-                if (status != 0)
-                    session.SendResponse(token, status);
-            }
+            IMessage response = (IMessage)Activator.CreateInstance(responseType);
+            Action<Session, BattlenetRpcErrorCode, IMessage> continuation = CreateServerContinuation(token, nameof(request), response.Descriptor);
+            BattlenetRpcErrorCode status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response, continuation);
+
+            if (continuation != null)
+                continuation(session, status, response);
+        }
+
+        Action<Session, BattlenetRpcErrorCode, IMessage> CreateServerContinuation(uint token, string methodName, Google.Protobuf.Reflection.MessageDescriptor outputDescriptor)
+        {
+            return (service, status, response) =>
+             {
+                 Cypher.Assert(response.Descriptor == outputDescriptor);
+                 Log.outDebug(LogFilter.ServiceProtobuf, $"{service.GetClientInfo()} Client called server method {methodName}() {outputDescriptor.FullName}{{ {response} }} status {status}.");
+                 if (status == 0)
+                     service.SendResponse(token, response);
+                 else
+                     service.SendResponse(token, status);
+             };
         }
     }
 
@@ -120,6 +117,7 @@ namespace BNetServer
     {
         public uint ServiceHash { get; set; }
         public uint MethodId { get; set; }
+        public Action<Session, BattlenetRpcErrorCode, IMessage> SendResponse { get; set; }
 
         public ServiceAttribute(OriginalHash serviceHash, uint methodId)
         {

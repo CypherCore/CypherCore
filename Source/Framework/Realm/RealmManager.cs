@@ -11,7 +11,6 @@ using Framework.Web.Rest.Realmlist;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -156,16 +155,6 @@ public class RealmManager : Singleton<RealmManager>
         return null;
     }
 
-    public void WriteSubRegions(Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeResponse response)
-    {
-        foreach (string subRegion in GetSubRegions())
-        {
-            var variant = new Bgs.Protocol.Variant();
-            variant.StringValue = subRegion;
-            response.AttributeValue.Add(variant);
-        }
-    }
-
     void FillRealmEntry(Realm realm, uint clientBuild, AccountTypes accountSecurityLevel, RealmEntry realmEntry)
     {
         realmEntry.WowRealmAddress = (int)realm.Id.GetAddress();
@@ -254,28 +243,34 @@ public class RealmManager : Singleton<RealmManager>
         return BitConverter.GetBytes(jsonData.Length).Combine(ZLib.Compress(jsonData));
     }
 
-    public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, ClientBuildVariantId buildVariant, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, TimeSpan timezoneOffset, string accountName, AccountTypes accountSecurityLevel, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
+    public RealmJoinResult JoinRealm(uint realmAddress, uint build, ClientBuildVariantId buildVariant, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, TimeSpan timezoneOffset, string accountName, AccountTypes accountSecurityLevel)
     {
         Realm realm = GetRealm(new RealmId(realmAddress));
         if (realm != null)
         {
             if (realm.PopulationLevel == RealmPopulationState.Offline || realm.Build != build || accountSecurityLevel < realm.AllowedSecurityLevel)
-                return BattlenetRpcErrorCode.UserServerNotPermittedOnRealm;
+                return new RealmJoinResult { Result = BattlenetRpcErrorCode.UserServerNotPermittedOnRealm };
 
             RealmListServerIPAddresses serverAddresses = new();
-            AddressFamily addressFamily = new();
-            addressFamily.Id = 1;
+            AddressFamily addressFamily = new()
+            {
+                Id = 1
+            };
 
-            var address = new Address();
-            address.Ip = realm.GetAddressForClient(clientAddress).ToString();
-            address.Port = realm.Port;
+            var address = new Address
+            {
+                Ip = realm.GetAddressForClient(clientAddress).ToString(),
+                Port = realm.Port
+            };
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);
 
             var jsonData = Encoding.UTF8.GetBytes("JSONRealmListServerIPAddresses:" + JsonSerializer.Serialize(serverAddresses) + "\0");
-            byte[] compressed = BitConverter.GetBytes(jsonData.Length).Combine(ZLib.Compress(jsonData));
+            byte[] serverAddressesCompressed = BitConverter.GetBytes(jsonData.Length).Combine(ZLib.Compress(jsonData));
+            if (serverAddressesCompressed.Empty())
+                return new RealmJoinResult { Result = BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse };
 
-            byte[] serverSecret = new byte[0].GenerateRandomKey(32);
+            byte[] serverSecret = RandomHelper.GetRandomBytes(32);
             byte[] keyData = clientSecret.Combine(serverSecret);
 
             PreparedStatement stmt = LoginDatabase.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
@@ -294,27 +289,18 @@ public class RealmManager : Singleton<RealmManager>
             joinTicket.ClientArch = buildVariant.Arch;
             joinTicket.Type = buildVariant.Type;
 
-            Bgs.Protocol.Attribute attribute = new();
-            attribute.Name = "Param_RealmJoinTicket";
-            attribute.Value = new Bgs.Protocol.Variant();
-            attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFromUtf8(JsonSerializer.Serialize(joinTicket));
-            response.Attribute.Add(attribute);
+            string joinTicketJson = JsonSerializer.Serialize(joinTicket);
 
-            attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_ServerAddresses";
-            attribute.Value = new Bgs.Protocol.Variant();
-            attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(compressed);
-            response.Attribute.Add(attribute);
-
-            attribute = new Bgs.Protocol.Attribute();
-            attribute.Name = "Param_JoinSecret";
-            attribute.Value = new Bgs.Protocol.Variant();
-            attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(serverSecret);
-            response.Attribute.Add(attribute);
-            return BattlenetRpcErrorCode.Ok;
+            return new RealmJoinResult
+            {
+                Result = BattlenetRpcErrorCode.Ok,
+                JoinTicket = Encoding.UTF8.GetBytes(joinTicketJson),
+                ServerAddresses = serverAddressesCompressed,
+                JoinSecret = serverSecret
+            };
         }
 
-        return BattlenetRpcErrorCode.UtilServerUnknownRealm;
+        return new RealmJoinResult { Result = BattlenetRpcErrorCode.UtilServerUnknownRealm };
     }
 
     RealmFlags ConvertLegacyRealmFlags(LegacyRealmFlags legacyRealmFlags)
@@ -343,7 +329,7 @@ public class RealmManager : Singleton<RealmManager>
     }
 
     public ICollection<Realm> GetRealms() { return _realms.Values; }
-    List<string> GetSubRegions() { return _subRegions; }
+    public List<string> GetSubRegions() { return _subRegions; }
 
     ConcurrentDictionary<RealmId, Realm> _realms = new();
     Dictionary<RealmId, string> _removedRealms = new();

@@ -4,6 +4,7 @@
 using Bgs.Protocol;
 using Bgs.Protocol.Connection.V1;
 using Framework.Constants;
+using Google.Protobuf;
 using System;
 
 namespace BNetServer.Networking
@@ -11,14 +12,14 @@ namespace BNetServer.Networking
     public partial class Session
     {
         [Service(OriginalHash.ConnectionService, 1)]
-        BattlenetRpcErrorCode HandleConnect(ConnectRequest request, ConnectResponse response)
+        BattlenetRpcErrorCode HandleConnect(ConnectRequest request, ConnectResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
         {
             if (request.ClientId != null)
                 response.ClientId.MergeFrom(request.ClientId);
 
             response.ServerId = new ProcessId();
             response.ServerId.Label = (uint)Environment.ProcessId;
-            response.ServerId.Epoch = (uint)Time.UnixTime;
+            response.ServerId.Epoch = (uint)Time.UnixTime - Time.GetMSTime();
             response.ServerTime = (ulong)Time.UnixTimeMilliseconds;
 
             response.UseBindlessRpc = request.UseBindlessRpc;

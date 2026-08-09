@@ -8,7 +8,7 @@ namespace Framework.Database
         public override void PreparedStatements()
         {
             const string BnetAccountInfo = "ba.id AS bnet_account_id, UPPER(ba.email), ba.locked, ba.lock_country, ba.last_ip, ba.LoginTicketExpiry, bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate AS is_bnet_banned, bab.unbandate = bab.bandate AS is_bnet_permanently_banned";
-            const string BnetGameAccountInfo = "a.id AS account_id, a.username, ab.unbandate AS account_unbandate, ab.unbandate = ab.bandate AS is_banned, aa.SecurityLevel";
+            const string BnetGameAccountInfo = "a.id AS account_id, a.username, ab.bandate, ab.unbandate AS account_unbandate, ab.unbandate = ab.bandate AS is_banned, aa.SecurityLevel";
 
             PrepareStatement(LoginStatements.SEL_REALMLIST, "SELECT id, name, address, localAddress, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE flag <> 3 ORDER BY name");
             PrepareStatement(LoginStatements.UPD_REALM_POPULATION, "UPDATE realmlist SET population = ? WHERE id = ?");

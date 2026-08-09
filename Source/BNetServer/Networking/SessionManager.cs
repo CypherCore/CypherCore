@@ -10,6 +10,8 @@ namespace BNetServer.Networking
     {
         public static SessionManager Instance { get; } = new SessionManager();
 
+        public volatile uint SessionIdGenerator = 0;
+
         public override bool StartNetwork(string bindIp, int port, int threadCount = 1)
         {
             if (!base.StartNetwork(bindIp, port, threadCount))

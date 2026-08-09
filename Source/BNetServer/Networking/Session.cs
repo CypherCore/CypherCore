@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Bgs.Protocol;
+using Framework.ClientBuild;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
@@ -18,26 +19,33 @@ namespace BNetServer.Networking
 {
     public partial class Session : SocketBase
     {
-        AccountInfo accountInfo;
-        GameAccountInfo gameAccountInfo;
+        uint _sessionId;
+        DateTime _creationTime;
+        string _clientInstanceId;
 
-        string locale;
-        string os;
-        uint build;
-        Framework.ClientBuild.ClientBuildVariantId _clientInfo;
+        AccountInfo _accountInfo;
+        GameAccountInfo _gameAccountInfo;
+
+        string _locale;
+        string _os;
+        uint _build;
+        ClientBuildVariantId _buildVariant;
         TimeSpan _timezoneOffset;
-        string ipCountry;
+        string _ipCountry;
 
-        byte[] clientSecret;
-        bool authed;
-        uint requestToken;
+        byte[] _clientSecret;
+        bool _authed;
+        uint _requestToken;
 
         AsyncCallbackProcessor<QueryCallback> queryProcessor;
         Dictionary<uint, Action<CodedInputStream>> responseCallbacks;
 
         public Session(Socket socket) : base(socket, true)
         {
-            clientSecret = new byte[32];
+            _sessionId = ++Global.SessionMgr.SessionIdGenerator;
+            _creationTime = DateTime.Now;
+
+            _clientSecret = new byte[32];
             queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
             responseCallbacks = new Dictionary<uint, Action<CodedInputStream>>();
         }
@@ -65,7 +73,7 @@ namespace BNetServer.Networking
                             banned = true;
 
                         if (!string.IsNullOrEmpty(result.Read<string>(1)))
-                            ipCountry = result.Read<string>(1);
+                            _ipCountry = result.Read<string>(1);
 
                     } while (result.NextRow());
 
@@ -101,6 +109,14 @@ namespace BNetServer.Networking
             queryProcessor.ProcessReadyCallbacks();
 
             return true;
+        }
+
+        public GameAccountInfo GetGameAccountInfo(uint gameAccountId)
+        {
+            if (_accountInfo == null)
+                return null;
+
+            return _accountInfo.GameAccounts.LookupByKey(gameAccountId);
         }
 
         public async override void ReadHandler(byte[] data, int receivedLength)
@@ -152,6 +168,7 @@ namespace BNetServer.Networking
             header.Token = token;
             header.ServiceId = 0xFE;
             header.Size = (uint)response.CalculateSize();
+            header.Ciid = _clientInstanceId;
 
             ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
@@ -167,12 +184,19 @@ namespace BNetServer.Networking
             header.Token = token;
             header.Status = (uint)status;
             header.ServiceId = 0xFE;
+            header.Ciid = _clientInstanceId;
 
             ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
 
             await AsyncWrite(buffer.GetData());
+        }
+
+        public async void SendRequest(uint serviceHash, uint methodId, IMessage request, Action<CodedInputStream> callback)
+        {
+            responseCallbacks[_requestToken] = callback;
+            SendRequest(serviceHash, methodId, request);
         }
 
         public async void SendRequest(uint serviceHash, uint methodId, IMessage request)
@@ -182,7 +206,8 @@ namespace BNetServer.Networking
             header.ServiceHash = serviceHash;
             header.MethodId = methodId;
             header.Size = (uint)request.CalculateSize();
-            header.Token = requestToken++;
+            header.Token = _requestToken++;
+            header.Ciid = _clientInstanceId;
 
             ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
@@ -190,6 +215,18 @@ namespace BNetServer.Networking
             buffer.WriteBytes(request.ToByteArray());
 
             await AsyncWrite(buffer.GetData());
+        }
+
+        void SetClientInfo(uint gameAccountId, ClientBuildVariantId buildVariant, byte[] clientSecret)
+        {
+            _gameAccountInfo = GetGameAccountInfo(gameAccountId);
+            _buildVariant = buildVariant;
+            _clientSecret = clientSecret;
+        }
+
+        LastPlayedCharacterInfo GetLastPlayedCharacter(string subRegion)
+        {
+            return _gameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion);
         }
 
         public byte[] GetHeaderSize(Header header)
@@ -208,16 +245,34 @@ namespace BNetServer.Networking
         public string GetClientInfo()
         {
             string stream = '[' + GetRemoteIpAddress().ToString();
-            if (accountInfo != null && !accountInfo.Login.IsEmpty())
-                stream += ", Account: " + accountInfo.Login;
+            if (_accountInfo != null && !_accountInfo.Login.IsEmpty())
+                stream += ", Account: " + _accountInfo.Login;
 
-            if (gameAccountInfo != null)
-                stream += ", Game account: " + gameAccountInfo.Name;
+            if (_gameAccountInfo != null)
+                stream += ", Game account: " + _gameAccountInfo.Name;
 
             stream += ']';
 
             return stream;
         }
+
+        public bool IsAuthed() { return _authed; }
+        uint GetAccountId() { return _accountInfo.Id; }
+        AccountInfo GetAccountInfo() { return _accountInfo; }
+
+        uint GetGameAccountId() { return _gameAccountInfo.Id; }
+        GameAccountInfo GetGameAccountInfo() { return _gameAccountInfo; }
+
+        string GetLocale() { return _locale; }
+        string GetOS() { return _os; }
+        uint GetBuild() { return _build; }
+        ClientBuildVariantId GetBuildVariant() { return _buildVariant; }
+        TimeSpan GetTimezoneOffset() { return _timezoneOffset; }
+        byte[] GetClientSecret() { return _clientSecret; }
+
+        public uint GetSessionId() { return _sessionId; }
+        public DateTime GetCreationTime() { return _creationTime; }
+        public void SetClientInstanceId(string ciid) { _clientInstanceId = ciid; }
     }
 
     public class AccountInfo
@@ -260,7 +315,8 @@ namespace BNetServer.Networking
         public uint Id;
         public string Name;
         public string DisplayName;
-        public uint UnbanDate;
+        public long BanDate;
+        public long UnbanDate;
         public bool IsBanned;
         public bool IsPermanenetlyBanned;
         public AccountTypes SecurityLevel;
@@ -272,10 +328,11 @@ namespace BNetServer.Networking
         {
             Id = fields.Read<uint>(startColumn + 0);
             Name = fields.Read<string>(startColumn + 1);
-            UnbanDate = fields.Read<uint>(startColumn + 2);
-            IsPermanenetlyBanned = fields.Read<uint>(startColumn + 3) != 0;
+            BanDate = fields.Read<uint>(startColumn + 2);
+            UnbanDate = fields.Read<uint>(startColumn + 3);
+            IsPermanenetlyBanned = fields.Read<uint>(startColumn + 4) != 0;
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
-            SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
+            SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 5);
 
             int hashPos = Name.IndexOf('#');
             if (hashPos != -1)
