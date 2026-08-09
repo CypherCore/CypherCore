@@ -157,13 +157,6 @@ namespace Game
                             break;
                         case CommandStates.Attack: // spellid = 1792  //ATTACK
                         {
-                            // Can't attack if owner is pacified
-                            if (GetPlayer().HasAuraType(AuraType.ModPacify))
-                            {
-                                // @todo Send proper error message to client
-                                return;
-                            }
-
                             // only place where pet can be player
                             Unit TargetUnit = Global.ObjAccessor.GetUnit(GetPlayer(), guid2);
                             if (TargetUnit == null)
