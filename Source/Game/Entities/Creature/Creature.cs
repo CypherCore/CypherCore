@@ -2894,7 +2894,7 @@ namespace Game.Entities
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
             double baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
 
-            return (ulong)Math.Max(baseHealth * creatureDifficulty.HealthModifier, 1.0);
+            return (ulong)Math.Ceiling(baseHealth * creatureDifficulty.HealthModifier);
         }
 
         public override float GetHealthMultiplierForTarget(WorldObject target)
