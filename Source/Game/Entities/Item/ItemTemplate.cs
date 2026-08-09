@@ -322,7 +322,7 @@ namespace Game.Entities
         public uint GetSellPrice() { return ExtendedData.SellPrice; }
         public InventoryType GetInventoryType() { return ExtendedData.inventoryType; }
         public int GetAllowableClass() { return ExtendedData.AllowableClass; }
-        public RaceMask<long> GetAllowableRace() { return ExtendedData.AllowableRace; }
+        public RaceMask<int> GetAllowableRace() { return ExtendedData.AllowableRace; }
         public uint GetBaseItemLevel() { return ExtendedData.ItemLevel; }
         public int GetBaseRequiredLevel() { return ExtendedData.RequiredLevel; }
         public uint GetRequiredSkill() { return ExtendedData.RequiredSkill; }

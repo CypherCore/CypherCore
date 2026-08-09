@@ -331,6 +331,7 @@ namespace Game.Networking.Packets
             public List<string> MailSenders = new();
             public List<uint> MailSenderTypes = new();
             public bool RpeAvailable;
+            public uint NoRpeReason = 4; // recently active
 
             public void Write(WorldPacket data)
             {
@@ -343,6 +344,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(RestrictionFlags);
                 data.WriteInt32(MailSenders.Count);
                 data.WriteInt32(MailSenderTypes.Count);
+                data.WriteUInt32(NoRpeReason);
 
                 if (!MailSenderTypes.Empty())
                     foreach (var type in MailSenderTypes)

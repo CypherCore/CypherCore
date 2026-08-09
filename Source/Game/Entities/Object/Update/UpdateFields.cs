@@ -262,7 +262,7 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, Player receiver, Item owner)
         {
-            data.WriteBits(Values.Size(), 6);
+            data.WriteBits(Values.Size(), 7);
             for (int i = 0; i < Values.Size(); ++i)
             {
                 Values[i].WriteCreate(data, receiver, owner);
@@ -281,9 +281,9 @@ namespace Game.Entities
             if (changesMask[0])
             {
                 if (!ignoreChangesMask)
-                    Values.WriteUpdateMask(data, 6);
+                    Values.WriteUpdateMask(data, 7);
                 else
-                    WriteCompleteDynamicFieldUpdateMask(Values.Size(), data, 6);
+                    WriteCompleteDynamicFieldUpdateMask(Values.Size(), data, 7);
             }
             data.FlushBits();
             if (changesMask[0])
@@ -5041,24 +5041,70 @@ namespace Game.Entities
         }
     }
 
+    public struct CraftingReagentBase : IEquatable<CraftingReagentBase>, IsUpdateFieldStructure<Player>
+    {
+        public int? ItemID;
+        public int? CurrencyID;
+
+        public void WriteCreate(WorldPacket data, Player receiver, Player owner)
+        {
+            data.WriteBits(ItemID.HasValue, 1);
+            data.WriteBits(CurrencyID.HasValue, 1);
+            data.FlushBits();
+            if (ItemID.HasValue)
+            {
+                data.WriteInt32(ItemID.Value);
+            }
+            if (CurrencyID.HasValue)
+            {
+                data.WriteInt32(CurrencyID.Value);
+            }
+        }
+
+        public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
+        {
+            data.WriteBits(ItemID.HasValue, 1);
+            data.WriteBits(CurrencyID.HasValue, 1);
+            data.FlushBits();
+            if (ItemID.HasValue)
+            {
+                data.WriteInt32(ItemID.Value);
+            }
+            if (CurrencyID.HasValue)
+            {
+                data.WriteInt32(CurrencyID.Value);
+            }
+        }
+
+        public bool Equals(CraftingReagentBase right)
+        {
+            return ItemID == right.ItemID
+                && CurrencyID == right.CurrencyID;
+        }
+    }
+
     public class CraftingOrderItem() : HasChangesMask(7), IsUpdateFieldStructure<Player>
     {
-        public UpdateField<ulong> OrderItemID = new(-1, 0);
-        public UpdateField<ObjectGuid> ItemGUID = new(-1, 1);
-        public UpdateField<ObjectGuid> OwnerGUID = new(-1, 2);
-        public UpdateField<int> ItemID = new(-1, 3);
-        public UpdateField<uint> Quantity = new(-1, 4);
-        public UpdateField<int> ReagentQuality = new(-1, 5);
-        public OptionalUpdateField<byte> DataSlotIndex = new(-1, 6);
+        public UpdateField<ulong> OrderItemID = new(0, 1);
+        public UpdateField<int> OrderItemType = new(0, 2);
+        public UpdateField<ObjectGuid> ItemGUID = new(0, 3);
+        public UpdateField<ObjectGuid> OwnerGUID = new(4, 5);
+        public UpdateField<CraftingReagentBase> Reagent = new(4, 6);
+        public UpdateField<uint> Quantity = new(4, 7);
+        public UpdateField<int> ReagentQuality = new(8, 9);
+        public OptionalUpdateField<byte> DataSlotIndex = new(8, 10);
+        public UpdateField<uint> Flags = new(8, 11);
 
         public void WriteCreate(WorldPacket data, Player receiver, Player owner)
         {
             data.WriteUInt64(OrderItemID);
+            data.WriteInt32(OrderItemType);
             data.WritePackedGuid(ItemGUID);
             data.WritePackedGuid(OwnerGUID);
-            data.WriteInt32(ItemID);
             data.WriteUInt32(Quantity);
             data.WriteInt32(ReagentQuality);
+            data.WriteUInt32(Flags);
+            Reagent.GetValue().WriteCreate(data, receiver, owner);
             data.WriteBits(DataSlotIndex.HasValue(), 1);
             data.FlushBits();
             if (DataSlotIndex.HasValue())
@@ -5073,40 +5119,63 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlock(0), 7);
+            data.WriteBits(changesMask.GetBlock(0), 12);
 
             data.FlushBits();
             if (changesMask[0])
             {
-                data.WriteUInt64(OrderItemID);
-            }
-            if (changesMask[1])
-            {
-                data.WritePackedGuid(ItemGUID);
-            }
-            if (changesMask[2])
-            {
-                data.WritePackedGuid(OwnerGUID);
-            }
-            if (changesMask[3])
-            {
-                data.WriteInt32(ItemID);
+                if (changesMask[1])
+                {
+                    data.WriteUInt64(OrderItemID);
+                }
+                if (changesMask[2])
+                {
+                    data.WriteInt32(OrderItemType);
+                }
+                if (changesMask[3])
+                {
+                    data.WritePackedGuid(ItemGUID);
+                }
             }
             if (changesMask[4])
             {
-                data.WriteUInt32(Quantity);
-            }
-            if (changesMask[5])
-            {
-                data.WriteInt32(ReagentQuality);
-            }
-            data.WriteBits(DataSlotIndex.HasValue(), 1);
-            data.FlushBits();
-            if (changesMask[6])
-            {
-                if (DataSlotIndex.HasValue())
+                if (changesMask[5])
                 {
-                    data.WriteUInt8(DataSlotIndex);
+                    data.WritePackedGuid(OwnerGUID);
+                }
+                if (changesMask[7])
+                {
+                    data.WriteUInt32(Quantity);
+                }
+            }
+            if (changesMask[8])
+            {
+                if (changesMask[9])
+                {
+                    data.WriteInt32(ReagentQuality);
+                }
+                if (changesMask[11])
+                {
+                    data.WriteUInt32(Flags);
+                }
+            }
+            if (changesMask[4])
+            {
+                if (changesMask[6])
+                {
+                    Reagent.GetValue().WriteUpdate(ignoreChangesMask, data, receiver, owner);
+                }
+            }
+            if (changesMask[8])
+            {
+                data.WriteBit(DataSlotIndex.HasValue());
+                data.FlushBits();
+                if (changesMask[10])
+                {
+                    if (DataSlotIndex.HasValue())
+                    {
+                        data.WriteUInt8(DataSlotIndex);
+                    }
                 }
             }
         }
@@ -5114,12 +5183,14 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(OrderItemID);
+            ClearChangesMask(OrderItemType);
             ClearChangesMask(ItemGUID);
             ClearChangesMask(OwnerGUID);
-            ClearChangesMask(ItemID);
+            ClearChangesMask(Reagent);
             ClearChangesMask(Quantity);
             ClearChangesMask(ReagentQuality);
             ClearChangesMask(DataSlotIndex);
+            ClearChangesMask(Flags);
             _changesMask.ResetAll();
         }
     }
@@ -8690,7 +8761,7 @@ namespace Game.Entities
         }
     }
 
-    public class GameObjectFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.GameObject, 26), IsUpdateFieldStructure<GameObject>
+    public class GameObjectFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.GameObject, 27), IsUpdateFieldStructure<GameObject>
     {
         public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
         public DynamicUpdateField<int> EnableDoodadSets = new(0, 2);
@@ -8704,19 +8775,20 @@ namespace Game.Entities
         public UpdateField<ObjectGuid> CreatedBy = new(0, 10);
         public UpdateField<ObjectGuid> GuildGUID = new(0, 11);
         public UpdateField<uint> Flags = new(0, 12);
-        public UpdateField<Quaternion> ParentRotation = new(0, 13);
-        public UpdateField<uint> FactionTemplate = new(0, 14);
-        public UpdateField<sbyte> State = new(0, 15);
-        public UpdateField<sbyte> TypeID = new(0, 16);
-        public UpdateField<byte> PercentHealth = new(0, 17);
-        public UpdateField<uint> ArtKit = new(0, 18);
-        public UpdateField<uint> CustomParam = new(0, 19);
-        public UpdateField<uint> Level = new(0, 20);
-        public UpdateField<uint> AnimGroupInstance = new(0, 21);
-        public UpdateField<uint> UiWidgetItemID = new(0, 22);
-        public UpdateField<uint> UiWidgetItemQuality = new(0, 23);
-        public UpdateField<uint> UiWidgetItemCount = new(0, 24);
-        public OptionalUpdateField<GameObjectAssistActionData> AssistActionData = new(0, 25);
+        public UpdateField<uint> FlagsB = new(0, 13);
+        public UpdateField<Quaternion> ParentRotation = new(0, 14);
+        public UpdateField<uint> FactionTemplate = new(0, 15);
+        public UpdateField<sbyte> State = new(0, 16);
+        public UpdateField<sbyte> TypeID = new(0, 17);
+        public UpdateField<byte> PercentHealth = new(0, 18);
+        public UpdateField<uint> ArtKit = new(0, 19);
+        public UpdateField<uint> CustomParam = new(0, 20);
+        public UpdateField<uint> Level = new(0, 21);
+        public UpdateField<uint> AnimGroupInstance = new(0, 22);
+        public UpdateField<uint> UiWidgetItemID = new(0, 23);
+        public UpdateField<uint> UiWidgetItemQuality = new(0, 24);
+        public UpdateField<uint> UiWidgetItemCount = new(0, 25);
+        public OptionalUpdateField<GameObjectAssistActionData> AssistActionData = new(0, 26);
 
         public void WriteCreate(UpdateFieldFlag fieldVisibilityFlags, WorldPacket data, Player receiver, GameObject owner)
         {
@@ -8734,6 +8806,7 @@ namespace Game.Entities
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
+            data.WriteUInt32(FlagsB);
             data.WriteUInt32(GetViewerDependentGameObjectFlags(this, receiver, owner));
             Quaternion rotation = ParentRotation;
             data.WriteFloat(rotation.X);
@@ -8776,7 +8849,7 @@ namespace Game.Entities
 
         public void WriteUpdate(UpdateMask changesMask, WorldPacket data, Player receiver, GameObject owner, bool ignoreNestedChangesMask)
         {
-            data.WriteBits(changesMask.GetBlock(0), 26);
+            data.WriteBits(changesMask.GetBlock(0), 27);
 
             List<uint> stateWorldEffectIDs;
 
@@ -8871,58 +8944,62 @@ namespace Game.Entities
                 }
                 if (changesMask[13])
                 {
+                    data.WriteUInt32(FlagsB);
+                }
+                if (changesMask[14])
+                {
                     data.WriteFloat(((Quaternion)ParentRotation).X);
                     data.WriteFloat(((Quaternion)ParentRotation).Y);
                     data.WriteFloat(((Quaternion)ParentRotation).Z);
                     data.WriteFloat(((Quaternion)ParentRotation).W);
                 }
-                if (changesMask[14])
+                if (changesMask[15])
                 {
                     data.WriteUInt32(FactionTemplate);
                 }
-                if (changesMask[15])
+                if (changesMask[16])
                 {
                     data.WriteInt8(GetViewerDependentGameObjectState(this, receiver, owner));
                 }
-                if (changesMask[16])
+                if (changesMask[17])
                 {
                     data.WriteInt8(TypeID);
                 }
-                if (changesMask[17])
+                if (changesMask[18])
                 {
                     data.WriteUInt8(PercentHealth);
                 }
-                if (changesMask[18])
+                if (changesMask[19])
                 {
                     data.WriteUInt32(ArtKit);
                 }
-                if (changesMask[19])
+                if (changesMask[20])
                 {
                     data.WriteUInt32(CustomParam);
                 }
-                if (changesMask[20])
+                if (changesMask[21])
                 {
                     data.WriteUInt32(Level);
                 }
-                if (changesMask[21])
+                if (changesMask[22])
                 {
                     data.WriteUInt32(AnimGroupInstance);
                 }
-                if (changesMask[22])
+                if (changesMask[23])
                 {
                     data.WriteUInt32(UiWidgetItemID);
                 }
-                if (changesMask[23])
+                if (changesMask[24])
                 {
                     data.WriteUInt32(UiWidgetItemQuality);
                 }
-                if (changesMask[24])
+                if (changesMask[25])
                 {
                     data.WriteUInt32(UiWidgetItemCount);
                 }
                 data.WriteBits(AssistActionData.HasValue(), 1);
                 data.FlushBits();
-                if (changesMask[25])
+                if (changesMask[26])
                 {
                     if (AssistActionData.HasValue())
                     {
@@ -8946,6 +9023,7 @@ namespace Game.Entities
             ClearChangesMask(CreatedBy);
             ClearChangesMask(GuildGUID);
             ClearChangesMask(Flags);
+            ClearChangesMask(FlagsB);
             ClearChangesMask(ParentRotation);
             ClearChangesMask(FactionTemplate);
             ClearChangesMask(State);

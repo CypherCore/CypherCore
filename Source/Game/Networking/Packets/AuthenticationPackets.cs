@@ -4,12 +4,9 @@
 using Framework.Constants;
 using Framework.Cryptography;
 using Framework.Cryptography.Ed25519;
-using Framework.IO;
 using Game.DataStorage;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 
 namespace Game.Networking.Packets
 {
@@ -258,62 +255,76 @@ namespace Game.Networking.Packets
 
     class ConnectTo : ServerPacket
     {
-        public ConnectTo() : base(ServerOpcodes.ConnectTo)
-        {
-            Payload = new ConnectPayload();
-        }
+        public ConnectTo() : base(ServerOpcodes.ConnectTo) { }
 
         public override void Write()
         {
-            ByteBuffer whereBuffer = new();
-            whereBuffer.WriteUInt8((byte)Payload.Where.Type);
-
-            switch (Payload.Where.Type)
-            {
-                case AddressType.IPv4:
-                    whereBuffer.WriteBytes(Payload.Where.IPv4);
-                    break;
-                case AddressType.IPv6:
-                    whereBuffer.WriteBytes(Payload.Where.IPv6);
-                    break;
-                case AddressType.NamedSocket:
-                    whereBuffer.WriteString(Payload.Where.NameSocket);
-                    break;
-                default:
-                    break;
-            }
-
-            Sha256 hash = new();
-            hash.Process(whereBuffer.GetData(), (int)whereBuffer.GetSize());
-            hash.Process((uint)Payload.Where.Type);
-            hash.Finish(BitConverter.GetBytes(Payload.Port));
-
-            var signHash = RsaCrypt.RSA.SignHash(hash.Digest, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-            signHash.Reverse();
-            Payload.Signature = signHash;
-
-            _worldPacket.WriteBytes(Payload.Signature, (uint)Payload.Signature.Length);
-            _worldPacket.WriteBytes(whereBuffer);
-            _worldPacket.WriteUInt16(Payload.Port);
+            _worldPacket.WriteInt32(Payload.Count);
             _worldPacket.WriteUInt32((uint)Serial);
             _worldPacket.WriteUInt8(Con);
             _worldPacket.WriteUInt64(Key);
             _worldPacket.WriteUInt32(NativeRealmAddress);
             _worldPacket.WriteUInt32(Key3);
+
+            foreach (ConnectPayload payload in Payload)
+                payload.Write(_worldPacket);
+
         }
 
         public ulong Key;
         public uint NativeRealmAddress;
         public uint Key3;
         public ConnectToSerial Serial;
-        public ConnectPayload Payload;
+        public List<ConnectPayload> Payload = [];
         public byte Con;
+
+        public struct BleepToken
+        {
+            public string Token;
+            public string ProxyId;
+            public string Address;
+            public TimeSpan TokenLifespan;
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteBits(Token, 5);
+                data.WriteBits(ProxyId.GetByteCount() + 1, 24);
+                data.WriteBits(Address, 6);
+                data.WriteInt64(TokenLifespan.Nanoseconds);
+                data.WriteString(Token);
+                data.WriteCString(ProxyId);
+                data.WriteString(Address);
+            }
+        }
 
         public class ConnectPayload
         {
-            public SocketAddress Where;
+            public SocketAddress Address;
             public ushort Port;
-            public byte[] Signature = new byte[256];
+            public BleepToken Token;
+
+            public void Write(WorldPacket data)
+            {
+                data.WriteUInt8((byte)Address.Type);
+
+                switch (Address.Type)
+                {
+                    case AddressType.IPv4:
+                        data.WriteBytes(Address.IPv4);
+                        break;
+                    case AddressType.IPv6:
+                        data.WriteBytes(Address.IPv6);
+                        break;
+                    case AddressType.NamedSocket:
+                        data.WriteString(Address.NameSocket);
+                        break;
+                    default:
+                        break;
+                }
+
+                data.WriteUInt16(Port);
+                Token.Write(data);
+            }
         }
 
         public struct SocketAddress

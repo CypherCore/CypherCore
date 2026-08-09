@@ -881,6 +881,7 @@ namespace Game.Entities
             public uint NotLOSBlocking;                          // 11 Not LOS Blocking, enum { false, true, }; Default: false
             public uint InteractRadiusOverride;                  // 12 Interact Radius Override (Yards * 100), int, Min value: 0, Max value: 2147483647, Default value: 0
             public uint Collisionupdatedelayafteropen;           // 13 Collision update delay(ms) after open, int, Min value: 0, Max value: 2147483647, Default value: 0
+            public uint BlockGhosts;                             // 14 Block Ghosts, enum { false, true, }; Default: false
         }
 
         public struct button

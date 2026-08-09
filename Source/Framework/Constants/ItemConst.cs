@@ -1461,6 +1461,7 @@ namespace Framework.Constants
         AccountMoneyLocked = 130,// You cannot withdraw or deposit gold from the warband bank currently; please try again later.
         CharacterBankNotAccessible = 131,// This character does not have access to this bank.
         CharacterBankNotConverted = 132,// Your character's bank has not been converted. Please try again later.
+        NoSalvagedItemsInAccountBank = 133,// You cannot place that in the Warband Bank.
     }
 
     public enum BankType

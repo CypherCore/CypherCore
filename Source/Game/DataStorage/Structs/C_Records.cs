@@ -92,11 +92,10 @@ namespace Game.DataStorage
     public sealed class CharacterLoadoutRecord
     {
         public uint Id;
-        public RaceMask<long> RaceMask;
         public sbyte ChrClassID;
         public int Purpose;
         public byte ItemContext;
-        public RaceMask<int> RaceMask_ = new(2);
+        public RaceMask<int> RaceMask = new(2);
 
         public bool IsForNewCharacter() { return Purpose == 9; }
     }
@@ -246,7 +245,6 @@ namespace Game.DataStorage
     public sealed class ChrCustomizationReqRecord
     {
         public uint Id;
-        public RaceMask<long> RaceMask;
         public string ReqSource;
         public int Flags;
         public int ClassMask;
@@ -255,7 +253,7 @@ namespace Game.DataStorage
         public int QuestID;
         public int OverrideArchive;                                          // -1: allow any, otherwise must match OverrideArchive cvar
         public uint ItemModifiedAppearanceID;
-        public RaceMask<int> RaceMask_ = new(2);
+        public RaceMask<int> RaceMask = new(2);
 
         public bool HasFlag(ChrCustomizationReqFlag chrCustomizationReqFlag) { return (Flags & (int)chrCustomizationReqFlag) != 0; }
     }

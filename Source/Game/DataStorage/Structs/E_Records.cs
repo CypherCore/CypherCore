@@ -8,7 +8,6 @@ namespace Game.DataStorage
     public sealed class EmotesRecord
     {
         public uint Id;
-        public RaceMask<long> RaceMask;
         public string EmoteSlashCommand;
         public short AnimID;
         public int EmoteFlags;
@@ -17,7 +16,7 @@ namespace Game.DataStorage
         public uint EventSoundID;
         public uint SpellVisualKitId;
         public int ClassMask;
-        public RaceMask<int> RaceMask_ = new(2);
+        public RaceMask<int> RaceMask = new(2);
     }
 
     public sealed class EmotesTextRecord

@@ -925,7 +925,7 @@ namespace Game.Networking.Packets
 
         public void Read(WorldPacket data)
         {
-            var itemModListCount = data.ReadBits<uint>(6);
+            var itemModListCount = data.ReadBits<uint>(7);
             data.ResetBitPos();
 
             for (var i = 0; i < itemModListCount; ++i)
@@ -938,7 +938,7 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteBits(Values.Count, 6);
+            data.WriteBits(Values.Count, 7);
             data.FlushBits();
 
             foreach (ItemMod itemMod in Values)

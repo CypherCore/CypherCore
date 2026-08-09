@@ -301,6 +301,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(ClientLearnedSpellData.Count);
             _worldPacket.WriteUInt32(SpecializationID);
+            _worldPacket.WriteInt32(MinActionBarSlot);
             _worldPacket.WriteBit(SuppressMessaging);
             _worldPacket.WriteBit(TraitGrantedByAura);
             _worldPacket.FlushBits();
@@ -311,6 +312,7 @@ namespace Game.Networking.Packets
 
         public List<LearnedSpellInfo> ClientLearnedSpellData = new();
         public uint SpecializationID;
+        public int MinActionBarSlot;                     ///< Where to start pushing spells on action bar
         public bool SuppressMessaging;
         public bool TraitGrantedByAura;
     }
@@ -788,17 +790,19 @@ namespace Game.Networking.Packets
     class SpellVisualLoadScreen : ServerPacket
     {
         public int SpellVisualKitID;
+        public TimeSpan Duration;
         public int Delay;
 
-        public SpellVisualLoadScreen(int spellVisualKitId, int delay) : base(ServerOpcodes.SpellVisualLoadScreen, ConnectionType.Instance)
+        public SpellVisualLoadScreen(int spellVisualKitId, TimeSpan duration) : base(ServerOpcodes.SpellVisualLoadScreen, ConnectionType.Instance)
         {
             SpellVisualKitID = spellVisualKitId;
-            Delay = delay;
+            Duration = duration;
         }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(SpellVisualKitID);
+            _worldPacket.WriteInt32((int)Duration.TotalMilliseconds);
             _worldPacket.WriteInt32(Delay);
         }
     }
@@ -1059,9 +1063,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             UnitGUID = _worldPacket.ReadPackedGuid();
+            DisplayID = _worldPacket.ReadInt32();
         }
 
         public ObjectGuid UnitGUID;
+        public int DisplayID;
     }
 
     class MirrorImageComponentedData : ServerPacket
@@ -1935,6 +1941,7 @@ namespace Game.Networking.Packets
         public SpellCastVisual Visual;
         public uint SendCastFlags;
         public SpellTargetData Target = new();
+        TimeSpan? ReceiveTime;
         public MissileTrajectoryRequest MissileTrajectory;
         public MovementInfo MoveUpdate;
         public List<SpellWeight> Weight = new();
@@ -1968,18 +1975,22 @@ namespace Game.Networking.Packets
             for (var i = 0; i < extraCurrencyCostsCount; ++i)
                 ExtraCurrencyCosts[i].Read(data);
 
-            Target.Read(data);
-
             data.ResetBitPos();
+            bool hasReceiveTime = data.HasBit();
             bool hasMoveUpdate = data.HasBit();
             var weightCount = data.ReadBits<uint>(2);
             bool hasCraftingOrderID = data.HasBit();
 
-            for (var i = 0; i < craftingReagentsCount; ++i)
-                CraftingReagents[i].Read(data);
+            Target.Read(data);
+
+            if (hasReceiveTime)
+                ReceiveTime = TimeSpan.FromMilliseconds(data.ReadUInt32());
 
             if (hasCraftingOrderID)
                 CraftingOrderID = data.ReadUInt64();
+
+            for (var i = 0; i < craftingReagentsCount; ++i)
+                CraftingReagents[i].Read(data);
 
             for (var i = 0; i < removedReagentsCount; ++i)
                 RemovedReagents[i].Read(data);

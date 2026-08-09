@@ -100,7 +100,6 @@ namespace Game.DataStorage
 
     public sealed class SkillLineAbilityRecord
     {
-        public RaceMask<long> RaceMask;
         public string AbilityVerb;
         public string AbilityAllVerb;
         public uint Id;
@@ -117,7 +116,7 @@ namespace Game.DataStorage
         public short UniqueBit;
         public short TradeSkillCategoryID;
         public ushort SkillupSkillLineID;
-        public RaceMask<int> RaceMask_ = new(2);
+        public RaceMask<int> RaceMask = new(2);
 
         public bool HasFlag(SkillLineAbilityFlags skillLineAbilityFlags) { return (Flags & (int)skillLineAbilityFlags) != 0; }
     }
@@ -133,14 +132,13 @@ namespace Game.DataStorage
     public sealed class SkillRaceClassInfoRecord
     {
         public uint Id;
-        public RaceMask<long> RaceMask;
         public ushort SkillID;
         public int ClassMask;
         public int Flags;
         public int Availability;
         public sbyte MinLevel;
         public ushort SkillTierID;
-        public RaceMask<int> RaceMask_ = new(2);
+        public RaceMask<int> RaceMask = new(2);
 
         public bool HasFlag(SkillRaceClassInfoFlags skillRaceClassInfoFlags) { return (Flags & (int)skillRaceClassInfoFlags) != 0; }
     }

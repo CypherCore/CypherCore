@@ -350,7 +350,6 @@ namespace Game.DataStorage
     public sealed class ItemSearchNameRecord
     {
         public uint Id;
-        public long AllowableRace;
         public string Display;
         public byte OverallQualityID;
         public int ExpansionID;
@@ -363,7 +362,7 @@ namespace Game.DataStorage
         public uint RequiredAbility;
         public ushort ItemLevel;
         public int[] Flags = new int[5];
-        public RaceMask<int> AllowableRace_ = new(2);
+        public RaceMask<int> AllowableRace = new(2);
     }
 
     public sealed class ItemSetRecord
@@ -391,7 +390,6 @@ namespace Game.DataStorage
     public sealed class ItemSparseRecord
     {
         public uint Id;
-        public RaceMask<long> AllowableRace;
         public string Description;
         public string Display3;
         public string Display2;
@@ -413,7 +411,7 @@ namespace Game.DataStorage
         public uint MaxCount;
         public uint MinReputation;
         public uint RequiredAbility;
-        public RaceMask<int> AllowableRace_ = new(2);
+        public RaceMask<int> AllowableRace = new(2);
         public uint SellPrice;
         public uint BuyPrice;
         public uint VendorStackCount;

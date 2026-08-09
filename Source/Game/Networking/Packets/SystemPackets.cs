@@ -109,8 +109,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteBit(GuildTradeSkillsEnabled);
             _worldPacket.WriteBits(Unknown1027.GetByteCount(), 10);
-            _worldPacket.WriteBit(BNSendWhisperUseV2Services);
-            _worldPacket.WriteBit(BNSendGameDataUseV2Services);
             _worldPacket.WriteBit(IsAccountCurrencyTransferEnabled);
 
             _worldPacket.WriteBit(NetEaseChatTelemetryEnabled);
@@ -193,8 +191,6 @@ namespace Game.Networking.Packets
         public bool PetHappinessEnabled = true;  // classic only
         public bool GuildEventsEditsEnabled = true;
         public bool GuildTradeSkillsEnabled = true;
-        public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
-        public bool BNSendGameDataUseV2Services = true; ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
         public bool IsAccountCurrencyTransferEnabled;
         public bool NetEaseChatTelemetryEnabled;
         public bool LobbyMatchmakerQueueFromMainlineEnabled;
@@ -333,6 +329,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(LiveRegionKeyBindingsCopyEnabled);
             _worldPacket.WriteBit(BrowserCrashReporterEnabled);
             _worldPacket.WriteBit(IsEmployeeAccount);
+            _worldPacket.WriteBit(UseBleep);
             _worldPacket.WriteBit(EuropaTicketSystemStatus.HasValue);
             _worldPacket.WriteBit(NameReservationOnly);
             _worldPacket.WriteBit(LaunchDurationETA.HasValue);
@@ -344,9 +341,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AccountLockedPostExport);
 
             _worldPacket.WriteBits(RealmHiddenAlert.GetByteCount() + 1, 11);
-
-            _worldPacket.WriteBit(BNSendWhisperUseV2Services);
-            _worldPacket.WriteBit(BNSendGameDataUseV2Services);
 
             _worldPacket.WriteBit(CharacterSelectListModeRealmless);
             _worldPacket.WriteBit(WowTokenLimitedMode);
@@ -424,14 +418,13 @@ namespace Game.Networking.Packets
         public bool LiveRegionKeyBindingsCopyEnabled;
         public bool BrowserCrashReporterEnabled; // NYI
         public bool IsEmployeeAccount; // NYI
+        public bool UseBleep; // NYI
         public bool NameReservationOnly; // classic only
         public bool TimerunningEnabled; // NYI
         public bool ScriptsDisallowedForBeta;
         public bool PlayerIdentityOptionsEnabled;
         public bool AccountExportEnabled;
         public bool AccountLockedPostExport;
-        public bool BNSendWhisperUseV2Services = true; ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
-        public bool BNSendGameDataUseV2Services = true; ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
         public bool CharacterSelectListModeRealmless;
         public bool WowTokenLimitedMode; // classic only
         public bool NavBarEnabled;

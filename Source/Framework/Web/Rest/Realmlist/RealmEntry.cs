@@ -1,8 +1,8 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System.Text.Json.Serialization;
 using Framework.Web.Rest.Realmlist;
+using System.Text.Json.Serialization;
 
 namespace Framework.Web
 {
@@ -37,5 +37,11 @@ namespace Framework.Web
 
         [JsonPropertyName("cfgLanguagesID")]
         public int CfgLanguagesID { get; set; }
+
+        [JsonPropertyName("cfgContentSetID")]
+        public uint CfgContentSetID { get; set; } = 11;
+
+        [JsonPropertyName("useBleepChance")]
+        public float UseBleepChance { get; set; } = 12;
     }
 }

@@ -194,6 +194,8 @@ public class RealmManager : Singleton<RealmManager>
         realmEntry.Name = realm.Name;
         realmEntry.CfgConfigsID = (int)realm.GetConfigId();
         realmEntry.CfgLanguagesID = 1;
+        realmEntry.CfgContentSetID = 0;
+        realmEntry.UseBleepChance = 0.0f;
     }
 
     public byte[] GetRealmEntryJSON(RealmId id, uint build, AccountTypes accountSecurityLevel)

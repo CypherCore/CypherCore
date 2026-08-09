@@ -14,15 +14,25 @@ namespace BNetServer.Networking
         [Service(OriginalHash.ConnectionService, 1)]
         BattlenetRpcErrorCode HandleConnect(ConnectRequest request, ConnectResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
         {
-            if (request.ClientId != null)
-                response.ClientId.MergeFrom(request.ClientId);
-
             response.ServerId = new ProcessId();
             response.ServerId.Label = (uint)Environment.ProcessId;
             response.ServerId.Epoch = (uint)Time.UnixTime - Time.GetMSTime();
+            if (request.ClientId == null)
+            {
+                response.ClientId = new ProcessId();
+                response.ClientId.Label = (uint)Environment.ProcessId;
+                response.ClientId.Epoch = (uint)(GetCreationTime() - DateTime.UnixEpoch).TotalSeconds;
+            }
+            else
+                response.ClientId.MergeFrom(request.ClientId);
+
             response.ServerTime = (ulong)Time.UnixTimeMilliseconds;
 
             response.UseBindlessRpc = request.UseBindlessRpc;
+
+            response.Ciid = $"{response.ServerId.Label:08X}{response.ServerId.Epoch:08X}-{response.ClientId.Label:08X}{response.ClientId.Epoch:08X}";
+
+            SetClientInstanceId(response.Ciid);
 
             return BattlenetRpcErrorCode.Ok;
         }

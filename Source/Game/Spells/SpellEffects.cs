@@ -709,7 +709,7 @@ namespace Game.Spells
             {
                 Player playerTarget = unitTarget.ToPlayer();
                 if (playerTarget != null)
-                    playerTarget.SendPacket(new SpellVisualLoadScreen(effectInfo.MiscValueB, effectInfo.MiscValue));
+                    playerTarget.SendPacket(new SpellVisualLoadScreen(effectInfo.MiscValueB, TimeSpan.FromMilliseconds(effectInfo.MiscValue)));
             }
 
             TeleportToOptions options = GetTeleportOptions(m_caster, unitTarget, m_destTargets[effectInfo.EffectIndex]);

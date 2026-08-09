@@ -598,7 +598,7 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!(factionEntry.ReputationRaceMask2_.HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
+                if (!(factionEntry.ReputationRaceMask2.HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
                     SetVisible(factionEntry);
         }
 
@@ -812,10 +812,10 @@ namespace Game
 
             RaceMask<int>[] reputationRaceMask =
             [
-                factionEntry.ReputationRaceMask1_,
-                factionEntry.ReputationRaceMask2_,
-                factionEntry.ReputationRaceMask3_,
-                factionEntry.ReputationRaceMask4_
+                factionEntry.ReputationRaceMask1,
+                factionEntry.ReputationRaceMask2,
+                factionEntry.ReputationRaceMask3,
+                factionEntry.ReputationRaceMask4
             ];
 
             for (int i = 0; i < 4; i++)
@@ -883,10 +883,10 @@ namespace Game
 
             RaceMask<int>[] reputationRaceMask =
             [
-                factionEntry.ReputationRaceMask1_,
-                factionEntry.ReputationRaceMask2_,
-                factionEntry.ReputationRaceMask3_,
-                factionEntry.ReputationRaceMask4_
+                factionEntry.ReputationRaceMask1,
+                factionEntry.ReputationRaceMask2,
+                factionEntry.ReputationRaceMask3,
+                factionEntry.ReputationRaceMask4
             ];
 
             for (int i = 0; i < 4; i++)

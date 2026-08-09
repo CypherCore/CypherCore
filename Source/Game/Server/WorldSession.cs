@@ -726,22 +726,26 @@ namespace Game
                 NativeRealmAddress = Global.WorldMgr.GetVirtualRealmAddress(),
                 Serial = serial
             };
-            connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortWorld);
+
+            ConnectTo.ConnectPayload payload = new();
+            payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortWorld);
             connectTo.Con = (byte)ConnectionType.Instance;
 
             if (instanceAddress != null)
             {
                 if (instanceAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                 {
-                    connectTo.Payload.Where.IPv4 = instanceAddress.GetAddressBytes();
-                    connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv4;
+                    payload.Address.IPv4 = instanceAddress.GetAddressBytes();
+                    payload.Address.Type = ConnectTo.AddressType.IPv4;
                 }
                 else
                 {
-                    connectTo.Payload.Where.IPv6 = instanceAddress.GetAddressBytes();
-                    connectTo.Payload.Where.Type = ConnectTo.AddressType.IPv6;
+                    payload.Address.IPv6 = instanceAddress.GetAddressBytes();
+                    payload.Address.Type = ConnectTo.AddressType.IPv6;
                 }
             }
+
+            connectTo.Payload.Add(payload);
 
             SendPacket(connectTo);
         }

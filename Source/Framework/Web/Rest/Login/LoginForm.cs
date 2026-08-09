@@ -19,5 +19,8 @@ namespace Framework.Web.Rest.Login
 
         [JsonPropertyName("inputs")]
         public List<FormInputValue> Inputs { get; set; } = new List<FormInputValue>();
+
+        [JsonPropertyName("title_id")]
+        public uint TitleId { get; set; }
     }
 }
