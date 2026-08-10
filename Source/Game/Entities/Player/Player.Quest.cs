@@ -397,7 +397,7 @@ namespace Game.Entities
 
         public Quest GetNextQuest(WorldObject questGiver, Quest quest)
         {
-            uint nextQuestID = quest.NextQuestInChain;
+            uint nextQuestID = quest.RewardNextQuest;
             if (nextQuestID == 0)
                 return null;
 

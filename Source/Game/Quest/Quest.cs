@@ -26,7 +26,7 @@ namespace Game
             QuestSortID = fields.Read<short>(4);
             QuestInfoID = fields.Read<ushort>(5);
             SuggestedPlayers = fields.Read<uint>(6);
-            NextQuestInChain = fields.Read<uint>(7);
+            RewardNextQuest = fields.Read<uint>(7);
             RewardXPDifficulty = fields.Read<uint>(8);
             RewardXPMultiplier = fields.Read<float>(9);
             RewardMoneyDifficulty = fields.Read<uint>(10);
@@ -710,7 +710,7 @@ namespace Game
             response.Info.QuestSortID = QuestSortID;
             response.Info.QuestInfoID = QuestInfoID;
             response.Info.SuggestedGroupNum = SuggestedPlayers;
-            response.Info.RewardNextQuest = NextQuestInChain;
+            response.Info.RewardNextQuest = RewardNextQuest;
             response.Info.RewardXPDifficulty = RewardXPDifficulty;
             response.Info.RewardXPMultiplier = RewardXPMultiplier;
 
@@ -900,7 +900,7 @@ namespace Game
         public int QuestSortID;
         public uint QuestInfoID;
         public uint SuggestedPlayers;
-        public uint NextQuestInChain { get; set; }
+        public uint RewardNextQuest { get; set; }
         public uint RewardXPDifficulty;
         public float RewardXPMultiplier;
         public uint RewardMoneyDifficulty;

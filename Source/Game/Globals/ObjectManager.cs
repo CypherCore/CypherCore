@@ -7824,13 +7824,13 @@ namespace Game
                         usedMailTemplates[qinfo.RewardMailTemplateId] = qinfo.Id;
                 }
 
-                if (qinfo.NextQuestInChain != 0)
+                if (qinfo.RewardNextQuest != 0)
                 {
-                    if (!_questTemplates.ContainsKey(qinfo.NextQuestInChain))
+                    if (!_questTemplates.ContainsKey(qinfo.RewardNextQuest))
                     {
-                        Log.outError(LogFilter.Sql, "Quest {0} has `NextQuestIdChain` = {1} but quest {2} does not exist, quest chain will not work.",
-                            qinfo.Id, qinfo.NextQuestInChain, qinfo.NextQuestInChain);
-                        qinfo.NextQuestInChain = 0;
+                        Log.outError(LogFilter.Sql, "Quest {0} has `RewardNextQuest` = {1} but quest {2} does not exist, quest chain will not work.",
+                            qinfo.Id, qinfo.RewardNextQuest, qinfo.RewardNextQuest);
+                        qinfo.RewardNextQuest = 0;
                     }
                 }
 

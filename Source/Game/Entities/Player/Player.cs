@@ -269,18 +269,9 @@ namespace Game.Entities
             LearnDefaultSkills();
             LearnCustomSpells();
 
-            // Original action bar. Do not use Player.AddActionButton because we do not have skill spells loaded at this time
-            // but checks will still be performed later when loading character from db in Player._LoadActions
+            // original action bar
             foreach (var action in info.action)
-            {
-                // create new button
-                ActionButton ab = new();
-
-                // set data
-                ab.SetActionAndType(action.action, (ActionButtonType)action.type);
-
-                m_actionButtons[action.button] = ab;
-            }
+                AddActionButton(action.button, action.action, action.type);
 
             ChrSpecializationRecord defaultSpec = DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             if (defaultSpec != null)
