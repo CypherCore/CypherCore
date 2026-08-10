@@ -3640,11 +3640,20 @@ namespace Game
                     }
                 }
 
-                uint healthPct = Math.Clamp(data.curHealthPct, 1, 100);
-                if (data.curHealthPct != healthPct)
+                if (data.curHealthPct.HasValue)
                 {
-                    Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with invalid `curHealthPct` {data.curHealthPct}, set to {healthPct}.");
-                    data.curHealthPct = healthPct;
+                    uint healthPct = Math.Clamp(data.curHealthPct.Value, 1, 100);
+                    if (data.curHealthPct != healthPct)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with invalid `curHealthPct` {data.curHealthPct}, set to {healthPct}.");
+                        data.curHealthPct = healthPct;
+                    }
+
+                    if (cInfo.RegenHealth)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with `curHealthPct` {data.curHealthPct}, but health regeneration is not disabled in `creature_template`, set to 100.");
+                        data.curHealthPct = 100;
+                    }
                 }
 
                 if (WorldConfig.GetBoolValue(WorldCfg.CalculateCreatureZoneAreaData))

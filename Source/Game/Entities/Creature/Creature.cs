@@ -1421,24 +1421,22 @@ namespace Game.Entities
 
             // check if it's a custom model and if not, use 0 for displayId
             CreatureTemplate cinfo = GetCreatureTemplate();
-            if (cinfo != null)
-            {
-                foreach (CreatureModel model in cinfo.Models)
-                    if (displayId != 0 && displayId == model.CreatureDisplayID)
-                        displayId = 0;
+            foreach (CreatureModel model in cinfo.Models)
+                if (displayId != 0 && displayId == model.CreatureDisplayID)
+                    displayId = 0;
 
-                if (spawnNpcFlags != cinfo.Npcflag)
-                    npcflag = spawnNpcFlags;
+            if (spawnNpcFlags != cinfo.Npcflag)
+                npcflag = spawnNpcFlags;
 
-                if (m_unitData.Flags == (uint)cinfo.UnitFlags)
-                    unitFlags = m_unitData.Flags;
+            if (m_unitData.Flags == (uint)cinfo.UnitFlags)
+                unitFlags = m_unitData.Flags;
 
-                if (m_unitData.Flags2 == cinfo.UnitFlags2)
-                    unitFlags2 = m_unitData.Flags2;
+            if (m_unitData.Flags2 == cinfo.UnitFlags2)
+                unitFlags2 = m_unitData.Flags2;
 
-                if (m_unitData.Flags3 == cinfo.UnitFlags3)
-                    unitFlags3 = m_unitData.Flags3;
-            }
+            if (m_unitData.Flags3 == cinfo.UnitFlags3)
+                unitFlags3 = m_unitData.Flags3;
+
 
             if (data.SpawnId == 0)
                 data.SpawnId = m_spawnId;
@@ -1466,7 +1464,8 @@ namespace Game.Entities
             // prevent add data integrity problems
             data.WanderDistance = GetDefaultMovementType() == MovementGeneratorType.Idle ? 0.0f : m_wanderDistance;
             data.currentwaypoint = 0;
-            data.curHealthPct = (uint)GetHealthPct();
+            if (!cinfo.RegenHealth)
+                data.curHealthPct = (uint)GetHealthPct();
             // prevent add data integrity problems
             data.movementType = (byte)(m_wanderDistance == 0 && GetDefaultMovementType() == MovementGeneratorType.Random
                 ? MovementGeneratorType.Idle : GetDefaultMovementType());
@@ -1832,7 +1831,13 @@ namespace Game.Entities
 
         public void SetSpawnHealth()
         {
-            SetHealth(CountPctFromMaxHealth(m_creatureData != null ? (int)m_creatureData.curHealthPct : 100));
+            // set health only if regenerating is not enabled (otherwise it would immediately go back to full health anyway)
+            if (!_regenerateHealth && m_creatureData != null && m_creatureData.curHealthPct.HasValue)
+                SetHealth(CountPctFromMaxHealth(m_creatureData.curHealthPct.Value));
+            // or when creature respawns in legacy compatibility mode
+            else if (GetDeathState() == DeathState.JustRespawned)
+                SetFullHealth();
+
             SetInitialPowerValue(GetPowerType());
         }
 

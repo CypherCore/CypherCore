@@ -3,11 +3,10 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using System;
-using System.Collections.Generic;
-using Game.Networking.Packets;
-using Game.Maps;
 using Game.DataStorage;
+using Game.Maps;
+using Game.Networking.Packets;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -272,7 +271,7 @@ namespace Game.Entities
         public sbyte equipmentId;
         public float WanderDistance;
         public uint currentwaypoint;
-        public uint curHealthPct;
+        public uint? curHealthPct;
         public byte movementType;
         public ulong? npcflag;
         public uint? unit_flags;                                  // enum UnitFlags mask values
