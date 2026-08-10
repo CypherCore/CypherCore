@@ -285,12 +285,18 @@ namespace Game
                         go.SetLootState(LootState.JustDeactivated);
                     }
                     else if (go.GetGoType() == GameObjectTypes.FishingHole)
-                    {                                               // The fishing hole used once more
-                        go.AddUse();                               // if the max usage is reached, will be despawned in next tick
-                        if (go.GetUseCount() >= go.GetGoValue().FishingHole.MaxOpens)
-                            go.SetLootState(LootState.JustDeactivated);
-                        else
-                            go.SetLootState(LootState.Ready);
+                    {
+                        bool allOpensConsumed = false;
+                        if (go.GetGoValue().FishingHole.MaxOpens != 0)
+                        {
+                            // The fishing hole used once more
+                            go.AddUse();
+
+                            // If the max usage is reached, will be despawned in next tick
+                            allOpensConsumed = go.GetUseCount() >= go.GetGoValue().FishingHole.MaxOpens;
+                        }
+
+                        go.SetLootState(allOpensConsumed ? LootState.JustDeactivated : LootState.Ready);
                     }
                     else if (go.GetGoType() != GameObjectTypes.GatheringNode && go.IsFullyLooted())
                         go.SetLootState(LootState.JustDeactivated);
