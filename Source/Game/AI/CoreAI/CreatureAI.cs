@@ -126,8 +126,8 @@ namespace Game.AI
             if (!me.IsTypeId(TypeId.Unit) || me.IsEngaged() || me.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing | UnitState.Distracted))
                 return;
 
-            // Only alert for hostiles!
-            if (me.IsCivilian() || me.HasReactState(ReactStates.Passive) || !me.IsHostileTo(who) || !me._IsTargetAcceptable(who))
+            // Only alert for hostiles that can actually engage the target.
+            if (me.IsCivilian() || me.HasReactState(ReactStates.Passive) || me.IsImmuneToPC() || !me.IsHostileTo(who) || !me._IsTargetAcceptable(who))
                 return;
 
             // Send alert sound (if any) for this creature
