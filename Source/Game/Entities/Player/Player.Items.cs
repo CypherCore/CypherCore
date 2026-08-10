@@ -2990,7 +2990,7 @@ namespace Game.Entities
                 uint eslot = slot - InventorySlots.BuyBackStart;
 
                 SetInvSlot(slot, pItem.GetGUID());
-                SetBuybackPrice(eslot, pItem.GetSellPrice(this) * pItem.GetCount());
+                SetBuybackPrice(eslot, pItem.GetSellPrice(this, true) * pItem.GetCount());
 
                 SetBuybackTimestamp(eslot, etime);
 
@@ -3422,20 +3422,11 @@ namespace Game.Entities
             if (amount > item.GetCount())
                 return SellResult.CantSellItem;
 
-            uint sellPrice = item.GetSellPrice(this);
+            uint sellPrice = item.GetSellPrice(this, true);
             if (sellPrice <= 0)
                 return SellResult.CantSellItem;
 
             ulong money = (ulong)sellPrice * amount;
-            ulong durabilityPenalty = item.CalculateDurabilitySellPenalty();
-
-            if (durabilityPenalty != 0)
-            {
-                if (durabilityPenalty > money)
-                    money = 1;
-                else
-                    money -= durabilityPenalty;
-            }
 
             if (money > uint.MaxValue) // ensure sell price * amount doesn't overflow buyback price
                 return SellResult.CantSellItem;
@@ -3445,16 +3436,7 @@ namespace Game.Entities
 
         public SellResult? SellItemToVendor(Item item, uint amount)
         {
-            ulong money = (ulong)item.GetSellPrice(this) * amount;
-            ulong durabilityPenalty = item.CalculateDurabilitySellPenalty();
-
-            if (durabilityPenalty != 0)
-            {
-                if (durabilityPenalty > money)
-                    money = 1;
-                else
-                    money -= durabilityPenalty;
-            }
+            ulong money = (ulong)item.GetSellPrice(this, true) * amount;
 
             if (!ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
                 return SellResult.CantSellItem;

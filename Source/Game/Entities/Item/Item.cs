@@ -929,11 +929,6 @@ namespace Game.Entities
             return cost;
         }
 
-        public ulong CalculateDurabilitySellPenalty()
-        {
-            return CalculateDurabilityRepairCost(1.0f, false);
-        }
-
         bool HasEnchantRequiredSkill(Player player)
         {
             // Check all enchants for required skill
@@ -1749,9 +1744,26 @@ namespace Game.Entities
             return (uint)(proto.GetPriceVariance() * typeFactor * baseFactor * qualityFactor * proto.GetPriceRandomValue());
         }
 
-        public uint GetSellPrice(Player owner)
+        public uint GetSellPrice(Player owner, bool forVendor = false)
         {
-            return GetSellPrice(GetTemplate(), (uint)GetQuality(), GetItemLevel(owner));
+            ItemTemplate itemTemplate = GetTemplate();
+            long price = GetSellPrice(itemTemplate, (uint)GetQuality(), GetItemLevel(owner));
+            if (forVendor)
+            {
+                var effects = GetEffects();
+                var effectWithCharges = effects.FirstOrDefault(itemEffect => itemEffect.SpellID != 0 && itemEffect.TriggerType == ItemSpelltriggerType.OnUse && itemEffect.Charges < 0);
+
+                if (effectWithCharges != null)
+                    price = price * GetSpellCharges(effectWithCharges) / effectWithCharges.Charges;
+
+                long repairCost = (long)CalculateDurabilityRepairCost(1.0f, false);
+                if (repairCost < price)
+                    price -= repairCost;
+                else
+                    price = 1;
+            }
+
+            return (uint)price;
         }
 
         public static uint GetSellPrice(ItemTemplate proto, uint quality, uint itemLevel)
