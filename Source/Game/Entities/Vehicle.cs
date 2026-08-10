@@ -683,6 +683,9 @@ namespace Game.Entities
                 player.SendOnCancelExpectedVehicleRideAura();
                 if (!veSeat.HasFlag(VehicleSeatFlagsB.KeepPet))
                     player.UnsummonPetTemporaryIfAny();
+
+                // This is not perfectly mirroring official behavior (aura removal is delayed, most likely on heartbeat)
+                player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Standing);
             }
 
             if (veSeat.HasFlag(VehicleSeatFlags.DisableGravity))
