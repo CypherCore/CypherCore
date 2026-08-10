@@ -376,14 +376,19 @@ namespace Framework.Constants
         DastardlyDuos = 651,
         Delves = 652,
         AratorsJourney = 653,
+        Abundance2 = 654,
         Neighborhood = 655,
         Prey = 656,
         CatchUp = 657,
         SiegeOfArathiHighlands = 658,
         DepthDivers = 659,
         CloakAndCapture = 661,
+        LegacyOfTheAmani = 663,
         Haranir = 664,
         DecorDuel = 665,
+        omnium_folio = 670,
+        VoidAssaults = 671,
+        RitualSites = 672,
     }
 
     public enum QuestFailedReasons
