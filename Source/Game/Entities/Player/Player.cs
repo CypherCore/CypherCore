@@ -237,11 +237,6 @@ namespace Game.Entities
             SetRestState(RestTypes.Honor, PlayerRestState.Normal);
             SetNativeGender(createInfo.Sex);
 
-            if (HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured))
-                SetInventorySlotCount(InventorySlots.InventoryAccountSecuredSize);
-            else
-                SetInventorySlotCount(InventorySlots.InventoryDefaultSize);
-
             // set starting level
             SetLevel(GetStartLevel(createInfo.RaceId, createInfo.ClassId, createInfo.TemplateSet), false);
 
@@ -2482,6 +2477,16 @@ namespace Game.Entities
             TeleportTo(m_summon_location);
 
             broadcastSummonResponse(true);
+        }
+
+        public void SetAccountSecured(bool secured)
+        {
+            if (secured)
+                SetPlayerLocalFlag(PlayerLocalFlags.AccountSecured);
+            else
+                RemovePlayerLocalFlag(PlayerLocalFlags.AccountSecured);
+
+            UpdateInventorySlotCount();
         }
 
         public void AddUnlockedTransmogOutfits(ICollection<int> transmogOutfitIds)

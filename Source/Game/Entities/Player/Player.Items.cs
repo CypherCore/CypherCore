@@ -2682,6 +2682,20 @@ namespace Game.Entities
 
             return itemList;
         }
+
+        void UpdateInventorySlotCount()
+        {
+            byte slotCount = ItemConst.InventoryDefaultSize;
+            if (HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured))
+                slotCount += ItemConst.InventoryAccountSecuredBonusSize;
+
+            AuraEffect alpacaSaddlebags = GetAuraEffect(ItemConst.SpellAlpacaSaddlebags, 0);
+            if (alpacaSaddlebags != null)
+                slotCount += (byte)alpacaSaddlebags.GetAmount();
+
+            SetInventorySlotCount(slotCount);
+        }
+
         public bool HasItemCount(uint item, uint count = 1, bool inBankAlso = false)
         {
             ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
@@ -4284,6 +4298,8 @@ namespace Game.Entities
                     // prevent cheating
                     if ((slot >= InventorySlots.BuyBackStart && slot < InventorySlots.BuyBackEnd) || slot >= (byte)PlayerSlots.End)
                         return InventoryResult.WrongBagType;
+                    if (slot < InventorySlots.ItemEnd && slot >= InventorySlots.ItemStart + GetInventorySlotCount())
+                        return InventoryResult.NoSlotAvailable;
                 }
                 else
                 {

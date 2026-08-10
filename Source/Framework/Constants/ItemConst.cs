@@ -26,6 +26,11 @@ namespace Framework.Constants
         public const int MaxItemSetItems = 17;
         public const int MaxItemSetSpells = 8;
 
+        public const byte InventoryDefaultSize = 16;
+        public const byte InventoryAccountSecuredBonusSize = 4;
+
+        public const uint SpellAlpacaSaddlebags = 317795;
+
         public static uint[] ItemQualityColors =
         {
             0xff9d9d9d, // GREY
@@ -158,8 +163,6 @@ namespace Framework.Constants
         public const byte AccountBankBagEnd = 105;
 
         public const byte Bag0 = 255;
-        public const byte InventoryDefaultSize = 16;
-        public const byte InventoryAccountSecuredSize = InventoryDefaultSize + 4; // 4 slots are provided for having a secured account
     }
 
     enum EquipableSpellSlots

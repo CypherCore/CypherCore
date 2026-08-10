@@ -27,6 +27,8 @@ namespace Game.Entities
     {
         void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult, uint timeDiff)
         {
+            UpdateInventorySlotCount();
+
             Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
             ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
@@ -4149,11 +4151,6 @@ namespace Game.Entities
                 ScheduleDelayedOperation(PlayerDelayedOperations.SavePlayer);
                 return;
             }
-
-            // adding extra inventory slots to existing characters
-            if (HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured) && GetInventorySlotCount() == InventorySlots.InventoryDefaultSize)
-                SetInventorySlotCount(InventorySlots.InventoryAccountSecuredSize);
-
 
             // first save/honor gain after midnight will also update the player's honor fields
             UpdateHonorFields();
