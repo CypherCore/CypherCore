@@ -516,6 +516,8 @@ namespace Game
 
                     if (newRank <= ReputationRank.Hostile)
                         SetAtWar(factionState, true);
+                    else if (newRank > oldRank)
+                        SetAtWar(factionState, false);
 
                     if (newRank > oldRank)
                         _sendFactionIncreased = true;
