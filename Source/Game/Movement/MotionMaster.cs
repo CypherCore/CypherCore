@@ -387,13 +387,7 @@ namespace Game.Movement
                         DirectClearDefault();
                     break;
                 case MovementSlot.Active:
-                    do
-                    {
-                        var itr = _generators.FirstOrDefault(a => a.GetMovementGeneratorType() == type);
-                        if (itr == null)
-                            break;
-                        Remove(itr, GetCurrentMovementGenerator() == itr, false);
-                    } while (true);
+                    DirectClear(a => a.GetMovementGeneratorType() == type);
                     break;
                 default:
                     break;
@@ -1157,14 +1151,11 @@ namespace Game.Movement
 
         void DirectClear(Func<MovementGenerator, bool> filter)
         {
+            MovementGenerator top = GetCurrentMovementGenerator();
             foreach (var movement in _generators.ToList())
             {
                 if (filter(movement))
-                {
-                    MovementGenerator top = GetCurrentMovementGenerator(); // erase may change top, get fresh value on every removal
-                    _generators.Remove(movement);
-                    Delete(movement, movement == top, false);
-                }
+                    Remove(movement, movement == top, false);
             }
         }
 
