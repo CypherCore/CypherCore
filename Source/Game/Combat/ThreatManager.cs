@@ -801,7 +801,7 @@ namespace Game.Combat
                 return (uint)_sortedThreatList.Count;
             uint returnValue = 0;
             foreach (ThreatReference refe in _sortedThreatList)
-                if (refe.IsAvailable() && refe.GetOwner().GetTypeId() == TypeId.Player)
+                if (refe.IsAvailable() && refe.GetVictim().GetTypeId() == TypeId.Player)
                     ++returnValue;
             return returnValue;
         }
