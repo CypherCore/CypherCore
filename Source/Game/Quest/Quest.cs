@@ -772,6 +772,7 @@ namespace Game
                 {
                     response.Info.UnfilteredChoiceItems[i].ItemID = RewardChoiceItemId[i];
                     response.Info.UnfilteredChoiceItems[i].Quantity = RewardChoiceItemCount[i];
+                    response.Info.UnfilteredChoiceItems[i].DisplayID = RewardChoiceItemDisplayId[i];
                 }
             }
 
