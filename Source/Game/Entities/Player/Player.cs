@@ -236,7 +236,11 @@ namespace Game.Entities
             SetRestState(RestTypes.XP, ((GetSession().IsARecruiter() || GetSession().GetRecruiterId() != 0) ? PlayerRestState.RAFLinked : PlayerRestState.Normal));
             SetRestState(RestTypes.Honor, PlayerRestState.Normal);
             SetNativeGender(createInfo.Sex);
-            SetInventorySlotCount(InventorySlots.DefaultSize);
+
+            if (HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured))
+                SetInventorySlotCount(InventorySlots.InventoryAccountSecuredSize);
+            else
+                SetInventorySlotCount(InventorySlots.InventoryDefaultSize);
 
             // set starting level
             SetLevel(GetStartLevel(createInfo.RaceId, createInfo.ClassId, createInfo.TemplateSet), false);

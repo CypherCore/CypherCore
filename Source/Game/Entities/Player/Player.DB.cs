@@ -4150,6 +4150,11 @@ namespace Game.Entities
                 return;
             }
 
+            // adding extra inventory slots to existing characters
+            if (HasPlayerLocalFlag(PlayerLocalFlags.AccountSecured) && GetInventorySlotCount() == InventorySlots.InventoryDefaultSize)
+                SetInventorySlotCount(InventorySlots.InventoryAccountSecuredSize);
+
+
             // first save/honor gain after midnight will also update the player's honor fields
             UpdateHonorFields();
 

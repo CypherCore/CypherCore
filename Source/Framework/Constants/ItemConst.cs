@@ -158,7 +158,8 @@ namespace Framework.Constants
         public const byte AccountBankBagEnd = 105;
 
         public const byte Bag0 = 255;
-        public const byte DefaultSize = 16;
+        public const byte InventoryDefaultSize = 16;
+        public const byte InventoryAccountSecuredSize = InventoryDefaultSize + 4; // 4 slots are provided for having a secured account
     }
 
     enum EquipableSpellSlots
