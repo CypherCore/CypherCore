@@ -405,8 +405,7 @@ namespace Game.Entities
             SendMessageToSet(new SAttackStop(this, victim), true);
 
             if (victim != null)
-                Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking {2} {3}", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString(),
-                    (victim.IsTypeId(TypeId.Player) ? "player" : "creature"), victim.GetGUID().ToString());
+                Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking {2} {3}", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString(), (victim.IsTypeId(TypeId.Player) ? "player" : "creature"), victim.GetGUID().ToString());
             else
                 Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString());
         }

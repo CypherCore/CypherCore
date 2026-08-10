@@ -18,14 +18,14 @@ namespace Game
             if (enemy == null)
             {
                 // stop attack state at client
-                SendAttackStop(null);
+                _player.SendMeleeAttackStop();
                 return;
             }
 
             if (!GetPlayer().IsValidAttackTarget(enemy))
             {
                 // stop attack state at client
-                SendAttackStop(enemy);
+                _player.SendMeleeAttackStop(enemy);
                 return;
             }
 
@@ -39,7 +39,7 @@ namespace Game
                 Cypher.Assert(seat != null);
                 if (!seat.HasFlag(VehicleSeatFlags.CanAttack))
                 {
-                    SendAttackStop(enemy);
+                    _player.SendMeleeAttackStop(enemy);
                     return;
                 }
             }
@@ -63,11 +63,6 @@ namespace Game
             }
 
             GetPlayer().SetSheath((SheathState)packet.CurrentSheathState);
-        }
-
-        void SendAttackStop(Unit enemy)
-        {
-            SendPacket(new SAttackStop(GetPlayer(), enemy));
         }
     }
 }
