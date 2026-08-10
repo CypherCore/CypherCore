@@ -1536,6 +1536,9 @@ namespace Game.AI
                     if (ev.Event.minMaxRepeat.repeatMin == 0 && ev.Event.minMaxRepeat.repeatMax == 0)
                         ev.Event.event_flags |= SmartEventFlags.NotRepeatable;
 
+                    if (e.Event.event_flags != 0 && (e.Event.event_flags & SmartEventFlags.WhileCharmed) != 0)
+                        ev.Event.event_flags |= SmartEventFlags.WhileCharmed;
+
                     ev.Action.type = SmartActions.TriggerTimedEvent;
                     ev.Action.timeEvent.id = e.Action.timeEvent.id;
 
