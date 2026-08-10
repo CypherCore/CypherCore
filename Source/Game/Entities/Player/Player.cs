@@ -6051,28 +6051,9 @@ namespace Game.Entities
 
             CastSpell(this, 836, true);                             // LOGINEFFECT
 
-            // set some aura effects that send packet to player client after add player to map
-            // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
-            // same auras state lost at far teleport, send it one more time in this case also
-            AuraType[] auratypes =
-            {
-                AuraType.Transform, AuraType.WaterWalk,
-                AuraType.FeatherFall, AuraType.Hover, AuraType.SafeFall,
-                AuraType.Fly, AuraType.ModIncreaseMountedFlightSpeed, AuraType.AdvFlying
-            };
-            foreach (var auraType in auratypes)
-            {
-                var auraList = GetAuraEffectsByType(auraType);
-                if (!auraList.Empty())
-                    auraList.First().HandleEffect(this, AuraEffectHandleModes.SendForClient, true);
-            }
-
-            if (HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModStunDisableGravity))
-                SetRooted(true);
-
             MoveSetCompoundState setCompoundState = new();
             // manual send package (have code in HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true); that must not be re-applied.
-            if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
+            if (HasAuraType(AuraType.ModStun) || HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || HasAuraType(AuraType.ModRootDisableGravity))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveRoot, m_movementCounter++));
 
             if (HasAuraType(AuraType.FeatherFall))
@@ -6084,13 +6065,19 @@ namespace Game.Entities
             if (HasAuraType(AuraType.Hover))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetHovering, m_movementCounter++));
 
+            if (HasAuraType(AuraType.Fly) || HasAuraType(AuraType.ModIncreaseMountedFlightSpeed) || HasAuraType(AuraType.AdvFlying))
+                setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetCanFly, m_movementCounter++));
+
+            if (HasAuraType(AuraType.AdvFlying))
+                setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetCanAdvFly, m_movementCounter++));
+
             if (HasAuraType(AuraType.ModRootDisableGravity) || HasAuraType(AuraType.ModStunDisableGravity) || HasAuraType(AuraType.DisableGravity))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveDisableGravity, m_movementCounter++));
 
             if (HasAuraType(AuraType.CanTurnWhileFalling))
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveSetCanTurnWhileFalling, m_movementCounter++));
 
-            if (HasAura(196055)) //DH DoubleJump
+            if (HasAura(196055) || HasAuraType(AuraType.AdvFlying)) //DH DoubleJump
                 setCompoundState.StateChanges.Add(new MoveSetCompoundState.MoveStateChange(ServerOpcodes.MoveEnableDoubleJump, m_movementCounter++));
 
             if (HasAuraType(AuraType.IgnoreMovementForces))
