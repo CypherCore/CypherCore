@@ -898,9 +898,6 @@ namespace Game.Entities
             LoadCreaturesAddon();
             LoadCreaturesSparringHealth(true);
 
-            //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
-            posZ += GetHoverOffset();
-
             LastUsedScriptID = GetScriptId();
 
             if (IsSpiritHealer() || IsAreaSpiritHealer() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.GhostVisibility))
