@@ -377,13 +377,13 @@ namespace Game
         public void DespawnPool(SpawnedPoolData spawnedPoolData, uint pool_id, bool alwaysDeleteRespawnTime = false)
         {
             if (mPoolCreatureGroups.ContainsKey(pool_id) && !mPoolCreatureGroups[pool_id].IsEmpty())
-                mPoolCreatureGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
+                mPoolCreatureGroups[pool_id].DespawnAllObjects(spawnedPoolData, alwaysDeleteRespawnTime);
 
             if (mPoolGameobjectGroups.ContainsKey(pool_id) && !mPoolGameobjectGroups[pool_id].IsEmpty())
-                mPoolGameobjectGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
+                mPoolGameobjectGroups[pool_id].DespawnAllObjects(spawnedPoolData, alwaysDeleteRespawnTime);
 
             if (mPoolPoolGroups.ContainsKey(pool_id) && !mPoolPoolGroups[pool_id].IsEmpty())
-                mPoolPoolGroups[pool_id].DespawnObject(spawnedPoolData, 0, alwaysDeleteRespawnTime);
+                mPoolPoolGroups[pool_id].DespawnAllObjects(spawnedPoolData, alwaysDeleteRespawnTime);
         }
 
         public bool IsEmpty(uint pool_id)
@@ -562,37 +562,25 @@ namespace Game
             return true;
         }
 
-        public void DespawnObject(SpawnedPoolData spawns, ulong guid = 0, bool alwaysDeleteRespawnTime = false)
+        public void DespawnObject(SpawnedPoolData spawns, ulong guid, bool alwaysDeleteRespawnTime = false)
         {
-            for (int i = 0; i < EqualChanced.Count; ++i)
+            // if spawned
+            if (spawns.IsSpawnedObject<T>(guid))
             {
-                // if spawned
-                if (spawns.IsSpawnedObject<T>(EqualChanced[i].guid))
-                {
-                    if (guid == 0 || EqualChanced[i].guid == guid)
-                    {
-                        Despawn1Object(spawns, EqualChanced[i].guid, alwaysDeleteRespawnTime);
-                        spawns.RemoveSpawn<T>(EqualChanced[i].guid, poolId);
-                    }
-                }
-                else if (alwaysDeleteRespawnTime)
-                    RemoveRespawnTimeFromDB(spawns, EqualChanced[i].guid);
+                Despawn1Object(spawns, guid, alwaysDeleteRespawnTime);
+                spawns.RemoveSpawn<T>(guid, poolId);
             }
+            else if (alwaysDeleteRespawnTime)
+                RemoveRespawnTimeFromDB(spawns, guid);
+        }
 
-            for (int i = 0; i < ExplicitlyChanced.Count; ++i)
-            {
-                // spawned
-                if (spawns.IsSpawnedObject<T>(ExplicitlyChanced[i].guid))
-                {
-                    if (guid == 0 || ExplicitlyChanced[i].guid == guid)
-                    {
-                        Despawn1Object(spawns, ExplicitlyChanced[i].guid, alwaysDeleteRespawnTime);
-                        spawns.RemoveSpawn<T>(ExplicitlyChanced[i].guid, poolId);
-                    }
-                }
-                else if (alwaysDeleteRespawnTime)
-                    RemoveRespawnTimeFromDB(spawns, ExplicitlyChanced[i].guid);
-            }
+        public void DespawnAllObjects(SpawnedPoolData spawns, bool alwaysDeleteRespawnTime)
+        {
+            foreach (PoolObject pooledObject in EqualChanced)
+                DespawnObject(spawns, pooledObject.guid, alwaysDeleteRespawnTime);
+
+            foreach (PoolObject pooledObject in ExplicitlyChanced)
+                DespawnObject(spawns, pooledObject.guid, alwaysDeleteRespawnTime);
         }
 
         void Despawn1Object(SpawnedPoolData spawns, ulong guid, bool alwaysDeleteRespawnTime = false, bool saveRespawnTime = true)
@@ -763,12 +751,6 @@ namespace Game
                     Global.PoolMgr.SpawnPool(spawns, (uint)obj.guid);
                     break;
             }
-        }
-
-        void ReSpawn1Object(SpawnedPoolData spawns, PoolObject obj)
-        {
-            Despawn1Object(spawns, obj.guid, false, false);
-            Spawn1Object(spawns, obj);
         }
 
         void RemoveRespawnTimeFromDB(SpawnedPoolData spawns, ulong guid)
