@@ -121,7 +121,7 @@ namespace Game
                         LootMoneyNotify packet = new();
                         packet.Money = goldPerPlayer;
                         packet.MoneyMod = goldMod;
-                        packet.SoleLooter = playersNear.Count <= 1 ? true : false;
+                        packet.SoleLooter = playersNear.Count <= 1;
                         pl.SendPacket(packet);
                     }
                 }

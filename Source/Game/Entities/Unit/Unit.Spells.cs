@@ -1268,7 +1268,7 @@ namespace Game.Entities
             if (spell != null)
                 if (!CanCastSpellWhileMoving(spell.GetSpellInfo())
                     && ((spell.GetState() == SpellState.Preparing && spell.GetSpellInfo().InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
-                        || spell.GetState() == SpellState.Channeling && !spell.GetSpellInfo().IsMoveAllowedChannel()))
+                        || (spell.GetState() == SpellState.Channeling && !spell.GetSpellInfo().IsMoveAllowedChannel())))
                     return true;
 
             return false;

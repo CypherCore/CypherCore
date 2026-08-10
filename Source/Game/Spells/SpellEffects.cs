@@ -1952,10 +1952,11 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null || m_caster.IsTypeId(TypeId.Player))
+            if (!unitTarget.IsPlayer())
                 return;
 
-            unitTarget.ToPlayer().SendRespecWipeConfirm(m_caster.GetGUID(), unitTarget.ToPlayer().GetNextResetTalentsCost(), SpecResetType.Talents);
+            Player playerTarget = unitTarget.ToPlayer();
+            playerTarget.SendRespecWipeConfirm(m_caster.GetGUID(), playerTarget.GetNextResetTalentsCost(), SpecResetType.Talents);
         }
 
         [SpellEffectHandler(SpellEffects.TeleportUnitsFaceCaster)]
