@@ -1108,10 +1108,11 @@ namespace Game.Spells
             {
                 target.m_stealth.AddValue(type, -GetAmountAsInt());
 
-                if (!target.HasAuraType(AuraType.ModStealth)) // if last SPELL_AURA_MOD_STEALTH
-                {
+                if (!target.HasAuraTypeWithMiscvalue(AuraType.ModStealth, (int)type))
                     target.m_stealth.DelFlag(type);
 
+                if (target.m_stealth.GetFlags() == 0)
+                {
                     target.RemoveVisFlag(UnitVisFlags.Stealthed);
                     Player playerTarget = target.ToPlayer();
                     if (playerTarget != null)
