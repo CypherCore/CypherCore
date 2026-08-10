@@ -3931,10 +3931,26 @@ namespace Game.Entities
             addValue += GetTotalAuraModifier(AuraType.ModHealthRegenInCombat);
             addValue += m_baseHealthRegen / 2.5f;
 
-            if (addValue < 0)
-                addValue = 0;
+            if (addValue < 0.0f)
+                return;
 
-            ModifyHealth((int)addValue);
+            addValue += m_healthFraction;
+            int integerValue = (int)addValue;
+            if (integerValue == 0)
+                return;
+
+            if (curValue + integerValue < maxValue)
+            {
+                curValue += (uint)integerValue;
+                m_healthFraction = addValue - integerValue;
+            }
+            else
+            {
+                curValue = maxValue;
+                m_healthFraction = 0.0f;
+            }
+
+            SetHealth(curValue);
         }
         public void ResetAllPowers()
         {

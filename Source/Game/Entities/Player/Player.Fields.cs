@@ -97,6 +97,7 @@ namespace Game.Entities
         uint m_baseManaRegen;
         uint m_baseHealthRegen;
         int m_spellPenetrationItemMod;
+        float m_healthFraction;
 
         //Spell
         Dictionary<uint, PlayerSpell> m_spells = new();
