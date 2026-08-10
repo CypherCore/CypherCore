@@ -676,7 +676,7 @@ namespace Game.Maps
                 {
                     Creature summon = instance.GetCreature(summonGUID);
                     if (summon != null)
-                        summon.CastSpell(player, spell, true);
+                        summon.CastSpell(summon, spell, true);
                 }
             }
 
@@ -688,7 +688,7 @@ namespace Game.Maps
                 Unit controlled = player.m_Controlled[i];
                 if (controlled != null)
                     if (controlled.IsInWorld && controlled.IsCreature())
-                        controlled.CastSpell(player, spell, true);
+                        controlled.CastSpell(controlled, spell, true);
             }
         }
 
