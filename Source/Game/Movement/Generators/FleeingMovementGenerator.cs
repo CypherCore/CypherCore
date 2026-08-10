@@ -26,22 +26,23 @@ namespace Game.Movement
             ScriptResult = scriptResult;
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (owner == null || !owner.IsAlive())
-                return;
+                return false;
 
             _path = null;
             SetTargetLocation(owner);
+            return true;
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            Initialize(owner);
+            return Initialize(owner);
         }
 
         public override bool Update(Unit owner, uint diff)

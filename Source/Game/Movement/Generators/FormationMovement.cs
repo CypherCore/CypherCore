@@ -36,7 +36,7 @@ namespace Game.Movement
             BaseUnitState = UnitState.FollowFormation;
         }
 
-        public override void DoInitialize(Creature owner)
+        public override bool DoInitialize(Creature owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
@@ -45,17 +45,18 @@ namespace Game.Movement
             {
                 AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
-                return;
+                return true;
             }
 
             _nextMoveTimer.Reset(0);
+            return true;
         }
 
-        public override void DoReset(Creature owner)
+        public override bool DoReset(Creature owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
-            DoInitialize(owner);
+            return DoInitialize(owner);
         }
 
         public override bool DoUpdate(Creature owner, uint diff)

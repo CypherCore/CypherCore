@@ -44,7 +44,7 @@ namespace Game.Movement
             BaseUnitState = UnitState.Roaming;
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
@@ -52,21 +52,21 @@ namespace Game.Movement
             if (_chainSize == 0)
             {
                 Log.outError(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: couldn't initialize generator, referenced spline is empty! ({owner.GetGUID()})");
-                return;
+                return false;
             }
 
             if (_nextIndex >= _chainSize)
             {
                 Log.outWarn(LogFilter.Movement, $"SplineChainMovementGenerator::Initialize: couldn't initialize generator, _nextIndex is >= _chainSize ({owner.GetGUID()})");
                 _msToNext = 0;
-                return;
+                return false;
             }
 
             if (_nextFirstWP != 0) // this is a resumed movegen that has to start with a partial spline
             {
 
                 if (HasFlag(MovementGeneratorFlags.Finalized))
-                    return;
+                    return false;
 
                 SplineChainLink thisLink = _chain[_nextIndex];
                 if (_nextFirstWP >= thisLink.Points.Count)
@@ -75,7 +75,6 @@ namespace Game.Movement
                     _nextFirstWP = (byte)(thisLink.Points.Count - 1);
                 }
 
-                owner.AddUnitState(UnitState.RoamingMove);
                 Span<Vector3> partial = thisLink.Points.ToArray();
                 SendPathSpline(owner, thisLink.Velocity, partial[(_nextFirstWP - 1)..]);
 
@@ -97,14 +96,15 @@ namespace Game.Movement
                 if (_nextIndex >= _chainSize)
                     _msToNext = 0;
             }
+            return true;
         }
 
-        public override void Reset(Unit owner) 
+        public override bool Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
 
             owner.StopMoving();
-            Initialize(owner);
+            return Initialize(owner);
         }
 
         public override bool Update(Unit owner, uint diff)
@@ -169,6 +169,8 @@ namespace Game.Movement
             int nodeCount = path.Length;
             Cypher.Assert(nodeCount > 1, $"SplineChainMovementGenerator::SendPathSpline: Every path must have source & destination (size > 1)! ({owner.GetGUID()})");
 
+            owner.AddUnitState(UnitState.RoamingMove);
+
             MoveSplineInit init = new(owner);
             if (nodeCount > 2)
                 init.MovebyPath(path);
@@ -220,7 +222,7 @@ namespace Game.Movement
 
         public uint GetId() { return _id; }
 
-    uint _id;
+        uint _id;
         List<SplineChainLink> _chain = new();
         byte _chainSize;
         bool _walk;

@@ -43,13 +43,13 @@ namespace Game.Movement
             ScriptResult = args.ScriptResult;
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             if (HasFlag(MovementGeneratorFlags.Deactivated) && !HasFlag(MovementGeneratorFlags.InitializationPending)) // Resume spline is not supported
             {
                 RemoveFlag(MovementGeneratorFlags.Deactivated);
                 AddFlag(MovementGeneratorFlags.Finalized);
-                return;
+                return false;
             }
 
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
@@ -60,11 +60,12 @@ namespace Game.Movement
             int duration = init.Launch();
             if (_durationTracksSpline)
                 _duration = new((uint)duration);
+            return duration > 0;
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
-            Initialize(owner);
+            return Initialize(owner);
         }
 
         public override bool Update(Unit owner, uint diff)

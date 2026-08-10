@@ -17,7 +17,7 @@ namespace Game.AI
             BaseUnitState = UnitState.Roaming;
         }
 
-        public override void DoInitialize(T owner)
+        public override bool DoInitialize(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
@@ -25,12 +25,13 @@ namespace Game.AI
             owner.SetNoSearchAssistance(false);
 
             SetTargetLocation(owner);
+            return true;
         }
 
-        public override void DoReset(T owner) 
+        public override bool DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
-            DoInitialize(owner);
+            return DoInitialize(owner);
         }
 
         public override bool DoUpdate(T owner, uint diff)

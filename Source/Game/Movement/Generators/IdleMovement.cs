@@ -18,14 +18,16 @@ namespace Game.Movement
             BaseUnitState = 0;
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             owner.StopMoving();
+            return true;
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
             owner.StopMoving();
+            return true;
         }
 
         public override bool Update(Unit owner, uint diff)
@@ -74,13 +76,12 @@ namespace Game.Movement
             ScriptResult = scriptResult;
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            owner.StopMoving();
-
+            return true;
             /*
              *  TODO: This code should be handled somewhere else, like MovementInform
              *
@@ -91,10 +92,10 @@ namespace Game.Movement
              */
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
-            Initialize(owner);
+            return Initialize(owner);
         }
 
         public override bool Update(Unit owner, uint diff)
@@ -168,7 +169,7 @@ namespace Game.Movement
             BaseUnitState = UnitState.Distracted;
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
@@ -186,12 +187,13 @@ namespace Game.Movement
 
             init.SetFacing(_orientation);
             init.Launch();
+            return true;
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
-            Initialize(owner);
+            return Initialize(owner);
         }
 
         public override bool Update(Unit owner, uint diff)

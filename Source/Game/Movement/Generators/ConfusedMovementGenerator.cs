@@ -20,27 +20,27 @@ namespace Game.Movement
             BaseUnitState = UnitState.Confused;
         }
 
-        public override void DoInitialize(T owner)
+        public override bool DoInitialize(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (!owner.IsAlive())
-                return;
+                return false;
 
             // TODO: UNIT_FIELD_FLAGS should not be handled by generators
             owner.SetUnitFlag(UnitFlags.Confused);
-            owner.StopMoving();
 
             _timer.Reset(0);
             _reference = owner.GetPosition();
             _path = null;
+            return true;
         }
 
-        public override void DoReset(T owner)
+        public override bool DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            DoInitialize(owner);
+            return DoInitialize(owner);
         }
 
         public override bool DoUpdate(T owner, uint diff)

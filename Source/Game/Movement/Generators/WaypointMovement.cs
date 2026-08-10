@@ -138,14 +138,14 @@ namespace Game.Movement
             return true;
         }
 
-        public override void DoInitialize(T owner)
+        public override bool DoInitialize(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
             if (_path == null)
             {
                 Log.outError(LogFilter.Sql, $"WaypointMovementGenerator::DoInitialize: couldn't load path for creature {owner.GetGUID()}");
-                return;
+                return false;
             }
 
             if (_path.Nodes.Count == 1)
@@ -154,9 +154,10 @@ namespace Game.Movement
             owner.StopMoving();
 
             _nextMoveTime.Reset(1000);
+            return true;
         }
 
-        public override void DoReset(T owner)
+        public override bool DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
@@ -164,6 +165,8 @@ namespace Game.Movement
 
             if (!HasFlag(MovementGeneratorFlags.Finalized) && _nextMoveTime.Passed())
                 _nextMoveTime.Reset(1); // Needed so that Update does not behave as if node was reached
+
+            return true;
         }
 
         public override bool DoUpdate(T owner, uint diff)

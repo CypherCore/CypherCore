@@ -23,10 +23,10 @@ namespace Game.Movement
         }
 
         // on top first update
-        public virtual void Initialize(Unit owner) { }
+        public virtual bool Initialize(Unit owner) { return false; }
 
         // on top reassign
-        public virtual void Reset(Unit owner) { }
+        public virtual bool Reset(Unit owner) { return false; }
 
         // on top on MotionMaster::Update
         public abstract bool Update(Unit owner, uint diff);
@@ -88,15 +88,15 @@ namespace Game.Movement
 
     public abstract class MovementGeneratorMedium<T> : MovementGenerator where T : Unit
     {
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
-            DoInitialize((T)owner);
             IsActive = true;
+            return DoInitialize((T)owner);
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
-            DoReset((T)owner);
+            return DoReset((T)owner);
         }
 
         public override bool Update(Unit owner, uint diff)
@@ -116,9 +116,9 @@ namespace Game.Movement
 
         public bool IsActive { get; set; }
 
-        public abstract void DoInitialize(T owner);
+        public abstract bool DoInitialize(T owner);
         public abstract void DoFinalize(T owner, bool active, bool movementInform);
-        public abstract void DoReset(T owner);
+        public abstract bool DoReset(T owner);
         public abstract bool DoUpdate(T owner, uint diff);
         public abstract void DoDeactivate(T owner);
 

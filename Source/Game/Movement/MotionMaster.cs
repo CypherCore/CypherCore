@@ -285,6 +285,13 @@ namespace Game.Movement
             return value;
         }
 
+        enum InitState
+        {
+            Failed,
+            Success,
+            AlreadyInitialized
+        };
+
         public void Update(uint diff)
         {
             if (_owner == null)
@@ -297,21 +304,23 @@ namespace Game.Movement
 
             AddFlag(MotionMasterFlags.Update);
 
+            InitState initializationState = InitState.AlreadyInitialized;
+
             MovementGenerator top = GetCurrentMovementGenerator();
             if (HasFlag(MotionMasterFlags.StaticInitializationPending) && IsStatic(top))
             {
                 RemoveFlag(MotionMasterFlags.StaticInitializationPending);
-                top.Initialize(_owner);
+                initializationState = top.Initialize(_owner) ? InitState.Success : InitState.Failed;
             }
 
             if (top.HasFlag(MovementGeneratorFlags.InitializationPending))
-                top.Initialize(_owner);
+                initializationState = top.Initialize(_owner) ? InitState.Success : InitState.Failed;
             if (top.HasFlag(MovementGeneratorFlags.Deactivated))
-                top.Reset(_owner);
+                initializationState = top.Reset(_owner) ? InitState.Success : InitState.Failed;
 
             Cypher.Assert(!top.HasFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated), $"MotionMaster:Update: update called on an uninitialized top! ({_owner.GetGUID()}) (type: {top.GetMovementGeneratorType()}, flags: {top.Flags})");
 
-            if (!top.Update(_owner, diff))
+            if (initializationState == InitState.Failed || !top.Update(_owner, initializationState == InitState.AlreadyInitialized ? diff : 0))
             {
                 Cypher.Assert(top == GetCurrentMovementGenerator(), $"MotionMaster::Update: top was modified while updating! ({_owner.GetGUID()})");
 

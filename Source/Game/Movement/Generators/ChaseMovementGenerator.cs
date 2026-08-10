@@ -37,19 +37,20 @@ namespace Game.Movement
             _rangeCheckTimer = new(RANGE_CHECK_INTERVAL);
         }
 
-        public override void Initialize(Unit owner)
+        public override bool Initialize(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized | MovementGeneratorFlags.InformEnabled);
 
             _path = null;
             _lastTargetPosition = null;
+            return true;
         }
 
-        public override void Reset(Unit owner)
+        public override bool Reset(Unit owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
-            Initialize(owner);
+            return Initialize(owner);
         }
 
         public override bool Update(Unit owner, uint diff)
@@ -84,7 +85,7 @@ namespace Game.Movement
             ChaseAngle? angle = mutualChase ? null : _angle;
 
             if (cOwner != null && cOwner.IsIgnoringChaseRange())
-                    minRange = minTarget = maxRange = maxTarget = 0.0f;
+                minRange = minTarget = maxRange = maxTarget = 0.0f;
 
             // periodically check if we're already in the expected range...
             _rangeCheckTimer.Update(diff);
@@ -251,7 +252,7 @@ namespace Game.Movement
 
         static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)
         {
-            if (minDistance .HasValue && owner.IsInDist(target, minDistance.Value))
+            if (minDistance.HasValue && owner.IsInDist(target, minDistance.Value))
                 return false;
             if (maxDistance.HasValue && !owner.IsInDist(target, maxDistance.Value))
                 return false;

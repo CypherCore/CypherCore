@@ -37,28 +37,28 @@ namespace Game.Movement
                 _duration = new TimeTracker(duration.Value);
         }
 
-        public override void DoInitialize(T owner)
+        public override bool DoInitialize(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.TimedPaused);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (!owner.IsAlive())
-                return;
+                return false;
 
             _reference = owner.GetPosition();
-            owner.StopMoving();
 
             // Retail seems to let a creature walk 2 up to 10 splines before triggering a pause
             _wanderSteps = RandomHelper.URand(2, 10);
 
             _timer.Reset(0);
             _path = null;
+            return true;
         }
 
-        public override void DoReset(T owner)
+        public override bool DoReset(T owner)
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
-            DoInitialize(owner);
+            return DoInitialize(owner);
         }
 
         public override bool DoUpdate(T owner, uint diff)

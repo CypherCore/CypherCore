@@ -35,16 +35,17 @@ namespace Game.Movement
             ScriptResult = scriptResult;
         }
 
-        public override void DoInitialize(Player owner)
+        public override bool DoInitialize(Player owner)
         {
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            DoReset(owner);
+            bool returnValue = DoReset(owner);
             InitEndGridInfo();
+            return returnValue;
         }
 
-        public override void DoReset(Player owner)
+        public override bool DoReset(Player owner)
         {
             RemoveFlag(MovementGeneratorFlags.Deactivated);
 
@@ -57,7 +58,7 @@ namespace Game.Movement
             if (currentNodeId == end)
             {
                 Log.outDebug(LogFilter.Movement, $"FlightPathMovementGenerator::DoReset: trying to start a flypath from the end point. {owner.GetDebugInfo()}");
-                return;
+                return false;
             }
 
             MoveSplineInit init = new(owner);
@@ -76,6 +77,7 @@ namespace Game.Movement
             init.SetWalk(true);
             init.SetVelocity(_speed.GetValueOrDefault(30.0f));
             init.Launch();
+            return true;
         }
 
         public override bool DoUpdate(Player owner, uint diff)
