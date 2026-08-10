@@ -1719,6 +1719,7 @@ namespace Framework.Constants
         MaxVisibilityDistanceBattleground,
         MaxVisibilityDistanceArena,
         MaxWho,
+        WhoListUpdateInterval,
         MinCharterName,
         MinCreatureScaledXpRatio,
         MinDiscoveredScaledXpRatio,

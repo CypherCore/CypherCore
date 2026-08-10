@@ -270,6 +270,7 @@ namespace Game
                 new() { Name = "Respawn.DynamicMinimumGameObject", DefaultValue = 10, Index = WorldCfg.RespawnDynamicMinimumGameObject },
                 new() { Name = "Respawn.WarningFrequency", DefaultValue = 1800, Index = WorldCfg.RespawnGuidWarningFrequency },
                 new() { Name = "MaxWhoListReturns", DefaultValue = 49, Index = WorldCfg.MaxWho },
+                new() { Name = "WhoList.Update.Interval", DefaultValue = 5, Index = WorldCfg.WhoListUpdateInterval, Min = 1 },
                 new() { Name = "HonorPointsAfterDuel", DefaultValue = 0, Index = WorldCfg.HonorAfterDuel },
                 new() { Name = "PvPToken.MapAllowType", DefaultValue = 4, Index = WorldCfg.PvpTokenMapType, Min = 1, Max = 4 },
                 new() { Name = "PvPToken.ItemID", DefaultValue = 29434, Index = WorldCfg.PvpTokenId },
