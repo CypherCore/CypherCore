@@ -480,6 +480,12 @@ namespace Game.Conditions
                     }
                     break;
                 }
+                case ConditionTypes.GroupStatus:
+                {
+                    if (player != null)
+                        condMeets = MeetsGroupStatusCondition(player, (GroupStatusCondition)ConditionValue1);
+                    break;
+                }
                 default:
                     break;
             }
@@ -610,6 +616,9 @@ namespace Game.Conditions
                 case ConditionTypes.Label:
                     mask |= GridMapTypeMask.Creature | GridMapTypeMask.GameObject;
                     break;
+                case ConditionTypes.GroupStatus:
+                    mask |= GridMapTypeMask.Player;
+                    break;
                 default:
                     Cypher.Assert(false, "Condition.GetSearcherTypeMaskForCondition - missing condition handling!");
                     break;
@@ -671,6 +680,25 @@ namespace Game.Conditions
 
             ss.Append(']');
             return ss.ToString();
+        }
+
+        public static bool MeetsGroupStatusCondition(Player player, GroupStatusCondition status)
+        {
+            var group = player.GetGroup();
+            switch (status)
+            {
+                case GroupStatusCondition.NotInGroup:
+                    return group == null;
+                case GroupStatusCondition.InGroup:
+                    return group != null;
+                case GroupStatusCondition.InGroupButNotInRaid:
+                    return group != null && !group.IsRaidGroup();
+                case GroupStatusCondition.InRaid:
+                    return group != null && group.IsRaidGroup();
+                case GroupStatusCondition.NotInGroupOrNotInRaid:
+                    return group == null || !group.IsRaidGroup();
+            }
+            return false;
         }
 
         public ConditionSourceType SourceType;        //SourceTypeOrReferenceId

@@ -7,7 +7,6 @@ using Framework.IO;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Groups;
 using Game.Loots;
 using Game.Maps;
 using Game.Miscellaneous;
@@ -1695,6 +1694,13 @@ namespace Game
                         return false;
                     }
                     break;
+                case ConditionTypes.GroupStatus:
+                    if (cond.ConditionValue1 > (uint)GroupStatusCondition.NotInGroupOrNotInRaid)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} has non invalid group status condition value1 ({cond.ConditionValue1}), skipped.");
+                        return false;
+                    }
+                    break;
                 case ConditionTypes.Alive:
                 case ConditionTypes.Areaid:
                 case ConditionTypes.TerrainSwap:
@@ -2119,35 +2125,8 @@ namespace Game
                     return false;
             }
 
-            if (condition.PartyStatus != 0)
-            {
-                Group group = player.GetGroup();
-                switch (condition.PartyStatus)
-                {
-                    case 1:
-                        if (group != null)
-                            return false;
-                        break;
-                    case 2:
-                        if (group == null)
-                            return false;
-                        break;
-                    case 3:
-                        if (group == null || group.IsRaidGroup())
-                            return false;
-                        break;
-                    case 4:
-                        if (group == null || !group.IsRaidGroup())
-                            return false;
-                        break;
-                    case 5:
-                        if (group != null && group.IsRaidGroup())
-                            return false;
-                        break;
-                    default:
-                        break;
-                }
-            }
+            if (!Condition.MeetsGroupStatusCondition(player, (GroupStatusCondition)(condition.PartyStatus - 1)))
+                return false;
 
             if (condition.PrevQuestID[0] != 0)
             {
@@ -3053,7 +3032,8 @@ namespace Game
             new ConditionTypeInfo("Player Condition",     true, false, false, false),
             new ConditionTypeInfo("Private Object",       false,false, false, false),
             new ConditionTypeInfo("String ID",            true, false, false, true),
-            new ConditionTypeInfo("Label",                true, false, false, false)
+            new ConditionTypeInfo("Label",                true, false, false, false),
+            new ConditionTypeInfo("Group status",         true, false, false, false)
         };
 
         public struct ConditionTypeInfo

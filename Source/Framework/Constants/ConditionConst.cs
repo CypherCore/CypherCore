@@ -65,6 +65,7 @@ namespace Framework.Constants
         PrivateObject = 57,          // 0                       0              0                  true if entity is private object
         StringId = 58,
         Label = 59,                  // Label                   0              0                  true if creature/gameobject has specified Label in CreatureLabel.db2/GameObjectLabel.db2
+        GroupStatus = 60,            // GroupStatus            0              0                  true if player group status is (0 = not in group, 1 = in group, 2 = in group but not in raid, 3 = in raid group, 4 = not in group or not in raid)
         Max
     }
 
@@ -130,5 +131,14 @@ namespace Framework.Constants
         GuidData,
         BossState,
         Data64
+    }
+
+    public enum GroupStatusCondition
+    {
+        NotInGroup = 0,
+        InGroup = 1,
+        InGroupButNotInRaid = 2,
+        InRaid = 3,
+        NotInGroupOrNotInRaid = 4
     }
 }
