@@ -2891,7 +2891,7 @@ namespace Game.Entities
             // Use a detour raycast to get our first collision point
             PathGenerator path = new(this);
             path.SetUseRaycast(true);
-            path.CalculatePath(destx, desty, destz, false);
+            path.CalculatePath(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), destx, desty, destz, false);
 
             // We have a invalid path result. Skip further processing.
             if ((path.GetPathType() & (PathType.NoPath | PathType.NotUsingPath | PathType.FarFromPolyStart)) == 0)
