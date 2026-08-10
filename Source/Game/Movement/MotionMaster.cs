@@ -1211,11 +1211,11 @@ namespace Game.Movement
                         AddFlag(MotionMasterFlags.StaticInitializationPending);
                     break;
                 case MovementSlot.Active:
-                    var where = _generators.GetViewBetween(movement, null).FirstOrDefault();
                     if (!_generators.Empty())
                     {
+                        var where = _generators.FirstOrDefault(p => p.Priority == movement.Priority); // find movement with equal priority
                         bool replacesExisting = !movement.HasFlag(MovementGeneratorFlags.Immediate)
-                            && where != null && !movement.Equals(where);
+                            && where != null;
                         var top = _generators.FirstOrDefault();
                         if (replacesExisting)
                             Remove(where, where == top, false);

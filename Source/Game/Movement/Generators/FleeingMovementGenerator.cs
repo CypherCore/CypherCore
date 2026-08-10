@@ -216,20 +216,10 @@ namespace Game.Movement
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
         {
-            AddFlag(MovementGeneratorFlags.Finalized);
-            if (!active)
-                return;
+            base.Finalize(owner, active, movementInform);
 
-            owner.StopMoving();
-            if (owner.IsCreature() && owner.IsAlive())
-            {
-                Unit victim = owner.GetVictim();
-                if (victim != null)
-                {
-                    owner.AttackStop();
-                    owner.GetAI().AttackStart(victim);
-                }
-            }
+            if (active)
+                owner.StopMoving();
 
             if (movementInform)
             {
