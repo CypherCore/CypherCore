@@ -1485,7 +1485,7 @@ namespace Game.Entities
             DisableSpline();
             if (IsPlayer())
             {
-                ToPlayer().TeleportTo(target, (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0)));
+                ToPlayer().TeleportTo(target, TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | (casting ? TeleportToOptions.Spell : TeleportToOptions.None));
             }
             else
             {

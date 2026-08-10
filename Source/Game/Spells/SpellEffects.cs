@@ -615,7 +615,7 @@ namespace Game.Spells
 
             if (targetDest.Position.GetMapId() == unitTarget.GetMapId())
             {
-                options |= TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet;
+                options |= TeleportToOptions.NotLeaveCombat;
 
                 if (unitTarget.GetTransGUID() == targetDest.TransportGUID)
                     options |= TeleportToOptions.NotLeaveTransport;
