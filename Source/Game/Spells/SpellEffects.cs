@@ -1582,6 +1582,7 @@ namespace Game.Spells
                         // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                         case SummonTitle.Vehicle:
                         case SummonTitle.Mount:
+                        case SummonTitle.LightWell:
                         {
                             if (unitCaster == null)
                                 return;
@@ -1589,7 +1590,6 @@ namespace Game.Spells
                             summon = unitCaster.GetMap().SummonCreature(entry, destTarget, properties, duration, unitCaster, m_spellInfo.Id, 0, privateObjectOwner);
                             break;
                         }
-                        case SummonTitle.LightWell:
                         case SummonTitle.Totem:
                         {
                             if (unitCaster == null)
