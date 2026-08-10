@@ -101,7 +101,7 @@ namespace Game.AI
              */
 
             owner.UpdateAllowedPositionZ(destination.posX, destination.posY, ref destination.posZ);
-            init.MoveTo(destination);
+            init.MoveTo(destination, true, true);
             init.SetFacing(destination.GetOrientation());
             init.SetWalk(false);
             init.Launch();
