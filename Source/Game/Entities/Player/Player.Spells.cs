@@ -3315,7 +3315,7 @@ namespace Game.Entities
                 return;
 
             uint runeIndex = GetPowerIndex(PowerType.Runes);
-            if (runeIndex == (int)PowerType.Max)
+            if (runeIndex >= (int)PowerType.MaxPerClass)
                 return;
 
             m_runes = new Runes();

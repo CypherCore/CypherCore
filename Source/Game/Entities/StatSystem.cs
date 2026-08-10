@@ -654,7 +654,7 @@ namespace Game.Entities
         public void SetMaxPower(PowerType powerType, int val)
         {
             uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
             int cur_power = GetPower(powerType);
@@ -680,7 +680,7 @@ namespace Game.Entities
         public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true)
         {
             uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
             int maxPower = GetMaxPower(powerType);
@@ -720,7 +720,7 @@ namespace Game.Entities
         public int GetPower(PowerType powerType)
         {
             uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
             return m_unitData.Power[(int)powerIndex];
@@ -729,7 +729,7 @@ namespace Game.Entities
         public int GetMaxPower(PowerType powerType)
         {
             uint powerIndex = GetPowerIndex(powerType);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return 0;
 
             return (int)(uint)m_unitData.MaxPower[(int)powerIndex];
@@ -748,6 +748,8 @@ namespace Game.Entities
         }
 
         public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
+
+        public virtual ClassPowerTypes GetPowerTypes() { return default; }
 
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
@@ -1139,8 +1141,8 @@ namespace Game.Entities
             UpdateAttackPowerAndDamage(true);
             UpdateMaxHealth();
 
-            for (var i = PowerType.Mana; i < PowerType.Max; ++i)
-                UpdateMaxPower(i);
+            foreach (var power in GetPowerTypes())
+                UpdateMaxPower(power);
 
             UpdateAllRatings();
             UpdateAllCritPercentages();
@@ -1342,7 +1344,7 @@ namespace Game.Entities
         public void UpdatePowerRegen(PowerType power)
         {
             uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
             // TODO: updating haste should update UnitData::PowerRegenFlatModifier for certain power types
@@ -1411,7 +1413,7 @@ namespace Game.Entities
         float GetPowerRegen(PowerType power)
         {
             uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return 0.0f;
 
             PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
@@ -2159,10 +2161,15 @@ namespace Game.Entities
             return Global.DB2Mgr.GetPowerIndexByClass(powerType, GetClass());
         }
 
+        public override ClassPowerTypes GetPowerTypes()
+        {
+            return Global.DB2Mgr.GetPowerTypesByClass(GetClass());
+        }
+
         public override void UpdateMaxPower(PowerType power)
         {
             uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+            if (powerIndex >= (uint)PowerType.MaxPerClass)
                 return;
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
@@ -2255,8 +2262,8 @@ namespace Game.Entities
             UpdateAttackPowerAndDamage();
             UpdateAttackPowerAndDamage(true);
 
-            for (var i = PowerType.Mana; i < PowerType.Max; ++i)
-                UpdateMaxPower(i);
+            foreach (var power in GetPowerTypes())
+                UpdateMaxPower(power);
 
             UpdateAllResistances();
 
@@ -2297,12 +2304,29 @@ namespace Game.Entities
                     break;
             }
 
-            return (uint)PowerType.Max;
+            return (uint)PowerType.MaxPerClass;
+        }
+
+        public override ClassPowerTypes GetPowerTypes()
+        {
+            return new ClassPowerTypes()
+            {
+                powerType =
+                [
+                    GetPowerType(),
+                    PowerType.AlternatePower,
+                    PowerType.ComboPoints,
+                    PowerType.AlternateQuest,
+                    PowerType.AlternateEncounter,
+                    PowerType.AlternateMount
+                ],
+                PowerTypeCount = 6
+            };
         }
 
         public override void UpdateMaxPower(PowerType power)
         {
-            if (GetPowerIndex(power) == (uint)PowerType.Max)
+            if (GetPowerIndex(power) >= (uint)PowerType.MaxPerClass)
                 return;
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;

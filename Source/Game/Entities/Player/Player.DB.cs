@@ -3970,25 +3970,17 @@ namespace Game.Entities
 
             // restore remembered power/health values (but not more max values)
             SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
-            int loadedPowers = 0;
-            for (PowerType i = 0; i < PowerType.Max; ++i)
+            ClassPowerTypes powerTypes = GetPowerTypes();
+            for (int i = 0; i < powerTypes.PowerTypeCount; ++i)
             {
-                if (Global.DB2Mgr.GetPowerIndexByClass(i, GetClass()) != (int)PowerType.Max)
-                {
-                    uint savedPower = powers[loadedPowers];
-                    uint maxPower = m_unitData.MaxPower[loadedPowers];
-                    SetPower(i, (int)(savedPower > maxPower ? maxPower : savedPower));
-                    if (++loadedPowers >= (int)PowerType.MaxPerClass)
-                        break;
-                }
+                uint savedPower = powers[i];
+                uint maxPower = m_unitData.MaxPower[i];
+                SetPower(powerTypes.powerType[i], (int)Math.Min(savedPower, maxPower));
             }
-
-            for (; loadedPowers < (int)PowerType.MaxPerClass; ++loadedPowers)
-                SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, loadedPowers), 0);
 
             SetPower(PowerType.LunarPower, 0);
             // Init rune recharge
-            if (GetPowerIndex(PowerType.Runes) != (int)PowerType.Max)
+            if (GetPowerIndex(PowerType.Runes) < (int)PowerType.MaxPerClass)
             {
                 int runes = GetPower(PowerType.Runes);
                 int maxRunes = GetMaxPower(PowerType.Runes);

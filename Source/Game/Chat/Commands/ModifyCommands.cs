@@ -490,7 +490,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (target.GetPowerIndex(powerType.PowerTypeEnum) == (int)PowerType.Max)
+            if (target.GetPowerIndex(powerType.PowerTypeEnum) >= (int)PowerType.MaxPerClass)
             {
                 handler.SendSysMessage(CypherStrings.InvalidPowerName);
                 return false;

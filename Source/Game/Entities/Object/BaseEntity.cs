@@ -587,7 +587,7 @@ namespace Game.Entities
                 Player player = this as Player;
 
                 bool HasSceneInstanceIDs = !player.GetSceneMgr().GetSceneTemplateByInstanceMap().Empty();
-                bool HasRuneState = player.GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
+                bool HasRuneState = player.GetPowerIndex(PowerType.Runes) < (int)PowerType.MaxPerClass;
 
                 data.WriteBit(HasSceneInstanceIDs);
                 data.WriteBit(HasRuneState);

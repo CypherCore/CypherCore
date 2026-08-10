@@ -363,7 +363,7 @@ namespace Game.Entities
                 advertisedBenefit += ToPlayer().GetBaseSpellPowerBonus();
 
                 // Check if we are ever using mana - PaperDollFrame.lua
-                if (GetPowerIndex(PowerType.Mana) != (uint)PowerType.Max)
+                if (GetPowerIndex(PowerType.Mana) < (uint)PowerType.MaxPerClass)
                     advertisedBenefit += Math.Max(0, (uint)GetStat(Stats.Intellect));  // spellpower from intellect
 
                 // Healing bonus from stats

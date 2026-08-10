@@ -3760,7 +3760,7 @@ namespace Game.Spells
                 return;
 
             Unit target = aurApp.GetTarget();
-            if (target.GetPowerIndex((PowerType)powerDisplay.ActualType) == (int)PowerType.Max)
+            if (target.GetPowerIndex((PowerType)powerDisplay.ActualType) >= (int)PowerType.MaxPerClass)
                 return;
 
             if (apply)
@@ -5034,9 +5034,9 @@ namespace Game.Spells
             if (target.GetTypeId() != TypeId.Player)
                 return;
 
-            for (PowerType i = 0; i < PowerType.Max; ++i)
-                if ((GetMiscValue() & (1 << (int)i)) != 0)
-                    target.ToPlayer().UpdatePowerRegen(i);
+            foreach (var power in target.GetPowerTypes())
+                if ((GetMiscValue() & (1 << (int)power)) != 0)
+                    target.ToPlayer().UpdatePowerRegen(power);
         }
 
         [AuraEffectHandler(AuraType.SetVehicleId)]

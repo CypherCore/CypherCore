@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.Entities;
 
 namespace Game.Chat.Commands
@@ -118,8 +117,8 @@ namespace Game.Chat.Commands
             {
                 Player player = handler.GetSession().GetPlayer();
                 // Set max power to all powers
-                for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
-                    player.SetPower(powerType, player.GetMaxPower(powerType));
+                foreach (var power in player.GetPowerTypes())
+                    player.SetFullPower(power);
 
                 player.SetCommandStatusOn(PlayerCommandStates.Power);
                 handler.SendSysMessage("Power Cheat is ON. You don't need mana/rage/energy to use spells.");

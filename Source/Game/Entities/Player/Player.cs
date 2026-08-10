@@ -3749,7 +3749,7 @@ namespace Game.Entities
         {
             m_regenTimerCount += RegenTimer;
 
-            for (PowerType power = PowerType.Mana; power < PowerType.Max; power++)// = power + 1)
+            foreach (PowerType power in GetPowerTypes())
                 if (power != PowerType.Runes)
                     Regenerate(power);
 
@@ -3790,7 +3790,7 @@ namespace Game.Entities
         {
             // Skip regeneration for power type we cannot have
             uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
+            if (powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
             PowerTypeRecord powerType = DB2Mgr.GetPowerTypeEntry(power);
@@ -3884,7 +3884,7 @@ namespace Game.Entities
         public void InterruptPowerRegen(PowerType power)
         {
             uint powerIndex = GetPowerIndex(power);
-            if (powerIndex == (uint)PowerType.Max || powerIndex >= (uint)PowerType.MaxPerClass)
+            if (powerIndex >= (uint)PowerType.MaxPerClass)
                 return;
 
             m_regenInterruptTimestamp = GameTime.Now();
@@ -6316,8 +6316,8 @@ namespace Game.Entities
             InitDataForForm(reapplyMods);
 
             // save new stats
-            for (var i = PowerType.Mana; i < PowerType.Max; ++i)
-                SetMaxPower(i, GetCreatePowerValue(i));
+            foreach (var power in GetPowerTypes())
+                SetMaxPower(power, GetCreatePowerValue(power));
 
             SetMaxHealth(0);                     // stamina bonus will applied later
 

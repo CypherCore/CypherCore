@@ -18,14 +18,6 @@ namespace Game.DataStorage
     {
         DB2Manager()
         {
-            for (uint i = 0; i < (int)Class.Max; ++i)
-            {
-                _powersByClass[i] = new uint[(int)PowerType.Max];
-
-                for (uint j = 0; j < (int)PowerType.Max; ++j)
-                    _powersByClass[i][j] = (uint)PowerType.Max;
-            }
-
             for (uint i = 0; i < (int)Locale.Total + 1; ++i)
                 _nameValidators[i] = new List<string>();
 
@@ -130,12 +122,9 @@ namespace Game.DataStorage
             powers.Sort(new ChrClassesXPowerTypesRecordComparer());
             foreach (var power in powers)
             {
-                uint index = 0;
-                for (uint j = 0; j < (int)PowerType.Max; ++j)
-                    if (_powersByClass[power.ClassID][j] != (int)PowerType.Max)
-                        ++index;
-
-                _powersByClass[power.ClassID][power.PowerType] = index;
+                byte index = _powersByClass[power.ClassID].TypeByIndex.PowerTypeCount++;
+                _powersByClass[power.ClassID].TypeByIndex.powerType[index] = (PowerType)power.PowerType;
+                _powersByClass[power.ClassID].IndexByType[power.PowerType] = index;
             }
 
             foreach (var customizationChoice in ChrCustomizationChoiceStorage.Values)
@@ -1098,9 +1087,14 @@ namespace Game.DataStorage
             return classEntry.Name[Locale.enUS];
         }
 
-        public uint GetPowerIndexByClass(PowerType powerType, Class classId)
+        public ClassPowerTypes GetPowerTypesByClass(Class classId)
         {
-            return _powersByClass[(int)classId][(int)powerType];
+            return _powersByClass[(int)classId].TypeByIndex;
+        }
+
+        public uint GetPowerIndexByClass(PowerType power, Class classId)
+        {
+            return _powersByClass[(int)classId].IndexByType[(int)power];
         }
 
         public List<ChrCustomizationChoiceRecord> GetCustomiztionChoices(uint chrCustomizationOptionId)
@@ -2346,7 +2340,7 @@ namespace Game.DataStorage
         Dictionary<(uint broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         Dictionary<(sbyte, sbyte), CharBaseInfoRecord> _charBaseInfoByRaceAndClass = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
-        uint[][] _powersByClass = new uint[(int)Class.Max][];
+        ClassPowerData[] _powersByClass = new ClassPowerData[(int)Class.Max];
         MultiMap<uint, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();
         Dictionary<Tuple<byte, byte>, ChrModelRecord> _chrModelsByRaceAndGender = new();
         Dictionary<Tuple<byte, byte, byte>, ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts = new();
@@ -2418,6 +2412,29 @@ namespace Game.DataStorage
         public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
 
         int _maxHotfixId;
+    }
+
+    public struct ClassPowerData
+    {
+        public ClassPowerData()
+        {
+            Array.Fill(IndexByType, (byte)PowerType.MaxPerClass);
+        }
+
+        public ClassPowerTypes TypeByIndex;
+        public byte[] IndexByType = new byte[(int)Class.Max];
+    }
+
+    public struct ClassPowerTypes()
+    {
+        public PowerType[] powerType = new PowerType[(int)PowerType.MaxPerClass];
+        public byte PowerTypeCount;
+
+        public IEnumerator<PowerType> GetEnumerator()
+        {
+            foreach (var obj in powerType)
+                yield return obj;
+        }
     }
 
     class UiMapBounds

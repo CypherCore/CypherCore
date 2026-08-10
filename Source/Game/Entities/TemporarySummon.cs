@@ -944,8 +944,8 @@ namespace Game.Entities
             for (var i = Stats.Strength; i < Stats.Max; ++i)
                 UpdateStats(i);
 
-            for (var i = PowerType.Mana; i < PowerType.Max; ++i)
-                UpdateMaxPower(i);
+            foreach (var power in GetPowerTypes())
+                UpdateMaxPower(power);
 
             UpdateAllResistances();
 
@@ -1034,7 +1034,7 @@ namespace Game.Entities
 
         public override void UpdateMaxPower(PowerType power)
         {
-            if (GetPowerIndex(power) == (uint)PowerType.Max)
+            if (GetPowerIndex(power) >= (uint)PowerType.MaxPerClass)
                 return;
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
