@@ -7,7 +7,6 @@ using Game.Entities;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game
 {
@@ -665,62 +664,66 @@ namespace Game
 
         public void SpawnObject(SpawnedPoolData spawns, uint limit, ulong triggerFrom)
         {
-            int count = (int)(limit - spawns.GetSpawnedObjects(poolId));
-
-            // If triggered from some object respawn this object is still marked as spawned
-            // and also counted into m_SpawnedPoolAmount so we need increase count to be
-            // spawned by 1
+            // First clear the object that triggered the respawn, if any.
+            // DespawnObject is responsible for decrementing the active object counter.
             if (triggerFrom != 0)
-                ++count;
+                DespawnObject(spawns, triggerFrom);
 
-            // This will try to spawn the rest of pool, not guaranteed
-            if (count > 0)
+            int count = (int)(limit - spawns.GetSpawnedObjects(poolId));
+            if (count <= 0)
+                return;
+
+            List<PoolObject> candidates = [];
+
+            // Add all not already active candidates.
+            foreach (PoolObject obj in EqualChanced)
+                if (!spawns.IsSpawnedObject<T>(obj.guid))
+                    candidates.Add(obj);
+
+            foreach (PoolObject obj in ExplicitlyChanced)
+                if (!spawns.IsSpawnedObject<T>(obj.guid))
+                    candidates.Add(obj);
+
+            if (candidates.Empty())
+                return;
+
+            List<PoolObject> rolledObjects = [];
+
+            // Attempt to select one object based on explicit chance.
+            if (!ExplicitlyChanced.Empty())
             {
-                List<PoolObject> rolledObjects = new();
-
-                // roll objects to be spawned
-                if (!ExplicitlyChanced.Empty())
+                float roll = (float)RandomHelper.randChance();
+                foreach (PoolObject candidate in candidates)
                 {
-                    float roll = (float)RandomHelper.randChance();
-
-                    foreach (PoolObject obj in ExplicitlyChanced)
+                    if (candidate.chance > 0)
                     {
-                        roll -= obj.chance;
-                        // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
-                        // so this need explicit check for this case
-                        if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)))
+                        roll -= candidate.chance;
+                        if (roll < 0)
                         {
-                            rolledObjects.Add(obj);
-                            break;
+                            rolledObjects.Add(candidate);
+                            candidates.Remove(candidate);
+                            break; // We only roll for one chanced object.
                         }
-                    }
-                }
-
-                if (!EqualChanced.Empty() && rolledObjects.Empty())
-                {
-                    rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsSpawnedObject<T>(obj.guid)));
-                    rolledObjects.RandomResize((uint)count);
-                }
-
-                // try to spawn rolled objects
-                foreach (PoolObject obj in rolledObjects)
-                {
-                    if (obj.guid == triggerFrom)
-                    {
-                        ReSpawn1Object(spawns, obj);
-                        triggerFrom = 0;
-                    }
-                    else
-                    {
-                        spawns.AddSpawn<T>(obj.guid, poolId);
-                        Spawn1Object(spawns, obj);
                     }
                 }
             }
 
-            // One spawn one despawn no count increase
-            if (triggerFrom != 0)
-                DespawnObject(spawns, triggerFrom);
+            // Fill the remaining slots with random selections from the rest of the candidates.
+            uint remainingCount = (uint)(count - rolledObjects.Count);
+            if (remainingCount > 0 && !candidates.Empty())
+            {
+                if (candidates.Count > remainingCount)
+                    candidates.RandomResize(remainingCount);
+
+                rolledObjects.AddRange(candidates);
+            }
+
+            // Spawn all the objects we've selected.
+            foreach (PoolObject objToSpawn in rolledObjects)
+            {
+                spawns.AddSpawn<T>(objToSpawn.guid, poolId);
+                Spawn1Object(spawns, objToSpawn);
+            }
         }
 
         void Spawn1Object(SpawnedPoolData spawns, PoolObject obj)
