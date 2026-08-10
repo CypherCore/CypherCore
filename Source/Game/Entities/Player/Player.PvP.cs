@@ -95,27 +95,7 @@ namespace Game.Entities
                     if (v_level <= k_grey)
                         return false;
 
-                    // PLAYER_CHOSEN_TITLE VALUES DESCRIPTION
-                    //  [0]      Just name
-                    //  [1..14]  Alliance honor titles and player name
-                    //  [15..28] Horde honor titles and player name
-                    //  [29..38] Other title and player name
-                    //  [39+]    Nothing
-                    // this is all wrong, should be going off PvpTitle, not PlayerTitle
-                    uint victim_title = plrVictim.m_playerData.PlayerTitle;
-                    // Get Killer titles, CharTitlesEntry.bit_index
-                    // Ranks:
-                    //  title[1..14]  . rank[5..18]
-                    //  title[15..28] . rank[5..18]
-                    //  title[other]  . 0
-                    if (victim_title == 0)
-                        victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
-                    else if (victim_title < 15)
-                        victim_rank = victim_title + 4;
-                    else if (victim_title < 29)
-                        victim_rank = victim_title - 14 + 4;
-                    else
-                        victim_guid.Clear();                        // Don't show HK: <rank> message, only log.
+                    victim_rank = plrVictim.m_activePlayerData.LifetimeMaxRank;
 
                     honor_f = (float)Math.Ceiling(Formulas.HKHonorAtLevelF(k_level) * (v_level - k_grey) / (k_level - k_grey));
 
