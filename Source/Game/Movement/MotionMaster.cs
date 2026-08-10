@@ -1213,9 +1213,9 @@ namespace Game.Movement
                 case MovementSlot.Active:
                     if (!_generators.Empty())
                     {
-                        var where = _generators.FirstOrDefault(p => p.Priority == movement.Priority); // find movement with equal priority
+                        var where = _generators.GetViewBetween(movement, null).FirstOrDefault(); // find movement with equal priority
                         bool replacesExisting = !movement.HasFlag(MovementGeneratorFlags.Immediate)
-                            && where != null;
+                            && where != null && !movement.Equals(where);
                         var top = _generators.FirstOrDefault();
                         if (replacesExisting)
                             Remove(where, where == top, false);
