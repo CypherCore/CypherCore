@@ -2042,7 +2042,7 @@ namespace Game.Maps
                 var existing = bySpawnIdMap.LookupByKey(info.spawnId);
                 if (existing != null) // spawnid already has a respawn scheduled
                 {
-                    if (info.respawnTime <= existing.respawnTime) // delete existing in this case
+                    if (info.respawnTime < existing.respawnTime) // delete existing in this case
                         DeleteRespawnInfo(existing);
                     else
                         return false;

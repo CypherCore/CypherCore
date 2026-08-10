@@ -3865,6 +3865,9 @@ namespace Game.Entities
             m_respawnDelayTime = (uint)(respawn > 0 ? respawn : 0);
             if (respawn != 0 && !m_spawnedByDefault)
                 UpdateObjectVisibility(true);
+
+            if (m_spawnedByDefault && !m_respawnCompatibilityMode && m_respawnTime > 0)
+                SetLootState(LootState.JustDeactivated);
         }
 
         public bool IsSpawned()
