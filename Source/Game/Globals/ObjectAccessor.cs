@@ -188,7 +188,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     }
     public Player FindPlayerByName(string name)
     {
-        Player player = PlayerNameMapHolder.Find(name);
+        Player player = FindConnectedPlayerByName(name);
         if (player == null || !player.IsInWorld)
             return null;
 
