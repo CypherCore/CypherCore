@@ -1121,18 +1121,6 @@ namespace Game
             _pendingTimeSyncRequests[counter] = Time.GetMSTime();
         }
 
-        uint AdjustClientMovementTime(uint time)
-        {
-            long movementTime = (long)time + _timeSyncClockDelta;
-            if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
-            {
-                Log.outWarn(LogFilter.Misc, "The computed movement time using clockDelta is erronous. Using fallback instead");
-                return GameTime.GetGameTimeMS();
-            }
-            else
-                return (uint)movementTime;
-        }
-
         public Locale GetSessionDbcLocale() { return m_sessionDbcLocale; }
         public Locale GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
 

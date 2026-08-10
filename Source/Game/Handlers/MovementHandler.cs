@@ -56,10 +56,10 @@ namespace Game
 
         void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
         {
-            if (!ValidateMovementInfo(movementInfo))
+            Unit mover = ValidateAndGetUnitBeingMoved(movementInfo.Guid, false);
+            if (!ValidateMovementInfo(mover, movementInfo))
                 return;
 
-            Unit mover = _player.GetUnitBeingMoved();
             Player plrMover = mover.ToPlayer();
 
             if (plrMover != null && plrMover.IsBeingTeleported())
@@ -221,7 +221,7 @@ namespace Game
             }
         }
 
-        public bool ValidateMovementInfo(MovementInfo mi)
+        public bool ValidateMovementInfo(Unit mover, MovementInfo mi)
         {
             //! Anti-cheat checks. Please keep them in seperate if () blocks to maintain a clear overview.
             //! Might be subject to latency, so just remove improper flags.
@@ -235,9 +235,7 @@ namespace Game
                 }
             });
 
-            Unit mover = _player.GetUnitBeingMoved();
-
-            if (mover == null || mi.Guid != mover.GetGUID())
+            if (mover == null)
                 return false;
 
             if (!mi.Pos.IsPositionValid())
@@ -306,6 +304,38 @@ namespace Game
                 mi.AddMovementFlag(MovementFlag.SplineElevation);
 
             return true;
+        }
+
+        Unit ValidateAndGetUnitBeingMoved(ObjectGuid guid, bool forStatusAck)
+        {
+            // the client is attempting to tamper movement data
+            // edit: this wouldn't happen in retail but it does in TC, even with a legitimate client.
+            Unit activelyMovedUnit = _player.GetUnitBeingMoved();
+            if (!forStatusAck && (activelyMovedUnit == null || activelyMovedUnit.GetGUID() != guid))
+            {
+                Log.outDebug(LogFilter.Unit, $"Attempt at tampering movement data by Player {_player.GetName()}");
+                return null;
+            }
+
+            if (activelyMovedUnit != null && activelyMovedUnit.GetGUID() == guid)
+                return activelyMovedUnit;
+
+            if (_player.GetGUID() == guid)
+                return _player;
+
+            return Global.ObjAccessor.GetUnit(_player, guid);
+        }
+
+        uint AdjustClientMovementTime(uint time)
+        {
+            long movementTime = time + _timeSyncClockDelta;
+            if (_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
+            {
+                Log.outWarn(LogFilter.Misc, "The computed movement time using clockDelta is erronous. Using fallback instead");
+                return GameTime.GetGameTimeMS();
+            }
+            else
+                return (uint)movementTime;
         }
 
         [WorldPacketHandler(ClientOpcodes.WorldPortResponse, Status = SessionStatus.Transfer)]
@@ -555,12 +585,13 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTeleportAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveTeleportAck(MoveTeleportAck packet)
         {
-            Player plMover = GetPlayer().GetUnitBeingMoved().ToPlayer();
-
-            if (plMover == null || plMover.GetTeleportState() != TeleportState.WaitingForTeleportAck)
+            Unit mover = ValidateAndGetUnitBeingMoved(packet.MoverGUID, false);
+            if (mover == null)
                 return;
 
-            if (packet.MoverGUID != plMover.GetGUID())
+            Player plMover = mover.ToPlayer();
+
+            if (plMover == null || plMover.GetTeleportState() != TeleportState.WaitingForTeleportAck)
                 return;
 
             plMover.SetTeleportState(TeleportState.NotTeleporting);
@@ -621,7 +652,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveForceWalkSpeedChangeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleForceSpeedChangeAck(MovementSpeedAck packet)
         {
-            if (!ValidateMovementInfo(packet.Ack.Status))
+            Unit mover = ValidateAndGetUnitBeingMoved(packet.Ack.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            if (!ValidateMovementInfo(mover, packet.Ack.Status))
                 return;
 
             /*----------------*/
@@ -701,7 +736,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingSurfaceFrictionAck)]
         void HandleSetAdvFlyingSpeedAck(MovementSpeedAck speedAck)
         {
-            ValidateMovementInfo(speedAck.Ack.Status);
+            Unit mover = ValidateAndGetUnitBeingMoved(speedAck.Ack.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            ValidateMovementInfo(mover, speedAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingBankingRateAck)]
@@ -710,7 +749,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingTurnVelocityThresholdAck)]
         void HandleSetAdvFlyingSpeedRangeAck(MovementSpeedRangeAck speedRangeAck)
         {
-            ValidateMovementInfo(speedRangeAck.Ack.Status);
+            Unit mover = ValidateAndGetUnitBeingMoved(speedRangeAck.Ack.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            ValidateMovementInfo(mover, speedRangeAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetActiveMover)]
@@ -726,15 +769,19 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveKnockBackAck(MoveKnockBackAck movementAck)
         {
-            if (!ValidateMovementInfo(movementAck.Ack.Status))
+            Unit mover = ValidateAndGetUnitBeingMoved(movementAck.Ack.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            if (!ValidateMovementInfo(mover, movementAck.Ack.Status))
                 return;
 
             movementAck.Ack.Status.Time = AdjustClientMovementTime(movementAck.Ack.Status.Time);
-            GetPlayer().m_movementInfo = movementAck.Ack.Status;
+            mover.m_movementInfo = movementAck.Ack.Status;
 
             MoveUpdateKnockBack updateKnockBack = new();
-            updateKnockBack.Status = GetPlayer().m_movementInfo;
-            GetPlayer().SendMessageToSet(updateKnockBack, false);
+            updateKnockBack.Status = mover.m_movementInfo;
+            mover.SendMessageToSet(updateKnockBack, false);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveEnableDoubleJumpAck, Processing = PacketProcessing.ThreadSafe)]
@@ -751,7 +798,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveWaterWalkAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMovementAckMessage(MovementAckMessage movementAck)
         {
-            ValidateMovementInfo(movementAck.Ack.Status);
+            Unit mover = ValidateAndGetUnitBeingMoved(movementAck.Ack.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            ValidateMovementInfo(mover, movementAck.Ack.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.SummonResponse)]
@@ -766,16 +817,23 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetCollisionHeightAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleSetCollisionHeightAck(MoveSetCollisionHeightAck packet)
         {
-            ValidateMovementInfo(packet.Data.Status);
+            Unit mover = ValidateAndGetUnitBeingMoved(packet.Data.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            ValidateMovementInfo(mover, packet.Data.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveApplyMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
         {
-            if (!ValidateMovementInfo(moveApplyMovementForceAck.Ack.Status))
+            Unit mover = ValidateAndGetUnitBeingMoved(moveApplyMovementForceAck.Ack.Status.Guid, true);
+            if (mover == null)
                 return;
 
-            Unit mover = _player.GetUnitBeingMoved();
+            if (!ValidateMovementInfo(mover, moveApplyMovementForceAck.Ack.Status))
+                return;
+
             moveApplyMovementForceAck.Ack.Status.Time = AdjustClientMovementTime(moveApplyMovementForceAck.Ack.Status.Time);
 
             MoveUpdateApplyMovementForce updateApplyMovementForce = new();
@@ -787,10 +845,13 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveRemoveMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
         {
-            if (!ValidateMovementInfo(moveRemoveMovementForceAck.Ack.Status))
+            Unit mover = ValidateAndGetUnitBeingMoved(moveRemoveMovementForceAck.Ack.Status.Guid, true);
+            if (mover == null)
                 return;
 
-            Unit mover = _player.GetUnitBeingMoved();
+            if (!ValidateMovementInfo(mover, moveRemoveMovementForceAck.Ack.Status))
+                return;
+
             moveRemoveMovementForceAck.Ack.Status.Time = AdjustClientMovementTime(moveRemoveMovementForceAck.Ack.Status.Time);
 
             MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
@@ -802,10 +863,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetModMovementForceMagnitudeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
         {
-            if (!ValidateMovementInfo(setModMovementForceMagnitudeAck.Ack.Status))
+            Unit mover = ValidateAndGetUnitBeingMoved(setModMovementForceMagnitudeAck.Ack.Status.Guid, true);
+            if (mover == null)
                 return;
 
-            Unit mover = _player.GetUnitBeingMoved();
+            if (!ValidateMovementInfo(mover, setModMovementForceMagnitudeAck.Ack.Status))
+                return;
 
             // skip all except last
             if (_player.m_movementForceModMagnitudeChanges > 0)
@@ -838,19 +901,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTimeSkipped, Processing = PacketProcessing.Inplace)]
         void HandleMoveTimeSkipped(MoveTimeSkipped moveTimeSkipped)
         {
-            Unit mover = GetPlayer().GetUnitBeingMoved();
+            Unit mover = ValidateAndGetUnitBeingMoved(moveTimeSkipped.MoverGUID, false);
             if (mover == null)
-            {
-                Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong mover state from the unit moved by {GetPlayer().GetGUID()}");
                 return;
-            }
-
-            // prevent tampered movement data
-            if (moveTimeSkipped.MoverGUID != mover.GetGUID())
-            {
-                Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong guid from the unit moved by {GetPlayer().GetGUID()}");
-                return;
-            }
 
             mover.m_movementInfo.Time += moveTimeSkipped.TimeSkipped;
 
@@ -863,7 +916,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {
-            if (!ValidateMovementInfo(moveSplineDone.Status))
+            Unit mover = ValidateAndGetUnitBeingMoved(moveSplineDone.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            if (!ValidateMovementInfo(mover, moveSplineDone.Status))
                 return;
 
             // in taxi flight packet received in 2 case:

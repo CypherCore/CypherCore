@@ -64,10 +64,14 @@ namespace Game
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveChangeVehicleSeats, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats packet)
+        void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats moveChangeVehicleSeats)
         {
-            Unit vehicle_base = GetPlayer().GetVehicleBase();
-            if (vehicle_base == null)
+            Unit mover = ValidateAndGetUnitBeingMoved(moveChangeVehicleSeats.Status.Guid, false);
+            if (mover == null)
+                return;
+
+            Vehicle vehicle = GetPlayer().GetVehicle();
+            if (vehicle == null)
                 return;
 
             VehicleSeatRecord seat = GetPlayer().GetVehicle().GetSeatForPassenger(GetPlayer());
@@ -78,22 +82,22 @@ namespace Game
                 return;
             }
 
-            if (!ValidateMovementInfo(packet.Status))
+            if (!ValidateMovementInfo(mover, moveChangeVehicleSeats.Status))
                 return;
 
-            vehicle_base.m_movementInfo = packet.Status;
+            mover.m_movementInfo = moveChangeVehicleSeats.Status;
 
-            if (packet.DstVehicle.IsEmpty())
-                GetPlayer().ChangeSeat(-1, packet.DstSeatIndex != 255);
+            if (moveChangeVehicleSeats.DstVehicle.IsEmpty())
+                GetPlayer().ChangeSeat(-1, moveChangeVehicleSeats.DstSeatIndex != 255);
             else
             {
-                Unit vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.DstVehicle);
+                Unit vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), moveChangeVehicleSeats.DstVehicle);
                 if (vehUnit != null)
                 {
-                    Vehicle vehicle = vehUnit.GetVehicleKit();
-                    if (vehicle != null)
-                        if (vehicle.HasEmptySeat((sbyte)packet.DstSeatIndex))
-                            vehUnit.HandleSpellClick(GetPlayer(), (sbyte)packet.DstSeatIndex);
+                    Vehicle vehicle1 = vehUnit.GetVehicleKit();
+                    if (vehicle1 != null)
+                        if (vehicle1.HasEmptySeat((sbyte)moveChangeVehicleSeats.DstSeatIndex))
+                            vehUnit.HandleSpellClick(GetPlayer(), (sbyte)moveChangeVehicleSeats.DstSeatIndex);
                 }
             }
         }
@@ -206,7 +210,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetVehicleRecIdAck)]
         void HandleMoveSetVehicleRecAck(MoveSetVehicleRecIdAck setVehicleRecIdAck)
         {
-            ValidateMovementInfo(setVehicleRecIdAck.Data.Status);
+            Unit mover = ValidateAndGetUnitBeingMoved(setVehicleRecIdAck.Data.Status.Guid, true);
+            if (mover == null)
+                return;
+
+            ValidateMovementInfo(mover, setVehicleRecIdAck.Data.Status);
         }
     }
 }

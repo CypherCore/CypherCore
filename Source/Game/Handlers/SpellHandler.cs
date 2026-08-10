@@ -565,25 +565,13 @@ namespace Game
             if (spell == null || spell.m_spellInfo.Id != packet.SpellID || spell.m_castId != packet.CastID || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
                 return;
 
-            Position pos = spell.m_targets.GetSrcPos();
-            pos.Relocate(packet.FirePos);
-            spell.m_targets.ModSrc(pos);
-
-            pos = spell.m_targets.GetDstPos();
-            pos.Relocate(packet.ImpactPos);
-            spell.m_targets.ModDst(pos);
-
+            spell.m_targets.ModSrc(new Position(packet.FirePos));
+            spell.m_targets.ModDst(new Position(packet.ImpactPos));
             spell.m_targets.SetPitch(packet.Pitch);
             spell.m_targets.SetSpeed(packet.Speed);
 
             if (packet.Status != null)
-            {
-                ValidateMovementInfo(packet.Status);
-                /*public uint opcode;
-                recvPacket >> opcode;
-                recvPacket.SetOpcode(CMSG_MOVE_STOP); // always set to CMSG_MOVE_STOP in client SetOpcode
-                //HandleMovementOpcodes(recvPacket);*/
-            }
+                HandleMovementOpcode(ClientOpcodes.MoveStop, packet.Status);
         }
 
         [WorldPacketHandler(ClientOpcodes.UpdateSpellVisual, Processing = PacketProcessing.Inplace)]
