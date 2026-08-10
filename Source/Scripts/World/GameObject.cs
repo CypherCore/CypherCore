@@ -202,19 +202,6 @@ namespace Scripts.World.GameObjects
         }
     }
 
-    class go_soulwell : GameObjectAI
-    {
-        public go_soulwell(GameObject go) : base(go) { }
-
-        public override bool OnGossipHello(Player player)
-        {
-            Unit owner = me.GetOwner();
-            if (owner == null || !owner.IsPlayer() || !player.IsInSameRaidWith(owner.ToPlayer()))
-                return true;
-            return false;
-        }
-    }
-
     class go_amberpine_outhouse : GameObjectAI
     {
         const uint ItemAnderholsSliderCider = 37247;

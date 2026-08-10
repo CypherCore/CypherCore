@@ -1735,6 +1735,7 @@ namespace Game.Entities
             if (ignoreCastInProgress)
                 spellArgs.TriggerFlags |= TriggerCastFlags.IgnoreCastInProgress;
 
+            bool addUse = false;
             Player playerUser = user.ToPlayer();
             if (playerUser != null)
             {
@@ -2307,7 +2308,7 @@ namespace Game.Entities
                     user.RemoveAurasByType(AuraType.Mounted);
                     spellId = info.SpellCaster.spell;
 
-                    AddUse();
+                    addUse = true;
                     break;
                 }
                 case GameObjectTypes.MeetingStone:                  //23
@@ -2694,29 +2695,32 @@ namespace Game.Entities
             if (player1 != null)
                 Global.OutdoorPvPMgr.HandleCustomSpell(player1, spellId, this);
 
+            SpellCastResult castResult;
             if (spellCaster != null)
-                spellCaster.CastSpell(user, spellId, spellArgs);
+                castResult = spellCaster.CastSpell(user, spellId, spellArgs);
             else
-            {
-                SpellCastResult castResult = CastSpell(user, spellId, spellArgs);
-                if (castResult == SpellCastResult.Success)
-                {
-                    switch (GetGoType())
-                    {
-                        case GameObjectTypes.NewFlag:
-                            HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.Taken, user.ToPlayer()));
-                            break;
-                        case GameObjectTypes.FlagStand:
-                            SetFlag(GameObjectFlags.InUse);
-                            ZoneScript zonescript = GetZoneScript();
-                            if (zonescript != null)
-                                zonescript.OnFlagTaken(this, user?.ToPlayer());
+                castResult = CastSpell(user, spellId, spellArgs);
 
-                            Delete();
-                            break;
-                        default:
-                            break;
-                    }
+            if (castResult == SpellCastResult.Success)
+            {
+                if (addUse)
+                    AddUse();
+
+                switch (GetGoType())
+                {
+                    case GameObjectTypes.NewFlag:
+                        HandleCustomTypeCommand(new GameObjectType.SetNewFlagState(FlagState.Taken, user.ToPlayer()));
+                        break;
+                    case GameObjectTypes.FlagStand:
+                        SetFlag(GameObjectFlags.InUse);
+                        ZoneScript zonescript = GetZoneScript();
+                        if (zonescript != null)
+                            zonescript.OnFlagTaken(this, user?.ToPlayer());
+
+                        Delete();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
