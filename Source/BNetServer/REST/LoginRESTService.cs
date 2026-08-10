@@ -159,7 +159,7 @@ namespace BNetServer.REST
                             return "WoW" + name.Substring(++hashPos);
                         else
                             return name;
-                    };
+                    }
 
                     long now = Time.UnixTime;
                     do
@@ -209,7 +209,6 @@ namespace BNetServer.REST
                 context.response.Status = HttpStatusCode.BadRequest;
                 context.response.ContentType = "application/json;charset=utf-8";
                 context.response.Content = JsonSerializer.Serialize(loginResult);
-                session.SendResponse(context);
 
                 return RequestHandlerResult.Handled;
             }
@@ -220,7 +219,7 @@ namespace BNetServer.REST
                     if (loginForm.Inputs[i].Id == inputId)
                         return loginForm.Inputs[i].Value;
                 return "";
-            };
+            }
 
             string login = getInputValue(loginForm, "account_name").ToUpper();
 
@@ -373,7 +372,6 @@ namespace BNetServer.REST
                 context.response.Status = HttpStatusCode.BadRequest;
                 context.response.ContentType = "application/json;charset=utf-8";
                 context.response.Content = JsonSerializer.Serialize(loginResult);
-                session.SendResponse(context);
 
                 return RequestHandlerResult.Handled;
             }
