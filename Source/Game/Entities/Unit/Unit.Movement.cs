@@ -1370,7 +1370,7 @@ namespace Game.Entities
                 //! No need to check height on ascent
                 AddUnitMovementFlag(MovementFlag.Hover);
                 if (hoverHeight != 0 && GetPositionZ() - GetFloorZ() < hoverHeight)
-                    UpdateHeight(GetPositionZ() + hoverHeight);
+                    UpdateHeight(Math.Max(GetFloorZ() + hoverHeight, GetPositionZ()));
             }
             else
             {
