@@ -6,7 +6,6 @@ using Framework.Database;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -716,7 +715,7 @@ namespace Game.Loots
             // scan loot for quest items
             LootTemplate lootTemplate = m_LootTemplates.LookupByKey(loot_id);
             if (lootTemplate != null)
-                return lootTemplate.HasQuestDrop(m_LootTemplates);
+                return lootTemplate.HasQuestDrop();
 
             return false;
         }
@@ -724,7 +723,7 @@ namespace Game.Loots
         public bool HaveQuestLootForPlayer(uint loot_id, Player player)
         {
             LootTemplate lootTemplate = m_LootTemplates.LookupByKey(loot_id);
-            if (lootTemplate != null && lootTemplate.HasQuestDropForPlayer(m_LootTemplates, player))
+            if (lootTemplate != null && lootTemplate.HasQuestDropForPlayer(player))
                 return true;
 
             return false;
@@ -1045,7 +1044,7 @@ namespace Game.Loots
             }
         }
 
-        public bool HasQuestDrop(LootTemplateMap store, byte groupId = 0)
+        public bool HasQuestDrop(byte groupId = 0)
         {
             if (groupId != 0)                                            // Group reference
             {
@@ -1068,10 +1067,10 @@ namespace Game.Loots
                             return true;                                    // quest drop found
                         break;
                     case LootStoreItemType.Reference:
-                        var Referenced = store.LookupByKey(item.itemid);
+                        var Referenced = LootStorage.Reference.GetLootFor(item.itemid);
                         if (Referenced == null)
                             continue;                                   // Error message [should be] already printed at loading stage
-                        if (Referenced.HasQuestDrop(store, item.groupid))
+                        if (Referenced.HasQuestDrop(item.groupid))
                             return true;
                         break;
                     default:
@@ -1087,7 +1086,7 @@ namespace Game.Loots
             return false;
         }
 
-        public bool HasQuestDropForPlayer(LootTemplateMap store, Player player, byte groupId = 0)
+        public bool HasQuestDropForPlayer(Player player, byte groupId = 0)
         {
             if (groupId != 0)                                            // Group reference
             {
@@ -1110,10 +1109,10 @@ namespace Game.Loots
                             return true;                                    // active quest drop found
                         break;
                     case LootStoreItemType.Reference:
-                        var Referenced = store.LookupByKey(item.itemid);
+                        var Referenced = LootStorage.Reference.GetLootFor(item.itemid);
                         if (Referenced == null)
                             continue;                                   // Error message already printed at loading stage
-                        if (Referenced.HasQuestDropForPlayer(store, player, item.groupid))
+                        if (Referenced.HasQuestDropForPlayer(player, item.groupid))
                             return true;
                         break;
                     case LootStoreItemType.Currency:
