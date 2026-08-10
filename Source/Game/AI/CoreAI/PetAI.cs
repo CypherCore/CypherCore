@@ -329,7 +329,7 @@ namespace Game.AI
 
             // Prevent activating movement when under control of spells
             // such as "Eyes of the Beast"
-            if (me.IsCharmed())
+            if (me.IsPossessed())
                 return;
 
             if (me.GetCharmInfo() == null)
@@ -452,7 +452,7 @@ namespace Game.AI
             // IMPORTANT: The order in which things are checked is important, be careful if you add or remove checks
 
             // Hmmm...
-            if (victim == null) 
+            if (victim == null)
                 return false;
 
             if (!victim.IsAlive())
