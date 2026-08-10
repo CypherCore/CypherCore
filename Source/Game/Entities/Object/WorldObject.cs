@@ -2872,16 +2872,21 @@ namespace Game.Entities
         public void MovePositionToFirstCollision(Position pos, float dist, float angle)
         {
             angle += GetOrientation();
-            float destx = pos.posX + dist * (float)Math.Cos(angle);
-            float desty = pos.posY + dist * (float)Math.Sin(angle);
+            float cosAngle = (float)Math.Cos(angle);
+            float sinAngle = (float)Math.Sin(angle);
+            float destx = pos.posX + dist * cosAngle;
+            float desty = pos.posY + dist * sinAngle;
             float destz = pos.posZ;
 
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty))
             {
-                Log.outError(LogFilter.Server, "WorldObject.MovePositionToFirstCollision invalid coordinates X: {0} and Y: {1} were passed!", destx, desty);
+                Log.outError(LogFilter.Server, $"WorldObject.MovePositionToFirstCollision invalid coordinates Src: {pos.ToString()}, dist: {dist}, angle: {angle}, destX: {destx}, destY: {desty} were passed!");
                 return;
             }
+
+            float halfHeight = GetCollisionHeight() * 0.5f;
+            bool col = false;
 
             // Use a detour raycast to get our first collision point
             PathGenerator path = new(this);
@@ -2889,34 +2894,29 @@ namespace Game.Entities
             path.CalculatePath(destx, desty, destz, false);
 
             // We have a invalid path result. Skip further processing.
-            if (!path.GetPathType().HasFlag(PathType.NotUsingPath))
-                if ((path.GetPathType() & ~(PathType.Normal | PathType.Shortcut | PathType.Incomplete | PathType.FarFromPoly)) != 0)
-                    return;
-
-            Vector3 result = path.GetPath()[path.GetPath().Length - 1];
-            destx = result.X;
-            desty = result.Y;
-            destz = result.Z;
-
-            // check static LOS
-            float halfHeight = GetCollisionHeight() * 0.5f;
-            bool col = false;
-
-            // Unit is flying, check for potential collision via vmaps
-            if (path.GetPathType().HasFlag(PathType.NotUsingPath))
+            if ((path.GetPathType() & (PathType.NoPath | PathType.NotUsingPath | PathType.FarFromPolyStart)) == 0)
             {
+                var result = path.GetPath()[path.GetPath().Length - 1];
+                destx = result.x;
+                desty = result.y;
+                destz = result.z;
+            }
+            else
+            {
+                // check static LOS
+                // Unit is flying, check for potential collision via vmaps
                 col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMapId(), GetMap().GetTerrain(), pos.posX, pos.posY),
-                    pos.posX, pos.posY, pos.posZ + halfHeight,
-                    destx, desty, destz + halfHeight,
-                    out destx, out desty, out destz, -0.5f);
+                pos.posX, pos.posY, pos.posZ + halfHeight,
+                destx, desty, destz + halfHeight,
+                out destx, out desty, out destz, -0.5f);
 
                 destz -= halfHeight;
 
                 // Collided with static LOS object, move back to collision point
                 if (col)
                 {
-                    destx -= SharedConst.ContactDistance * MathF.Cos(angle);
-                    desty -= SharedConst.ContactDistance * MathF.Sin(angle);
+                    destx -= SharedConst.ContactDistance * cosAngle;
+                    desty -= SharedConst.ContactDistance * sinAngle;
                     dist = MathF.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
                 }
             }
@@ -2929,8 +2929,8 @@ namespace Game.Entities
             // Collided with a gameobject, move back to collision point
             if (col)
             {
-                destx -= SharedConst.ContactDistance * (float)Math.Cos(angle);
-                desty -= SharedConst.ContactDistance * (float)Math.Sin(angle);
+                destx -= SharedConst.ContactDistance * cosAngle;
+                desty -= SharedConst.ContactDistance * sinAngle;
                 dist = (float)Math.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
             }
 
@@ -2939,8 +2939,7 @@ namespace Game.Entities
             GridDefines.NormalizeMapCoord(ref pos.posY);
             UpdateAllowedPositionZ(destx, desty, ref destz, ref groundZ);
 
-            pos.SetOrientation(GetOrientation());
-            pos.Relocate(destx, desty, destz);
+            pos.Relocate(destx, desty, destz, GetOrientation());
 
             // position has no ground under it (or is too far away)
             if (groundZ <= MapConst.InvalidHeight)
