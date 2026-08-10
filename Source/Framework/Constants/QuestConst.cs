@@ -115,7 +115,6 @@ namespace Framework.Constants
         Raid10 = 88,
         Raid25 = 89,
         Scenario = 98,
-        Account = 102,
         SideQuest = 104,
         Artifact = 107,
         WorldQuest = 109,
@@ -184,7 +183,9 @@ namespace Framework.Constants
         WorldBoss = 289,
         Hidden = 291,
         ImportantQuestNoAbandon = 292,
-        PreyWorldQuest = 295
+        PreyWorldQuest = 295,
+        WorldQuestShortDuration = 296,
+        ImportantQuestRaid = 297,
     }
 
     public enum QuestSort
