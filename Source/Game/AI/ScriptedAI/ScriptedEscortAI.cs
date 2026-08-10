@@ -182,20 +182,21 @@ namespace Game.AI
                             if (_despawnAtEnd)
                             {
                                 Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: reached end of waypoints, despawning at end ({me.GetGUID()})");
-                                if (_returnToStart)
-                                {
-                                    Position respawnPosition = me.GetRespawnPosition();
-                                    me.GetMotionMaster().MovePoint(EscortPointIds.Home, respawnPosition);
-                                    Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: returning to spawn location: {respawnPosition} ({me.GetGUID()})");
-                                }
-                                else if (_instantRespawn)
+                                if (_instantRespawn)
                                     me.Respawn();
                                 else
                                     me.DespawnOrUnsummon();
                             }
+                            else if (_returnToStart)
+                            {
+                                Position respawnPosition = me.GetRespawnPosition();
+                                me.GetMotionMaster().MovePoint(EscortPointIds.Home, respawnPosition);
+                                Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: returning to spawn location: {respawnPosition} ({me.GetGUID()})");
+                            }
+                            else
+                                RemoveEscortState(EscortState.Escorting);
 
                             Log.outDebug(LogFilter.ScriptsAi, $"EscortAI::UpdateAI: reached end of waypoints ({me.GetGUID()})");
-                            RemoveEscortState(EscortState.Escorting);
                             return;
                         }
 
