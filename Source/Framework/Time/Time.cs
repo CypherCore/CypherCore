@@ -18,7 +18,7 @@ public static class Time
     public const int Day = Hour * 24;
     public const int Week = Day * 7;
     public const int Month = Day * 30;
-    public const int Year = Month * 12;
+    public const int Year = Day * 365;
     public const int InMilliseconds = 1000;
 
     public static readonly DateTime ApplicationStartTime = DateTime.Now;
