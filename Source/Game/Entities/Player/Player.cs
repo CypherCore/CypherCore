@@ -2014,7 +2014,7 @@ namespace Game.Entities
             SetUnitMovementFlags(GetUnitMovementFlags() & MovementFlag.MaskHasPlayerStatusOpcode);
             m_movementInfo.ResetJump();
             DisableSpline();
-            GetMotionMaster().Remove(MovementGeneratorType.Effect);
+            GetMotionMaster().InterruptOnTeleport();
 
             ITransport transport = GetTransport();
             if (transport != null)
@@ -2064,10 +2064,13 @@ namespace Game.Entities
 
                 // code for finish transfer called in WorldSession.HandleMovementOpcodes()
                 // at client packet CMSG_MOVE_TELEPORT_ACK
-                SetTeleportState(TeleportState.WaitingForTeleportAck);
+                SetTeleportState(GetPlayerMovingMe() != null ? TeleportState.WaitingForTeleportAck : TeleportState.NotTeleporting);
                 // near teleport, triggering send CMSG_MOVE_TELEPORT_ACK from client at landing
                 if (!GetSession().PlayerLogout())
                     SendTeleportPacket(teleportDest);
+
+                if (!IsBeingTeleportedNear()) // update position immediately if we will not be waiting for client ACK
+                    UpdatePosition(teleportDest.Location, true);
             }
             else
             {

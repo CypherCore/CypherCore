@@ -498,6 +498,13 @@ namespace Game.Movement
             return true;
         }
 
+        public void InterruptOnTeleport()
+        {
+            MovementGenerator top = GetCurrentMovementGenerator();
+            if (top != null && !top.HasFlag(MovementGeneratorFlags.Deactivated | MovementGeneratorFlags.Finalized))
+                top.Deactivate(_owner); // only deactivate top, don't remove it. non-resumable generators will clean up themselves on next update
+        }
+
         public void MoveIdle()
         {
             Add(GetIdleMovementGenerator(), MovementSlot.Default);

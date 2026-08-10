@@ -1463,13 +1463,13 @@ namespace Game.Entities
 
         public void NearTeleportTo(TeleportLocation target, bool casting = false)
         {
-            DisableSpline();
-            if (IsPlayer())
-            {
-                ToPlayer().TeleportTo(target, TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | (casting ? TeleportToOptions.Spell : TeleportToOptions.None));
-            }
+            Player player = ToPlayer();
+            if (player != null)
+                player.TeleportTo(target, TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | (casting ? TeleportToOptions.Spell : TeleportToOptions.None));
             else
             {
+                DisableSpline();
+                GetMotionMaster().InterruptOnTeleport();
                 SendTeleportPacket(target);
                 UpdatePosition(target.Location, true);
                 UpdateObjectVisibility();
