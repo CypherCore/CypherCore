@@ -28,7 +28,6 @@ namespace Game.Movement
         public FlightPathMovementGenerator(float? speed, ActionResultSetter<MovementStopReason> scriptResult)
         {
             _speed = speed;
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.InFlight;

@@ -10,7 +10,6 @@ namespace Game.Movement
 {
     public abstract class MovementGenerator : IEquatable<MovementGenerator>
     {
-        public MovementGeneratorMode Mode;
         public MovementGeneratorPriority Priority;
         public MovementGeneratorFlags Flags;
         public UnitState BaseUnitState;
@@ -60,20 +59,17 @@ namespace Game.Movement
 
         public bool Equals(MovementGenerator other)
         {
-            if (Mode == other.Mode && Priority == other.Priority)
-                return true;
-
-            return false;
+            return Priority > other.Priority;
         }
 
         public int GetHashCode(MovementGenerator obj)
         {
-            return obj.Mode.GetHashCode() ^ obj.Priority.GetHashCode();
+            return obj.Priority.GetHashCode();
         }
 
         public virtual string GetDebugInfo()
         {
-            return $"Mode: {Mode} Priority: {Priority} Flags: {Flags} BaseUniteState: {BaseUnitState}";
+            return $"Priority: {Priority} Flags: {Flags} BaseUniteState: {BaseUnitState}";
         }
 
         public void SetScriptResult(MovementStopReason reason)

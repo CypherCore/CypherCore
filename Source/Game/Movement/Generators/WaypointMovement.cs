@@ -52,7 +52,6 @@ namespace Game.Movement
             _generatePath = generatePath;
             _fadeObject = fadeObject;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
@@ -78,7 +77,6 @@ namespace Game.Movement
             _generatePath = generatePath;
             _fadeObject = fadeObject;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;

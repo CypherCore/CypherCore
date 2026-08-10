@@ -18,15 +18,7 @@ namespace Game.Movement
     {
         public int Compare(MovementGenerator a, MovementGenerator b)
         {
-            if (a.Equals(b))
-                return 0;
-
-            if (a.Mode > b.Mode)
-                return 1;
-            else if (a.Mode == b.Mode)
-                return a.Priority.CompareTo(b.Priority);
-
-            return -1;
+            return a.Priority.CompareTo(b.Priority);
         }
     }
 
@@ -232,7 +224,6 @@ namespace Game.Movement
 
         public MovementGenerator GetMovementGenerator(Func<MovementGenerator, bool> filter, MovementSlot slot = MovementSlot.Active)
         {
-
             if (Empty() || IsInvalidMovementSlot(slot))
                 return null;
 
@@ -244,12 +235,9 @@ namespace Game.Movement
                         movement = _defaultGenerator;
                     break;
                 case MovementSlot.Active:
-                    if (!_generators.Empty())
-                    {
-                        var itr = _generators.FirstOrDefault(filter);
-                        if (itr != null)
-                            movement = itr;
-                    }
+                    var itr = _generators.FirstOrDefault(filter);
+                    if (itr != null)
+                        movement = itr;
                     break;
                 default:
                     break;
@@ -268,15 +256,10 @@ namespace Game.Movement
             switch (slot)
             {
                 case MovementSlot.Default:
-                    if (_defaultGenerator != null && filter(_defaultGenerator))
-                        value = true;
+                    value = _defaultGenerator != null && filter(_defaultGenerator);
                     break;
                 case MovementSlot.Active:
-                    if (!_generators.Empty())
-                    {
-                        var itr = _generators.FirstOrDefault(filter);
-                        value = itr != null;
-                    }
+                    value = _generators.Any(filter);
                     break;
                 default:
                     break;
@@ -343,7 +326,8 @@ namespace Game.Movement
 
             if (movement.HasFlag(MovementGeneratorFlags.Immediate) && movement.HasFlag(MovementGeneratorFlags.InitializationPending))
             {
-                if (!movement.Initialize(_owner))
+                bool wouldBecomeTop = _generators.GetViewBetween(movement, null).FirstOrDefault() == _generators.FirstOrDefault();
+                if (!wouldBecomeTop || !movement.Initialize(_owner))
                     return;
             }
 
@@ -374,25 +358,22 @@ namespace Game.Movement
                         DirectClearDefault();
                     break;
                 case MovementSlot.Active:
-                    if (!_generators.Empty())
-                    {
-                        if (_generators.Contains(movement))
-                            Remove(movement, GetCurrentMovementGenerator() == movement, false);
-                    }
+                    if (_generators.Contains(movement))
+                        Remove(movement, GetCurrentMovementGenerator() == movement, false);
                     break;
                 default:
                     break;
             }
         }
 
-        public void Remove(MovementGeneratorType type, MovementSlot slot = MovementSlot.Active, MovementGeneratorMode mode = MovementGeneratorMode.Default)
+        public void Remove(MovementGeneratorType type, MovementSlot slot = MovementSlot.Active)
         {
             if (IsInvalidMovementGeneratorType(type) || IsInvalidMovementSlot(slot))
                 return;
 
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot, mode), MotionMasterDelayedActionType.RemoveType));
+                _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot), MotionMasterDelayedActionType.RemoveType));
                 return;
             }
 
@@ -406,12 +387,13 @@ namespace Game.Movement
                         DirectClearDefault();
                     break;
                 case MovementSlot.Active:
-                    if (!_generators.Empty())
+                    do
                     {
-                        var itr = _generators.FirstOrDefault(a => a.GetMovementGeneratorType() == type && a.Mode == mode);
-                        if (itr != null)
-                            Remove(itr, GetCurrentMovementGenerator() == itr, false);
-                    }
+                        var itr = _generators.FirstOrDefault(a => a.GetMovementGeneratorType() == type);
+                        if (itr == null)
+                            break;
+                        Remove(itr, GetCurrentMovementGenerator() == itr, false);
+                    } while (true);
                     break;
                 default:
                     break;
@@ -455,20 +437,6 @@ namespace Game.Movement
                 default:
                     break;
             }
-        }
-
-        public void Clear(MovementGeneratorMode mode)
-        {
-            if (HasFlag(MotionMasterFlags.Delayed))
-            {
-                _delayedActions.Enqueue(new DelayedAction(() => Clear(mode), MotionMasterDelayedActionType.ClearMode));
-                return;
-            }
-
-            if (Empty())
-                return;
-
-            DirectClear(a => a.Mode == mode);
         }
 
         public void Clear(MovementGeneratorPriority priority)
@@ -1154,8 +1122,9 @@ namespace Game.Movement
 
         void Pop(bool active, bool movementInform)
         {
-            if (!_generators.Empty())
-                Remove(_generators.FirstOrDefault(), active, movementInform);
+            var itr = _generators.FirstOrDefault();
+            if (itr != null)
+                Remove(itr, active, movementInform);
         }
 
         void DirectInitialize()
@@ -1188,14 +1157,11 @@ namespace Game.Movement
 
         void DirectClear(Func<MovementGenerator, bool> filter)
         {
-            if (_generators.Empty())
-                return;
-
-            MovementGenerator top = GetCurrentMovementGenerator();
             foreach (var movement in _generators.ToList())
             {
                 if (filter(movement))
                 {
+                    MovementGenerator top = GetCurrentMovementGenerator(); // erase may change top, get fresh value on every removal
                     _generators.Remove(movement);
                     Delete(movement, movement == top, false);
                 }
@@ -1215,27 +1181,15 @@ namespace Game.Movement
                         AddFlag(MotionMasterFlags.StaticInitializationPending);
                     break;
                 case MovementSlot.Active:
+                    var where = _generators.GetViewBetween(movement, null).FirstOrDefault();
                     if (!_generators.Empty())
                     {
-                        if (movement.Priority >= _generators.FirstOrDefault().Priority)
-                        {
-                            MovementGenerator currentTopMovement = _generators.FirstOrDefault();
-                            if (movement.Priority == currentTopMovement.Priority)
-                            {
-                                if (movement.Mode > currentTopMovement.Mode)
-                                    currentTopMovement.Deactivate(_owner);
-                                else if (movement.Mode == currentTopMovement.Mode)
-                                    Remove(currentTopMovement, true, false);
-                            }
-                            else
-                                currentTopMovement.Deactivate(_owner);
-                        }
-                        else
-                        {
-                            var pointer = _generators.FirstOrDefault(a => a.Priority == movement.Priority && a.Mode == movement.Mode);
-                            if (pointer != null)
-                                Remove(pointer, false, false);
-                        }
+                        bool replacesExisting = where != null && !movement.Equals(where);
+                        var top = _generators.FirstOrDefault();
+                        if (replacesExisting)
+                            Remove(where, where == top, false);
+                        else if (where == top)
+                            top.Deactivate(_owner);
                     }
                     else
                         _defaultGenerator.Deactivate(_owner);

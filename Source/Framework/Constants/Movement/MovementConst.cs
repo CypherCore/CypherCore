@@ -3,17 +3,11 @@
 
 namespace Framework.Constants
 {
-    public enum MovementGeneratorMode
-    {
-        Default = 0,
-        Override
-    }
-
     public enum MovementGeneratorPriority
     {
         None = 0,
-        Normal,
-        Highest
+        Normal = 64,
+        Highest = 128
     }
 
     public enum MovementSlot

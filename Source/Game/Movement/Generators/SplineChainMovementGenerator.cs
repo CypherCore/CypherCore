@@ -19,7 +19,6 @@ namespace Game.Movement
             _chainSize = (byte)chain.Count;
             _walk = walk;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
@@ -35,7 +34,6 @@ namespace Game.Movement
             _nextFirstWP = info.PointIndex;
             _msToNext = info.TimeToNext;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             if (info.SplineIndex >= info.Chain.Count)

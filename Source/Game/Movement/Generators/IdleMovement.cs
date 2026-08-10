@@ -12,7 +12,6 @@ namespace Game.Movement
     {
         public IdleMovementGenerator()
         {
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.Initialized;
             BaseUnitState = 0;
@@ -69,7 +68,6 @@ namespace Game.Movement
             _turnSpeed = turnSpeed;
             _totalTurnAngle = totalTurnAngle;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Rotating;
@@ -163,7 +161,6 @@ namespace Game.Movement
             _timer = timer;
             _orientation = orientation;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Distracted;

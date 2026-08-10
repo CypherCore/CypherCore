@@ -19,7 +19,6 @@ namespace Game.Movement
             _fleeTargetGUID = fleeTargetGUID;
             _timer = new TimeTracker();
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Fleeing;

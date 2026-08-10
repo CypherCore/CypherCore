@@ -830,7 +830,7 @@ namespace Game.AI
                 {
                     if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() != null && !me.GetMotionMaster().HasMovementGenerator(movement =>
                     {
-                        return movement.GetMovementGeneratorType() == MovementGeneratorType.Chase && movement.Mode == MovementGeneratorMode.Default && movement.Priority == MovementGeneratorPriority.Normal;
+                        return movement.GetMovementGeneratorType() == MovementGeneratorType.Chase && movement.Priority == MovementGeneratorPriority.Normal;
                     }))
                     {
                         SetRun(_run);
@@ -839,7 +839,7 @@ namespace Game.AI
                 }
                 else
                 {
-                    var movement = me.GetMotionMaster().GetMovementGenerator(a => a.GetMovementGeneratorType() == MovementGeneratorType.Chase && a.Mode == MovementGeneratorMode.Default && a.Priority == MovementGeneratorPriority.Normal);
+                    var movement = me.GetMotionMaster().GetMovementGenerator(a => a.GetMovementGeneratorType() == MovementGeneratorType.Chase && a.Priority == MovementGeneratorPriority.Normal);
                     if (movement != null)
                     {
                         me.GetMotionMaster().Remove(movement);

@@ -29,7 +29,6 @@ namespace Game.Movement
             _range = range;
             _angle = angle;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Chase;

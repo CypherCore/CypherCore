@@ -14,7 +14,6 @@ namespace Game.Movement
             _timer = new TimeTracker();
             _reference = new();
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Highest;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Confused;

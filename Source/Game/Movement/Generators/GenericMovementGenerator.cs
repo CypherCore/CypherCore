@@ -26,7 +26,6 @@ namespace Game.Movement
             _pointId = id;
             _durationTracksSpline = true;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
@@ -125,7 +124,6 @@ namespace Game.Movement
             _type = type;
             _pointId = id;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Immediate;
             BaseUnitState = 0;

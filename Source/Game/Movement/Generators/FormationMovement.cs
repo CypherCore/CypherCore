@@ -30,7 +30,6 @@ namespace Game.Movement
             _point1 = point1;
             _point2 = point2;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.FollowFormation;

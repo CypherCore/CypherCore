@@ -11,7 +11,6 @@ namespace Game.AI
     {
         public HomeMovementGenerator()
         {
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;

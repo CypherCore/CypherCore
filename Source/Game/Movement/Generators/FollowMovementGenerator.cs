@@ -32,7 +32,6 @@ namespace Game.Movement
             _angle = angle;
             _ignoreTargetWalk = ignoreTargetWalk;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Follow;

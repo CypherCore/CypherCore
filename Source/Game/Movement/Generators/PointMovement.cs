@@ -36,7 +36,6 @@ namespace Game.Movement
             _closeEnoughDistance = closeEnoughDistance;
             _fadeObject = fadeObject;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;

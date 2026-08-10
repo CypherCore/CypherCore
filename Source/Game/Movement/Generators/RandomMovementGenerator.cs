@@ -27,7 +27,6 @@ namespace Game.Movement
             _reference = new();
             _wanderDistance = distance;
 
-            Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
             Flags = MovementGeneratorFlags.InitializationPending;
             BaseUnitState = UnitState.Roaming;
