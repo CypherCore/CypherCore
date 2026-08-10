@@ -795,6 +795,17 @@ namespace Game.Combat
 
         public int GetThreatListSize() { return _sortedThreatList.Count; }
 
+        public uint GetThreatListPlayerCount(bool includeOffline = false)
+        {
+            if (includeOffline)
+                return (uint)_sortedThreatList.Count;
+            uint returnValue = 0;
+            foreach (ThreatReference refe in _sortedThreatList)
+                if (refe.IsAvailable() && refe.GetOwner().GetTypeId() == TypeId.Player)
+                    ++returnValue;
+            return returnValue;
+        }
+
         // fastest of the three threat list getters - gets the threat list in "arbitrary" order
         public List<ThreatReference> GetSortedThreatList() { return _sortedThreatList; }
 
