@@ -177,6 +177,8 @@ namespace Game.Movement
             if (!owner.IsStandState())
                 owner.SetStandState(UnitStandStateType.Stand);
 
+            _originalOrientation = owner.GetOrientation();
+
             MoveSplineInit init = new(owner);
             init.MoveTo(owner, false);
             if (!owner.GetTransGUID().IsEmpty())
@@ -216,19 +218,15 @@ namespace Game.Movement
         {
             AddFlag(MovementGeneratorFlags.Finalized);
 
-            // TODO: This code should be handled somewhere else
-            // If this is a creature, then return orientation to original position (for idle movement creatures)
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled) && owner.IsCreature())
-            {
-                float angle = owner.ToCreature().GetHomePosition().GetOrientation();
-                owner.SetFacingTo(angle);
-            }
+                owner.SetFacingTo(_originalOrientation, true);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
 
         uint _timer;
         float _orientation;
+        float _originalOrientation;
     }
 
     public class AssistanceDistractMovementGenerator : DistractMovementGenerator

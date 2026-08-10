@@ -26,15 +26,7 @@ namespace Game.AI
         public virtual void AttackStart(Unit victim)
         {
             if (victim != null && me.Attack(victim, true))
-            {
-                // Clear distracted state on attacking
-                if (me.HasUnitState(UnitState.Distracted))
-                {
-                    me.ClearUnitState(UnitState.Distracted);
-                    me.GetMotionMaster().Clear();
-                }
                 me.GetMotionMaster().MoveChase(victim);
-            }
         }
 
         public void AttackStartCaster(Unit victim, float dist)
@@ -248,7 +240,7 @@ namespace Game.AI
                                 return false;
 
                             return targetSelectorInner.Invoke(candidate);
-                        };
+                        }
                         target = SelectTarget(SelectTargetMethod.Random, 0, targetSelector);
                     }
                     break;
@@ -279,7 +271,7 @@ namespace Game.AI
                                 return false;
 
                             return targetSelectorInner.Invoke(candidate);
-                        };
+                        }
                         if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim) && targetSelector(me.GetVictim()))
                             target = me.GetVictim();
                         else

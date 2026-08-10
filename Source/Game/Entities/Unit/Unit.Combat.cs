@@ -54,8 +54,6 @@ namespace Game.Entities
                 UpdateNearbyPlayersInteractions();
         }
 
-        public virtual void AtEngage(Unit target) { }
-
         public virtual void AtDisengage() { }
 
         public void CombatStop(bool includingCast = false, bool mutualPvP = true, Func<Unit, bool> unitFilter = null)
@@ -793,6 +791,12 @@ namespace Game.Entities
                 packet.ContentTuning = contentTuningParams;
 
             SendCombatLogMessage(packet);
+        }
+
+        public virtual void AtEngage(Unit target)
+        {
+            if (HasUnitState(UnitState.Distracted))
+                GetMotionMaster().Remove(MovementGeneratorType.Distract);
         }
 
         public void AtTargetAttacked(Unit target, bool canInitialAggro = true)
