@@ -1782,6 +1782,7 @@ namespace Framework.Constants
         StateWorkZulamanBlacksmitting = 1129,
         StateWorkZulamanHammeringSound = 1131,
         Attack1hZone2BreakingStuffSound = 1132,
+        OneshotOfferLooop = 1141,
     }
 
     public enum GlyphSlotType
