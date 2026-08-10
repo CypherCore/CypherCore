@@ -3803,29 +3803,15 @@ namespace Game.Achievements
 
         // store criterias by type to speed up lookup
         MultiMap<CriteriaType, Criteria> _criteriasByType = new();
-        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<(int, int), Criteria> _criteriasByAsset = [];
         MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
-        MultiMap<uint, Criteria>[] _scenarioCriteriasByTypeAndScenarioId = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<(int, int), Criteria> _scenarioCriteriasByTypeAndScenarioId = [];
         MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
-        MultiMap<int, Criteria>[] _criteriasByStartEvent = new MultiMap<int, Criteria>[(int)CriteriaStartEvent.Count];
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Count];
+        MultiMap<(int, int), Criteria> _criteriasByStartEvent = [];
+        MultiMap<(int, int), Criteria> _criteriasByFailEvent = [];
 
-        CriteriaManager()
-        {
-            for (var i = 0; i < (int)CriteriaType.Count; ++i)
-            {
-                _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
-                _scenarioCriteriasByTypeAndScenarioId[i] = new MultiMap<uint, Criteria>();
-            }
-
-            for (var i = 0; i < (int)CriteriaStartEvent.Count; ++i)
-                _criteriasByStartEvent[i] = new();
-
-            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-                _criteriasByFailEvent[i] = new();
-
-        }
+        CriteriaManager() { }
 
         public void LoadCriteriaModifiersTree()
         {
@@ -3840,9 +3826,11 @@ namespace Game.Achievements
             // Load modifier tree nodes
             foreach (var tree in CliDB.ModifierTreeStorage.Values)
             {
-                ModifierTreeNode node = new();
-                node.Entry = tree;
-                _criteriaModifiers[node.Entry.Id] = node;
+                ModifierTreeNode node = new()
+                {
+                    Entry = tree
+                };
+                _criteriaModifiers[tree.Id] = node;
             }
 
             // Build tree
@@ -3882,6 +3870,17 @@ namespace Game.Achievements
         {
             uint oldMSTime = Time.GetMSTime();
 
+            _criteriasByFailEvent.Clear();
+            _criteriasByStartEvent.Clear();
+            _scenarioCriteriasByTypeAndScenarioId.Clear();
+            _criteriasByAsset.Clear();
+            _questObjectiveCriteriasByType.Clear();
+            _guildCriteriasByType.Clear();
+            _criteriasByType.Clear();
+            _criteriaTreeByCriteria.Clear();
+            _criteria.Clear();
+            _criteriaTrees.Clear();
+
             Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
             foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
                 if (achievement.CriteriaTree != 0)
@@ -3917,29 +3916,28 @@ namespace Game.Achievements
                 if (achievement == null && scenarioStep == null && questObjective == null)
                     continue;
 
-                CriteriaTree criteriaTree = new();
-                criteriaTree.Id = tree.Id;
-                criteriaTree.Achievement = achievement;
-                criteriaTree.ScenarioStep = scenarioStep;
-                criteriaTree.QuestObjective = questObjective;
-                criteriaTree.Entry = tree;
+                CriteriaTree criteriaTree = new()
+                {
+                    Id = tree.Id,
+                    Achievement = achievement,
+                    ScenarioStep = scenarioStep,
+                    QuestObjective = questObjective,
+                    Entry = tree
+                };
 
                 _criteriaTrees[criteriaTree.Entry.Id] = criteriaTree;
             }
 
             // Build tree
-            foreach (var pair in _criteriaTrees)
+            foreach (var (_, criteriaTree) in _criteriaTrees)
             {
-                CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
+                CriteriaTree parent = _criteriaTrees.LookupByKey(criteriaTree.Entry.Parent);
                 if (parent != null)
-                    parent.Children.Add(pair.Value);
+                    parent.Children.Add(criteriaTree);
 
-                if (CliDB.CriteriaStorage.HasRecord(pair.Value.Entry.CriteriaID))
-                    _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
+                if (CliDB.CriteriaStorage.HasRecord(criteriaTree.Entry.CriteriaID))
+                    _criteriaTreeByCriteria.Add(criteriaTree.Entry.CriteriaID, criteriaTree);
             }
-
-            for (var i = 0; i < (int)CriteriaFailEvent.Count; ++i)
-                _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
 
             // Load criteria
             uint criterias = 0;
@@ -3956,10 +3954,12 @@ namespace Game.Achievements
                 if (treeList.Empty())
                     continue;
 
-                Criteria criteria = new();
-                criteria.Id = criteriaEntry.Id;
-                criteria.Entry = criteriaEntry;
-                criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
+                Criteria criteria = new()
+                {
+                    Id = criteriaEntry.Id,
+                    Entry = criteriaEntry,
+                    Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId)
+                };
 
                 _criteria[criteria.Id] = criteria;
 
@@ -3994,7 +3994,7 @@ namespace Game.Achievements
                     if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
                     {
                         if (criteriaEntry.Type != CriteriaType.RevealWorldMapOverlay)
-                            _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
+                            _criteriasByAsset.Add(((int)criteriaEntry.Type, (int)criteriaEntry.Asset), criteria);
                         else
                         {
                             var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteriaEntry.Asset);
@@ -4010,7 +4010,7 @@ namespace Game.Achievements
                                         if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
                                             valid = false;
                                     if (valid)
-                                        _criteriasByAsset[(int)criteriaEntry.Type].Add(worldOverlayEntry.AreaID[j], criteria);
+                                        _criteriasByAsset.Add(((int)criteriaEntry.Type, (int)worldOverlayEntry.AreaID[j]), criteria);
                                 }
                             }
                         }
@@ -4027,7 +4027,7 @@ namespace Game.Achievements
                 {
                     ++scenarioCriterias;
                     foreach (uint scenarioId in scenarioIds)
-                        _scenarioCriteriasByTypeAndScenarioId[(int)criteriaEntry.Type].Add(scenarioId, criteria);
+                        _scenarioCriteriasByTypeAndScenarioId.Add(((int)criteriaEntry.Type, (int)scenarioId), criteria);
                 }
 
                 if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.QuestObjective))
@@ -4037,10 +4037,10 @@ namespace Game.Achievements
                 }
 
                 if (criteriaEntry.StartEvent != 0)
-                    _criteriasByStartEvent[criteriaEntry.StartEvent].Add((int)criteriaEntry.StartAsset, criteria);
+                    _criteriasByStartEvent.Add((criteriaEntry.StartEvent, (int)criteriaEntry.StartAsset), criteria);
 
                 if (criteriaEntry.FailEvent != 0)
-                    _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
+                    _criteriasByFailEvent.Add((criteriaEntry.FailEvent, (int)criteriaEntry.FailAsset), criteria);
             }
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {criterias} criteria, {guildCriterias} guild criteria, {scenarioCriterias} scenario criteria and {questObjectiveCriterias} quest objective criteria in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
@@ -4224,8 +4224,8 @@ namespace Game.Achievements
         {
             if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
             {
-                if (_criteriasByAsset[(int)type].ContainsKey(asset))
-                    return _criteriasByAsset[(int)type][asset];
+                if (_criteriasByAsset.ContainsKey(((int)type, (int)asset)))
+                    return _criteriasByAsset[((int)type, (int)asset)];
 
                 return new List<Criteria>();
             }
@@ -4235,27 +4235,17 @@ namespace Game.Achievements
 
         public List<Criteria> GetScenarioCriteriaByTypeAndScenario(CriteriaType type, uint scenarioId)
         {
-            return _scenarioCriteriasByTypeAndScenarioId[(int)type].LookupByKey(scenarioId);
-        }
-
-        public MultiMap<int, Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent)
-        {
-            return _criteriasByStartEvent[(int)startEvent];
+            return _scenarioCriteriasByTypeAndScenarioId.LookupByKey(((int)type, (int)scenarioId));
         }
 
         public List<Criteria> GetCriteriaByStartEvent(CriteriaStartEvent startEvent, int asset)
         {
-            return _criteriasByStartEvent[(int)startEvent].LookupByKey(asset);
-        }
-
-        public MultiMap<int, Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent)
-        {
-            return _criteriasByFailEvent[(int)failEvent];
+            return _criteriasByStartEvent.LookupByKey(((int)startEvent, asset));
         }
 
         public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
         {
-            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
+            return _criteriasByFailEvent.LookupByKey(((int)failEvent, asset));
         }
 
         public List<Criteria> GetGuildCriteriaByType(CriteriaType type)

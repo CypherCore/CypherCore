@@ -5,7 +5,6 @@ using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
-using Game.Achievements;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -1460,32 +1459,25 @@ namespace Game
             }
 
             // Load all possible event ids from criterias
-            void addCriteriaEventsToStore(List<Criteria> criteriaList)
+            foreach (CriteriaRecord criteria in CliDB.CriteriaStorage.Values)
             {
-                foreach (Criteria criteria in criteriaList)
-                    if (criteria.Entry.Asset != 0)
-                        _eventStorage.Add(criteria.Entry.Asset);
+                switch ((CriteriaType)criteria.Type)
+                {
+                    case CriteriaType.PlayerTriggerGameEvent:
+                    case CriteriaType.AnyoneTriggerGameEventScenario:
+                        if (criteria.Asset != 0)
+                            _eventStorage.Add(criteria.Asset);
+                        break;
+                    default:
+                        break;
+                }
+
+                if ((CriteriaStartEvent)criteria.StartEvent == CriteriaStartEvent.SendEvent && criteria.StartAsset != 0)
+                    _eventStorage.Add(criteria.StartAsset);
+
+                if ((CriteriaFailEvent)criteria.FailEvent == CriteriaFailEvent.SendEvent && criteria.FailAsset != 0)
+                    _eventStorage.Add(criteria.FailAsset);
             }
-
-            CriteriaType[] eventCriteriaTypes = { CriteriaType.PlayerTriggerGameEvent, CriteriaType.AnyoneTriggerGameEventScenario };
-            foreach (CriteriaType criteriaType in eventCriteriaTypes)
-            {
-                addCriteriaEventsToStore(Global.CriteriaMgr.GetPlayerCriteriaByType(criteriaType, 0));
-                addCriteriaEventsToStore(Global.CriteriaMgr.GetGuildCriteriaByType(criteriaType));
-                addCriteriaEventsToStore(Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(criteriaType));
-            }
-
-            foreach (ScenarioRecord scenario in CliDB.ScenarioStorage.Values)
-                foreach (CriteriaType criteriaType in eventCriteriaTypes)
-                    addCriteriaEventsToStore(Global.CriteriaMgr.GetScenarioCriteriaByTypeAndScenario(criteriaType, scenario.Id));
-
-            foreach (var (gameEventId, _) in Global.CriteriaMgr.GetCriteriaByStartEvent(CriteriaStartEvent.SendEvent))
-                if (gameEventId != 0)
-                    _eventStorage.Add((uint)gameEventId);
-
-            foreach (var (gameEventId, _) in Global.CriteriaMgr.GetCriteriaByFailEvent(CriteriaFailEvent.SendEvent))
-                if (gameEventId != 0)
-                    _eventStorage.Add((uint)gameEventId);
         }
 
         public void LoadEventScripts()

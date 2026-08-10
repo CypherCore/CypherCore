@@ -617,6 +617,9 @@ namespace Game.Chat
             Log.outInfo(LogFilter.Server, "Re-Loading GameObjects for quests...");
             Global.ObjectMgr.LoadGameObjectForQuests();
             handler.SendGlobalGMSysMessage("Data GameObjects for quests reloaded.");
+            Log.outInfo(LogFilter.Server, "Re-Loading Criteria Lists...");
+            Global.CriteriaMgr.LoadCriteriaList();
+            handler.SendGlobalGMSysMessage("Criteria lists for quests reloaded.");
             return true;
         }
 
