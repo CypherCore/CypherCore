@@ -6,7 +6,6 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting.v2;
 using System;
-using System.Threading.Tasks;
 
 namespace Game.Movement
 {
@@ -146,9 +145,6 @@ namespace Game.Movement
                     }
 
                     target.GetNearPoint(owner, out x, out y, out z, range, target.ToAbsoluteAngle(tAngle));
-
-                    if (owner.IsHovering())
-                        owner.UpdateAllowedPositionZ(x, y, ref z);
 
                     // pets are allowed to "cheat" on pathfinding when following their master
                     bool allowShortcut = false;
