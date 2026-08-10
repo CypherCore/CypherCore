@@ -827,6 +827,7 @@ namespace Game.AI
                 SmartActions.EnterVehicle => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
                 SmartActions.BoardPassenger => Marshal.SizeOf(typeof(SmartAction.EnterVehicle)),
                 SmartActions.ExitVehicle => 0,
+                SmartActions.ResumeMovement => Marshal.SizeOf(typeof(SmartAction.ResumeMovement)),
                 SmartActions.Fall => Marshal.SizeOf(typeof(SmartAction.Fall)),
                 _ => Marshal.SizeOf(typeof(SmartAction.Raw)),
             };
@@ -2197,6 +2198,7 @@ namespace Game.AI
                 case SmartActions.AddToStoredTargetList:
                 case SmartActions.DoAction:
                 case SmartActions.ExitVehicle:
+                case SmartActions.ResumeMovement:
                 case SmartActions.Fall:
                     break;
                 case SmartActions.BecomePersonalCloneForPlayer:
@@ -3312,6 +3314,9 @@ namespace Game.AI
         public DestroyConversation destroyConversation;
 
         [FieldOffset(4)]
+        public ResumeMovement resumeMovement;
+
+        [FieldOffset(4)]
         public EnterVehicle enterVehicle;
 
         [FieldOffset(4)]
@@ -3882,6 +3887,11 @@ namespace Game.AI
             public uint id;
             public uint isPrivate;
             public uint range;
+        }
+        public struct ResumeMovement
+        {
+            public uint movementSlot;
+            public uint resumeTimer;
         }
         public struct EnterVehicle
         {

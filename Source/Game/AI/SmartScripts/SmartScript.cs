@@ -2767,6 +2767,16 @@ namespace Game.AI
                     Cell.VisitGridObjects(GetBaseObject(), worker, e.Action.destroyConversation.range);
                     break;
                 }
+                case SmartActions.ResumeMovement:
+                {
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit unitTarget = target.ToUnit();
+                        if (unitTarget != null)
+                            unitTarget.ResumeMovement(e.Action.resumeMovement.resumeTimer, (MovementSlot)e.Action.resumeMovement.movementSlot);
+                    }
+                    break;
+                }
                 case SmartActions.Fall:
                 {
                     MultiActionResult<MovementStopReason> waitEvent = CreateTimedActionListWaitEventFor<MultiActionResult<MovementStopReason>>(e, targets.Count);

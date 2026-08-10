@@ -96,7 +96,7 @@ namespace Framework.Constants
 
         Deprecated = (Difficulty0_Deprecated | Difficulty1_Deprecated | Difficulty2_Deprecated | Difficulty3_Deprecated),
         All = (NotRepeatable | Deprecated | ActionlistWaits | Reserved6 | DebugOnly | DontReset | WhileCharmed),
-        
+
         // Temp flags, used only at runtime, never stored in DB
         TempIgnoreChanceRoll = 0x40000000,              //Event occurs no matter what roll_chance_i(e.event.event_chance) returns.
     }
@@ -398,7 +398,7 @@ namespace Framework.Constants
         EnterVehicle = 155,    // seat id
         BoardPassenger = 156,    // seat id
         ExitVehicle = 157,
-        ResumeMovement = 158,    // UNUSED
+        ResumeMovement = 158,    // MovementSlot (default = 0, active = 1, controlled = 2), ResumeTime (ms)
         Fall = 159, // pointId
 
         End
