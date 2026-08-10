@@ -370,14 +370,14 @@ namespace Game.Movement
             }
         }
 
-        public void Remove(MovementGeneratorType type, MovementSlot slot = MovementSlot.Active)
+        public void Remove(MovementGeneratorType type, MovementSlot slot = MovementSlot.Active, MovementGeneratorMode mode = MovementGeneratorMode.Default)
         {
             if (IsInvalidMovementGeneratorType(type) || IsInvalidMovementSlot(slot))
                 return;
 
             if (HasFlag(MotionMasterFlags.Delayed))
             {
-                _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot), MotionMasterDelayedActionType.RemoveType));
+                _delayedActions.Enqueue(new DelayedAction(() => Remove(type, slot, mode), MotionMasterDelayedActionType.RemoveType));
                 return;
             }
 
@@ -393,7 +393,7 @@ namespace Game.Movement
                 case MovementSlot.Active:
                     if (!_generators.Empty())
                     {
-                        var itr = _generators.FirstOrDefault(a => a.GetMovementGeneratorType() == type);
+                        var itr = _generators.FirstOrDefault(a => a.GetMovementGeneratorType() == type && a.Mode == mode);
                         if (itr != null)
                             Remove(itr, GetCurrentMovementGenerator() == itr, false);
                     }
@@ -1189,35 +1189,6 @@ namespace Game.Movement
 
         void DirectAdd(MovementGenerator movement, MovementSlot slot = MovementSlot.Active)
         {
-            /*
-            IMovementGenerator curr = _slot[(int)slot];
-            if (curr != null)
-            {
-                _slot[(int)slot] = null; // in case a new one is generated in this slot during directdelete
-                if (_top == (int)slot && Convert.ToBoolean(_cleanFlag & MotionMasterCleanFlag.Update))
-                    DelayedDelete(curr);
-                else
-                    DirectDelete(curr);
-            }
-            else if (_top < (int)slot)
-            {
-                _top = (int)slot;
-            }
-
-            _slot[(int)slot] = m;
-            if (_top > (int)slot)
-                _initialize[(int)slot] = true;
-            else
-            {
-                _initialize[(int)slot] = false;
-                m.Initialize(_owner);
-            }
-            */
-
-            /*
-        * NOTE: This mimics old behaviour: only one MOTION_SLOT_IDLE, MOTION_SLOT_ACTIVE, MOTION_SLOT_CONTROLLED
-        * On future changes support for multiple will be added
-        */
             switch (slot)
             {
                 case MovementSlot.Default:
@@ -1233,15 +1204,20 @@ namespace Game.Movement
                     {
                         if (movement.Priority >= _generators.FirstOrDefault().Priority)
                         {
-                            var itr = _generators.FirstOrDefault();
-                            if (movement.Priority == itr.Priority)
-                                Remove(itr, true, false);
+                            MovementGenerator currentTopMovement = _generators.FirstOrDefault();
+                            if (movement.Priority == currentTopMovement.Priority)
+                            {
+                                if (movement.Mode > currentTopMovement.Mode)
+                                    currentTopMovement.Deactivate(_owner);
+                                else
+                                    Remove(currentTopMovement, true, false);
+                            }
                             else
-                                itr.Deactivate(_owner);
+                                currentTopMovement.Deactivate(_owner);
                         }
                         else
                         {
-                            var pointer = _generators.FirstOrDefault(a => a.Priority == movement.Priority);
+                            var pointer = _generators.FirstOrDefault(a => a.Priority == movement.Priority && a.Mode == movement.Mode);
                             if (pointer != null)
                                 Remove(pointer, false, false);
                         }
