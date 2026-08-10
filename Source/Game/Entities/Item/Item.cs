@@ -890,7 +890,7 @@ namespace Game.Entities
             }
         }
 
-        public ulong CalculateDurabilityRepairCost(float discount)
+        public ulong CalculateDurabilityRepairCost(float discount, bool useRateConfig = true)
         {
             uint maxDurability = m_itemData.MaxDurability;
             if (maxDurability == 0)
@@ -921,12 +921,17 @@ namespace Game.Entities
                 dmultiplier = durabilityCost.ArmorSubClassCost[itemTemplate.GetSubClass()];
 
             ulong cost = (ulong)Math.Round(lostDurability * dmultiplier * durabilityQualityEntry.Data * GetRepairCostMultiplier());
-            cost = (ulong)(cost * discount * WorldConfig.GetFloatValue(WorldCfg.RateRepaircost));
+            cost = (ulong)(cost * discount * (useRateConfig ? WorldConfig.GetFloatValue(WorldCfg.RateRepaircost) : 1));
 
             if (cost == 0) // Fix for ITEM_QUALITY_ARTIFACT
                 cost = 1;
 
             return cost;
+        }
+
+        public ulong CalculateDurabilitySellPenalty()
+        {
+            return CalculateDurabilityRepairCost(1.0f, false);
         }
 
         bool HasEnchantRequiredSkill(Player player)

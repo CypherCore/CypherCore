@@ -3427,6 +3427,15 @@ namespace Game.Entities
                 return SellResult.CantSellItem;
 
             ulong money = (ulong)sellPrice * amount;
+            ulong durabilityPenalty = item.CalculateDurabilitySellPenalty();
+
+            if (durabilityPenalty != 0)
+            {
+                if (durabilityPenalty > money)
+                    money = 1;
+                else
+                    money -= durabilityPenalty;
+            }
 
             if (money > uint.MaxValue) // ensure sell price * amount doesn't overflow buyback price
                 return SellResult.CantSellItem;
@@ -3437,6 +3446,15 @@ namespace Game.Entities
         public SellResult? SellItemToVendor(Item item, uint amount)
         {
             ulong money = (ulong)item.GetSellPrice(this) * amount;
+            ulong durabilityPenalty = item.CalculateDurabilitySellPenalty();
+
+            if (durabilityPenalty != 0)
+            {
+                if (durabilityPenalty > money)
+                    money = 1;
+                else
+                    money -= durabilityPenalty;
+            }
 
             if (!ModifyMoney((long)money)) // ensure player doesn't exceed gold limit
                 return SellResult.CantSellItem;
