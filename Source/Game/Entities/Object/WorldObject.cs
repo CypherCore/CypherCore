@@ -2897,9 +2897,9 @@ namespace Game.Entities
             if ((path.GetPathType() & (PathType.NoPath | PathType.NotUsingPath | PathType.FarFromPolyStart)) == 0)
             {
                 var result = path.GetPath()[path.GetPath().Length - 1];
-                destx = result.x;
-                desty = result.y;
-                destz = result.z;
+                destx = result.X;
+                desty = result.Y;
+                destz = result.Z;
             }
             else
             {
@@ -2935,8 +2935,8 @@ namespace Game.Entities
             }
 
             float groundZ = MapConst.VMAPInvalidHeightValue;
-            GridDefines.NormalizeMapCoord(ref pos.posX);
-            GridDefines.NormalizeMapCoord(ref pos.posY);
+            GridDefines.NormalizeMapCoord(ref destx);
+            GridDefines.NormalizeMapCoord(ref desty);
             UpdateAllowedPositionZ(destx, desty, ref destz, ref groundZ);
 
             pos.Relocate(destx, desty, destz, GetOrientation());
