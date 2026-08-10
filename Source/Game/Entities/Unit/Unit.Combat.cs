@@ -554,6 +554,9 @@ namespace Game.Entities
 
             AttackSwingErr? getAutoAttackError()
             {
+                if (!IsValidAttackTarget(victim))
+                    return AttackSwingErr.CantAttack;
+
                 if (!IsWithinMeleeRange(victim))
                     return AttackSwingErr.NotInRange;
 
