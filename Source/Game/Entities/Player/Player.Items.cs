@@ -1405,12 +1405,18 @@ namespace Game.Entities
                 return InventoryResult.CantEquipReputation;
 
             // learning (recipes, mounts, pets, etc.)
-            if (proto.Effects.Count >= 2)
+            uint learnableCount = 0;
+            uint learnedCount = 0;
+            foreach (ItemEffectRecord itemEffect in proto.Effects)
             {
-                if (proto.Effects[0].SpellID == 483 || proto.Effects[0].SpellID == 55884)
-                    if (HasSpell((uint)proto.Effects[1].SpellID))
-                        return InventoryResult.InternalBagError;
+                if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
+                    continue;
+
+                ++learnableCount;
+                learnedCount += HasSpell((uint)itemEffect.SpellID) ? 1 : 0u;
             }
+            if (learnableCount != 0 && learnedCount == learnableCount)
+                return InventoryResult.None;
 
             ArtifactRecord artifact = CliDB.ArtifactStorage.LookupByKey(proto.GetArtifactID());
             if (artifact != null)

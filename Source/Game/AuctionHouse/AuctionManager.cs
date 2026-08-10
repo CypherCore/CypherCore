@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.IO;
 using Game.BattlePets;
 using Game.DataStorage;
 using Game.Entities;
@@ -911,16 +910,22 @@ namespace Game
                     else if (bucketData.ItemClass == (int)ItemClass.Consumable || bucketData.ItemClass == (int)ItemClass.Recipe || bucketData.ItemClass == (int)ItemClass.Miscellaneous)
                     {
                         ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(bucket.Key.ItemId);
-                        if (itemTemplate.Effects.Count >= 2 && (itemTemplate.Effects[0].SpellID == 483 || itemTemplate.Effects[0].SpellID == 55884))
+                        bool hasUnlearned = itemTemplate.Effects.Any(itemEffect =>
                         {
-                            if (player.HasSpell((uint)itemTemplate.Effects[1].SpellID))
-                                continue;
 
-                            var battlePetSpecies = BattlePetMgr.GetBattlePetSpeciesBySpell((uint)itemTemplate.Effects[1].SpellID);
+                            if (itemEffect.TriggerType != ItemSpelltriggerType.OnLearn)
+                                return false;
+                            if (player.HasSpell((uint)itemEffect.SpellID))
+                                return false;
+
+                            var battlePetSpecies = BattlePetMgr.GetBattlePetSpeciesBySpell((uint)itemEffect.SpellID);
                             if (battlePetSpecies != null)
                                 if (knownPetSpecies.Get((int)battlePetSpecies.Id))
-                                    continue;
-                        }
+                                    return false;
+                            return true;
+                        });
+                        if (!hasUnlearned)
+                            continue;
                     }
                 }
 
