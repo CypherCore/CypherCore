@@ -338,41 +338,22 @@ namespace Game.Entities
                 Orientation = GetAbsoluteAngle(target.GetPosition());
         }
 
-        public void SetFacingTo(float ori, bool force = true)
+        public void SetFacingTo(float ori, bool force = true, uint movementId = EventId.Face)
         {
             // do not face when already moving
             if (!force && (!IsStopped() || !MoveSpline.Finalized()))
                 return;
 
-            MoveSplineInit init = new(this);
-            init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
-            if (GetTransport() != null)
-                init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
-            init.SetFacing(ori);
-
-            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
-            UpdateSplineMovement((uint)init.Launch());
-            Creature creature = ToCreature();
-            if (creature != null)
-                creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
+            GetMotionMaster().MoveFace(ori, movementId);
         }
 
-        public void SetFacingToObject(WorldObject obj, bool force = true)
+        public void SetFacingToObject(WorldObject obj, bool force = true, uint movementId = EventId.Face)
         {
             // do not face when already moving
             if (!force && (!IsStopped() || !MoveSpline.Finalized()))
                 return;
 
-            // @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.
-            MoveSplineInit init = new(this);
-            init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
-            init.SetFacing(GetAbsoluteAngle(obj));   // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
-
-            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
-            UpdateSplineMovement((uint)init.Launch());
-            Creature creature = ToCreature();
-            if (creature != null)
-                creature.GetAI().MovementInform(MovementGeneratorType.Effect, EventId.Face);
+            GetMotionMaster().MoveFace(obj, movementId);
         }
 
         void SetFacingToPoint(Position point, bool force = true)

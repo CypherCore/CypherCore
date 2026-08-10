@@ -1084,6 +1084,38 @@ namespace Game.Movement
                 Add(new FormationMovementGenerator(leader, range, angle, point1, point2), MovementSlot.Default);
         }
 
+        public void MoveFace(float orientation, uint id = EventId.Face)
+        {
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveFace: '{_owner.GetGUID()}', faces '{orientation}'");
+
+            var owner = _owner;
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), false);
+                if (owner.GetTransport() != null)
+                    init.DisableTransportPathTransformations();     // It makes no sense to target global orientation
+                init.SetFacing(orientation);
+            };
+
+            Add(new ImmediateMovementGenerator(initializer, MovementGeneratorType.Face, id));
+        }
+
+        public void MoveFace(WorldObject obj, uint id = EventId.Face)
+        {
+            if (obj == null)
+                return;
+
+            Log.outDebug(LogFilter.Movement, $"MotionMaster::MoveFace: '{_owner.GetGUID()}', faces '{obj.GetGUID()}'");
+
+            var initializer = (MoveSplineInit init) =>
+            {
+                init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), false);
+                init.SetFacing(_owner.GetAbsoluteAngle(obj));    // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
+            };
+
+            Add(new ImmediateMovementGenerator(initializer, MovementGeneratorType.Face, id));
+        }
+
         public void LaunchMoveSpline(Action<MoveSplineInit> initializer, uint id = 0, MovementGeneratorPriority priority = MovementGeneratorPriority.Normal, MovementGeneratorType type = MovementGeneratorType.Effect, ActionResultSetter<MovementStopReason> scriptResult = null)
         {
             if (IsInvalidMovementGeneratorType(type))

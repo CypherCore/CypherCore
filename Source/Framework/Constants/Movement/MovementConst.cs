@@ -39,6 +39,7 @@ namespace Framework.Constants
         Effect = 16,
         SplineChain = 17, // SplineChainMovementGenerator
         Formation = 18, // FormationMovementGenerator
+        Face = 19,
         Max
     }
 
