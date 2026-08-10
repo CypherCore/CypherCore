@@ -227,6 +227,12 @@ namespace Game.Entities
                     int maxLevel = m_unitData.ScalingLevelMax + m_unitData.ScalingLevelDelta;
                     uint level = (uint)Math.Clamp(unitSummoner.GetLevel(), minLevel, maxLevel);
                     SetLevel(level);
+                    if (!IsGuardian())
+                    {
+                        UpdateLevelDependantStats();
+                        UpdateAttackPowerAndDamage(false);
+                        UpdateAttackPowerAndDamage(true);
+                    }
                 }
             }
 
