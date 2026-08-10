@@ -806,7 +806,6 @@ namespace Framework.Constants
         AlternateMount = 25,
         Max = 26,
 
-        All = 127,          // default for class?
         Health = -2,    // (-2 as signed value)
         MaxPerClass = 10
     }

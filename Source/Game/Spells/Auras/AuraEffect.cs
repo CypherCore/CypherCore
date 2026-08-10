@@ -5529,11 +5529,7 @@ namespace Game.Spells
 
         void HandleObsModPowerAuraTick(Unit target, Unit caster)
         {
-            PowerType powerType;
-            if (GetMiscValue() == (int)PowerType.All)
-                powerType = target.GetPowerType();
-            else
-                powerType = (PowerType)GetMiscValue();
+            PowerType powerType = (PowerType)GetMiscValue();
 
             if (!target.IsAlive() || target.GetMaxPower(powerType) == 0)
                 return;
