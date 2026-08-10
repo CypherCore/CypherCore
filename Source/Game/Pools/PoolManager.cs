@@ -452,7 +452,7 @@ namespace Game
         {
             return mPoolTemplate.LookupByKey(pool_id);
         }
-        
+
         public uint IsPartOfAPool<T>(ulong db_guid)
         {
             switch (typeof(T).Name)
@@ -764,14 +764,8 @@ namespace Game
 
         void ReSpawn1Object(SpawnedPoolData spawns, PoolObject obj)
         {
-            switch (typeof(T).Name)
-            {
-                case "Creature":
-                case "GameObject":
-                    Despawn1Object(spawns, obj.guid, false, false);
-                    Spawn1Object(spawns, obj);
-                    break;
-            }
+            Despawn1Object(spawns, obj.guid, false, false);
+            Spawn1Object(spawns, obj);
         }
 
         void RemoveRespawnTimeFromDB(SpawnedPoolData spawns, ulong guid)
