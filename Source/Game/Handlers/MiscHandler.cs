@@ -663,10 +663,6 @@ namespace Game
                 return;
             }
 
-            Difficulty difficultyID = (Difficulty)difficultyEntry.Id;
-            if (difficultyID == GetPlayer().GetDungeonDifficultyID())
-                return;
-
             // cannot reset while in an instance
             Map map = GetPlayer().GetMap();
             if (map != null && map.Instanceable())
@@ -676,9 +672,14 @@ namespace Game
                 return;
             }
 
+            Difficulty difficultyID = (Difficulty)difficultyEntry.Id;
+
             Group group = GetPlayer().GetGroup();
             if (group != null)
             {
+                if (difficultyID == group.GetDungeonDifficultyID())
+                    return;
+
                 if (!group.IsLeader(_player.GetGUID()))
                     return;
 
@@ -689,12 +690,15 @@ namespace Game
                 group.ResetInstances(InstanceResetMethod.OnChangeDifficulty, _player);
                 group.SetDungeonDifficultyID(difficultyID);
             }
-            else
-            {
+
+            if (difficultyID == _player.GetDungeonDifficultyID())
+                return;
+
+            if (group == null)
                 GetPlayer().ResetInstances(InstanceResetMethod.OnChangeDifficulty);
-                GetPlayer().SetDungeonDifficultyID(difficultyID);
-                GetPlayer().SendDungeonDifficulty();
-            }
+
+            _player.SetDungeonDifficultyID(difficultyID);
+            _player.SendDungeonDifficulty();
         }
 
         [WorldPacketHandler(ClientOpcodes.SetRaidDifficulty)]
@@ -729,10 +733,6 @@ namespace Game
                 return;
             }
 
-            Difficulty difficultyID = (Difficulty)difficultyEntry.Id;
-            if (difficultyID == (setRaidDifficulty.Legacy != 0 ? GetPlayer().GetLegacyRaidDifficultyID() : GetPlayer().GetRaidDifficultyID()))
-                return;
-
             // cannot reset while in an instance
             Map map = GetPlayer().GetMap();
             if (map != null && map.Instanceable())
@@ -742,9 +742,14 @@ namespace Game
                 return;
             }
 
+            Difficulty difficultyID = (Difficulty)difficultyEntry.Id;
+
             Group group = GetPlayer().GetGroup();
             if (group != null)
             {
+                if (difficultyID == (setRaidDifficulty.Legacy != 0 ? group.GetLegacyRaidDifficultyID() : group.GetRaidDifficultyID()))
+                    return;
+
                 if (!group.IsLeader(_player.GetGUID()))
                     return;
 
@@ -758,16 +763,19 @@ namespace Game
                 else
                     group.SetRaidDifficultyID(difficultyID);
             }
-            else
-            {
-                GetPlayer().ResetInstances(InstanceResetMethod.OnChangeDifficulty);
-                if (setRaidDifficulty.Legacy != 0)
-                    GetPlayer().SetLegacyRaidDifficultyID(difficultyID);
-                else
-                    GetPlayer().SetRaidDifficultyID(difficultyID);
 
-                GetPlayer().SendRaidDifficulty(setRaidDifficulty.Legacy != 0);
-            }
+            if (difficultyID == (setRaidDifficulty.Legacy != 0 ? _player.GetLegacyRaidDifficultyID() : _player.GetRaidDifficultyID()))
+                return;
+
+            if (group == null)
+                GetPlayer().ResetInstances(InstanceResetMethod.OnChangeDifficulty);
+
+            if (setRaidDifficulty.Legacy != 0)
+                GetPlayer().SetLegacyRaidDifficultyID(difficultyID);
+            else
+                GetPlayer().SetRaidDifficultyID(difficultyID);
+
+            GetPlayer().SendRaidDifficulty(setRaidDifficulty.Legacy != 0);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetTaxiBenchmarkMode, Processing = PacketProcessing.Inplace)]

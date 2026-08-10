@@ -363,7 +363,8 @@ namespace Game.Entities
                 if (mapEntry == null)
                     return false;
 
-                Difficulty target_difficulty = GetDifficultyID(mapEntry);
+                Group group = GetGroup();
+                Difficulty target_difficulty = group != null ? group.GetDifficultyID(mapEntry) : GetDifficultyID(mapEntry);
                 MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
                 if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
                 {
@@ -523,17 +524,17 @@ namespace Game.Entities
             return entranceLocation;
         }
 
-        public void SendDungeonDifficulty(int forcedDifficulty = -1)
+        public void SendDungeonDifficulty()
         {
             DungeonDifficultySet dungeonDifficultySet = new();
-            dungeonDifficultySet.DifficultyID = (short)(forcedDifficulty == -1 ? (short)GetDungeonDifficultyID() : forcedDifficulty);
+            dungeonDifficultySet.DifficultyID = (short)GetDungeonDifficultyID();
             SendPacket(dungeonDifficultySet);
         }
 
-        public void SendRaidDifficulty(bool legacy, int forcedDifficulty = -1)
+        public void SendRaidDifficulty(bool legacy)
         {
             RaidDifficultySet raidDifficultySet = new();
-            raidDifficultySet.DifficultyID = (short)(forcedDifficulty == -1 ? (short)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID()) : forcedDifficulty);
+            raidDifficultySet.DifficultyID = (short)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID());
             raidDifficultySet.Legacy = legacy ? 1 : 0;
             SendPacket(raidDifficultySet);
         }

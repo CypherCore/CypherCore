@@ -356,7 +356,8 @@ namespace Game
                         if (mapEntry.IsDungeon())
                         {
                             DisableFlags disabledModes = (DisableFlags)data.flags;
-                            Difficulty targetDifficulty = player.GetDifficultyID(mapEntry);
+                            var group = player.GetGroup();
+                            Difficulty targetDifficulty = group != null ? group.GetDifficultyID(mapEntry) : player.GetDifficultyID(mapEntry);
                             Global.DB2Mgr.GetDownscaledMapDifficultyData(entry, ref targetDifficulty);
                             switch (targetDifficulty)
                             {

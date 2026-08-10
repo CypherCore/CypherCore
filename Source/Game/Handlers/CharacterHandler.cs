@@ -814,6 +814,8 @@ namespace Game
 
             pCurrChar.GetMotionMaster().Initialize();
             pCurrChar.SendDungeonDifficulty();
+            pCurrChar.SendRaidDifficulty(false);
+            pCurrChar.SendRaidDifficulty(true);
 
             LoginVerifyWorld loginVerifyWorld = new();
             loginVerifyWorld.MapID = (int)pCurrChar.GetMapId();

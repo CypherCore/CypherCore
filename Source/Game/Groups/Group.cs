@@ -394,15 +394,17 @@ namespace Game.Groups
                     return false;
             }
 
-            MemberSlot member = new();
-            member.guid = player.GetGUID();
-            member.name = player.GetName();
-            member.race = player.GetRace();
-            member._class = (byte)player.GetClass();
-            member.group = subGroup;
-            member.flags = 0;
-            member.roles = 0;
-            member.readyChecked = false;
+            MemberSlot member = new()
+            {
+                guid = player.GetGUID(),
+                name = player.GetName(),
+                race = player.GetRace(),
+                _class = (byte)player.GetClass(),
+                group = subGroup,
+                flags = 0,
+                roles = 0,
+                readyChecked = false
+            };
             m_memberSlots.Add(member);
 
             SubGroupCounterIncrease(subGroup);
@@ -448,24 +450,6 @@ namespace Game.Groups
             SendUpdate();
             Global.ScriptMgr.OnGroupAddMember(this, player.GetGUID());
 
-            if (!IsLeader(player.GetGUID()) && !IsBGGroup() && !IsBFGroup())
-            {
-                if (player.GetDungeonDifficultyID() != GetDungeonDifficultyID())
-                {
-                    player.SetDungeonDifficultyID(GetDungeonDifficultyID());
-                    player.SendDungeonDifficulty();
-                }
-                if (player.GetRaidDifficultyID() != GetRaidDifficultyID())
-                {
-                    player.SetRaidDifficultyID(GetRaidDifficultyID());
-                    player.SendRaidDifficulty(false);
-                }
-                if (player.GetLegacyRaidDifficultyID() != GetLegacyRaidDifficultyID())
-                {
-                    player.SetLegacyRaidDifficultyID(GetLegacyRaidDifficultyID());
-                    player.SendRaidDifficulty(true);
-                }
-            }
             player.SetGroupUpdateFlag(GroupUpdateFlags.Full);
             Pet pet = player.GetPet();
             if (pet != null)
@@ -1275,12 +1259,7 @@ namespace Game.Groups
                 DB.Characters.Execute(stmt);
             }
 
-            foreach (GroupReference groupRef in GetMembers())
-            {
-                Player player = groupRef.GetSource();
-                player.SetDungeonDifficultyID(difficulty);
-                player.SendDungeonDifficulty();
-            }
+            SendUpdate();
         }
 
         public void SetRaidDifficultyID(Difficulty difficulty)
@@ -1296,12 +1275,7 @@ namespace Game.Groups
                 DB.Characters.Execute(stmt);
             }
 
-            foreach (GroupReference groupRef in GetMembers())
-            {
-                Player player = groupRef.GetSource();
-                player.SetRaidDifficultyID(difficulty);
-                player.SendRaidDifficulty(false);
-            }
+            SendUpdate();
         }
 
         public void SetLegacyRaidDifficultyID(Difficulty difficulty)
@@ -1317,12 +1291,7 @@ namespace Game.Groups
                 DB.Characters.Execute(stmt);
             }
 
-            foreach (GroupReference groupRef in GetMembers())
-            {
-                Player player = groupRef.GetSource();
-                player.SetLegacyRaidDifficultyID(difficulty);
-                player.SendRaidDifficulty(true);
-            }
+            SendUpdate();
         }
 
         public Difficulty GetDifficultyID(MapRecord mapEntry)

@@ -1719,7 +1719,8 @@ namespace Game.Maps
             if (!entry.IsDungeon())
                 return null;
 
-            Difficulty targetDifficulty = player.GetDifficultyID(entry);
+            Group group = player.GetGroup();
+            Difficulty targetDifficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
             var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref targetDifficulty);
             if (mapDiff == null)
@@ -1736,7 +1737,6 @@ namespace Game.Maps
                     return abortParams;
             }
 
-            Group group = player.GetGroup();
             if (entry.IsRaid() && (int)entry.Expansion() >= WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
                 if ((group == null || !group.IsRaidGroup()) && !WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return new TransferAbortParams(TransferAbortReason.NeedGroup);

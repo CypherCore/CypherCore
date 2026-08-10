@@ -6103,16 +6103,6 @@ namespace Game.Entities
             SendItemDurations();                                    // must be after add to map
             SendItemPassives();                                     // must be after add to map
 
-            // raid downscaling - send difficulty to player
-            if (GetMap().IsRaid())
-            {
-                Difficulty mapDifficulty = GetMap().GetDifficultyID();
-                var difficulty = CliDB.DifficultyStorage.LookupByKey(mapDifficulty);
-                SendRaidDifficulty(difficulty != null && difficulty.HasFlag(DifficultyFlags.Legacy), (int)mapDifficulty);
-            }
-            else if (GetMap().IsNonRaidDungeon())
-                SendDungeonDifficulty((int)GetMap().GetDifficultyID());
-
             PhasingHandler.OnMapChange(this);
 
             if (_garrison != null)
