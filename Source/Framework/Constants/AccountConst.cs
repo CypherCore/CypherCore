@@ -570,7 +570,7 @@ namespace Framework.Constants
         CommandReloadSpellPetAuras = 697,
         CommandCharacterChangeaccount = 698,
         CommandReloadSpellProc = 699,
-        CommandReloadSpellScripts = 700,
+        // 700 previously used, do not reuse
         CommandReloadSpellTargetPosition = 701,
         CommandReloadSpellThreats = 702,
         CommandReloadSpellGroupStackRules = 703,

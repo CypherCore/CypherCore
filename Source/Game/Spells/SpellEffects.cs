@@ -183,10 +183,6 @@ namespace Game.Spells
                     return;
                 }
             }
-
-            // normal DB scripted effect
-            Log.outDebug(LogFilter.Spells, "Spell ScriptStart spellid {0} in EffectDummy({1})", m_spellInfo.Id, effectInfo.EffectIndex);
-            m_caster.GetMap().ScriptsStart(ScriptsType.Spell, (uint)((int)m_spellInfo.Id | (int)(effectInfo.EffectIndex << 24)), m_caster, unitTarget);
         }
 
         [SpellEffectHandler(SpellEffects.TriggerSpell)]
@@ -2878,10 +2874,6 @@ namespace Game.Spells
                     break;
                 }
             }
-
-            // normal DB scripted effect
-            Log.outDebug(LogFilter.Spells, "Spell ScriptStart spellid {0} in EffectScriptEffect({1})", m_spellInfo.Id, effectInfo.EffectIndex);
-            m_caster.GetMap().ScriptsStart(ScriptsType.Spell, (uint)((int)m_spellInfo.Id | (int)(effectInfo.EffectIndex << 24)), m_caster, unitTarget);
         }
 
         [SpellEffectHandler(SpellEffects.Sanctuary)]

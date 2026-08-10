@@ -1137,9 +1137,8 @@ namespace Game
 
             scripts.Clear();                                       // need for reload support
 
-            bool isSpellScriptTable = (type == ScriptsType.Spell);
-            //                                         0    1       2         3         4          5    6  7  8  9
-            SQLResult result = DB.World.Query("SELECT id, delay, command, datalong, datalong2, dataint, x, y, z, o{0} FROM {1}", isSpellScriptTable ? ", effIndex" : "", tableName);
+            //                                         0    1      2        3         4          5       6  7  8  9
+            SQLResult result = DB.World.Query($"SELECT id, delay, command, datalong, datalong2, dataint, x, y, z, o FROM {tableName}");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 script definitions. DB table `{0}` is empty!", tableName);
@@ -1152,8 +1151,6 @@ namespace Game
                 ScriptInfo tmp = new();
                 tmp.type = type;
                 tmp.id = result.Read<uint>(0);
-                if (isSpellScriptTable)
-                    tmp.id |= result.Read<uint>(10) << 24;
                 tmp.delay = result.Read<uint>(1);
                 tmp.command = (ScriptCommands)result.Read<uint>(2);
                 unsafe
@@ -1439,34 +1436,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} script definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public void LoadSpellScripts()
-        {
-            LoadScripts(ScriptsType.Spell);
-
-            // check ids
-            foreach (var script in sSpellScripts)
-            {
-                uint spellId = script.Key & 0x00FFFFFF;
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-                if (spellInfo == null)
-                {
-                    Log.outError(LogFilter.Sql, "Table `spell_scripts` has not existing spell (Id: {0}) as script id", spellId);
-                    continue;
-                }
-
-                byte spellEffIndex = (byte)((script.Key >> 24) & 0x000000FF);
-                if (spellEffIndex >= spellInfo.GetEffects().Count)
-                {
-                    Log.outError(LogFilter.Sql, $"Table `spell_scripts` has too high effect index {spellEffIndex} for spell (Id: {spellId}) as script id");
-                    continue;
-                }
-
-                //check for correct spellEffect
-                if (spellInfo.GetEffect(spellEffIndex).Effect == 0 || (spellInfo.GetEffect(spellEffIndex).Effect != SpellEffects.ScriptEffect && spellInfo.GetEffect(spellEffIndex).Effect != SpellEffects.Dummy))
-                    Log.outError(LogFilter.Sql, $"Table `spell_scripts` - spell {spellId} effect {spellEffIndex} is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY");
-            }
-        }
-
         void LoadEventSet()
         {
             _eventStorage.Clear();
@@ -1739,8 +1708,6 @@ namespace Game
         {
             switch (type)
             {
-                case ScriptsType.Spell:
-                    return sSpellScripts;
                 case ScriptsType.Event:
                     return sEventScripts;
                 default:
@@ -1751,8 +1718,6 @@ namespace Game
         {
             switch (type)
             {
-                case ScriptsType.Spell:
-                    return "spell_scripts";
                 case ScriptsType.Event:
                     return "event_scripts";
                 default:
@@ -11643,7 +11608,6 @@ namespace Game
         //Scripts
         ScriptNameContainer _scriptNamesStorage = new();
         MultiMap<uint, uint> spellScriptsStorage = new();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sSpellScripts = new();
         public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new();
         Dictionary<uint, uint> areaTriggerScriptStorage = new();
         List<uint> _eventStorage = new();

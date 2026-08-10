@@ -815,26 +815,6 @@ namespace Game.Chat
             return true;
         }
 
-        [Command("spell_scripts", RBACPermissions.CommandReloadSpellScripts, true)]
-        static bool HandleReloadSpellScriptsCommand(CommandHandler handler, StringArguments args)
-        {
-            if (Global.MapMgr.IsScriptScheduled())
-            {
-                handler.SendSysMessage("DB scripts used currently, please attempt reload later.");
-                return false;
-            }
-
-            if (args != null)
-                Log.outInfo(LogFilter.Server, "Re-Loading Scripts from `spell_scripts`...");
-
-            Global.ObjectMgr.LoadSpellScripts();
-
-            if (args != null)
-                handler.SendGlobalGMSysMessage("DB table `spell_scripts` reloaded.");
-
-            return true;
-        }
-
         [Command("spell_script_names", RBACPermissions.CommandReloadSpellScriptNames, true)]
         static bool HandleReloadSpellScriptNamesCommand(CommandHandler handler)
         {
@@ -845,7 +825,7 @@ namespace Game.Chat
             handler.SendGlobalGMSysMessage("Spell scripts reloaded.");
             return true;
         }
-        
+
         [Command("spell_target_position", RBACPermissions.CommandReloadSpellTargetPosition, true)]
         static bool HandleReloadSpellTargetPositionCommand(CommandHandler handler)
         {
@@ -1058,7 +1038,6 @@ namespace Game.Chat
 
                 Log.outInfo(LogFilter.Server, "Re-Loading Scripts...");
                 HandleReloadEventScriptsCommand(handler, null);
-                HandleReloadSpellScriptsCommand(handler, null);
                 handler.SendGlobalGMSysMessage("DB tables `*_scripts` reloaded.");
                 HandleReloadWpCommand(handler, null);
                 return true;

@@ -1433,8 +1433,7 @@ namespace Framework.Constants
     {
         First = 1,
 
-        Spell = First,
-        Event,
+        Event = First,
         Waypoint,
 
         Last
