@@ -1214,7 +1214,8 @@ namespace Game.Movement
                     var where = _generators.GetViewBetween(movement, null).FirstOrDefault();
                     if (!_generators.Empty())
                     {
-                        bool replacesExisting = where != null && !movement.Equals(where);
+                        bool replacesExisting = !movement.HasFlag(MovementGeneratorFlags.Immediate)
+                            && where != null && !movement.Equals(where);
                         var top = _generators.FirstOrDefault();
                         if (replacesExisting)
                             Remove(where, where == top, false);
