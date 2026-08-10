@@ -1940,12 +1940,6 @@ namespace Game.AI
                 }
                 case SmartActions.PauseMovement:
                 {
-                    if (e.Action.pauseMovement.pauseTimer == 0)
-                    {
-                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} does not specify pause duration");
-                        return false;
-                    }
-
                     TC_SAI_IS_BOOLEAN_VALID(e, e.Action.pauseMovement.force);
                     break;
                 }
