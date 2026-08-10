@@ -3018,8 +3018,10 @@ namespace Game.Spells
             {
                 SendInterrupted(SpellCastResult.DontReport);
 
-                if (m_caster.IsTypeId(TypeId.Player))
-                    m_caster.ToPlayer().SetSpellModTakingSpell(this, false);
+                // cleanup after mod system
+                // triggered spell pointer can be not removed in some cases
+                if (modOwner != null)
+                    modOwner.SetSpellModTakingSpell(this, false);
 
                 Finish(SpellCastResult.Interrupted);
                 SetExecutedCurrently(false);
