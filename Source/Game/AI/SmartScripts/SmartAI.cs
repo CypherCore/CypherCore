@@ -998,6 +998,7 @@ namespace Game.AI
                 {
                     _OOCReached = false;
                     RemoveEscortState(SmartEscortState.Returning);
+                    GetScript().ProcessEventsFor(SmartEvents.ReachedHome);
                     if (!HasEscortState(SmartEscortState.Paused))
                         ResumePath();
                 }
