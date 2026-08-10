@@ -6056,7 +6056,7 @@ namespace Game.Entities
             // same auras state lost at far teleport, send it one more time in this case also
             AuraType[] auratypes =
             {
-                AuraType.ModFear, AuraType.Transform, AuraType.WaterWalk,
+                AuraType.Transform, AuraType.WaterWalk,
                 AuraType.FeatherFall, AuraType.Hover, AuraType.SafeFall,
                 AuraType.Fly, AuraType.ModIncreaseMountedFlightSpeed, AuraType.AdvFlying
             };
@@ -6104,6 +6104,9 @@ namespace Game.Entities
                 setCompoundState.MoverGUID = GetGUID();
                 SendPacket(setCompoundState);
             }
+
+            if (HasUnitState(UnitState.Fleeing | UnitState.Confused) || HasAuraType(AuraType.ModConfuse) || HasAuraType(AuraType.ModFear))
+                SetClientControl(this, false);
 
             SendAurasForTarget(this);
             SendEnchantmentDurations();                             // must be after add to map
