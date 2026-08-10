@@ -2561,7 +2561,7 @@ namespace Game.Entities
             if (withRoot)
                 RemoveAurasWithMechanic(1 << (int)Mechanics.Root, AuraRemoveMode.Default, 0, true);
 
-            RemoveAurasWithMechanic(1 << (int)Mechanics.Snare, AuraRemoveMode.Default, 0, false);
+            RemoveAurasWithMechanic(1 << (int)Mechanics.Snare, AuraRemoveMode.Default, 0, true);
         }
 
         public void RemoveAllAurasRequiringDeadTarget()
