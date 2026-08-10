@@ -2284,12 +2284,24 @@ namespace Game.Entities
 
                     if (info.SpellCaster.partyOnly != 0)
                     {
-                        Unit caster = GetOwner();
-                        if (caster == null || !caster.IsTypeId(TypeId.Player))
+                        ObjectGuid ownerGuid = GetOwnerGUID();
+                        if (ownerGuid.IsEmpty())
                             return;
 
-                        if (!user.IsTypeId(TypeId.Player) || !user.ToPlayer().IsInSameRaidWith(caster.ToPlayer()))
-                            return;
+                        if (ownerGuid != user.GetGUID())
+                        {
+                            Unit owner = Global.ObjAccessor.GetUnit(this, ownerGuid);
+                            if (owner != null)
+                                ownerGuid = owner.GetCharmerOrOwnerOrOwnGUID();
+
+                            Player playerUser1 = user.GetCharmerOrOwnerPlayerOrPlayerItself();
+                            if (playerUser1 == null)
+                                return;
+
+                            Group group = playerUser1.GetGroup();
+                            if (group == null || !group.IsMember(ownerGuid))
+                                return;
+                        }
                     }
 
                     user.RemoveAurasByType(AuraType.Mounted);
