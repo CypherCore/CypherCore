@@ -1257,25 +1257,21 @@ namespace Game.Entities
         /// </summary>
         public virtual bool IsMovementPreventedByCasting()
         {
-            // can always move when not casting
-            if (!HasUnitState(UnitState.Casting))
-                return false;
-
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
             if (spell != null)
-                if (CanCastSpellWhileMoving(spell.GetSpellInfo()) || spell.GetState() == SpellState.Finished ||
-                    !spell.m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
-                    return false;
+                if (!CanCastSpellWhileMoving(spell.GetSpellInfo())
+                    && spell.GetState() == SpellState.Preparing && spell.GetSpellInfo().InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
+                    return true;
 
-            // channeled spells during channel stage (after the initial cast timer) allow movement with a specific spell attribute
+            // channeled spells during channel stage (after the initial cast timer) allow movement without Moving channel interrupt flag
             spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
             if (spell != null)
-                if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
-                    if (spell.GetSpellInfo().IsMoveAllowedChannel() || CanCastSpellWhileMoving(spell.GetSpellInfo()))
-                        return false;
+                if (!CanCastSpellWhileMoving(spell.GetSpellInfo())
+                    && ((spell.GetState() == SpellState.Preparing && spell.GetSpellInfo().InterruptFlags.HasFlag(SpellInterruptFlags.Movement))
+                        || spell.GetState() == SpellState.Channeling && !spell.GetSpellInfo().IsMoveAllowedChannel()))
+                    return true;
 
-            // prohibit movement for all other spell casts
-            return true;
+            return false;
         }
 
         public bool HasAuraTypeWithFamilyFlags(AuraType auraType, uint familyName, FlagArray128 familyFlags)
@@ -2024,7 +2020,9 @@ namespace Game.Entities
                     if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
                         m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
                         InterruptSpell(CurrentSpellTypes.AutoRepeat);
-                    AddUnitState(UnitState.Casting);
+
+                    if (!pSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                        AddUnitState(UnitState.Casting);
 
                     break;
                 }
@@ -2057,7 +2055,7 @@ namespace Game.Entities
             pSpell.m_selfContainer = m_currentSpells[pSpell.GetCurrentContainer()];
         }
 
-        public bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true)
+        public bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true, bool skipChanneledAllowingActions = false)
         {
             // We don't do loop here to explicitly show that melee spell is excluded.
             // Maybe later some special spells will be excluded too.
@@ -2077,7 +2075,8 @@ namespace Game.Entities
             // channeled spells may be delayed, but they are still considered cast
             if (!skipChanneled && currentSpell != null && (currentSpell.GetState() != SpellState.Finished))
             {
-                if (!isAutoshoot || !currentSpell.m_spellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers))
+                if ((!isAutoshoot || !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr2.DoNotResetCombatTimers)) &&
+                    (!skipChanneledAllowingActions || !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel)))
                     return true;
             }
 

@@ -3142,7 +3142,7 @@ namespace Game.Spells
 
                 unitCaster = m_caster.ToUnit();
                 if (unitCaster != null)
-                    if (unitCaster.HasUnitState(UnitState.Casting) && !unitCaster.IsNonMeleeSpellCast(false, false, true))
+                    if (unitCaster.HasUnitState(UnitState.Casting) && !unitCaster.IsNonMeleeSpellCast(false, false, true, false, true, true))
                         unitCaster.ClearUnitState(UnitState.Casting);
             }
             else
@@ -3591,7 +3591,7 @@ namespace Game.Spells
             if (m_spellInfo.IsChanneled())
                 unitCaster.UpdateInterruptMask();
 
-            if (unitCaster.HasUnitState(UnitState.Casting) && !unitCaster.IsNonMeleeSpellCast(false, false, true))
+            if (unitCaster.HasUnitState(UnitState.Casting) && !unitCaster.IsNonMeleeSpellCast(false, false, true, false, true, true))
                 unitCaster.ClearUnitState(UnitState.Casting);
 
             // Unsummon summon as possessed creatures on spell cancel

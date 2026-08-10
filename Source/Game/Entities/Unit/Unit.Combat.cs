@@ -546,11 +546,7 @@ namespace Game.Entities
                 return;
 
             if (HasUnitState(UnitState.Casting))
-            {
-                Spell channeledSpell = GetCurrentSpell(CurrentSpellTypes.Channeled);
-                if (channeledSpell == null || !channeledSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
-                    return;
-            }
+                return;
 
             Unit victim = GetVictim();
             if (victim == null)
