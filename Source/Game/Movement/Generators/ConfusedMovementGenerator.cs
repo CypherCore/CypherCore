@@ -33,6 +33,7 @@ namespace Game.Movement
             _timer.Reset(0);
             _reference = owner.GetPosition();
             _path = null;
+            SetTargetLocation(owner);
             return true;
         }
 
@@ -62,40 +63,7 @@ namespace Game.Movement
             if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
             {
                 RemoveFlag(MovementGeneratorFlags.Transitory);
-
-                Position destination = new(_reference);
-                float distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
-                float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
-                owner.MovePositionToFirstCollision(destination, distance, angle);
-
-                // Check if the destination is in LOS
-                if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
-                {
-                    // Retry later on
-                    _timer.Reset(200);
-                    return true;
-                }
-
-                if (_path == null)
-                {
-                    _path = new PathGenerator(owner);
-                    _path.SetPathLengthLimit(30.0f);
-                }
-
-                bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
-                if (!result || _path.GetPathType().HasFlag(PathType.NoPath) || _path.GetPathType().HasFlag(PathType.Shortcut) || _path.GetPathType().HasFlag(PathType.FarFromPoly))
-                {
-                    _timer.Reset(100);
-                    return true;
-                }
-
-                owner.AddUnitState(UnitState.ConfusedMove);
-
-                MoveSplineInit init = new(owner);
-                init.MovebyPath(_path.GetPath());
-                init.SetWalk(true);
-                uint traveltime = (uint)init.Launch();
-                _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
+                SetTargetLocation(owner);
             }
 
             return true;
@@ -124,6 +92,48 @@ namespace Game.Movement
                 else if (owner.IsPlayer())
                     owner.StopMoving();
             }
+        }
+
+        void SetTargetLocation(T owner)
+        {
+            if (owner == null)
+                return;
+
+            Position destination = new(_reference);
+            float distance = 4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f;
+            float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
+            owner.MovePositionToFirstCollision(destination, distance, angle);
+
+            // Check if the destination is in LOS
+            if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
+            {
+                // Retry later on
+                _timer.Reset(200);
+                return;
+            }
+
+            if (_path == null)
+            {
+                _path = new PathGenerator(owner);
+                _path.SetPathLengthLimit(30.0f);
+            }
+
+            bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
+            if (!result || (_path.GetPathType().HasFlag(PathType.NoPath))
+                || (_path.GetPathType().HasFlag(PathType.Shortcut))
+                || (_path.GetPathType().HasFlag(PathType.FarFromPoly)))
+            {
+                _timer.Reset(100);
+                return;
+            }
+
+            owner.AddUnitState(UnitState.ConfusedMove);
+
+            MoveSplineInit init = new(owner);
+            init.MovebyPath(_path.GetPath());
+            init.SetWalk(true);
+            int traveltime = init.Launch();
+            _timer.Reset((uint)(traveltime + RandomHelper.URand(800, 1500)));
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()
