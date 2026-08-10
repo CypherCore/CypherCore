@@ -1209,7 +1209,7 @@ namespace Game.Movement
                             {
                                 if (movement.Mode > currentTopMovement.Mode)
                                     currentTopMovement.Deactivate(_owner);
-                                else
+                                else if (movement.Mode == currentTopMovement.Mode)
                                     Remove(currentTopMovement, true, false);
                             }
                             else
