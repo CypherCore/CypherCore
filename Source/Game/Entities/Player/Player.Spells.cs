@@ -1512,76 +1512,54 @@ namespace Game.Entities
             }
         }
 
-        public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
+        public void CastItemUseSpell(Item item, uint spellId, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
         {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            if (spellInfo == null)
+            {
+                Log.outError(LogFilter.Player, $"Player::CastItemUseSpell: Item (Entry: {item.GetEntry()}) has wrong spell id {spellId}, ignoring");
+                return;
+            }
+
+            ItemTemplate proto = item.GetTemplate();
+            bool isValidSpell = false;
             if (!item.GetTemplate().HasFlag(ItemFlags.Legacy))
+                isValidSpell = item.GetEffects().Any(effectData => effectData.SpellID == spellId && effectData.TriggerType == ItemSpelltriggerType.OnUse);
+
+            if (!isValidSpell)
             {
-                // item spells casted at use
-                foreach (ItemEffectRecord effectData in item.GetEffects())
+                // Item enchantments spells casted at use
+                for (EnchantmentSlot slot = 0; slot < EnchantmentSlot.Max; ++slot)
                 {
-                    // wrong triggering type
-                    if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
-                        continue;
-
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
-                    if (spellInfo == null)
-                    {
-                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", item.GetEntry(), effectData.SpellID);
-                        continue;
-                    }
-
-                    Spell spell = new(this, spellInfo, TriggerCastFlags.None);
-
-                    SpellPrepare spellPrepare = new()
-                    {
-                        ClientCastID = castCount,
-                        ServerCastID = spell.m_castId
-                    };
-                    SendPacket(spellPrepare);
-
-                    spell.m_fromClient = true;
-                    spell.m_CastItem = item;
-                    spell.m_misc.Data0 = misc[0];
-                    spell.m_misc.Data1 = misc[1];
-                    spell.Prepare(targets);
-                    return;
+                    SpellItemEnchantmentRecord enchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(slot));
+                    if (enchant != null)
+                        for (byte enchantEffect = 0; enchantEffect < ItemConst.MaxItemEnchantmentEffects; ++enchantEffect)
+                            if (enchant.Effect[enchantEffect] == ItemEnchantmentType.UseSpell && enchant.EffectArg[enchantEffect] == spellId)
+                                isValidSpell = true;
                 }
             }
 
-            // Item enchantments spells casted at use
-            for (EnchantmentSlot e_slot = 0; e_slot < EnchantmentSlot.Max; ++e_slot)
+            if (!isValidSpell)
             {
-                uint enchant_id = item.GetEnchantmentId(e_slot);
-                var pEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
-                if (pEnchant == null)
-                    continue;
-                for (byte s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
-                {
-                    if (pEnchant.Effect[s] != ItemEnchantmentType.UseSpell)
-                        continue;
-
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pEnchant.EffectArg[s], Difficulty.None);
-                    if (spellInfo == null)
-                    {
-                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell Enchant {0}, cast unknown spell {1}", enchant_id, pEnchant.EffectArg[s]);
-                        continue;
-                    }
-
-                    Spell spell = new(this, spellInfo, TriggerCastFlags.None);
-
-                    SpellPrepare spellPrepare = new();
-                    spellPrepare.ClientCastID = castCount;
-                    spellPrepare.ServerCastID = spell.m_castId;
-                    SendPacket(spellPrepare);
-
-                    spell.m_fromClient = true;
-                    spell.m_CastItem = item;
-                    spell.m_misc.Data0 = misc[0];
-                    spell.m_misc.Data1 = misc[1];
-                    spell.Prepare(targets);
-                    return;
-                }
+                Log.outError(LogFilter.Player, $"Player::CastItemUseSpell: Tried to cast Spell {spellId} not found on Item {proto.GetId()}, ignoring");
+                return;
             }
+
+            Spell spell = new Spell(this, spellInfo, TriggerCastFlags.None);
+
+            SpellPrepare spellPrepare = new()
+            {
+                ClientCastID = castCount,
+                ServerCastID = spell.m_castId
+            };
+            SendPacket(spellPrepare);
+
+            spell.m_fromClient = true;
+            spell.m_CastItem = item;
+            spell.m_misc.Data0 = misc[0];
+            spell.m_misc.Data1 = misc[1];
+            spell.m_misc.Data2 = misc[2];
+            spell.Prepare(targets);
         }
 
         public void LearnSkillRewardedSpells(uint skillId, uint skillValue, Race race)
@@ -3904,7 +3882,7 @@ namespace Game.Entities
             if (!Global.ScriptMgr.OnItemUse(this, item, targets, castRequest.CastRequest.CastID))
             {
                 // no script or script not process request by self
-                CastItemUseSpell(item, targets, castRequest.CastRequest.CastID, castRequest.CastRequest.Misc);
+                CastItemUseSpell(item, castRequest.CastRequest.SpellID, targets, castRequest.CastRequest.CastID, castRequest.CastRequest.Misc);
             }
 
             return true;
