@@ -374,7 +374,7 @@ namespace Game.AI
             _returnToStart = canLoopPath;
 
             if (_returnToStart && _instantRespawn)
-                Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()} is set to return home after waypoint end and instant respawn at waypoint end. Creature will never despawn ({me.GetGUID()})");
+                Log.outError(LogFilter.ScriptsAi, $"EscortAI::Start: (script: {me.GetScriptName()}) starts with 0 waypoints (possible missing entry in script_waypoint. Quest: {(quest != null ? quest.Id : 0)} ({me.GetGUID()})");
 
             me.GetMotionMaster().MoveIdle();
             me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
