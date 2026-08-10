@@ -518,8 +518,8 @@ namespace Game.Entities
 
             if (pItem != null)
             {
-                // item used
-                if (pItem.m_lootGenerated)
+                // swapping/merging with currently looted item
+                if (GetLootGUID() == pItem.GetGUID())
                 {
                     no_space_count = count;
                     return InventoryResult.LootGone;
@@ -842,8 +842,7 @@ namespace Game.Entities
                 if (pProto == null)
                     return InventoryResult.ItemNotFound;
 
-                // item used
-                if (item.m_lootGenerated)
+                if (item.m_lootGenerated || GetLootGUID() == item.GetGUID())
                     return InventoryResult.LootGone;
 
                 // item it 'bind'
@@ -4409,8 +4408,7 @@ namespace Game.Entities
             if (pProto == null)
                 return swap ? InventoryResult.CantSwap : InventoryResult.ItemNotFound;
 
-            // item used
-            if (pItem.m_lootGenerated)
+            if (GetLootGUID() == pItem.GetGUID())
                 return InventoryResult.LootGone;
 
             if (pItem.IsBindedNotWith(this))
@@ -4956,8 +4954,7 @@ namespace Game.Entities
                 ItemTemplate pProto = pItem.GetTemplate();
                 if (pProto != null)
                 {
-                    // item used
-                    if (pItem.m_lootGenerated)
+                    if (GetLootGUID() == pItem.GetGUID())
                         return InventoryResult.LootGone;
 
                     if (pItem.IsBindedNotWith(this))
@@ -5257,8 +5254,7 @@ namespace Game.Entities
             if (pProto == null)
                 return InventoryResult.ItemNotFound;
 
-            // item used
-            if (pItem.m_lootGenerated)
+            if (GetLootGUID() == pItem.GetGUID())
                 return InventoryResult.LootGone;
 
             if (IsCharmed())
