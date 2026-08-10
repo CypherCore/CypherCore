@@ -278,6 +278,8 @@ namespace Game.Movement
 
         public void SetJumpOrientationFixed(bool enable) { args.flags.SetUnsetFlag(MoveSplineFlagEnum.JumpOrientationFixed, enable); }
 
+        public void SetSwim() { args.flags.SetUnsetFlag(MoveSplineFlagEnum.CanSwim, true); }
+
         public void SetSteering() { args.flags.EnableSteering(); }
 
         public void SetUnlimitedSpeed() { args.flags.SetUnsetFlag(MoveSplineFlagEnum.UnlimitedSpeed, true); }
