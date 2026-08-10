@@ -14,17 +14,19 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveDismissVehicle(MoveDismissVehicle moveDismissVehicle)
         {
-            ObjectGuid vehicleGUID = GetPlayer().GetCharmedGUID();
-            if (vehicleGUID.IsEmpty())                                       // something wrong here...
+            Unit mover = ValidateAndGetUnitBeingMoved(moveDismissVehicle.Status.Guid, false);
+            if (!ValidateMovementInfo(mover, moveDismissVehicle.Status))
                 return;
 
-            if (moveDismissVehicle.Status.Guid != vehicleGUID)
+            moveDismissVehicle.Status.Time = AdjustClientMovementTime(moveDismissVehicle.Status.Time);
+            mover.m_movementInfo = moveDismissVehicle.Status;
+
+            Unit vehicleBase = _player.GetVehicleBase();
+            if (vehicleBase != null)
             {
-                Log.outError(LogFilter.Network, $"Player {GetPlayer().GetGUID()} tried to dismiss a controlled vehicle ({vehicleGUID}) that he has no control over. Possible cheater or malformed packet.");
-                return;
+                vehicleBase.SendPetDismissSound();
+                _player.ExitVehicle();
             }
-
-            GetPlayer().ExitVehicle();
         }
 
         [WorldPacketHandler(ClientOpcodes.RequestVehiclePrevSeat, Processing = PacketProcessing.Inplace)]
