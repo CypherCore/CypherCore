@@ -8006,18 +8006,22 @@ namespace Game.Entities
             if (offItem == null)
                 return;
 
-            ItemTemplate offtemplate = offItem.GetTemplate();
+            ItemTemplate offhandTemplate = offItem.GetTemplate();
 
             // unequip offhand weapon if player doesn't have dual wield anymore
-            if (!CanDualWield() && ((offItem.GetTemplate().GetInventoryType() == InventoryType.WeaponOffhand && !offItem.GetTemplate().HasFlag(ItemFlags3.AlwaysAllowDualWield))
-                    || offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon))
+            if (!CanDualWield() && ((offhandTemplate.GetInventoryType() == InventoryType.WeaponOffhand && !offhandTemplate.HasFlag(ItemFlags3.AlwaysAllowDualWield))
+                || offhandTemplate.GetInventoryType() == InventoryType.Weapon))
                 force = true;
 
             // need unequip offhand for 2h-weapon without TitanGrip (in any from hands)
-            if (!force && CanTitanGrip(offItem))
+            if (!force)
             {
                 Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                if (mainItem == null || CanTitanGrip(mainItem))
+                if ((mainItem == null || mainItem.GetTemplate().GetInventoryType() != InventoryType.Weapon2Hand)
+                    && offhandTemplate.GetInventoryType() != InventoryType.Weapon2Hand)
+                    return;
+
+                if ((mainItem == null || CanTitanGrip(mainItem)) && CanTitanGrip(offItem))
                     return;
             }
 
