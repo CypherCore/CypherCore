@@ -384,6 +384,19 @@ namespace Framework.Constants
             LockType.KhazAlgarJewelcrafting25 => SkillType.KhazAlgarJewelcrafting,
             LockType.KhazAlgarLeatherworking25 => SkillType.KhazAlgarLeatherworking,
             LockType.KhazAlgarSkinning25 => SkillType.KhazAlgarSkinning,
+            LockType.MidnightMining or LockType.MidnightMining25 => SkillType.MidnightMining,
+            LockType.MidnightHerbalism or LockType.MidnightHerbalism25 => SkillType.MidnightHerbalism,
+            LockType.MidnightSkinning or LockType.MidnightSkinning25 => SkillType.MidnightSkinning,
+            LockType.MidnightAlchemy or LockType.MidnightAlchemy25 => SkillType.MidnightAlchemy,
+            LockType.MidnightBlacksmithing or LockType.MidnightBlacksmithing25 => SkillType.MidnightBlacksmithing,
+            LockType.MidnightEngineering or LockType.MidnightEngineering25 => SkillType.MidnightEngineering,
+            LockType.MidnightLeatherworking or LockType.MidnightLeatherworking25 => SkillType.MidnightLeatherworking,
+            LockType.MidnightTailoring or LockType.MidnightTailoring25 => SkillType.MidnightTailoring,
+            LockType.MidnightEnchanting25 => SkillType.MidnightEnchanting,
+            LockType.MidnightInscription25 => SkillType.MidnightInscription,
+            LockType.MidnightJewelcrafting25 => SkillType.MidnightJewelcrafting,
+            LockType.MidnightCooking25 => SkillType.MidnightCooking,
+            LockType.MidnightFishing25 => SkillType.MidnightFishing,
             _ => SkillType.None
         };
 

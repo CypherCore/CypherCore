@@ -1956,7 +1956,29 @@ namespace Framework.Constants
         KhazAlgarLeatherworking25 = 202,
         KhazAlgarMining25 = 203,
         KhazAlgarSkinning25 = 204,
-        KhazAlgarTailoring25 = 205
+        KhazAlgarTailoring25 = 205,
+        MidnightHerbalism = 206,
+        MidnightMining = 207,
+        MidnightSkinning = 214,
+        MidnightLeatherworking = 216,
+        MidnightEngineering = 217,
+        MidnightBlacksmithing = 218,
+        MidnightTailoring = 219,
+        MidnightAlchemy = 220,
+        Lumber = 222,
+        MidnightMining25 = 224,
+        MidnightHerbalism25 = 226,
+        MidnightEnchanting25 = 229,
+        MidnightSkinning25 = 231,
+        MidnightAlchemy25 = 233,
+        MidnightBlacksmithing25 = 234,
+        MidnightEngineering25 = 235,
+        MidnightLeatherworking25 = 236,
+        MidnightTailoring25 = 237,
+        MidnightInscription25 = 239,
+        MidnightJewelcrafting25 = 241,
+        MidnightCooking25 = 242,
+        MidnightFishing25 = 244
     }
 
     public enum MapTypes : byte
