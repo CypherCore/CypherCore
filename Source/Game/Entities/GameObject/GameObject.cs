@@ -287,7 +287,7 @@ namespace Game.Entities
             {
                 case GameObjectTypes.FishingHole:
                     SetGoAnimProgress(animProgress);
-                    m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
+                    m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, Math.Max(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock));
                     break;
                 case GameObjectTypes.DestructibleBuilding:
                     m_goValue.Building.DestructibleHitpoint = Global.ObjectMgr.GetDestructibleHitpoint(GetGoInfo().DestructibleBuilding.HealthRec);
@@ -606,7 +606,7 @@ namespace Game.Entities
                                         break;
                                     case GameObjectTypes.FishingHole:
                                         // Initialize a new max fish count on respawn
-                                        m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
+                                        m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, Math.Max(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock));
                                         break;
                                     default:
                                         break;
