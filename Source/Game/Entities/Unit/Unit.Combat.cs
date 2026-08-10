@@ -402,7 +402,11 @@ namespace Game.Entities
 
         public void SendMeleeAttackStop(Unit victim = null)
         {
-            SendMessageToSet(new SAttackStop(this, victim), true);
+            SAttackStop attackStop = new();
+            attackStop.Attacker = GetGUID();
+            attackStop.Victim = victim?.GetGUID() ?? ObjectGuid.Empty;
+            attackStop.NowDead = !IsAlive();
+            SendMessageToSet(attackStop, true);
 
             if (victim != null)
                 Log.outInfo(LogFilter.Unit, "{0} {1} stopped attacking {2} {3}", (IsTypeId(TypeId.Player) ? "Player" : "Creature"), GetGUID().ToString(), (victim.IsTypeId(TypeId.Player) ? "player" : "creature"), victim.GetGUID().ToString());

@@ -58,15 +58,7 @@ namespace Game.Networking.Packets
 
     public class SAttackStop : ServerPacket
     {
-        public SAttackStop(Unit attacker, Unit victim) : base(ServerOpcodes.AttackStop, ConnectionType.Instance)
-        {
-            Attacker = attacker.GetGUID();
-            if (victim != null)
-            {
-                Victim = victim.GetGUID();
-                NowDead = !victim.IsAlive(); // using isAlive instead of isDead to catch JUST_DIED death states as well
-            }
-        }
+        public SAttackStop() : base(ServerOpcodes.AttackStop, ConnectionType.Instance) { }
 
         public override void Write()
         {
@@ -192,7 +184,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt8(PowerType);
         }
     }
-    
+
     public class SetSheathed : ClientPacket
     {
         public SetSheathed(WorldPacket packet) : base(packet) { }
