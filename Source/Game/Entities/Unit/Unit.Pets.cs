@@ -456,6 +456,14 @@ namespace Game.Entities
             else
                 RestoreFaction();
 
+            if (type != CharmType.Charm && !IsPlayer())
+            {
+                StopMoving(true);
+
+                // Purge flags left over by client control
+                m_movementInfo.RemoveMovementFlag(MovementFlag.MaskMoving | MovementFlag.MaskTurning);
+            }
+
             ///@todo Handle SLOT_IDLE motion resume
             GetMotionMaster().InitializeDefault();
 

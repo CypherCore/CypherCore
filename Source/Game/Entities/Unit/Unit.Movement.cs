@@ -293,12 +293,12 @@ namespace Game.Entities
             return MovementGeneratorType.Idle;
         }
 
-        public void StopMoving()
+        public void StopMoving(bool force = false)
         {
             ClearUnitState(UnitState.Moving);
 
             // not need send any packets if not in world or not moving
-            if (!IsInWorld || MoveSpline.Finalized())
+            if (!IsInWorld || (!force && MoveSpline.Finalized()))
                 return;
 
             // Update position now since Stop does not start a new movement that can be updated later
@@ -306,7 +306,7 @@ namespace Game.Entities
                 UpdateSplinePosition();
 
             MoveSplineInit init = new(this);
-            init.Stop();
+            init.Stop(force);
         }
 
         public void PauseMovement(uint timer = 0, MovementSlot slot = 0, bool forced = true)

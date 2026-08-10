@@ -150,17 +150,17 @@ namespace Game.Movement
             return move_spline.Duration();
         }
 
-        public void Stop()
+        public void Stop(bool force = false)
         {
             MoveSpline move_spline = unit.MoveSpline;
 
             // No need to stop if we are not moving
-            if (move_spline.Finalized())
+            if (!force && move_spline.Finalized())
                 return;
 
             bool transport = !unit.GetTransGUID().IsEmpty();
             Vector4 loc = new();
-            if (move_spline.onTransport == transport)
+            if (move_spline.onTransport == transport && !move_spline.Finalized())
                 loc = move_spline.ComputePosition();
             else
             {
