@@ -338,6 +338,7 @@ namespace Game.Entities
 
             // Set charmed
             charmer.SetCharm(this, true);
+            m_combatManager.RevalidateCombat();
 
             Player player = ToPlayer();
             if (player != null)
