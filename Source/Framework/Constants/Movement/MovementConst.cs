@@ -84,6 +84,7 @@ namespace Framework.Constants
         InformEnabled = 0x080,
         Finalized = 0x100,
         PersistOnDeath = 0x200,
+        Immediate = 0x400,
 
         Transitory = SpeedUpdatePending | Interrupted
     }

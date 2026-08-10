@@ -341,6 +341,12 @@ namespace Game.Movement
             if (IsInvalidMovementSlot(slot))
                 return;
 
+            if (movement.HasFlag(MovementGeneratorFlags.Immediate) && movement.HasFlag(MovementGeneratorFlags.InitializationPending))
+            {
+                if (!movement.Initialize(_owner))
+                    return;
+            }
+
             if (HasFlag(MotionMasterFlags.Delayed))
                 _delayedActions.Enqueue(new DelayedAction(() => Add(movement, slot), MotionMasterDelayedActionType.Add));
             else
@@ -1234,8 +1240,15 @@ namespace Game.Movement
                     else
                         _defaultGenerator.Deactivate(_owner);
 
-                    _generators.Add(movement);
-                    AddBaseUnitState(movement);
+                    if (!movement.HasFlag(MovementGeneratorFlags.Immediate))
+                    {
+                        _generators.Add(movement);
+                        AddBaseUnitState(movement);
+                    }
+                    else
+                    {
+                        movement.Finalize(_owner, true, true);
+                    }
                     break;
                 default:
                     break;

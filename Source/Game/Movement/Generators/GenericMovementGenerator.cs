@@ -113,6 +113,53 @@ namespace Game.Movement
         public override MovementGeneratorType GetMovementGeneratorType() { return _type; }
     }
 
+    class ImmediateMovementGenerator : MovementGenerator
+    {
+        Action<MoveSplineInit> _splineInit;
+        MovementGeneratorType _type;
+        uint _pointId;
+
+        public ImmediateMovementGenerator(Action<MoveSplineInit> initializer, MovementGeneratorType type, uint id)
+        {
+            _splineInit = initializer;
+            _type = type;
+            _pointId = id;
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Immediate;
+            BaseUnitState = 0;
+        }
+
+        public override bool Initialize(Unit owner)
+        {
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
+            MoveSplineInit init = new(owner);
+            _splineInit(init);
+            int duration = init.Launch();
+            if (duration <= 0)
+                return false;
+
+            owner.UpdateSplineMovement((uint)duration); // immediately consume the entire spline
+            return true;
+        }
+
+        public override void Finalize(Unit owner, bool active, bool movementInform)
+        {
+            Creature creature = owner.ToCreature();
+            if (creature != null && creature.GetAI() != null)
+                creature.GetAI().MovementInform(_type, _pointId);
+        }
+
+        public override bool Reset(Unit owner) { return true; }
+        public override bool Update(Unit owner, uint diff) { return true; }
+        public override void Deactivate(Unit owner) { }
+
+        public override MovementGeneratorType GetMovementGeneratorType() { return _type; }
+    }
+
     struct GenericMovementGeneratorArgs
     {
         public uint? ArrivalSpellId;

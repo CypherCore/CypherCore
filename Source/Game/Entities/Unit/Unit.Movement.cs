@@ -2122,7 +2122,7 @@ namespace Game.Entities
             return MoveSpline.Initialized() && !MoveSpline.Finalized();
         }
 
-        void UpdateSplineMovement(uint diff)
+        public void UpdateSplineMovement(uint diff)
         {
             if (MoveSpline.Finalized())
                 return;
