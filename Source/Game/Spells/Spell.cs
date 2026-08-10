@@ -4645,7 +4645,7 @@ namespace Game.Spells
             foreach (ItemEffectRecord itemEffect in m_CastItem.GetEffects())
             {
                 // item has limited charges
-                if (itemEffect.Charges != 0)
+                if (itemEffect.TriggerType == ItemSpelltriggerType.OnUse && itemEffect.Charges != 0)
                 {
                     if (itemEffect.Charges < 0)
                         expendable = true;
