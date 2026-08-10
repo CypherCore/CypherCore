@@ -14,7 +14,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveDismissVehicle(MoveDismissVehicle moveDismissVehicle)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(moveDismissVehicle.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(moveDismissVehicle.Status.Guid, moveDismissVehicle.GetOpcode(), false);
             if (!ValidateMovementInfo(mover, moveDismissVehicle.Status))
                 return;
 
@@ -68,7 +68,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveChangeVehicleSeats, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats moveChangeVehicleSeats)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(moveChangeVehicleSeats.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(moveChangeVehicleSeats.Status.Guid, moveChangeVehicleSeats.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -212,7 +212,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetVehicleRecIdAck)]
         void HandleMoveSetVehicleRecAck(MoveSetVehicleRecIdAck setVehicleRecIdAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(setVehicleRecIdAck.Data.Status.Guid, true);
+            Unit mover = ValidateAndGetUnitBeingMoved(setVehicleRecIdAck.Data.Status.Guid, setVehicleRecIdAck.GetOpcode(), true);
             if (mover == null)
                 return;
 

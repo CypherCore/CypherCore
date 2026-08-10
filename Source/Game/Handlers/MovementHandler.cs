@@ -56,7 +56,7 @@ namespace Game
 
         void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(movementInfo.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(movementInfo.Guid, opcode, false);
             if (!ValidateMovementInfo(mover, movementInfo))
                 return;
 
@@ -306,14 +306,14 @@ namespace Game
             return true;
         }
 
-        Unit ValidateAndGetUnitBeingMoved(ObjectGuid guid, bool forStatusAck)
+        Unit ValidateAndGetUnitBeingMoved(ObjectGuid guid, ClientOpcodes opcode, bool forStatusAck)
         {
             // the client is attempting to tamper movement data
             // edit: this wouldn't happen in retail but it does in TC, even with a legitimate client.
             Unit activelyMovedUnit = _player.GetUnitBeingMoved();
             if (!forStatusAck && (activelyMovedUnit == null || activelyMovedUnit.GetGUID() != guid))
             {
-                Log.outDebug(LogFilter.Unit, $"Attempt at tampering movement data by Player {_player.GetName()}");
+                Log.outDebug(LogFilter.Unit, $"{GetPlayerInfo()} Attempted tampering movement data in {opcode}, requesting not allowed mover {guid} but expected {activelyMovedUnit?.GetGUID()}");
                 return null;
             }
 
@@ -585,7 +585,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTeleportAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveTeleportAck(MoveTeleportAck packet)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(packet.MoverGUID, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(packet.MoverGUID, packet.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -652,7 +652,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveForceWalkSpeedChangeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleForceSpeedChangeAck(MovementSpeedAck packet)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(packet.Ack.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(packet.Ack.Status.Guid, packet.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -736,7 +736,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingSurfaceFrictionAck)]
         void HandleSetAdvFlyingSpeedAck(MovementSpeedAck speedAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(speedAck.Ack.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(speedAck.Ack.Status.Guid, speedAck.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -749,7 +749,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetAdvFlyingTurnVelocityThresholdAck)]
         void HandleSetAdvFlyingSpeedRangeAck(MovementSpeedRangeAck speedRangeAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(speedRangeAck.Ack.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(speedRangeAck.Ack.Status.Guid, speedRangeAck.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -769,7 +769,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveKnockBackAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveKnockBackAck(MoveKnockBackAck movementAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(movementAck.Ack.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(movementAck.Ack.Status.Guid, movementAck.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -798,7 +798,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveWaterWalkAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMovementAckMessage(MovementAckMessage movementAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(movementAck.Ack.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(movementAck.Ack.Status.Guid, movementAck.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -817,7 +817,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetCollisionHeightAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleSetCollisionHeightAck(MoveSetCollisionHeightAck packet)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(packet.Data.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(packet.Data.Status.Guid, packet.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -827,7 +827,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveApplyMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(moveApplyMovementForceAck.Ack.Status.Guid, true);
+            Unit mover = ValidateAndGetUnitBeingMoved(moveApplyMovementForceAck.Ack.Status.Guid, moveApplyMovementForceAck.GetOpcode(), true);
             if (mover == null)
                 return;
 
@@ -845,7 +845,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveRemoveMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(moveRemoveMovementForceAck.Ack.Status.Guid, true);
+            Unit mover = ValidateAndGetUnitBeingMoved(moveRemoveMovementForceAck.Ack.Status.Guid, moveRemoveMovementForceAck.GetOpcode(), true);
             if (mover == null)
                 return;
 
@@ -863,7 +863,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetModMovementForceMagnitudeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(setModMovementForceMagnitudeAck.Ack.Status.Guid, true);
+            Unit mover = ValidateAndGetUnitBeingMoved(setModMovementForceMagnitudeAck.Ack.Status.Guid, setModMovementForceMagnitudeAck.GetOpcode(), true);
             if (mover == null)
                 return;
 
@@ -901,7 +901,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTimeSkipped, Processing = PacketProcessing.Inplace)]
         void HandleMoveTimeSkipped(MoveTimeSkipped moveTimeSkipped)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(moveTimeSkipped.MoverGUID, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(moveTimeSkipped.MoverGUID, moveTimeSkipped.GetOpcode(), false);
             if (mover == null)
                 return;
 
@@ -916,7 +916,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {
-            Unit mover = ValidateAndGetUnitBeingMoved(moveSplineDone.Status.Guid, false);
+            Unit mover = ValidateAndGetUnitBeingMoved(moveSplineDone.Status.Guid, moveSplineDone.GetOpcode(), false);
             if (mover == null)
                 return;
 
