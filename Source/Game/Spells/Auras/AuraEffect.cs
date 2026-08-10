@@ -4149,7 +4149,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            target.HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, (float)GetAmount(), apply);
+            target.HandleAttackPowerModifier(AttackPowerModIndex.Melee, GetAmount() >= 0 ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPower)]
@@ -4163,7 +4163,7 @@ namespace Game.Spells
             if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
                 return;
 
-            target.HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)GetAmount(), apply);
+            target.HandleAttackPowerModifier(AttackPowerModIndex.Ranged, GetAmount() >= 0 ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModAttackPowerPct)]
@@ -4174,14 +4174,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, (float)GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModAttackPowerPct);
-                target.SetStatPctModifier(UnitMods.AttackPower, UnitModifierPctType.Total, amount);
-            }
+            target.HandleAttackPowerModifier(AttackPowerModIndex.Melee, AttackPowerModType.Pct, (float)GetAmount(), apply);
         }
 
         [AuraEffectHandler(AuraType.ModRangedAttackPowerPct)]
@@ -4195,14 +4188,7 @@ namespace Game.Spells
             if ((target.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0)
                 return;
 
-            //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
-            if (apply)
-                target.ApplyStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, (float)GetAmount());
-            else
-            {
-                float amount = target.GetTotalAuraMultiplier(AuraType.ModRangedAttackPowerPct);
-                target.SetStatPctModifier(UnitMods.AttackPowerRanged, UnitModifierPctType.Total, amount);
-            }
+            target.HandleAttackPowerModifier(AttackPowerModIndex.Ranged, AttackPowerModType.Pct, (float)GetAmount(), apply);
         }
 
         /********************************/

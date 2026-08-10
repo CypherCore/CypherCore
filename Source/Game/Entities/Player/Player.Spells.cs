@@ -555,8 +555,8 @@ namespace Game.Entities
             {
                 for (int s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
                 {
-                    ItemEnchantmentType enchant_display_type = (ItemEnchantmentType)pEnchant.Effect[s];
-                    uint enchant_amount = pEnchant.EffectPointsMin[s];
+                    ItemEnchantmentType enchant_display_type = pEnchant.Effect[s];
+                    int enchant_amount = pEnchant.EffectPointsMin[s];
                     uint enchant_spell_id = pEnchant.EffectArg[s];
 
                     switch (enchant_display_type)
@@ -600,10 +600,10 @@ namespace Game.Entities
 
                                 GtSpellScalingRecord spellScaling = CliDB.SpellScalingGameTable.GetRow(scalingLevel);
                                 if (spellScaling != null)
-                                    enchant_amount = (uint)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
+                                    enchant_amount = (int)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
                             }
 
-                            enchant_amount = Math.Max(enchant_amount, 1u);
+                            enchant_amount = Math.Max(enchant_amount, 1);
                             HandleStatFlatModifier((UnitMods)((uint)UnitMods.ResistanceStart + enchant_spell_id), UnitModifierFlatType.Total, enchant_amount, apply);
                             break;
                         case ItemEnchantmentType.Stat:
@@ -625,10 +625,10 @@ namespace Game.Entities
 
                                 GtSpellScalingRecord spellScaling = CliDB.SpellScalingGameTable.GetRow(scalingLevel);
                                 if (spellScaling != null)
-                                    enchant_amount = (uint)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
+                                    enchant_amount = (int)(pEnchant.EffectScalingPoints[s] * CliDB.GetSpellScalingColumnForClass(spellScaling, scalingClass));
                             }
 
-                            enchant_amount = Math.Max(enchant_amount, 1u);
+                            enchant_amount = Math.Max(enchant_amount, 1);
 
                             Log.outDebug(LogFilter.Player, "Adding {0} to stat nb {1}", enchant_amount, enchant_spell_id);
                             switch ((ItemModType)enchant_spell_id)
@@ -667,101 +667,101 @@ namespace Game.Entities
                                     UpdateStatBuffMod(Stats.Stamina);
                                     break;
                                 case ItemModType.DefenseSkillRating:
-                                    ApplyRatingMod(CombatRating.DefenseSkill, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.DefenseSkill, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} DEFENSE", enchant_amount);
                                     break;
                                 case ItemModType.DodgeRating:
-                                    ApplyRatingMod(CombatRating.Dodge, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.Dodge, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} DODGE", enchant_amount);
                                     break;
                                 case ItemModType.ParryRating:
-                                    ApplyRatingMod(CombatRating.Parry, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.Parry, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} PARRY", enchant_amount);
                                     break;
                                 case ItemModType.BlockRating:
-                                    ApplyRatingMod(CombatRating.Block, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.Block, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} SHIELD_BLOCK", enchant_amount);
                                     break;
                                 case ItemModType.HitMeleeRating:
-                                    ApplyRatingMod(CombatRating.HitMelee, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HitMelee, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} MELEE_HIT", enchant_amount);
                                     break;
                                 case ItemModType.HitRangedRating:
-                                    ApplyRatingMod(CombatRating.HitRanged, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HitRanged, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} RANGED_HIT", enchant_amount);
                                     break;
                                 case ItemModType.HitSpellRating:
-                                    ApplyRatingMod(CombatRating.HitSpell, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HitSpell, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} SPELL_HIT", enchant_amount);
                                     break;
                                 case ItemModType.CritMeleeRating:
-                                    ApplyRatingMod(CombatRating.CritMelee, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.CritMelee, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} MELEE_CRIT", enchant_amount);
                                     break;
                                 case ItemModType.CritRangedRating:
-                                    ApplyRatingMod(CombatRating.CritRanged, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.CritRanged, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} RANGED_CRIT", enchant_amount);
                                     break;
                                 case ItemModType.CritSpellRating:
-                                    ApplyRatingMod(CombatRating.CritSpell, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.CritSpell, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} SPELL_CRIT", enchant_amount);
                                     break;
                                 case ItemModType.HasteSpellRating:
-                                    ApplyRatingMod(CombatRating.HasteSpell, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HasteSpell, enchant_amount, apply);
                                     break;
                                 case ItemModType.HitRating:
-                                    ApplyRatingMod(CombatRating.HitMelee, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.HitRanged, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.HitSpell, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HitMelee, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HitRanged, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HitSpell, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} HIT", enchant_amount);
                                     break;
                                 case ItemModType.CritRating:
-                                    ApplyRatingMod(CombatRating.CritMelee, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.CritRanged, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.CritSpell, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.CritMelee, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.CritRanged, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.CritSpell, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} CRITICAL", enchant_amount);
                                     break;
                                 case ItemModType.ResilienceRating:
-                                    ApplyRatingMod(CombatRating.ResiliencePlayerDamage, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.ResiliencePlayerDamage, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} RESILIENCE", enchant_amount);
                                     break;
                                 case ItemModType.HasteRating:
-                                    ApplyRatingMod(CombatRating.HasteMelee, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.HasteRanged, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.HasteSpell, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HasteMelee, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HasteRanged, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.HasteSpell, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} HASTE", enchant_amount);
                                     break;
                                 case ItemModType.ExpertiseRating:
-                                    ApplyRatingMod(CombatRating.Expertise, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.Expertise, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} EXPERTISE", enchant_amount);
                                     break;
                                 case ItemModType.AttackPower:
-                                    HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, enchant_amount, apply);
-                                    HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, enchant_amount, apply);
+                                    HandleAttackPowerModifier(AttackPowerModIndex.Melee, (enchant_amount >= 0) ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)enchant_amount, apply);
+                                    HandleAttackPowerModifier(AttackPowerModIndex.Ranged, (enchant_amount >= 0) ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} ATTACK_POWER", enchant_amount);
                                     break;
                                 case ItemModType.RangedAttackPower:
-                                    HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, enchant_amount, apply);
+                                    HandleAttackPowerModifier(AttackPowerModIndex.Ranged, (enchant_amount >= 0) ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} RANGED_ATTACK_POWER", enchant_amount);
                                     break;
                                 case ItemModType.ManaRegeneration:
-                                    ApplyManaRegenBonus((int)enchant_amount, apply);
+                                    ApplyManaRegenBonus(enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} MANA_REGENERATION", enchant_amount);
                                     break;
                                 case ItemModType.ArmorPenetrationRating:
-                                    ApplyRatingMod(CombatRating.ArmorPenetration, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.ArmorPenetration, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} ARMOR PENETRATION", enchant_amount);
                                     break;
                                 case ItemModType.SpellPower:
-                                    ApplySpellPowerBonus((int)enchant_amount, apply);
+                                    ApplySpellPowerBonus(enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} SPELL_POWER", enchant_amount);
                                     break;
                                 case ItemModType.HealthRegen:
-                                    ApplyHealthRegenBonus((int)enchant_amount, apply);
+                                    ApplyHealthRegenBonus(enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} HEALTH_REGENERATION", enchant_amount);
                                     break;
                                 case ItemModType.SpellPenetration:
-                                    ApplySpellPenetrationBonus((int)enchant_amount, apply);
+                                    ApplySpellPenetrationBonus(enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} SPELL_PENETRATION", enchant_amount);
                                     break;
                                 case ItemModType.BlockValue:
@@ -769,13 +769,13 @@ namespace Game.Entities
                                     Log.outDebug(LogFilter.Player, "+ {0} BLOCK_VALUE", enchant_amount);
                                     break;
                                 case ItemModType.MasteryRating:
-                                    ApplyRatingMod(CombatRating.Mastery, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.Mastery, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} MASTERY", enchant_amount);
                                     break;
                                 case ItemModType.Versatility:
-                                    ApplyRatingMod(CombatRating.VersatilityDamageDone, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.VersatilityHealingDone, (int)enchant_amount, apply);
-                                    ApplyRatingMod(CombatRating.VersatilityDamageTaken, (int)enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.VersatilityDamageDone, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.VersatilityHealingDone, enchant_amount, apply);
+                                    ApplyRatingMod(CombatRating.VersatilityDamageTaken, enchant_amount, apply);
                                     Log.outDebug(LogFilter.Player, "+ {0} VERSATILITY", enchant_amount);
                                     break;
                                 default:

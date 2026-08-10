@@ -3775,11 +3775,11 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Expertise, (int)val, apply);
                         break;
                     case ItemModType.AttackPower:
-                        HandleStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Total, (float)val, apply);
-                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
+                        HandleAttackPowerModifier(AttackPowerModIndex.Melee, (val >= 0) ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)val, apply);
+                        HandleAttackPowerModifier(AttackPowerModIndex.Ranged, (val >= 0) ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)val, apply);
                         break;
                     case ItemModType.RangedAttackPower:
-                        HandleStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Total, (float)val, apply);
+                        HandleAttackPowerModifier(AttackPowerModIndex.Ranged, (val >= 0) ? AttackPowerModType.FlatPositive : AttackPowerModType.FlatNegative, (float)val, apply);
                         break;
                     case ItemModType.Versatility:
                         ApplyRatingMod(CombatRating.VersatilityDamageDone, (int)val, apply);

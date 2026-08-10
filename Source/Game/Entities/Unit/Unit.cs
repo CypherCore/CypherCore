@@ -55,6 +55,14 @@ namespace Game.Entities
 
             m_auraPctModifiersGroup[(int)UnitMods.DamageOffHand][(int)UnitModifierPctType.Total] = 0.5f;
 
+            for (int i = 0; i < (int)AttackPowerModIndex.End; ++i)
+            {
+                m_attackPowerMods[i] = new float[(int)AttackPowerModType.End];
+                m_attackPowerMods[i][(int)AttackPowerModType.FlatPositive] = 0.0f;
+                m_attackPowerMods[i][(int)AttackPowerModType.FlatNegative] = 0.0f;
+                m_attackPowerMods[i][(int)AttackPowerModType.Pct] = 1.0f;
+            }
+
             foreach (AuraType auraType in Enum.GetValues(typeof(AuraType)))
                 m_modAuras[auraType] = new List<AuraEffect>();
 
@@ -4225,6 +4233,41 @@ namespace Game.Entities
         }
 
         public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchoolMask.None; }
+
+        public void HandleAttackPowerModifier(AttackPowerModIndex index, AttackPowerModType modifierType, float amount, bool apply)
+        {
+            if (index >= AttackPowerModIndex.End || modifierType >= AttackPowerModType.End)
+            {
+                Log.outError(LogFilter.Unit, "ERROR in HandleAttackPowerModifier(): non-existing AttackPowerModIndex or wrong AttackPowerModType!");
+                return;
+            }
+
+            switch (modifierType)
+            {
+                case AttackPowerModType.Pct:
+                    MathFunctions.ApplyPercentModFloatVar(ref m_attackPowerMods[(int)index][(int)modifierType], amount, apply);
+                    break;
+                default:
+                    m_attackPowerMods[(int)index][(int)modifierType] += apply ? amount : -amount;
+                    break;
+            }
+
+            if (!CanModifyStats())
+                return;
+
+            UpdateAttackPowerAndDamage(index == AttackPowerModIndex.Ranged);
+        }
+
+        public float GetAttackPowerModifierValue(AttackPowerModIndex index, AttackPowerModType modifierType)
+        {
+            if (index >= AttackPowerModIndex.End || modifierType >= AttackPowerModType.End)
+            {
+                Log.outError(LogFilter.Unit, "ERROR in GetAttackPowerModifierValue(): non-existing AttackPowerModIndex or wrong AttackPowerModType!");
+                return 0.0f;
+            }
+
+            return m_attackPowerMods[(int)index][(int)modifierType];
+        }
 
         public virtual void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
         {

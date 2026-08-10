@@ -93,6 +93,7 @@ namespace Game.Entities
         List<Aura> m_scAuras = new();
         protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
         protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];
+        float[][] m_attackPowerMods = new float[(int)AttackPowerModIndex.End][];
         uint m_removedAurasCount;
 
         //General  

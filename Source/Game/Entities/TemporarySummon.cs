@@ -1054,7 +1054,7 @@ namespace Game.Entities
 
             float val;
             float bonusAP = 0.0f;
-            UnitMods unitMod = UnitMods.AttackPower;
+            AttackPowerModIndex unitMod = AttackPowerModIndex.Melee;
 
             if (GetEntry() == ENTRY_IMP)                                   // imp's attack power
                 val = GetStat(Stats.Strength) - 10.0f;
@@ -1102,13 +1102,14 @@ namespace Game.Entities
                 }
             }
 
-            SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, val + bonusAP);
-
-            //in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
-            float base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
+            float base_attPower = val + bonusAP;
+            float attPowerModPos = GetAttackPowerModifierValue(unitMod, AttackPowerModType.FlatPositive);
+            float attPowerModNeg = GetAttackPowerModifierValue(unitMod, AttackPowerModType.FlatNegative);
+            float attPowerMultiplier = GetAttackPowerModifierValue(unitMod, AttackPowerModType.Pct) - 1.0f;
 
             SetAttackPower((int)base_attPower);
+            SetAttackPowerModPos((int)attPowerModPos);
+            SetAttackPowerModNeg((int)attPowerModNeg);
             SetAttackPowerMultiplier(attPowerMultiplier);
 
             //automatically update weapon damage after attack power modification

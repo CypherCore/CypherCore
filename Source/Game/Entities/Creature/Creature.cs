@@ -1593,8 +1593,8 @@ namespace Game.Entities
             SetBaseWeaponDamage(WeaponAttackType.RangedAttack, WeaponDamageRange.MinDamage, weaponBaseMinDamage);
             SetBaseWeaponDamage(WeaponAttackType.RangedAttack, WeaponDamageRange.MaxDamage, weaponBaseMaxDamage);
 
-            SetStatFlatModifier(UnitMods.AttackPower, UnitModifierFlatType.Base, stats.AttackPower);
-            SetStatFlatModifier(UnitMods.AttackPowerRanged, UnitModifierFlatType.Base, stats.RangedAttackPower);
+            m_baseAttackPower = stats.AttackPower;
+            m_baseRangedAttackPower = stats.RangedAttackPower;
 
             float armor = GetBaseArmorForLevel(level);
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);

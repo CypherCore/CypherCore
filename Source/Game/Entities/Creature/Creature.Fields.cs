@@ -50,6 +50,8 @@ namespace Game.Entities
         uint m_cannotReachTimer;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
+        uint m_baseAttackPower;
+        uint m_baseRangedAttackPower;
         public uint m_originalEntry;
 
         Position m_homePosition;

@@ -96,7 +96,7 @@ namespace Game.Entities
             if (unitMod >= UnitMods.End || modifierType >= UnitModifierPctType.End)
             {
                 Log.outError(LogFilter.Unit, "attempt to access non-existing modifier value from UnitMods!");
-                return 0.0f;
+                return 1.0f;
             }
 
             return m_auraPctModifiersGroup[(int)unitMod][(int)modifierType];
@@ -157,12 +157,6 @@ namespace Game.Entities
                 case UnitMods.ResistanceShadow:
                 case UnitMods.ResistanceArcane:
                     UpdateResistances(GetSpellSchoolByAuraGroup(unitMod));
-                    break;
-                case UnitMods.AttackPower:
-                    UpdateAttackPowerAndDamage();
-                    break;
-                case UnitMods.AttackPowerRanged:
-                    UpdateAttackPowerAndDamage(true);
                     break;
                 case UnitMods.DamageMainHand:
                     UpdateDamagePhysical(WeaponAttackType.BaseAttack);
@@ -1467,7 +1461,7 @@ namespace Game.Entities
             float level = GetLevel();
 
             var entry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
-            UnitMods unitMod = ranged ? UnitMods.AttackPowerRanged : UnitMods.AttackPower;
+            AttackPowerModIndex unitMod = ranged ? AttackPowerModIndex.Ranged : AttackPowerModIndex.Melee;
 
             if (!HasAuraType(AuraType.OverrideAttackPowerBySpPct))
             {
@@ -1495,23 +1489,24 @@ namespace Game.Entities
                 val2 = MathFunctions.CalculatePct(minSpellPower, m_activePlayerData.OverrideAPBySpellPowerPercent);
             }
 
-            SetStatFlatModifier(unitMod, UnitModifierFlatType.Base, val2);
-
-            float base_attPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float attPowerMod = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            float attPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
+            float baseAttackPower = val2;
+            float attackPowerModPos = GetAttackPowerModifierValue(unitMod, AttackPowerModType.FlatPositive);
+            float attackPowerModNeg = GetAttackPowerModifierValue(unitMod, AttackPowerModType.FlatNegative);
+            float attackPowerMultiplier = GetAttackPowerModifierValue(unitMod, AttackPowerModType.Pct) - 1.0f;
 
             if (ranged)
             {
-                SetRangedAttackPower((int)base_attPower);
-                SetRangedAttackPowerModPos((int)attPowerMod);
-                SetRangedAttackPowerMultiplier(attPowerMultiplier);
+                SetRangedAttackPower((int)baseAttackPower);
+                SetRangedAttackPowerModPos((int)attackPowerModPos);
+                SetRangedAttackPowerModNeg((int)attackPowerModNeg);
+                SetRangedAttackPowerMultiplier(attackPowerMultiplier);
             }
             else
             {
-                SetAttackPower((int)base_attPower);
-                SetAttackPowerModPos((int)attPowerMod);
-                SetAttackPowerMultiplier(attPowerMultiplier);
+                SetAttackPower((int)baseAttackPower);
+                SetAttackPowerModPos((int)attackPowerModPos);
+                SetAttackPowerModNeg((int)attackPowerModNeg);
+                SetAttackPowerMultiplier(attackPowerMultiplier);
             }
 
             Pet pet = GetPet();                                //update pet's AP
@@ -2341,19 +2336,25 @@ namespace Game.Entities
 
         public override void UpdateAttackPowerAndDamage(bool ranged = false)
         {
-            UnitMods unitMod = ranged ? UnitMods.AttackPowerRanged : UnitMods.AttackPower;
+            AttackPowerModIndex unitMod = ranged ? AttackPowerModIndex.Ranged : AttackPowerModIndex.Melee;
 
-            float baseAttackPower = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) * GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            float attackPowerMultiplier = GetPctModifierValue(unitMod, UnitModifierPctType.Total) - 1.0f;
+            float baseAttackPower = ranged ? m_baseRangedAttackPower : m_baseAttackPower;
+            float attackPowerModPos = GetAttackPowerModifierValue(unitMod, AttackPowerModType.FlatPositive);
+            float attackPowerModNeg = GetAttackPowerModifierValue(unitMod, AttackPowerModType.FlatNegative);
+            float attackPowerMultiplier = GetAttackPowerModifierValue(unitMod, AttackPowerModType.Pct) - 1.0f;
 
             if (ranged)
             {
                 SetRangedAttackPower((int)baseAttackPower);
+                SetRangedAttackPowerModPos((int)attackPowerModPos);
+                SetRangedAttackPowerModNeg((int)attackPowerModNeg);
                 SetRangedAttackPowerMultiplier(attackPowerMultiplier);
             }
             else
             {
                 SetAttackPower((int)baseAttackPower);
+                SetAttackPowerModPos((int)attackPowerModPos);
+                SetAttackPowerModNeg((int)attackPowerModNeg);
                 SetAttackPowerMultiplier(attackPowerMultiplier);
             }
 

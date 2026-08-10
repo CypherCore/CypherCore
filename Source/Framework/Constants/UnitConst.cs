@@ -200,8 +200,6 @@ namespace Framework.Constants
         ResistanceFrost,
         ResistanceShadow,
         ResistanceArcane,
-        AttackPower,
-        AttackPowerRanged,
         DamageMainHand,
         DamageOffHand,
         DamageRanged,
@@ -228,6 +226,21 @@ namespace Framework.Constants
         Base = 0,
         Total = 1,
         End = 2
+    }
+
+    public enum AttackPowerModIndex
+    {
+        Melee,
+        Ranged,
+        End
+    }
+
+    public enum AttackPowerModType
+    {
+        FlatPositive,
+        FlatNegative,
+        Pct,
+        End
     }
 
     public enum VictimState
