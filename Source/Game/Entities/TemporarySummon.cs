@@ -226,6 +226,7 @@ namespace Game.Entities
                     int minLevel = m_unitData.ScalingLevelMin + m_unitData.ScalingLevelDelta;
                     int maxLevel = m_unitData.ScalingLevelMax + m_unitData.ScalingLevelDelta;
                     uint level = (uint)Math.Clamp(unitSummoner.GetLevel(), minLevel, maxLevel);
+                    ApplyLevelScaling(unitSummoner.m_unitData.ContentTuningID, unitSummoner.m_unitData.ScalingLevelDelta);
                     SetLevel(level);
                     if (!IsGuardian())
                     {
@@ -685,7 +686,8 @@ namespace Game.Entities
             {
                 // remove elite bonuses included in DB values
                 CreatureBaseStats stats = Global.ObjectMgr.GetCreatureBaseStats(petlevel, cinfo.UnitClass);
-                ApplyLevelScaling();
+                if (m_Properties == null) // pet loaded from DB
+                    ApplyLevelScaling(GetOwner().m_unitData.ContentTuningID, GetOwner().m_unitData.ScalingLevelDelta);
 
                 CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
                 SetCreateHealth((uint)Math.Max(Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, petlevel, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cinfo.UnitClass, 0) * creatureDifficulty.HealthModifier * GetHealthMod(cinfo.Classification), 1.0f));

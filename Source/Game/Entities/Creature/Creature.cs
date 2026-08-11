@@ -2875,26 +2875,59 @@ namespace Game.Entities
         public void ApplyLevelScaling()
         {
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            var levels = Global.DB2Mgr.GetContentTuningData(creatureDifficulty.ContentTuningID, []);
+            uint contentTuningId = creatureDifficulty.ContentTuningID;
+
+            if (contentTuningId == 0 && !IsCritter())
+            {
+                MapDifficultyRecord mapDifficulty = GetMap().GetMapDifficulty();
+                if (mapDifficulty != null && mapDifficulty.ContentTuningID != 0)
+                    contentTuningId = (uint)mapDifficulty.ContentTuningID;
+
+                if (contentTuningId == 0)
+                {
+                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
+                    while (area != null)
+                    {
+                        if (area.ContentTuningID != 0)
+                        {
+                            contentTuningId = area.ContentTuningID;
+                            break;
+                        }
+
+                        area = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                    }
+                }
+            }
+
+            int scalingLevelDelta = 0;
+            if (contentTuningId != 0)
+            {
+                int mindelta = Math.Min(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
+                int maxdelta = Math.Max(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
+                scalingLevelDelta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
+            }
+
+            ApplyLevelScaling(contentTuningId, scalingLevelDelta);
+        }
+
+        public void ApplyLevelScaling(uint contentTuningId, int scalingLevelDelta)
+        {
+            var levels = Global.DB2Mgr.GetContentTuningData(contentTuningId, []);
             if (levels.HasValue)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
             }
 
-            int mindelta = Math.Min(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
-            int maxdelta = Math.Max(creatureDifficulty.DeltaLevelMax, creatureDifficulty.DeltaLevelMin);
-            int delta = mindelta == maxdelta ? mindelta : RandomHelper.IRand(mindelta, maxdelta);
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), delta);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), creatureDifficulty.ContentTuningID);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelDelta), scalingLevelDelta);
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ContentTuningID), contentTuningId);
         }
 
         ulong GetMaxHealthByLevel(uint level)
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            double baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
+            double baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cInfo.UnitClass, 0);
 
             return (ulong)Math.Ceiling(baseHealth * creatureDifficulty.HealthModifier);
         }
@@ -2913,7 +2946,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
+            return Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureAutoAttackDps, level, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cInfo.UnitClass, 0);
         }
 
         public override float GetDamageMultiplierForTarget(WorldObject target)
@@ -2930,7 +2963,7 @@ namespace Game.Entities
         {
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureDifficulty creatureDifficulty = GetCreatureDifficulty();
-            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), creatureDifficulty.ContentTuningID, (Class)cInfo.UnitClass, 0);
+            float baseArmor = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureArmor, level, creatureDifficulty.GetHealthScalingExpansion(), m_unitData.ContentTuningID, (Class)cInfo.UnitClass, 0);
             return baseArmor * creatureDifficulty.ArmorModifier;
         }
 
