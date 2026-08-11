@@ -3685,20 +3685,19 @@ namespace Game
             return mapPersonalObjectGuidsStore.ContainsKey((mapid, spawnMode, phaseId));
         }
 
-        public CellObjectGuids GetCellPersonalObjectGuids(uint mapid, Difficulty spawnMode, uint phaseId, uint cell_id)
+        public CellObjectGuids GetCellPersonalObjectGuids(uint mapid, Difficulty spawnMode, uint phaseId, uint gridId)
         {
             var guids = mapPersonalObjectGuidsStore.LookupByKey((mapid, spawnMode, phaseId));
             if (guids != null)
-                return guids.LookupByKey(cell_id);
+                return guids.LookupByKey(gridId);
 
             return null;
         }
 
         void AddSpawnDataToGrid(SpawnData data)
         {
-            uint cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
-            bool isPersonalPhase = PhasingHandler.IsPersonalPhase(data.PhaseId);
-            if (!isPersonalPhase)
+            uint gridId = GridDefines.ComputeGridCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
+            if (!PhasingHandler.IsPersonalPhase(data.PhaseId))
             {
                 foreach (Difficulty difficulty in data.SpawnDifficulties)
                 {
@@ -3706,10 +3705,10 @@ namespace Game
                     if (!mapObjectGuidsStore.ContainsKey(key))
                         mapObjectGuidsStore[key] = new();
 
-                    if (!mapObjectGuidsStore[key].ContainsKey(cellId))
-                        mapObjectGuidsStore[key][cellId] = new();
+                    if (!mapObjectGuidsStore[key].ContainsKey(gridId))
+                        mapObjectGuidsStore[key][gridId] = new();
 
-                    mapObjectGuidsStore[key][cellId].AddSpawn(data);
+                    mapObjectGuidsStore[key][gridId].AddSpawn(data);
                 }
             }
             else
@@ -3720,27 +3719,26 @@ namespace Game
                     if (!mapPersonalObjectGuidsStore.ContainsKey(key))
                         mapPersonalObjectGuidsStore[key] = new();
 
-                    if (!mapPersonalObjectGuidsStore[key].ContainsKey(cellId))
-                        mapPersonalObjectGuidsStore[key][cellId] = new();
+                    if (!mapPersonalObjectGuidsStore[key].ContainsKey(gridId))
+                        mapPersonalObjectGuidsStore[key][gridId] = new();
 
-                    mapPersonalObjectGuidsStore[key][cellId].AddSpawn(data);
+                    mapPersonalObjectGuidsStore[key][gridId].AddSpawn(data);
                 }
             }
         }
 
         void RemoveSpawnDataFromGrid(SpawnData data)
         {
-            uint cellId = GridDefines.ComputeCellCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
-            bool isPersonalPhase = PhasingHandler.IsPersonalPhase(data.PhaseId);
-            if (!isPersonalPhase)
+            uint gridId = GridDefines.ComputeGridCoord(data.SpawnPoint.GetPositionX(), data.SpawnPoint.GetPositionY()).GetId();
+            if (!PhasingHandler.IsPersonalPhase(data.PhaseId))
             {
                 foreach (Difficulty difficulty in data.SpawnDifficulties)
                 {
                     var key = (data.MapId, difficulty);
-                    if (!mapObjectGuidsStore.ContainsKey(key) || !mapObjectGuidsStore[key].ContainsKey(cellId))
+                    if (!mapObjectGuidsStore.ContainsKey(key) || !mapObjectGuidsStore[key].ContainsKey(gridId))
                         continue;
 
-                    mapObjectGuidsStore[(data.MapId, difficulty)][cellId].RemoveSpawn(data);
+                    mapObjectGuidsStore[(data.MapId, difficulty)][gridId].RemoveSpawn(data);
                 }
             }
             else
@@ -3748,10 +3746,10 @@ namespace Game
                 foreach (Difficulty difficulty in data.SpawnDifficulties)
                 {
                     var key = (data.MapId, difficulty, data.PhaseId);
-                    if (!mapPersonalObjectGuidsStore.ContainsKey(key) || !mapPersonalObjectGuidsStore[key].ContainsKey(cellId))
+                    if (!mapPersonalObjectGuidsStore.ContainsKey(key) || !mapPersonalObjectGuidsStore[key].ContainsKey(gridId))
                         continue;
 
-                    mapPersonalObjectGuidsStore[key][cellId].RemoveSpawn(data);
+                    mapPersonalObjectGuidsStore[key][gridId].RemoveSpawn(data);
                 }
             }
         }
@@ -11080,11 +11078,11 @@ namespace Game
             return mapObjectGuidsStore[key][cellid];
         }
 
-        public CellObjectGuids GetCellObjectGuids(uint mapid, Difficulty difficulty, uint cellid)
+        public CellObjectGuids GetGridObjectGuids(uint mapid, Difficulty difficulty, uint gridId)
         {
             var key = (mapid, difficulty);
 
-            if (mapObjectGuidsStore.ContainsKey(key) && mapObjectGuidsStore[key].TryGetValue(cellid, out CellObjectGuids guids))
+            if (mapObjectGuidsStore.ContainsKey(key) && mapObjectGuidsStore[key].TryGetValue(gridId, out CellObjectGuids guids))
                 return guids;
 
             return null;

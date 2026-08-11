@@ -608,7 +608,7 @@ namespace Game.Chat
             {
                 handler.SendSysMessage($"Loading all cells (mapId: {map.GetId()}). Current GameObjects {map.GetObjectsStore().Count(p => p.Value is GameObject)}, Creatures {map.GetObjectsStore().Count(p => p.Value is Creature)}");
 
-                map.LoadAllCells();
+                map.LoadAllGrids();
 
                 handler.SendSysMessage($"Cells loaded (mapId: {map.GetId()}) After load - GameObject {map.GetObjectsStore().Count(p => p.Value is GameObject)}, Creatures {map.GetObjectsStore().Count(p => p.Value is Creature)}");
             }

@@ -72,8 +72,6 @@ namespace Game.Entities
             SetObjectScale(1);
             SetOwnerGUID(owner.GetGUID());
 
-            _cellCoord = GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY());
-
             PhasingHandler.InheritPhaseShift(this, owner);
 
             return true;
@@ -202,7 +200,6 @@ namespace Game.Entities
                 return false;
             }
 
-            _cellCoord = GridDefines.ComputeCellCoord(GetPositionX(), GetPositionY());
             return true;
         }
 
@@ -305,9 +302,6 @@ namespace Game.Entities
         public void ResetGhostTime() { m_time = GameTime.GetGameTime(); }
         public CorpseType GetCorpseType() { return m_type; }
 
-        public CellCoord GetCellCoord() { return _cellCoord; }
-        public void SetCellCoord(CellCoord cellCoord) { _cellCoord = cellCoord; }
-
         public override Loot GetLootForPlayer(Player player) { return loot; }
 
         public CorpseData m_corpseData;
@@ -317,7 +311,6 @@ namespace Game.Entities
 
         CorpseType m_type;
         long m_time;
-        CellCoord _cellCoord;                                    // gride for corpse position for fast search
 
         class ValuesUpdateForPlayerWithMaskSender
         {

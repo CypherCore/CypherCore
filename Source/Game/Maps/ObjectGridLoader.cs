@@ -3,14 +3,12 @@
 
 using Framework.Constants;
 using Game.Entities;
-using System;
 using System.Collections.Generic;
 
 namespace Game.Maps
 {
     class ObjectGridLoaderBase : Notifier
     {
-        internal Cell i_cell;
         internal Grid i_grid;
         internal Map i_map;
         internal uint i_gameObjects;
@@ -18,9 +16,8 @@ namespace Game.Maps
         internal uint i_corpses;
         internal uint i_areaTriggers;
 
-        public ObjectGridLoaderBase(Grid grid, Map map, Cell cell)
+        public ObjectGridLoaderBase(Grid grid, Map map)
         {
-            i_cell = new Cell(cell);
             i_grid = grid;
             i_map = map;
         }
@@ -30,7 +27,20 @@ namespace Game.Maps
         public uint GetLoadedCorpses() { return i_corpses; }
         public uint GetLoadedAreaTriggers() { return i_areaTriggers; }
 
-        internal void LoadHelper<T>(SortedSet<ulong> guid_set, CellCoord cell, ref uint count, Map map, uint phaseId = 0, ObjectGuid? phaseOwner = null) where T : WorldObject, new()
+        public static void AddToMap<T>(T obj, Map map, ref uint objectCount) where T : WorldObject
+        {
+            CellCoord cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
+            Cell cell = new(cellCoord);
+
+            map.AddToGrid<T>(obj, cell);
+            obj.AddToWorld();
+            if (obj.IsActiveObject())
+                map.AddToActive(obj);
+
+            ++objectCount;
+        }
+
+        internal void LoadHelper<T>(SortedSet<ulong> guid_set, ref uint count, Map map, uint phaseId = 0, ObjectGuid? phaseOwner = null) where T : WorldObject, new()
         {
             foreach (var guid in guid_set)
             {
@@ -51,163 +61,65 @@ namespace Game.Maps
                     map.GetMultiPersonalPhaseTracker().RegisterTrackedObject(phaseId, phaseOwner.Value, obj);
                 }
 
-                AddObjectHelper(cell, ref count, map, obj);
+                AddToMap(obj, map, ref count);
             }
-        }
-
-        void AddObjectHelper<T>(CellCoord cellCoord, ref uint count, Map map, T obj) where T : WorldObject
-        {
-            var cell = new Cell(cellCoord);
-            map.AddToGrid(obj, cell);
-            obj.AddToWorld();
-
-            if (obj.IsCreature())
-                if (obj.IsActiveObject())
-                    map.AddToActive(obj);
-
-            ++count;
         }
     }
 
     class ObjectGridLoader : ObjectGridLoaderBase
     {
-        public ObjectGridLoader(Grid grid, Map map, Cell cell) : base(grid, map, cell) { }
+        public ObjectGridLoader(Grid grid, Map map) : base(grid, map) { }
 
         public void LoadN()
         {
             i_creatures = 0;
             i_gameObjects = 0;
             i_corpses = 0;
-            i_cell.data.cell_y = 0;
-            for (uint x = 0; x < MapConst.MaxCells; ++x)
+
+            //Load creatures and game objects
+            var grid_guids = Global.ObjectMgr.GetGridObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), i_grid.GetGridId());
+            if (grid_guids != null)
             {
-                i_cell.data.cell_x = x;
-                for (uint y = 0; y < MapConst.MaxCells; ++y)
-                {
-                    i_cell.data.cell_y = y;
-
-                    var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                    i_grid.VisitGrid(x, y, visitor);
-
-                    ObjectWorldLoader worker = new(this);
-                    visitor = new Visitor(worker, GridMapTypeMask.AllWorld);
-                    i_grid.VisitGrid(x, y, visitor);
-                }
+                LoadHelper<GameObject>(grid_guids.gameobjects, ref i_gameObjects, i_map);
+                LoadHelper<Creature>(grid_guids.creatures, ref i_creatures, i_map);
             }
+
+            //Load areatriggers
+            var areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndGrid(i_map.GetId(), i_map.GetDifficultyID(), i_grid.GetGridId());
+            if (areaTriggers != null)
+                LoadHelper<AreaTrigger>(areaTriggers, ref i_areaTriggers, i_map);
+
+
+            //Load corpses (not bones)
+            var corpses = i_map.GetCorpsesInGrid(i_grid.GetGridId());
+            if (corpses != null)
+            {
+                foreach (Corpse corpse in corpses)
+                    AddToMap(corpse, i_map, ref i_corpses);
+            }
+
             Log.outDebug(LogFilter.Maps, $"{i_gameObjects} GameObjects, {i_creatures} Creatures, {i_areaTriggers} AreaTrriggers and {i_corpses} Corpses/Bones loaded for grid {i_grid.GetGridId()} on map {i_map.GetId()}");
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids != null)
-                LoadHelper<GameObject>(cellguids.gameobjects, cellCoord, ref i_gameObjects, i_map);
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (cellguids != null)
-                LoadHelper<Creature>(cellguids.creatures, cellCoord, ref i_creatures, i_map);
-        }
-
-        public override void Visit(IList<AreaTrigger> objs)
-        {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
-            if (areaTriggers == null)
-                return;
-
-            LoadHelper<AreaTrigger>(areaTriggers, cellCoord, ref i_areaTriggers, i_map);
         }
     }
 
     class PersonalPhaseGridLoader : ObjectGridLoaderBase
     {
-        uint _phaseId;
         ObjectGuid _phaseOwner;
 
-        public PersonalPhaseGridLoader(Grid grid, Map map, Cell cell, ObjectGuid phaseOwner) : base(grid, map, cell)
+        public PersonalPhaseGridLoader(Grid grid, Map map, ObjectGuid phaseOwner) : base(grid, map)
         {
-            _phaseId = 0;
             _phaseOwner = phaseOwner;
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
-            if (cell_guids != null)
-                LoadHelper<GameObject>(cell_guids.gameobjects, cellCoord, ref i_gameObjects, i_map, _phaseId, _phaseOwner);
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            CellObjectGuids cell_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), _phaseId, cellCoord.GetId());
-            if (cell_guids != null)
-                LoadHelper<Creature>(cell_guids.creatures, cellCoord, ref i_creatures, i_map, _phaseId, _phaseOwner);
         }
 
         public void Load(uint phaseId)
         {
-            _phaseId = phaseId;
-            i_cell.data.cell_y = 0;
-            for (uint x = 0; x < MapConst.MaxCells; ++x)
+            var grid_guids = Global.ObjectMgr.GetCellPersonalObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), phaseId, i_grid.GetGridId());
+            if (grid_guids != null)
             {
-                i_cell.data.cell_x = x;
-                for (uint y = 0; y < MapConst.MaxCells; ++y)
-                {
-                    i_cell.data.cell_y = y;
-
-                    //Load creatures and game objects
-                    var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                    i_grid.VisitGrid(x, y, visitor);
-                }
+                LoadHelper<GameObject>(grid_guids.gameobjects, ref i_gameObjects, i_map, phaseId, _phaseOwner);
+                LoadHelper<Creature>(grid_guids.creatures, ref i_creatures, i_map, phaseId, _phaseOwner);
             }
         }
-    }
-
-    class ObjectWorldLoader : Notifier
-    {
-        public ObjectWorldLoader(ObjectGridLoaderBase gloader)
-        {
-            i_cell = gloader.i_cell;
-            i_map = gloader.i_map;
-            i_grid = gloader.i_grid;
-            i_corpses = gloader.i_corpses;
-        }
-
-        public override void Visit(IList<Corpse> objs)
-        {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            var corpses = i_map.GetCorpsesInCell(cellCoord.GetId());
-            if (corpses != null)
-            {
-                foreach (Corpse corpse in corpses)
-                {
-                    corpse.AddToWorld();
-                    var cell = i_grid.GetGridCell(i_cell.GetCellX(), i_cell.GetCellY());
-                    if (corpse.IsStoredInWorldObjectGridContainer())
-                    {
-                        i_map.AddToGrid(corpse, new Cell(cellCoord));
-                        cell.AddWorldObject(corpse);
-                    }
-                    else
-                        cell.AddGridObject(corpse);
-
-                    ++i_corpses;
-                }
-            }
-        }
-
-        Cell i_cell;
-        Map i_map;
-        Grid i_grid;
-
-        public uint i_corpses;
     }
 
     //Stop the creatures before unloading the NGrid

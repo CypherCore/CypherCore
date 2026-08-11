@@ -84,11 +84,11 @@ namespace Game.Maps
             m_terrain.UnloadMMapInstance(GetId(), GetInstanceId());
         }
 
-        public void LoadAllCells()
+        public void LoadAllGrids()
         {
-            for (uint cellX = 0; cellX < MapConst.TotalCellsPerMap; cellX++)
-                for (uint cellY = 0; cellY < MapConst.TotalCellsPerMap; cellY++)
-                    LoadGrid((cellX + 0.5f - MapConst.CenterGridCellId) * MapConst.SizeofCells, (cellY + 0.5f - MapConst.CenterGridCellId) * MapConst.SizeofCells);
+            for (uint gridX = 0; gridX < MapConst.MaxGrids; ++gridX)
+                for (uint gridY = 0; gridY < MapConst.MaxGrids; ++gridY)
+                    EnsureGridLoaded(new GridCoord(gridX, gridY));
         }
 
         public virtual void InitVisibilityDistance()
@@ -212,7 +212,7 @@ namespace Game.Maps
                 Log.outDebug(LogFilter.Maps, "Creating grid[{0}, {1}] for map {2} instance {3}", p.X_coord, p.Y_coord,
                     GetId(), i_InstanceId);
 
-                var grid = new Grid(p.X_coord * MapConst.MaxGrids + p.Y_coord, p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
+                var grid = new Grid(p.GetId(), p.X_coord, p.Y_coord, i_gridExpiry, WorldConfig.GetBoolValue(WorldCfg.GridUnload));
                 grid.SetGridState(GridState.Idle);
                 SetGrid(grid, p.X_coord, p.Y_coord);
 
@@ -225,37 +225,35 @@ namespace Game.Maps
             }
         }
 
-        void EnsureGridLoadedForActiveObject(Cell cell, WorldObject obj)
+        void EnsureGridLoadedForActiveObject(GridCoord p, WorldObject obj)
         {
-            EnsureGridLoaded(cell);
-            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
+            EnsureGridLoaded(p);
+            var grid = GetGrid(p.X_coord, p.Y_coord);
 
             if (obj.IsPlayer())
-                GetMultiPersonalPhaseTracker().LoadGrid(obj.GetPhaseShift(), grid, this, cell);
+                GetMultiPersonalPhaseTracker().LoadGrid(obj.GetPhaseShift(), grid, this);
 
             // refresh grid state & timer
             if (grid.GetGridState() != GridState.Active)
             {
-                Log.outDebug(LogFilter.Maps, "Active object {0} triggers loading of grid [{1}, {2}] on map {3}",
-                    obj.GetGUID(), cell.GetGridX(), cell.GetGridY(), GetId());
+                Log.outDebug(LogFilter.Maps, $"Active object {obj.GetGUID()} triggers loading of grid [{p.X_coord}, {p.Y_coord}] on map {GetId()}");
                 ResetGridExpiry(grid, 0.1f);
                 grid.SetGridState(GridState.Active);
             }
         }
 
-        private bool EnsureGridLoaded(Cell cell)
+        private bool EnsureGridLoaded(GridCoord p)
         {
-            EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
-            Grid grid = GetGrid(cell.GetGridX(), cell.GetGridY());
+            EnsureGridCreated(p);
+            var grid = GetGrid(p.X_coord, p.Y_coord);
 
             if (!grid.IsGridObjectDataLoaded())
             {
-                Log.outDebug(LogFilter.Maps, "Loading grid[{0}, {1}] for map {2} instance {3}", cell.GetGridX(),
-                    cell.GetGridY(), GetId(), i_InstanceId);
+                Log.outDebug(LogFilter.Maps, $"Loading grid[{p.X_coord}, {p.Y_coord}] for map {GetId()} instance {i_InstanceId}");
 
                 grid.SetGridObjectDataLoaded(true);
 
-                LoadGridObjects(grid, cell);
+                LoadGridObjects(grid);
 
                 Balance();
                 return true;
@@ -264,19 +262,16 @@ namespace Game.Maps
             return false;
         }
 
-        public virtual void LoadGridObjects(Grid grid, Cell cell)
+        public virtual void LoadGridObjects(Grid grid)
         {
-            ObjectGridLoader loader = new(grid, this, cell);
+            ObjectGridLoader loader = new(grid, this);
             loader.LoadN();
         }
 
         void GridMarkNoUnload(uint x, uint y)
         {
             // First make sure this grid is loaded
-            float gX = (((float)x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
-            float gY = (((float)y - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
-            Cell cell = new(gX, gY);
-            EnsureGridLoaded(cell);
+            EnsureGridLoaded(new GridCoord(x, y));
 
             // Mark as don't unload
             var grid = GetGrid(x, y);
@@ -295,12 +290,12 @@ namespace Game.Maps
 
         public void LoadGrid(float x, float y)
         {
-            EnsureGridLoaded(new Cell(x, y));
+            EnsureGridLoaded(GridDefines.ComputeGridCoord(x, y));
         }
 
         public void LoadGridForActiveObject(float x, float y, WorldObject obj)
         {
-            EnsureGridLoadedForActiveObject(new Cell(x, y), obj);
+            EnsureGridLoadedForActiveObject(GridDefines.ComputeGridCoord(x, y), obj);
         }
 
         public virtual bool AddPlayerToMap(Player player, bool initPlayer = true)
@@ -313,7 +308,7 @@ namespace Game.Maps
                 return false;
             }
             var cell = new Cell(cellCoord);
-            EnsureGridLoadedForActiveObject(cell, player);
+            EnsureGridLoadedForActiveObject(new GridCoord(cell.GetGridX(), cell.GetGridY()), player);
             AddToGrid(player, cell);
 
             Cypher.Assert(player.GetMap() == this);
@@ -345,8 +340,8 @@ namespace Game.Maps
 
         public void UpdatePersonalPhasesForPlayer(Player player)
         {
-            Cell cell = new(player.GetPositionX(), player.GetPositionY());
-            GetMultiPersonalPhaseTracker().OnOwnerPhaseChanged(player, GetGrid(cell.GetGridX(), cell.GetGridY()), this, cell);
+            GridCoord gridCoord = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY());
+            GetMultiPersonalPhaseTracker().OnOwnerPhaseChanged(player, GetGrid(gridCoord.X_coord, gridCoord.Y_coord), this);
         }
 
         public int GetWorldStateValue(int worldStateId)
@@ -456,7 +451,7 @@ namespace Game.Maps
 
             var cell = new Cell(cellCoord);
             if (obj.IsActiveObject())
-                EnsureGridLoadedForActiveObject(cell, obj);
+                EnsureGridLoadedForActiveObject(new GridCoord(cell.GetGridX(), cell.GetGridY()), obj);
             else
                 EnsureGridCreated(new GridCoord(cell.GetGridX(), cell.GetGridY()));
             AddToGrid(obj, cell);
@@ -951,7 +946,7 @@ namespace Game.Maps
 
                 RemoveFromGrid(player, oldcell);
                 if (oldcell.DiffGrid(newcell))
-                    EnsureGridLoadedForActiveObject(newcell, player);
+                    EnsureGridLoadedForActiveObject(new GridCoord(newcell.GetGridX(), newcell.GetGridY()), player);
 
                 AddToGrid(player, newcell);
             }
@@ -1343,10 +1338,12 @@ namespace Game.Maps
                 return true;
             }
 
+            GridCoord new_grid = new(new_cell.GetGridX(), new_cell.GetGridY());
+
             // in diff. grids but active creature
             if (obj.IsActiveObject())
             {
-                EnsureGridLoadedForActiveObject(new_cell, obj);
+                EnsureGridLoadedForActiveObject(new_grid, obj);
 
                 Log.outDebug(LogFilter.Maps,
                     "Active creature (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to grid[{4}, {5}].",
@@ -1360,7 +1357,7 @@ namespace Game.Maps
 
             Creature c = obj.ToCreature();
             if (c != null && c.GetCharmerOrOwnerGUID().IsPlayer())
-                EnsureGridLoaded(new_cell);
+                EnsureGridLoaded(new_grid);
 
             // in diff. loaded grid normal creature
             var grid = new GridCoord(new_cell.GetGridX(), new_cell.GetGridY());
@@ -1550,14 +1547,14 @@ namespace Game.Maps
 
             _transports.Clear();
 
-            foreach (var corpse in _corpsesByCell.Values.ToList())
+            foreach (var corpse in _corpsesByGrid.Values.ToList())
             {
                 corpse.RemoveFromWorld();
                 corpse.ResetMap();
                 corpse.Dispose();
             }
 
-            _corpsesByCell.Clear();
+            _corpsesByGrid.Clear();
             _corpsesByPlayer.Clear();
             _corpseBones.Clear();
         }
@@ -2966,9 +2963,10 @@ namespace Game.Maps
 
         public void AddCorpse(Corpse corpse)
         {
+            GridCoord gridCoord = GridDefines.ComputeGridCoord(corpse.GetPositionX(), corpse.GetPositionY());
             corpse.SetMap(this);
 
-            _corpsesByCell.Add(corpse.GetCellCoord().GetId(), corpse);
+            _corpsesByGrid.Add(gridCoord.GetId(), corpse);
             if (corpse.GetCorpseType() != CorpseType.Bones)
                 _corpsesByPlayer[corpse.GetOwnerGUID()] = corpse;
             else
@@ -2977,6 +2975,7 @@ namespace Game.Maps
 
         void RemoveCorpse(Corpse corpse)
         {
+            GridCoord gridCoord = GridDefines.ComputeGridCoord(corpse.GetPositionX(), corpse.GetPositionY());
             Cypher.Assert(corpse != null);
 
             corpse.UpdateObjectVisibilityOnDestroy();
@@ -2988,7 +2987,7 @@ namespace Game.Maps
                 corpse.ResetMap();
             }
 
-            _corpsesByCell.Remove(corpse.GetCellCoord().GetId(), corpse);
+            _corpsesByGrid.Remove(gridCoord.GetId(), corpse);
             if (corpse.GetCorpseType() != CorpseType.Bones)
                 _corpsesByPlayer.Remove(corpse.GetOwnerGUID());
             else
@@ -3034,7 +3033,6 @@ namespace Game.Maps
                 for (int i = 0; i < EquipmentSlot.End; ++i)
                     bones.SetItem((uint)i, corpse.m_corpseData.Items[i]);
 
-                bones.SetCellCoord(corpse.GetCellCoord());
                 bones.Relocate(corpse.GetPositionX(), corpse.GetPositionY(), corpse.GetPositionZ(), corpse.GetOrientation());
 
                 PhasingHandler.InheritPhaseShift(bones, corpse);
@@ -3521,9 +3519,9 @@ namespace Game.Maps
 
         public MultiMap<ulong, AreaTrigger> GetAreaTriggerBySpawnIdStore() { return _areaTriggerBySpawnIdStore; }
 
-        public List<Corpse> GetCorpsesInCell(uint cellId)
+        public List<Corpse> GetCorpsesInGrid(uint cellId)
         {
-            return _corpsesByCell.LookupByKey(cellId);
+            return _corpsesByGrid.LookupByKey(cellId);
         }
 
         public Corpse GetCorpseByPlayer(ObjectGuid ownerGuid)
@@ -3721,7 +3719,7 @@ namespace Game.Maps
             uint cell_y = cell.GetCellY();
 
             if (!cell.NoCreate())
-                EnsureGridLoaded(cell);
+                EnsureGridLoaded(new GridCoord(x, y));
 
             var grid = GetGrid(x, y);
             if (grid != null && grid.IsGridObjectDataLoaded())
@@ -4888,7 +4886,7 @@ namespace Game.Maps
         MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
         MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new();
         MultiMap<ulong, AreaTrigger> _areaTriggerBySpawnIdStore = new();
-        MultiMap<uint, Corpse> _corpsesByCell = new();
+        MultiMap<uint, Corpse> _corpsesByGrid = new();
         Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
         List<Corpse> _corpseBones = new();
 

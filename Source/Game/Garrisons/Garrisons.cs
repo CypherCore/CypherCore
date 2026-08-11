@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
@@ -728,10 +727,10 @@ namespace Game.Garrisons
 
                 if (go.GetGoType() == GameObjectTypes.GarrisonBuilding && go.GetGoInfo().GarrisonBuilding.SpawnMap != 0)
                 {
-                    var cells = Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().GarrisonBuilding.SpawnMap, map.GetDifficultyID());
-                    if (cells != null)
+                    var grids = Global.ObjectMgr.GetMapObjectGuids((uint)go.GetGoInfo().GarrisonBuilding.SpawnMap, map.GetDifficultyID());
+                    if (grids != null)
                     {
-                        foreach (var (_, guids) in cells)
+                        foreach (var (_, guids) in grids)
                         {
                             foreach (var spawnId in guids.creatures)
                             {

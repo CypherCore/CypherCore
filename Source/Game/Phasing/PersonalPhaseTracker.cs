@@ -1,7 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Maps;
 using System;
@@ -120,12 +119,12 @@ namespace Game
     {
         Dictionary<ObjectGuid, PlayerPersonalPhasesTracker> _playerData = new();
 
-        public void LoadGrid(PhaseShift phaseShift, Grid grid, Map map, Cell cell)
+        public void LoadGrid(PhaseShift phaseShift, Grid grid, Map map)
         {
             if (!phaseShift.HasPersonalPhase())
                 return;
 
-            PersonalPhaseGridLoader loader = new(grid, map, cell, phaseShift.GetPersonalGuid());
+            PersonalPhaseGridLoader loader = new(grid, map, phaseShift.GetPersonalGuid());
             PlayerPersonalPhasesTracker playerTracker = _playerData[phaseShift.GetPersonalGuid()];
 
             foreach (var phaseRef in phaseShift.GetPhases())
@@ -139,7 +138,7 @@ namespace Game
                 if (playerTracker.IsGridLoadedForPhase(grid.GetGridId(), phaseRef.Key))
                     continue;
 
-                Log.outDebug(LogFilter.Maps, $"Loading personal phase objects (phase {phaseRef.Key}) in {cell} for map {map.GetId()} instance {map.GetInstanceId()}");
+                Log.outDebug(LogFilter.Maps, $"Loading personal phase objects (phase {phaseRef.Key}) in {grid} for map {map.GetId()} instance {map.GetInstanceId()}");
 
                 loader.Load(phaseRef.Key);
 
@@ -176,14 +175,14 @@ namespace Game
                 playerTracker.UnregisterTrackedObject(obj);
         }
 
-        public void OnOwnerPhaseChanged(WorldObject phaseOwner, Grid grid, Map map, Cell cell)
+        public void OnOwnerPhaseChanged(WorldObject phaseOwner, Grid grid, Map map)
         {
             PlayerPersonalPhasesTracker playerTracker = _playerData.LookupByKey(phaseOwner.GetGUID());
             if (playerTracker != null)
                 playerTracker.OnOwnerPhasesChanged(phaseOwner);
 
             if (grid != null)
-                LoadGrid(phaseOwner.GetPhaseShift(), grid, map, cell);
+                LoadGrid(phaseOwner.GetPhaseShift(), grid, map);
         }
 
         public void MarkAllPhasesForDeletion(ObjectGuid phaseOwner)

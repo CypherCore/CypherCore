@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
-using System.Collections.Generic;
 
 namespace Game.Garrisons
 {
@@ -16,11 +15,11 @@ namespace Game.Garrisons
             InitVisibilityDistance();
         }
 
-        public override void LoadGridObjects(Grid grid, Cell cell)
+        public override void LoadGridObjects(Grid grid)
         {
-            base.LoadGridObjects(grid, cell);
+            base.LoadGridObjects(grid);
 
-            GarrisonGridLoader loader = new(grid, this, cell);
+            GarrisonGridLoader loader = new(grid, this);
             loader.LoadN();
         }
 
@@ -62,9 +61,8 @@ namespace Game.Garrisons
 
     class GarrisonGridLoader : Notifier
     {
-        public GarrisonGridLoader(Grid grid, GarrisonMap map, Cell cell)
+        public GarrisonGridLoader(Grid grid, GarrisonMap map)
         {
-            i_cell = cell;
             i_grid = grid;
             i_map = map;
             i_garrison = map.GetGarrison();
@@ -74,51 +72,19 @@ namespace Game.Garrisons
         {
             if (i_garrison != null)
             {
-                i_cell.data.cell_y = 0;
-                for (uint x = 0; x < MapConst.MaxCells; ++x)
+                foreach (var plot in i_garrison.GetPlots())
                 {
-                    i_cell.data.cell_x = x;
-                    for (uint y = 0; y < MapConst.MaxCells; ++y)
-                    {
-                        i_cell.data.cell_y = y;
-
-                        //Load creatures and game objects
-                        var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
-                        i_grid.VisitGrid(x, y, visitor);
-                    }
-                }
-            }
-
-            Log.outDebug(LogFilter.Maps, "{0} GameObjects and {1} Creatures loaded for grid {2} on map {3}", i_gameObjects, i_creatures, i_grid.GetGridId(), i_map.GetId());
-        }
-
-        public override void Visit(IList<GameObject> objs)
-        {
-            ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
-            if (!plots.Empty())
-            {
-                CellCoord cellCoord = i_cell.GetCellCoord();
-                foreach (Garrison.Plot plot in plots)
-                {
-                    Position spawn = plot.PacketInfo.PlotPos;
-                    if (cellCoord != GridDefines.ComputeCellCoord(spawn.GetPositionX(), spawn.GetPositionY()))
-                        continue;
-
                     GameObject go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
                     if (go == null)
                         continue;
 
-                    var cell = new Cell(cellCoord);
-                    i_map.AddToGrid(go, cell);
-                    go.AddToWorld();
-                    ++i_gameObjects;
+                    ObjectGridLoaderBase.AddToMap(go, i_map, ref i_gameObjects);
                 }
             }
+
+            Log.outDebug(LogFilter.Maps, $"{i_gameObjects} GameObjects and {i_creatures} Creatures loaded for grid {i_grid.GetGridId()} on map {i_map.GetId()}");
         }
 
-        public override void Visit(IList<Creature> objs) { }
-
-        Cell i_cell;
         Grid i_grid;
         GarrisonMap i_map;
         Garrison i_garrison;

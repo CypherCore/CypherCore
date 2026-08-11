@@ -384,17 +384,17 @@ namespace Game.DataStorage
                     spawn.spawnGroupData = Global.ObjectMgr.GetLegacySpawnGroup();
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.SpawnPoint.GetPositionX(), spawn.SpawnPoint.GetPositionY());
+                    GridCoord gridCoord = GridDefines.ComputeGridCoord(spawn.SpawnPoint.GetPositionX(), spawn.SpawnPoint.GetPositionY());
 
                     foreach (Difficulty difficulty in difficulties)
                     {
                         if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.MapId, difficulty)))
                             _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)] = new Dictionary<uint, SortedSet<ulong>>();
 
-                        if (!_areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)].ContainsKey(cellCoord.GetId()))
-                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()] = new SortedSet<ulong>();
+                        if (!_areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)].ContainsKey(gridCoord.GetId()))
+                            _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][gridCoord.GetId()] = new SortedSet<ulong>();
 
-                        _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][cellCoord.GetId()].Add(spawnId);
+                        _areaTriggerSpawnsByLocation[(spawn.MapId, difficulty)][gridCoord.GetId()].Add(spawnId);
                     }
 
                     // add the position to the map
@@ -415,11 +415,11 @@ namespace Game.DataStorage
             return _areaTriggerCreateProperties.LookupByKey(areaTriggerCreatePropertiesId);
         }
 
-        public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, Difficulty difficulty, uint cellId)
+        public SortedSet<ulong> GetAreaTriggersForMapAndGrid(uint mapId, Difficulty difficulty, uint gridId)
         {
             var atForMapAndDifficulty = _areaTriggerSpawnsByLocation.LookupByKey((mapId, difficulty));
             if (atForMapAndDifficulty != null)
-                return atForMapAndDifficulty.LookupByKey(cellId);
+                return atForMapAndDifficulty.LookupByKey(gridId);
 
             return null;
         }

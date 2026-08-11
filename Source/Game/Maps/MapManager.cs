@@ -53,7 +53,7 @@ namespace Game.Entities
             map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.BasemapLoadGrids))
-                map.LoadAllCells();
+                map.LoadAllGrids();
 
             return map;
         }
@@ -87,7 +87,7 @@ namespace Game.Entities
             map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.InstancemapLoadGrids))
-                map.LoadAllCells();
+                map.LoadAllGrids();
 
             return map;
         }
@@ -104,7 +104,7 @@ namespace Game.Entities
             map.InitSpawnGroupState();
 
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundMapLoadGrids))
-                map.LoadAllCells();
+                map.LoadAllGrids();
 
             return map;
         }

@@ -549,11 +549,11 @@ namespace Game.Entities
             if (mapId == 0)
                 return;
 
-            var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, GetMap().GetDifficultyID());
-            if (cells == null)
+            var grids = Global.ObjectMgr.GetMapObjectGuids(mapId, GetMap().GetDifficultyID());
+            if (grids == null)
                 return;
 
-            foreach (var (_, guids) in cells)
+            foreach (var (_, guids) in grids)
             {
                 // GameObjects on transport
                 foreach (var spawnId in guids.gameobjects)
