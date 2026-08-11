@@ -759,6 +759,16 @@ namespace Game.Entities
             return true;
         }
 
+        public void SendNewlyTamed(bool playPingFx = true)
+        {
+            PetNewlyTamed petNewlyTamed = new()
+            {
+                UnitGUID = GetGUID(),
+                PlayPingFX = playPingFx
+            };
+            SendMessageToSet(petNewlyTamed, true);
+        }
+
         public bool HaveInDiet(ItemTemplate item)
         {
             if (item.FoodType == 0)

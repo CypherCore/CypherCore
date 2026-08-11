@@ -744,9 +744,7 @@ namespace Game.Entities
             if (!pet.CreateBaseAtCreature(creatureTarget))
                 return null;
 
-            uint level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
-
-            if (!InitTamedPet(pet, level, spell_id))
+            if (!InitTamedPet(pet, GetLevel(), spell_id))
             {
                 pet.Dispose();
                 return null;

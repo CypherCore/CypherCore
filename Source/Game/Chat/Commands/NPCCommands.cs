@@ -1,18 +1,18 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Collections;
 using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Loots;
 using Game.Maps;
 using Game.Movement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.Collections;
-using Game.Loots;
 
 namespace Game.Chat
 {
@@ -434,17 +434,11 @@ namespace Game.Chat
             // set pet to defensive mode by default (some classes can't control controlled pets in fact).
             pet.SetReactState(ReactStates.Defensive);
 
-            // calculate proper level
-            uint level = Math.Max(player.GetLevel() - 5, creatureTarget.GetLevel());
-
-            // prepare visual effect for levelup
-            pet.SetLevel(level - 1);
-
             // add to world
             pet.GetMap().AddToMap(pet.ToCreature());
 
             // visual effect for levelup
-            pet.SetLevel(level);
+            pet.SendNewlyTamed();
 
             // caster have pet now
             player.SetMinion(pet, true);

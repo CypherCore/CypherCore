@@ -365,6 +365,19 @@ namespace Game.Networking.Packets
         public uint Result;
     }
 
+    class PetNewlyTamed() : ServerPacket(ServerOpcodes.PetNewlyTamed, ConnectionType.Instance)
+    {
+        public ObjectGuid UnitGUID;
+        public bool PlayPingFX;
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(UnitGUID);
+            _worldPacket.WriteBit(PlayPingFX);
+            _worldPacket.FlushBits();
+        }
+    }
+
     class PetMode : ServerPacket
     {
         public ObjectGuid PetGUID;

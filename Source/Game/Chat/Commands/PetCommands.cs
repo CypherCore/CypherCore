@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.IO;
 using Game.Entities;
 using Game.Spells;
 
@@ -48,14 +47,11 @@ namespace Game.Chat
             // "kill" original creature
             creatureTarget.DespawnOrUnsummon();
 
-            // prepare visual effect for levelup
-            pet.SetLevel(player.GetLevel() - 1);
-
             // add to world
             pet.GetMap().AddToMap(pet.ToCreature());
 
             // visual effect for levelup
-            pet.SetLevel(player.GetLevel());
+            pet.SendNewlyTamed();
 
             // caster have pet now
             player.SetMinion(pet, true);
