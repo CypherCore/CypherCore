@@ -2012,17 +2012,23 @@ namespace Game.Entities
                 }
                 case CurrentSpellTypes.Channeled:
                 {
-                    // channel spells always break generic non-delayed and any channeled spells
-                    InterruptSpell(CurrentSpellTypes.Generic, false);
+                    // channel spells always break other channeled spells
                     InterruptSpell(CurrentSpellTypes.Channeled);
 
-                    // it also does break autorepeat if not Auto Shot
-                    if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-                        m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
-                        InterruptSpell(CurrentSpellTypes.AutoRepeat);
-
                     if (!pSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
+                    {
+                        // channel spells break generic non-delayed
+                        if (m_currentSpells[CurrentSpellTypes.Generic] != null
+                            && !m_currentSpells[CurrentSpellTypes.Generic].GetSpellInfo().HasAttribute(SpellAttr9.AllowCastWhileChanneling))
+                            InterruptSpell(CurrentSpellTypes.Generic, false);
+
+                        // it also does break autorepeat if not Auto Shot
+                        if (m_currentSpells[CurrentSpellTypes.AutoRepeat] != null &&
+                            m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                            InterruptSpell(CurrentSpellTypes.AutoRepeat);
+
                         AddUnitState(UnitState.Casting);
+                    }
 
                     break;
                 }
@@ -2036,7 +2042,11 @@ namespace Game.Entities
                     {
                         // generic autorepeats break generic non-delayed and channeled non-delayed spells
                         InterruptSpell(CurrentSpellTypes.Generic, false);
-                        InterruptSpell(CurrentSpellTypes.Channeled, false);
+
+                        if (m_currentSpells[CurrentSpellTypes.Channeled] != null &&
+                            !m_currentSpells[CurrentSpellTypes.Channeled].GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel) &&
+                            !pSpell.GetSpellInfo().HasAttribute(SpellAttr9.AllowCastWhileChanneling))
+                            InterruptSpell(CurrentSpellTypes.Channeled, false);
                     }
                     break;
                 }
