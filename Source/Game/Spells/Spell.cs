@@ -1747,10 +1747,6 @@ namespace Game.Spells
                 float x = pos.GetPositionX();
                 float y = pos.GetPositionY();
 
-                CellCoord p = GridDefines.ComputeCellCoord(x, y);
-                Cell cell = new(p);
-                cell.SetNoCreate();
-
                 Map map = referer.GetMap();
 
                 if (searchInWorld)

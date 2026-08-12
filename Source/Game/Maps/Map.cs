@@ -298,6 +298,18 @@ namespace Game.Maps
             EnsureGridLoadedForActiveObject(GridDefines.ComputeGridCoord(x, y), obj);
         }
 
+        public void LoadGridsInRange(float x, float y, float radius)
+        {
+            CellArea area = Cell.CalculateCellArea(x, y, Math.Min(radius, MapConst.SizeofGrids));
+
+            GridCoord gridAreaLow = new Cell(area.low_bound).GetGridCoord();
+            GridCoord gridAreaHigh = new Cell(area.high_bound).GetGridCoord();
+
+            for (uint gx = gridAreaLow.X_coord; gx <= gridAreaHigh.X_coord; ++gx)
+                for (uint gy = gridAreaLow.Y_coord; gy <= gridAreaHigh.Y_coord; ++gy)
+                    EnsureGridLoaded(new GridCoord(gx, gy));
+        }
+
         public virtual bool AddPlayerToMap(Player player, bool initPlayer = true)
         {
             CellCoord cellCoord = GridDefines.ComputeCellCoord(player.GetPositionX(), player.GetPositionY());
@@ -545,7 +557,6 @@ namespace Game.Maps
                     MarkCell(cell_id);
                     var pair = new CellCoord(x, y);
                     var cell = new Cell(pair);
-                    cell.SetNoCreate();
                     Visit(cell, gridVisitor);
                     Visit(cell, worldVisitor);
                 }
@@ -775,7 +786,6 @@ namespace Game.Maps
 
                             var pair = new CellCoord(xx, yy);
                             var cell = new Cell(pair);
-                            cell.SetNoCreate();
 
                             var cell_relocation = new DelayedUnitRelocation(cell, pair, this, SharedConst.MaxVisibilityDistance);
                             var grid_object_relocation = new Visitor(cell_relocation, GridMapTypeMask.AllGrid);
@@ -824,7 +834,6 @@ namespace Game.Maps
 
                             var pair = new CellCoord(xx, yy);
                             var cell = new Cell(pair);
-                            cell.SetNoCreate();
                             Visit(cell, grid_notifier);
                             Visit(cell, world_notifier);
                         }
@@ -3717,9 +3726,6 @@ namespace Game.Maps
             uint y = cell.GetGridY();
             uint cell_x = cell.GetCellX();
             uint cell_y = cell.GetCellY();
-
-            if (!cell.NoCreate())
-                EnsureGridLoaded(new GridCoord(x, y));
 
             var grid = GetGrid(x, y);
             if (grid != null && grid.IsGridObjectDataLoaded())
