@@ -28,7 +28,7 @@ namespace Game.Maps
         {
             return IsValidMapCoord(x, y, z) && float.IsFinite(o);
         }
-        
+
         public static bool IsValidMapCoord(uint mapid, float x, float y)
         {
             return Global.MapMgr.IsValidMAP(mapid) && IsValidMapCoord(x, y);
@@ -98,11 +98,6 @@ namespace Game.Maps
         {
             X_coord = x;
             Y_coord = y;
-        }
-        public CellCoord(CellCoord obj)
-        {
-            X_coord = obj.X_coord;
-            Y_coord = obj.Y_coord;
         }
 
         public bool IsCoordValid()
@@ -206,7 +201,7 @@ namespace Game.Maps
         {
             return Y_coord * Limit + X_coord;
         }
-        
+
         public void Dec_x(uint val)
         {
             if (X_coord > val)

@@ -282,17 +282,10 @@ namespace Game.Maps
 
     public class CellArea
     {
-        public CellArea() { }
         public CellArea(CellCoord low, CellCoord high)
         {
             low_bound = low;
             high_bound = high;
-        }
-
-        void ResizeBorders(ref ICoord begin_cell, ref ICoord end_cell)
-        {
-            begin_cell = low_bound;
-            end_cell = high_bound;
         }
 
         public bool Check()
