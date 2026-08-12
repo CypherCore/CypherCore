@@ -69,7 +69,8 @@ namespace Game.Maps
 
             uint x_val = (uint)(x_offset + MapConst.CenterGridId + 0.5f);
             uint y_val = (uint)(y_offset + MapConst.CenterGridId + 0.5f);
-            return new GridCoord(x_val, y_val);
+
+            return new GridCoord(x_val >= 0 ? x_val < MapConst.MaxGrids ? x_val : MapConst.MaxGrids - 1 : 0, y_val >= 0 ? y_val < MapConst.MaxGrids ? y_val : MapConst.MaxGrids - 1 : 0);
         }
 
         public static GridCoord ComputeGridCoordSimple(float x, float y)
@@ -86,7 +87,7 @@ namespace Game.Maps
 
             uint x_val = (uint)(x_offset + MapConst.CenterGridCellId + 0.5f);
             uint y_val = (uint)(y_offset + MapConst.CenterGridCellId + 0.5f);
-            return new CellCoord(x_val, y_val);
+            return new CellCoord(x_val >= 0 ? x_val < MapConst.TotalCellsPerMap ? x_val : MapConst.TotalCellsPerMap - 1 : 0, y_val >= 0 ? y_val < MapConst.TotalCellsPerMap ? y_val : MapConst.TotalCellsPerMap - 1 : 0);
         }
     }
 
@@ -104,12 +105,7 @@ namespace Game.Maps
         {
             return X_coord < Limit && Y_coord < Limit;
         }
-        public ICoord Normalize()
-        {
-            X_coord = Math.Min(X_coord, Limit - 1);
-            Y_coord = Math.Min(Y_coord, Limit - 1);
-            return this;
-        }
+
         public uint GetId()
         {
             return Y_coord * Limit + X_coord;
@@ -181,22 +177,12 @@ namespace Game.Maps
             X_coord = x;
             Y_coord = y;
         }
-        public GridCoord(GridCoord obj)
-        {
-            X_coord = obj.X_coord;
-            Y_coord = obj.Y_coord;
-        }
 
         public bool IsCoordValid()
         {
             return X_coord < Limit && Y_coord < Limit;
         }
-        public ICoord Normalize()
-        {
-            X_coord = Math.Min(X_coord, Limit - 1);
-            Y_coord = Math.Min(Y_coord, Limit - 1);
-            return this;
-        }
+
         public uint GetId()
         {
             return Y_coord * Limit + X_coord;
@@ -263,7 +249,6 @@ namespace Game.Maps
             return new { X_coord, Y_coord }.GetHashCode();
         }
 
-
         public uint X_coord { get; set; }
         public uint Y_coord { get; set; }
     }
@@ -271,7 +256,6 @@ namespace Game.Maps
     public interface ICoord
     {
         bool IsCoordValid();
-        ICoord Normalize();
         uint GetId();
         void Dec_x(uint val);
         void Inc_x(uint val);

@@ -253,12 +253,12 @@ namespace Game.Maps
         {
             if (radius <= 0.0f)
             {
-                CellCoord center = (CellCoord)GridDefines.ComputeCellCoord(x, y).Normalize();
+                CellCoord center = GridDefines.ComputeCellCoord(x, y);
                 return new CellArea(center, center);
             }
 
-            CellCoord centerX = (CellCoord)GridDefines.ComputeCellCoord(x - radius, y - radius).Normalize();
-            CellCoord centerY = (CellCoord)GridDefines.ComputeCellCoord(x + radius, y + radius).Normalize();
+            CellCoord centerX = GridDefines.ComputeCellCoord(x - radius, y - radius);
+            CellCoord centerY = GridDefines.ComputeCellCoord(x + radius, y + radius);
 
             return new CellArea(centerX, centerY);
         }

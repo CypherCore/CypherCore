@@ -300,10 +300,10 @@ namespace Game.Maps
 
         public void LoadGridsInRange(float x, float y, float radius)
         {
-            CellArea area = Cell.CalculateCellArea(x, y, Math.Min(radius, MapConst.SizeofGrids));
+            radius = Math.Min(radius, MapConst.SizeofGrids);
 
-            GridCoord gridAreaLow = new Cell(area.low_bound).GetGridCoord();
-            GridCoord gridAreaHigh = new Cell(area.high_bound).GetGridCoord();
+            GridCoord gridAreaLow = GridDefines.ComputeGridCoord(x - radius, y - radius);
+            GridCoord gridAreaHigh = GridDefines.ComputeGridCoord(x + radius, y + radius);
 
             for (uint gx = gridAreaLow.X_coord; gx <= gridAreaHigh.X_coord; ++gx)
                 for (uint gy = gridAreaLow.Y_coord; gy <= gridAreaHigh.Y_coord; ++gy)
