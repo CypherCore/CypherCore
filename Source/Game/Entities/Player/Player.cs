@@ -261,9 +261,9 @@ namespace Game.Entities
             UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
             SetFullHealth();
 
-            foreach (var (_, powerType) in CliDB.PowerTypeStorage)
-                if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnInitialLogIn))
-                    SetFullPower(powerType.PowerTypeEnum);
+            foreach (var power in GetPowerTypes())
+                if (Global.DB2Mgr.GetPowerTypeEntry(power).HasFlag(PowerTypeFlags.SetToMaxOnInitialLogIn))
+                    SetFullPower(power);
 
             // original spells
             LearnDefaultSkills();
@@ -5720,9 +5720,9 @@ namespace Game.Entities
 
             // Only health and mana are set to maximum.
             SetFullHealth();
-            foreach (PowerTypeRecord powerType in CliDB.PowerTypeStorage.Values)
-                if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
-                    SetFullPower(powerType.PowerTypeEnum);
+            foreach (var power in GetPowerTypes())
+                if (Global.DB2Mgr.GetPowerTypeEntry(power).HasFlag(PowerTypeFlags.SetToMaxOnLevelUp))
+                    SetFullPower(power);
 
             // update level to hunter/summon pet
             Pet pet = GetPet();
