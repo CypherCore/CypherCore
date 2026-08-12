@@ -1376,6 +1376,90 @@ namespace Game.Networking.Packets
         }
     }
 
+    class MoveApplyInertia() : ServerPacket(ServerOpcodes.MoveApplyInertia)
+    {
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex;
+        public int InertiaID;
+        public TimeSpan LifetimeMs;
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(InertiaID);
+            _worldPacket.WriteUInt32((uint)LifetimeMs.TotalMilliseconds);
+        }
+    }
+
+    class MoveRemoveInertia() : ServerPacket(ServerOpcodes.MoveRemoveInertia)
+    {
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex;
+        public int InertiaID;
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteInt32(InertiaID);
+        }
+    }
+
+    class MoveApplyInertiaAck(WorldPacket packet) : ClientPacket(packet)
+    {
+        public MovementAck Ack;
+        public int InertiaID;
+        public TimeSpan LifetimeMs;
+
+        public override void Read()
+        {
+            Ack = new();
+            Ack.Read(_worldPacket);
+            InertiaID = _worldPacket.ReadInt32();
+            LifetimeMs = TimeSpan.FromMilliseconds(_worldPacket.ReadUInt32());
+        }
+    }
+
+    class MoveRemoveInertiaAck(WorldPacket packet) : ClientPacket(packet)
+    {
+        public MovementAck Ack;
+        public int InertiaID;
+
+        public override void Read()
+        {
+            Ack = new();
+            Ack.Read(_worldPacket);
+            InertiaID = _worldPacket.ReadInt32();
+        }
+    }
+
+    class MoveUpdateApplyInertia() : ServerPacket(ServerOpcodes.MoveApplyInertia)
+    {
+        public MovementInfo Status;
+        public int InertiaID;
+        public TimeSpan LifetimeMs;
+
+        public override void Write()
+        {
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            _worldPacket.WriteInt32(InertiaID);
+            _worldPacket.WriteUInt32((uint)LifetimeMs.TotalMilliseconds);
+        }
+    }
+
+    class MoveUpdateRemoveInertia() : ServerPacket(ServerOpcodes.MoveUpdateRemoveInertia)
+    {
+        public MovementInfo Status;
+        public int InertiaID;
+
+        public override void Write()
+        {
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            _worldPacket.WriteInt32(InertiaID);
+        }
+    }
+
     //Structs
     public struct MovementAck
     {

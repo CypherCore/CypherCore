@@ -913,6 +913,45 @@ namespace Game
             mover.SendMessageToSet(moveSkipTime, _player);
         }
 
+        [WorldPacketHandler(ClientOpcodes.MoveApplyInertiaAck, Processing = PacketProcessing.Inplace)]
+        void HandleMoveApplyInertiaAck(MoveApplyInertiaAck moveApplyInertiaAck)
+        {
+            Unit mover = ValidateAndGetUnitBeingMoved(moveApplyInertiaAck.Ack.Status.Guid, moveApplyInertiaAck.GetOpcode(), true);
+            if (mover == null)
+                return;
+
+            if (!ValidateMovementInfo(mover, moveApplyInertiaAck.Ack.Status))
+                return;
+
+            moveApplyInertiaAck.Ack.Status.Time = AdjustClientMovementTime(moveApplyInertiaAck.Ack.Status.Time);
+            mover.m_movementInfo = moveApplyInertiaAck.Ack.Status;
+
+            MoveUpdateApplyInertia updateApplyInertia = new();
+            updateApplyInertia.Status = mover.m_movementInfo;
+            updateApplyInertia.InertiaID = moveApplyInertiaAck.InertiaID;
+            updateApplyInertia.LifetimeMs = moveApplyInertiaAck.LifetimeMs;
+            mover.SendMessageToSet(updateApplyInertia, false);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.MoveRemoveInertiaAck, Processing = PacketProcessing.Inplace)]
+        void HandleMoveRemoveInertiaAck(MoveRemoveInertiaAck moveRemoveInertiaAck)
+        {
+            Unit mover = ValidateAndGetUnitBeingMoved(moveRemoveInertiaAck.Ack.Status.Guid, moveRemoveInertiaAck.GetOpcode(), true);
+            if (mover == null)
+                return;
+
+            if (!ValidateMovementInfo(mover, moveRemoveInertiaAck.Ack.Status))
+                return;
+
+            moveRemoveInertiaAck.Ack.Status.Time = AdjustClientMovementTime(moveRemoveInertiaAck.Ack.Status.Time);
+            mover.m_movementInfo = moveRemoveInertiaAck.Ack.Status;
+
+            MoveUpdateRemoveInertia updateRemoveInertia = new();
+            updateRemoveInertia.Status = mover.m_movementInfo;
+            updateRemoveInertia.InertiaID = moveRemoveInertiaAck.InertiaID;
+            mover.SendMessageToSet(updateRemoveInertia, false);
+        }
+
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {

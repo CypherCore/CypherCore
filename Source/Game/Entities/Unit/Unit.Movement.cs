@@ -2021,6 +2021,68 @@ namespace Game.Entities
             }
         }
 
+        void ApplyInertia(int id, TimeSpan duration)
+        {
+            MovementInfo.Inertia inertia = new()
+            {
+                id = id,
+                lifetime = (uint)duration.TotalMilliseconds
+            };
+            m_movementInfo.inertia = inertia;
+
+            Player movingPlayer = GetPlayerMovingMe();
+            if (movingPlayer != null)
+            {
+                MoveApplyInertia applyInertia = new()
+                {
+                    MoverGUID = GetGUID(),
+                    SequenceIndex = m_movementCounter++,
+                    InertiaID = id,
+                    LifetimeMs = duration
+                };
+                movingPlayer.SendPacket(applyInertia);
+            }
+            else
+            {
+                MoveUpdateApplyInertia updateApplyInertia = new()
+                {
+                    Status = m_movementInfo,
+                    InertiaID = id,
+                    LifetimeMs = duration
+                };
+                SendMessageToSet(updateApplyInertia, true);
+            }
+        }
+
+        void RemoveInertia(int id)
+        {
+            if (!m_movementInfo.inertia.HasValue || m_movementInfo.inertia.Value.id != id)
+                return;
+
+            m_movementInfo.inertia = null;
+
+            Player movingPlayer = GetPlayerMovingMe();
+            if (movingPlayer != null)
+            {
+                MoveRemoveInertia moveRemoveInertia = new()
+                {
+                    MoverGUID = GetGUID(),
+                    SequenceIndex = m_movementCounter++,
+                    InertiaID = id
+                };
+                movingPlayer.SendPacket(moveRemoveInertia);
+            }
+            else
+            {
+                MoveUpdateRemoveInertia updateRemoveInertia = new()
+                {
+                    Status = m_movementInfo,
+                    InertiaID = id
+                };
+                SendMessageToSet(updateRemoveInertia, true);
+            }
+        }
+
         public bool IsPlayingHoverAnim() { return m_updateFlag.PlayHoverAnim; }
 
         void SetPlayHoverAnim(bool enable, bool sendUpdate = true)
