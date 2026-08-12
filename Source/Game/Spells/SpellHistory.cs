@@ -682,6 +682,13 @@ namespace Game.Spells
             return _categoryCooldowns.ContainsKey(category);
         }
 
+        public bool HasCooldownOnHold(uint spellId)
+        {
+            // TODO: Delete this function and make SpellHistory::IsReady return enum with reason instead of bool
+            var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
+            return cooldownEntry != null && cooldownEntry.OnHold;
+        }
+
         public TimeSpan GetRemainingCooldown(SpellInfo spellInfo)
         {
             DateTime end;

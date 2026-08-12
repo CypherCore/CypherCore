@@ -5040,10 +5040,10 @@ namespace Game.Spells
                 {
                     if (!m_caster.ToUnit().GetSpellHistory().IsReady(m_spellInfo, m_castItemEntry))
                     {
-                        if (m_triggeredByAuraSpell != null || m_spellInfo.IsCooldownStartedOnEvent())
+                        if (m_triggeredByAuraSpell != null || (m_spellInfo.IsCooldownStartedOnEvent() && !m_caster.ToUnit().GetSpellHistory().HasCooldownOnHold(m_spellInfo.Id)))
                             return SpellCastResult.DontReport;
-                        else
-                            return SpellCastResult.NotReady;
+
+                        return SpellCastResult.NotReady;
                     }
 
                     if ((IsAutoRepeat() || m_spellInfo.CategoryId == 76) && !m_caster.ToUnit().IsAttackReady(WeaponAttackType.RangedAttack))
