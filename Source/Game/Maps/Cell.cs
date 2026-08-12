@@ -114,26 +114,12 @@ namespace Game.Maps
             if (!standing_cell.IsCoordValid())
                 return;
 
-            //no jokes here... Actually placing ASSERT() here was good idea, but
-            //we had some problems with DynamicObjects, which pass radius = 0.0f (DB issue?)
-            //maybe it is better to just return when radius <= 0.0f?
-            if (radius <= 0.0f)
-            {
-                map.Visit(this, visitor);
-                return;
-            }
             //lets limit the upper value for search radius
             if (radius > MapConst.SizeofGrids)
                 radius = MapConst.SizeofGrids;
 
             //lets calculate object coord offsets from cell borders.
             CellArea area = CalculateCellArea(x_off, y_off, radius);
-            //if radius fits inside standing cell
-            if (area == null)
-            {
-                map.Visit(this, visitor);
-                return;
-            }
 
             //visit all cells, found in CalculateCellArea()
             //if radius is known to reach cell area more than 4x4 then we should call optimized VisitCircle
@@ -145,23 +131,15 @@ namespace Game.Maps
                 return;
             }
 
-            //ALWAYS visit standing cell first!!! Since we deal with small radiuses
-            //it is very essential to call visitor for standing cell firstly...
-            map.Visit(this, visitor);
-
             // loop the cell range
             for (uint x = area.low_bound.X_coord; x <= area.high_bound.X_coord; ++x)
             {
                 for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
                 {
                     CellCoord cellCoord = new(x, y);
-                    //lets skip standing cell since we already visited it
-                    if (cellCoord != standing_cell)
-                    {
-                        Cell r_zone = new(cellCoord);
-                        r_zone.data.nocreate = data.nocreate;
-                        map.Visit(r_zone, visitor);
-                    }
+                    Cell r_zone = new(cellCoord);
+                    r_zone.data.nocreate = this.data.nocreate;
+                    map.Visit(r_zone, visitor);
                 }
             }
         }
@@ -319,7 +297,7 @@ namespace Game.Maps
 
         public bool Check()
         {
-           return low_bound == high_bound;
+            return low_bound == high_bound;
         }
 
         public ICoord low_bound;
