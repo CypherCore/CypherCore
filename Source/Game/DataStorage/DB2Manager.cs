@@ -330,15 +330,10 @@ namespace Game.DataStorage
                 _journalTiersByIndex.Add(journalTier);
 
             foreach (MapDifficultyRecord entry in MapDifficultyStorage.Values)
-            {
-                if (MapStorage.HasRecord(entry.MapID))
-                {
-                    if (!_mapDifficulties.ContainsKey(entry.MapID))
-                        _mapDifficulties[entry.MapID] = new Dictionary<int, MapDifficultyRecord>();
+                if (MapStorage.HasRecord(entry.MapID) && (entry.DifficultyID == 0 || DifficultyStorage.HasRecord((uint)entry.DifficultyID)))
+                    _mapDifficulties.Add(entry);
 
-                    _mapDifficulties[entry.MapID][entry.DifficultyID] = entry;
-                }
-            }
+            _mapDifficulties = _mapDifficulties.OrderBy(entry => entry.MapID).ThenBy(entry => entry.DifficultyID).ToList();
 
             List<MapDifficultyXConditionRecord> mapDifficultyConditions = [.. MapDifficultyXConditionStorage.Values];
 
@@ -1663,70 +1658,55 @@ namespace Game.DataStorage
 
         public MapDifficultyRecord GetDefaultMapDifficulty(uint mapId)
         {
-            Difficulty NotUsed = Difficulty.None;
-            return GetDefaultMapDifficulty(mapId, ref NotUsed);
-        }
+            var difficultyBegin = _mapDifficulties.FindIndex(mapRecord => mapRecord.MapID == mapId);
 
-        public MapDifficultyRecord GetDefaultMapDifficulty(uint mapId, ref Difficulty difficulty)
-        {
-            var difficultiesForMap = _mapDifficulties.LookupByKey(mapId);
-            if (difficultiesForMap == null)
-                return null;
-
-            if (difficultiesForMap.Empty())
-                return null;
-
-            foreach (var pair in difficultiesForMap)
+            MapDifficultyRecord defaultDifficulty = null;
+            while (difficultyBegin != _mapDifficulties.Count - 1)
             {
-                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(pair.Key);
-                if (difficultyEntry == null)
-                    continue;
-
-                if (difficultyEntry.HasFlag(DifficultyFlags.Default))
+                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(_mapDifficulties[difficultyBegin].DifficultyID);
+                if (difficultyEntry != null)
                 {
-                    difficulty = (Difficulty)pair.Key;
-                    return pair.Value;
+                    // if a default difficulty exists then use that
+                    if (difficultyEntry.HasFlag(DifficultyFlags.Default))
+                    {
+                        defaultDifficulty = _mapDifficulties[difficultyBegin];
+                        break;
+                    }
+                    // otherwise pick first existing difficulty
+                    if (defaultDifficulty == null)
+                        defaultDifficulty = _mapDifficulties[difficultyBegin];
                 }
+                ++difficultyBegin;
             }
 
-            difficulty = (Difficulty)difficultiesForMap.First().Key;
 
-            return difficultiesForMap.First().Value;
+            // if no difficulty was found in Difficulty.db2 then we should only have DIFFICULTY_NONE
+            return defaultDifficulty;
         }
 
         public MapDifficultyRecord GetMapDifficultyData(uint mapId, Difficulty difficulty)
         {
-            var dictionaryMapDiff = _mapDifficulties.LookupByKey(mapId);
-            if (dictionaryMapDiff == null)
-                return null;
-
-            var mapDifficulty = dictionaryMapDiff.LookupByKey(difficulty);
-            if (mapDifficulty == null)
-                return null;
-
-            return mapDifficulty;
+            return _mapDifficulties.FirstOrDefault(mapDifficulty => mapDifficulty.MapID == mapId && mapDifficulty.DifficultyID == (short)difficulty);
         }
 
-        public MapDifficultyRecord GetDownscaledMapDifficultyData(uint mapId, ref Difficulty difficulty)
+        public MapDifficultyRecord GetDownscaledMapDifficultyData(uint mapId, Difficulty difficulty)
         {
-            DifficultyRecord diffEntry = DifficultyStorage.LookupByKey(difficulty);
-            if (diffEntry == null)
-                return GetDefaultMapDifficulty(mapId, ref difficulty);
-
-            Difficulty tmpDiff = difficulty;
-            MapDifficultyRecord mapDiff = GetMapDifficultyData(mapId, tmpDiff);
-            while (mapDiff == null)
+            MapDifficultyRecord mapDiff = null;
+            Difficulty currentDifficulty = difficulty;
+            do
             {
-                tmpDiff = (Difficulty)diffEntry.FallbackDifficultyID;
-                diffEntry = DifficultyStorage.LookupByKey(tmpDiff);
-                if (diffEntry == null)
-                    return GetDefaultMapDifficulty(mapId, ref difficulty);
+                mapDiff = GetMapDifficultyData(mapId, currentDifficulty);
+                DifficultyRecord difficultyEntry = DifficultyStorage.LookupByKey(currentDifficulty);
+                if (currentDifficulty == Difficulty.None)
+                    break;
 
-                // pull new data
-                mapDiff = GetMapDifficultyData(mapId, tmpDiff); // we are 10 normal or 25 normal
-            }
+                currentDifficulty = (Difficulty)difficultyEntry.FallbackDifficultyID;
 
-            difficulty = tmpDiff;
+            } while (mapDiff == null);
+
+            if (mapDiff == null)
+                mapDiff = GetDefaultMapDifficulty(mapId);
+
             return mapDiff;
         }
 
@@ -2312,7 +2292,7 @@ namespace Game.DataStorage
 
         public bool HasItemCurrencyCost(uint itemId) { return _itemsWithCurrencyCost.Contains(itemId); }
 
-        public Dictionary<uint, Dictionary<int, MapDifficultyRecord>> GetMapDifficulties() { return _mapDifficulties; }
+        public List<MapDifficultyRecord> GetMapDifficulties() { return _mapDifficulties; }
 
         public void AddDB2<T>(uint tableHash, DB6Storage<T> store) where T : new()
         {
@@ -2369,7 +2349,7 @@ namespace Game.DataStorage
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
         List<JournalTierRecord> _journalTiersByIndex = new();
-        Dictionary<uint, Dictionary<int, MapDifficultyRecord>> _mapDifficulties = new();
+        List<MapDifficultyRecord> _mapDifficulties = new();
         MultiMap<uint, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
         Dictionary<uint, MountRecord> _mountsBySpellId = new();
         MultiMap<uint, MountTypeXCapabilityRecord> _mountCapabilitiesByType = new();

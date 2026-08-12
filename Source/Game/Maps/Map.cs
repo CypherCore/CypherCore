@@ -1728,7 +1728,7 @@ namespace Game.Maps
             Group group = player.GetGroup();
             Difficulty targetDifficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
-            var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref targetDifficulty);
+            var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, targetDifficulty);
             if (mapDiff == null)
                 return new TransferAbortParams(TransferAbortReason.Difficulty);
 
@@ -1739,7 +1739,7 @@ namespace Game.Maps
             //Other requirements
             {
                 TransferAbortParams abortParams = new();
-                if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, abortParams, true))
+                if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, mapDiff.GetDifficultyID()), mapid, abortParams, true))
                     return abortParams;
             }
 

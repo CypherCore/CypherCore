@@ -365,7 +365,7 @@ namespace Game.Entities
 
                 Group group = GetGroup();
                 Difficulty target_difficulty = group != null ? group.GetDifficultyID(mapEntry) : GetDifficultyID(mapEntry);
-                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
+                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, target_difficulty);
                 if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
                 {
                     var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions(mapDiff.Id);
@@ -427,7 +427,7 @@ namespace Game.Entities
                             if (abortParams != null)
                             {
                                 abortParams.Reason = TransferAbortReason.Difficulty;
-                                abortParams.Arg = (byte)target_difficulty;
+                                abortParams.Arg = (byte)mapDiff.DifficultyID;
                                 abortParams.MapDifficultyXConditionId = failedMapDifficultyXCondition;
                             }
                         }
@@ -516,7 +516,7 @@ namespace Game.Entities
                     Difficulty difficulty = group != null ? group.GetDifficultyID(mapEntry) : GetDifficultyID(mapEntry);
                     ObjectGuid instanceOwnerGuid = group != null ? group.GetRecentInstanceOwner(targetMapId) : GetGUID();
 
-                    InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, new MapDb2Entries(mapEntry, Global.DB2Mgr.GetDownscaledMapDifficultyData(targetMapId, ref difficulty)));
+                    InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, new MapDb2Entries(mapEntry, Global.DB2Mgr.GetDownscaledMapDifficultyData(targetMapId, difficulty)));
                     if (instanceLock != null)
                         entranceLocation = Global.ObjectMgr.GetWorldSafeLoc(instanceLock.GetData().EntranceWorldSafeLocId);
                 }

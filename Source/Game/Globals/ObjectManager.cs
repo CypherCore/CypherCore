@@ -3417,17 +3417,9 @@ namespace Game
             }
 
             // Build single time for check spawnmask
-            Dictionary<uint, List<Difficulty>> spawnMasks = new();
-            foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
-            {
-                foreach (var difficultyPair in mapDifficultyPair.Value)
-                {
-                    if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
-                        spawnMasks[mapDifficultyPair.Key] = new List<Difficulty>();
-
-                    spawnMasks[mapDifficultyPair.Key].Add((Difficulty)difficultyPair.Key);
-                }
-            }
+            MultiMap<uint, Difficulty> spawnMasks = new();
+            foreach (MapDifficultyRecord mapDifficulty in CliDB.MapDifficultyStorage.Values)
+                spawnMasks.Add(mapDifficulty.MapID, mapDifficulty.GetDifficultyID());
 
             PhaseShift phaseShift = new();
 
@@ -4280,17 +4272,9 @@ namespace Game
             uint count = 0;
 
             // build single time for check spawnmask
-            Dictionary<uint, List<Difficulty>> spawnMasks = new();
-            foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
-            {
-                foreach (var difficultyPair in mapDifficultyPair.Value)
-                {
-                    if (!spawnMasks.ContainsKey(mapDifficultyPair.Key))
-                        spawnMasks[mapDifficultyPair.Key] = new List<Difficulty>();
-
-                    spawnMasks[mapDifficultyPair.Key].Add((Difficulty)difficultyPair.Key);
-                }
-            }
+            MultiMap<uint, Difficulty> spawnMasks = new();
+            foreach (MapDifficultyRecord mapDifficulty in CliDB.MapDifficultyStorage.Values)
+                spawnMasks.Add(mapDifficulty.MapID, mapDifficulty.GetDifficultyID());
 
             PhaseShift phaseShift = new();
 

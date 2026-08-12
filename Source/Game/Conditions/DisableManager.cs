@@ -358,8 +358,10 @@ namespace Game
                             DisableFlags disabledModes = (DisableFlags)data.flags;
                             var group = player.GetGroup();
                             Difficulty targetDifficulty = group != null ? group.GetDifficultyID(mapEntry) : player.GetDifficultyID(mapEntry);
-                            Global.DB2Mgr.GetDownscaledMapDifficultyData(entry, ref targetDifficulty);
-                            switch (targetDifficulty)
+                            MapDifficultyRecord mapDifficulty = Global.DB2Mgr.GetDownscaledMapDifficultyData(entry, targetDifficulty);
+                            if (mapDifficulty == null)
+                                return false;
+                            switch ((Difficulty)mapDifficulty.DifficultyID)
                             {
                                 case Difficulty.Normal:
                                     return disabledModes.HasFlag(DisableFlags.DungeonStatusNormal);

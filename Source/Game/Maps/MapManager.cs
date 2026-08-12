@@ -69,9 +69,6 @@ namespace Game.Entities
                 return null;
             }
 
-            // some instances only have one difficulty
-            Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty);
-
             Log.outDebug(LogFilter.Maps, $"MapInstanced::CreateInstance: {(instanceLock?.IsNew() == true ? "new" : " ")} map instance {instanceId} for {mapId} created with difficulty {Global.DB2Mgr.GetDifficultyName(difficulty)}");
 
             InstanceMap map = new InstanceMap(mapId, i_gridCleanUpDelay, instanceId, difficulty, team, instanceLock, lfgDungeonsId);
@@ -164,7 +161,7 @@ namespace Game.Entities
                 {
                     Group group = player.GetGroup();
                     Difficulty difficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
-                    MapDb2Entries entries = new(entry, Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty));
+                    MapDb2Entries entries = new(entry, Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, difficulty));
                     ObjectGuid instanceOwnerGuid = group != null ? group.GetRecentInstanceOwner(mapId) : player.GetGUID();
                     InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, entries);
                     if (instanceLock != null)
@@ -173,7 +170,7 @@ namespace Game.Entities
 
                         // Reset difficulty to the one used in instance lock
                         if (!entries.Map.IsFlexLocking())
-                            difficulty = instanceLock.GetDifficultyId();
+                            entries.MapDifficulty = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, instanceLock.GetDifficultyId());
                     }
                     else
                     {
@@ -200,7 +197,7 @@ namespace Game.Entities
 
                     if (map == null)
                     {
-                        map = CreateInstance(mapId, newInstanceId, instanceLock, difficulty, SharedConst.GetTeamIdForTeam(Global.CharacterCacheStorage.GetCharacterTeamByGuid(instanceOwnerGuid)), group, lfgDungeonsId);
+                        map = CreateInstance(mapId, newInstanceId, instanceLock, entries.MapDifficulty.GetDifficultyID(), SharedConst.GetTeamIdForTeam(Global.CharacterCacheStorage.GetCharacterTeamByGuid(instanceOwnerGuid)), group, lfgDungeonsId);
                         if (group != null)
                             group.SetRecentInstance(mapId, instanceOwnerGuid, newInstanceId);
                         else
@@ -256,7 +253,7 @@ namespace Game.Entities
             {
                 Group group = player.GetGroup();
                 Difficulty difficulty = group != null ? group.GetDifficultyID(entry) : player.GetDifficultyID(entry);
-                MapDb2Entries entries = new(entry, Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, ref difficulty));
+                MapDb2Entries entries = new(entry, Global.DB2Mgr.GetDownscaledMapDifficultyData(mapId, difficulty));
 
                 ObjectGuid instanceOwnerGuid = group != null ? group.GetRecentInstanceOwner(mapId) : player.GetGUID();
                 InstanceLock instanceLock = Global.InstanceLockMgr.FindActiveInstanceLock(instanceOwnerGuid, entries);
