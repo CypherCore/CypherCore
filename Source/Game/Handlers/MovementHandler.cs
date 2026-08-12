@@ -121,20 +121,6 @@ namespace Game
             else if (plrMover != null && plrMover.GetTransport() != null)                // if we were on a transport, leave
                 plrMover.GetTransport().RemovePassenger(plrMover);
 
-            // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-            if (opcode == ClientOpcodes.MoveFallLand && plrMover != null && !plrMover.IsInFlight())
-                plrMover.HandleFall(movementInfo);
-
-            // interrupt parachutes upon falling or landing in water
-            if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim || opcode == ClientOpcodes.MoveSetFly)
-                mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LandingOrFlight); // Parachutes
-
-            if (opcode == ClientOpcodes.MoveSetFly || opcode == ClientOpcodes.MoveSetAdvFly)
-            {
-                _player.UnsummonPetTemporaryIfAny(); // always do the pet removal on current client activeplayer only
-                _player.UnsummonBattlePetTemporaryIfAny(true);
-            }
-
             movementInfo.Guid = mover.GetGUID();
             movementInfo.Time = AdjustClientMovementTime(movementInfo.Time);
             mover.m_movementInfo = movementInfo;
@@ -163,6 +149,20 @@ namespace Game
             MoveUpdate moveUpdate = new();
             moveUpdate.Status = mover.m_movementInfo;
             mover.SendMessageToSet(moveUpdate, GetPlayer());
+
+            // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
+            if (opcode == ClientOpcodes.MoveFallLand && plrMover != null && !plrMover.IsInFlight())
+                plrMover.HandleFall();
+
+            // interrupt parachutes upon falling or landing in water
+            if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim)
+                mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LandingOrFlight); // Parachutes
+
+            if (opcode == ClientOpcodes.MoveSetFly || opcode == ClientOpcodes.MoveSetAdvFly)
+            {
+                _player.UnsummonPetTemporaryIfAny(); // always do the pet removal on current client activeplayer only
+                _player.UnsummonBattlePetTemporaryIfAny(true);
+            }
 
             if (plrMover != null)                                            // nothing is charmed, or player charmed
             {

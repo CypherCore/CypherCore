@@ -2275,10 +2275,10 @@ namespace Game.Entities
             return startMoney;
         }
 
-        public void HandleFall(MovementInfo movementInfo)
+        public void HandleFall()
         {
             // calculate total z distance of the fall
-            float z_diff = m_lastFallZ - movementInfo.Pos.posZ;
+            float z_diff = m_lastFallZ - m_movementInfo.Pos.posZ;
             Log.outDebug(LogFilter.Server, "zDiff = {0}", z_diff);
 
             //Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
@@ -2296,8 +2296,8 @@ namespace Game.Entities
                 {
                     uint damage = (uint)(damageperc * GetMaxHealth() * WorldConfig.GetFloatValue(WorldCfg.RateDamageFall));
 
-                    float height = movementInfo.Pos.posZ;
-                    UpdateGroundPositionZ(movementInfo.Pos.posX, movementInfo.Pos.posY, ref height);
+                    float height = m_movementInfo.Pos.posZ;
+                    UpdateGroundPositionZ(m_movementInfo.Pos.posX, m_movementInfo.Pos.posY, ref height);
 
                     damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModifyFallDamagePct));
 
@@ -2320,7 +2320,7 @@ namespace Game.Entities
                     }
 
                     //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-                    Log.outDebug(LogFilter.Player, $"FALLDAMAGE z={movementInfo.Pos.GetPositionZ()} sz={height} pZ={GetPositionZ()} FallTime={movementInfo.jump.fallTime} mZ={height} damage={damage} SF={safe_fall}\nPlayer debug info:\n{GetDebugInfo()}");
+                    Log.outDebug(LogFilter.Player, $"FALLDAMAGE z={m_movementInfo.Pos.GetPositionZ()} sz={height} pZ={GetPositionZ()} FallTime={m_movementInfo.jump.fallTime} mZ={height} damage={damage} SF={safe_fall}\nPlayer debug info:\n{GetDebugInfo()}");
                 }
             }
         }
