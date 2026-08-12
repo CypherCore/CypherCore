@@ -2065,6 +2065,26 @@ namespace Game.Entities
             pSpell.m_selfContainer = m_currentSpells[pSpell.GetCurrentContainer()];
         }
 
+        public void CancelAutoRepeatSpell()
+        {
+            var spell = GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
+            if (spell != null)
+            {
+                if (!spell.IsInterruptable() || spell.GetState() == SpellState.Launched || spell.GetState() == SpellState.Idle)
+                {
+                    m_currentSpells[CurrentSpellTypes.AutoRepeat] = null;
+                    spell.SetReferencedFromCurrent(false);
+                }
+                else
+                    spell.Cancel(SpellCastResult.Interrupted);
+
+                // send autorepeat cancel message for autorepeat spells
+                Player player = ToPlayer();
+                if (player != null)
+                    player.SendAutoRepeatCancel(this);
+            }
+        }
+
         public bool IsNonMeleeSpellCast(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false, bool isAutoshoot = false, bool skipInstant = true, bool skipChanneledAllowingActions = false)
         {
             // We don't do loop here to explicitly show that melee spell is excluded.

@@ -328,9 +328,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CancelAutoRepeatSpell, Processing = PacketProcessing.Inplace)]
         void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell packet)
         {
-            //may be better send SMSG_CANCEL_AUTO_REPEAT?
-            //cancel and prepare for deleting
-            _player.InterruptSpell(CurrentSpellTypes.AutoRepeat);
+            _player.CancelAutoRepeatSpell();
         }
 
         [WorldPacketHandler(ClientOpcodes.CancelChannelling, Processing = PacketProcessing.Inplace)]
