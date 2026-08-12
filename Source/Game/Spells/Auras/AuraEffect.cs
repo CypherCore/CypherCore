@@ -1728,13 +1728,11 @@ namespace Game.Spells
                     if (!isAffectedByFeignDeath(unit))
                         continue;
 
-                    for (var i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i++)
+                    for (CurrentSpellTypes i = CurrentSpellTypes.Generic; i < CurrentSpellTypes.Max; i = (i + 1))
                     {
-                        if (unit.GetCurrentSpell(i) != null
-                        && unit.GetCurrentSpell(i).m_targets.GetUnitTargetGUID() == target.GetGUID())
-                        {
+                        Spell currentSpell = unit.GetCurrentSpell(i);
+                        if (currentSpell != null && currentSpell.m_targets.GetUnitTargetGUID() == target.GetGUID())
                             unit.InterruptSpell(i, false);
-                        }
                     }
                 }
 
