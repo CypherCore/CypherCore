@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Miscellaneous;
 using System;
 
 namespace Game.DataStorage
@@ -362,7 +361,7 @@ namespace Game.DataStorage
         public uint RequiredAbility;
         public ushort ItemLevel;
         public int[] Flags = new int[5];
-        public RaceMask<int> AllowableRace = new(2);
+        public int[] AllowableRace = new int[2];
     }
 
     public sealed class ItemSetRecord
@@ -411,7 +410,7 @@ namespace Game.DataStorage
         public uint MaxCount;
         public uint MinReputation;
         public uint RequiredAbility;
-        public RaceMask<int> AllowableRace = new(2);
+        public int[] AllowableRace = new int[2];
         public uint SellPrice;
         public uint BuyPrice;
         public uint VendorStackCount;

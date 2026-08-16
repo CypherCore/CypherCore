@@ -2367,7 +2367,7 @@ namespace Game
                 uint item = result.Read<uint>(2);
                 uint idx = result.Read<uint>(3);
 
-                if (creatureTemplateStorage.ContainsKey(entry))
+                if (!creatureTemplateStorage.ContainsKey(entry))
                 {
                     Log.outError(LogFilter.Sql, $"Table `creature_questitem` has data for nonexistent creature (entry: {entry}, difficulty: {difficulty} idx: {idx}), skipped");
                     continue;
@@ -3449,7 +3449,7 @@ namespace Game
                 data.spawntimesecs = result.Read<int>(9);
                 data.WanderDistance = result.Read<float>(10);
                 data.currentwaypoint = result.Read<uint>(11);
-                data.curHealthPct = result.Read<uint>(12);
+                data.curHealthPct = result.Read<uint?>(12);
                 data.movementType = result.Read<byte>(13);
                 data.SpawnDifficulties = ParseSpawnDifficulties(result.Read<string>(14), "creature", guid, data.MapId, spawnMasks.LookupByKey(data.MapId));
                 short gameEvent = result.Read<short>(15);
@@ -6040,7 +6040,8 @@ namespace Game
 
                     foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                     {
-                        if (!characterLoadout.RaceMask.HasRace((Race)race.Id))
+                        var raceMask = new RaceMask<int>(characterLoadout.RaceMask);
+                        if (!raceMask.HasRace((Race)race.Id))
                             continue;
 
                         var playerInfo = _playerInfo.LookupByKey(Tuple.Create((Race)race.Id, (Class)characterLoadout.ChrClassID));
@@ -6151,7 +6152,8 @@ namespace Game
                     {
                         foreach (ChrRacesRecord race in CliDB.ChrRacesStorage.Values)
                         {
-                            if (rcInfo.RaceMask.IsEmpty() || rcInfo.RaceMask.HasRace((Race)race.Id))
+                            var raceMask = new RaceMask<int>(rcInfo.RaceMask);
+                            if (raceMask.IsEmpty() || raceMask.HasRace((Race)race.Id))
                             {
                                 for (Class classIndex = Class.Warrior; classIndex < Class.Max; ++classIndex)
                                 {
@@ -6357,8 +6359,8 @@ namespace Game
 
                 } while (result.NextRow());
 
-                //                               0      1      2    3    4    5
-                result = DB.World.Query("SELECT class, level, str, agi, sta, inte FROM player_classlevelstats");
+                //                               0      1      2    3    4    5     6
+                result = DB.World.Query("SELECT class, level, str, agi, sta, inte, spi FROM player_classlevelstats");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 level stats definitions. DB table `player_classlevelstats` is empty.");
@@ -7461,6 +7463,7 @@ namespace Game
                     }
                 }
                 // AllowableRaces, can be -1/RACEMASK_ALL_PLAYABLE to allow any race
+                var g = RaceMask.All_V<int>(2);
                 if (qinfo.AllowableRaces != RaceMask.All_V<int>(2))
                 {
                     if (!qinfo.AllowableRaces.IsEmpty() && (qinfo.AllowableRaces & RaceMask.AllPlayable_V<int>(2)).IsEmpty())

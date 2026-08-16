@@ -102,7 +102,7 @@ namespace Game
             AreaGroupID = fields.Read<uint>(102);
             LimitTime = fields.Read<uint>(103);
             var rawValue = fields.Read<ulong>(104);
-            AllowableRaces = new([(int)(rawValue & 0xFFFFFFFF), (int)(rawValue >> 32)]);
+            AllowableRaces = new([(int)(rawValue & int.MaxValue), (int)(rawValue >> 32)]);
             ResetByScheduler = fields.Read<bool>(105);
             Expansion = fields.Read<int>(106);
             ManagedWorldStateID = fields.Read<int>(107);

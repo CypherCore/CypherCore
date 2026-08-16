@@ -3,10 +3,8 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using Framework.Database;
 using Framework.Dynamic;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -238,7 +236,7 @@ namespace Game.DataStorage
                         bool hasRef = refData.Entries.TryGetValue(i, out int refId);
 
                         long recordIndex = i + previousRecordCount;
-                        long recordOffset =  (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
+                        long recordOffset = (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
 
                         var rec = new WDC4Row(this, bitReader, (int)recordOffset, Header.HasIndexTable() ? (isIndexEmpty ? i : indexData[i]) : -1, hasRef ? refId : -1, stringsTable);
                         Records.Add(rec.Id, rec);
@@ -258,7 +256,7 @@ namespace Game.DataStorage
                 }
             }
 
-            return true;            
+            return true;
         }
     }
 

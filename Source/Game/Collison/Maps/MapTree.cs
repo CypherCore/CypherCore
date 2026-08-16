@@ -249,7 +249,7 @@ namespace Game.Collision
 
         public static string GetTileFileName(uint mapID, uint tileX, uint tileY, string extension)
         {
-            return $"{mapID:D4}/{mapID:D4}_{tileX:D2}_{tileY:D2}.{extension}";
+            return $"/{mapID:D4}/{mapID:D4}_{tileX:D2}_{tileY:D2}.{extension}";
         }
 
         public bool GetLocationInfo(Vector3 pos, LocationInfo info)

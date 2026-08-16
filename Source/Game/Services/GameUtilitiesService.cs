@@ -187,7 +187,7 @@ namespace Game
         }
 
         [Service(OriginalHash.GameUtilitiesService, 1)]
-        BattlenetRpcErrorCode HandleProcessTask(ProcessTaskRequest request, ProcessTaskResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        BattlenetRpcErrorCode HandleProcessTask(ProcessTaskRequest request, ProcessTaskResponse response, Action<WorldSession, BattlenetRpcErrorCode, IMessage> continuation)
         {
             List<(string, object)> Params = [];
             List<(string, object)> responseValues = [];
@@ -214,7 +214,7 @@ namespace Game
         }
 
         [Service(OriginalHash.GameUtilitiesService, 2)]
-        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response, Action<WorldSession, BattlenetRpcErrorCode, IMessage> continuation)
         {
             List<object> responseValues = [];
 

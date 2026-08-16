@@ -73,7 +73,7 @@ namespace Framework.ClientBuild
 
                     ClientBuildAuthKey buildKey = new()
                     {
-                        Variant = new() { Platform = platformType.ToFourCC(), Arch = arch.ToFourCC(), Type = type.ToFourCC() },
+                        Variant = new() { Platform = (int)platformType.ToFourCC(), Arch = (int)arch.ToFourCC(), Type = (int)type.ToFourCC() },
                         Key = result.Read<byte[]>(4)
                     };
 

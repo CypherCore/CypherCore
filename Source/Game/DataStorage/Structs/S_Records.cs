@@ -3,7 +3,6 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Game.Miscellaneous;
 
 namespace Game.DataStorage
 {
@@ -46,7 +45,6 @@ namespace Game.DataStorage
         public uint Id;
         public uint FirstSceneScriptID;
         public uint NextSceneScriptID;
-        public int Flags;
         public int Unknown915;
     }
 
@@ -116,7 +114,7 @@ namespace Game.DataStorage
         public short UniqueBit;
         public short TradeSkillCategoryID;
         public ushort SkillupSkillLineID;
-        public RaceMask<int> RaceMask = new(2);
+        public int[] RaceMask = new int[2];
 
         public bool HasFlag(SkillLineAbilityFlags skillLineAbilityFlags) { return (Flags & (int)skillLineAbilityFlags) != 0; }
     }
@@ -138,7 +136,7 @@ namespace Game.DataStorage
         public int Availability;
         public sbyte MinLevel;
         public ushort SkillTierID;
-        public RaceMask<int> RaceMask = new(2);
+        public int[] RaceMask = new int[2];
 
         public bool HasFlag(SkillRaceClassInfoFlags skillRaceClassInfoFlags) { return (Flags & (int)skillRaceClassInfoFlags) != 0; }
     }

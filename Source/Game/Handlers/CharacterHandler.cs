@@ -176,7 +176,8 @@ namespace Game
             if (req.ClassMask != 0 && (req.ClassMask & (1 << ((int)playerClass - 1))) == 0)
                 return false;
 
-            if (race != Race.None && !req.RaceMask.IsEmpty() && req.RaceMask != RaceMask.All_V<int>(2) && !req.RaceMask.HasRace(race))
+            var raceMask = new RaceMask<int>(req.RaceMask);
+            if (race != Race.None && !raceMask.IsEmpty() && raceMask != RaceMask.All_V<int>(2) && !raceMask.HasRace(race))
                 return false;
 
             if (req.AchievementID != 0 /*&& !HasAchieved(req->AchievementID)*/)

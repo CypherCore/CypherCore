@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Miscellaneous;
 
 namespace Game.DataStorage
 {
@@ -25,10 +24,10 @@ namespace Game.DataStorage
         public int[] ReputationMax = new int[4];
         public float[] ParentFactionMod = new float[2];                        // Faction outputs rep * ParentFactionModOut as spillover reputation
         public byte[] ParentFactionCap = new byte[2];                        // The highest rank the faction will profit from incoming spillover
-        public RaceMask<int> ReputationRaceMask1 = new(2);
-        public RaceMask<int> ReputationRaceMask2 = new(2);
-        public RaceMask<int> ReputationRaceMask3 = new(2);
-        public RaceMask<int> ReputationRaceMask4 = new(2);
+        public int[] ReputationRaceMask1 = new int[2];
+        public int[] ReputationRaceMask2 = new int[2];
+        public int[] ReputationRaceMask3 = new int[2];
+        public int[] ReputationRaceMask4 = new int[2];
 
         // helpers
         public bool CanHaveReputation()

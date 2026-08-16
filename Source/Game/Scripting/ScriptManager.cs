@@ -168,7 +168,7 @@ namespace Game.Scripting
                                 if (attribute.Args.Empty())
                                     Activator.CreateInstance(genericType);
                                 else
-                                    Activator.CreateInstance(genericType, name, attribute.Args);
+                                    Activator.CreateInstance(genericType, new object[] { name }.Combine(attribute.Args));
                                 continue;
                             default:
                                 genericType = typeof(GenericCreatureScript<>).MakeGenericType(type);
@@ -1282,13 +1282,13 @@ namespace Game.Scripting
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class ScriptAttribute : Attribute
     {
+        public string Name { get; private set; }
+        public object[] Args { get; private set; }
+
         public ScriptAttribute(string name = "", params object[] args)
         {
             Name = name;
             Args = args;
         }
-
-        public string Name { get; private set; }
-        public object[] Args { get; private set; }
     }
 }

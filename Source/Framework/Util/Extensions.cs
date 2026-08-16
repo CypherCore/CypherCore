@@ -26,7 +26,7 @@ namespace System
         {
             if (reverse)
                 byteArray.Reverse();
-            
+
             return byteArray.Aggregate("", (current, b) => current + b.ToString("X2"));
         }
 
@@ -463,9 +463,9 @@ namespace System
             return hash;
         }
 
-        public static int ToFourCC(this string text)
+        public static uint ToFourCC(this string text)
         {
-            int intValue = 0;
+            uint intValue = 0;
             foreach (char c in text)
             {
                 intValue <<= 8;

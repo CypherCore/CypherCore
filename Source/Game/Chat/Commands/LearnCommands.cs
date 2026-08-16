@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Miscellaneous;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -242,7 +243,8 @@ namespace Game.Chat.Commands
                         continue;
 
                     // skip racial skills
-                    if (!skillLine.RaceMask.IsEmpty())
+                    var raceMask = new RaceMask<int>(skillLine.RaceMask);
+                    if (!raceMask.IsEmpty())
                         continue;
 
                     // skip wrong class skills

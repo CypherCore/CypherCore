@@ -787,7 +787,7 @@ namespace Framework.Constants
         RemoveDecor = 271, /*NYI*/ // Remove any decor
         CollectUniqueDecor = 272, /*NYI*/ // Collect Unique Decor
 
-        Count = 283
+        Count = 284
     }
 
     public enum CriteriaDataType

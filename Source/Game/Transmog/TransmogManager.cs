@@ -21,7 +21,7 @@ namespace Game
         List<TransmogOutfitSlotAndOptionInfo> AllSlots = [];
         TransmogOutfitSlotInfo[] SlotInfoByOutfitSlot = new TransmogOutfitSlotInfo[(int)TransmogOutfitSlot.Max];
         TransmogOutfitSlotInfo[] SlotInfoByInvSlot = new TransmogOutfitSlotInfo[EquipmentSlot.End];
-        List<TransmogSituationRecord> DefaultSituations;
+        List<TransmogSituationRecord> DefaultSituations = [];
 
         public static string[] DefaultOutfitName =
         [
@@ -147,7 +147,7 @@ namespace Game
                 TransmogSetItemsByTransmogSet.Add(transmogSetItem);
             }
 
-            TransmogSetItemsByTransmogSet.Sort((x, y) => x.TransmogSetID.CompareTo(y));
+            TransmogSetItemsByTransmogSet.Sort((x, y) => x.TransmogSetID.CompareTo(y.TransmogSetID));
 
             foreach (TransmogOutfitEntryRecord transmogOutfitEntry in CliDB.TransmogOutfitEntryStorage.Values)
             {
@@ -165,7 +165,7 @@ namespace Game
             {
                 Cypher.Assert(transmogOutfitSlot.GetSlot() < TransmogOutfitSlot.Max);
 
-                TransmogOutfitSlotInfo slot = SlotInfoByOutfitSlot[(int)transmogOutfitSlot.GetSlot()];
+                TransmogOutfitSlotInfo slot = new();
                 slot.Data = transmogOutfitSlot;
 
                 if (!transmogOutfitSlot.HasFlag(TransmogOutfitSlotFlags.IsSecondarySlot))
@@ -173,6 +173,8 @@ namespace Game
                     Cypher.Assert(transmogOutfitSlot.InventorySlotEnum < EquipmentSlot.End);
                     SlotInfoByInvSlot[transmogOutfitSlot.InventorySlotEnum] = slot;
                 }
+
+                SlotInfoByOutfitSlot[(int)transmogOutfitSlot.GetSlot()] = slot;
             }
 
             foreach (TransmogOutfitSlotOptionRecord transmogOutfitSlotOption in CliDB.TransmogOutfitSlotOptionInfoStorage.Values)
@@ -191,7 +193,7 @@ namespace Game
             for (var i = 0; i < SlotInfoByOutfitSlot.Length; ++i)
             {
                 TransmogOutfitSlotInfo slotInfo = SlotInfoByOutfitSlot[i];
-                if (slotInfo.Data == null)
+                if (slotInfo == null)
                     continue;
 
                 TransmogOutfitSlotAndOptionInfo slot = new()
@@ -253,7 +255,7 @@ namespace Game
 
         public ItemModifiedAppearanceRecord GetDefaultItemModifiedAppearance(uint itemId)
         {
-            return ItemModifiedAppearancesByItem.LookupByKey((itemId, 0));
+            return ItemModifiedAppearancesByItem.LookupByKey((itemId, 0u));
         }
 
         public TransmogIllusionRecord GetTransmogIllusionForSpellItemEnchantment(uint spellItemEnchantmentId)

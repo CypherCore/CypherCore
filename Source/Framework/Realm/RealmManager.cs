@@ -224,7 +224,10 @@ public class RealmManager : Singleton<RealmManager>
             if (realm.Id.GetSubRegionAddress() != subRegion)
                 continue;
 
-            RealmListUpdatePart state = new();
+            RealmListUpdatePart state = new()
+            {
+                WoWRealmAddress = (int)realm.Id.GetAddress()
+            };
             FillRealmEntry(realm, build, accountSecurityLevel, state.Update);
             state.Deleting = false;
             realmList.Updates.Add(state);
@@ -235,9 +238,11 @@ public class RealmManager : Singleton<RealmManager>
             if (id.GetSubRegionAddress() != subRegion)
                 continue;
 
-            RealmListUpdatePart state = new();
-            state.WoWRealmAddress = (int)id.GetAddress();
-            state.Deleting = true;
+            RealmListUpdatePart state = new()
+            {
+                WoWRealmAddress = (int)id.GetAddress(),
+                Deleting = true
+            };
             realmList.Updates.Add(state);
         }
 
@@ -287,9 +292,9 @@ public class RealmManager : Singleton<RealmManager>
 
             RealmJoinTicket joinTicket = new();
             joinTicket.GameAccount = accountName;
-            joinTicket.Platform = buildVariant.Platform;
-            joinTicket.ClientArch = buildVariant.Arch;
-            joinTicket.Type = buildVariant.Type;
+            joinTicket.Platform = (int)buildVariant.Platform;
+            joinTicket.ClientArch = (int)buildVariant.Arch;
+            joinTicket.Type = (int)buildVariant.Type;
 
             string joinTicketJson = JsonSerializer.Serialize(joinTicket);
 

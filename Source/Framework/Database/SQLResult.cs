@@ -105,7 +105,7 @@ namespace Framework.Database
         {
             if (_reader == null)
                 return true;
-            
+
             return _reader.IsClosed || !_reader.HasRows;
         }
 

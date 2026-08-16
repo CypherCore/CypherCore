@@ -7795,7 +7795,8 @@ namespace Game.Entities
             foreach (var _spell_idx in bounds)
             {
                 // skip wrong race skills
-                if (!_spell_idx.RaceMask.IsEmpty() && !_spell_idx.RaceMask.HasRace(GetRace()))
+                var raceMask = new RaceMask<int>(_spell_idx.RaceMask);
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(GetRace()))
                     continue;
 
                 // skip wrong class skills

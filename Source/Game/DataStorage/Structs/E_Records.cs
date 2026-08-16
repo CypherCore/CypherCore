@@ -1,8 +1,6 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using Game.Miscellaneous;
-
 namespace Game.DataStorage
 {
     public sealed class EmotesRecord
@@ -16,7 +14,7 @@ namespace Game.DataStorage
         public uint EventSoundID;
         public uint SpellVisualKitId;
         public int ClassMask;
-        public RaceMask<int> RaceMask = new(2);
+        public int[] RaceMask = new int[2];
     }
 
     public sealed class EmotesTextRecord

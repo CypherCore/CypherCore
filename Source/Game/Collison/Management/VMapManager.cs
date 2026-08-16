@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace Game.Collision
 {
-    public class VMapManager() : Singleton<VMapManager>
+    public class VMapManager : Singleton<VMapManager>
     {
         bool _enableLineOfSightCalc;
         bool _enableHeightCalc;
@@ -21,6 +21,8 @@ namespace Game.Collision
         Dictionary<uint, uint> iParentMapData = new();
         // Mutex for iLoadedModelFiles
         Lock LoadedModelFilesLock = new();
+
+        VMapManager() { }
 
         public StaticMapTree GetMapTree(uint mapId)
         {
@@ -255,7 +257,7 @@ namespace Game.Collision
 
         public static string GetMapFileName(uint mapId)
         {
-            return $"{mapId:D4}/{mapId:D4}.vmtree";
+            return $"/{mapId:D4}/{mapId:D4}.vmtree";
         }
 
         public void SetEnableLineOfSightCalc(bool pVal) { _enableLineOfSightCalc = pVal; }

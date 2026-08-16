@@ -416,7 +416,7 @@ namespace Game.DataStorage
             WorldStateExpressionStorage = ReadDB2<WorldStateExpressionRecord>("WorldStateExpression.db2", HotfixStatements.SEL_WORLD_STATE_EXPRESSION);
 
             // Check loaded DB2 files proper version
-            foreach (uint criticalItemId in new uint[208392, 242709])
+            foreach (uint criticalItemId in new uint[] { 208392, 242709 })
             {
                 if (!ItemSparseStorage.ContainsKey(criticalItemId))
                 {

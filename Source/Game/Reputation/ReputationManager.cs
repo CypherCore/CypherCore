@@ -599,9 +599,12 @@ namespace Game
 
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
+            {
                 // Never show factions of the opposing team
-                if (!(factionEntry.ReputationRaceMask2.HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
+                var raceMask = new RaceMask<int>(factionEntry.ReputationRaceMask2);
+                if (!(raceMask.HasRace(_player.GetRace()) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom))
                     SetVisible(factionEntry);
+            }
         }
 
         public void SetVisible(FactionRecord factionEntry)
@@ -814,10 +817,10 @@ namespace Game
 
             RaceMask<int>[] reputationRaceMask =
             [
-                factionEntry.ReputationRaceMask1,
-                factionEntry.ReputationRaceMask2,
-                factionEntry.ReputationRaceMask3,
-                factionEntry.ReputationRaceMask4
+                new RaceMask<int>(factionEntry.ReputationRaceMask1),
+                new RaceMask<int>(factionEntry.ReputationRaceMask2),
+                new RaceMask<int>(factionEntry.ReputationRaceMask3),
+                new RaceMask<int>(factionEntry.ReputationRaceMask4)
             ];
 
             for (int i = 0; i < 4; i++)
@@ -885,10 +888,10 @@ namespace Game
 
             RaceMask<int>[] reputationRaceMask =
             [
-                factionEntry.ReputationRaceMask1,
-                factionEntry.ReputationRaceMask2,
-                factionEntry.ReputationRaceMask3,
-                factionEntry.ReputationRaceMask4
+                new RaceMask<int>(factionEntry.ReputationRaceMask1),
+                new RaceMask<int>(factionEntry.ReputationRaceMask2),
+                new RaceMask<int>(factionEntry.ReputationRaceMask3),
+                new RaceMask<int>(factionEntry.ReputationRaceMask4)
             ];
 
             for (int i = 0; i < 4; i++)

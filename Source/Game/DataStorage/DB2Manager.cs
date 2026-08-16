@@ -3,6 +3,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.Miscellaneous;
 using Game.Networking;
 using System;
 using System.Collections;
@@ -120,6 +121,10 @@ namespace Game.DataStorage
                 powers.Add(chrClasses);
 
             powers.Sort(new ChrClassesXPowerTypesRecordComparer());
+
+            for (var i = 0; i < (int)Class.Max; i++)
+                _powersByClass[i] = new ClassPowerData();
+
             foreach (var power in powers)
             {
                 byte index = _powersByClass[power.ClassID].TypeByIndex.PowerTypeCount++;
@@ -1929,7 +1934,8 @@ namespace Game.DataStorage
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
             foreach (var skllRaceClassInfo in bounds)
             {
-                if (!skllRaceClassInfo.RaceMask.IsEmpty() && !skllRaceClassInfo.RaceMask.HasRace(race))
+                var raceMask = new RaceMask<int>(skllRaceClassInfo.RaceMask);
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
                     continue;
                 if (skllRaceClassInfo.ClassMask != 0 && !Convert.ToBoolean(skllRaceClassInfo.ClassMask & (1 << ((byte)class_ - 1))))
                     continue;
@@ -2394,18 +2400,19 @@ namespace Game.DataStorage
         int _maxHotfixId;
     }
 
-    public struct ClassPowerData
+    public class ClassPowerData
     {
+        public ClassPowerTypes TypeByIndex;
+        public byte[] IndexByType = new byte[(int)PowerType.Max];
+
         public ClassPowerData()
         {
             Array.Fill(IndexByType, (byte)PowerType.MaxPerClass);
+            TypeByIndex = new();
         }
-
-        public ClassPowerTypes TypeByIndex;
-        public byte[] IndexByType = new byte[(int)Class.Max];
     }
 
-    public struct ClassPowerTypes()
+    public class ClassPowerTypes
     {
         public PowerType[] powerType = new PowerType[(int)PowerType.MaxPerClass];
         public byte PowerTypeCount;

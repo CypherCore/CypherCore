@@ -897,7 +897,7 @@ namespace Game
 
                 mGameEventCreatureQuests = new List<Tuple<uint, uint>>[maxEventId];
                 mGameEventGameObjectQuests = new List<Tuple<uint, uint>>[maxEventId];
-                mGameEventVendors = new Dictionary<uint, VendorItem>[maxEventId];
+                mGameEventVendors = new MultiMap<uint, VendorItem>[maxEventId];
                 mGameEventNPCFlags = new List<(ulong guid, ulong npcflag)>[maxEventId];
                 mGameEventModelEquip = new List<Tuple<ulong, ModelEquip>>[maxEventId];
                 for (var i = 0; i < maxEventId; ++i)
@@ -905,7 +905,7 @@ namespace Game
                     mGameEvent[i] = new GameEventData();
                     mGameEventCreatureQuests[i] = new List<Tuple<uint, uint>>();
                     mGameEventGameObjectQuests[i] = new List<Tuple<uint, uint>>();
-                    mGameEventVendors[i] = new Dictionary<uint, VendorItem>();
+                    mGameEventVendors[i] = new MultiMap<uint, VendorItem>();
                     mGameEventNPCFlags[i] = new List<(ulong guid, ulong npcflag)>();
                     mGameEventModelEquip[i] = new List<Tuple<ulong, ModelEquip>>();
                 }
@@ -1654,7 +1654,7 @@ namespace Game
 
         List<Tuple<uint, uint>>[] mGameEventCreatureQuests;
         List<Tuple<uint, uint>>[] mGameEventGameObjectQuests;
-        Dictionary<uint, VendorItem>[] mGameEventVendors;
+        MultiMap<uint, VendorItem>[] mGameEventVendors;
         List<Tuple<ulong, ModelEquip>>[] mGameEventModelEquip;
         List<uint>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;

@@ -222,7 +222,7 @@ namespace Game.Maps
         {
             if (Global.VMapMgr.IsMapLoadingEnabled())
             {
-                LoadResult result = Global.VMapMgr.ExistsMap(Global.WorldMgr.GetDataPath(), mapid, gx, gy);
+                LoadResult result = Global.VMapMgr.ExistsMap(Global.WorldMgr.GetDataPath() + "/vmaps", mapid, gx, gy);
                 string name = VMapManager.GetMapFileName(mapid);//, gx, gy);
                 switch (result)
                 {

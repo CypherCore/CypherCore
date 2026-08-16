@@ -328,7 +328,7 @@ namespace Framework.Cryptography
             BigInteger x = new(xBytes, true, true);
             if ((xBytes[0] & 0x80) != 0)
             {
-                byte[] fix = [1, ..new byte[64]];
+                byte[] fix = [1, .. new byte[64]];
                 x -= new BigInteger(fix, true);
             }
 

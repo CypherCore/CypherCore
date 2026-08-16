@@ -40,8 +40,6 @@ namespace Game
                 QuestLineDataByQuest.Add(questLineQuest.QuestID, questLineData);
             }
 
-            CampaignQuestLines.Sort();
-
             foreach (var key in QuestsByQuestLine.Keys)
                 QuestsByQuestLine[key] = QuestsByQuestLine[key].OrderBy(p => p.OrderIndex).ToList();
         }

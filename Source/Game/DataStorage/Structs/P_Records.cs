@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Game.Miscellaneous;
 
 namespace Game.DataStorage
 {
@@ -155,7 +154,7 @@ namespace Game.DataStorage
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
         public int[] MovementFlags = new int[2];
-        public RaceMask<int> RaceMask = new(2);
+        public int[] RaceMask = new int[2];
         public int[] TraitNodeEntryID = new int[4];
         public ushort[] TraitNodeEntryMinRank = new ushort[4];
         public ushort[] TraitNodeEntryMaxRank = new ushort[4];

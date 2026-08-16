@@ -9,9 +9,9 @@ namespace Game.Miscellaneous
 {
     public struct RaceMask
     {
-        public static RaceMask<T> All_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> => ~new RaceMask<T>(size);
+        public static RaceMask<T> All_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T> => ~new RaceMask<T>(size);
 
-        public static RaceMask<T> AllPlayable_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> =>
+        public static RaceMask<T> AllPlayable_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T> =>
             RaceMask<T>.GetMaskForRace(Race.Human, size) | RaceMask<T>.GetMaskForRace(Race.Orc, size) | RaceMask<T>.GetMaskForRace(Race.Dwarf, size) | RaceMask<T>.GetMaskForRace(Race.NightElf, size) |
             RaceMask<T>.GetMaskForRace(Race.Undead, size) | RaceMask<T>.GetMaskForRace(Race.Tauren, size) | RaceMask<T>.GetMaskForRace(Race.Gnome, size) | RaceMask<T>.GetMaskForRace(Race.Troll, size) |
             RaceMask<T>.GetMaskForRace(Race.BloodElf, size) | RaceMask<T>.GetMaskForRace(Race.Draenei, size) | RaceMask<T>.GetMaskForRace(Race.Goblin, size) | RaceMask<T>.GetMaskForRace(Race.Worgen, size) |
@@ -21,16 +21,16 @@ namespace Game.Miscellaneous
             RaceMask<T>.GetMaskForRace(Race.MechaGnome, size) | RaceMask<T>.GetMaskForRace(Race.DracthyrAlliance, size) | RaceMask<T>.GetMaskForRace(Race.DracthyrHorde, size) | RaceMask<T>.GetMaskForRace(Race.EarthenDwarfHorde, size) |
             RaceMask<T>.GetMaskForRace(Race.EarthenDwarfAlliance, size) | RaceMask<T>.GetMaskForRace(Race.HaranirAlliance, size) | RaceMask<T>.GetMaskForRace(Race.HaranirHorde, size);
 
-        public static RaceMask<T> Neutral_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> => RaceMask<T>.GetMaskForRace(Race.PandarenNeutral, size);
+        public static RaceMask<T> Neutral_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T> => RaceMask<T>.GetMaskForRace(Race.PandarenNeutral, size);
 
-        public static RaceMask<T> Alliance_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> =>
+        public static RaceMask<T> Alliance_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T> =>
            RaceMask<T>.GetMaskForRace(Race.Human, size) | RaceMask<T>.GetMaskForRace(Race.Dwarf, size) | RaceMask<T>.GetMaskForRace(Race.NightElf, size) |
            RaceMask<T>.GetMaskForRace(Race.Gnome, size) | RaceMask<T>.GetMaskForRace(Race.Draenei, size) | RaceMask<T>.GetMaskForRace(Race.Worgen, size) |
            RaceMask<T>.GetMaskForRace(Race.PandarenAlliance, size) | RaceMask<T>.GetMaskForRace(Race.VoidElf, size) | RaceMask<T>.GetMaskForRace(Race.LightforgedDraenei, size) |
            RaceMask<T>.GetMaskForRace(Race.KulTiran, size) | RaceMask<T>.GetMaskForRace(Race.DarkIronDwarf, size) | RaceMask<T>.GetMaskForRace(Race.MechaGnome, size) | RaceMask<T>.GetMaskForRace(Race.DracthyrAlliance, size) |
            RaceMask<T>.GetMaskForRace(Race.EarthenDwarfAlliance, size) | RaceMask<T>.GetMaskForRace(Race.HaranirAlliance, size);
 
-        public static RaceMask<T> Horde_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T> => AllPlayable_V<T>(size) & ~(Neutral_V<T>(size) | Alliance_V<T>(size));
+        public static RaceMask<T> Horde_V<T>(int size = 1) where T : INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T> => AllPlayable_V<T>(size) & ~(Neutral_V<T>(size) | Alliance_V<T>(size));
 
         public static RaceMask<ulong> All = All_V<ulong>();
         public static RaceMask<ulong> AllPlayable = AllPlayable_V<ulong>();
@@ -39,7 +39,7 @@ namespace Game.Miscellaneous
         public static RaceMask<ulong> Horde = Horde_V<ulong>();
     }
 
-    public class RaceMask<T> where T : INumber<T>, IBitwiseOperators<T, T, T>
+    public class RaceMask<T> where T : INumber<T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>
     {
         public T[] RawValue;
         public int Size;
@@ -47,17 +47,8 @@ namespace Game.Miscellaneous
         public RaceMask(T[] rawValue)
         {
             RawValue = rawValue;
+            Size = rawValue.Length;
         }
-
-        /*public RaceMask(ulong rawValue)
-        {
-            RawValue = [T.CreateChecked(rawValue & 0xFFFFFFFF), T.CreateChecked(rawValue >> 32)];
-        }
-
-        public RaceMask(long rawValue)
-        {
-            RawValue = [T.CreateChecked(rawValue & 0xFFFFFFFF), T.CreateChecked(rawValue >> 32)];
-        }*/
 
         public RaceMask(int size = 1)
         {
@@ -69,15 +60,18 @@ namespace Game.Miscellaneous
         {
             int raceBit = GetRaceBit(raceId);
             return raceBit >= 0 && raceBit < Marshal.SizeOf<T>() * 8 * RawValue.Length
-                && (RawValue[raceBit / (Marshal.SizeOf<T>() * 8)] & T.CreateChecked(1 << (raceBit % (Marshal.SizeOf<T>() * 8)))) != T.Zero;
+                && (RawValue[raceBit / (Marshal.SizeOf<T>() * 8)] & T.One << (raceBit % (Marshal.SizeOf<T>() * 8))) != T.Zero;
         }
 
         public static RaceMask<T> GetMaskForRace(Race raceId, int size)
         {
+            var g = Marshal.SizeOf<T>();
+
+
             RaceMask<T> result = new(size);
             int raceBit = GetRaceBit(raceId);
             if (raceBit >= 0 && raceBit < Marshal.SizeOf<T>() * 8 * size)
-                result.RawValue[raceBit / (Marshal.SizeOf<T>() * 8)] = T.CreateChecked(1 << (raceBit % (Marshal.SizeOf<T>() * 8)));
+                result.RawValue[raceBit / (Marshal.SizeOf<T>() * 8)] = T.One << (raceBit % (Marshal.SizeOf<T>() * 8));
             return result;
         }
 

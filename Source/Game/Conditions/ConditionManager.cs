@@ -1986,7 +1986,8 @@ namespace Game
                 }
             }
 
-            if (!condition.RaceMask.IsEmpty() && condition.RaceMask.HasRace(player.GetRace()))
+            var raceMask = new RaceMask<int>(condition.RaceMask);
+            if (!raceMask.IsEmpty() && raceMask.HasRace(player.GetRace()))
                 return false;
 
             if (condition.ClassMask != 0 && !Convert.ToBoolean(player.GetClassMask() & condition.ClassMask))

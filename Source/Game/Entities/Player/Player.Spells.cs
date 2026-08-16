@@ -4,6 +4,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
+using Game.Miscellaneous;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
@@ -1593,7 +1594,8 @@ namespace Game.Entities
                 }
 
                 // Check race if set
-                if (!ability.RaceMask.IsEmpty() && !ability.RaceMask.HasRace(race))
+                var raceMask = new RaceMask<int>(ability.RaceMask);
+                if (!raceMask.IsEmpty() && !raceMask.HasRace(race))
                     continue;
 
                 // Check class if set
