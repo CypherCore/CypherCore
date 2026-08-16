@@ -8,7 +8,6 @@ using Google.Protobuf;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
@@ -49,7 +48,7 @@ namespace BNetServer
                             continue;
                         }
 
-                        serviceHandlers[key] = new BnetServiceHandler(methodInfo, parameters);
+                        serviceHandlers[key] = new BnetServiceHandler(methodInfo);
                     }
                 }
             }
@@ -73,27 +72,39 @@ namespace BNetServer
 
     public class BnetServiceHandler
     {
-        Delegate methodCaller;
-        Type requestType;
-        Type responseType;
+        MethodInfo info;
 
-        public BnetServiceHandler(MethodInfo info, ParameterInfo[] parameters)
+        public BnetServiceHandler(MethodInfo info)
         {
-            requestType = parameters[0].ParameterType;
-            responseType = parameters[1].ParameterType;
-
-            methodCaller = info.CreateDelegate(Expression.GetDelegateType([typeof(Session), requestType, responseType, typeof(Action<Session, BattlenetRpcErrorCode, IMessage>), info.ReturnType]));
+            this.info = info;
         }
 
         public void Invoke(Session session, uint token, CodedInputStream stream)
         {
-            var request = (IMessage)Activator.CreateInstance(requestType);
+            var parameters = info.GetParameters();
+
+            List<object> args = [];
+
+            var request = (IMessage)Activator.CreateInstance(parameters[0].ParameterType);
             request.MergeFrom(stream);
 
-            IMessage response = (IMessage)Activator.CreateInstance(responseType);
-            Action<Session, BattlenetRpcErrorCode, IMessage> continuation = CreateServerContinuation(token, nameof(request), response.Descriptor);
-            BattlenetRpcErrorCode status = (BattlenetRpcErrorCode)methodCaller.DynamicInvoke(session, request, response, continuation);
+            args.Add(request);
 
+            IMessage response = null;
+            if (parameters.Length > 1)
+            {
+                response = (IMessage)Activator.CreateInstance(parameters[1].ParameterType);
+                args.Add(response);
+            }
+
+            Action<Session, BattlenetRpcErrorCode, IMessage> continuation = null;
+            if (parameters.Length > 2)
+            {
+                continuation = CreateServerContinuation(token, nameof(request), response.Descriptor);
+                args.Add(continuation);
+            }
+
+            BattlenetRpcErrorCode status = (BattlenetRpcErrorCode)info.Invoke(session, args.ToArray());
             if (continuation != null)
                 continuation(session, status, response);
         }

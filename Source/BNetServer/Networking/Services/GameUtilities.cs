@@ -121,7 +121,7 @@ namespace BNetServer.Networking
             object identity = FindParamValue(Params, "Param_Identity");
             if (identity != null && identity is byte[])
             {
-                string json = Encoding.UTF8.GetString((byte[])identity);
+                string json = Encoding.UTF8.GetString((byte[])identity).TrimEnd('\0');
                 int jsonStart = json.IndexOf(':');
                 if (jsonStart != -1)
                 {
@@ -143,12 +143,12 @@ namespace BNetServer.Networking
             object clientInfo = FindParamValue(Params, "Param_ClientInfo");
             if (clientInfo != null)
             {
-                string json = Encoding.UTF8.GetString((byte[])clientInfo);
+                string json = Encoding.UTF8.GetString((byte[])clientInfo).TrimEnd('\0');
                 var jsonStart = json.IndexOf(':');
                 if (jsonStart != -1)
                 {
                     RealmListTicketClientInformation data = JsonSerializer.Deserialize<RealmListTicketClientInformation>(json.Substring(jsonStart + 1));
-                    if (data.Info.Secret.Count == 32 / 4)
+                    if (data.Info.Secret.Count == 32)
                     {
                         clientSecret = new byte[32];
                         Buffer.BlockCopy(data.Info.Secret.ToArray(), 0, clientSecret, 0, 32);
@@ -205,7 +205,7 @@ namespace BNetServer.Networking
                 realmCharacterCounts.Counts.Add(countEntry);
             }
 
-            var characterCountsJson = CompressJson("JSONRealmCharacterCountList:" + JsonSerializer.Serialize(realmCharacterCounts));
+            var characterCountsJson = CompressJson("JSONRealmCharacterCountList:" + JsonSerializer.Serialize(realmCharacterCounts) + "\0");
 
             if (characterCountsJson.Empty())
                 return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
@@ -291,6 +291,9 @@ namespace BNetServer.Networking
                 case byte[] blob:
                     to.BlobValue = ByteString.CopyFrom(blob);
                     break;
+                case List<byte> blob:
+                    to.BlobValue = ByteString.CopyFrom(blob.ToArray());
+                    break;
                 case ulong u:
                     to.UintValue = u;
                     break;
@@ -301,8 +304,8 @@ namespace BNetServer.Networking
             return to;
         }
 
-        [Service(OriginalHash.GameUtilitiesService, 1)]
-        BattlenetRpcErrorCode HandleProcessTask(ProcessTaskRequest request, ProcessTaskResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        [Service(OriginalHash.GameUtilitiesServiceV2, 1)]
+        BattlenetRpcErrorCode HandleProcessTask(ProcessTaskRequest request, ProcessTaskResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
             if (!IsAuthed())
                 return BattlenetRpcErrorCode.Denied;
@@ -334,8 +337,8 @@ namespace BNetServer.Networking
             return result;
         }
 
-        [Service(OriginalHash.GameUtilitiesService, 2)]
-        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        [Service(OriginalHash.GameUtilitiesServiceV2, 2)]
+        BattlenetRpcErrorCode HandleGetAllValuesForAttribute(GetAllValuesForAttributeRequest request, GetAllValuesForAttributeResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
             if (!IsAuthed())
                 return BattlenetRpcErrorCode.Denied;

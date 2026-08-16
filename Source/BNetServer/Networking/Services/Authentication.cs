@@ -192,8 +192,8 @@ namespace BNetServer.Networking
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.AuthenticationService, 1)]
-        BattlenetRpcErrorCode HandleLogon(LogonRequest request, NoData response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        [Service(OriginalHash.AuthenticationServiceV2, 1)]
+        BattlenetRpcErrorCode HandleLogon(LogonRequest request, NoData response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
             string deviceId = "";
             string cachedAuthToken = null;
@@ -220,14 +220,14 @@ namespace BNetServer.Networking
                     Payload = ByteString.CopyFromUtf8($"http{(!Global.LoginServiceMgr.UsesDevWildcardCertificate() ? "s" : "")}://{Global.LoginService.GetHostnameForClient(GetRemoteIpAddress())}:{Global.LoginService.GetPort()}/bnetserver/login/")
                 };
 
-                SendRequest((uint)OriginalHash.ChallengeListener, 4, externalChallenge);
+                SendRequest((uint)OriginalHash.AuthenticationListenerV2, 4, externalChallenge);
             }
 
             return result;
         }
 
-        [Service(OriginalHash.AuthenticationService, 2)]
-        BattlenetRpcErrorCode HandleVerifyAuthToken(VerifyAuthTokenRequest request, NoData response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        [Service(OriginalHash.AuthenticationServiceV2, 2)]
+        BattlenetRpcErrorCode HandleVerifyAuthToken(VerifyAuthTokenRequest request, NoData response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
             if (!request.HasAuthToken)
                 return BattlenetRpcErrorCode.Denied;
@@ -235,8 +235,8 @@ namespace BNetServer.Networking
             return HandleVerifyAuthToken(request.AuthToken.ToStringUtf8(), continuation);
         }
 
-        [Service(OriginalHash.AuthenticationService, 3)]
-        BattlenetRpcErrorCode HandleGenerateAuthToken(GenerateAuthTokenRequest request, GenerateAuthTokenResponse response, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        [Service(OriginalHash.AuthenticationServiceV2, 3)]
+        BattlenetRpcErrorCode HandleGenerateAuthToken(GenerateAuthTokenRequest request, GenerateAuthTokenResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
             if (!IsAuthed())
                 return BattlenetRpcErrorCode.Denied;
@@ -247,16 +247,16 @@ namespace BNetServer.Networking
                 {
                     AuthToken = ByteString.CopyFromUtf8(webCredentials)
                 };
-                continuation(BattlenetRpcErrorCode.Ok, response);
+                continuation(this, BattlenetRpcErrorCode.Ok, response);
             });
         }
 
-        BattlenetRpcErrorCode HandleVerifyAuthToken(string authToken, Action<BattlenetRpcErrorCode, IMessage> continuation)
+        BattlenetRpcErrorCode HandleVerifyAuthToken(string authToken, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
             return HandleVerifyAuthToken(authToken, result =>
             {
                 NoData response = new();
-                continuation(result, response);
+                continuation(this, result, response);
             },
             (AccountInfo accountInfo, string country) =>
             {
@@ -273,7 +273,7 @@ namespace BNetServer.Networking
                     GameAccountHandle gameAccount = new()
                     {
                         Id = gameAccountInfo.Id,
-                        TitleId = 0x576f5, //WoW;
+                        TitleId = "WoW".ToFourCC(),
                         Region = 2
                     };
                     logonRecord.GameAccount.Add(gameAccount);
@@ -284,7 +284,7 @@ namespace BNetServer.Networking
 
                 logonRecord.SessionKey = ByteString.CopyFrom(RandomHelper.GetRandomBytes(64));
 
-                SendRequest((uint)OriginalHash.AuthenticationListener, 1, logonResult);
+                SendRequest((uint)OriginalHash.AuthenticationListenerV2, 1, logonResult);
             });
         }
     }

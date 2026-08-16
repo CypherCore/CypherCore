@@ -231,15 +231,10 @@ namespace BNetServer.Networking
 
         public byte[] GetHeaderSize(Header header)
         {
-            var size = (ushort)header.CalculateSize();
-            byte[] bytes = new byte[2];
-            bytes[0] = (byte)(size >> 8 & 0xff);
-            bytes[1] = (byte)(size & 0xff);
-
             var headerSizeBytes = BitConverter.GetBytes((ushort)header.CalculateSize());
             Array.Reverse(headerSizeBytes);
 
-            return bytes;
+            return headerSizeBytes;
         }
 
         public string GetClientInfo()

@@ -349,8 +349,6 @@ namespace BNetServer.REST
                         loginResult.ServerEvidenceM2 = serverM2;
 
                     context.response.ContentType = "application/json;charset=utf-8";
-                    JsonSerializerOptions options = new JsonSerializerOptions();
-                    options.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
                     context.response.Content = JsonSerializer.Serialize(loginResult);
                     session.SendResponse(context);
                 }).SetNextQuery(DB.Login.AsyncQuery(stmt));

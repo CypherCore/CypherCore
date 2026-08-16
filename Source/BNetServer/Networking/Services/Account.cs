@@ -1,75 +1,90 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Bgs.Protocol.Account.V2;
+using Bgs.Protocol.Account.V2.Client;
+using Framework.Constants;
+using Google.Protobuf;
+using System;
+
 namespace BNetServer.Networking
 {
     public partial class Session
     {
-        /*
-        [Service(OriginalHash.AccountService, 30)]
-        BattlenetRpcErrorCode HandleGetAccountState(GetAccountStateRequest request, GetAccountStateResponse response)
+        [Service(OriginalHash.AccountServiceV2, 101)]
+        BattlenetRpcErrorCode HandleGetAccountInfo(GetAccountInfoRequest request, GetAccountInfoResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
-            if (!IsAuthed())
-                return BattlenetRpcErrorCode.Denied;
-
-            if (request.Options.FieldPrivacyInfo)
+            Bgs.Protocol.Account.V2.AccountInfo info = new()
             {
-                response.State = new AccountState();
-                response.State.PrivacyInfo = new PrivacyInfo();
-                response.State.PrivacyInfo.IsUsingRid = false;
-                response.State.PrivacyInfo.IsVisibleForViewFriends = false;
-                response.State.PrivacyInfo.IsHiddenFromFriendFinder = true;
+                AccountId = GetAccountId()
+            };
+            info.Flags.Add((uint)Bgs.Protocol.Account.V2.AccountInfo.Types.Flag.IsHiddenFromFriendFinder);
 
-                response.Tags = new AccountFieldTags();
-                response.Tags.PrivacyInfoTag = 0xD7CA834D;
+            response.Info = info;
+
+            return BattlenetRpcErrorCode.Ok;
+        }
+
+        [Service(OriginalHash.AccountServiceV2, 104)]
+        BattlenetRpcErrorCode HandleGetRestriction(GetRestrictionRequest request, GetRestrictionResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
+        {
+            return BattlenetRpcErrorCode.Ok;
+        }
+
+        [Service(OriginalHash.AccountServiceV2, 201)]
+        BattlenetRpcErrorCode HandleGetGameAccountInfo(GetGameAccountInfoRequest request, GetGameAccountInfoResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
+        {
+            if (request.GameAccount != null)
+            {
+                GameAccountInfo gameAccountInfo = GetGameAccountInfo((uint)request.GameAccount.Id);
+                if (gameAccountInfo != null)
+                {
+                    Bgs.Protocol.Account.V2.GameAccountInfo info = new()
+                    {
+                        AccountId = request.GameAccount.Id,
+                        Name = gameAccountInfo.DisplayName
+                    };
+                    response.Info = info;
+                }
             }
 
             return BattlenetRpcErrorCode.Ok;
         }
 
-        [Service(OriginalHash.AccountService, 31)]
-        BattlenetRpcErrorCode HandleGetGameAccountState(GetGameAccountStateRequest request, GetGameAccountStateResponse response)
+        [Service(OriginalHash.AccountServiceV2, 203)]
+        BattlenetRpcErrorCode HandleGetGameAccountRestriction(GetGameAccountRestrictionRequest request, GetGameAccountRestrictionResponse response, Action<Session, BattlenetRpcErrorCode, IMessage> continuation)
         {
-            if (!IsAuthed())
-                return BattlenetRpcErrorCode.Denied;
-
-            if (request.Options.FieldGameLevelInfo)
+            if (request.GameAccount != null)
             {
-                var gameAccountInfo = _accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
+                GameAccountInfo gameAccountInfo = GetGameAccountInfo((uint)request.GameAccount.Id);
                 if (gameAccountInfo != null)
                 {
-                    response.State = new GameAccountState();
-                    response.State.GameLevelInfo = new GameLevelInfo();
-                    response.State.GameLevelInfo.Name = gameAccountInfo.DisplayName;
-                    response.State.GameLevelInfo.Program = 5730135; // WoW
+                    if (gameAccountInfo.IsPermanenetlyBanned)
+                    {
+                        Restriction restriction = new()
+                        {
+                            TitleId = "WoW".ToFourCC(),
+                            Type = (uint)RestrictionType.LoginBanned,
+                            CreatedTimeMs = (ulong)(gameAccountInfo.BanDate * Time.InMilliseconds)
+                        };
+                        response.Restrictions.Add(restriction);
+                    }
+
+                    if (gameAccountInfo.IsBanned)
+                    {
+                        Restriction restriction = new()
+                        {
+                            TitleId = "WoW".ToFourCC(),
+                            Type = (uint)RestrictionType.LoginSuspended,
+                            CreatedTimeMs = (ulong)(gameAccountInfo.BanDate * Time.InMilliseconds),
+                            ExpireTimeMs = (ulong)(gameAccountInfo.UnbanDate * Time.InMilliseconds)
+                        };
+                        response.Restrictions.Add(restriction);
+                    }
                 }
-
-                response.Tags = new GameAccountFieldTags();
-                response.Tags.GameLevelInfoTag = 0x5C46D483;
-            }
-
-            if (request.Options.FieldGameStatus)
-            {
-                if (response.State == null)
-                    response.State = new GameAccountState();
-
-                response.State.GameStatus = new GameStatus();
-
-                var gameAccountInfo = _accountInfo.GameAccounts.LookupByKey(request.GameAccountId.Low);
-                if (gameAccountInfo != null)
-                {
-                    response.State.GameStatus.IsSuspended = gameAccountInfo.IsBanned;
-                    response.State.GameStatus.IsBanned = gameAccountInfo.IsPermanenetlyBanned;
-                    response.State.GameStatus.SuspensionExpires = (gameAccountInfo.UnbanDate * 1000000);
-                }
-
-                response.State.GameStatus.Program = 5730135; // WoW
-                response.Tags.GameStatusTag = 0x98B75F99;
             }
 
             return BattlenetRpcErrorCode.Ok;
         }
-
-        */
     }
 }
