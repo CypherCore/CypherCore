@@ -551,11 +551,11 @@ namespace Game.Networking.Packets
         public string LogDescription = "";
         public string DescriptionText = "";
         public List<ConditionalQuestText> ConditionalDescriptionText = new();
-        public bool DisplayPopup;
-        public bool StartCheat;
         public bool AutoLaunched;
         public bool FromContentPush;
         public bool ResetByScheduler;
+        public bool DisplayPopup;
+        public bool StartCheat;
     }
 
     public class QuestGiverRequestItems : ServerPacket

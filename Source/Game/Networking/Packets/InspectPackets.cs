@@ -208,28 +208,49 @@ namespace Game.Networking.Packets
         public List<AzeriteEssenceData> AzeriteEssences = new();
     }
 
-    public class PlayerModelDisplayInfo
+    public class CharDisplayInfo
     {
-        public ObjectGuid GUID;
-        public List<InspectItemData> Items = new();
         public string Name;
-        public uint SpecializationID;
         public byte GenderID;
         public byte Race;
         public byte ClassID;
         public List<ChrCustomizationChoice> Customizations = new();
 
+        public void Write(WorldPacket data)
+        {
+            data.WriteBits(Name.GetByteCount(), 6);
+            data.WriteUInt8(GenderID);
+            data.WriteUInt8(Race);
+            data.WriteUInt8(ClassID);
+            data.WriteInt32(Customizations.Count);
+            data.WriteString(Name);
+
+            foreach (var customization in Customizations)
+            {
+                data.WriteUInt32(customization.ChrCustomizationOptionID);
+                data.WriteUInt32(customization.ChrCustomizationChoiceID);
+            }
+        }
+    }
+
+    public class PlayerModelDisplayInfo
+    {
+        public ObjectGuid GUID;
+        public uint SpecializationID;
+        public CharDisplayInfo DisplayInfo = new();
+        public List<InspectItemData> Items = new();
+
         public void Initialize(Player player)
         {
             GUID = player.GetGUID();
             SpecializationID = (uint)player.GetPrimarySpecialization();
-            Name = player.GetName();
-            GenderID = (byte)player.GetNativeGender();
-            Race = (byte)player.GetRace();
-            ClassID = (byte)player.GetClass();
+            DisplayInfo.Name = player.GetName();
+            DisplayInfo.GenderID = (byte)player.GetNativeGender();
+            DisplayInfo.Race = (byte)player.GetRace();
+            DisplayInfo.ClassID = (byte)player.GetClass();
 
             foreach (var customization in player.m_playerData.Customizations)
-                Customizations.Add(customization);
+                DisplayInfo.Customizations.Add(customization);
 
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
@@ -244,18 +265,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(GUID);
             data.WriteUInt32(SpecializationID);
             data.WriteInt32(Items.Count);
-            data.WriteBits(Name.GetByteCount(), 6);
-            data.WriteUInt8(GenderID);
-            data.WriteUInt8(Race);
-            data.WriteUInt8(ClassID);
-            data.WriteInt32(Customizations.Count);
-            data.WriteString(Name);
-
-            foreach (var customization in Customizations)
-            {
-                data.WriteUInt32(customization.ChrCustomizationOptionID);
-                data.WriteUInt32(customization.ChrCustomizationChoiceID);
-            }
+            DisplayInfo.Write(data);
 
             foreach (InspectItemData item in Items)
                 item.Write(data);
