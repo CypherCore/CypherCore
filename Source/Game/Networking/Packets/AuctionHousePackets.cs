@@ -555,8 +555,8 @@ namespace Game.Networking.Packets
     {
         public List<BucketInfo> Buckets = new();
         public uint DesiredDelay;
-        public int Unknown830_0;
-        public int Unknown830_1;
+        public AuctionHouseFilterMask Filters;
+        public int TotalCount;
         public AuctionHouseBrowseMode BrowseMode;
         public bool HasMoreResults;
 
@@ -566,8 +566,8 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Buckets.Count);
             _worldPacket.WriteUInt32(DesiredDelay);
-            _worldPacket.WriteInt32(Unknown830_0);
-            _worldPacket.WriteInt32(Unknown830_1);
+            _worldPacket.WriteInt32((int)Filters);
+            _worldPacket.WriteInt32(TotalCount);
             _worldPacket.WriteBits((int)BrowseMode, 1);
             _worldPacket.WriteBit(HasMoreResults);
             _worldPacket.FlushBits();
@@ -598,8 +598,8 @@ namespace Game.Networking.Packets
     public class AuctionListItemsResult : ServerPacket
     {
         public List<AuctionItem> Items = new();
-        public uint Unknown830;
         public uint TotalCount;
+        public uint TotalQuantity;
         public uint DesiredDelay;
         public AuctionHouseListType ListType;
         public bool HasMoreResults;
@@ -610,7 +610,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Items.Count);
-            _worldPacket.WriteUInt32(Unknown830);
+            _worldPacket.WriteUInt32(TotalCount);
             _worldPacket.WriteUInt32(DesiredDelay);
             foreach (AuctionItem item in Items)
                 item.Write(_worldPacket);
@@ -620,7 +620,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
 
             BucketKey.Write(_worldPacket);
-            _worldPacket.WriteUInt32(TotalCount);
+            _worldPacket.WriteUInt32(TotalQuantity);
         }
     }
 

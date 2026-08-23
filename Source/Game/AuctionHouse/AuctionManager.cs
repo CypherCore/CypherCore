@@ -964,6 +964,8 @@ namespace Game
                 listBucketsResult.Buckets.Add(bucketInfo);
             }
 
+            listBucketsResult.Filters = filters;
+            listBucketsResult.TotalCount = builder.GetTotalCount();
             listBucketsResult.HasMoreResults = builder.HasMoreResults();
         }
 
@@ -987,6 +989,7 @@ namespace Game
                 listBucketsResult.Buckets.Add(bucketInfo);
             }
 
+            listBucketsResult.TotalCount = buckets.Count;
             listBucketsResult.HasMoreResults = false;
         }
 
@@ -1016,7 +1019,7 @@ namespace Game
 
         public void BuildListAuctionItems(AuctionListItemsResult listItemsResult, Player player, AuctionsBucketKey bucketKey, uint offset, AuctionSortDef[] sorts)
         {
-            listItemsResult.TotalCount = 0;
+            listItemsResult.TotalQuantity = 0;
             AuctionsBucketData bucket = _buckets.LookupByKey(bucketKey);
             if (bucket != null)
             {
@@ -1027,7 +1030,7 @@ namespace Game
                 {
                     builder.AddItem(auction);
                     foreach (Item item in auction.Items)
-                        listItemsResult.TotalCount += item.GetCount();
+                        listItemsResult.TotalQuantity += item.GetCount();
                 }
 
                 foreach (AuctionPosting resultAuction in builder.GetResultRange())
@@ -1037,6 +1040,7 @@ namespace Game
                     listItemsResult.Items.Add(auctionItem);
                 }
 
+                listItemsResult.TotalCount = (uint)builder.GetTotalCount();
                 listItemsResult.HasMoreResults = builder.HasMoreResults();
             }
         }
@@ -1046,7 +1050,7 @@ namespace Game
             var sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts);
             var builder = new AuctionsResultBuilder<AuctionPosting>(offset, sorter, AuctionHouseResultLimits.Items);
 
-            listItemsResult.TotalCount = 0;
+            listItemsResult.TotalQuantity = 0;
             var bucketData = _buckets.LookupByKey(new AuctionsBucketKey(itemId, 0, 0, 0));
             if (bucketData != null)
             {
@@ -1054,7 +1058,7 @@ namespace Game
                 {
                     builder.AddItem(auction);
                     foreach (Item item in auction.Items)
-                        listItemsResult.TotalCount += item.GetCount();
+                        listItemsResult.TotalQuantity += item.GetCount();
                 }
             }
 
@@ -1067,6 +1071,7 @@ namespace Game
                 listItemsResult.Items.Add(auctionItem);
             }
 
+            listItemsResult.TotalCount = (uint)builder.GetTotalCount();
             listItemsResult.HasMoreResults = builder.HasMoreResults();
         }
 
@@ -2027,15 +2032,14 @@ namespace Game
         uint _offset;
         IComparer<T> _sorter;
         AuctionHouseResultLimits _maxResults;
+        int _totalCount;
         List<T> _items = new();
-        bool _hasMoreResults;
 
         public AuctionsResultBuilder(uint offset, IComparer<T> sorter, AuctionHouseResultLimits maxResults)
         {
             _offset = offset;
             _sorter = sorter;
             _maxResults = maxResults;
-            _hasMoreResults = false;
         }
 
         public void AddItem(T item)
@@ -2043,12 +2047,11 @@ namespace Game
             var index = _items.BinarySearch(item, _sorter);
             if (index < 0)
                 index = ~index;
+
+            ++_totalCount;
             _items.Insert(index, item);
             if (_items.Count > (int)_maxResults + _offset)
-            {
                 _items.RemoveAt(_items.Count - 1);
-                _hasMoreResults = true;
-            }
         }
 
         public Span<T> GetResultRange()
@@ -2057,9 +2060,14 @@ namespace Game
             return h[(int)_offset..];
         }
 
+        public int GetTotalCount()
+        {
+            return _totalCount;
+        }
+
         public bool HasMoreResults()
         {
-            return _hasMoreResults;
+            return _totalCount > _items.Count;
         }
     }
 }
