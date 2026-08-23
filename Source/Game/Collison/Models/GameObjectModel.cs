@@ -118,15 +118,16 @@ namespace Game.Collision
             // child bounds are defined in object space:
             Vector3 pModel = iInvRot.Multiply(point - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
-            float zDist;
 
-            GroupLocationInfo groupInfo = new();
-            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, groupInfo))
+            WorldModelLocationInfoQueryResult locationQueryResult = new();
+            if (iModel.GetLocationInfo(pModel, zDirModel, locationQueryResult))
             {
-                Vector3 modelGround = pModel + zDist * zDirModel;
+                Vector3 modelGround = pModel + locationQueryResult.distanceToModel * zDirModel;
                 float world_Z = (iInvRot.Multiply(modelGround) * iScale + iPos).Z;
                 if (info.ground_Z < world_Z)
                 {
+                    info.rootId = locationQueryResult.rootId;
+                    info.hitModel = locationQueryResult.hitModel;
                     info.ground_Z = world_Z;
                     return true;
                 }
@@ -135,13 +136,13 @@ namespace Game.Collision
             return false;
         }
 
-        public bool GetLiquidLevel(Vector3 point, LocationInfo info, ref float liqHeight)
+        public bool GetLiquidLevel(Vector3 point, GroupModel model, ref float liqHeight)
         {
             // child bounds are defined in object space:
             Vector3 pModel = iInvRot.Multiply(point - iPos) * iInvScale;
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
-            if (info.hitModel.GetLiquidLevel(pModel, out zDist))
+            if (model.GetLiquidLevel(pModel, out zDist))
             {
                 // calculate world height (zDist in model coords):
                 liqHeight = (iInvRot.Multiply(new Vector3(pModel.X, pModel.Y, zDist)) * iScale + iPos).Z;

@@ -161,7 +161,7 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                LocationInfo info = new();
+                StaticMapTreeLocationInfo info = new();
                 Vector3 pos = ConvertPositionToInternalRep(x, y, z);
                 if (instanceTree.GetLocationInfo(pos, info))
                 {
@@ -172,7 +172,7 @@ namespace Game.Collision
                         uint liquidType = info.hitModel.GetLiquidType(); // entry from LiquidType.dbc
                         float liquidLevel = 0;
                         if (!reqLiquidType.HasValue || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType.Value) != 0)
-                            if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
+                            if (info.hitInstance.GetLiquidLevel(pos, info.hitModel, ref liquidLevel))
                                 data.liquidInfo = new(liquidType, liquidLevel);
                     }
 

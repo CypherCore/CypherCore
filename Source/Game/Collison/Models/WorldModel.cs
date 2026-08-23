@@ -363,9 +363,8 @@ namespace Game.Collision
             return isc.hit;
         }
 
-        public bool GetLocationInfo(Vector3 p, Vector3 down, out float dist, GroupLocationInfo info)
+        public bool GetLocationInfo(Vector3 p, Vector3 down, WorldModelLocationInfoQueryResult info)
         {
-            dist = 0f;
             if (groupModels.Empty())
                 return false;
 
@@ -375,9 +374,9 @@ namespace Game.Collision
             groupTree.IntersectRay(r, callback, ref zDist, false);
             if (callback.hit[(int)GroupModel.InsideResult.Inside] != null)
             {
-                info.rootId = (int)RootWMOID;
                 info.hitModel = callback.hit[(int)GroupModel.InsideResult.Inside];
-                dist = zDist;
+                info.distanceToModel = zDist;
+                info.rootId = (int)RootWMOID;
                 return true;
             }
 
@@ -386,9 +385,9 @@ namespace Game.Collision
             // then find back where we originated from (GroupModel::MAYBE_INSIDE)
             if (callback.hit[(int)GroupModel.InsideResult.MaybeInside] != null && callback.hit[(int)GroupModel.InsideResult.Above] != null)
             {
-                info.rootId = (int)RootWMOID;
                 info.hitModel = callback.hit[(int)GroupModel.InsideResult.MaybeInside];
-                dist = zDist;
+                info.distanceToModel = zDist;
+                info.rootId = (int)RootWMOID;
                 return true;
             }
             return false;
@@ -435,7 +434,14 @@ namespace Game.Collision
 
         public bool IsM2() { return Flags.HasFlag(ModelFlags.IsM2); }
         public List<GroupModel> GetGroupModels() { return groupModels; }
-}
+    }
+
+    public class WorldModelLocationInfoQueryResult
+    {
+        public GroupModel hitModel;
+        public float distanceToModel;
+        public int rootId = -1;
+    }
 
     [Flags]
     enum ModelFlags

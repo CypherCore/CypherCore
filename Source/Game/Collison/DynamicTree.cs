@@ -122,16 +122,18 @@ namespace Game.Collision
             Vector3 v = new(x, y, z + 0.5f);
             DynamicTreeLocationInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
-            if (intersectionCallBack.GetLocationInfo().hitModel != null)
+
+            GroupModel hitModel = intersectionCallBack.GetLocationInfo().hitModel;
+            if (hitModel != null)
             {
                 data.floorZ = intersectionCallBack.GetLocationInfo().ground_Z;
-                uint liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
+                uint liquidType = hitModel.GetLiquidType();
                 float liquidLevel = 0;
                 if (!reqLiquidType.HasValue || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType.Value) != 0)
-                    if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, intersectionCallBack.GetLocationInfo(), ref liquidLevel))
+                    if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, hitModel, ref liquidLevel))
                         data.liquidInfo = new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel);
 
-                data.areaInfo = new((int)intersectionCallBack.GetLocationInfo().hitModel.GetWmoID(), intersectionCallBack.GetHitModel().GetNameSetId(), intersectionCallBack.GetLocationInfo().rootId, intersectionCallBack.GetLocationInfo().hitModel.GetMogpFlags(), 0);
+                data.areaInfo = new((int)hitModel.GetWmoID(), intersectionCallBack.GetHitModel().GetNameSetId(), intersectionCallBack.GetLocationInfo().rootId, hitModel.GetMogpFlags(), 0);
                 return true;
             }
 

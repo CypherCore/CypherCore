@@ -120,13 +120,13 @@ namespace Game.Collision
             return hit;
         }
 
-        public bool GetLiquidLevel(Vector3 p, LocationInfo info, ref float liqHeight)
+        public bool GetLiquidLevel(Vector3 p, GroupModel model, ref float liqHeight)
         {
             // child bounds are defined in object space:
             Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
-            if (info.hitModel.GetLiquidLevel(pModel, out zDist))
+            if (model.GetLiquidLevel(pModel, out zDist))
             {
                 // calculate world height (zDist in model coords):
                 // assume WMO not tilted (wouldn't make much sense anyway)
@@ -152,22 +152,20 @@ namespace Game.Collision
             // child bounds are defined in object space:
             Vector3 pModel = iInvRot.Multiply(p - iPos) * iInvScale;
             Vector3 zDirModel = iInvRot.Multiply(new Vector3(0.0f, 0.0f, -1.0f));
-            float zDist;
 
-            GroupLocationInfo groupInfo = new();
-            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, groupInfo))
+            WorldModelLocationInfoQueryResult locationQueryResult = new();
+            if (iModel.GetLocationInfo(pModel, zDirModel, locationQueryResult))
             {
-                Vector3 modelGround = pModel + zDist * zDirModel;
+                Vector3 modelGround = pModel + locationQueryResult.distanceToModel * zDirModel;
                 // Transform back to world space. Note that:
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
                 float world_Z = (iInvRot.Multiply(modelGround * iScale) + iPos).Z;
                 if (info.ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
                 {
-                    info.rootId = groupInfo.rootId;
-                    info.hitModel = groupInfo.hitModel;
+                    info.rootId = locationQueryResult.rootId;
+                    info.hitModel = locationQueryResult.hitModel;
                     info.ground_Z = world_Z;
-                    info.hitInstance = this;
                     return true;
                 }
             }

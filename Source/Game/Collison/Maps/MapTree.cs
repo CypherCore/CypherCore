@@ -11,23 +11,16 @@ using System.Numerics;
 
 namespace Game.Collision
 {
-    public class GroupLocationInfo
+    public class LocationInfo
     {
         public GroupModel hitModel;
         public int rootId = -1;
+        public float ground_Z = float.NegativeInfinity;
     }
 
-    public class LocationInfo
+    public class StaticMapTreeLocationInfo : LocationInfo
     {
-        public LocationInfo()
-        {
-            ground_Z = float.NegativeInfinity;
-        }
-
-        public int rootId;
-        public ModelInstance hitInstance;
-        public GroupModel hitModel;
-        public float ground_Z;
+        public ModelInstance hitInstance = null;
     }
 
     public class AreaInfo
@@ -252,11 +245,11 @@ namespace Game.Collision
             return $"/{mapID:D4}/{mapID:D4}_{tileX:D2}_{tileY:D2}.{extension}";
         }
 
-        public bool GetLocationInfo(Vector3 pos, LocationInfo info)
+        public bool GetLocationInfo(Vector3 pos, StaticMapTreeLocationInfo info)
         {
             LocationInfoCallback intersectionCallBack = new(iTreeValues, info);
             iTree.IntersectPoint(pos, intersectionCallBack);
-            return intersectionCallBack.result;
+            return intersectionCallBack.locInfo.hitInstance != null;
         }
 
         public float GetHeight(Vector3 pPos, float maxSearchDist)

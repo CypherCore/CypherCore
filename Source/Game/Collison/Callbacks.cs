@@ -27,13 +27,10 @@ namespace Game.Collision
 
         public void Invoke(MeshTriangle tri, out AxisAlignedBox value)
         {
-            Vector3 lo = vertices[(int)tri.idx0];
-            Vector3 hi = lo;
-
-            lo = Vector3.Min(Vector3.Min(lo, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
-            hi = Vector3.Max(Vector3.Max(hi, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
-
-            value = new AxisAlignedBox(lo, hi);
+            Vector3 p1 = vertices[(int)tri.idx0];
+            Vector3 p2 = vertices[(int)tri.idx1];
+            Vector3 p3 = vertices[(int)tri.idx2];
+            value = new AxisAlignedBox(Vector3.Min(Vector3.Min(p1, p2), p3), Vector3.Max(Vector3.Max(p1, p2), p3));
         }
 
         List<Vector3> vertices;
@@ -83,9 +80,7 @@ namespace Game.Collision
         }
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
         {
-            bool result = models[(int)entry].IntersectRay(ray, ref distance, pStopAtFirstHit);
-            if (result) hit = true;
-            return hit;
+            return hit |= models[(int)entry].IntersectRay(ray, ref distance, pStopAtFirstHit);
         }
     }
 
@@ -99,8 +94,7 @@ namespace Game.Collision
         }
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
         {
-            hit = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance) || hit;
-            return hit;
+            return hit |= IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance);
         }
 
         bool IntersectTriangle(MeshTriangle tri, List<Vector3> points, Ray ray, ref float distance)
@@ -182,21 +176,19 @@ namespace Game.Collision
 
     public class LocationInfoCallback : WorkerCallback
     {
-        public LocationInfoCallback(ModelInstance[] val, LocationInfo info)
+        public ModelInstance[] prims;
+        public StaticMapTreeLocationInfo locInfo;
+
+        public LocationInfoCallback(ModelInstance[] val, StaticMapTreeLocationInfo info)
         {
             prims = val;
             locInfo = info;
-            result = false;
         }
 
         public override void Invoke(Vector3 point, uint entry)
         {
             if (prims[entry] != null && prims[entry].GetLocationInfo(point, locInfo))
-                result = true;
+                locInfo.hitInstance = prims[entry];
         }
-
-        ModelInstance[] prims;
-        LocationInfo locInfo;
-        public bool result;
     }
 }
