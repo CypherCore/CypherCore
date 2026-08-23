@@ -1088,9 +1088,8 @@ namespace Game.Spells
                     if (unitTarget.GetSpellOtherImmunityMask().HasFlag(SpellOtherImmunity.AoETarget))
                         return SpellCastResult.BadTargets;
 
-                if (HasAttribute(SpellAttr9.TargetMustBeGrounded) &&
-                    (unitTarget.HasUnitMovementFlag(MovementFlag.Falling | MovementFlag.Swimming | MovementFlag.Flying | MovementFlag.Hover) ||
-                    unitTarget.HasExtraUnitMovementFlag2(MovementFlags3.AdvFlying)))
+                if (HasAttribute(SpellAttr9.TargetMustBeGrounded)
+                    && unitTarget.HasUnitMovementFlag(MovementFlag.Falling | MovementFlag.Swimming | MovementFlag.Flying | MovementFlag.Hover | MovementFlag.AdvFlying))
                     return SpellCastResult.TargetNotGrounded;
             }
             // corpse specific target checks

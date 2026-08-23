@@ -452,15 +452,15 @@ namespace Game.Entities
             VehicleFlags vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
 
             if (vehicleFlags.HasAnyFlag(VehicleFlags.NoStrafe))
-                _me.AddUnitMovementFlag2(MovementFlag2.NoStrafe);
+                _me.AddUnitMovementFlag(MovementFlag.NoStrafe);
             if (vehicleFlags.HasAnyFlag(VehicleFlags.NoJumping))
-                _me.AddUnitMovementFlag2(MovementFlag2.NoJumping);
+                _me.AddUnitMovementFlag(MovementFlag.NoJumping);
             if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedturning))
-                _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
+                _me.AddUnitMovementFlag(MovementFlag.FullSpeedTurning);
             if (vehicleFlags.HasAnyFlag(VehicleFlags.AllowPitching))
-                _me.AddUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
+                _me.AddUnitMovementFlag(MovementFlag.AlwaysAllowPitching);
             if (vehicleFlags.HasAnyFlag(VehicleFlags.Fullspeedpitching))
-                _me.AddUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+                _me.AddUnitMovementFlag(MovementFlag.FullSpeedPitching);
 
             _me.m_movementInfo.Pitch = GetPitch();
         }

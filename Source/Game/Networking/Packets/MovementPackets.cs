@@ -62,9 +62,7 @@ namespace Game.Networking.Packets
             {
                 Guid = data.ReadPackedGuid()
             };
-            movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt32());
-            movementInfo.SetMovementFlags2((MovementFlag2)data.ReadUInt32());
-            movementInfo.SetExtraMovementFlags2((MovementFlags3)data.ReadUInt32());
+            movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt64());
             movementInfo.Time = data.ReadUInt32();
             float x = data.ReadFloat();
             float y = data.ReadFloat();
@@ -168,9 +166,7 @@ namespace Game.Networking.Packets
             bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
 
             data.WritePackedGuid(movementInfo.Guid);
-            data.WriteUInt32((uint)movementInfo.GetMovementFlags());
-            data.WriteUInt32((uint)movementInfo.GetMovementFlags2());
-            data.WriteUInt32((uint)movementInfo.GetExtraMovementFlags2());
+            data.WriteUInt64((uint)movementInfo.GetMovementFlags());
             data.WriteUInt32(movementInfo.Time);
             data.WriteFloat(movementInfo.Pos.GetPositionX());
             data.WriteFloat(movementInfo.Pos.GetPositionY());

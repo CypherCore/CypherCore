@@ -1085,7 +1085,7 @@ namespace Game.Entities
 
         public bool IsPetNeedBeTemporaryUnsummoned()
         {
-            return !IsInWorld || !IsAlive() || HasUnitMovementFlag(MovementFlag.Flying) || HasExtraUnitMovementFlag2(MovementFlags3.AdvFlying);
+            return !IsInWorld || !IsAlive() || HasUnitMovementFlag(MovementFlag.Flying) || HasUnitMovementFlag(MovementFlag.AdvFlying);
         }
 
         public void SendRemoveControlBar()
@@ -4419,7 +4419,7 @@ namespace Game.Entities
             SetDeathState(DeathState.Alive);
 
             // add the flag to make sure opcode is always sent
-            AddUnitMovementFlag(MovementFlag.WaterWalk);
+            AddUnitMovementFlag(MovementFlag.Waterwalking);
             SetWaterWalking(false);
             if (!HasUnitState(UnitState.Stunned))
                 SetRooted(false);

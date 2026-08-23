@@ -3075,8 +3075,6 @@ namespace Game.Entities
     {
         public ObjectGuid Guid { get; set; }
         MovementFlag flags;
-        MovementFlag2 flags2;
-        MovementFlags3 flags3;
         public Position Pos { get; set; }
         public uint Time { get; set; }
         public TransportInfo transport;
@@ -3093,7 +3091,6 @@ namespace Game.Entities
         {
             Guid = ObjectGuid.Empty;
             flags = MovementFlag.None;
-            flags2 = MovementFlag2.None;
             Time = 0;
             Pitch = 0.0f;
 
@@ -3107,18 +3104,6 @@ namespace Game.Entities
         public void AddMovementFlag(MovementFlag f) { flags |= f; }
         public void RemoveMovementFlag(MovementFlag f) { flags &= ~f; }
         public bool HasMovementFlag(MovementFlag f) { return (flags & f) != 0; }
-
-        public MovementFlag2 GetMovementFlags2() { return flags2; }
-        public void SetMovementFlags2(MovementFlag2 f) { flags2 = f; }
-        public void AddMovementFlag2(MovementFlag2 f) { flags2 |= f; }
-        public void RemoveMovementFlag2(MovementFlag2 f) { flags2 &= ~f; }
-        public bool HasMovementFlag2(MovementFlag2 f) { return (flags2 & f) != 0; }
-
-        public MovementFlags3 GetExtraMovementFlags2() { return flags3; }
-        public void SetExtraMovementFlags2(MovementFlags3 flag) { flags3 = flag; }
-        public void AddExtraMovementFlag2(MovementFlags3 flag) { flags3 |= flag; }
-        public void RemoveExtraMovementFlag2(MovementFlags3 flag) { flags3 &= ~flag; }
-        public bool HasExtraMovementFlag2(MovementFlags3 flag) { return (flags3 & flag) != 0; }
 
         public void SetFallTime(uint time) { jump.fallTime = time; }
 

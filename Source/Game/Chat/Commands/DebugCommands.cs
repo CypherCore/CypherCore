@@ -649,7 +649,7 @@ namespace Game.Chat
         }
 
         [Command("moveflags", RBACPermissions.CommandDebug)]
-        static bool HandleDebugMoveflagsCommand(CommandHandler handler, OptionalArg<uint> moveFlags, OptionalArg<uint> moveFlagsExtra, OptionalArg<uint> moveFlagsExtra2)
+        static bool HandleDebugMoveflagsCommand(CommandHandler handler, OptionalArg<ulong> moveFlags)
         {
             Unit target = handler.GetSelectedUnit();
             if (target == null)
@@ -658,17 +658,11 @@ namespace Game.Chat
             if (!moveFlags.HasValue)
             {
                 //! Display case
-                handler.SendSysMessage(CypherStrings.MoveflagsGet, target.GetUnitMovementFlags(), target.GetUnitMovementFlags2());
+                handler.SendSysMessage(CypherStrings.MoveflagsGet, target.GetUnitMovementFlags(), target.GetUnitMovementFlags().ToString());
             }
             else
             {
                 target.SetUnitMovementFlags((MovementFlag)moveFlags.Value);
-
-                if (moveFlagsExtra.HasValue)
-                    target.SetUnitMovementFlags2((MovementFlag2)moveFlagsExtra.Value);
-
-                if (moveFlagsExtra2.HasValue)
-                    target.SetExtraUnitMovementFlags2((MovementFlags3)moveFlagsExtra2.Value);
 
                 if (!target.IsTypeId(TypeId.Player))
                     target.DestroyForNearbyPlayers();  // Force new SMSG_UPDATE_OBJECT:CreateObject
@@ -679,7 +673,7 @@ namespace Game.Chat
                     target.SendMessageToSet(moveUpdate, true);
                 }
 
-                handler.SendSysMessage(CypherStrings.MoveflagsSet, target.GetUnitMovementFlags(), target.GetUnitMovementFlags2());
+                handler.SendSysMessage(CypherStrings.MoveflagsSet, target.GetUnitMovementFlags(), target.GetUnitMovementFlags().ToString());
             }
 
             return true;

@@ -6,21 +6,21 @@ using System;
 namespace Framework.Constants
 {
     [Flags]
-    public enum MovementFlag
+    public enum MovementFlag : ulong
     {
-        None = 0x0,
-        Forward = 0x1,
-        Backward = 0x2,
-        StrafeLeft = 0x4,
-        StrafeRight = 0x8,
+        None = 0x00,   // Skip
+        Forward = 0x01,
+        Backward = 0x02,
+        StrafeLeft = 0x04,
+        StrafeRight = 0x08,
         Left = 0x10,
         Right = 0x20,
         PitchUp = 0x40,
         PitchDown = 0x80,
-        Walking = 0x100,
-        DisableGravity = 0x200,
-        Root = 0x400,
-        Falling = 0x800,
+        Walking = 0x100,   // Walking
+        DisableGravity = 0x200,   // Former Levitating. This Is Used When Walking Is Not Possible.
+        Root = 0x400,   // Must Not Be Set Along With MaskMoving
+        Falling = 0x800,   // Damage Dealt On That Type Of Falling
         FallingFar = 0x1000,
         PendingStop = 0x2000,
         PendingStrafeStop = 0x4000,
@@ -29,67 +29,69 @@ namespace Framework.Constants
         PendingStrafeLeft = 0x20000,
         PendingStrafeRight = 0x40000,
         PendingRoot = 0x80000,
-        Swimming = 0x100000,
-        Ascending = 0x200000,
+        Swimming = 0x100000,   // Appears With Fly Flag Also
+        Ascending = 0x200000,   // Press "Space" When Flying
         Descending = 0x400000,
-        CanFly = 0x800000,
-        Flying = 0x1000000,
-        SplineElevation = 0x2000000,
-        WaterWalk = 0x4000000,
-        FallingSlow = 0x8000000,
-        Hover = 0x10000000,
+        CanFly = 0x800000,   // Appears When Unit Can Fly. For Example, Appears When A Player Sits On A Mount.
+        Flying = 0x1000000,   // Unit Is Actually Flying. Pretty Sure This Is Only Used For Players. Creatures Use DisableGravity
+        SplineElevation = 0x2000000,   // Used For Flight Paths
+        Waterwalking = 0x4000000,   // Prevent Unit From Falling Through Water
+        FallingSlow = 0x8000000,   // Active Rogue Safe Fall Spell (Passive)
+        CannotSwim = 0x10000000,
         DisableCollision = 0x20000000,
+        Knockback = 0x40000000,
+        TouchingGround = 0x80000000,   // Terrain Normal Calculation Is Disabled If This Flag Is Not Present, Client Automatically Handles Setting This Flag
+        NoStrafe = 0x100000000,
+        NoJumping = 0x200000000,
+        FullSpeedTurning = 0x400000000,
+        FullSpeedPitching = 0x800000000,
+        AlwaysAllowPitching = 0x1000000000,
+        WaterwalkingFullPitch = 0x2000000000,
+        CanSwimToFlyTrans = 0x4000000000,
+        CanTurnWhileFalling = 0x8000000000,
+        IgnoreMovementForces = 0x10000000000,
+        CanDoubleJump = 0x20000000000,
+        DoubleJump = 0x40000000000,
+        Unk43 = 0x80000000000,   // Old Movementflags2 0x8000
+        DisableInertia = 0x100000000000,
+        CanAdvFly = 0x200000000000,
+        AdvFlying = 0x400000000000,
+        Unk47 = 0x800000000000,   // Old Movementflags3 0x8
+        Unk48 = 0x1000000000000,   // Old Movementflags3 0x10
+        FallingAdvFlyDismount = 0x2000000000000,   // Falling After Dismounting While Adv Flying
+        Unk50 = 0x4000000000000,   // Old Movementflags3 0x200
+        WalkingOnWater = 0x8000000000000,   // Currently On Water Surface
+        CanDrive = 0x10000000000000,
+        DrivingForward = 0x20000000000000,
+        DrivingBackward = 0x40000000000000,
+        Unk55 = 0x80000000000000,   // Old Movementflags3 0x20000
+        Unk56 = 0x100000000000000,   // Old Movementflags3 0x40000
+        Unk57 = 0x200000000000000,   // Old Movementflags3 0x80000
+        Unk58 = 0x400000000000000,
+        Hover = 0x800000000000000,
 
-        MaskMoving = Forward | Backward | StrafeLeft | StrafeRight | Falling | Ascending | Descending,
+        MaskMoving =
+            Forward | Backward | StrafeLeft | StrafeRight |
+            Falling | Ascending | Descending,// Skip
 
-        MaskTurning = Left | Right | PitchUp | PitchDown,
+        MaskTurning =
+            Left | Right | PitchUp | PitchDown, // Skip
 
-        MaskMovingFly = Flying | Ascending | Descending,
+        MaskMovingFly =
+            Flying | Ascending | Descending, // Skip
 
-        MaskCreatureAllowed = Forward | DisableGravity | Root | Swimming |
-            CanFly | WaterWalk | FallingSlow | Hover | DisableCollision,
+        // Movement Flags Allowed For Creature In Createobject - We Need To Keep All Other Enabled Serverside
+        // To Properly Calculate All Movement
+        MaskCreatureAllowed =
+            Forward | DisableGravity | Root | Swimming |
+            CanFly | Waterwalking | FallingSlow | Hover | DisableCollision, // Skip
 
-        MaskPlayerOnly = Flying,
+        /// @Todo If Needed: Add More Flags To This Masks That Are Exclusive To Players
+        MaskPlayerOnly =
+            Flying, // Skip
 
-        MaskHasPlayerStatusOpcode = DisableGravity | Root | CanFly | WaterWalk |
-            FallingSlow | Hover | DisableCollision
-    }
-
-    [Flags]
-    public enum MovementFlag2
-    {
-        None = 0x0,
-        NoStrafe = 0x1,
-        NoJumping = 0x2,
-        FullSpeedTurning = 0x4,
-        FullSpeedPitching = 0x8,
-        AlwaysAllowPitching = 0x10,
-        IsVehicleExitVoluntary = 0x20,
-        WaterwalkingFullPitch = 0x40, // Will Always Waterwalk, Even If Facing The Camera Directly Down
-        VehiclePassengerIsTransitionAllowed = 0x80,
-        CanSwimToFlyTrans = 0x100,
-        Unk9 = 0x200, // Terrain Normal Calculation Is Disabled If This Flag Is Not Present, Client Automatically Handles Setting This Flag
-        CanTurnWhileFalling = 0x400,
-        IgnoreMovementForces = 0x800,
-        CanDoubleJump = 0x1000,
-        DoubleJump = 0x2000,
-        // These Flags Are Not Sent
-        AwaitingLoad = 0x10000,
-        InterpolatedMovement = 0x20000,
-        InterpolatedTurning = 0x40000,
-        InterpolatedPitching = 0x80000
-    }
-
-    [Flags]
-    public enum MovementFlags3
-    {
-        None = 0x00,
-        DisableInertia = 0x01,
-        CanAdvFly = 0x02,
-        AdvFlying = 0x04,
-        CannotSwim = 0x2000,
-        CanDrive = 0x4000,
-        DrivingFoward = 0x8000,
-        DrivingBackward = 0x10000,
+        /// Movement Flags That Have Change Status Opcodes Associated For Players
+        MaskHasPlayerStatusOpcode = DisableGravity | Root |
+            CanFly | Waterwalking | FallingSlow | Hover | DisableCollision // Skip
     }
 }

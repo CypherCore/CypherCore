@@ -2113,11 +2113,17 @@ namespace Game
             if (condition.LifetimeMaxPVPRank != 0 && player.m_activePlayerData.LifetimeMaxRank != condition.LifetimeMaxPVPRank)
                 return false;
 
-            if (condition.MovementFlags[0] != 0 && !Convert.ToBoolean((uint)player.GetUnitMovementFlags() & condition.MovementFlags[0]))
-                return false;
+            if (condition.MovementFlags != 0)
+            {
+                const MovementFlag PlayerConditionSupportedMovementFlags = MovementFlag.Forward | MovementFlag.Backward
+                    | MovementFlag.StrafeLeft | MovementFlag.StrafeRight | MovementFlag.Left | MovementFlag.Right
+                    | MovementFlag.PitchUp | MovementFlag.PitchDown | MovementFlag.Walking | MovementFlag.DisableGravity
+                    | MovementFlag.Root | MovementFlag.Falling | MovementFlag.Swimming;
 
-            if (condition.MovementFlags[1] != 0 && !Convert.ToBoolean((uint)player.GetUnitMovementFlags2() & condition.MovementFlags[1]))
-                return false;
+                MovementFlag requiredFlags = (MovementFlag)condition.MovementFlags & PlayerConditionSupportedMovementFlags;
+                if ((player.GetUnitMovementFlags() & requiredFlags) != requiredFlags)
+                    return false;
+            }
 
             if (condition.WeaponSubclassMask != 0)
             {

@@ -229,8 +229,7 @@ namespace Game
             {
                 if (check)
                 {
-                    Log.outDebug(LogFilter.Unit, "Player.ValidateMovementInfo: Violation of MovementFlags found ({0}). MovementFlags: {1}, MovementFlags2: {2} for player {3}. Mask {4} will be removed.",
-                        check, mi.GetMovementFlags(), mi.GetMovementFlags2(), GetPlayer().GetGUID(), maskToRemove);
+                    Log.outDebug(LogFilter.Unit, $"Player.ValidateMovementInfo: Violation of MovementFlags found ({check}). MovementFlags: {mi.GetMovementFlags()} for player {GetPlayer().GetGUID()}. Mask {maskToRemove} will be removed.");
                     mi.RemoveMovementFlag(maskToRemove);
                 }
             });
@@ -275,8 +274,8 @@ namespace Game
                 MovementFlag.Forward | MovementFlag.Backward);
 
             //! Cannot walk on water without SPELL_AURA_WATER_WALK except for ghosts
-            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.WaterWalk) &&
-                !mover.HasAuraType(AuraType.WaterWalk) && !mover.HasAuraType(AuraType.Ghost), MovementFlag.WaterWalk);
+            RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.Waterwalking) &&
+                !mover.HasAuraType(AuraType.WaterWalk) && !mover.HasAuraType(AuraType.Ghost), MovementFlag.Waterwalking);
 
             //! Cannot feather fall without SPELL_AURA_FEATHER_FALL
             RemoveViolatingFlags(mi.HasMovementFlag(MovementFlag.FallingSlow) && !mover.HasAuraType(AuraType.FeatherFall),

@@ -120,6 +120,7 @@ namespace Game.DataStorage
         public sbyte PowerType;
         public byte PowerTypeComp;
         public sbyte PowerTypeValue;
+        public int MovementFlags;
         public int WeaponSubclassMask;
         public byte MaxGuildLevel;
         public byte MinGuildLevel;
@@ -153,7 +154,6 @@ namespace Game.DataStorage
         public uint[] CurrencyID = new uint[4];
         public uint[] CurrencyCount = new uint[4];
         public uint[] QuestKillMonster = new uint[6];
-        public int[] MovementFlags = new int[2];
         public int[] RaceMask = new int[2];
         public int[] TraitNodeEntryID = new int[4];
         public ushort[] TraitNodeEntryMinRank = new ushort[4];

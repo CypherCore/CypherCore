@@ -462,13 +462,13 @@ namespace Game.Entities
 
         bool SetStrafingDisabled(bool disable)
         {
-            if (disable == HasUnitMovementFlag2(MovementFlag2.NoStrafe))
+            if (disable == HasUnitMovementFlag(MovementFlag.NoStrafe))
                 return false;
 
             if (disable)
-                AddUnitMovementFlag2(MovementFlag2.NoStrafe);
+                AddUnitMovementFlag(MovementFlag.NoStrafe);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.NoStrafe);
+                RemoveUnitMovementFlag(MovementFlag.NoStrafe);
 
 
             Player playerMover = GetPlayerMovingMe();
@@ -489,13 +489,13 @@ namespace Game.Entities
 
         bool SetJumpingDisabled(bool disable)
         {
-            if (disable == HasUnitMovementFlag2(MovementFlag2.NoJumping))
+            if (disable == HasUnitMovementFlag(MovementFlag.NoJumping))
                 return false;
 
             if (disable)
-                AddUnitMovementFlag2(MovementFlag2.NoJumping);
+                AddUnitMovementFlag(MovementFlag.NoJumping);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.NoJumping);
+                RemoveUnitMovementFlag(MovementFlag.NoJumping);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -515,13 +515,13 @@ namespace Game.Entities
 
         bool SetEnableFullSpeedTurning(bool enable)
         {
-            if (enable == HasUnitMovementFlag2(MovementFlag2.FullSpeedTurning))
+            if (enable == HasUnitMovementFlag(MovementFlag.FullSpeedTurning))
                 return false;
 
             if (enable)
-                AddUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
+                AddUnitMovementFlag(MovementFlag.FullSpeedTurning);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.FullSpeedTurning);
+                RemoveUnitMovementFlag(MovementFlag.FullSpeedTurning);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -541,13 +541,13 @@ namespace Game.Entities
 
         bool SetEnableFullSpeedPitching(bool enable)
         {
-            if (enable == HasUnitMovementFlag2(MovementFlag2.FullSpeedPitching))
+            if (enable == HasUnitMovementFlag(MovementFlag.FullSpeedPitching))
                 return false;
 
             if (enable)
-                AddUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+                AddUnitMovementFlag(MovementFlag.FullSpeedPitching);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.FullSpeedPitching);
+                RemoveUnitMovementFlag(MovementFlag.FullSpeedPitching);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -567,13 +567,13 @@ namespace Game.Entities
 
         bool SetAlwaysAllowPitching(bool enable)
         {
-            if (enable == HasUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching))
+            if (enable == HasUnitMovementFlag(MovementFlag.AlwaysAllowPitching))
                 return false;
 
             if (enable)
-                AddUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
+                AddUnitMovementFlag(MovementFlag.AlwaysAllowPitching);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.AlwaysAllowPitching);
+                RemoveUnitMovementFlag(MovementFlag.AlwaysAllowPitching);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -596,13 +596,13 @@ namespace Game.Entities
             if (!IsTypeId(TypeId.Player))
                 return false;
 
-            if (enable == HasUnitMovementFlag2(MovementFlag2.CanSwimToFlyTrans))
+            if (enable == HasUnitMovementFlag(MovementFlag.CanSwimToFlyTrans))
                 return false;
 
             if (enable)
-                AddUnitMovementFlag2(MovementFlag2.CanSwimToFlyTrans);
+                AddUnitMovementFlag(MovementFlag.CanSwimToFlyTrans);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.CanSwimToFlyTrans);
+                RemoveUnitMovementFlag(MovementFlag.CanSwimToFlyTrans);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -627,9 +627,9 @@ namespace Game.Entities
             //return false;
 
             if (enable)
-                AddUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling);
+                AddUnitMovementFlag(MovementFlag.CanTurnWhileFalling);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling);
+                RemoveUnitMovementFlag(MovementFlag.CanTurnWhileFalling);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -649,13 +649,13 @@ namespace Game.Entities
 
         public bool SetCanDoubleJump(bool enable)
         {
-            if (enable == HasUnitMovementFlag2(MovementFlag2.CanDoubleJump))
+            if (enable == HasUnitMovementFlag(MovementFlag.CanDoubleJump))
                 return false;
 
             if (enable)
-                AddUnitMovementFlag2(MovementFlag2.CanDoubleJump);
+                AddUnitMovementFlag(MovementFlag.CanDoubleJump);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.CanDoubleJump);
+                RemoveUnitMovementFlag(MovementFlag.CanDoubleJump);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -675,13 +675,13 @@ namespace Game.Entities
 
         public bool SetDisableInertia(bool disable)
         {
-            if (disable == HasExtraUnitMovementFlag2(MovementFlags3.DisableInertia))
+            if (disable == HasUnitMovementFlag(MovementFlag.DisableInertia))
                 return false;
 
             if (disable)
-                AddExtraUnitMovementFlag2(MovementFlags3.DisableInertia);
+                AddUnitMovementFlag(MovementFlag.DisableInertia);
             else
-                RemoveExtraUnitMovementFlag2(MovementFlags3.DisableInertia);
+                RemoveUnitMovementFlag(MovementFlag.DisableInertia);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -1276,13 +1276,13 @@ namespace Game.Entities
 
         public bool SetWaterWalking(bool enable)
         {
-            if (enable == HasUnitMovementFlag(MovementFlag.WaterWalk))
+            if (enable == HasUnitMovementFlag(MovementFlag.Waterwalking))
                 return false;
 
             if (enable)
-                AddUnitMovementFlag(MovementFlag.WaterWalk);
+                AddUnitMovementFlag(MovementFlag.Waterwalking);
             else
-                RemoveUnitMovementFlag(MovementFlag.WaterWalk);
+                RemoveUnitMovementFlag(MovementFlag.Waterwalking);
 
 
             Player playerMover = GetPlayerMovingMe();
@@ -1821,13 +1821,13 @@ namespace Game.Entities
 
         public bool SetCanAdvFly(bool enable)
         {
-            if (enable == HasExtraUnitMovementFlag2(MovementFlags3.CanAdvFly))
+            if (enable == HasUnitMovementFlag(MovementFlag.CanAdvFly))
                 return false;
 
             if (enable)
-                AddExtraUnitMovementFlag2(MovementFlags3.CanAdvFly);
+                AddUnitMovementFlag(MovementFlag.CanAdvFly);
             else
-                RemoveExtraUnitMovementFlag2(MovementFlags3.CanAdvFly | MovementFlags3.AdvFlying);
+                RemoveUnitMovementFlag(MovementFlag.CanAdvFly | MovementFlag.AdvFlying);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -1847,13 +1847,13 @@ namespace Game.Entities
 
         public bool SetMoveCantSwim(bool cantSwim)
         {
-            if (cantSwim == HasExtraUnitMovementFlag2(MovementFlags3.CannotSwim))
+            if (cantSwim == HasUnitMovementFlag(MovementFlag.CannotSwim))
                 return false;
 
             if (cantSwim)
-                AddExtraUnitMovementFlag2(MovementFlags3.CannotSwim);
+                AddUnitMovementFlag(MovementFlag.CannotSwim);
             else
-                RemoveExtraUnitMovementFlag2(MovementFlags3.CannotSwim);
+                RemoveUnitMovementFlag(MovementFlag.CannotSwim);
 
             Player playerMover = GetPlayerMovingMe();
             if (playerMover != null)
@@ -1958,13 +1958,13 @@ namespace Game.Entities
 
         public bool SetIgnoreMovementForces(bool ignore)
         {
-            if (ignore == HasUnitMovementFlag2(MovementFlag2.IgnoreMovementForces))
+            if (ignore == HasUnitMovementFlag(MovementFlag.IgnoreMovementForces))
                 return false;
 
             if (ignore)
-                AddUnitMovementFlag2(MovementFlag2.IgnoreMovementForces);
+                AddUnitMovementFlag(MovementFlag.IgnoreMovementForces);
             else
-                RemoveUnitMovementFlag2(MovementFlag2.IgnoreMovementForces);
+                RemoveUnitMovementFlag(MovementFlag.IgnoreMovementForces);
 
             ServerOpcodes[] ignoreMovementForcesOpcodeTable =
             {
@@ -2131,33 +2131,6 @@ namespace Game.Entities
         {
             m_movementInfo.SetMovementFlags(f);
         }
-
-        public void AddUnitMovementFlag2(MovementFlag2 f)
-        {
-            m_movementInfo.AddMovementFlag2(f);
-        }
-        void RemoveUnitMovementFlag2(MovementFlag2 f)
-        {
-            m_movementInfo.RemoveMovementFlag2(f);
-        }
-        public bool HasUnitMovementFlag2(MovementFlag2 f)
-        {
-            return m_movementInfo.HasMovementFlag2(f);
-        }
-        public MovementFlag2 GetUnitMovementFlags2()
-        {
-            return m_movementInfo.GetMovementFlags2();
-        }
-        public void SetUnitMovementFlags2(MovementFlag2 f)
-        {
-            m_movementInfo.SetMovementFlags2(f);
-        }
-
-        public void AddExtraUnitMovementFlag2(MovementFlags3 f) { m_movementInfo.AddExtraMovementFlag2(f); }
-        public void RemoveExtraUnitMovementFlag2(MovementFlags3 f) { m_movementInfo.RemoveExtraMovementFlag2(f); }
-        public bool HasExtraUnitMovementFlag2(MovementFlags3 f) { return m_movementInfo.HasExtraMovementFlag2(f); }
-        public MovementFlags3 GetExtraUnitMovementFlags2() { return m_movementInfo.GetExtraMovementFlags2(); }
-        public void SetExtraUnitMovementFlags2(MovementFlags3 f) { m_movementInfo.SetExtraMovementFlags2(f); }
 
         //Spline
         public bool IsSplineEnabled()

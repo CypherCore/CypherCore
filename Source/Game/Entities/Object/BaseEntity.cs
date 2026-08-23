@@ -240,8 +240,6 @@ namespace Game.Entities
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
 
                 data.WriteUInt32((uint)unit.GetUnitMovementFlags());
-                data.WriteUInt32((uint)unit.GetUnitMovementFlags2());
-                data.WriteUInt32((uint)unit.GetExtraUnitMovementFlags2());
 
                 data.WriteUInt32(unit.m_movementInfo.Time);                     // MoveTime
                 data.WriteFloat(unit.GetPositionX());
