@@ -936,7 +936,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(HideWarboardHeader);
             _worldPacket.WriteBit(KeepOpenAfterChoice);
             _worldPacket.WriteBit(ShowChoicesAsList);
-            _worldPacket.WriteBit(ForceDontShowChoicesAsList);
+            _worldPacket.WriteBit(HasPowerChoice);
             _worldPacket.WriteBit(RequiresSelection);
             _worldPacket.FlushBits();
 
@@ -961,7 +961,7 @@ namespace Game.Networking.Packets
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
         public bool ShowChoicesAsList;
-        public bool ForceDontShowChoicesAsList;
+        public bool HasPowerChoice;
         public bool RequiresSelection;
     }
 

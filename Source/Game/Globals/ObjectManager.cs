@@ -10078,8 +10078,8 @@ namespace Game
 
             //                                               0         1               2           3                4         5         6
             SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, " +
-                //7              8                   9                    10                 11                          12                 13            14
-                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, ForceDontShowChoicesAsList, RequiresSelection, MaxResponses, ScriptName FROM playerchoice");
+                //7              8                   9                    10                 11                 12            13
+                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, RequiresSelection, MaxResponses, ScriptName FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -10096,25 +10096,26 @@ namespace Game
 
             do
             {
-                PlayerChoice choice = new();
-                choice.ChoiceId = choiceResult.Read<int>(0);
-                choice.UiTextureKitId = choiceResult.Read<int>(1);
-                choice.SoundKitId = choiceResult.Read<uint>(2);
-                choice.CloseSoundKitId = choiceResult.Read<uint>(3);
-                choice.Duration = TimeSpan.FromSeconds(choiceResult.Read<long>(4));
-                choice.Question = choiceResult.Read<string>(5);
-                choice.PendingChoiceText = choiceResult.Read<string>(6);
-                choice.InfiniteRange = choiceResult.Read<bool>(7);
-                choice.HideWarboardHeader = choiceResult.Read<bool>(8);
-                choice.KeepOpenAfterChoice = choiceResult.Read<bool>(9);
-                choice.ShowChoicesAsList = choiceResult.Read<bool>(10);
-                choice.ForceDontShowChoicesAsList = choiceResult.Read<bool>(11);
-                choice.RequiresSelection = choiceResult.Read<bool>(12);
+                PlayerChoice choice = new()
+                {
+                    ChoiceId = choiceResult.Read<int>(0),
+                    UiTextureKitId = choiceResult.Read<int>(1),
+                    SoundKitId = choiceResult.Read<uint>(2),
+                    CloseSoundKitId = choiceResult.Read<uint>(3),
+                    Duration = TimeSpan.FromSeconds(choiceResult.Read<long>(4)),
+                    Question = choiceResult.Read<string>(5),
+                    PendingChoiceText = choiceResult.Read<string>(6),
+                    InfiniteRange = choiceResult.Read<bool>(7),
+                    HideWarboardHeader = choiceResult.Read<bool>(8),
+                    KeepOpenAfterChoice = choiceResult.Read<bool>(9),
+                    ShowChoicesAsList = choiceResult.Read<bool>(10),
+                    RequiresSelection = choiceResult.Read<bool>(11)
+                };
 
-                if (!choiceResult.IsNull(13))
-                    choice.MaxResponses = choiceResult.Read<uint>(13);
+                if (!choiceResult.IsNull(12))
+                    choice.MaxResponses = choiceResult.Read<uint>(12);
 
-                choice.ScriptId = GetScriptId(choiceResult.Read<string>(14));
+                choice.ScriptId = GetScriptId(choiceResult.Read<string>(13));
 
                 _playerChoices[choice.ChoiceId] = choice;
 

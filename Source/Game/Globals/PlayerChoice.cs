@@ -105,7 +105,6 @@ namespace Game
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
         public bool ShowChoicesAsList;
-        public bool ForceDontShowChoicesAsList;
         public bool RequiresSelection;
 
         public uint MaxResponses;

@@ -5104,7 +5104,6 @@ namespace Game.Entities
             displayPlayerChoice.HideWarboardHeader = playerChoice.HideWarboardHeader;
             displayPlayerChoice.KeepOpenAfterChoice = playerChoice.KeepOpenAfterChoice;
             displayPlayerChoice.ShowChoicesAsList = playerChoice.ShowChoicesAsList;
-            displayPlayerChoice.ForceDontShowChoicesAsList = playerChoice.ForceDontShowChoicesAsList;
             displayPlayerChoice.RequiresSelection = playerChoice.RequiresSelection;
 
             for (var i = 0; i < playerChoice.Responses.Count && (playerChoice.MaxResponses == 0 || displayPlayerChoice.Responses.Count < playerChoice.MaxResponses); ++i)
@@ -5192,6 +5191,8 @@ namespace Game.Entities
                     mawPower.Rarity = playerChoiceResponse.MawPower.Value.Rarity;
                     mawPower.SpellID = playerChoiceResponse.MawPower.Value.SpellID;
                     mawPower.MaxStacks = playerChoiceResponse.MawPower.Value.MaxStacks;
+
+                    displayPlayerChoice.HasPowerChoice = true;
 
                     playerChoiceResponse.MawPower = mawPower;
                 }
