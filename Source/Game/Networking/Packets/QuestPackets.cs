@@ -505,7 +505,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(PortraitTurnInName.GetByteCount(), 8);
             _worldPacket.WriteBit(AutoLaunched);
             _worldPacket.WriteBit(FromContentPush);
-            _worldPacket.WriteBit(false);   // unused in client
+            _worldPacket.WriteBit(ReplayQuest);
             _worldPacket.WriteBit(ResetByScheduler);
             _worldPacket.WriteBit(StartCheat);
             _worldPacket.WriteBit(DisplayPopup);
@@ -553,6 +553,7 @@ namespace Game.Networking.Packets
         public List<ConditionalQuestText> ConditionalDescriptionText = new();
         public bool AutoLaunched;
         public bool FromContentPush;
+        public bool ReplayQuest;
         public bool ResetByScheduler;
         public bool DisplayPopup;
         public bool StartCheat;

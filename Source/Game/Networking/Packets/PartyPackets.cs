@@ -1274,7 +1274,7 @@ namespace Game.Networking.Packets
         public int ConsecutiveSuccesses;
         public long LastPenaltyTime;
         public long LeaverExpirationTime;
-        public int Unknown_1120;
+        public int Flags;
         public bool LeaverStatus;
 
         public void Write(WorldPacket data)
@@ -1287,7 +1287,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(ConsecutiveSuccesses);
             data.WriteInt64(LastPenaltyTime);
             data.WriteInt64(LeaverExpirationTime);
-            data.WriteInt32(Unknown_1120);
+            data.WriteInt32(Flags);
             data.WriteBits(LeaverStatus, 1);
             data.FlushBits();
         }

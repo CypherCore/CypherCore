@@ -595,10 +595,10 @@ namespace Game.Networking.Packets
     public struct SupportTicketHouseInfo
     {
         public string NeighborhoodName;
-        public ObjectGuid Unknown_1127_1;
-        public ObjectGuid Unknown_1127_2;
-        public ObjectGuid Unknown_1127_3;
-        public byte Unknown_1127_4;
+        public ObjectGuid NeighborhoodGUID;
+        public ObjectGuid NeighborhoodOwnerGUID;
+        public ObjectGuid HouseGUID;
+        public byte PlotID;
 
         public void Read(WorldPacket data)
         {
@@ -606,10 +606,10 @@ namespace Game.Networking.Packets
 
             var stringSize = data.ReadBits<uint>(8);
 
-            Unknown_1127_1 = data.ReadPackedGuid();
-            Unknown_1127_2 = data.ReadPackedGuid();
-            Unknown_1127_3 = data.ReadPackedGuid();
-            Unknown_1127_4 = data.ReadUInt8();
+            NeighborhoodGUID = data.ReadPackedGuid();
+            NeighborhoodOwnerGUID = data.ReadPackedGuid();
+            HouseGUID = data.ReadPackedGuid();
+            PlotID = data.ReadUInt8();
 
             NeighborhoodName = data.ReadString(stringSize);
         }
