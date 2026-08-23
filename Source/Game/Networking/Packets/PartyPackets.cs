@@ -1313,8 +1313,8 @@ namespace Game.Networking.Packets
             data.WriteBits(Name.GetByteCount(), 6);
             data.WriteBits(VoiceStateID.GetByteCount() + 1, 6);
             data.WriteBit(Connected);
-            data.WriteBit(VoiceChatSilenced);
             data.WriteBit(FromSocialQueue);
+            data.WriteBit(VoiceChatSilenced);
             Leaver.Write(data);
             data.WritePackedGuid(GUID);
             data.WriteUInt8(Subgroup);
