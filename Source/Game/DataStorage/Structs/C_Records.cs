@@ -614,15 +614,15 @@ namespace Game.DataStorage
         public uint Id;
         public CriteriaType Type;
         public uint Asset;
-        public uint ModifierTreeId;
+        public int ModifierTreeId;
         public int StartEvent;
         public uint StartAsset;
-        public ushort StartTimer;
+        public int StartTimer;
         public int FailEvent;
         public uint FailAsset;
         public int Flags;
-        public ushort EligibilityWorldStateID;
-        public byte EligibilityWorldStateValue;
+        public int EligibilityWorldStateID;
+        public int EligibilityWorldStateValue;
 
         public bool HasFlag(CriteriaFlags criteriaFlags) { return (Flags & (int)criteriaFlags) != 0; }
     }

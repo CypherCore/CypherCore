@@ -272,7 +272,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint SpellID;
         public uint ModalNextSpell;
-        public byte SpellClassSet;
+        public int SpellClassSet;
         public FlagArray128 SpellClassMask;
     }
 

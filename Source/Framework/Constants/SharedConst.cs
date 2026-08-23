@@ -935,6 +935,7 @@ namespace Framework.Constants
         Bezier4 = 4,
         Bezier = 5,
         Constant = 6,
+        Step = 7,
     }
 
     public enum Difficulty : short

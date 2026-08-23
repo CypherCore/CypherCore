@@ -1254,10 +1254,8 @@ namespace Game.DataStorage
                 {
                     switch (points.Count)
                     {
-                        case 1:
-                            return CurveInterpolationMode.Constant;
                         case 2:
-                            return CurveInterpolationMode.Linear;
+                            return CurveInterpolationMode.Cosine;
                         case 3:
                             return CurveInterpolationMode.Bezier3;
                         case 4:
@@ -1269,11 +1267,15 @@ namespace Game.DataStorage
                 }
                 case 3:
                     return CurveInterpolationMode.Cosine;
+                case 4:
+                    return CurveInterpolationMode.Constant;
+                case 5:
+                    return CurveInterpolationMode.Step;
                 default:
                     break;
             }
 
-            return points.Count != 1 ? CurveInterpolationMode.Linear : CurveInterpolationMode.Constant;
+            return CurveInterpolationMode.Linear;
         }
 
         public float GetCurveValueAt(uint curveId, float x)
@@ -1283,18 +1285,26 @@ namespace Game.DataStorage
             if (points.Empty())
                 return 0.0f;
 
+            if (points.Count == 1)
+                return points[0].Y;
+
             return GetCurveValueAt(DetermineCurveType(curve, points), points, x);
         }
 
         public float GetCurveValueAt(CurveInterpolationMode mode, IList<Vector2> points, float x)
         {
+            int findPointIndex(int pointIndex)
+            {
+                while (pointIndex < points.Count && points[pointIndex].X <= x)
+                    ++pointIndex;
+                return pointIndex;
+            }
+
             switch (mode)
             {
                 case CurveInterpolationMode.Linear:
                 {
-                    int pointIndex = 0;
-                    while (pointIndex < points.Count && points[pointIndex].X <= x)
-                        ++pointIndex;
+                    int pointIndex = findPointIndex(0);
                     if (pointIndex == 0)
                         return points[0].Y;
                     if (pointIndex >= points.Count)
@@ -1306,9 +1316,7 @@ namespace Game.DataStorage
                 }
                 case CurveInterpolationMode.Cosine:
                 {
-                    int pointIndex = 0;
-                    while (pointIndex < points.Count && points[pointIndex].X <= x)
-                        ++pointIndex;
+                    int pointIndex = findPointIndex(0);
                     if (pointIndex == 0)
                         return points[0].Y;
                     if (pointIndex >= points.Count)
@@ -1320,9 +1328,7 @@ namespace Game.DataStorage
                 }
                 case CurveInterpolationMode.CatmullRom:
                 {
-                    int pointIndex = 1;
-                    while (pointIndex < points.Count && points[pointIndex].X <= x)
-                        ++pointIndex;
+                    int pointIndex = findPointIndex(1);
                     if (pointIndex == 1)
                         return points[1].Y;
                     if (pointIndex >= points.Count - 1)
@@ -1382,7 +1388,23 @@ namespace Game.DataStorage
                     return tmp[0];
                 }
                 case CurveInterpolationMode.Constant:
-                    return points[0].Y;
+                {
+                    int pointIndex = findPointIndex(0);
+                    if (pointIndex == 0)
+                        return points[0].Y;
+                    if (pointIndex >= points.Count)
+                        return points.Last().Y;
+                    return 0.0f;
+                }
+                case CurveInterpolationMode.Step:
+                {
+                    int pointIndex = findPointIndex(0);
+                    if (pointIndex == 0)
+                        return points[0].Y;
+                    if (pointIndex >= points.Count)
+                        return points.Last().Y;
+                    return points[pointIndex - 1].Y;
+                }
                 default:
                     break;
             }
@@ -2376,7 +2398,7 @@ namespace Game.DataStorage
         Dictionary<Tuple<int, int>, SoulbindConduitRankRecord> _soulbindConduitRanks = new();
         MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new();
         List<Tuple<int, uint>> _specsBySpecSet = new();
-        List<byte> _spellFamilyNames = new();
+        List<int> _spellFamilyNames = new();
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
         MultiMap<uint, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];

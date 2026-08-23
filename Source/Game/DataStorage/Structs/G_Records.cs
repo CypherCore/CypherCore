@@ -53,6 +53,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint OwnerID;
         public uint DisplayID;
+        public int Flags;
         public float Scale;
         public GameObjectTypes TypeID;
         public int PhaseUseFlags;
@@ -68,7 +69,7 @@ namespace Game.DataStorage
         public string Name;
         public string Description;
         public byte GarrAbilityCategoryID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public int IconFileDataID;
         public ushort FactionChangeGarrAbilityID;
         public int Flags;
@@ -135,7 +136,7 @@ namespace Game.DataStorage
         public string AllianceSourceText;
         public string TitleName;
         public sbyte GarrTypeID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public int HordeCreatureID;
         public int AllianceCreatureID;
         public byte HordeGarrFollRaceID;
@@ -185,7 +186,7 @@ namespace Game.DataStorage
         public Vector2 WorldPos;
         public sbyte GarrTypeID;
         public byte GarrMissionTypeID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public byte MaxFollowers;
         public uint MissionCost;
         public ushort MissionCostCurrencyTypesID;
@@ -319,7 +320,7 @@ namespace Game.DataStorage
         public int GossipNpcOption;
         public int LFGDungeonsID;
         public int TrainerID;
-        public sbyte GarrFollowerTypeID;
+        public byte GarrFollowerTypeID;
         public int CharShipmentID;
         public int GarrTalentTreeID;
         public int UiMapID;
