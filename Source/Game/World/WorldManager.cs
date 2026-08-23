@@ -439,16 +439,25 @@ namespace Game
             if (category != null && category.GetCreateCharsetMask().HasFlag(CfgCategoriesCharsets.Russian))
                 WorldConfig.SetValue(WorldCfg.DeclinedNamesUsed, true);
 
-            MultiMap<uint, uint> mapData = new();
+            Dictionary<uint, List<uint>> mapData = new();
             foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
             {
+                mapData.TryAdd(mapEntry.Id, new List<uint>());
                 if (mapEntry.ParentMapID != -1)
                 {
                     Cypher.Assert(mapEntry.CosmeticParentMapID == -1 || mapEntry.ParentMapID == mapEntry.CosmeticParentMapID, $"Inconsistent parent map data for map {mapEntry.Id} (ParentMapID = {mapEntry.ParentMapID}, CosmeticParentMapID = {mapEntry.CosmeticParentMapID})");
-                    mapData.Add((uint)mapEntry.ParentMapID, mapEntry.Id);
+                    if (!mapData.ContainsKey(mapEntry.ParentMapID))
+                        mapData.TryAdd((uint)mapEntry.ParentMapID, new List<uint>());
+
+                    mapData[(uint)mapEntry.ParentMapID].Add(mapEntry.Id);
                 }
                 else if (mapEntry.CosmeticParentMapID != -1)
-                    mapData.Add((uint)mapEntry.CosmeticParentMapID, mapEntry.Id);
+                {
+                    if (!mapData.ContainsKey(mapEntry.CosmeticParentMapID))
+                        mapData.TryAdd((uint)mapEntry.CosmeticParentMapID, new List<uint>());
+
+                    mapData[(uint)mapEntry.CosmeticParentMapID].Add(mapEntry.Id);
+                }
             }
 
             Global.TerrainMgr.InitializeParentMapData(mapData);

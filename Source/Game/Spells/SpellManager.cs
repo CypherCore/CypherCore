@@ -1347,19 +1347,19 @@ namespace Game.Entities
 
                     SpellProcEntry baseProcEntry = new();
 
-                    baseProcEntry.SchoolMask = (SpellSchoolMask)result.Read<uint>(1);
-                    baseProcEntry.SpellFamilyName = (SpellFamilyNames)result.Read<uint>(2);
-                    baseProcEntry.SpellFamilyMask = new FlagArray128(result.Read<uint>(3), result.Read<uint>(4), result.Read<uint>(5), result.Read<uint>(6));
-                    baseProcEntry.ProcFlags = new ProcFlagsInit(result.Read<int>(7), result.Read<int>(8), 2);
-                    baseProcEntry.SpellTypeMask = (ProcFlagsSpellType)result.Read<uint>(9);
-                    baseProcEntry.SpellPhaseMask = (ProcFlagsSpellPhase)result.Read<uint>(10);
-                    baseProcEntry.HitMask = (ProcFlagsHit)result.Read<uint>(11);
-                    baseProcEntry.AttributesMask = (ProcAttributes)result.Read<uint>(12);
-                    baseProcEntry.DisableEffectsMask = result.Read<uint>(13);
-                    baseProcEntry.ProcsPerMinute = result.Read<float>(14);
-                    baseProcEntry.Chance = result.Read<float>(15);
-                    baseProcEntry.Cooldown = result.Read<uint>(16);
-                    baseProcEntry.Charges = result.Read<uint>(17);
+                    var schoolMask = (SpellSchoolMask)result.Read<uint>(1);
+                    var spellFamilyName = (SpellFamilyNames)result.Read<uint>(2);
+                    var spellFamilyMask = new FlagArray128(result.Read<uint>(3), result.Read<uint>(4), result.Read<uint>(5), result.Read<uint>(6));
+                    var procFlags = new ProcFlagsInit(result.Read<int>(7), result.Read<int>(8), 2);
+                    var spellTypeMask = (ProcFlagsSpellType)result.Read<uint>(9);
+                    var spellPhaseMask = (ProcFlagsSpellPhase)result.Read<uint>(10);
+                    var hitMask = (ProcFlagsHit)result.Read<uint>(11);
+                    var attributesMask = (ProcAttributes)result.Read<uint>(12);
+                    var disableEffectsMask = result.Read<uint>(13);
+                    var procsPerMinute = result.Read<float>(14);
+                    var chance = result.Read<float>(15);
+                    var cooldown = result.Read<uint>(16);
+                    var charges = result.Read<uint>(17);
 
                     while (spellInfo != null)
                     {
@@ -1368,7 +1368,23 @@ namespace Game.Entities
                             Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_proc` has duplicate entry in the table", spellInfo.Id);
                             break;
                         }
-                        SpellProcEntry procEntry = baseProcEntry;
+
+                        SpellProcEntry procEntry = new()
+                        {
+                            SchoolMask = schoolMask,
+                            SpellFamilyName = spellFamilyName,
+                            SpellFamilyMask = spellFamilyMask,
+                            ProcFlags = procFlags,
+                            SpellTypeMask = spellTypeMask,
+                            SpellPhaseMask = spellPhaseMask,
+                            HitMask = hitMask,
+                            AttributesMask = attributesMask,
+                            DisableEffectsMask = disableEffectsMask,
+                            ProcsPerMinute = procsPerMinute,
+                            Chance = chance,
+                            Cooldown = cooldown,
+                            Charges = charges
+                        };
 
                         // take defaults from dbcs
                         if (!procEntry.ProcFlags)
@@ -1470,7 +1486,7 @@ namespace Game.Entities
                     continue;
 
                 // Nothing to do if no flags set
-                if (spellInfo.ProcFlags == null)
+                if (spellInfo.ProcFlags == null || !spellInfo.ProcFlags)
                     continue;
 
                 bool addTriggerFlag = false;
@@ -4631,7 +4647,7 @@ namespace Game.Entities
                         Log.outError(LogFilter.Sql, $"Invalid value in `SchoolMask` {school} for creature immunities {id}, truncated");
                     if (immunities.DispelType.ToUInt() != dispelType)
                         Log.outError(LogFilter.Sql, $"Invalid value in `DispelTypeMask` {dispelType} for creature immunities {id}, truncated");
-                    if (immunities.Mechanic.ToUInt() != mechanics)
+                    if (immunities.Mechanic.ToULong() != mechanics)
                         Log.outError(LogFilter.Sql, $"Invalid value in `MechanicsMask` {mechanics} for creature immunities {id}, truncated");
 
                     foreach (string token in result.Read<string>(4).Split(',', StringSplitOptions.RemoveEmptyEntries))

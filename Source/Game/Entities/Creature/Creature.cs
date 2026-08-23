@@ -3171,6 +3171,8 @@ namespace Game.Entities
             if (apply)
             {
                 bool addFragment = m_vendorData == null;
+                if (addFragment)
+                    m_vendorData = new();
 
                 SetNpcFlag(flags);
                 SetUpdateFieldFlagValue(m_values.ModifyValue(m_vendorData).ModifyValue(m_vendorData.Flags), (int)vendorFlags);
@@ -3197,6 +3199,8 @@ namespace Game.Entities
             if (apply)
             {
                 bool addFragment = m_vendorData == null;
+                if (addFragment)
+                    m_vendorData = new();
 
                 SetNpcFlag(NPCFlags.Petitioner);
                 SetUpdateFieldFlagValue(m_values.ModifyValue(m_vendorData).ModifyValue(m_vendorData.Flags), (int)VendorDataTypeFlags.Petition);

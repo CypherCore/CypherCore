@@ -193,16 +193,23 @@ namespace System.Collections.Generic
 
         public static uint[] ToBlockRange(this BitSet array)
         {
-            uint[] blockValues = new uint[array.Length / 32 + 1];
+            uint[] blockValues = new uint[(array.Length + 31) / 32];
             array.CopyTo(blockValues, 0);
             return blockValues;
         }
 
         public static uint ToUInt(this BitSet array)
         {
-            uint[] blockValues = new uint[array.Length / 32 + 1];
+            uint[] blockValues = new uint[(array.Length + 31) / 32];
             array.CopyTo(blockValues, 0);
             return blockValues[0];
+        }
+
+        public static ulong ToULong(this BitSet array)
+        {
+            byte[] targetBytes = new byte[8];
+            array.CopyTo(targetBytes, 0);
+            return BitConverter.ToUInt64(targetBytes, 0);
         }
 
         public static void Clear(this Array array)

@@ -150,7 +150,7 @@ namespace Game.Spells
             amount = Math.Clamp(amount, SpellEffectInfo.MinValue, SpellEffectInfo.MaxValue);
 
             _estimatedAmount = CalculateEstimatedAmount(caster, amount);
-            if (_estimatedAmount != 0)
+            if (_estimatedAmount.HasValue)
                 _estimatedAmount = Math.Clamp(_estimatedAmount.Value, SpellEffectInfo.MinValue, SpellEffectInfo.MaxValue);
 
             return amount;

@@ -86,7 +86,7 @@ namespace Game.Chat
             ulong mechanicImmuneMask = 0;
             CreatureImmunities immunities = Global.SpellMgr.GetCreatureImmunities(cInfo.CreatureImmunitiesId);
             if (immunities != null)
-                mechanicImmuneMask = immunities.Mechanic.ToUInt();
+                mechanicImmuneMask = immunities.Mechanic.ToULong();
             uint displayid = target.GetDisplayId();
             uint nativeid = target.GetNativeDisplayId();
             uint entry = target.GetEntry();

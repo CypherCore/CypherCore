@@ -1178,7 +1178,7 @@ namespace Game.Groups
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
             Player reference = membersRefe.GetSource();
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.MapIDs[0], reference.GetLevel());
+            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgOrTemplate.MapIDs[0], reference.GetLevel());
             if (bracketEntry == null)
                 return GroupJoinBattlegroundResult.BattlegroundJoinFailed;
 
@@ -1202,7 +1202,7 @@ namespace Game.Groups
                 if (member.GetTeam() != team)
                     return GroupJoinBattlegroundResult.JoinTimedOut;
                 // not in the same Battleground level braket, don't let join
-                PvpDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.GetLevel());
+                PVPDifficultyRecord memberBracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(bracketEntry.MapID, member.GetLevel());
                 if (memberBracketEntry != bracketEntry)
                     return GroupJoinBattlegroundResult.JoinRangeIndex;
                 // don't let join rated matches if the arena team id doesn't match

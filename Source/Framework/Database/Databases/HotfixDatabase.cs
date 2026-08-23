@@ -997,6 +997,10 @@ namespace Framework.Database
             // MawPower.db2
             PrepareStatement(HotfixStatements.SEL_MAW_POWER, "SELECT ID, SpellID, MawPowerRarityID FROM maw_power WHERE (`VerifiedBuild` > 0) = ?");
 
+            // ModifiedCraftingItem.db2
+            PrepareStatement(HotfixStatements.SEL_MODIFIED_CRAFTING_ITEM, "SELECT ID, ModifiedCraftingReagentItemID, CraftingQualityID FROM modified_crafting_item" +
+                " WHERE (`VerifiedBuild` > 0) = ?");
+
             // ModifierTree.db2
             PrepareStatement(HotfixStatements.SEL_MODIFIER_TREE, "SELECT ID, Parent, Operator, Amount, Type, Asset, SecondaryAsset, TertiaryAsset FROM modifier_tree" +
                 " WHERE (`VerifiedBuild` > 0) = ?");
@@ -2238,6 +2242,8 @@ namespace Framework.Database
         SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE,
 
         SEL_MAW_POWER,
+
+        SEL_MODIFIED_CRAFTING_ITEM,
 
         SEL_MODIFIER_TREE,
 

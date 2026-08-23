@@ -181,7 +181,7 @@ namespace System.Collections
 
         public bool Any()
         {
-            for (var i  = 0; i < Length; ++i)
+            for (var i = 0; i < Length; ++i)
             {
                 if (Get(i))
                     return true;
@@ -228,6 +228,14 @@ namespace System.Collections
 
                 _mLength = value;
                 _version++;
+            }
+        }
+
+        public uint NumBlocks
+        {
+            get
+            {
+                return (uint)GetArrayLength(_mLength, BitsPerInt32);
             }
         }
 

@@ -1888,7 +1888,7 @@ namespace Game
                     continue;
                 }
 
-                if (creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
+                if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
                     Log.outError(LogFilter.Sql, $"creature_template_resistance has resistance definitions for creature {creatureID} but this creature doesn't exist");
                     continue;
@@ -1928,7 +1928,7 @@ namespace Game
                     continue;
                 }
 
-                if (creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
+                if (!creatureTemplateStorage.TryGetValue(creatureID, out CreatureTemplate creatureTemplate))
                 {
                     Log.outError(LogFilter.Sql, $"creature_template_spell has spell definitions for creature {creatureID} but this creature doesn't exist");
                     continue;

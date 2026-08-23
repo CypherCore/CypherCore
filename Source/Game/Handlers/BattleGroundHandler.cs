@@ -11,7 +11,6 @@ using Game.Groups;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
-using System;
 using System.Collections.Generic;
 
 namespace Game
@@ -80,7 +79,7 @@ namespace Game
                 return;
 
             // expected bracket entry
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], GetPlayer().GetLevel());
+            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -129,7 +128,7 @@ namespace Game
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
-                
+
                 bool isInRandomBgQueue = _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RB, BattlegroundQueueIdType.Battleground, false, 0))
                     || _player.InBattlegroundQueueForBattlegroundQueueType(Global.BattlegroundMgr.BGQueueTypeId((ushort)BattlegroundTypeId.RandomEpic, BattlegroundQueueIdType.Battleground, false, 0));
                 if (!Global.BattlegroundMgr.IsRandomBattleground(bgTypeId) && isInRandomBgQueue)
@@ -307,7 +306,7 @@ namespace Game
                 mapId = bg.GetMapId();
 
             // expected bracket entry
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(mapId, GetPlayer().GetLevel());
+            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel(mapId, GetPlayer().GetLevel());
             if (bracketEntry == null)
                 return;
 
@@ -397,7 +396,7 @@ namespace Game
                 if (bgQueue.GetQueueId().TeamSize == 0)
                     Global.BattlegroundMgr.ScheduleQueueUpdate(ginfo.ArenaMatchmakerRating, bgQueueTypeId, bracketEntry.GetBracketId());
 
-                Log.outDebug(LogFilter.Battleground, $"Battleground: player {_player.GetName()} ({_player.GetGUID()}) left queue for bgtype { bg.GetTypeID()}, queue {bgQueueTypeId}.");
+                Log.outDebug(LogFilter.Battleground, $"Battleground: player {_player.GetName()} ({_player.GetGUID()}) left queue for bgtype {bg.GetTypeID()}, queue {bgQueueTypeId}.");
             }
         }
 
@@ -466,7 +465,7 @@ namespace Game
                         continue;
 
                     // expected bracket entry
-                    PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], _player.GetLevel());
+                    PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], _player.GetLevel());
                     if (bracketEntry == null)
                         continue;
 
@@ -503,7 +502,7 @@ namespace Game
 
             BattlegroundTypeId bgTypeId = bgTemplate.Id;
             BattlegroundQueueTypeId bgQueueTypeId = Global.BattlegroundMgr.BGQueueTypeId((ushort)bgTypeId, BattlegroundQueueIdType.Arena, true, arenatype);
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], _player.GetLevel());
+            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketByLevel((uint)bgTemplate.MapIDs[0], _player.GetLevel());
             if (bracketEntry == null)
                 return;
 

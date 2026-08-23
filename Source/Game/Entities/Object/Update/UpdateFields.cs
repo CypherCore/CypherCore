@@ -1476,7 +1476,7 @@ namespace Game.Entities
             data.WriteFloat(CombatReach);
             data.WriteFloat(DisplayScale);
             data.WriteInt32(CreatureFamily);
-            data.WriteUInt8(CreatureType);
+            data.WriteUInt8(OverrideCreatureType);
             data.WriteUInt32(NativeDisplayID);
             data.WriteFloat(NativeXDisplayScale);
             data.WriteUInt32(MountDisplayID);
@@ -2785,13 +2785,13 @@ namespace Game.Entities
         {
             data.WriteUInt32(QuestID);
             data.WriteUInt16(StateFlags);
-            data.WriteInt64(EndTime);
-            data.WriteUInt32(ObjectiveFlags);
-            data.WriteUInt32(EnabledObjectivesMask);
             for (int i = 0; i < 24; ++i)
             {
                 data.WriteUInt16(ObjectiveProgress[i]);
             }
+            data.WriteInt64(EndTime);
+            data.WriteUInt32(ObjectiveFlags);
+            data.WriteUInt32(EnabledObjectivesMask);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner)
@@ -2809,15 +2809,15 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteInt64(EndTime);
+                    data.WriteUInt32(QuestID);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(QuestID);
+                    data.WriteUInt16(StateFlags);
                 }
                 if (changesMask[3])
                 {
-                    data.WriteUInt32(StateFlags);
+                    data.WriteInt64(EndTime);
                 }
                 if (changesMask[4])
                 {
@@ -3230,12 +3230,12 @@ namespace Game.Entities
         }
     }
 
-    public struct NPCAsPlayerInfo : IEquatable<NPCAsPlayerInfo>, IsUpdateFieldStructure<Player>
+    public class NPCAsPlayerInfo : IEquatable<NPCAsPlayerInfo>, IsUpdateFieldStructure<Player>
     {
         public int Field_0;
         public int CharacterLoadoutID;
         public int CreatureID;
-        public Position LocWorldSpace;
+        public Position LocWorldSpace = new();
         public float FacingWorldSpace;
         public ObjectGuid TransportGUID;
 
@@ -8806,8 +8806,8 @@ namespace Game.Entities
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
-            data.WriteUInt32(FlagsB);
             data.WriteUInt32(GetViewerDependentGameObjectFlags(this, receiver, owner));
+            data.WriteUInt32(FlagsB);
             Quaternion rotation = ParentRotation;
             data.WriteFloat(rotation.X);
             data.WriteFloat(rotation.Y);

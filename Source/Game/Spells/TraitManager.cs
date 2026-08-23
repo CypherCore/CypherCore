@@ -521,6 +521,7 @@ namespace Game
                 {
                     int amount = cost.Amount * entry.Rank * multiplier;
 
+                    cachedCurrencies.TryAdd(cost.TraitCurrencyID, new SpentCurrency());
                     SpentCurrency cached = cachedCurrencies[cost.TraitCurrencyID];
                     cached.Total += amount;
 
@@ -534,6 +535,7 @@ namespace Game
                         cached.ByGate.Add((gate, amount));
                     else
                         gateCost.Item2 += amount;
+
                 }
             }
 
@@ -940,14 +942,21 @@ namespace Game
                 var entryItr = node.Entries.Find(nodeEntry => nodeEntry.Data.Id == traitEntry.TraitNodeEntryID);
                 Cypher.Assert(entryItr != null);
 
-                if (!subtrees.ContainsKey(entryItr.Data.TraitSubTreeID))
-                    subtrees[entryItr.Data.TraitSubTreeID] = new();
-
                 if (node.Data.GetNodeType() == TraitNodeType.SubTreeSelection)
+                {
+                    if (!subtrees.ContainsKey(entryItr.Data.TraitSubTreeID))
+                        subtrees[entryItr.Data.TraitSubTreeID] = new();
+
                     subtrees[entryItr.Data.TraitSubTreeID].IsSelected = true;
+                }
 
                 if (node.Data.TraitSubTreeID != 0)
+                {
+                    if (!subtrees.ContainsKey(entryItr.Data.TraitSubTreeID))
+                        subtrees[entryItr.Data.TraitSubTreeID] = new();
+
                     subtrees[node.Data.TraitSubTreeID].Entries.Add(traitEntry);
+                }
             }
 
             foreach (TraitSubTreeCachePacket subTree in traitConfig.SubTrees)

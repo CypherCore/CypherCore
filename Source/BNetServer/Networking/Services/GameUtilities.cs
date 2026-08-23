@@ -150,8 +150,7 @@ namespace BNetServer.Networking
                     RealmListTicketClientInformation data = JsonSerializer.Deserialize<RealmListTicketClientInformation>(json.Substring(jsonStart + 1));
                     if (data.Info.Secret.Count == 32)
                     {
-                        clientSecret = new byte[32];
-                        Buffer.BlockCopy(data.Info.Secret.ToArray(), 0, clientSecret, 0, 32);
+                        clientSecret = data.Info.Secret.ToArray();
                     }
 
                     clientBuildVariant = new()
@@ -176,7 +175,7 @@ namespace BNetServer.Networking
 
             DB.Login.Execute(stmt);
 
-            List<byte> realmListTicket = [.. Encoding.UTF8.GetBytes("AuthRealmListTicket\0")];
+            List<byte> realmListTicket = [.. Encoding.UTF8.GetBytes("AuthRealmListTicket")];
             responseValues.Add(("Param_RealmListTicket", realmListTicket));
 
             return BattlenetRpcErrorCode.Ok;
@@ -222,7 +221,7 @@ namespace BNetServer.Networking
             if (realmAddress == null || realmAddress is not ulong)
                 return BattlenetRpcErrorCode.UtilServerUnknownRealm;
 
-            RealmJoinResult result = Global.RealmMgr.JoinRealm((uint)realmAddress, GetBuild(), GetBuildVariant(),
+            RealmJoinResult result = Global.RealmMgr.JoinRealm((ulong)realmAddress, GetBuild(), GetBuildVariant(),
                  GetRemoteIpAddress(), GetClientSecret(), GetLocale().ToEnum<Locale>(), GetOS(),
                  GetTimezoneOffset(), GetGameAccountInfo().Name, GetGameAccountInfo().SecurityLevel);
 

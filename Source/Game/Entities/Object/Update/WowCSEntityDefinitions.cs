@@ -256,12 +256,22 @@ namespace Game.Entities
         public static EntityFragmentIsChangedFn[] IsChanged = new EntityFragmentIsChangedFn[N];
         public static EntityFragmentClearChangedFn[] ClearChanged = new EntityFragmentClearChangedFn[N];
 
-        public static void Register<FragmentData, OwnerObject>(EntityFragment index) where FragmentData : IsUpdateFieldStructure<OwnerObject> where OwnerObject : BaseEntity
+        public static void Register<FragmentData, OwnerObject>(EntityFragment fragment) where FragmentData : IsUpdateFieldStructure<OwnerObject> where OwnerObject : BaseEntity
         {
-            SerializeCreate[(int)index] = BuildCreate<FragmentData, OwnerObject>;
-            SerializeUpdate[(int)index] = BuildUpdate<OwnerObject>;
-            IsChanged[(int)index] = BuildIsChanged<OwnerObject>;
-            ClearChanged[(int)index] = BuildClearChanged<OwnerObject>;
+            int index = (int)fragment;
+            SerializeCreate[index] = BuildCreate<FragmentData, OwnerObject>;
+            SerializeUpdate[index] = BuildUpdate<OwnerObject>;
+            IsChanged[index] = BuildIsChanged<OwnerObject>;
+            ClearChanged[index] = BuildClearChanged<OwnerObject>;
+        }
+
+        public static void Register(EntityFragment fragment, EntityFragmentSerializeFn serializeCreate, EntityFragmentSerializeFn serializeUpdate, EntityFragmentIsChangedFn isChanged, EntityFragmentClearChangedFn clearChanged)
+        {
+            int index = (int)fragment;
+            SerializeCreate[index] = serializeCreate;
+            SerializeUpdate[index] = serializeUpdate;
+            IsChanged[index] = isChanged;
+            ClearChanged[index] = clearChanged;
         }
 
         static void BuildCreate<FragmentData, OwnerObject>(dynamic rawFragmentData, UpdateFieldFlag flags, WorldPacket data, Player target, BaseEntity baseEntity) where FragmentData : IsUpdateFieldStructure<OwnerObject> where OwnerObject : BaseEntity

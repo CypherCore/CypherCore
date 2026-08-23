@@ -240,7 +240,7 @@ namespace Game.DataStorage
         public bool IsDisabled() { return HasFlag(PrestigeLevelInfoFlags.Disabled); }
     }
 
-    public sealed class PvpDifficultyRecord
+    public sealed class PVPDifficultyRecord
     {
         public uint Id;
         public byte RangeIndex;
@@ -255,7 +255,7 @@ namespace Game.DataStorage
         }
     }
 
-    public sealed class PvpStatRecord
+    public sealed class PVPStatRecord
     {
         public LocalizedString Description;
         public uint Id;

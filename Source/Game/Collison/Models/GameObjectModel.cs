@@ -43,7 +43,7 @@ namespace Game.Collision
                 return false;
             }
 
-            iModel = Global.VMapMgr.AcquireModelInstance(dataPath + "vmaps/", modelData.name);
+            iModel = Global.VMapMgr.AcquireModelInstance(dataPath + "/vmaps/", modelData.name);
 
             if (iModel == null)
                 return false;

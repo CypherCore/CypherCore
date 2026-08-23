@@ -1193,7 +1193,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
                 UpdateCriteria(CriteriaType.AcquireItem, itemId, count);
 
-                if (allowedLooters.Count > 1 && item.IsSoulBound()
+                if (allowedLooters?.Count > 1 && item.IsSoulBound()
                     && (item.GetTemplate().GetMaxStackSize() == 1 || item.GetTemplate().HasFlag(ItemFlags2.CanTradeBindOnAcquire))
                     && !item.GetBonus().CannotTradeBindOnPickup)
                 {

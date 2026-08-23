@@ -297,7 +297,7 @@ namespace Game.BattleGrounds
             if (bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.AA || bgTypeId == BattlegroundTypeId.RandomEpic)
                 return null;
 
-            PvpDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById((uint)bg_template.MapIDs[0], bracketId);
+            PVPDifficultyRecord bracketEntry = Global.DB2Mgr.GetBattlegroundBracketById((uint)bg_template.MapIDs[0], bracketId);
             if (bracketEntry == null)
             {
                 Log.outError(LogFilter.Battleground, $"Battleground: CreateNewBattleground: bg bracket entry not found for map {bg_template.MapIDs[0]} bracket id {bracketId}");

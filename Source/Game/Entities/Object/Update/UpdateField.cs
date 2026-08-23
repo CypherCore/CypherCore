@@ -434,7 +434,7 @@ namespace Game.Entities
         public void TryAdd(K key)
         {
             if (!_values.ContainsKey(key))
-                _values[key] = new() { state = MapUpdateFieldState.Changed };
+                _values[key] = new() { state = MapUpdateFieldState.Changed, value = new() };
         }
 
         public void Remove(K key)
@@ -464,8 +464,11 @@ namespace Game.Entities
 
         public (K, V) FindIf(Predicate<V> predicate)
         {
-            var itr = _values.First(pair => { return predicate(pair.Value.value); });
-            if (itr.Key != null)
+            if (_values.Empty())
+                return default;
+
+            var itr = _values.FirstOrDefault(pair => predicate(pair.Value.value));
+            if (itr.Value != null)
                 return (itr.Key, itr.Value.value);
 
             return default;
@@ -590,7 +593,7 @@ namespace Game.Entities
                             ((IHasChangesMask)key).ClearChangesMask();
 
                         if (typeof(HasChangesMask).IsAssignableFrom(typeof(V)))
-                            ((IHasChangesMask)value).ClearChangesMask();
+                            ((IHasChangesMask)value.value).ClearChangesMask();
 
                         value.state = MapUpdateFieldState.Unchanged;
                         break;
@@ -715,13 +718,13 @@ namespace Game.Entities
             if (index >= updateField._values.Count)
             {
                 // fill with zeros until reaching desired slot
-                updateField._values.Resize((uint)index + 1);
+                updateField._values.Resize((uint)index + 1, new U());
                 updateField._updateMask.Resize((uint)(updateField._values.Count + 31) / 32);
             }
 
             _changesMask.Set(updateField.BlockBit);
             _changesMask.Set(updateField.Bit);
-            updateField.MarkChanged(index);
+            updateField.MarkChanged((int)index);
 
             return new DynamicUpdateFieldSetter<U>(updateField, index);
         }
@@ -731,7 +734,7 @@ namespace Game.Entities
             if (dynamicIndex >= updateField[index].Size())
             {
                 // fill with zeros until reaching desired slot
-                updateField[index]._values.Resize((uint)dynamicIndex + 1);
+                updateField[index]._values.Resize((uint)dynamicIndex + 1, new U());
                 updateField[index]._updateMask.Resize((uint)(updateField[index]._values.Count + 31) / 32);
             }
 
@@ -851,9 +854,9 @@ namespace Game.Entities
                     data.Write(k);
 
                 if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
-                    ((IsUpdateFieldStructure<T>)v).WriteCreate(data, receiver, owner);
+                    ((IsUpdateFieldStructure<T>)v.value).WriteCreate(data, receiver, owner);
                 else
-                    data.Write(v);
+                    data.Write(v.value);
             }
         }
 
@@ -884,9 +887,9 @@ namespace Game.Entities
                         continue;
 
                     if (typeof(IsUpdateFieldStructure<T>).IsAssignableFrom(typeof(V)))
-                        ((IsUpdateFieldStructure<T>)v).WriteUpdate(false, tempBuffer, receiver, owner);
+                        ((IsUpdateFieldStructure<T>)v.value).WriteUpdate(false, tempBuffer, receiver, owner);
                     else
-                        tempBuffer.Write(v);
+                        tempBuffer.Write(v.value);
                 }
 
                 data.WriteUInt16(changesCount);

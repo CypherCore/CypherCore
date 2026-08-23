@@ -43,7 +43,7 @@ namespace Game.BattleGrounds
         }
 
         // add group or player (grp == null) to bg queue with the given leader and bg specifications
-        public GroupQueueInfo AddGroup(Player leader, Group group, Team team, PvpDifficultyRecord bracketEntry, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
+        public GroupQueueInfo AddGroup(Player leader, Group group, Team team, PVPDifficultyRecord bracketEntry, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
         {
             BattlegroundBracketId bracketId = bracketEntry.GetBracketId();
 
@@ -76,7 +76,7 @@ namespace Game.BattleGrounds
             {
                 ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenateamid);
                 if (arenaTeam != null)
-                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldJoin, arenaTeam.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, ginfo.ArenaTeamRating);
+                    Global.WorldMgr.SendWorldText(CypherStrings.ArenaQueueAnnounceWorldJoin, arenaTeam.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, ginfo.ArenaTeamRating);
             }
 
             //add players from group to ginfo
@@ -273,7 +273,7 @@ namespace Game.BattleGrounds
             {
                 ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(group.ArenaTeamId);
                 if (team != null)
-                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldExit, team.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, group.ArenaTeamRating);
+                    Global.WorldMgr.SendWorldText(CypherStrings.ArenaQueueAnnounceWorldExit, team.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, group.ArenaTeamRating);
             }
 
             // if player leaves queue and he is invited to rated arena match, then he have to lose
@@ -312,7 +312,7 @@ namespace Game.BattleGrounds
                     uint queueSlot = plr2.GetBattlegroundQueueIndex(m_queueId);
 
                     plr2.RemoveBattlegroundQueueId(m_queueId); // must be called this way, because if you move this call to
-                                                                   // queue.removeplayer, it causes bugs
+                                                               // queue.removeplayer, it causes bugs
 
                     BattlefieldStatusNone battlefieldStatus;
                     Global.BattlegroundMgr.BuildBattlegroundStatusNone(out battlefieldStatus, plr2, queueSlot, plr2.GetBattlegroundQueueJoinTime(m_queueId));
@@ -942,7 +942,7 @@ namespace Game.BattleGrounds
         }
 
         public BattlegroundQueueTypeId GetQueueId() { return m_queueId; }
-        
+
         BattlegroundQueueTypeId m_queueId;
 
         Dictionary<ObjectGuid, PlayerQueueInfo> m_QueuedPlayers = new();
@@ -1027,7 +1027,7 @@ namespace Game.BattleGrounds
     }
 
     public struct BattlegroundQueueTypeId
-    {  
+    {
         public ushort BattlemasterListId;
         public byte BgType;
         public bool Rated;

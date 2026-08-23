@@ -18,11 +18,11 @@ namespace Game.Maps
         Dictionary<uint, TerrainInfo> _terrainMaps = new();
 
         // parent map links
-        MultiMap<uint, uint> _parentMapData = new();
+        Dictionary<uint, List<uint>> _parentMapData = new();
 
         TerrainManager() { }
 
-        public void InitializeParentMapData(MultiMap<uint, uint> mapData)
+        public void InitializeParentMapData(Dictionary<uint, List<uint>> mapData)
         {
             _parentMapData = mapData;
         }

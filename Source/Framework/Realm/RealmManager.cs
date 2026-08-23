@@ -83,6 +83,7 @@ public class RealmManager : Singleton<RealmManager>
 
                 var realm = new Realm();
                 realm.Name = name;
+                realm.NormalizedName = name;
                 realm.Addresses.Add(externalAddress);
                 realm.Addresses.Add(localAddress);
                 realm.Port = result.Read<ushort>(4);
@@ -250,9 +251,9 @@ public class RealmManager : Singleton<RealmManager>
         return BitConverter.GetBytes(jsonData.Length).Combine(ZLib.Compress(jsonData));
     }
 
-    public RealmJoinResult JoinRealm(uint realmAddress, uint build, ClientBuildVariantId buildVariant, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, TimeSpan timezoneOffset, string accountName, AccountTypes accountSecurityLevel)
+    public RealmJoinResult JoinRealm(ulong realmAddress, uint build, ClientBuildVariantId buildVariant, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, TimeSpan timezoneOffset, string accountName, AccountTypes accountSecurityLevel)
     {
-        Realm realm = GetRealm(new RealmId(realmAddress));
+        Realm realm = GetRealm(new RealmId((uint)realmAddress));
         if (realm != null)
         {
             if (realm.PopulationLevel == RealmPopulationState.Offline || realm.Build != build || accountSecurityLevel < realm.AllowedSecurityLevel)

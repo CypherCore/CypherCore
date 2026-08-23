@@ -17,10 +17,10 @@ namespace Framework.Database
 
             string CharacterSelectEquipmentSlot(string table_alias, string slot_name)
             {
-                return "{table_alias}{slot_name}EquippedItemID, {table_alias}{slot_name}VisibleItemID," +
-                    "{table_alias}{slot_name}Subclass, {table_alias}{slot_name}InvType," +
-                    "{table_alias}{slot_name}DisplayID, { table_alias}{slot_name}DisplayEnchantID," +
-                    "{table_alias}{slot_name}SecondaryItemModifiedAppearanceID, {table_alias}{slot_name}SheatheCategory";
+                return $"{table_alias}{slot_name}EquippedItemID, {table_alias}{slot_name}VisibleItemID," +
+                    $"{table_alias}{slot_name}Subclass, {table_alias}{slot_name}InvType," +
+                    $"{table_alias}{slot_name}DisplayID, {table_alias}{slot_name}DisplayEnchantID," +
+                    $"{table_alias}{slot_name}SecondaryItemModifiedAppearanceID, {table_alias}{slot_name}SheatheCategory";
             }
 
             string CharacterSelectEquipment(string table_alias)

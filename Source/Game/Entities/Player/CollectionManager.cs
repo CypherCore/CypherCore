@@ -857,10 +857,10 @@ namespace Game.Entities
 
         public void LoadAccountTransmogIllusions(SQLResult knownTransmogIllusions)
         {
-            uint[] blocks = new uint[7];
-
+            _transmogIllusions = new(0);
             if (!knownTransmogIllusions.IsEmpty())
             {
+                uint[] blocks = [];
                 do
                 {
                     ushort blobIndex = knownTransmogIllusions.Read<ushort>(0);
@@ -870,9 +870,9 @@ namespace Game.Entities
                     blocks[blobIndex] = knownTransmogIllusions.Read<uint>(1);
 
                 } while (knownTransmogIllusions.NextRow());
-            }
 
-            _transmogIllusions = new(blocks);
+                _transmogIllusions = new(blocks);
+            }
 
             // Static illusions known by every player
             ushort[] defaultIllusions =
@@ -887,7 +887,12 @@ namespace Game.Entities
             };
 
             foreach (ushort illusionId in defaultIllusions)
+            {
+                if (_transmogIllusions.Length <= illusionId)
+                    _transmogIllusions.Length = illusionId + 1;
+
                 _transmogIllusions.Set(illusionId, true);
+            }
         }
 
         public void SaveAccountTransmogIllusions(SQLTransaction trans)
@@ -913,7 +918,7 @@ namespace Game.Entities
             Player owner = _owner.GetPlayer();
             if (_transmogIllusions.Count <= transmogIllusionId)
             {
-                uint numBlocks = (uint)(_transmogIllusions.Count << 2);
+                var numBlocks = (uint)((_transmogIllusions.Length + 31) / 32);
                 _transmogIllusions.Length = (int)transmogIllusionId + 1;
                 numBlocks = (uint)(_transmogIllusions.Count << 2) - numBlocks;
                 while (numBlocks-- != 0)
@@ -954,7 +959,10 @@ namespace Game.Entities
             }
 
             foreach (TransmogOutfitEntryRecord transmogOutfitEntry in Global.TransmogMgr.GetAutomaticallyUnlockedOutfits())
-                _transmogOutfits.Add((int)transmogOutfitEntry.Id);
+            {
+                if (!_transmogOutfits.Contains((int)transmogOutfitEntry.Id))
+                    _transmogOutfits.Add((int)transmogOutfitEntry.Id);
+            }
         }
 
         void SaveAccountTransmogOutfits(SQLTransaction trans)

@@ -196,20 +196,18 @@ namespace Game
                 if (slotInfo == null)
                     continue;
 
-                TransmogOutfitSlotAndOptionInfo slot = new()
-                {
-                    Slot = slotInfo.Data,
-                    SlotIndex = (uint)AllSlots.Count - 1
-                };
+                AllSlots.Add(new TransmogOutfitSlotAndOptionInfo());
 
-                AllSlots.Add(slot);
+                var slot = AllSlots.Last();
+                slot.Slot = slotInfo.Data;
+                slot.SlotIndex = (uint)AllSlots.Count - 1;
 
                 if (slotInfo.Options != null)
                 {
                     // if slot has options, keep adding transmog slots for every option
                     var options = slotInfo.Options;
 
-                    var index = Array.FindIndex(options, p => p.Data == null);
+                    var index = Array.FindIndex(options, p => p.Data != null);
 
                     slot.SlotOption = options[index].Data;
                     options[index].SlotIndex = AllSlots.Count - 1;
@@ -219,18 +217,16 @@ namespace Game
                         if (options[index].Data == null)
                             continue;
 
-                        TransmogOutfitSlotAndOptionInfo newSlot = new()
-                        {
-                            Slot = slotInfo.Data,
-                            SlotOption = options[index].Data,
-                            SlotIndex = (uint)AllSlots.Count - 1
-                        };
-                        options[index].SlotIndex = AllSlots.Count - 1;
+                        AllSlots.Add(new TransmogOutfitSlotAndOptionInfo());
 
-                        AllSlots.Add(newSlot);
+                        var newSlot = AllSlots.Last();
+                        newSlot.Slot = slotInfo.Data;
+                        newSlot.SlotOption = options[index].Data;
+                        newSlot.SlotIndex = (uint)AllSlots.Count - 1;
+                        options[index].SlotIndex = AllSlots.Count - 1;
                     }
                 }
-                if (slotInfo.SlotIndex != 0)
+                if (slotInfo.SlotIndex == 0)
                     slotInfo.SlotIndex = AllSlots.Count - 1;
 
             }
@@ -453,15 +449,10 @@ namespace Game
 
         public int GetSlotIndex(TransmogOutfitSlotOption slotOption)
         {
-            switch (SlotIndex)
-            {
-                case 0:
-                    return SlotIndex;
-                case 1:
-                    return Options[(int)slotOption].SlotIndex;
-                default:
-                    return -1;
-            }
+            if (Options != null)
+                return Options[(int)slotOption].SlotIndex;
+
+            return SlotIndex;
         }
     }
 

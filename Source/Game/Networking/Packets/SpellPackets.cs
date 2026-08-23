@@ -1939,9 +1939,9 @@ namespace Game.Networking.Packets
         public ObjectGuid CastID;
         public uint SpellID;
         public SpellCastVisual Visual;
-        public uint SendCastFlags;
+        public byte SendCastFlags;
         public SpellTargetData Target = new();
-        TimeSpan? ReceiveTime;
+        public TimeSpan? ReceiveTime;
         public MissileTrajectoryRequest MissileTrajectory;
         public MovementInfo MoveUpdate;
         public List<SpellWeight> Weight = new();
@@ -1956,7 +1956,7 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             CastID = data.ReadPackedGuid();
-            SendCastFlags = data.ReadUInt32();
+            SendCastFlags = data.ReadUInt8();
             Misc[0] = data.ReadUInt32();
             Misc[1] = data.ReadUInt32();
             Misc[2] = data.ReadUInt32();

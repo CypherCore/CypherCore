@@ -454,7 +454,7 @@ namespace Game.DataStorage
                 _powerTypes[powerType.PowerTypeEnum] = powerType;
             }
 
-            foreach (PvpStatRecord pvpStat in PvpStatStorage.Values)
+            foreach (PVPStatRecord pvpStat in PVPStatStorage.Values)
                 _pvpStatIdsByMap.Add(pvpStat.MapID, pvpStat.Id);
 
             foreach (PvpTalentSlotUnlockRecord talentUnlock in PvpTalentSlotUnlockStorage.Values)
@@ -1794,10 +1794,10 @@ namespace Game.DataStorage
             return _paths.LookupByKey(pathId);
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
+        public PVPDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
         {
-            PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
-            foreach (var entry in PvpDifficultyStorage.Values)
+            PVPDifficultyRecord maxEntry = null;              // used for level > max listed level case
+            foreach (var entry in PVPDifficultyStorage.Values)
             {
                 // skip unrelated and too-high brackets
                 if (entry.MapID != mapid || entry.MinLevel > level)
@@ -1815,9 +1815,9 @@ namespace Game.DataStorage
             return maxEntry;
         }
 
-        public PvpDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
+        public PVPDifficultyRecord GetBattlegroundBracketById(uint mapid, BattlegroundBracketId id)
         {
-            foreach (var entry in PvpDifficultyStorage.Values)
+            foreach (var entry in PVPDifficultyStorage.Values)
                 if (entry.MapID == mapid && entry.GetBracketId() == id)
                     return entry;
 

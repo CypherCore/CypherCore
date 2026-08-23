@@ -21,7 +21,7 @@ namespace Framework.Database
         public bool Populate()
         {
             SQLResult result = _database.Query("SHOW TABLES");
-            if (!result.IsEmpty() && !result.IsEmpty())
+            if (!result.IsEmpty() && result.GetFieldCount() > 0)
                 return true;
 
             Log.outInfo(LogFilter.SqlUpdates, $"Database {_database.GetDatabaseName()} is empty, auto populating it...");
@@ -258,7 +258,7 @@ namespace Framework.Database
         {
             _database.ApplyFile(path);
         }
-        
+
         void Apply(string query)
         {
             _database.Execute(query);

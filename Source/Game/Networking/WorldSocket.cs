@@ -192,7 +192,7 @@ namespace Game.Networking
                         break; // Couldn't receive the whole header this time.
 
                     // We just received nice new header
-                    if (!ReadHeader())
+                    if (!ReadHeaderHandler())
                     {
                         CloseSocket();
                         return;
@@ -226,7 +226,7 @@ namespace Game.Networking
             await AsyncRead();
         }
 
-        bool ReadHeader()
+        bool ReadHeaderHandler()
         {
             PacketHeader header = new();
             header.Read(_headerBuffer.GetData());
@@ -460,7 +460,7 @@ namespace Game.Networking
 
         void HandleAuthSession(AuthSession authSession)
         {
-            RealmJoinTicket joinTicket = JsonSerializer.Deserialize<RealmJoinTicket>(authSession.RealmJoinTicket);
+            RealmJoinTicket joinTicket = JsonSerializer.Deserialize<RealmJoinTicket>(authSession.RealmJoinTicket.TrimEnd('\0'));
             if (joinTicket == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.WowServicesInvalidJoinTicket);

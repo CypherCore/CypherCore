@@ -1,9 +1,9 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Framework.Web.Rest.Realmlist;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Framework.Web.Rest.Realmlist;
 
 namespace Framework.Web
 {
@@ -37,7 +37,7 @@ namespace Framework.Web
         public ClientVersion ClientVersion { get; set; } = new ClientVersion();
 
         [JsonPropertyName("secret")]
-        public List<int> Secret { get; set; }
+        public List<byte> Secret { get; set; }
 
         [JsonPropertyName("clientArch")]
         public int ClientArch { get; set; }

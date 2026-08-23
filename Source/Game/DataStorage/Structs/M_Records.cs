@@ -174,6 +174,13 @@ namespace Game.DataStorage
         public int MawPowerRarityID;
     }
 
+    public sealed class ModifiedCraftingItemRecord
+    {
+        public uint ID;
+        public int ModifiedCraftingReagentItemID;
+        public int CraftingQualityID;
+    }
+
     public sealed class ModifierTreeRecord
     {
         public uint Id;

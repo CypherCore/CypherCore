@@ -533,8 +533,6 @@ namespace Game.Networking.Packets
                     ChrCustomizationChoiceID = _worldPacket.ReadUInt32()
                 };
             }
-
-            CreateInfo.Customizations.Sort();
         }
 
         public CharacterCreateInfo CreateInfo;

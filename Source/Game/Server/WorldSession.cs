@@ -1192,7 +1192,7 @@ namespace Game
         uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
         TutorialsFlag tutorialsChanged;
 
-        Dictionary<uint /*instanceId*/, DateTime/*releaseTime*/> _instanceResetTimes;
+        Dictionary<uint /*instanceId*/, DateTime/*releaseTime*/> _instanceResetTimes = [];
 
         Array<byte> _realmListSecret = new(32);
         Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();

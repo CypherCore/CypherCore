@@ -2173,7 +2173,7 @@ namespace Game.Spells
                         {
                             schoolImmunityMask |= creatureImmunities.School.ToUInt();
                             dispelImmunityMask |= creatureImmunities.DispelType.ToUInt();
-                            mechanicImmunityMask |= creatureImmunities.Mechanic.ToUInt();
+                            mechanicImmunityMask |= creatureImmunities.Mechanic.ToULong();
                             otherImmunityMask |= (byte)creatureImmunities.Other;
                             foreach (SpellEffects effectType in creatureImmunities.Effect)
                                 immuneInfo.SpellEffectImmune.Add(effectType);

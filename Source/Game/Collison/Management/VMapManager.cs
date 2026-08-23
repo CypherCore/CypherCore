@@ -34,10 +34,14 @@ namespace Game.Collision
             return itr;
         }
 
-        public void Initialize(MultiMap<uint, uint> mapData)
+        public void Initialize(Dictionary<uint, List<uint>> mapData)
         {
-            foreach (var pair in mapData)
-                iParentMapData[pair.Value] = pair.Key;
+            foreach (var (mapId, childMapIds) in mapData)
+            {
+                iInstanceMapTrees[mapId] = null;
+                foreach (uint childMapId in childMapIds)
+                    iParentMapData[childMapId] = mapId;
+            }
         }
 
         public LoadResult LoadMap(string basePath, uint mapId, uint x, uint y)

@@ -1422,7 +1422,7 @@ namespace Game.BattleGrounds
             m_BgRaids[GetTeamIndexByTeamId(team)] = bg_raid;
         }
 
-        public void SetBracket(PvpDifficultyRecord bracketEntry)
+        public void SetBracket(PVPDifficultyRecord bracketEntry)
         {
             _pvpDifficultyEntry = bracketEntry;
         }
@@ -1672,7 +1672,7 @@ namespace Game.BattleGrounds
         BattlegroundMap m_Map;
 
         BattlegroundTemplate _battlegroundTemplate;
-        PvpDifficultyRecord _pvpDifficultyEntry;
+        PVPDifficultyRecord _pvpDifficultyEntry;
         List<uint> _pvpStatIds = new();
 
         List<BattlegroundPlayerPosition> _playerPositions = new();

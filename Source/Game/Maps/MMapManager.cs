@@ -18,12 +18,12 @@ namespace Game
         const string MAP_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}.mmap";
         const string TILE_FILE_NAME_FORMAT = "{0}/mmaps/{1:D4}_{2:D2}_{3:D2}.mmtile";
 
-        public void Initialize(MultiMap<uint, uint> mapData)
+        public void Initialize(Dictionary<uint, List<uint>> mapData)
         {
-            foreach (var mapId in mapData.Keys)
+            foreach (var (mapId, childMapIds) in mapData)
             {
                 loadedMMaps.TryAdd(mapId, new MMapData());
-                foreach (uint childMapId in mapData[mapId])
+                foreach (uint childMapId in childMapIds)
                     parentMapData[childMapId] = mapId;
             }
         }

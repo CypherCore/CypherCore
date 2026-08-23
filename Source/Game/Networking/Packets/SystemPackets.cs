@@ -593,8 +593,8 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteBits(UpdateType, 1);
-            data.WriteBits(Name.GetByteCount(), 24);
-            data.WriteBits(Value.GetByteCount(), 24);
+            data.WriteBits(Name.GetByteCount() + 1, 24);
+            data.WriteBits(Value.GetByteCount() + 1, 24);
             data.FlushBits();
 
             data.WriteCString(Name);

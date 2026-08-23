@@ -489,7 +489,7 @@ namespace Game.DataStorage
         public int Flags;
     }
 
-    public sealed class CraftingQualityEntry
+    public sealed class CraftingQualityRecord
     {
         public uint Id;
         public int QualityTier;

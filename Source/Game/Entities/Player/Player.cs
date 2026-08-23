@@ -36,6 +36,8 @@ namespace Game.Entities
         {
             ObjectTypeId = TypeId.Player;
 
+            EntityFragments.Add(EntityFragment.Tag_Player, false);
+
             m_playerData = new PlayerData();
             m_activePlayerData = new ActivePlayerData();
 
@@ -2495,7 +2497,7 @@ namespace Game.Entities
 
         public void CreateTransmogOutfit(uint id, Networking.Packets.TransmogOutfitDataInfo outfitData)
         {
-            var outfit = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
+            TransmogOutfitData outfit = m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TransmogOutfits, id);
             InitializeNewTransmogOutfit(outfit, id, outfitData);
             m_changedTransmogOutfits.Add(id);
         }

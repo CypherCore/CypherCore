@@ -15,7 +15,7 @@ namespace Game.Entities
 
         public TypeId ObjectTypeId = TypeId.Max;
         public CreateObjectBits m_updateFlag;
-        public EntityFragmentsHolder EntityFragments;
+        public EntityFragmentsHolder EntityFragments = new();
 
         public UpdateFieldHolder m_values = new();
 
@@ -104,7 +104,7 @@ namespace Game.Entities
                 if (EntityFragmentsHolder.IsIndirectFragment(fragmentId))
                     tempBuffer.WriteUInt8(1);  // IndirectFragmentActive
 
-                EntityFragmentInfo.SerializeCreate[(int)EntityFragments.Updateable.Ids[i]](EntityFragments.Updateable.Data[i], fieldFlags, tempBuffer, target, this);
+                EntityFragmentInfo.SerializeCreate[(int)EntityFragments.Updateable.Ids[i]]?.Invoke(EntityFragments.Updateable.Data[i], fieldFlags, tempBuffer, target, this);
             }
 
             buffer.WriteUInt32(tempBuffer.GetSize());
@@ -640,7 +640,7 @@ namespace Game.Entities
         public void ClearUpdateMask(bool remove)
         {
             for (int i = 0; i < EntityFragments.UpdateableCount; ++i)
-                EntityFragmentInfo.ClearChanged[(int)EntityFragments.Updateable.Ids[i]](EntityFragments.Updateable.Data[i]);
+                EntityFragmentInfo.ClearChanged[(int)EntityFragments.Updateable.Ids[i]]?.Invoke(EntityFragments.Updateable.Data[i]);
 
             EntityFragments.IdsChanged = false;
 

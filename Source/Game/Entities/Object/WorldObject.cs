@@ -26,7 +26,7 @@ namespace Game.Entities
             _name = "";
             m_isStoredInWorldObjectGridContainer = isWorldObject;
 
-            if (!isWorldObject)
+            if (!IsTypeMask(TypeMask.Item | TypeMask.Container | TypeMask.AzeriteEmpoweredItem | TypeMask.AzeriteItem))
                 m_updateFlag.HasEntityPosition = true;
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);
@@ -35,6 +35,8 @@ namespace Game.Entities
             ObjectTypeId = TypeId.Object;
 
             m_movementInfo = new MovementInfo();
+
+            EntityFragmentInfo.Register(EntityFragment.CGObject, BuildObjectFragmentCreate, BuildObjectFragmentUpdate, IsObjectFragmentChanged, ClearObjectFragmentChanged);
 
             EntityFragments.Add(EntityFragment.CGObject, false, this);
 
@@ -149,24 +151,24 @@ namespace Game.Entities
             data.WriteUInt32(0);
         }
 
-        static void BuildObjectFragmentCreate(BaseEntity entity, WorldPacket data, UpdateFieldFlag flags, Player target)
+        static void BuildObjectFragmentCreate(dynamic rawFragmentData, UpdateFieldFlag flags, WorldPacket data, Player target, BaseEntity entity)
         {
-            (entity as WorldObject).BuildValuesCreate(flags, data, target);
+            (rawFragmentData as WorldObject).BuildValuesCreate(flags, data, target);
         }
 
-        static void BuildObjectFragmentUpdate(BaseEntity entity, WorldPacket data, UpdateFieldFlag flags, Player target)
+        static void BuildObjectFragmentUpdate(dynamic rawFragmentData, UpdateFieldFlag flags, WorldPacket data, Player target, BaseEntity entity)
         {
-            (entity as WorldObject).BuildValuesUpdate(flags, data, target);
+            (rawFragmentData as WorldObject).BuildValuesUpdate(flags, data, target);
         }
 
-        static bool IsObjectFragmentChanged(BaseEntity entity)
+        static bool IsObjectFragmentChanged(dynamic rawFragmentData)
         {
-            return entity.m_values.GetChangedObjectTypeMask() != 0;
+            return (rawFragmentData as WorldObject).m_values.GetChangedObjectTypeMask() != 0;
         }
 
-        public void ClearObjectFragmentChanged(BaseEntity entity)
+        public void ClearObjectFragmentChanged(dynamic rawFragmentData)
         {
-            (entity as WorldObject).ClearValuesChangesMask();
+            (rawFragmentData as WorldObject).ClearValuesChangesMask();
         }
 
         public override string GetDebugInfo()
@@ -2218,6 +2220,17 @@ namespace Game.Entities
                 target.SendPacket(pkt);
             else
                 SendMessageToSet(pkt, true);
+        }
+
+        public override bool AddToObjectUpdate()
+        {
+            GetMap().AddUpdateObject(this);
+            return true;
+        }
+
+        public override void RemoveFromObjectUpdate()
+        {
+            GetMap().RemoveUpdateObject(this);
         }
 
         public void DestroyForNearbyPlayers()
