@@ -161,7 +161,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             bool hasPartyIndex = _worldPacket.HasBit();
-            byte reasonLen = _worldPacket.ReadBits<byte>(8);
+            byte reasonLen = _worldPacket.ReadBits<byte>(9);
 
             TargetGUID = _worldPacket.ReadPackedGuid();
 
@@ -667,8 +667,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
+            bool hasPartyIndex = _worldPacket.HasBit();
             IsReady = _worldPacket.HasBit();
-            if (_worldPacket.HasBit())
+            if (hasPartyIndex)
                 PartyIndex = _worldPacket.ReadUInt8();
         }
 
