@@ -312,57 +312,10 @@ namespace Game
         public void LoadRaceAndClassExpansionRequirements()
         {
             uint oldMSTime = Time.GetMSTime();
-            _raceUnlockRequirementStorage.Clear();
+            _raceClassRequirementStorage.Clear();
 
-            //                                         0       1          2
-            SQLResult result = DB.World.Query("SELECT raceID, expansion, achievementId FROM `race_unlock_requirement`");
-            if (!result.IsEmpty())
-            {
-                uint count = 0;
-                do
-                {
-                    byte raceID = result.Read<byte>(0);
-                    byte expansion = result.Read<byte>(1);
-                    uint achievementId = result.Read<uint>(2);
-
-                    ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
-                    if (raceEntry == null)
-                    {
-                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` does not exists, skipped.", raceID);
-                        continue;
-                    }
-
-                    if (expansion >= (int)Expansion.MaxAccountExpansions)
-                    {
-                        Log.outError(LogFilter.Sql, "Race {0} defined in `race_unlock_requirement` has incorrect expansion {1}, skipped.", raceID, expansion);
-                        continue;
-                    }
-
-                    if (achievementId != 0 && !CliDB.AchievementStorage.ContainsKey(achievementId))
-                    {
-                        Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` has incorrect achievement {achievementId}, skipped.");
-                        continue;
-                    }
-
-                    RaceUnlockRequirement raceUnlockRequirement = new();
-                    raceUnlockRequirement.Expansion = expansion;
-                    raceUnlockRequirement.AchievementId = achievementId;
-
-                    _raceUnlockRequirementStorage[raceID] = raceUnlockRequirement;
-
-                    ++count;
-                }
-                while (result.NextRow());
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} race expansion requirements in {1} ms.", count, Time.GetMSTimeDiffToNow(oldMSTime));
-            }
-            else
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 race expansion requirements. DB table `race_expansion_requirement` is empty.");
-
-            oldMSTime = Time.GetMSTime();
-            _classExpansionRequirementStorage.Clear();
-
-            //                               0        1       2                     3
-            result = DB.World.Query("SELECT ClassID, RaceID, ActiveExpansionLevel, AccountExpansionLevel FROM `class_expansion_requirement`");
+            //                                         0        1       2                     3
+            SQLResult result = DB.World.Query("SELECT ClassID, RaceID, ActiveExpansionLevel, AccountExpansionLevel FROM `class_expansion_requirement`");
             if (!result.IsEmpty())
             {
                 Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>> temp = new();
@@ -414,27 +367,86 @@ namespace Game
 
                 foreach (var race in temp)
                 {
-                    RaceClassAvailability raceClassAvailability = new();
-                    raceClassAvailability.RaceID = race.Key;
+                    RaceClassAvailability raceClassAvailability = new()
+                    {
+                        RaceID = race.Key
+                    };
 
                     foreach (var class_ in race.Value)
                     {
-                        ClassAvailability classAvailability = new();
-                        classAvailability.ClassID = class_.Key;
-                        classAvailability.ActiveExpansionLevel = class_.Value.Item1;
-                        classAvailability.AccountExpansionLevel = class_.Value.Item2;
-                        classAvailability.MinActiveExpansionLevel = minRequirementForClass[class_.Key];
+                        ClassAvailability classAvailability = new()
+                        {
+                            ClassID = class_.Key,
+                            ActiveExpansionLevel = class_.Value.Item1,
+                            AccountExpansionLevel = class_.Value.Item2,
+                            MinActiveExpansionLevel = minRequirementForClass[class_.Key]
+                        };
 
                         raceClassAvailability.Classes.Add(classAvailability);
                     }
 
-                    _classExpansionRequirementStorage.Add(raceClassAvailability);
+                    _raceClassRequirementStorage.Add(raceClassAvailability);
                 }
 
                 Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} class expansion requirements in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
             }
             else
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 class expansion requirements. DB table `class_expansion_requirement` is empty.");
+
+
+            oldMSTime = Time.GetMSTime();
+
+            //                               0       1          2
+            result = DB.World.Query("SELECT raceID, expansion, achievementId FROM `race_unlock_requirement`");
+
+            if (!result.IsEmpty())
+            {
+                uint loadedRows = 0;
+                do
+                {
+                    byte raceID = result.Read<byte>(0);
+                    byte expansion = result.Read<byte>(1);
+                    uint achievementId = result.Read<uint>(2);
+
+                    ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(raceID);
+                    if (raceEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` does not exists, skipped.");
+                        continue;
+                    }
+
+                    if (expansion >= (byte)Expansion.MaxAccountExpansions)
+                    {
+                        Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` has incorrect expansion {expansion}, skipped.");
+                        continue;
+                    }
+
+                    if (achievementId != 0 && !CliDB.AchievementStorage.HasRecord(achievementId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Race {raceID} defined in `race_unlock_requirement` has incorrect achievement {achievementId}, skipped.");
+                        continue;
+                    }
+
+                    var raceClassAvailability = _raceClassRequirementStorage.Find(p => p.RaceID == raceID);
+                    if (raceClassAvailability == null)
+                    {
+                        raceClassAvailability = new RaceClassAvailability
+                        {
+                            RaceID = raceID
+                        };
+                        _raceClassRequirementStorage.Add(raceClassAvailability);
+                    }
+
+                    RaceUnlockRequirement raceUnlockRequirement = raceClassAvailability.UnlockRequirement;
+                    raceUnlockRequirement.Expansion = expansion;
+                    raceUnlockRequirement.AchievementId = achievementId;
+                    ++loadedRows;
+                }
+                while (result.NextRow());
+                Log.outInfo(LogFilter.ServerLoading, $"Loaded {loadedRows} race expansion requirements in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
+            }
+            else
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 race expansion requirements. DB table `race_expansion_requirement` is empty.");
         }
 
         public string GetCypherString(uint entry, Locale locale = Locale.enUS)
@@ -456,24 +468,24 @@ namespace Game
             return GetCypherString((uint)cmd, locale);
         }
 
-        public Dictionary<byte, RaceUnlockRequirement> GetRaceUnlockRequirements() { return _raceUnlockRequirementStorage; }
-        public RaceUnlockRequirement GetRaceUnlockRequirement(Race race) { return _raceUnlockRequirementStorage.LookupByKey((byte)race); }
-        public List<RaceClassAvailability> GetClassExpansionRequirements() { return _classExpansionRequirementStorage; }
-        public ClassAvailability GetClassExpansionRequirement(Race raceId, Class classId)
-        {
-            var raceClassAvailability = _classExpansionRequirementStorage.Find(raceClass =>
-            {
-                return raceClass.RaceID == (byte)raceId;
-            });
+        public List<RaceClassAvailability> GetRaceClassRequirements() { return _raceClassRequirementStorage; }
 
+        public RaceUnlockRequirement GetRaceUnlockRequirement(Race raceId)
+        {
+            var raceClassAvailability = _raceClassRequirementStorage.Find(p => p.RaceID == (byte)raceId);
             if (raceClassAvailability == null)
                 return null;
 
-            var classAvailability = raceClassAvailability.Classes.Find(availability =>
-            {
-                return availability.ClassID == (byte)classId;
-            });
+            return raceClassAvailability.UnlockRequirement;
+        }
 
+        public ClassAvailability GetClassExpansionRequirement(Race raceId, Class classId)
+        {
+            var raceClassAvailability = _raceClassRequirementStorage.Find(p => p.RaceID == (byte)raceId);
+            if (raceClassAvailability == null)
+                return null;
+
+            var classAvailability = raceClassAvailability.Classes.Find(p => p.ClassID == (byte)classId);
             if (classAvailability == null)
                 return null;
 
@@ -481,7 +493,7 @@ namespace Game
         }
         public ClassAvailability GetClassExpansionRequirementFallback(byte classId)
         {
-            foreach (RaceClassAvailability raceClassAvailability in _classExpansionRequirementStorage)
+            foreach (RaceClassAvailability raceClassAvailability in _raceClassRequirementStorage)
                 foreach (ClassAvailability classAvailability in raceClassAvailability.Classes)
                     if (classAvailability.ClassID == classId)
                         return classAvailability;
@@ -11572,8 +11584,7 @@ namespace Game
         MultiMap<uint, uint> _uiMapQuestsStorage = new();
         Dictionary<(ulong, Difficulty), CreatureStaticFlagsOverride> _creatureStaticFlagsOverrideStorage = new();
 
-        Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
-        List<RaceClassAvailability> _classExpansionRequirementStorage = new();
+        List<RaceClassAvailability> _raceClassRequirementStorage = [];
 
         //Quest
         Dictionary<uint, Quest> _questTemplates = new();
@@ -12612,16 +12623,17 @@ namespace Game
         public byte MinActiveExpansionLevel;
     }
 
-    public class RaceClassAvailability
-    {
-        public byte RaceID;
-        public List<ClassAvailability> Classes = new();
-    }
-
     public class RaceUnlockRequirement
     {
         public byte Expansion;
         public uint AchievementId;
+    }
+
+    public class RaceClassAvailability
+    {
+        public byte RaceID;
+        public RaceUnlockRequirement UnlockRequirement;
+        public List<ClassAvailability> Classes = new();
     }
 
     public class QuestRelationResult : List<uint>

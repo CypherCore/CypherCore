@@ -430,8 +430,10 @@ namespace Game.Networking.Packets
             public bool HasUnlockedLicense;
             public bool HasUnlockedAchievement;
             public bool HasHeritageArmorUnlockAchievement;
+            public bool HasEntitlement;
             public bool HideRaceOnClient;
             public bool FactionBalanceDisabled;
+            public bool DoesNotHaveAvailableClasses;
             public List<ClassUnlock> ClassUnlocks = [];
 
             public void Write(WorldPacket data)
@@ -445,8 +447,10 @@ namespace Game.Networking.Packets
                 data.WriteBit(HasUnlockedLicense);
                 data.WriteBit(HasUnlockedAchievement);
                 data.WriteBit(HasHeritageArmorUnlockAchievement);
+                data.WriteBit(HasEntitlement);
                 data.WriteBit(HideRaceOnClient);
                 data.WriteBit(FactionBalanceDisabled);
+                data.WriteBit(DoesNotHaveAvailableClasses);
                 data.FlushBits();
             }
         }

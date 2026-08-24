@@ -112,13 +112,30 @@ namespace Game
                 while (result.NextRow() && charResult.Characters.Count < SharedConst.MaxCharactersPerRealm);
             }
 
-            foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
+            foreach (RaceClassAvailability requirement in Global.ObjectMgr.GetRaceClassRequirements())
             {
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
-                raceUnlock.RaceID = (sbyte)requirement.Key;
-                raceUnlock.HasUnlockedLicense = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
-                raceUnlock.HasUnlockedAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
-                    /* || HasAccountAchievement(requirement.second.AchievementId)*/);
+                raceUnlock.RaceID = (sbyte)requirement.RaceID;
+                raceUnlock.HasUnlockedLicense = (byte)GetAccountExpansion() >= requirement.UnlockRequirement.Expansion;
+                raceUnlock.HasUnlockedAchievement = requirement.UnlockRequirement.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
+                    /* || HasAccountAchievement(requirement.UnlockRequirement.AchievementId)*/);
+                raceUnlock.HasEntitlement = true;
+
+                foreach (ClassAvailability classRequirement in requirement.Classes)
+                {
+                    EnumCharactersResult.ClassUnlock classUnlock = new()
+                    {
+                        ClassID = (sbyte)classRequirement.ClassID,
+                        //classUnlock.AchievementID = classRequirement.AchievementId;
+                        HasExpansion = (byte)GetAccountExpansion() >= classRequirement.AccountExpansionLevel && (byte)GetExpansion() >= classRequirement.ActiveExpansionLevel,
+                        HasUnlockedAchievement = true/*classRequirement.AchievementId == 0 || HasAccountAchievement(classRequirement.AchievementId)*/,
+                        HasEntitlement = true
+                    };
+                    raceUnlock.ClassUnlocks.Add(classUnlock);
+                }
+
+                raceUnlock.DoesNotHaveAvailableClasses = !raceUnlock.ClassUnlocks.Any(classUnlock => classUnlock.HasExpansion && classUnlock.HasUnlockedAchievement && classUnlock.HasEntitlement);
+
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
 

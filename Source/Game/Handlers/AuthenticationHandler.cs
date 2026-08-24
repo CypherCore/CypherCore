@@ -36,7 +36,7 @@ namespace Game
                     foreach (var templ in Global.CharacterTemplateDataStorage.GetCharacterTemplates().Values)
                         response.SuccessInfo.Templates.Add(templ);
 
-                response.SuccessInfo.AvailableClasses = Global.ObjectMgr.GetClassExpansionRequirements();
+                response.SuccessInfo.AvailableClasses = Global.ObjectMgr.GetRaceClassRequirements();
             }
 
             if (queued)
