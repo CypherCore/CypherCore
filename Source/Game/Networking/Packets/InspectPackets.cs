@@ -175,13 +175,13 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WritePackedGuid(CreatorGUID);
+            Item.Write(data);
             data.WriteUInt8(Index);
             data.WriteInt32(AzeritePowers.Count);
             data.WriteInt32(AzeriteEssences.Count);
             foreach (var id in AzeritePowers)
                 data.WriteInt32(id);
 
-            Item.Write(data);
             data.WriteBit(Usable);
             data.WriteBits(Enchants.Count, 4);
             data.WriteBits(Gems.Count, 2);
