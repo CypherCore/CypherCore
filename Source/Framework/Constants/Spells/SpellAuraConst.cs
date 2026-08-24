@@ -669,6 +669,9 @@ namespace Framework.Constants
         Unk659 = 659,
         Unk660 = 660,
         AlteredFormInCombat = 661,
+        Unk662 = 662,
+        Unk663 = 663,
+        Unk664 = 664,
 
         Total
     }

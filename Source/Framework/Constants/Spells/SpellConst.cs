@@ -2751,6 +2751,11 @@ namespace Framework.Constants
         CreateAreatrigger2 = 353,
         SetNeighorhoodInitiative = 354, // MiscValue[0] = NeighborhoodInitiative
         LearnHouseType = 355, // MiscValue[0] = HouseExteriorWmoData
+        Unk356 = 356,
+        Unk357 = 357, // MiscValue[0] = ItemBonusList
+        Unk358 = 358, // MiscValue[0] = ItemBonusList
+        Unk359 = 359,
+
         TotalSpellEffects
     }
 

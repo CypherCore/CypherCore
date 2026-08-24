@@ -699,6 +699,12 @@ namespace Framework.Constants
         Warbound19 = 183,
         Warbound20 = 184,
         Endeavors = 185,
+        TimewalkerMaxLevel = 186,
+        BonusRoll1 = 187,
+        BonusRoll2 = 188,
+        BonusRoll3 = 189,
+        BonusRoll4 = 190,
+        BonusRoll5 = 191,
 
         Max
     }
