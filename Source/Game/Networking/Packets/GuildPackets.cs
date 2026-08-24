@@ -43,8 +43,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(Info.BorderStyle);
                 _worldPacket.WriteUInt32(Info.BorderColor);
                 _worldPacket.WriteUInt32(Info.BackgroundColor);
-                _worldPacket.WriteBits(Info.GuildName.GetByteCount(), 7);
-                _worldPacket.FlushBits();
 
                 foreach (var rank in Info.Ranks)
                 {
@@ -54,6 +52,9 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteBits(rank.RankName.GetByteCount(), 7);
                     _worldPacket.WriteString(rank.RankName);
                 }
+
+                _worldPacket.WriteBits(Info.GuildName.GetByteCount(), 7);
+                _worldPacket.FlushBits();
 
                 _worldPacket.WriteString(Info.GuildName);
             }
@@ -114,11 +115,12 @@ namespace Game.Networking.Packets
             CreateDate.Write(_worldPacket);
             _worldPacket.WriteInt32(GuildFlags);
             _worldPacket.WriteInt32(MemberData.Count);
+
+            MemberData.ForEach(p => p.Write(_worldPacket));
+
             _worldPacket.WriteBits(WelcomeText.GetByteCount(), 11);
             _worldPacket.WriteBits(InfoText.GetByteCount(), 10);
             _worldPacket.FlushBits();
-
-            MemberData.ForEach(p => p.Write(_worldPacket));
 
             _worldPacket.WriteString(WelcomeText);
             _worldPacket.WriteString(InfoText);
@@ -1017,8 +1019,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(WithdrawalsRemaining);
             _worldPacket.WriteInt32(TabInfo.Count);
             _worldPacket.WriteInt32(ItemInfo.Count);
-            _worldPacket.WriteBit(FullUpdate);
-            _worldPacket.FlushBits();
 
             foreach (GuildBankTabInfo tab in TabInfo)
             {
@@ -1033,13 +1033,12 @@ namespace Game.Networking.Packets
             foreach (GuildBankItemInfo item in ItemInfo)
             {
                 _worldPacket.WriteInt32(item.Slot);
+                item.Item.Write(_worldPacket);
                 _worldPacket.WriteInt32(item.Count);
                 _worldPacket.WriteInt32(item.EnchantmentID);
                 _worldPacket.WriteInt32(item.Charges);
                 _worldPacket.WriteInt32(item.OnUseEnchantmentID);
                 _worldPacket.WriteUInt32(item.Flags);
-
-                item.Item.Write(_worldPacket);
 
                 _worldPacket.WriteBits(item.SocketEnchant.Count, 2);
                 _worldPacket.WriteBit(item.Locked);
@@ -1048,6 +1047,9 @@ namespace Game.Networking.Packets
                 foreach (ItemGemData socketEnchant in item.SocketEnchant)
                     socketEnchant.Write(_worldPacket);
             }
+
+            _worldPacket.WriteBit(FullUpdate);
+            _worldPacket.FlushBits();
         }
 
         public List<GuildBankItemInfo> ItemInfo;
@@ -1340,8 +1342,6 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Tab);
             _worldPacket.WriteInt32(Entry.Count);
-            _worldPacket.WriteBit(WeeklyBonusMoney.HasValue);
-            _worldPacket.FlushBits();
 
             foreach (GuildBankLogEntry logEntry in Entry)
             {
@@ -1367,6 +1367,9 @@ namespace Game.Networking.Packets
                 if (logEntry.OtherTab.HasValue)
                     _worldPacket.WriteInt8(logEntry.OtherTab.Value);
             }
+
+            _worldPacket.WriteBit(WeeklyBonusMoney.HasValue);
+            _worldPacket.FlushBits();
 
             if (WeeklyBonusMoney.HasValue)
                 _worldPacket.WriteUInt64(WeeklyBonusMoney.Value);
@@ -1616,6 +1619,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Level);
             data.WriteUInt8(ClassID);
             data.WriteUInt8(Gender);
+            DungeonScore.Write(data);
             data.WriteUInt64(GuildClubMemberID);
             data.WriteUInt8(RaceID);
             data.WriteInt32(TimerunningSeasonID);
@@ -1625,8 +1629,6 @@ namespace Game.Networking.Packets
             data.WriteBits(OfficerNote.GetByteCount(), 8);
             data.WriteBit(Authenticated);
             data.FlushBits();
-
-            DungeonScore.Write(data);
 
             data.WriteString(Name);
             data.WriteString(Note);

@@ -1392,7 +1392,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt64(Quantity);
-            _worldPacket.WriteUInt8((byte)DisplayToastMethod);
+            _worldPacket.WriteUInt32((uint)DisplayToastMethod);
             _worldPacket.WriteUInt32(QuestID);
 
             _worldPacket.WriteBit(Mailed);

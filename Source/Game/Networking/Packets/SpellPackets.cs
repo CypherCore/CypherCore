@@ -168,10 +168,9 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBit(UpdateAll);
             _worldPacket.WriteBits(Auras.Count, 9);
+            _worldPacket.WritePackedGuid(UnitGUID);
             foreach (AuraInfo aura in Auras)
                 aura.Write(_worldPacket);
-
-            _worldPacket.WritePackedGuid(UnitGUID);
         }
 
         public bool UpdateAll;
@@ -302,12 +301,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(ClientLearnedSpellData.Count);
             _worldPacket.WriteUInt32(SpecializationID);
             _worldPacket.WriteInt32(MinActionBarSlot);
-            _worldPacket.WriteBit(SuppressMessaging);
-            _worldPacket.WriteBit(TraitGrantedByAura);
-            _worldPacket.FlushBits();
 
             foreach (LearnedSpellInfo spell in ClientLearnedSpellData)
                 spell.Write(_worldPacket);
+
+            _worldPacket.WriteBit(SuppressMessaging);
+            _worldPacket.WriteBit(TraitGrantedByAura);
+            _worldPacket.FlushBits();
         }
 
         public List<LearnedSpellInfo> ClientLearnedSpellData = new();
@@ -792,6 +792,7 @@ namespace Game.Networking.Packets
         public int SpellVisualKitID;
         public TimeSpan Duration;
         public int Delay;
+        public bool Unknown_1210;
 
         public SpellVisualLoadScreen(int spellVisualKitId, TimeSpan duration) : base(ServerOpcodes.SpellVisualLoadScreen, ConnectionType.Instance)
         {
@@ -804,6 +805,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(SpellVisualKitID);
             _worldPacket.WriteInt32((int)Duration.TotalMilliseconds);
             _worldPacket.WriteInt32(Delay);
+            _worldPacket.WriteBit(Unknown_1210);
         }
     }
 
@@ -1724,9 +1726,6 @@ namespace Game.Networking.Packets
             data.WriteBits(EstimatedPoints.Count, 6);
             data.WriteBit(ContentTuning != null);
 
-            if (ContentTuning != null)
-                ContentTuning.Write(data);
-
             if (CastUnit.HasValue)
                 data.WritePackedGuid(CastUnit.Value);
 
@@ -1747,6 +1746,9 @@ namespace Game.Networking.Packets
 
             foreach (var point in EstimatedPoints)
                 data.WriteFloat(point);
+
+            if (ContentTuning != null)
+                ContentTuning.Write(data);
         }
 
         public ObjectGuid CastID;
@@ -1902,6 +1904,14 @@ namespace Game.Networking.Packets
         public uint Type;
         public int ID;
         public uint Quantity;
+
+        public void Read(WorldPacket data)
+        {
+            data.ResetBitPos();
+            Type = data.ReadBits<uint>(2);
+            ID = data.ReadInt32();
+            Quantity = data.ReadUInt32();
+        }
     }
 
     public struct SpellCraftingReagent
@@ -1963,7 +1973,7 @@ namespace Game.Networking.Packets
             SpellID = data.ReadUInt32();
 
             Visual.Read(data);
-
+            Target.Read(data);
             MissileTrajectory.Read(data);
             CraftingNPC = data.ReadPackedGuid();
 
@@ -1975,38 +1985,33 @@ namespace Game.Networking.Packets
             for (var i = 0; i < extraCurrencyCostsCount; ++i)
                 ExtraCurrencyCosts[i].Read(data);
 
-            data.ResetBitPos();
-            bool hasReceiveTime = data.HasBit();
-            bool hasMoveUpdate = data.HasBit();
-            var weightCount = data.ReadBits<uint>(2);
-            bool hasCraftingOrderID = data.HasBit();
-
-            Target.Read(data);
-
-            if (hasReceiveTime)
-                ReceiveTime = TimeSpan.FromMilliseconds(data.ReadUInt32());
-
-            if (hasCraftingOrderID)
-                CraftingOrderID = data.ReadUInt64();
-
             for (var i = 0; i < craftingReagentsCount; ++i)
                 CraftingReagents[i].Read(data);
 
             for (var i = 0; i < removedReagentsCount; ++i)
                 RemovedReagents[i].Read(data);
 
+            data.ResetBitPos();
+            bool hasReceiveTime = data.HasBit();
+            bool hasMoveUpdate = data.HasBit();
+            var weightCount = data.ReadBits<uint>(2);
+            bool hasCraftingOrderID = data.HasBit();
+
+            if (hasReceiveTime)
+                ReceiveTime = TimeSpan.FromMilliseconds(data.ReadUInt32());
+
             if (hasMoveUpdate)
                 MoveUpdate = MovementExtensions.ReadMovementInfo(data);
 
             for (var i = 0; i < weightCount; ++i)
             {
-                data.ResetBitPos();
-                SpellWeight weight;
-                weight.Type = data.ReadBits<uint>(2);
-                weight.ID = data.ReadInt32();
-                weight.Quantity = data.ReadUInt32();
+                SpellWeight weight = new();
+                weight.Read(data);
                 Weight.Add(weight);
             }
+
+            if (hasCraftingOrderID)
+                CraftingOrderID = data.ReadUInt64();
         }
     }
 
@@ -2116,6 +2121,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(CastFlagsEx2);
             data.WriteUInt32(CastTime);
 
+            Target.Write(data);
             MissileTrajectory.Write(data);
 
             data.WriteInt32(AmmoDisplayID);
@@ -2132,8 +2138,6 @@ namespace Game.Networking.Packets
             data.WriteBit(RemainingRunes != null);
             data.WriteBits(TargetPoints.Count, 16);
             data.FlushBits();
-
-            Target.Write(data);
 
             foreach (ObjectGuid hitTarget in HitTargets)
                 data.WritePackedGuid(hitTarget);

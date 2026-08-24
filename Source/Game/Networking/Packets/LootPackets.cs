@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System.Collections.Generic;
 
@@ -35,10 +34,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Coins);
             _worldPacket.WriteInt32(Items.Count);
             _worldPacket.WriteInt32(Currencies.Count);
-            _worldPacket.WriteBit(Acquired);
-            _worldPacket.WriteBit(AELooting);
-            _worldPacket.WriteBit(SuppressError);
-            _worldPacket.FlushBits();
 
             foreach (LootItemData item in Items)
                 item.Write(_worldPacket);
@@ -51,6 +46,11 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBits(currency.UIType, 3);
                 _worldPacket.FlushBits();
             }
+
+            _worldPacket.WriteBit(Acquired);
+            _worldPacket.WriteBit(AELooting);
+            _worldPacket.WriteBit(SuppressError);
+            _worldPacket.FlushBits();
         }
 
         public ObjectGuid LootObj;
@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
         public Array<LootRequest> Loot = new(100);
         public ObjectGuid Target;
     }
-    
+
     class LootRemoved : ServerPacket
     {
         public LootRemoved() : base(ServerOpcodes.LootRemoved, ConnectionType.Instance) { }
@@ -276,6 +276,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(LootObj);
             _worldPacket.WriteInt32(MapID);
+            Item.Write(_worldPacket);
             _worldPacket.WriteUInt32(RollTime);
             _worldPacket.WriteUInt8((byte)ValidRolls);
             foreach (var reason in LootRollIneligibleReason)
@@ -283,7 +284,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteUInt8((byte)Method);
             _worldPacket.WriteUInt32(DungeonEncounterID);
-            Item.Write(_worldPacket);
         }
     }
 
@@ -304,10 +304,10 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(LootObj);
             _worldPacket.WritePackedGuid(Player);
+            Item.Write(_worldPacket);
             _worldPacket.WriteInt32(Roll);
             _worldPacket.WriteUInt8((byte)RollType);
             _worldPacket.WriteUInt32(DungeonEncounterID);
-            Item.Write(_worldPacket);
             _worldPacket.WriteBit(Autopassed);
             _worldPacket.WriteBit(OffSpec);
             _worldPacket.FlushBits();
@@ -329,11 +329,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(LootObj);
+            Item.Write(_worldPacket);
             _worldPacket.WritePackedGuid(Winner);
             _worldPacket.WriteInt32(Roll);
             _worldPacket.WriteUInt8((byte)RollType);
             _worldPacket.WriteUInt32(DungeonEncounterID);
-            Item.Write(_worldPacket);
             _worldPacket.WriteBit(MainSpec);
             _worldPacket.FlushBits();
         }
@@ -350,8 +350,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(LootObj);
-            _worldPacket.WriteUInt32(DungeonEncounterID);
             Item.Write(_worldPacket);
+            _worldPacket.WriteUInt32(DungeonEncounterID);
         }
     }
 
@@ -417,10 +417,10 @@ namespace Game.Networking.Packets
             data.WriteBits(UIType, 3);
             data.WriteBit(CanTradeToTapList);
             data.FlushBits();
-            Loot.Write(data); // WorldPackets::Item::ItemInstance
             data.WriteUInt32(Quantity);
             data.WriteUInt8(LootItemType);
             data.WriteUInt8(LootListID);
+            Loot.Write(data); // WorldPackets::Item::ItemInstance
         }
 
         public byte Type;

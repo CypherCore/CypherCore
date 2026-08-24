@@ -163,6 +163,10 @@ namespace Framework.Constants
         OnMyWay = 3,
         AlertThreat = 4,
         AlertNotThreat = 5,
+        ActionReady = 6,
+        ActionOnCooldown = 7,
+        ActionUnavailable = 8,
+        ActionNotReady = 9,
 
         Max
     }

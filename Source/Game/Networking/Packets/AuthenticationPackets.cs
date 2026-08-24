@@ -109,7 +109,21 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(SuccessInfo.AvailableClasses.Count);
                 _worldPacket.WriteInt32(SuccessInfo.Templates.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.CurrencyID);
+
+                {
+                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.BillingType);
+                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.MinutesRemaining);
+                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.RealBillingType);
+                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.IsInIGR); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
+                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.IsPaidForByIGR); // inGameRoom lua return from Script_GetBillingPlan
+                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.IsCAISEnabled); // not used anywhere in the client
+                    _worldPacket.FlushBits();
+                }
+
                 _worldPacket.WriteInt64(SuccessInfo.Time);
+
+                foreach (VirtualRealmInfo virtualRealm in SuccessInfo.VirtualRealms)
+                    virtualRealm.Write(_worldPacket);
 
                 foreach (var raceClassAvailability in SuccessInfo.AvailableClasses)
                 {
@@ -124,45 +138,6 @@ namespace Game.Networking.Packets
                         _worldPacket.WriteUInt8(classAvailability.MinActiveExpansionLevel);
                     }
                 }
-
-                _worldPacket.WriteBit(SuccessInfo.IsExpansionTrial);
-                _worldPacket.WriteBit(SuccessInfo.ForceCharacterTemplate);
-                _worldPacket.WriteBit(SuccessInfo.NumPlayersHorde.HasValue);
-                _worldPacket.WriteBit(SuccessInfo.NumPlayersAlliance.HasValue);
-                _worldPacket.WriteBit(SuccessInfo.ExpansionTrialExpiration.HasValue);
-                _worldPacket.WriteBit(SuccessInfo.CurrentBuild != null);
-                _worldPacket.FlushBits();
-
-                {
-                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.BillingType);
-                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.MinutesRemaining);
-                    _worldPacket.WriteUInt32(SuccessInfo.GameTimeInfo.RealBillingType);
-                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.IsInIGR); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
-                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.IsPaidForByIGR); // inGameRoom lua return from Script_GetBillingPlan
-                    _worldPacket.WriteBit(SuccessInfo.GameTimeInfo.IsCAISEnabled); // not used anywhere in the client
-                    _worldPacket.FlushBits();
-                }
-
-                if (SuccessInfo.NumPlayersHorde.HasValue)
-                    _worldPacket.WriteUInt16(SuccessInfo.NumPlayersHorde.Value);
-
-                if (SuccessInfo.NumPlayersAlliance.HasValue)
-                    _worldPacket.WriteUInt16(SuccessInfo.NumPlayersAlliance.Value);
-
-                if (SuccessInfo.ExpansionTrialExpiration.HasValue)
-                    _worldPacket.WriteInt64(SuccessInfo.ExpansionTrialExpiration.Value);
-
-                if (SuccessInfo.CurrentBuild != null)
-                {
-                    for (int i = 0; i < 16; ++i)
-                    {
-                        _worldPacket.WriteUInt8(SuccessInfo.CurrentBuild.BuildKey[i]);
-                        _worldPacket.WriteUInt8(SuccessInfo.CurrentBuild.ConfigKey[i]);
-                    }
-                }
-
-                foreach (VirtualRealmInfo virtualRealm in SuccessInfo.VirtualRealms)
-                    virtualRealm.Write(_worldPacket);
 
                 foreach (var characterTemplate in SuccessInfo.Templates)
                 {
@@ -180,6 +155,32 @@ namespace Game.Networking.Packets
 
                     _worldPacket.WriteString(characterTemplate.Name);
                     _worldPacket.WriteString(characterTemplate.Description);
+                }
+
+                _worldPacket.WriteBit(SuccessInfo.IsExpansionTrial);
+                _worldPacket.WriteBit(SuccessInfo.ForceCharacterTemplate);
+                _worldPacket.WriteBit(SuccessInfo.NumPlayersHorde.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.NumPlayersAlliance.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.ExpansionTrialExpiration.HasValue);
+                _worldPacket.WriteBit(SuccessInfo.CurrentBuild != null);
+                _worldPacket.FlushBits();
+
+                if (SuccessInfo.NumPlayersHorde.HasValue)
+                    _worldPacket.WriteUInt16(SuccessInfo.NumPlayersHorde.Value);
+
+                if (SuccessInfo.NumPlayersAlliance.HasValue)
+                    _worldPacket.WriteUInt16(SuccessInfo.NumPlayersAlliance.Value);
+
+                if (SuccessInfo.ExpansionTrialExpiration.HasValue)
+                    _worldPacket.WriteInt64(SuccessInfo.ExpansionTrialExpiration.Value);
+
+                if (SuccessInfo.CurrentBuild != null)
+                {
+                    for (int i = 0; i < 16; ++i)
+                    {
+                        _worldPacket.WriteUInt8(SuccessInfo.CurrentBuild.BuildKey[i]);
+                        _worldPacket.WriteUInt8(SuccessInfo.CurrentBuild.ConfigKey[i]);
+                    }
                 }
             }
 

@@ -34,11 +34,11 @@ namespace Game.Networking.Packets
         {
             VendorGUID = _worldPacket.ReadPackedGuid();
             ContainerGUID = _worldPacket.ReadPackedGuid();
+            Item.Read(_worldPacket);
             Quantity = _worldPacket.ReadInt32();
             Muid = _worldPacket.ReadUInt32();
             Slot = _worldPacket.ReadUInt32();
             ItemType = (ItemVendorType)_worldPacket.ReadInt32();
-            Item.Read(_worldPacket);
         }
 
         public ObjectGuid VendorGUID;
@@ -418,6 +418,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(PlayerGUID);
             _worldPacket.WriteUInt8(Slot);
             _worldPacket.WriteInt32(SlotInBag);
+            Item.Write(_worldPacket);
             _worldPacket.WriteInt32(ProxyItemID);
             _worldPacket.WriteUInt32(Quantity);
             _worldPacket.WriteUInt32(QuantityInInventory);
@@ -442,13 +443,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(FirstCraftOperationID.HasValue);
             _worldPacket.FlushBits();
 
-            Item.Write(_worldPacket);
+            if (CraftingData != null)
+                CraftingData.Write(_worldPacket);
 
             if (FirstCraftOperationID.HasValue)
                 _worldPacket.WriteUInt32(FirstCraftOperationID.Value);
-
-            if (CraftingData != null)
-                CraftingData.Write(_worldPacket);
         }
 
         public ObjectGuid PlayerGUID;
@@ -1026,11 +1025,9 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(ItemID);
-
+            Modifications.Write(data);
             data.WriteBit(ItemBonus != null);
             data.FlushBits();
-
-            Modifications.Write(data);
 
             if (ItemBonus != null)
                 ItemBonus.Write(data);
@@ -1039,13 +1036,12 @@ namespace Game.Networking.Packets
         public void Read(WorldPacket data)
         {
             ItemID = data.ReadUInt32();
+            Modifications.Read(data);
 
             if (data.HasBit())
                 ItemBonus = new();
 
             data.ResetBitPos();
-
-            Modifications.Read(data);
 
             if (ItemBonus != null)
                 ItemBonus.Read(data);

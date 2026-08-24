@@ -58,8 +58,8 @@ namespace Game.Networking.Packets
         {
             Guid = _worldPacket.ReadPackedGuid();
             MarketID = _worldPacket.ReadUInt32();
-            BidAmount = _worldPacket.ReadUInt64();
             Item.Read(_worldPacket);
+            BidAmount = _worldPacket.ReadUInt64();
         }
 
         public ObjectGuid Guid;
@@ -75,8 +75,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(MarketID);
-            _worldPacket.WriteUInt32((uint)Result);
             Item.Write(_worldPacket);
+            _worldPacket.WriteUInt32((uint)Result);
         }
 
         public uint MarketID;
@@ -91,8 +91,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(MarketID);
-            _worldPacket.WriteUInt32(RandomPropertiesID);
             Item.Write(_worldPacket);
+            _worldPacket.WriteUInt32(RandomPropertiesID);
         }
 
         public uint MarketID;
@@ -107,8 +107,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(MarketID);
-            _worldPacket.WriteInt32(RandomPropertiesID);
             Item.Write(_worldPacket);
+            _worldPacket.WriteInt32(RandomPropertiesID);
         }
 
         public uint MarketID;
@@ -118,35 +118,6 @@ namespace Game.Networking.Packets
 
     public struct BlackMarketItem
     {
-        public void Read(WorldPacket data)
-        {
-            MarketID = data.ReadUInt32();
-            SellerNPC = data.ReadUInt32();
-            Item.Read(data);
-            Quantity = data.ReadUInt32();
-            MinBid = data.ReadUInt64();
-            MinIncrement = data.ReadUInt64();
-            CurrentBid = data.ReadUInt64();
-            SecondsRemaining = data.ReadUInt32();
-            NumBids = data.ReadUInt32();
-            HighBid = data.HasBit();
-        }
-
-        public void Write(WorldPacket data)
-        {
-            data.WriteUInt32(MarketID);
-            data.WriteUInt32(SellerNPC);
-            data.WriteUInt32(Quantity);
-            data.WriteUInt64(MinBid);
-            data.WriteUInt64(MinIncrement);
-            data.WriteUInt64(CurrentBid);
-            data.WriteUInt32(SecondsRemaining);
-            data.WriteUInt32(NumBids);
-            Item.Write(data);
-            data.WriteBit(HighBid);
-            data.FlushBits();
-        }
-
         public uint MarketID;
         public uint SellerNPC;
         public ItemInstance Item;
@@ -157,5 +128,20 @@ namespace Game.Networking.Packets
         public uint SecondsRemaining;
         public uint NumBids;
         public bool HighBid;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteUInt32(MarketID);
+            data.WriteUInt32(SellerNPC);
+            Item.Write(data);
+            data.WriteUInt32(Quantity);
+            data.WriteUInt64(MinBid);
+            data.WriteUInt64(MinIncrement);
+            data.WriteUInt64(CurrentBid);
+            data.WriteUInt32(SecondsRemaining);
+            data.WriteUInt32(NumBids);
+            data.WriteBit(HighBid);
+            data.FlushBits();
+        }
     }
 }

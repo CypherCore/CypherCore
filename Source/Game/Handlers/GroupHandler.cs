@@ -698,6 +698,9 @@ namespace Game
             broadcastPingUnit.Type = pingUnit.Type;
             broadcastPingUnit.PinFrameID = pingUnit.PinFrameID;
             broadcastPingUnit.PingDuration = pingUnit.PingDuration;
+            broadcastPingUnit.Health = pingUnit.Health;
+            broadcastPingUnit.Mana = pingUnit.Mana;
+            broadcastPingUnit.IsUnitFrameStatusTextPing = pingUnit.IsUnitFrameStatusTextPing;
             broadcastPingUnit.CreatureID = pingUnit.CreatureID;
             broadcastPingUnit.SpellOverrideNameID = pingUnit.SpellOverrideNameID;
             broadcastPingUnit.Write();
@@ -739,6 +742,36 @@ namespace Game
                     continue;
 
                 member.SendPacket(broadcastPingWorldPoint);
+            }
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SendPingCooldown)]
+        void HandleSendPingCooldown(SendPingCooldown pingCooldown)
+        {
+            Group group = null;
+            if (!CanSendPing(_player, pingCooldown.Type, ref group))
+                return;
+
+            ReceivePingCooldown broadcastPingCooldown = new()
+            {
+                SenderGUID = _player.GetGUID(),
+                PinFrameID = pingCooldown.PinFrameID,
+                SpellID = pingCooldown.SpellID,
+                ItemID = pingCooldown.ItemID,
+                Duration = pingCooldown.Duration,
+                Remaining = pingCooldown.Remaining,
+                Type = pingCooldown.Type,
+                SpellCategoryID = pingCooldown.SpellCategoryID
+            };
+            broadcastPingCooldown.Write();
+
+            foreach (GroupReference itr in group.GetMembers())
+            {
+                Player member = itr.GetSource();
+                if (_player == member || !_player.IsInMap(member))
+                    continue;
+
+                member.SendPacket(broadcastPingCooldown);
             }
         }
     }

@@ -106,8 +106,11 @@ namespace Game
         public bool KeepOpenAfterChoice;
         public bool ShowChoicesAsList;
         public bool RequiresSelection;
+        public bool ShowChoicesAsGrid;
+        public bool HideAnswerArt;
+        public bool ShowChoicesAsColumns;
 
-        public uint MaxResponses;
+        public uint? MaxResponses;
 
         public uint ScriptId;
 

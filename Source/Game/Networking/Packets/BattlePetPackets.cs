@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -18,14 +17,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16(Trap);
             _worldPacket.WriteInt32(Slots.Count);
             _worldPacket.WriteInt32(Pets.Count);
-            _worldPacket.WriteBit(HasJournalLock);
-            _worldPacket.FlushBits();
 
             foreach (var slot in Slots)
                 slot.Write(_worldPacket);
 
             foreach (var pet in Pets)
                 pet.Write(_worldPacket);
+
+            _worldPacket.WriteBit(HasJournalLock);
+            _worldPacket.FlushBits();
         }
 
         public ushort Trap;
@@ -47,7 +47,7 @@ namespace Game.Networking.Packets
 
         public override void Write() { }
     }
-    
+
     class BattlePetRequestJournal : ClientPacket
     {
         public BattlePetRequestJournal(WorldPacket packet) : base(packet) { }
@@ -61,7 +61,7 @@ namespace Game.Networking.Packets
 
         public override void Read() { }
     }
-    
+
     class BattlePetUpdates : ServerPacket
     {
         public BattlePetUpdates() : base(ServerOpcodes.BattlePetUpdates) { }
@@ -69,11 +69,12 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Pets.Count);
-            _worldPacket.WriteBit(PetAdded);
-            _worldPacket.FlushBits();
 
             foreach (var pet in Pets)
                 pet.Write(_worldPacket);
+
+            _worldPacket.WriteBit(PetAdded);
+            _worldPacket.FlushBits();
         }
 
         public List<BattlePetStruct> Pets = new();
@@ -87,12 +88,13 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Slots.Count);
-            _worldPacket.WriteBit(NewSlot);
-            _worldPacket.WriteBit(AutoSlotted);
-            _worldPacket.FlushBits();
 
             foreach (var slot in Slots)
                 slot.Write(_worldPacket);
+
+            _worldPacket.WriteBit(NewSlot);
+            _worldPacket.WriteBit(AutoSlotted);
+            _worldPacket.FlushBits();
         }
 
         public List<BattlePetSlot> Slots = new();
@@ -122,8 +124,10 @@ namespace Game.Networking.Packets
         {
             PetGuid = _worldPacket.ReadPackedGuid();
             uint nameLength = _worldPacket.ReadBits<uint>(7);
+            bool hasDeclinedNames = _worldPacket.HasBit();
+            Name = _worldPacket.ReadString(nameLength);
 
-            if (_worldPacket.HasBit())
+            if (hasDeclinedNames)
             {
                 DeclinedNames = new();
 
@@ -135,8 +139,6 @@ namespace Game.Networking.Packets
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                     DeclinedNames.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
             }
-
-            Name = _worldPacket.ReadString(nameLength);
         }
 
         public ObjectGuid PetGuid;
@@ -196,7 +198,7 @@ namespace Game.Networking.Packets
         public DeclinedName DeclinedNames;
         public string Name;
     }
-    
+
     class BattlePetDeletePet : ClientPacket
     {
         public BattlePetDeletePet(WorldPacket packet) : base(packet) { }
@@ -236,7 +238,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid PetGuid;
     }
-    
+
     class CageBattlePet : ClientPacket
     {
         public CageBattlePet(WorldPacket packet) : base(packet) { }
@@ -298,13 +300,13 @@ namespace Game.Networking.Packets
             PetGuid = _worldPacket.ReadPackedGuid();
         }
     }
-    
+
     //Structs
     public struct BattlePetStruct
     {
         public void Write(WorldPacket data)
         {
-            data .WritePackedGuid( Guid);
+            data.WritePackedGuid(Guid);
             data.WriteUInt32(Species);
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(DisplayID);
@@ -315,8 +317,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Power);
             data.WriteUInt32(Health);
             data.WriteUInt32(MaxHealth);
-            data .WriteUInt32( Speed);
-            data .WriteUInt8( Quality);
+            data.WriteUInt32(Speed);
+            data.WriteUInt8(Quality);
             data.WriteBits(Name.GetByteCount(), 7);
             data.WriteBit(OwnerInfo.HasValue); // HasOwnerInfo
             data.WriteBit(false); // NoRename
@@ -360,9 +362,9 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data .WritePackedGuid(Pet.Guid.IsEmpty() ? ObjectGuid.Create(HighGuid.BattlePet, 0) : Pet.Guid);
-            data .WriteUInt32( CollarID);
-            data .WriteUInt8( Index);
+            data.WritePackedGuid(Pet.Guid.IsEmpty() ? ObjectGuid.Create(HighGuid.BattlePet, 0) : Pet.Guid);
+            data.WriteUInt32(CollarID);
+            data.WriteUInt8(Index);
             data.WriteBit(Locked);
             data.FlushBits();
         }

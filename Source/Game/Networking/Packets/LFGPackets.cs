@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -239,12 +238,12 @@ namespace Game.Networking.Packets
             foreach (ulong bgQueueID in BgQueueIDs)
                 _worldPacket.WriteUInt64(bgQueueID);
 
+            foreach (var member in Members)
+                member.Write(_worldPacket);
+
             _worldPacket.WriteBit(IsBeginning);
             _worldPacket.WriteBit(IsRequeue);
             _worldPacket.FlushBits();
-
-            foreach (var member in Members)
-                member.Write(_worldPacket);
         }
 
         public byte PartyIndex;
@@ -432,7 +431,7 @@ namespace Game.Networking.Packets
 
     //Structs
     public class LFGBlackListSlot
-    {   
+    {
         public uint Slot;
         public uint Reason;
         public int SubReason1;
@@ -459,7 +458,7 @@ namespace Game.Networking.Packets
     }
 
     public class LFGBlackList
-    {     
+    {
         public ObjectGuid? PlayerGuid;
         public List<LFGBlackListSlot> Slot = new();
 
@@ -582,13 +581,15 @@ namespace Game.Networking.Packets
             data.WriteUInt32(CompletedMask);
             data.WriteUInt32(EncounterMask);
             data.WriteInt32(ShortageReward.Count);
+
+            Rewards.Write(data);
+
+            foreach (var shortageReward in ShortageReward)
+                shortageReward.Write(data);
+
             data.WriteBit(FirstReward);
             data.WriteBit(ShortageEligible);
             data.FlushBits();
-
-            Rewards.Write(data);
-            foreach (var shortageReward in ShortageReward)
-                shortageReward.Write(data);
         }
 
         public uint Slot;
@@ -666,8 +667,10 @@ namespace Game.Networking.Packets
 
             if (!isCurrency)
             {
-                RewardItem = new();
-                RewardItem.ItemID = id;
+                RewardItem = new()
+                {
+                    ItemID = id
+                };
             }
             else
             {
@@ -679,12 +682,11 @@ namespace Game.Networking.Packets
         {
             data.WriteBit(RewardItem != null);
             data.WriteBit(RewardCurrency.HasValue);
+            data.WriteUInt32(Quantity);
+            data.WriteInt32(BonusQuantity);
 
             if (RewardItem != null)
                 RewardItem.Write(data);
-
-            data.WriteUInt32(Quantity);
-            data.WriteInt32(BonusQuantity);
 
             if (RewardCurrency.HasValue)
                 data.WriteUInt32(RewardCurrency.Value);

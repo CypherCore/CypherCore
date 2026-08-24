@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using Game.Mails;
 using System;
@@ -318,21 +317,21 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt8(Position);
             data.WriteUInt64(AttachID);
+            Item.Write(data);
             data.WriteUInt32(Count);
             data.WriteInt32(Charges);
             data.WriteUInt32(MaxDurability);
             data.WriteUInt32(Durability);
-            Item.Write(data);
             data.WriteBits(Enchants.Count, 4);
             data.WriteBits(Gems.Count, 2);
             data.WriteBit(Unlocked);
             data.FlushBits();
 
-            foreach (ItemGemData gem in Gems)
-                gem.Write(data);
-
             foreach (ItemEnchantData en in Enchants)
                 en.Write(data);
+
+            foreach (ItemGemData gem in Gems)
+                gem.Write(data);
         }
 
         public byte Position;
@@ -344,7 +343,7 @@ namespace Game.Networking.Packets
         public uint Durability;
         public bool Unlocked;
         List<ItemEnchantData> Enchants = new();
-        List<ItemGemData> Gems= new();
+        List<ItemGemData> Gems = new();
     }
 
     public class MailListEntry
@@ -419,11 +418,11 @@ namespace Game.Networking.Packets
                     break;
             }
 
+            Attachments.ForEach(p => p.Write(data));
+
             data.WriteBits(Subject.GetByteCount(), 8);
             data.WriteBits(Body.GetByteCount(), 13);
             data.FlushBits();
-
-            Attachments.ForEach(p => p.Write(data));
 
             data.WriteString(Subject);
             data.WriteString(Body);

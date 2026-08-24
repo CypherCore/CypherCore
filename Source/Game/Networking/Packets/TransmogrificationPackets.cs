@@ -41,8 +41,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Npc = _worldPacket.ReadPackedGuid();
-            Source = (TransmogOutfitEntrySource)_worldPacket.ReadUInt8();
             Info.Read(_worldPacket);
+            Source = (TransmogOutfitEntrySource)_worldPacket.ReadUInt8();
         }
     }
 

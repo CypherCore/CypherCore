@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -58,21 +57,22 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FriendshipFactionID);
             _worldPacket.WriteInt32(GossipOptions.Count);
             _worldPacket.WriteInt32(GossipText.Count);
-            _worldPacket.WriteBit(RandomTextID.HasValue);
-            _worldPacket.WriteBit(BroadcastTextID.HasValue);
-            _worldPacket.FlushBits();
 
             foreach (ClientGossipOptions options in GossipOptions)
                 options.Write(_worldPacket);
+
+            foreach (ClientGossipText text in GossipText)
+                text.Write(_worldPacket);
+
+            _worldPacket.WriteBit(RandomTextID.HasValue);
+            _worldPacket.WriteBit(BroadcastTextID.HasValue);
+            _worldPacket.FlushBits();
 
             if (RandomTextID.HasValue)
                 _worldPacket.WriteInt32(RandomTextID.Value);
 
             if (BroadcastTextID.HasValue)
                 _worldPacket.WriteInt32(BroadcastTextID.Value);
-
-            foreach (ClientGossipText text in GossipText)
-                text.Write(_worldPacket);
         }
 
         public List<ClientGossipOptions> GossipOptions = new();
@@ -359,6 +359,7 @@ namespace Game.Networking.Packets
             data.WriteInt8((sbyte)OptionFlags);
             data.WriteUInt64(OptionCost);
             data.WriteUInt32(OptionLanguage);
+            Treasure.Write(data);
             data.WriteInt32((int)Flags);
             data.WriteInt32(OrderIndex);
             data.WriteBits(Text.GetByteCount(), 12);
@@ -368,8 +369,6 @@ namespace Game.Networking.Packets
             data.WriteBit(OverrideIconID.HasValue);
             data.WriteBits(FailureDescription.GetByteCount() + 1, 8);
             data.FlushBits();
-
-            Treasure.Write(data);
 
             data.WriteString(Text);
             data.WriteString(Confirm);
@@ -434,12 +433,11 @@ namespace Game.Networking.Packets
             data.WriteInt32(Quantity);
             data.WriteInt32(ExtendedCostID);
             data.WriteInt32(PlayerConditionFailed);
+            Item.Write(data);
             data.WriteBit(Locked);
             data.WriteBit(DoNotFilterOnVendor);
             data.WriteBit(Refundable);
             data.FlushBits();
-
-            Item.Write(data);
         }
 
         public int MuID;

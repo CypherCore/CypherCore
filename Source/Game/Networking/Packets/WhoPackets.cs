@@ -113,16 +113,16 @@ namespace Game.Networking.Packets
 
             data.ResetBitPos();
 
+            Name = data.ReadString(nameLength);
+            VirtualRealmName = data.ReadString(virtualRealmNameLength);
+            Guild = data.ReadString(guildNameLength);
+            GuildVirtualRealmName = data.ReadString(guildVirtualRealmNameLength);
+
             for (int i = 0; i < wordsCount; ++i)
             {
                 Words.Add(data.ReadString(data.ReadBits<uint>(7)));
                 data.ResetBitPos();
             }
-
-            Name = data.ReadString(nameLength);
-            VirtualRealmName = data.ReadString(virtualRealmNameLength);
-            Guild = data.ReadString(guildNameLength);
-            GuildVirtualRealmName = data.ReadString(guildVirtualRealmNameLength);
 
             if (ServerInfo.HasValue)
                 ServerInfo.Value.Read(data);

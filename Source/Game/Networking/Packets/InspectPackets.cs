@@ -33,12 +33,18 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Glyphs.Count);
             _worldPacket.WriteInt32(Talents.Count);
             _worldPacket.WriteInt32(PvpTalents.Count);
+            TalentInfo.Write(_worldPacket);
             _worldPacket.WriteInt32(ItemLevel);
+
+            foreach (PVPBracketData bracket in Bracket)
+                bracket.Write(_worldPacket);
+
             _worldPacket.WriteUInt8(LifetimeMaxRank);
             _worldPacket.WriteUInt16(TodayHK);
             _worldPacket.WriteUInt16(YesterdayHK);
             _worldPacket.WriteUInt32(LifetimeHK);
             _worldPacket.WriteUInt32(HonorLevel);
+            TraitsInfo.Write(_worldPacket);
 
             for (int i = 0; i < Glyphs.Count; ++i)
                 _worldPacket.WriteUInt16(Glyphs[i]);
@@ -49,22 +55,15 @@ namespace Game.Networking.Packets
             for (int i = 0; i < PvpTalents.Count; ++i)
                 _worldPacket.WriteUInt16(PvpTalents[i]);
 
-            TalentInfo.Write(_worldPacket);
-
             _worldPacket.WriteBit(GuildData.HasValue);
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
             _worldPacket.FlushBits();
-
-            foreach (PVPBracketData bracket in Bracket)
-                bracket.Write(_worldPacket);
 
             if (GuildData.HasValue)
                 GuildData.Value.Write(_worldPacket);
 
             if (AzeriteLevel.HasValue)
                 _worldPacket.WriteUInt32(AzeriteLevel.Value);
-
-            TraitsInfo.Write(_worldPacket);
         }
 
         public PlayerModelDisplayInfo DisplayInfo;
@@ -264,8 +263,8 @@ namespace Game.Networking.Packets
         {
             data.WritePackedGuid(GUID);
             data.WriteUInt32(SpecializationID);
-            data.WriteInt32(Items.Count);
             DisplayInfo.Write(data);
+            data.WriteInt32(Items.Count);
 
             foreach (InspectItemData item in Items)
                 item.Write(data);

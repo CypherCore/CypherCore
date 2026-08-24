@@ -240,7 +240,6 @@ namespace Game.Networking.Packets
         public List<ushort> GlyphIDs = new();
         public sbyte Role;
         public int PrimarySpecialization;
-        public bool Unused1125;
 
         public void Write(WorldPacket data)
         {
@@ -258,9 +257,6 @@ namespace Game.Networking.Packets
 
             foreach (ushort id in GlyphIDs)
                 data.WriteUInt16(id);
-
-            data.WriteBit(Unused1125);
-            data.FlushBits();
         }
     }
 

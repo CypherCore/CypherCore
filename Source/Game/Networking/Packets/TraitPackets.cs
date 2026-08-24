@@ -262,8 +262,6 @@ namespace Game.Networking.Packets
                 Entries.Add(traitEntry);
             }
 
-            uint nameLength = data.ReadBits<uint>(9);
-
             for (var i = 0; i < subtreesSize; ++i)
             {
                 TraitSubTreeCachePacket subtrees = new();
@@ -271,6 +269,8 @@ namespace Game.Networking.Packets
                 SubTrees.Add(subtrees);
             }
 
+            data.ResetBitPos();
+            uint nameLength = data.ReadBits<uint>(9);
             Name = data.ReadString(nameLength);
         }
 
@@ -302,11 +302,10 @@ namespace Game.Networking.Packets
             foreach (TraitEntryPacket traitEntry in Entries)
                 traitEntry.Write(data);
 
-            data.WriteBits(Name.GetByteCount(), 9);
-
             foreach (TraitSubTreeCachePacket traitSubTreeCache in SubTrees)
                 traitSubTreeCache.Write(data);
 
+            data.WriteBits(Name.GetByteCount(), 9);
             data.FlushBits();
 
             data.WriteString(Name);

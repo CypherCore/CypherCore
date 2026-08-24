@@ -119,11 +119,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Header.Read(_worldPacket);
+            ChatLog.Read(_worldPacket);
+            HorusChatLog.Read(_worldPacket);
             TargetCharacterGUID = _worldPacket.ReadPackedGuid();
             ReportType = _worldPacket.ReadInt32();
             MajorCategory = _worldPacket.ReadInt32();
             MinorCategoryFlags = _worldPacket.ReadInt32();
-            ChatLog.Read(_worldPacket);
 
             uint noteLength = _worldPacket.ReadBits<uint>(10);
             bool hasMailInfo = _worldPacket.HasBit();
@@ -136,18 +137,9 @@ namespace Game.Networking.Packets
             bool hasClubFinderResult = _worldPacket.HasBit();
             bool hasArenaTeamInfo = _worldPacket.HasBit();
             bool hasHouseInfo = _worldPacket.HasBit();
+            bool hasHousingBlueprint = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
-
-            if (hasVoiceChatInfo)
-            {
-                SupportTicketVoiceChatInfo voiceChatInfo = new();
-                voiceChatInfo.TargetIsCurrentlyInVoiceChatWithPlayer = _worldPacket.HasBit();
-                VoiceChatInfo = voiceChatInfo;
-                _worldPacket.ResetBitPos();
-            }
-
-            HorusChatLog.Read(_worldPacket);
 
             Note = _worldPacket.ReadString(noteLength);
 
@@ -204,6 +196,22 @@ namespace Game.Networking.Packets
                 HouseInfo = new();
                 HouseInfo.Value.Read(_worldPacket);
             }
+
+            if (hasHousingBlueprint)
+            {
+                HousingBlueprint = new();
+                HousingBlueprint.Value.Read(_worldPacket);
+            }
+
+            if (hasVoiceChatInfo)
+            {
+                _worldPacket.ResetBitPos();
+                SupportTicketVoiceChatInfo voiceChatInfo = new()
+                {
+                    TargetIsCurrentlyInVoiceChatWithPlayer = _worldPacket.HasBit()
+                };
+                VoiceChatInfo = voiceChatInfo;
+            }
         }
 
         public SupportTicketHeader Header;
@@ -224,6 +232,7 @@ namespace Game.Networking.Packets
         public SupportTicketClubFinderInfo? ClubFinderInfo;
         public SupportTicketArenaTeamInfo? ArenaTeamInfo;
         public SupportTicketHouseInfo? HouseInfo;
+        public SupportTicketHousingBlueprint? HousingBlueprint;
 
         public struct SupportTicketChatLine
         {
@@ -478,6 +487,23 @@ namespace Game.Networking.Packets
                 uint arenaTeamNameLength = data.ReadBits<uint>(7);
                 ArenaTeamID = data.ReadPackedGuid();
                 ArenaTeamName = data.ReadString(arenaTeamNameLength);
+            }
+        }
+
+        public struct SupportTicketHousingBlueprint
+        {
+            public string Id;
+            public string ShareCode;
+
+            public void Read(WorldPacket data)
+            {
+                data.ResetBitPos();
+
+                uint idSize = data.ReadBits<uint>(24);
+                uint shareCodeSize = data.ReadBits<uint>(24);
+
+                Id = data.ReadCString();
+                ShareCode = data.ReadCString();
             }
         }
     }

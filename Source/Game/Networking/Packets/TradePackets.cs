@@ -2,7 +2,6 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
 using System.Collections.Generic;
 
@@ -224,9 +223,9 @@ namespace Game.Networking.Packets
             public void Write(WorldPacket data)
             {
                 data.WriteUInt8(Slot);
+                Item.Write(data);
                 data.WriteInt32(StackCount);
                 data.WritePackedGuid(GiftCreator);
-                Item.Write(data);
                 data.WriteBit(Unwrapped != null);
                 data.FlushBits();
 

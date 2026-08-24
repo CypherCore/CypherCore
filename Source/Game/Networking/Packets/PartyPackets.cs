@@ -92,11 +92,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(InviterName.GetByteCount(), 6);
             _worldPacket.WriteBit(IsCrossFaction);
 
-            InviterRealm.Write(_worldPacket);
-
             _worldPacket.WritePackedGuid(InviterGUID);
             _worldPacket.WritePackedGuid(InviterBNetAccountId);
             _worldPacket.WriteUInt16(InviterCfgRealmID);
+            InviterRealm.Write(_worldPacket);
             _worldPacket.WriteUInt8(ProposedRoles);
             _worldPacket.WriteInt32(LfgSlots.Count);
             _worldPacket.WriteInt32(LfgCompletedMask);
@@ -233,8 +232,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ForEnemy);
             _worldPacket.FlushBits();
 
-            MemberStats.Write(_worldPacket);
             _worldPacket.WritePackedGuid(MemberGuid);
+            MemberStats.Write(_worldPacket);
         }
 
         public void Initialize(Player player)
@@ -786,26 +785,27 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(LeaderFactionGroup);
             _worldPacket.WriteInt32((int)PingRestriction);
             _worldPacket.WriteInt32(PlayerList.Count);
+
+            foreach (var playerInfo in PlayerList)
+                playerInfo.Write(_worldPacket);
+
             _worldPacket.WriteBit(ChallengeMode.HasValue);
             _worldPacket.WriteBit(LfgInfos.HasValue);
             _worldPacket.WriteBit(LootSettings.HasValue);
             _worldPacket.WriteBit(DifficultySettings.HasValue);
             _worldPacket.FlushBits();
 
-            foreach (var playerInfo in PlayerList)
-                playerInfo.Write(_worldPacket);
+            if (ChallengeMode.HasValue)
+                ChallengeMode.Value.Write(_worldPacket);
+
+            if (LfgInfos.HasValue)
+                LfgInfos.Value.Write(_worldPacket);
 
             if (LootSettings.HasValue)
                 LootSettings.Value.Write(_worldPacket);
 
             if (DifficultySettings.HasValue)
                 DifficultySettings.Value.Write(_worldPacket);
-
-            if (ChallengeMode.HasValue)
-                ChallengeMode.Value.Write(_worldPacket);
-
-            if (LfgInfos.HasValue)
-                LfgInfos.Value.Write(_worldPacket);
         }
 
         public GroupFlags PartyFlags;
@@ -982,6 +982,9 @@ namespace Game.Networking.Packets
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
         public TimeSpan PingDuration;
+        public float Health = 1.0f; // range 0-1
+        public float Mana = 1.0f; // range 0-1
+        public bool IsUnitFrameStatusTextPing; // prints health (and mana if healer) in chat
         public uint CreatureID;
         public uint SpellOverrideNameID;
 
@@ -994,6 +997,9 @@ namespace Game.Networking.Packets
             Type = (PingSubjectType)_worldPacket.ReadUInt8();
             PinFrameID = _worldPacket.ReadUInt32();
             PingDuration = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
+            Health = _worldPacket.ReadFloat();
+            Mana = _worldPacket.ReadFloat();
+            IsUnitFrameStatusTextPing = _worldPacket.HasBit();
 
             bool hasCreatureID = _worldPacket.HasBit();
             bool hasSpellOverrideNameID = _worldPacket.HasBit();
@@ -1012,6 +1018,9 @@ namespace Game.Networking.Packets
         public PingSubjectType Type = PingSubjectType.Max;
         public uint PinFrameID;
         public TimeSpan PingDuration;
+        public float Health = 1.0f; // range 0-1
+        public float Mana = 1.0f; // range 0-1
+        public bool IsUnitFrameStatusTextPing; // prints health (and mana if healer) in chat
         public uint? CreatureID;
         public uint? SpellOverrideNameID;
 
@@ -1024,6 +1033,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8((byte)Type);
             _worldPacket.WriteUInt32(PinFrameID);
             _worldPacket.WriteInt32((int)PingDuration.TotalMilliseconds);
+            _worldPacket.WriteFloat(Health);
+            _worldPacket.WriteFloat(Mana);
+            _worldPacket.WriteBit(IsUnitFrameStatusTextPing);
             _worldPacket.WriteBit(CreatureID.HasValue);
             _worldPacket.WriteBit(SpellOverrideNameID.HasValue);
             _worldPacket.FlushBits();
@@ -1084,12 +1096,58 @@ namespace Game.Networking.Packets
         }
     }
 
-    class CancelPingPin : ServerPacket
+    class SendPingCooldown(WorldPacket packet) : ClientPacket(packet)
     {
         public ObjectGuid SenderGUID;
         public uint PinFrameID;
+        public uint SpellID;
+        public uint ItemID;
+        public TimeSpan Duration;
+        public TimeSpan Remaining;
+        public PingSubjectType Type;
+        public uint SpellCategoryID;
 
-        public CancelPingPin() : base(ServerOpcodes.CancelPingPin) { }
+        public override void Read()
+        {
+            SenderGUID = _worldPacket.ReadPackedGuid();
+            PinFrameID = _worldPacket.ReadUInt32();
+            SpellID = _worldPacket.ReadUInt32();
+            ItemID = _worldPacket.ReadUInt32();
+            Duration = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
+            Remaining = TimeSpan.FromMilliseconds(_worldPacket.ReadInt32());
+            Type = (PingSubjectType)_worldPacket.ReadUInt8();
+            SpellCategoryID = _worldPacket.ReadUInt32();
+        }
+    }
+
+    class ReceivePingCooldown() : ServerPacket(ServerOpcodes.ReceivePingCooldown)
+    {
+        public ObjectGuid SenderGUID;
+        public uint PinFrameID;
+        public uint SpellID;
+        public uint ItemID;
+        public TimeSpan Duration;
+        public TimeSpan Remaining;
+        public PingSubjectType Type;
+        public uint SpellCategoryID;
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(SenderGUID);
+            _worldPacket.WriteUInt32(PinFrameID);
+            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteUInt32(ItemID);
+            _worldPacket.WriteInt32((int)Duration.TotalMilliseconds);
+            _worldPacket.WriteInt32((int)Remaining.TotalMilliseconds);
+            _worldPacket.WriteUInt8((byte)Type);
+            _worldPacket.WriteUInt32(SpellCategoryID);
+        }
+    }
+
+    class CancelPingPin() : ServerPacket(ServerOpcodes.CancelPingPin)
+    {
+        public ObjectGuid SenderGUID;
+        public uint PinFrameID;
 
         public override void Write()
         {
@@ -1222,14 +1280,13 @@ namespace Game.Networking.Packets
 
             Phases.Write(data);
             ChromieTime.Write(data);
+            DungeonScore.Write(data);
 
             foreach (PartyMemberAuraStates aura in Auras)
                 aura.Write(data);
 
             data.WriteBit(PetStats != null);
             data.FlushBits();
-
-            DungeonScore.Write(data);
 
             if (PetStats != null)
                 PetStats.Write(data);
@@ -1304,6 +1361,7 @@ namespace Game.Networking.Packets
         public byte Subgroup;
         public byte Flags;
         public byte RolesAssigned;
+        public byte RolesUnk_1210;   // forces role displayed to be tank if this field contains tank role and RolesAssigned is dps
         public byte FactionGroup;
         public bool FromSocialQueue;
         public bool VoiceChatSilenced;
@@ -1316,13 +1374,14 @@ namespace Game.Networking.Packets
             data.WriteBit(Connected);
             data.WriteBit(FromSocialQueue);
             data.WriteBit(VoiceChatSilenced);
-            Leaver.Write(data);
             data.WritePackedGuid(GUID);
             data.WriteUInt8(Subgroup);
             data.WriteUInt8(Flags);
             data.WriteUInt8(RolesAssigned);
+            data.WriteUInt8(RolesUnk_1210);
             data.WriteUInt8(Class);
             data.WriteUInt8(FactionGroup);
+            Leaver.Write(data);
             data.WriteString(Name);
             if (!VoiceStateID.IsEmpty())
                 data.WriteString(VoiceStateID);

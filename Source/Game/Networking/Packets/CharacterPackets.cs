@@ -44,12 +44,6 @@ namespace Game.Networking.Packets
             if (ClassDisableMask.HasValue)
                 _worldPacket.WriteUInt32(ClassDisableMask.Value);
 
-            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
-                unlockedConditionalAppearance.Write(_worldPacket);
-
-            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
-                raceLimitDisableInfo.Write(_worldPacket);
-
             foreach (CharacterInfo charInfo in Characters)
                 charInfo.Write(_worldPacket);
 
@@ -58,6 +52,12 @@ namespace Game.Networking.Packets
 
             foreach (RaceUnlock raceUnlock in RaceUnlockData)
                 raceUnlock.Write(_worldPacket);
+
+            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
+                unlockedConditionalAppearance.Write(_worldPacket);
+
+            foreach (RaceLimitDisableInfo raceLimitDisableInfo in RaceLimitDisables)
+                raceLimitDisableInfo.Write(_worldPacket);
 
             foreach (WarbandGroup warbandGroup in WarbandGroups)
                 warbandGroup.Write(_worldPacket);
@@ -408,14 +408,18 @@ namespace Game.Networking.Packets
         public struct ClassUnlock
         {
             public sbyte ClassID;
+            public bool HasExpansion;
             public bool HasUnlockedAchievement;
+            public bool HasEntitlement;
             public uint AchievementID;
 
             public void Write(WorldPacket data)
             {
                 data.WriteInt8(ClassID);
                 data.WriteUInt32(AchievementID);
+                data.WriteBit(HasExpansion);
                 data.WriteBit(HasUnlockedAchievement);
+                data.WriteBit(HasEntitlement);
                 data.FlushBits();
             }
         }
@@ -434,15 +438,16 @@ namespace Game.Networking.Packets
             {
                 data.WriteInt8(RaceID);
                 data.WriteInt32(ClassUnlocks.Count);
+
+                foreach (var classUnlock in ClassUnlocks)
+                    classUnlock.Write(data);
+
                 data.WriteBit(HasUnlockedLicense);
                 data.WriteBit(HasUnlockedAchievement);
                 data.WriteBit(HasHeritageArmorUnlockAchievement);
                 data.WriteBit(HideRaceOnClient);
                 data.WriteBit(FactionBalanceDisabled);
                 data.FlushBits();
-
-                foreach (var classUnlock in ClassUnlocks)
-                    classUnlock.Write(data);
             }
         }
 

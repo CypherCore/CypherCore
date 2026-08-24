@@ -195,14 +195,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Auctioneer = _worldPacket.ReadPackedGuid();
+            BucketKey = new AuctionBucketKey(_worldPacket);
             Offset = _worldPacket.ReadUInt32();
             Unknown830 = _worldPacket.ReadInt8();
             if (_worldPacket.HasBit())
                 TaintedBy = new();
 
             uint sortCount = _worldPacket.ReadBits<uint>(2);
-
-            BucketKey = new AuctionBucketKey(_worldPacket);
 
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
@@ -543,11 +542,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Items.Count);
             _worldPacket.WriteUInt32(DesiredDelay);
-            _worldPacket.WriteBit(HasMoreResults);
-            _worldPacket.FlushBits();
 
             foreach (AuctionItem item in Items)
                 item.Write(_worldPacket);
+
+            _worldPacket.WriteBit(HasMoreResults);
+            _worldPacket.FlushBits();
         }
     }
 
@@ -568,12 +568,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(DesiredDelay);
             _worldPacket.WriteInt32((int)Filters);
             _worldPacket.WriteInt32(TotalCount);
-            _worldPacket.WriteBits((int)BrowseMode, 1);
-            _worldPacket.WriteBit(HasMoreResults);
-            _worldPacket.FlushBits();
 
             foreach (BucketInfo bucketInfo in Buckets)
                 bucketInfo.Write(_worldPacket);
+
+            _worldPacket.WriteBits((int)BrowseMode, 1);
+            _worldPacket.WriteBit(HasMoreResults);
+            _worldPacket.FlushBits();
         }
     }
 
@@ -638,14 +639,15 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Items.Count);
             _worldPacket.WriteInt32(SoldItems.Count);
             _worldPacket.WriteUInt32(DesiredDelay);
-            _worldPacket.WriteBit(HasMoreResults);
-            _worldPacket.FlushBits();
 
             foreach (AuctionItem item in Items)
                 item.Write(_worldPacket);
 
             foreach (AuctionItem item in SoldItems)
                 item.Write(_worldPacket);
+
+            _worldPacket.WriteBit(HasMoreResults);
+            _worldPacket.FlushBits();
         }
     }
 
@@ -970,12 +972,14 @@ namespace Game.Networking.Packets
             {
                 data.WriteBit(Bidder.HasValue);
                 data.WriteBit(BidAmount.HasValue);
+                if (Bidder.HasValue)
+                    data.WritePackedGuid(Bidder.Value);
+
+                if (BidAmount.HasValue)
+                    data.WriteUInt64(BidAmount.Value);
             }
 
             data.FlushBits();
-
-            if (Item != null)
-                Item.Write(data);
 
             data.WriteInt32(Count);
             data.WriteInt32(Charges);
@@ -986,8 +990,14 @@ namespace Game.Networking.Packets
             data.WriteUInt8(DeleteReason);
             data.WriteUInt32(Unused1110);
 
+            if (Item != null)
+                Item.Write(data);
+
             foreach (ItemEnchantData enchant in Enchantments)
                 enchant.Write(data);
+
+            foreach (ItemGemData gem in Gems)
+                gem.Write(data);
 
             if (MinBid.HasValue)
                 data.WriteUInt64(MinBid.Value);
@@ -1008,23 +1018,11 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(EndTime);
             }
 
-            if (Creator.HasValue)
-                data.WritePackedGuid(Creator.Value);
-
-            if (!CensorBidInfo)
-            {
-                if (Bidder.HasValue)
-                    data.WritePackedGuid(Bidder.Value);
-
-                if (BidAmount.HasValue)
-                    data.WriteUInt64(BidAmount.Value);
-            }
-
-            foreach (ItemGemData gem in Gems)
-                gem.Write(data);
-
             if (AuctionBucketKey != null)
                 AuctionBucketKey.Write(data);
+
+            if (Creator.HasValue)
+                data.WritePackedGuid(Creator.Value);
         }
     }
 

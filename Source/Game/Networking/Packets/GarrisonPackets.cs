@@ -6,7 +6,6 @@ using Game.DataStorage;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
-using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {
@@ -55,11 +54,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Garrisons.Count);
             _worldPacket.WriteInt32(FollowerSoftCaps.Count);
 
-            foreach (FollowerSoftCapInfo followerSoftCapInfo in FollowerSoftCaps)
-                followerSoftCapInfo.Write(_worldPacket);
-
             foreach (GarrisonInfo garrison in Garrisons)
                 garrison.Write(_worldPacket);
+
+            foreach (FollowerSoftCapInfo followerSoftCapInfo in FollowerSoftCaps)
+                followerSoftCapInfo.Write(_worldPacket);
         }
 
         public sbyte FactionIndex;
@@ -621,20 +620,40 @@ namespace Game.Networking.Packets
             data.WriteUInt32(NumMissionsStartedToday);
             data.WriteInt32(MinAutoTroopLevel);
 
+            foreach (GarrisonBuildingInfo building in Buildings)
+                building.Write(data);
+
             foreach (GarrisonPlotInfo plot in Plots)
                 plot.Write(data);
+
+            foreach (GarrisonFollower follower in Followers)
+                follower.Write(data);
+
+            foreach (GarrisonFollower follower in AutoTroops)
+                follower.Write(data);
 
             foreach (GarrisonMission mission in Missions)
                 mission.Write(data);
 
             foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
+            {
                 data.WriteInt32(missionReward.Count);
+                foreach (GarrisonMissionReward missionRewardItem in missionReward)
+                    missionRewardItem.Write(data);
+            }
 
             foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
+            {
                 data.WriteInt32(missionReward.Count);
+                foreach (GarrisonMissionReward missionRewardItem in missionReward)
+                    missionRewardItem.Write(data);
+            }
 
             foreach (GarrisonMissionBonusAbility areaBonus in MissionAreaBonuses)
                 areaBonus.Write(data);
+
+            foreach (GarrisonTalent talent in Talents)
+                talent.Write(data);
 
             foreach (GarrisonCollection collection in Collections)
                 collection.Write(data);
@@ -648,30 +667,10 @@ namespace Game.Networking.Packets
             foreach (var id in ArchivedMissions)
                 data.WriteInt32(id);
 
-            foreach (GarrisonBuildingInfo building in Buildings)
-                building.Write(data);
-
             foreach (bool canStartMission in CanStartMission)
                 data.WriteBit(canStartMission);
 
             data.FlushBits();
-
-            foreach (GarrisonFollower follower in Followers)
-                follower.Write(data);
-
-            foreach (GarrisonFollower follower in AutoTroops)
-                follower.Write(data);
-
-            foreach (GarrisonTalent talent in Talents)
-                talent.Write(data);
-
-            foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
-                foreach (GarrisonMissionReward missionRewardItem in missionReward)
-                    missionRewardItem.Write(data);
-
-            foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
-                foreach (GarrisonMissionReward missionRewardItem in missionReward)
-                    missionRewardItem.Write(data);
         }
 
         public GarrisonType GarrTypeID;

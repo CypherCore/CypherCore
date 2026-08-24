@@ -226,6 +226,8 @@ namespace Game.Entities
             data.WriteBit(flags.MeshObject);
             data.FlushBits();
 
+            data.WriteInt32(PauseTimes != null ? PauseTimes.Count : 0);
+
             if (flags.MovementUpdate)
             {
                 Unit unit = this as Unit;
@@ -269,24 +271,11 @@ namespace Game.Entities
                 data.WriteBit(HasDriveStatus);                                 // HasDriveStatus
                 data.FlushBits();
 
-                if (!unit.m_movementInfo.transport.guid.IsEmpty())
-                    MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
-
                 if (HasStandingOnGameObjectGUID)
                     data.WritePackedGuid(unit.m_movementInfo.standingOnGameObjectGUID.Value);
 
-                if (HasInertia)
-                {
-                    data.WriteInt32(unit.m_movementInfo.inertia.Value.id);
-                    data.WriteXYZ(unit.m_movementInfo.inertia.Value.force);
-                    data.WriteUInt32(unit.m_movementInfo.inertia.Value.lifetime);
-                }
-
-                if (HasAdvFlying)
-                {
-                    data.WriteFloat(unit.m_movementInfo.advFlying.Value.forwardVelocity);
-                    data.WriteFloat(unit.m_movementInfo.advFlying.Value.upVelocity);
-                }
+                if (!unit.m_movementInfo.transport.guid.IsEmpty())
+                    MovementExtensions.WriteTransportInfo(data, unit.m_movementInfo.transport);
 
                 if (HasFall)
                 {
@@ -299,6 +288,19 @@ namespace Game.Entities
                         data.WriteFloat(unit.m_movementInfo.jump.cosAngle);
                         data.WriteFloat(unit.m_movementInfo.jump.xyspeed);            // Speed
                     }
+                }
+
+                if (HasInertia)
+                {
+                    data.WriteInt32(unit.m_movementInfo.inertia.Value.id);
+                    data.WriteXYZ(unit.m_movementInfo.inertia.Value.force);
+                    data.WriteUInt32(unit.m_movementInfo.inertia.Value.lifetime);
+                }
+
+                if (HasAdvFlying)
+                {
+                    data.WriteFloat(unit.m_movementInfo.advFlying.Value.forwardVelocity);
+                    data.WriteFloat(unit.m_movementInfo.advFlying.Value.upVelocity);
                 }
 
                 if (HasDriveStatus)
@@ -350,19 +352,17 @@ namespace Game.Entities
                 data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.OverMaxDeceleration));
                 data.WriteFloat(unit.GetAdvFlyingSpeed(AdvFlyingRateTypeSingle.LaunchSpeedCoefficient));
 
-                data.WriteBit(HasSpline);
-                data.FlushBits();
-
                 if (movementForces != null)
                     foreach (MovementForce force in movementForces.GetForces())
                         MovementExtensions.WriteMovementForceWithDirection(force, data, unit);
+
+                data.WriteBit(HasSpline);
+                data.FlushBits();
 
                 // HasMovementSpline - marks that spline data is present in packet
                 if (HasSpline)
                     MovementExtensions.WriteCreateObjectSplineDataBlock(unit.MoveSpline, data);
             }
-
-            data.WriteInt32(PauseTimes != null ? PauseTimes.Count : 0);
 
             if (flags.Stationary)
             {
@@ -398,31 +398,6 @@ namespace Game.Entities
             {
                 GameObject gameObject = this as GameObject;
                 data.WriteInt64(gameObject.GetPackedLocalRotation());                 // Rotation
-            }
-
-            //if (flags.Room)
-            //    *data << ObjectGuid(HouseGUID);
-
-            //if (flags.Decor)
-            //    *data << ObjectGuid(RoomGUID);
-
-            //if (flags.MeshObject)
-            //{
-            //    *data << ObjectGuid(AttachParentGUID);
-            //    *data << TaggedPosition<Position::XYZ>(PositionLocalSpace);
-            //    *data << QuaternionData(RotationLocalSpace);
-            //    *data << float(ScaleLocalSpace);
-            //    *data << uint8(AttachmentFlags);
-            //}
-
-            if (PauseTimes != null && !PauseTimes.Empty())
-                foreach (var stopFrame in PauseTimes)
-                    data.WriteUInt32(stopFrame);
-
-            if (flags.MovementTransport)
-            {
-                WorldObject self = this as WorldObject;
-                MovementExtensions.WriteTransportInfo(data, self.m_movementInfo.transport);
             }
 
             if (flags.GameObject)
@@ -618,6 +593,25 @@ namespace Game.Entities
                     data.WriteUInt32(self.GetTextureKitId());
                 data.FlushBits();
             }
+
+            //if (flags.Room)
+            //    data << ObjectGuid(HouseGUID);
+
+            //if (flags.Decor)
+            //    data << ObjectGuid(RoomGUID);
+
+            //if (flags.MeshObject)
+            //{
+            //    data << ObjectGuid(AttachParentGUID);
+            //    data << TaggedPosition<Position::XYZ>(PositionLocalSpace);
+            //    data << QuaternionData(RotationLocalSpace);
+            //    data << float(ScaleLocalSpace);
+            //    data << uint8(AttachmentFlags);
+            //}
+
+            if (PauseTimes != null && !PauseTimes.Empty())
+                foreach (var stopFrame in PauseTimes)
+                    data.WriteUInt32(stopFrame);
         }
 
         public virtual UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)

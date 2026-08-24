@@ -5105,8 +5105,11 @@ namespace Game.Entities
             displayPlayerChoice.KeepOpenAfterChoice = playerChoice.KeepOpenAfterChoice;
             displayPlayerChoice.ShowChoicesAsList = playerChoice.ShowChoicesAsList;
             displayPlayerChoice.RequiresSelection = playerChoice.RequiresSelection;
+            displayPlayerChoice.ShowChoicesAsGrid = playerChoice.ShowChoicesAsGrid;
+            displayPlayerChoice.HideAnswerArt = playerChoice.HideAnswerArt;
+            displayPlayerChoice.ShowChoicesAsColumns = playerChoice.ShowChoicesAsColumns;
 
-            for (var i = 0; i < playerChoice.Responses.Count && (playerChoice.MaxResponses == 0 || displayPlayerChoice.Responses.Count < playerChoice.MaxResponses); ++i)
+            for (var i = 0; i < playerChoice.Responses.Count && (!playerChoice.MaxResponses.HasValue || displayPlayerChoice.Responses.Count < playerChoice.MaxResponses); ++i)
             {
                 PlayerChoiceResponse playerChoiceResponseTemplate = playerChoice.Responses[i];
                 if (!Global.ConditionMgr.IsObjectMeetingPlayerChoiceResponseConditions((uint)choiceId, playerChoiceResponseTemplate.ResponseId, this))

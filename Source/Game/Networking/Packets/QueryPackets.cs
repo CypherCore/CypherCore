@@ -3,7 +3,6 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using Framework.Dynamic;
 using Framework.IO;
 using Game.Cache;
 using Game.Entities;
@@ -524,11 +523,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteBit(Valid);
+            _worldPacket.WritePackedGuid(Id);
             _worldPacket.WriteBits(Text.GetByteCount(), 13);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(Text);
-            _worldPacket.WritePackedGuid(Id);
         }
 
         public ObjectGuid Id;
@@ -874,14 +873,15 @@ namespace Game.Networking.Packets
             data.WriteInt32(ItemPicks.Count);
             data.WriteInt32(CurrencyPicks.Count);
             data.WriteUInt64(Gold);
-            data.WriteBits(Context, 1);
-            data.FlushBits();
 
             foreach (TreasurePickItem treasurePickerItem in ItemPicks)
                 treasurePickerItem.Write(data);
 
             foreach (TreasurePickCurrency treasurePickCurrency in CurrencyPicks)
                 treasurePickCurrency.Write(data);
+
+            data.WriteBits(Context, 1);
+            data.FlushBits();
         }
     }
 
@@ -901,8 +901,6 @@ namespace Game.Networking.Packets
             data.WriteUInt64(Gold);
             data.WriteInt32(Bonuses.Count);
             data.WriteInt32(Flags);
-            data.WriteBit(IsChoice);
-            data.FlushBits();
 
             foreach (TreasurePickItem treasurePickItem in ItemPicks)
                 treasurePickItem.Write(data);
@@ -912,6 +910,9 @@ namespace Game.Networking.Packets
 
             foreach (TreasurePickerBonus treasurePickerBonus in Bonuses)
                 treasurePickerBonus.Write(data);
+
+            data.WriteBit(IsChoice);
+            data.FlushBits();
         }
     }
 }

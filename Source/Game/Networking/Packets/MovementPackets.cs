@@ -62,6 +62,7 @@ namespace Game.Networking.Packets
             {
                 Guid = data.ReadPackedGuid()
             };
+
             movementInfo.SetMovementFlags((MovementFlag)data.ReadUInt64());
             movementInfo.Time = data.ReadUInt32();
             float x = data.ReadFloat();
@@ -96,11 +97,27 @@ namespace Game.Networking.Packets
             bool hasAdvFlying = data.HasBit();
             bool hasDriveStatus = data.HasBit();
 
+            if (hasStandingOnGameObjectGUID)
+                movementInfo.standingOnGameObjectGUID = data.ReadPackedGuid();
+
             if (hasTransport)
                 ReadTransportInfo(data, ref movementInfo.transport);
 
-            if (hasStandingOnGameObjectGUID)
-                movementInfo.standingOnGameObjectGUID = data.ReadPackedGuid();
+            if (hasFall)
+            {
+                movementInfo.jump.fallTime = data.ReadUInt32();
+                movementInfo.jump.zspeed = data.ReadFloat();
+
+                // ResetBitReader
+
+                bool hasFallDirection = data.HasBit();
+                if (hasFallDirection)
+                {
+                    movementInfo.jump.sinAngle = data.ReadFloat();
+                    movementInfo.jump.cosAngle = data.ReadFloat();
+                    movementInfo.jump.xyspeed = data.ReadFloat();
+                }
+            }
 
             if (hasInertia)
             {
@@ -123,22 +140,6 @@ namespace Game.Networking.Packets
                 };
 
                 movementInfo.advFlying = advFlying;
-            }
-
-            if (hasFall)
-            {
-                movementInfo.jump.fallTime = data.ReadUInt32();
-                movementInfo.jump.zspeed = data.ReadFloat();
-
-                // ResetBitReader
-
-                bool hasFallDirection = data.HasBit();
-                if (hasFallDirection)
-                {
-                    movementInfo.jump.sinAngle = data.ReadFloat();
-                    movementInfo.jump.cosAngle = data.ReadFloat();
-                    movementInfo.jump.xyspeed = data.ReadFloat();
-                }
             }
 
             if (hasDriveStatus)
@@ -199,24 +200,11 @@ namespace Game.Networking.Packets
             data.WriteBit(movementInfo.driveStatus.HasValue);
             data.FlushBits();
 
-            if (hasTransportData)
-                WriteTransportInfo(data, movementInfo.transport);
-
             if (movementInfo.standingOnGameObjectGUID.HasValue)
                 data.WritePackedGuid(movementInfo.standingOnGameObjectGUID.Value);
 
-            if (movementInfo.inertia.HasValue)
-            {
-                data.WriteInt32(movementInfo.inertia.Value.id);
-                data.WriteXYZ(movementInfo.inertia.Value.force);
-                data.WriteUInt32(movementInfo.inertia.Value.lifetime);
-            }
-
-            if (movementInfo.advFlying.HasValue)
-            {
-                data.WriteFloat(movementInfo.advFlying.Value.forwardVelocity);
-                data.WriteFloat(movementInfo.advFlying.Value.upVelocity);
-            }
+            if (hasTransportData)
+                WriteTransportInfo(data, movementInfo.transport);
 
             if (hasFallData)
             {
@@ -231,6 +219,19 @@ namespace Game.Networking.Packets
                     data.WriteFloat(movementInfo.jump.cosAngle);
                     data.WriteFloat(movementInfo.jump.xyspeed);
                 }
+            }
+
+            if (movementInfo.inertia.HasValue)
+            {
+                data.WriteInt32(movementInfo.inertia.Value.id);
+                data.WriteXYZ(movementInfo.inertia.Value.force);
+                data.WriteUInt32(movementInfo.inertia.Value.lifetime);
+            }
+
+            if (movementInfo.advFlying.HasValue)
+            {
+                data.WriteFloat(movementInfo.advFlying.Value.forwardVelocity);
+                data.WriteFloat(movementInfo.advFlying.Value.upVelocity);
             }
 
             if (movementInfo.driveStatus.HasValue)
@@ -264,33 +265,11 @@ namespace Game.Networking.Packets
             if (hasSplineMove)
             {
                 data.WriteUInt32((uint)moveSpline.splineflags.Flags);   // SplineFlags
+                data.WriteUInt8((byte)moveSpline.facing.type);        // Face
                 data.WriteInt32(moveSpline.TimePassed());               // Elapsed
                 data.WriteInt32(moveSpline.Duration());                // Duration
                 data.WriteFloat(1.0f);                                  // DurationModifier
                 data.WriteFloat(1.0f);                                  // NextDurationModifier
-                data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
-                bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(MoveSplineFlagEnum.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
-                data.WriteBits(moveSpline.GetPath().Length, 16);
-                data.WriteBit(false);                                       // HasSplineFilter
-                data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
-                bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(MoveSplineFlagEnum.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0));
-                data.WriteBit(moveSpline.turn != null);                                  // HasTurnData
-                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
-                data.WriteBit(false);                                                   // HasSpellVisualData
-                data.FlushBits();
-
-                //if (HasSplineFilterKey)
-                //{
-                //    data << uint32(FilterKeysCount);
-                //    for (var i = 0; i < FilterKeysCount; ++i)
-                //    {
-                //        data << float(In);
-                //        data << float(Out);
-                //    }
-
-                //    data.WriteBits(FilterFlags, 2);
-                //    data.FlushBits();
-                //}
 
                 switch (moveSpline.facing.type)
                 {
@@ -305,11 +284,37 @@ namespace Game.Networking.Packets
                         break;
                 }
 
+
+                bool hasFadeObjectTime = moveSpline.splineflags.HasFlag(MoveSplineFlagEnum.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration();
+                data.WriteBit(hasFadeObjectTime);
+                data.WriteBits(moveSpline.GetPath().Length, 16);
+                data.WriteBit(false);                                       // HasSplineFilter
+                data.WriteBit(moveSpline.spell_effect_extra != null);  // HasSpellEffectExtraData
+                bool hasJumpExtraData = moveSpline.splineflags.HasFlag(MoveSplineFlagEnum.Parabolic) && (moveSpline.spell_effect_extra == null || moveSpline.effect_start_time != 0);
+                data.WriteBit(hasJumpExtraData);
+                data.WriteBit(moveSpline.turn != null);                                  // HasTurnData
+                data.WriteBit(moveSpline.anim_tier != null);                   // HasAnimTierTransition
+                data.WriteBit(false);                                                   // HasSpellVisualData
+                data.FlushBits();
+
                 if (hasFadeObjectTime)
                     data.WriteInt32(moveSpline.effect_start_time);     // FadeObjectTime
 
                 foreach (var vec in moveSpline.GetPath())
                     data.WriteVector3(vec);
+
+                //if (HasSplineFilterKey)
+                //{
+                //    data << uint32(FilterKeysCount);
+                //    for (var i = 0; i < FilterKeysCount; ++i)
+                //    {
+                //        data << float(In);
+                //        data << float(Out);
+                //    }
+
+                //    data.WriteBits(FilterFlags, 2);
+                //    data.FlushBits();
+                //}
 
                 if (moveSpline.spell_effect_extra != null)
                 {
@@ -511,8 +516,8 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(MoverGUID);
-            _worldPacket.WriteVector3(Pos);
             SplineData.Write(_worldPacket);
+            _worldPacket.WriteVector3(Pos);
         }
 
         public MovementMonsterSpline SplineData;
@@ -735,11 +740,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SequenceIndex);
             _worldPacket.WriteXYZ(Pos);
             _worldPacket.WriteFloat(Facing);
-            _worldPacket.WriteUInt8(PreloadWorld);
 
             _worldPacket.WriteBit(TransportGUID.HasValue);
             _worldPacket.WriteBit(Vehicle.HasValue);
+            _worldPacket.WriteBit(PreloadWorld);
             _worldPacket.FlushBits();
+
+            if (TransportGUID.HasValue)
+                _worldPacket.WritePackedGuid(TransportGUID.Value);
 
             if (Vehicle.HasValue)
             {
@@ -748,9 +756,6 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(Vehicle.Value.VehicleExitTeleport);
                 _worldPacket.FlushBits();
             }
-
-            if (TransportGUID.HasValue)
-                _worldPacket.WritePackedGuid(TransportGUID.Value);
         }
 
         public Position Pos;
@@ -759,7 +764,7 @@ namespace Game.Networking.Packets
         public ObjectGuid MoverGUID;
         public ObjectGuid? TransportGUID;
         public float Facing;
-        public byte PreloadWorld;
+        public bool PreloadWorld;
     }
 
     public class MoveUpdateTeleport : ServerPacket
@@ -771,6 +776,10 @@ namespace Game.Networking.Packets
             MovementExtensions.WriteMovementInfo(_worldPacket, Status);
 
             _worldPacket.WriteInt32(MovementForces != null ? MovementForces.Count : 0);
+            if (MovementForces != null)
+                foreach (MovementForce force in MovementForces)
+                    force.Write(_worldPacket);
+
             _worldPacket.WriteBit(WalkSpeed.HasValue);
             _worldPacket.WriteBit(RunSpeed.HasValue);
             _worldPacket.WriteBit(RunBackSpeed.HasValue);
@@ -781,10 +790,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(TurnRate.HasValue);
             _worldPacket.WriteBit(PitchRate.HasValue);
             _worldPacket.FlushBits();
-
-            if (MovementForces != null)
-                foreach (MovementForce force in MovementForces)
-                    force.Write(_worldPacket);
 
             if (WalkSpeed.HasValue)
                 _worldPacket.WriteFloat(WalkSpeed.Value);
@@ -1302,9 +1307,6 @@ namespace Game.Networking.Packets
                 data.WriteBit(DriveCapabilityRecID.HasValue);
                 data.FlushBits();
 
-                if (@MovementForce != null)
-                    @MovementForce.Write(data);
-
                 if (Speed.HasValue)
                     data.WriteFloat(Speed.Value);
 
@@ -1331,6 +1333,9 @@ namespace Game.Networking.Packets
                     data.WriteBits(CollisionHeight.Value.Reason, 2);
                     data.FlushBits();
                 }
+
+                if (@MovementForce != null)
+                    @MovementForce.Write(data);
 
                 if (MovementForceGUID.HasValue)
                     data.WritePackedGuid(MovementForceGUID.Value);
@@ -1644,14 +1649,14 @@ namespace Game.Networking.Packets
             data.WriteBit(SpellVisualData.HasValue);
             data.FlushBits();
 
-            if (SplineFilter != null)
-                SplineFilter.Write(data);
-
             foreach (Vector3 pos in Points)
                 data.WriteVector3(pos);
 
             foreach (Vector3 pos in PackedDeltas)
                 data.WritePackXYZ(pos);
+
+            if (SplineFilter != null)
+                SplineFilter.Write(data);
 
             if (SpellEffectExtraData.HasValue)
                 SpellEffectExtraData.Value.Write(data);
@@ -1702,11 +1707,11 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt32(Id);
+            Move.Write(data);
             data.WriteBit(CrzTeleport);
             data.WriteBit(StopUseFaceDirection);
             data.WriteBits(StopSplineStyle, 3);
-
-            Move.Write(data);
+            data.FlushBits();
         }
 
         public uint Id;

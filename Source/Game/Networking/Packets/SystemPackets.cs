@@ -27,10 +27,15 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteUInt32(CommercePricePollTimeSeconds);
             _worldPacket.WriteUInt32(KioskSessionDurationMinutes);
+            QuickJoinConfig.Write(_worldPacket);
             _worldPacket.WriteInt64(RedeemForBalanceAmount);
 
             _worldPacket.WriteUInt32(ClubsPresenceDelay);
             _worldPacket.WriteUInt32(ClubPresenceUnsubscribeDelay);
+
+            _worldPacket.WriteBit(Squelch.IsSquelched);
+            _worldPacket.WritePackedGuid(Squelch.BnetAccountGuid);
+            _worldPacket.WritePackedGuid(Squelch.GuildGuid);
 
             _worldPacket.WriteInt32(ContentSetID);
             _worldPacket.WriteInt32(DisabledGameModes.Count);
@@ -117,10 +122,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AddonProfilingEnabled);
             _worldPacket.WriteBit(GlobalUserGeneratedContentMuteEnabled);
             _worldPacket.WriteBit(AccountUserGeneratedContentIsRisky);
+            _worldPacket.WriteBit(FriendsDisabled);
 
             _worldPacket.FlushBits();
 
-            QuickJoinConfig.Write(_worldPacket);
+            if (EuropaTicketSystemStatus.HasValue)
+                EuropaTicketSystemStatus.Value.Write(_worldPacket);
 
             if (SessionAlert.HasValue)
             {
@@ -130,13 +137,6 @@ namespace Game.Networking.Packets
             }
 
             _worldPacket.WriteString(Unknown1027);
-
-            _worldPacket.WriteBit(Squelch.IsSquelched);
-            _worldPacket.WritePackedGuid(Squelch.BnetAccountGuid);
-            _worldPacket.WritePackedGuid(Squelch.GuildGuid);
-
-            if (EuropaTicketSystemStatus.HasValue)
-                EuropaTicketSystemStatus.Value.Write(_worldPacket);
         }
 
         public bool VoiceEnabled;
@@ -198,6 +198,7 @@ namespace Game.Networking.Packets
         public bool AddonProfilingEnabled;
         public bool GlobalUserGeneratedContentMuteEnabled;
         public bool AccountUserGeneratedContentIsRisky;
+        public bool FriendsDisabled;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -350,9 +351,6 @@ namespace Game.Networking.Packets
 
             _worldPacket.FlushBits();
 
-            if (EuropaTicketSystemStatus.HasValue)
-                EuropaTicketSystemStatus.Value.Write(_worldPacket);
-
             _worldPacket.WriteUInt32(CommercePricePollTimeSeconds);
             _worldPacket.WriteUInt32(KioskSessionDurationMinutes);
             _worldPacket.WriteInt64(RedeemForBalanceAmount);
@@ -376,6 +374,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(DebugTimeEvents.Count);
             _worldPacket.WriteInt32(MostRecentTimeEventID);
             _worldPacket.WriteUInt32(EventRealmQueues);
+
+            if (EuropaTicketSystemStatus.HasValue)
+                EuropaTicketSystemStatus.Value.Write(_worldPacket);
 
             if (LaunchDurationETA.HasValue)
                 _worldPacket.WriteInt32(LaunchDurationETA.Value);

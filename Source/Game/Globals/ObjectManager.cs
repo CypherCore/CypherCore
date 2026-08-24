@@ -10078,8 +10078,10 @@ namespace Game
 
             //                                               0         1               2           3                4         5         6
             SQLResult choiceResult = DB.World.Query("SELECT ChoiceId, UiTextureKitId, SoundKitId, CloseSoundKitId, Duration, Question, PendingChoiceText, " +
-                //7              8                   9                    10                 11                 12            13
-                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, RequiresSelection, MaxResponses, ScriptName FROM playerchoice");
+                //7              8                   9                    10                 11                 12                 13
+                "InfiniteRange, HideWarboardHeader, KeepOpenAfterChoice, ShowChoicesAsList, RequiresSelection, ShowChoicesAsGrid, HideAnswerArt, " +
+                //14                    15            16
+                "ShowChoicesAsColumns, MaxResponses, ScriptName FROM playerchoice");
             if (choiceResult.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player choices. DB table `playerchoice` is empty.");
@@ -10109,13 +10111,13 @@ namespace Game
                     HideWarboardHeader = choiceResult.Read<bool>(8),
                     KeepOpenAfterChoice = choiceResult.Read<bool>(9),
                     ShowChoicesAsList = choiceResult.Read<bool>(10),
-                    RequiresSelection = choiceResult.Read<bool>(11)
+                    RequiresSelection = choiceResult.Read<bool>(11),
+                    ShowChoicesAsGrid = choiceResult.Read<bool>(12),
+                    HideAnswerArt = choiceResult.Read<bool>(13),
+                    ShowChoicesAsColumns = choiceResult.Read<bool>(14),
+                    MaxResponses = choiceResult.Read<uint?>(15),
+                    ScriptId = GetScriptId(choiceResult.Read<string>(16))
                 };
-
-                if (!choiceResult.IsNull(12))
-                    choice.MaxResponses = choiceResult.Read<uint>(12);
-
-                choice.ScriptId = GetScriptId(choiceResult.Read<string>(13));
 
                 _playerChoices[choice.ChoiceId] = choice;
 

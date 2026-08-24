@@ -149,14 +149,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Events.Count);
             _worldPacket.WriteInt32(RaidLockouts.Count);
 
-            foreach (var lockout in RaidLockouts)
-                lockout.Write(_worldPacket);
-
             foreach (var invite in Invites)
                 invite.Write(_worldPacket);
 
             foreach (var Event in Events)
                 Event.Write(_worldPacket);
+
+            foreach (var lockout in RaidLockouts)
+                lockout.Write(_worldPacket);
         }
 
         public WowTime ServerTime;
@@ -182,12 +182,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt64(EventGuildID);
             _worldPacket.WriteInt32(Invites.Count);
 
+            foreach (var invite in Invites)
+                invite.Write(_worldPacket);
+
             _worldPacket.WriteBits(EventName.GetByteCount(), 8);
             _worldPacket.WriteBits(Description.GetByteCount(), 11);
             _worldPacket.FlushBits();
-
-            foreach (var invite in Invites)
-                invite.Write(_worldPacket);
 
             _worldPacket.WriteString(EventName);
             _worldPacket.WriteString(Description);
@@ -760,15 +760,15 @@ namespace Game.Networking.Packets
             Flags = data.ReadUInt16();
             var InviteCount = data.ReadUInt32();
 
-            byte titleLength = data.ReadBits<byte>(8);
-            ushort descriptionLength = data.ReadBits<ushort>(11);
-
             for (var i = 0; i < InviteCount; ++i)
             {
                 CalendarAddEventInviteInfo invite = new();
                 invite.Read(data);
                 Invites[i] = invite;
             }
+
+            byte titleLength = data.ReadBits<byte>(8);
+            ushort descriptionLength = data.ReadBits<ushort>(11);
 
             Title = data.ReadString(titleLength);
             Description = data.ReadString(descriptionLength);

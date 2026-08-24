@@ -95,10 +95,15 @@ namespace Game.Networking.Packets
             data.WriteUInt32(OperationID);
             data.WritePackedGuid(ItemGUID);
             data.WriteInt32(Quantity);
+            OldItem.Write(data);
+            NewItem.Write(data);
             data.WriteInt32(EnchantID);
             data.WriteInt32(ConcentrationCurrencyID);
             data.WriteInt32(ConcentrationSpent);
             data.WriteInt32(IngenuityRefund);
+
+            foreach (SpellReducedReagent spellReducedReagent in ResourcesReturned)
+                spellReducedReagent.Write(data);
 
             data.WriteBit(IsCrit);
             data.WriteBit(IsRecraft);
@@ -107,12 +112,6 @@ namespace Game.Networking.Packets
             data.WriteBit(HasIngenuityProc);
             data.WriteBit(ApplyConcentration);
             data.FlushBits();
-
-            OldItem.Write(data);
-            NewItem.Write(data);
-
-            foreach (SpellReducedReagent spellReducedReagent in ResourcesReturned)
-                spellReducedReagent.Write(data);
         }
     }
 }

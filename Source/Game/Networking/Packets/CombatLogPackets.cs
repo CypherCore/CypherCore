@@ -66,6 +66,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(WorldTextViewers.Count);
             _worldPacket.WriteInt32(Supporters.Count);
 
+            foreach (CombatWorldTextViewerInfo worldTextViewer in WorldTextViewers)
+                worldTextViewer.Write(_worldPacket);
+
             foreach (SpellSupportInfo supportInfo in Supporters)
                 supportInfo.Write(_worldPacket);
 
@@ -74,9 +77,6 @@ namespace Game.Networking.Packets
             WriteLogDataBit();
             _worldPacket.WriteBit(ContentTuning != null);
             FlushBits();
-
-            foreach (CombatWorldTextViewerInfo worldTextViewer in WorldTextViewers)
-                worldTextViewer.Write(_worldPacket);
 
             WriteLogData();
             if (ContentTuning != null)
@@ -218,13 +218,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(ContentTuning != null);
             FlushBits();
 
-            WriteLogData();
-
             if (CritRollMade.HasValue)
                 _worldPacket.WriteFloat(CritRollMade.Value);
 
             if (CritRollNeeded.HasValue)
                 _worldPacket.WriteFloat(CritRollNeeded.Value);
+
+            WriteLogData();
 
             if (ContentTuning != null)
                 ContentTuning.Write(_worldPacket);
@@ -254,10 +254,11 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CasterGUID);
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteInt32(Effects.Count);
-            WriteLogDataBit();
-            FlushBits();
 
             Effects.ForEach(p => p.Write(_worldPacket));
+
+            WriteLogDataBit();
+            FlushBits();
 
             WriteLogData();
         }
@@ -294,14 +295,14 @@ namespace Game.Networking.Packets
                 data.WriteBit(ContentTuning != null);
                 data.FlushBits();
 
-                if (ContentTuning != null)
-                    ContentTuning.Write(data);
-
                 if (DebugInfo.HasValue)
                 {
                     data.WriteFloat(DebugInfo.Value.CritRollMade);
                     data.WriteFloat(DebugInfo.Value.CritRollNeeded);
                 }
+
+                if (ContentTuning != null)
+                    ContentTuning.Write(data);
             }
 
             public uint Effect;
@@ -428,10 +429,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteInt32(Entries.Count);
-            _worldPacket.WriteBit(HideFromCombatLog);
 
             foreach (SpellLogMissEntry missEntry in Entries)
                 missEntry.Write(_worldPacket);
+
+            _worldPacket.WriteBit(HideFromCombatLog);
+            _worldPacket.FlushBits();
         }
 
         public uint SpellID;

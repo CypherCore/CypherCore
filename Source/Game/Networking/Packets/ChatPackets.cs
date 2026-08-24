@@ -251,7 +251,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(TargetVirtualAddress);
             _worldPacket.WriteUInt32(SenderVirtualAddress);
             _worldPacket.WriteUInt32(AchievementID);
-            _worldPacket.WriteUInt16((ushort)_ChatFlags);
+            _worldPacket.WriteUInt32((uint)_ChatFlags);
             _worldPacket.WriteFloat(DisplayTime);
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteBits(SenderName.GetByteCount(), 11);
