@@ -357,7 +357,7 @@ namespace Game.Networking.Packets
 
                 foreach (string str in MailSenders)
                     if (!str.IsEmpty())
-                        data.WriteCString(str);
+                        data.WriteSizedCString(str);
             }
         }
 

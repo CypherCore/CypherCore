@@ -77,10 +77,8 @@ namespace Game.Networking.Packets
 
                 for (var i = 0; i < SharedConst.MaxCreatureNames; ++i)
                 {
-                    if (!string.IsNullOrEmpty(Stats.Name[i]))
-                        _worldPacket.WriteCString(Stats.Name[i]);
-                    if (!string.IsNullOrEmpty(Stats.NameAlt[i]))
-                        _worldPacket.WriteCString(Stats.NameAlt[i]);
+                    _worldPacket.WriteSizedCString(Stats.Name[i]);
+                    _worldPacket.WriteSizedCString(Stats.NameAlt[i]);
                 }
 
                 for (var i = 0; i < Stats.Flags.Length; ++i)
@@ -116,14 +114,9 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Stats.WidgetSetID);
                 _worldPacket.WriteInt32(Stats.WidgetSetUnitConditionID);
 
-                if (!Stats.Title.IsEmpty())
-                    _worldPacket.WriteCString(Stats.Title);
-
-                if (!Stats.TitleAlt.IsEmpty())
-                    _worldPacket.WriteCString(Stats.TitleAlt);
-
-                if (!Stats.CursorName.IsEmpty())
-                    _worldPacket.WriteCString(Stats.CursorName);
+                _worldPacket.WriteSizedCString(Stats.Title);
+                _worldPacket.WriteSizedCString(Stats.TitleAlt);
+                _worldPacket.WriteSizedCString(Stats.CursorName);
 
                 foreach (var questItem in Stats.QuestItems)
                     _worldPacket.WriteUInt32(questItem);

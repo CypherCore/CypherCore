@@ -277,7 +277,7 @@ namespace Game.Networking.Packets
 
             foreach (string str in BlackListNames)
                 if (!str.IsEmpty())
-                    _worldPacket.WriteCString(str);
+                    _worldPacket.WriteSizedCString(str);
         }
 
         public RideTicket Ticket = new();

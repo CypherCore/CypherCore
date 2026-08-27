@@ -4586,7 +4586,7 @@ namespace Game.Entities
             data.WriteUInt64(GuildLobbyID);
             data.WriteUInt8(GuildSettings);
             data.WriteUInt8(DisplayNameType);
-            data.WriteCString(AccessToken);
+            data.WriteSizedCString(AccessToken);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner) => WriteCreate(data, receiver, owner);
@@ -8575,7 +8575,7 @@ namespace Game.Entities
             data.WriteInt64(Time);
             data.WriteInt32(DelveTier);
             data.WriteString(PlayerName);
-            data.WriteCString(MonsterName);
+            data.WriteSizedCString(MonsterName);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, GameObject owner) => WriteCreate(data, receiver, owner);
@@ -10742,7 +10742,7 @@ namespace Game.Entities
             {
                 DyeSlots.GetValue().WriteCreate(data, receiver, owner);
             }
-            data.WriteCString(SourceValue);
+            data.WriteSizedCString(SourceValue);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, BaseEntity owner)
@@ -10781,7 +10781,7 @@ namespace Game.Entities
             }
             if (changesMask[4])
             {
-                data.WriteCString(SourceValue);
+                data.WriteSizedCString(SourceValue);
             }
         }
 
@@ -11399,7 +11399,7 @@ namespace Game.Entities
             data.WritePackedGuid(OwnerGUID);
             data.WriteInt32(Houses.Size());
             data.WriteInt32(Managers.Size());
-            data.WriteCString(Name);
+            data.WriteSizedCString(Name);
             for (int i = 0; i < Houses.Size(); ++i)
             {
                 Houses[i].WriteCreate(data, receiver, owner);
@@ -11473,7 +11473,7 @@ namespace Game.Entities
                 }
                 if (changesMask[3])
                 {
-                    data.WriteCString(Name);
+                    data.WriteSizedCString(Name);
                 }
             }
         }
@@ -11661,7 +11661,7 @@ namespace Game.Entities
             }
             data.WriteBits(Name.GetByteCount() + 1, 8);
             data.FlushBits();
-            data.WriteCString(Name);
+            data.WriteSizedCString(Name);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner) => WriteCreate(data, receiver, owner);
@@ -11687,7 +11687,7 @@ namespace Game.Entities
             data.WritePackedGuid(CurrentOwnerGUID);
             data.WriteBits(NeighborhoodName.GetByteCount() + 1, 8);
             data.FlushBits();
-            data.WriteCString(NeighborhoodName);
+            data.WriteSizedCString(NeighborhoodName);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, Player owner) => WriteCreate(data, receiver, owner);

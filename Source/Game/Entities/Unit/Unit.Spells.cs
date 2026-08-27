@@ -2023,7 +2023,7 @@ namespace Game.Entities
                             InterruptSpell(CurrentSpellTypes.Generic, false);
 
                         // it also does break autorepeat if not Auto Shot
-                        if (m_currentSpells[CurrentSpellTypes.AutoRepeat] != null &&
+                        if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
                             m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
 

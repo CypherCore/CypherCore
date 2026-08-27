@@ -241,7 +241,7 @@ namespace Game.Entities
 
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
 
-                data.WriteUInt32((uint)unit.GetUnitMovementFlags());
+                data.WriteUInt64((uint)unit.GetUnitMovementFlags());
 
                 data.WriteUInt32(unit.m_movementInfo.Time);                     // MoveTime
                 data.WriteFloat(unit.GetPositionX());
@@ -362,6 +362,12 @@ namespace Game.Entities
                 // HasMovementSpline - marks that spline data is present in packet
                 if (HasSpline)
                     MovementExtensions.WriteCreateObjectSplineDataBlock(unit.MoveSpline, data);
+            }
+
+            if (flags.MovementTransport)
+            {
+                WorldObject self = this as WorldObject;
+                MovementExtensions.WriteTransportInfo(data, self.m_movementInfo.transport);
             }
 
             if (flags.Stationary)

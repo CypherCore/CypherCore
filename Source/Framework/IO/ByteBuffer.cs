@@ -263,6 +263,19 @@ namespace Framework.IO
             WriteUInt8(0);
         }
 
+        /// <summary>
+        /// Writes string + null terminator but only if not empty)
+        /// </summary>
+        /// <param name="str"></param>
+        public void WriteSizedCString(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return;
+
+            WriteString(str);
+            WriteUInt8(0);
+        }
+
         public void WriteString(string str)
         {
             if (str.IsEmpty())

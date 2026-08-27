@@ -380,7 +380,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(OverrideIconID.Value);
 
             if (!FailureDescription.IsEmpty())
-                data.WriteCString(FailureDescription);
+                data.WriteSizedCString(FailureDescription);
         }
     }
 

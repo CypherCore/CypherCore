@@ -26,7 +26,7 @@ namespace Game.Entities
             _name = "";
             m_isStoredInWorldObjectGridContainer = isWorldObject;
 
-            if (!IsTypeMask(TypeMask.Item | TypeMask.Container | TypeMask.AzeriteEmpoweredItem | TypeMask.AzeriteItem))
+            if (!IsTypeId(TypeId.Item) && !IsTypeId(TypeId.Container) && !IsTypeId(TypeId.AzeriteItem) && !IsTypeId(TypeId.AzeriteEmpoweredItem))
                 m_updateFlag.HasEntityPosition = true;
 
             m_serverSideVisibility.SetValue(ServerSideVisibilityType.Ghost, GhostVisibilityType.Alive | GhostVisibilityType.Ghost);

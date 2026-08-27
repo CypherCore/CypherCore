@@ -105,12 +105,15 @@ namespace BNetServer.Networking
                     do
                     {
                         RealmId realmId = new(lastPlayerCharactersResult.Read<byte>(3), lastPlayerCharactersResult.Read<byte>(4), lastPlayerCharactersResult.Read<uint>(2));
-                        LastPlayedCharacterInfo lastPlayedCharacter = accountInfo.GameAccounts[lastPlayerCharactersResult.Read<uint>(0)].LastPlayedCharacters[realmId.GetSubRegionAddress()];
+                        LastPlayedCharacterInfo lastPlayedCharacter = new()
+                        {
+                            RealmId = realmId,
+                            CharacterName = lastPlayerCharactersResult.Read<string>(4),
+                            CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5),
+                            LastPlayedTime = lastPlayerCharactersResult.Read<uint>(6)
+                        };
 
-                        lastPlayedCharacter.RealmId = realmId;
-                        lastPlayedCharacter.CharacterName = lastPlayerCharactersResult.Read<string>(4);
-                        lastPlayedCharacter.CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5);
-                        lastPlayedCharacter.LastPlayedTime = lastPlayerCharactersResult.Read<uint>(6);
+                        accountInfo.GameAccounts[lastPlayerCharactersResult.Read<uint>(0)].LastPlayedCharacters[realmId.GetSubRegionAddress()] = lastPlayedCharacter;
 
                     } while (lastPlayerCharactersResult.NextRow());
                 }

@@ -293,7 +293,7 @@ namespace Game.Networking.Packets
                 data.WriteBits(Address, 6);
                 data.WriteInt64(TokenLifespan.Nanoseconds);
                 data.WriteString(Token);
-                data.WriteCString(ProxyId);
+                data.WriteSizedCString(ProxyId);
                 data.WriteString(Address);
             }
         }

@@ -381,8 +381,7 @@ namespace Game.Networking.Packets
             if (LaunchDurationETA.HasValue)
                 _worldPacket.WriteInt32(LaunchDurationETA.Value);
 
-            if (!RealmHiddenAlert.IsEmpty())
-                _worldPacket.WriteCString(RealmHiddenAlert);
+            _worldPacket.WriteSizedCString(RealmHiddenAlert);
 
             foreach (var sourceRegion in LiveRegionCharacterCopySourceRegions)
                 _worldPacket.WriteInt32(sourceRegion);
@@ -598,8 +597,8 @@ namespace Game.Networking.Packets
             data.WriteBits(Value.GetByteCount() + 1, 24);
             data.FlushBits();
 
-            data.WriteCString(Name);
-            data.WriteCString(Value);
+            data.WriteSizedCString(Name);
+            data.WriteSizedCString(Value);
         }
     }
 

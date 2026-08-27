@@ -1383,8 +1383,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(FactionGroup);
             Leaver.Write(data);
             data.WriteString(Name);
-            if (!VoiceStateID.IsEmpty())
-                data.WriteString(VoiceStateID);
+            data.WriteSizedCString(VoiceStateID);
         }
     }
 
