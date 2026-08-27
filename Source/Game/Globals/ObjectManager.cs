@@ -12632,8 +12632,8 @@ namespace Game
     public class RaceClassAvailability
     {
         public byte RaceID;
-        public RaceUnlockRequirement UnlockRequirement;
-        public List<ClassAvailability> Classes = new();
+        public RaceUnlockRequirement UnlockRequirement = new();
+        public List<ClassAvailability> Classes = [];
     }
 
     public class QuestRelationResult : List<uint>

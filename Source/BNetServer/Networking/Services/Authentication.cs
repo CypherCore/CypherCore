@@ -100,7 +100,7 @@ namespace BNetServer.Networking
                 callback.SetNextQuery(DB.Login.AsyncQuery(stmt));
             }).WithCallback(lastPlayerCharactersResult =>
             {
-                if (lastPlayerCharactersResult.IsEmpty())
+                if (!lastPlayerCharactersResult.IsEmpty())
                 {
                     do
                     {
