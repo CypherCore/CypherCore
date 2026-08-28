@@ -9288,10 +9288,6 @@ namespace Game.Entities
                 {
                     data.WriteBit(IsDecay);
                 }
-            }
-            data.FlushBits();
-            if (changesMask[0])
-            {
                 data.WriteBit(AnimationDataID.HasValue());
             }
             data.FlushBits();
@@ -9305,6 +9301,10 @@ namespace Game.Entities
                 {
                     data.WriteUInt32(AnimProgress);
                 }
+            }
+            data.FlushBits();
+            if (changesMask[0])
+            {
                 if (changesMask[2])
                 {
                     if (AnimationDataID.HasValue())
@@ -9904,13 +9904,17 @@ namespace Game.Entities
 
     public class AreaTriggerBoundedPlane() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
-        public UpdateField<Vector2> Extents = new(0, 1);
-        public UpdateField<Vector2> ExtentsTarget = new(0, 2);
+        public UpdateField<float> ExtentsX = new(0, 1);
+        public UpdateField<float> ExtentsY = new(0, 2);
+        public UpdateField<float> ExtentsTargetX = new(0, 3);
+        public UpdateField<float> ExtentsTargetY = new(0, 4);
 
         public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
-            data.WriteVector2(Extents);
-            data.WriteVector2(ExtentsTarget);
+            data.WriteFloat(ExtentsX);
+            data.WriteFloat(ExtentsY);
+            data.WriteFloat(ExtentsTargetX);
+            data.WriteFloat(ExtentsTargetY);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
@@ -9919,26 +9923,36 @@ namespace Game.Entities
             if (ignoreChangesMask)
                 changesMask.SetAll();
 
-            data.WriteBits(changesMask.GetBlock(0), 3);
+            data.WriteBits(changesMask.GetBlock(0), 5);
 
             data.FlushBits();
             if (changesMask[0])
             {
                 if (changesMask[1])
                 {
-                    data.WriteVector2(Extents);
+                    data.WriteFloat(ExtentsX);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteVector2(ExtentsTarget);
+                    data.WriteFloat(ExtentsY);
+                }
+                if (changesMask[3])
+                {
+                    data.WriteFloat(ExtentsTargetX);
+                }
+                if (changesMask[4])
+                {
+                    data.WriteFloat(ExtentsTargetY);
                 }
             }
         }
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Extents);
-            ClearChangesMask(ExtentsTarget);
+            ClearChangesMask(ExtentsX);
+            ClearChangesMask(ExtentsY);
+            ClearChangesMask(ExtentsTargetX);
+            ClearChangesMask(ExtentsTargetY);
             _changesMask.ResetAll();
         }
     }

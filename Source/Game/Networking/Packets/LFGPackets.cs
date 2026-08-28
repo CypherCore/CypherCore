@@ -178,8 +178,8 @@ namespace Game.Networking.Packets
             foreach (var player in SuspendedPlayers)
                 _worldPacket.WritePackedGuid(player);
 
-            _worldPacket.WriteBit(IsParty);
             _worldPacket.WriteBit(NotifyUI);
+            _worldPacket.WriteBit(IsParty);
             _worldPacket.WriteBit(Joined);
             _worldPacket.WriteBit(LfgJoined);
             _worldPacket.WriteBit(Queued);

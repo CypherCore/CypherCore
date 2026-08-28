@@ -45,8 +45,8 @@ namespace Game.Networking.Packets
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(Quantity);
             Reagent.Write(data);
+            data.WriteInt32(Quantity);
         }
     }
 

@@ -797,8 +797,8 @@ namespace Game.Entities
             unsafe
             {
                 float scale = CalcCurrentScale();
-                float extentsX = MathFunctions.Lerp(boundedPlane.Extents.GetValue().X, boundedPlane.ExtentsTarget.GetValue().X, progress) * scale;
-                float extentsY = MathFunctions.Lerp(boundedPlane.Extents.GetValue().Y, boundedPlane.ExtentsTarget.GetValue().Y, progress) * scale;
+                float extentsX = MathFunctions.Lerp(boundedPlane.ExtentsX, boundedPlane.ExtentsTargetX, progress) * scale;
+                float extentsY = MathFunctions.Lerp(boundedPlane.ExtentsY, boundedPlane.ExtentsTargetY, progress) * scale;
                 float radius = MathF.Sqrt(extentsX * extentsX + extentsY * extentsY);
 
                 SearchUnits(targetList, radius, false);
@@ -1010,8 +1010,10 @@ namespace Game.Entities
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)8);
                     var boundedPlane = areaTriggerData.ModifyValue<AreaTriggerBoundedPlane>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.Extents), boundedPlaneInfo.Extents);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTarget), boundedPlaneInfo.ExtentsTarget);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsX), boundedPlaneInfo.Extents.X);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsY), boundedPlaneInfo.Extents.Y);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetX), boundedPlaneInfo.ExtentsTarget.X);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetY), boundedPlaneInfo.ExtentsTarget.Y);
                 }
             );
         }
