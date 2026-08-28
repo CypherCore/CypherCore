@@ -1986,17 +1986,14 @@ namespace Game.Entities
             float maxRadius = 45.0f * aggroRate;
             float minRadius = 5.0f * aggroRate;
 
-            int expansionMaxLevel = (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureTemplate().RequiredExpansion);
+            int expansionMaxLevel = (int)Global.ObjectMgr.GetMaxLevelForExpansion((Expansion)GetCreatureDifficulty().GetHealthScalingExpansion());
             int playerLevel = (int)player.GetLevelForTarget(this);
             int creatureLevel = (int)GetLevelForTarget(player);
-            int levelDifference = creatureLevel - playerLevel;
 
-            // The aggro radius for creatures with equal level as the player is 20 yards.
+            // The aggro radius for creatures with equal level as the player is 15 yards.
             // The combatreach should not get taken into account for the distance so we drop it from the range (see Supremus as expample)
-            float baseAggroDistance = 20.0f - GetCombatReach();
-
-            // + - 1 yard for each level difference between player and creature
-            float aggroRadius = baseAggroDistance + (float)levelDifference;
+            float baseAggroDistance = 15.0f - GetCombatReach();
+            float aggroRadius = baseAggroDistance;
 
             // detect range auras
             if ((creatureLevel + 5) <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
@@ -2010,6 +2007,8 @@ namespace Game.Entities
             // The following code is used for blizzlike behaviour such as skippable bosses
             if (creatureLevel > expansionMaxLevel)
                 aggroRadius = baseAggroDistance + (float)(expansionMaxLevel - playerLevel);
+            else // + - 1 yard for each level difference between player and creature
+                aggroRadius += (float)(creatureLevel - playerLevel);
 
             // Make sure that we wont go over the total range limits
             if (aggroRadius > maxRadius)
