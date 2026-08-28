@@ -2743,7 +2743,7 @@ namespace Game.Entities
             SetDisableGravity(IsFloating());
             SetControlled(IsSessile(), UnitState.Root);
 
-            if (IsSwimPrevented())
+            if (CanOnlySwimIfTargetSwims())
             {
                 SetUnitFlag2(UnitFlags2.AiWillOnlySwimIfTargetSwims);
                 SetSwim(false);
@@ -3590,7 +3590,7 @@ namespace Game.Entities
         public bool IsSwimDisabled() { return _staticFlags.HasFlag(CreatureStaticFlags3.CantSwim); }
 
         // Returns true if CREATURE_STATIC_FLAG_4_AI_WILL_ONLY_SWIM_IF_TARGET_SWIMS is set which prevents 'Amphibious' creatures from swimming when engaged until the victim is no longer on the ocean floor
-        public bool IsSwimPrevented() { return _staticFlags.HasFlag(CreatureStaticFlags4.AiWillOnlySwimIfTargetSwims); }
+        public bool CanOnlySwimIfTargetSwims() { return _staticFlags.HasFlag(CreatureStaticFlags4.AiWillOnlySwimIfTargetSwims); }
 
         public override bool CanFly() { return IsFlying() || HasUnitMovementFlag(MovementFlag.CanFly); }
 
