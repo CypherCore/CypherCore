@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Game.DataStorage;
 using Game.DungeonFinding;
 using Game.Entities;
 using Game.Groups;
@@ -9,8 +10,6 @@ using Game.Networking;
 using Game.Networking.Packets;
 using System.Collections.Generic;
 using System.Linq;
-using Game.DataStorage;
-using System;
 
 namespace Game
 {
@@ -167,7 +166,7 @@ namespace Game
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
                     if (quest != null)
                     {
-                        playerDungeonInfo.FirstReward = !GetPlayer().CanRewardQuest(quest, false);
+                        playerDungeonInfo.FirstReward = GetPlayer().CanRewardQuest(quest, false);
                         if (!playerDungeonInfo.FirstReward)
                             quest = Global.ObjectMgr.GetQuestTemplate(reward.otherQuest);
 
