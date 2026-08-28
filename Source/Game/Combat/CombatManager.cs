@@ -322,7 +322,9 @@ namespace Game.Combat
 
             if (combatState)
             {
-                _owner.SetUnitFlag(UnitFlags.InCombat);
+                // always set UNIT_FLAG_PET_IN_COMBAT even if the unit has no controlled summons
+                // This behavior is intended as retail uses this to toggle swimming for ocean floor combat
+                _owner.SetUnitFlag(UnitFlags.InCombat | UnitFlags.PetInCombat);
                 _owner.AtEnterCombat();
                 if (!_owner.IsCreature())
                     _owner.AtEngage(GetAnyTarget());
@@ -333,11 +335,12 @@ namespace Game.Combat
                 _owner.AtExitCombat();
                 if (!_owner.IsCreature())
                     _owner.AtDisengage();
-            }
 
-            Unit master = _owner.GetCharmerOrOwner();
-            if (master != null)
-                master.UpdatePetCombatState();
+                // UNIT_FLAG_PET_IN_COMBAT will be cleared if controlled summons are not in combat anymore
+                Unit master = _owner.GetCharmerOrOwner();
+                if (master != null)
+                    master.UpdatePetCombatState();
+            }
 
             return true;
         }
