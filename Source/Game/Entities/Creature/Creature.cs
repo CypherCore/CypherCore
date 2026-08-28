@@ -2744,9 +2744,13 @@ namespace Game.Entities
             SetDisableGravity(IsFloating());
             SetControlled(IsSessile(), UnitState.Root);
 
-            // If an amphibious creatures was swimming while engaged, disable swimming again
-            if (IsAmphibious() && !_staticFlags.HasFlag(CreatureStaticFlags.CanSwim))
-                RemoveUnitFlag(UnitFlags.CanSwim);
+            if (IsSwimPrevented())
+            {
+                SetUnitFlag2(UnitFlags2.AiWillOnlySwimIfTargetSwims);
+                SetSwim(false);
+            }
+            else
+                RemoveUnitFlag2(UnitFlags2.AiWillOnlySwimIfTargetSwims);
 
             UpdateMovementCapabilities();
         }
@@ -2764,12 +2768,14 @@ namespace Game.Entities
             if (!isInAir)
                 SetFall(false);
 
-            // Some Amphibious creatures toggle swimming while engaged
-            if (IsAmphibious() && !HasUnitFlag(UnitFlags.CantSwim) && !HasUnitFlag(UnitFlags.CanSwim) && IsEngaged())
-                if (!CanOnlySwimIfTargetSwims() || (GetVictim() != null && !GetVictim().IsOnOceanFloor()))
-                    SetUnitFlag(UnitFlags.CanSwim);
+            if (HasUnitFlag2(UnitFlags2.AiWillOnlySwimIfTargetSwims))
+                if (GetVictim() != null && GetVictim().IsInWater() && !GetVictim().IsOnOceanFloor())
+                    RemoveUnitFlag2(UnitFlags2.AiWillOnlySwimIfTargetSwims);
 
-            SetSwim(IsInWater() && CanSwim());
+            if (IsInWater() && CanSwim())
+                SetSwim(true);
+            else if (!IsInWater()) // We do not want to disable swimming again when a creature is in water - may to lead some nasty bugs
+                SetSwim(false);
         }
 
         public CreatureMovementData GetMovementTemplate()
@@ -3585,7 +3591,7 @@ namespace Game.Entities
         public bool IsSwimDisabled() { return _staticFlags.HasFlag(CreatureStaticFlags3.CantSwim); }
 
         // Returns true if CREATURE_STATIC_FLAG_4_AI_WILL_ONLY_SWIM_IF_TARGET_SWIMS is set which prevents 'Amphibious' creatures from swimming when engaged until the victim is no longer on the ocean floor
-        public bool CanOnlySwimIfTargetSwims() { return _staticFlags.HasFlag(CreatureStaticFlags4.AiWillOnlySwimIfTargetSwims); }
+        public bool IsSwimPrevented() { return _staticFlags.HasFlag(CreatureStaticFlags4.AiWillOnlySwimIfTargetSwims); }
 
         public override bool CanFly() { return IsFlying() || HasUnitMovementFlag(MovementFlag.CanFly); }
 
