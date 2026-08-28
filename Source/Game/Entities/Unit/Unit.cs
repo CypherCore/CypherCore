@@ -3578,22 +3578,7 @@ namespace Game.Entities
 
             victimResistance = Math.Max(victimResistance, 0.0f);
 
-            // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
-            // gameobject caster -- should it have level based resistance?
-            if (caster != null && !caster.IsGameObject() && (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell)))
-                victimResistance += Math.Max(((float)victim.GetLevelForTarget(caster) - (float)caster.GetLevelForTarget(victim)) * 5.0f, 0.0f);
-
-            uint bossLevel = 83;
-            float bossResistanceConstant = 510.0f;
-            uint level = caster != null ? victim.GetLevelForTarget(caster) : victim.GetLevel();
-            float resistanceConstant;
-
-            if (level == bossLevel)
-                resistanceConstant = bossResistanceConstant;
-            else
-                resistanceConstant = level * 5.0f;
-
-            return victimResistance / (victimResistance + resistanceConstant);
+            return victimResistance;
         }
 
         public static void CalcAbsorbResist(DamageInfo damageInfo, Spell spell = null)
