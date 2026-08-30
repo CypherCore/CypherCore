@@ -171,7 +171,8 @@ namespace Game.Entities
             }
 
             VisualAnim visualAnim = areaTriggerData.ModifyValue(m_areaTriggerData.VisualAnim);
-            SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), (ushort)GetCreateProperties().AnimId);
+            if (GetCreateProperties().AnimId != -1)
+                SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimationDataID), (ushort)GetCreateProperties().AnimId);
             SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.AnimKitID), GetCreateProperties().AnimKitId);
             if (GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.VisualAnimIsDecay))
                 SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.IsDecay), true);
@@ -416,23 +417,26 @@ namespace Game.Entities
 
         void SetOverrideMoveCurve(float x, float y, float z)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveX), x);
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveY), y);
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveZ), z);
+            AreaTriggerFieldData areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
+            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), x);
+            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), y);
+            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), z);
         }
 
         void SetOverrideMoveCurve(Vector2[] xCurvePoints, Vector2[] yCurvePoints, Vector2[] zCurvePoints, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveX), xCurvePoints, startTimeOffset, interpolation);
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveY), yCurvePoints, startTimeOffset, interpolation);
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveZ), zCurvePoints, startTimeOffset, interpolation);
+            var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
+            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), xCurvePoints, startTimeOffset, interpolation);
+            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), yCurvePoints, startTimeOffset, interpolation);
+            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), zCurvePoints, startTimeOffset, interpolation);
         }
 
         void ClearOverrideMoveCurve()
         {
-            ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveX));
-            ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveY));
-            ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideMoveCurveZ));
+            var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
+            ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX));
+            ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY));
+            ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ));
         }
 
         public void SetSpellVisual(SpellCastVisual visual)

@@ -974,7 +974,7 @@ namespace Game.Entities
     {
         uint _changesMask;
 
-        public HasChangesMask ModifyValue(HasChangesMask updateData)
+        public T ModifyValue<T>(T updateData) where T : HasChangesMask
         {
             if ((EntityFragment)updateData._blockBit == EntityFragment.CGObject)
                 _changesMask |= UpdateMask.GetBlockFlag(updateData.Bit);
