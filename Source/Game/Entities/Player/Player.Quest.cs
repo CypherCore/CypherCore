@@ -930,9 +930,7 @@ namespace Game.Entities
                     }
 
                     // Unlock the item appearance for the other reward items as well of possible
-                    ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(questPackageItem.ItemID);
-                    if (rewardProto != null && (rewardProto.ItemSpecClassMask & GetClassMask()) != 0)
-                        GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
+                    GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
                 }
             }
 

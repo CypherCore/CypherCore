@@ -1012,12 +1012,7 @@ namespace Game.Entities
                         if (questPackageItems != null)
                         {
                             foreach (QuestPackageItemRecord questPackageItem in questPackageItems)
-                            {
-                                ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(questPackageItem.ItemID);
-                                if (rewardProto != null)
-                                    if (rewardProto.ItemSpecClassMask.HasAnyFlag(GetClassMask()))
-                                        GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
-                            }
+                                GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
                         }
 
                         if (quest.CanIncreaseRewardedQuestCounters())
