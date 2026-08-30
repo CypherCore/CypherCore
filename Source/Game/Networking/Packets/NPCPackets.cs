@@ -389,7 +389,7 @@ namespace Game.Networking.Packets
         public uint QuestID;
         public uint ContentTuningID;
         public int QuestType;
-        public int Unused1102;
+        public int QuestInfoID;
         public bool Repeatable;
         public bool ResetByScheduler;
         public bool Important;
@@ -405,7 +405,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(QuestID);
             data.WriteUInt32(ContentTuningID);
             data.WriteInt32(QuestType);
-            data.WriteInt32(Unused1102);
+            data.WriteInt32(QuestInfoID);
             data.WriteUInt32(QuestFlags);
             data.WriteUInt32(QuestFlagsEx);
             data.WriteUInt32(QuestFlagsEx2);

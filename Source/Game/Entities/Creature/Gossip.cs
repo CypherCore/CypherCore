@@ -3,7 +3,6 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
@@ -317,6 +316,7 @@ namespace Game.Misc
                     gossipText.QuestID = questID;
                     gossipText.ContentTuningID = quest.ContentTuningId;
                     gossipText.QuestType = item.QuestIcon;
+                    gossipText.QuestInfoID = (int)quest.QuestInfoID;
                     gossipText.QuestFlags = (uint)quest.Flags;
                     gossipText.QuestFlagsEx = (uint)quest.FlagsEx;
                     gossipText.QuestFlagsEx2 = (uint)quest.FlagsEx2;
@@ -417,6 +417,7 @@ namespace Game.Misc
                     text.QuestID = questID;
                     text.ContentTuningID = quest.ContentTuningId;
                     text.QuestType = questMenuItem.QuestIcon;
+                    text.QuestInfoID = (int)quest.QuestInfoID;
                     text.QuestFlags = (uint)quest.Flags;
                     text.QuestFlagsEx = (uint)quest.FlagsEx;
                     text.QuestFlagsEx2 = (uint)quest.FlagsEx2;

@@ -1087,7 +1087,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteInt32(ItemDisplayID.Count);
             _worldPacket.WriteInt32(SpellVisualKitID);
-            _worldPacket.WriteInt32(Unused_1115);
+            _worldPacket.WriteFloat(DisplayScale);
 
             foreach (ChrCustomizationChoice customization in Customizations)
             {
@@ -1102,7 +1102,7 @@ namespace Game.Networking.Packets
         public ObjectGuid UnitGUID;
         public int ChrModelID;
         public int SpellVisualKitID;
-        public int Unused_1115;
+        public float DisplayScale;
         public byte RaceID;
         public byte Gender;
         public byte ClassID;

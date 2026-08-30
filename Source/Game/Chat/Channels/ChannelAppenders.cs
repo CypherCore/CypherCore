@@ -43,9 +43,10 @@ namespace Game.Chat
 
     class ChannelNotifyJoinedBuilder : MessageBuilder
     {
-        public ChannelNotifyJoinedBuilder(Channel source)
+        public ChannelNotifyJoinedBuilder(Channel source, ObjectGuid guid)
         {
             _source = source;
+            _guid = guid;
         }
 
         public override PacketSenderOwning<ChannelNotifyJoined> Invoke(Locale locale = Locale.enUS)
@@ -57,12 +58,14 @@ namespace Game.Chat
             notify.Data.ChatChannelID = (int)_source.GetChannelId();
             //notify.InstanceID = 0;
             notify.Data.ChannelFlags = _source.GetFlags();
+            notify.Data.UserFlags = (byte)_source.GetPlayerFlags(_guid);
             notify.Data.Channel = _source.GetName(localeIdx);
             notify.Data.ChannelGUID = _source.GetGUID();
             return notify;
         }
 
         Channel _source;
+        ObjectGuid _guid;
     }
 
     class ChannelNotifyLeftBuilder : MessageBuilder
@@ -118,7 +121,7 @@ namespace Game.Chat
 
             return packet;
         }
-        
+
         Channel _source;
         Language _lang;
         string _what;

@@ -174,7 +174,7 @@ namespace Game.Chat
             playerInfo.SetInvisible(!player.IsGMVisible());
             _playersStore[guid] = playerInfo;
 
-            SendToOne(new ChannelNotifyJoinedBuilder(this), guid);
+            SendToOne(new ChannelNotifyJoinedBuilder(this, guid), guid);
 
             JoinNotify(guid);
 
