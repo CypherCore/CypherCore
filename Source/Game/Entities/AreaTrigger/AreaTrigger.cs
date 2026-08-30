@@ -183,8 +183,6 @@ namespace Game.Entities
                 AreaTriggerFieldFlags fieldFlags = AreaTriggerFieldFlags.None;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
                     fieldFlags |= AreaTriggerFieldFlags.AbsoluteOrientation;
-                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasDynamicShape))
-                    fieldFlags |= AreaTriggerFieldFlags.DynamicShape;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir))
                     fieldFlags |= AreaTriggerFieldFlags.FaceMovementDir;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain))
@@ -255,6 +253,8 @@ namespace Game.Entities
             }
 
             AI_Initialize();
+
+            UpdateDynamicShapeFlag();
 
             // Relocate areatriggers with circular movement again
             if (HasOrbit())
@@ -388,31 +388,37 @@ namespace Game.Entities
         void SetOverrideScaleCurve(float overrideScale)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
+            UpdateDynamicShapeFlag();
         }
 
         void SetOverrideScaleCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), points, startTimeOffset, interpolation);
+            SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
         }
 
         void ClearOverrideScaleCurve()
         {
             ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve));
+            UpdateDynamicShapeFlag();
         }
 
         void SetExtraScaleCurve(float extraScale)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), extraScale);
+            UpdateDynamicShapeFlag();
         }
 
         void SetExtraScaleCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
             SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), points, startTimeOffset, interpolation);
+            SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
         }
 
         void ClearExtraScaleCurve()
         {
             ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve));
+            UpdateDynamicShapeFlag();
         }
 
         void SetOverrideMoveCurve(float x, float y, float z)
@@ -421,6 +427,7 @@ namespace Game.Entities
             SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), x);
             SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), y);
             SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), z);
+            UpdateDynamicShapeFlag();
         }
 
         void SetOverrideMoveCurve(Vector2[] xCurvePoints, Vector2[] yCurvePoints, Vector2[] zCurvePoints, uint? startTimeOffset, CurveInterpolationMode interpolation)
@@ -429,6 +436,7 @@ namespace Game.Entities
             SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), xCurvePoints, startTimeOffset, interpolation);
             SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), yCurvePoints, startTimeOffset, interpolation);
             SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), zCurvePoints, startTimeOffset, interpolation);
+            SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
         }
 
         void ClearOverrideMoveCurve()
@@ -437,6 +445,7 @@ namespace Game.Entities
             ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX));
             ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY));
             ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ));
+            UpdateDynamicShapeFlag();
         }
 
         public void SetSpellVisual(SpellCastVisual visual)
@@ -1020,6 +1029,9 @@ namespace Game.Entities
                     SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetY), boundedPlaneInfo.ExtentsTarget.Y);
                 }
             );
+
+            if (IsInWorld)
+                UpdateDynamicShapeFlag();
         }
 
         public float GetMaxSearchRadius()
@@ -1223,6 +1235,7 @@ namespace Game.Entities
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.MovementStartTime), GameTime.GetGameTimeMS());
 
+            SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.Spline);
             var pathData = areaTriggerData.ModifyValue<AreaTriggerSplineCalculator>(m_areaTriggerData.PathData);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.Catmullrom), splinePoints.Length >= 4);
@@ -1263,6 +1276,7 @@ namespace Game.Entities
             else
                 RemoveAreaTriggerFlag(AreaTriggerFieldFlags.CanLoop);
 
+            SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.Orbit);
             var pathData = areaTriggerData.ModifyValue<AreaTriggerOrbit>(m_areaTriggerData.PathData);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.CounterClockwise), orbit.CounterClockwise);
@@ -1397,6 +1411,7 @@ namespace Game.Entities
                     _ai.OnDestinationReached();
                     _spline = null;
                     SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.None);
+                    UpdateDynamicShapeFlag();
                 }
             }
         }
@@ -1510,6 +1525,24 @@ namespace Game.Entities
         public bool IsServerSide() { return _areaTriggerTemplate.Flags.HasFlag(AreaTriggerFlag.IsServerSide); }
         public bool IsStaticSpawn() { return _spawnId != 0; }
         public bool HasActionSetFlag(AreaTriggerActionSetFlag flag) { return _areaTriggerTemplate.ActionSetFlags.HasFlag(flag); }
+
+        void UpdateDynamicShapeFlag()
+        {
+            if (m_areaTriggerData.PathType != (int)AreaTriggerPathType.None
+                || HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached)
+                || (m_areaTriggerData.OverrideScaleCurve.GetValue().OverrideActive && (m_areaTriggerData.OverrideScaleCurve.GetValue().ParameterCurve & 1) == 0)
+                || m_areaTriggerData.ScaleCurveId != 0
+                || (m_areaTriggerData.ExtraScaleCurve.GetValue().OverrideActive && (m_areaTriggerData.ExtraScaleCurve.GetValue().ParameterCurve & 1) == 0)
+                || (HasOverridePosition()
+                    && ((m_areaTriggerData.OverrideMoveCurveX.GetValue().ParameterCurve & 1) == 0
+                        || (m_areaTriggerData.OverrideMoveCurveY.GetValue().ParameterCurve & 1) == 0
+                        || (m_areaTriggerData.OverrideMoveCurveZ.GetValue().ParameterCurve & 1) == 0))
+                || (m_areaTriggerData.TargetRollPitchYaw.HasValue() && m_areaTriggerData.RollPitchYaw.GetValue() != m_areaTriggerData.TargetRollPitchYaw.GetValue())
+                || GetCreateProperties().Shape.IsDynamic())
+                SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
+            else
+                RemoveAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
+        }
 
         void UpdateHasPlayersFlag()
         {

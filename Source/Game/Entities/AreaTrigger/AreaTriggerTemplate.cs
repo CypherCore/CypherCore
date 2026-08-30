@@ -43,6 +43,7 @@ namespace Game.Entities
 
     interface IShapeInfo
     {
+        bool IsDynamic();
         float GetMaxSearchRadius();
     }
 
@@ -57,6 +58,8 @@ namespace Game.Entities
         public bool IsDisk() { return Data.IsT4; }
         public bool IsBoundedPlane() { return Data.IsT5; }
 
+        public bool IsDynamic() => ((IShapeInfo)Data.Value).IsDynamic();
+
         public float GetMaxSearchRadius() { return ((IShapeInfo)Data.Value).GetMaxSearchRadius(); }
 
         public struct Sphere : IShapeInfo
@@ -69,6 +72,11 @@ namespace Game.Entities
             {
                 Radius = raw[0];
                 RadiusTarget = raw[1];
+            }
+
+            public bool IsDynamic()
+            {
+                return Radius != RadiusTarget;
             }
 
             public float GetMaxSearchRadius()
@@ -87,6 +95,11 @@ namespace Game.Entities
             {
                 Extents = new(raw[0], raw[1], raw[2]);
                 ExtentsTarget = new(raw[3], raw[4], raw[5]);
+            }
+
+            public bool IsDynamic()
+            {
+                return Extents != ExtentsTarget;
             }
 
             public float GetMaxSearchRadius()
@@ -109,6 +122,11 @@ namespace Game.Entities
             {
                 Height = raw[0];
                 HeightTarget = raw[1];
+            }
+
+            public bool IsDynamic()
+            {
+                return Height != HeightTarget || PolygonVertices != PolygonVerticesTarget;
             }
 
             public float GetMaxSearchRadius()
@@ -146,6 +164,11 @@ namespace Game.Entities
                 LocationZOffsetTarget = raw[5];
             }
 
+            public bool IsDynamic()
+            {
+                return Radius != RadiusTarget || Height != HeightTarget || LocationZOffset != LocationZOffsetTarget;
+            }
+
             public float GetMaxSearchRadius()
             {
                 return Math.Max(Radius, RadiusTarget);
@@ -176,6 +199,11 @@ namespace Game.Entities
                 LocationZOffsetTarget = raw[7];
             }
 
+            public bool IsDynamic()
+            {
+                return InnerRadius != InnerRadiusTarget || OuterRadius != OuterRadiusTarget || Height != HeightTarget || LocationZOffset != LocationZOffsetTarget;
+            }
+
             public float GetMaxSearchRadius()
             {
                 return Math.Max(OuterRadius, OuterRadiusTarget);
@@ -192,6 +220,11 @@ namespace Game.Entities
             {
                 Extents = new(raw[0], raw[1]);
                 ExtentsTarget = new(raw[2], raw[3]);
+            }
+
+            public bool IsDynamic()
+            {
+                return Extents != ExtentsTarget;
             }
 
             public float GetMaxSearchRadius()

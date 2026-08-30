@@ -34,8 +34,8 @@ namespace Framework.Constants
     {
         None = 0x00,
         HasAbsoluteOrientation = 0x01,
-        HasDynamicShape = 0x02,
-        HasAttached = 0x04,
+        HasDynamicShape = 0x02, // DEPRECATED
+        HasAttached = 0x04, // DEPRECATED
         HasFaceMovementDir = 0x08,
         HasFollowsTerrain = 0x10, // NYI
         AlwaysExterior = 0x20,
