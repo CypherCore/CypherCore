@@ -1391,7 +1391,7 @@ namespace Game.Entities
             if (m_areaTriggerData.FacingCurveId != 0)
                 orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetProgress());
 
-            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation) && HasAreaTriggerFlag(AreaTriggerFieldFlags.FaceMovementDir))
+            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
             {
                 _spline.Evaluate_Derivative(lastPositionIndex, percentFromLastPoint, out Vector3 derivative);
                 if (derivative.X != 0.0f || derivative.Y != 0.0f)

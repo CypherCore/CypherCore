@@ -36,7 +36,7 @@ namespace Framework.Constants
         HasAbsoluteOrientation = 0x01,
         HasDynamicShape = 0x02, // DEPRECATED
         HasAttached = 0x04, // DEPRECATED
-        HasFaceMovementDir = 0x08,
+        HasFaceMovementDir = 0x08, // NYI
         HasFollowsTerrain = 0x10, // NYI
         AlwaysExterior = 0x20,
         HasTargetRollPitchYaw = 0x40, // NYI
@@ -55,8 +55,8 @@ namespace Framework.Constants
         CanLoop = 0x0004,
         AbsoluteOrientation = 0x0008,
         DynamicShape = 0x0010,
-        Attached = 0x0020, // DEPRECATED
-        FaceMovementDir = 0x0040,
+        Attached = 0x0020,
+        FaceMovementDir = 0x0040, // applies when attached to unit (refers to movement direction of the unit)
         FollowsTerrain = 0x0080,
         Unknown1025 = 0x0100,
         AlwaysExterior = 0x0200,
