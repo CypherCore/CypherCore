@@ -1060,14 +1060,20 @@ namespace Game.Entities
                     {
                         for (uint i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                         {
-                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
+                            if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item)
                             {
-                                List<ItemPosCount> dest = new();
-                                if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                                if (quest.RewardChoiceItemId[i] == rewardId)
                                 {
-                                    Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(rewardId), null, ItemContext.QuestReward);
-                                    SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
+                                    List<ItemPosCount> dest = new();
+                                    if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
+                                    {
+                                        Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(rewardId), null, ItemContext.QuestReward);
+                                        SendNewItem(item, quest.RewardChoiceItemCount[i], true, false);
+                                    }
                                 }
+
+                                // Add the remaining item appearances for the quest if possible
+                                GetSession().GetCollectionMgr().AddItemAppearance(quest.RewardChoiceItemId[i]);
                             }
                         }
                     }
