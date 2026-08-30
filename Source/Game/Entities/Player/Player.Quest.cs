@@ -915,19 +915,24 @@ namespace Game.Entities
             {
                 foreach (QuestPackageItemRecord questPackageItem in questPackageItems)
                 {
-                    if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
-                        continue;
-
-                    if (CanSelectQuestPackageItem(questPackageItem))
+                    if (onlyItemId != 0 && questPackageItem.ItemID == onlyItemId)
                     {
-                        hasFilteredQuestPackageReward = true;
-                        List<ItemPosCount> dest = new();
-                        if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                        if (CanSelectQuestPackageItem(questPackageItem))
                         {
-                            Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(questPackageItem.ItemID), null, context);
-                            SendNewItem(item, questPackageItem.ItemQuantity, true, false);
+                            hasFilteredQuestPackageReward = true;
+                            List<ItemPosCount> dest = new();
+                            if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
+                            {
+                                Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(questPackageItem.ItemID), null, context);
+                                SendNewItem(item, questPackageItem.ItemQuantity, true, false);
+                            }
                         }
                     }
+
+                    // Unlock the item appearance for the other reward items as well of possible
+                    ItemTemplate rewardProto = Global.ObjectMgr.GetItemTemplate(questPackageItem.ItemID);
+                    if (rewardProto != null && (rewardProto.ItemSpecClassMask & GetClassMask()) != 0)
+                        GetSession().GetCollectionMgr().AddItemAppearance(questPackageItem.ItemID);
                 }
             }
 
