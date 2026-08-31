@@ -9259,7 +9259,7 @@ namespace Game.Entities
         public UpdateField<bool> IsDecay = new(0, 1);
         public OptionalUpdateField<ushort> AnimationDataID = new(0, 2);
         public UpdateField<uint> AnimKitID = new(0, 3);
-        public UpdateField<uint> AnimProgress = new(0, 4);
+        public UpdateField<uint> ServerTime = new(0, 4);
 
         public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
@@ -9267,7 +9267,7 @@ namespace Game.Entities
             data.WriteBit(IsDecay);
             data.FlushBits();
             data.WriteUInt32(AnimKitID);
-            data.WriteUInt32(AnimProgress);
+            data.WriteUInt32(ServerTime);
             if (AnimationDataID.HasValue())
             {
                 data.WriteUInt16(AnimationDataID);
@@ -9299,7 +9299,7 @@ namespace Game.Entities
                 }
                 if (changesMask[4])
                 {
-                    data.WriteUInt32(AnimProgress);
+                    data.WriteUInt32(ServerTime);
                 }
             }
             data.FlushBits();
@@ -9320,7 +9320,7 @@ namespace Game.Entities
             ClearChangesMask(IsDecay);
             ClearChangesMask(AnimationDataID);
             ClearChangesMask(AnimKitID);
-            ClearChangesMask(AnimProgress);
+            ClearChangesMask(ServerTime);
             _changesMask.ResetAll();
         }
     }
@@ -9964,14 +9964,14 @@ namespace Game.Entities
         public UpdateField<ScaleCurve> OverrideMoveCurveX = new(0, 3);
         public UpdateField<ScaleCurve> OverrideMoveCurveY = new(0, 4);
         public UpdateField<ScaleCurve> OverrideMoveCurveZ = new(0, 5);
-        public UpdateField<ScaleCurve> Unk1205Curve = new(0, 6);
+        public UpdateField<ScaleCurve> OverrideFacingCurve = new(0, 6);
         public UpdateField<ObjectGuid> Caster = new(0, 7);
         public UpdateField<uint> Duration = new(0, 8);
         public UpdateField<uint> TimeToTarget = new(0, 9);
         public UpdateField<uint> TimeToTargetScale = new(0, 10);
         public UpdateField<uint> TimeToTargetExtraScale = new(0, 11);
         public UpdateField<uint> TimeToTargetPos = new(0, 12);                                 // Linked to m_overrideMoveCurve
-        public UpdateField<uint> TimeToTargetUnk1205Curve = new(0, 13);                        // Linked to m_unk1205Curve
+        public UpdateField<uint> TimeToTargetFacing = new(0, 13);                        // Linked to m_overrideFacingCurve
         public UpdateField<uint> SpellID = new(0, 14);
         public UpdateField<uint> SpellForVisuals = new(0, 15);
         public UpdateField<SpellCastVisualField> SpellVisual = new(0, 16);
@@ -10006,14 +10006,14 @@ namespace Game.Entities
             OverrideMoveCurveX.GetValue().WriteCreate(data, receiver, owner);
             OverrideMoveCurveY.GetValue().WriteCreate(data, receiver, owner);
             OverrideMoveCurveZ.GetValue().WriteCreate(data, receiver, owner);
-            Unk1205Curve.GetValue().WriteCreate(data, receiver, owner);
+            OverrideFacingCurve.GetValue().WriteCreate(data, receiver, owner);
             data.WritePackedGuid(Caster);
             data.WriteUInt32(Duration);
             data.WriteUInt32(TimeToTarget);
             data.WriteUInt32(TimeToTargetScale);
             data.WriteUInt32(TimeToTargetExtraScale);
             data.WriteUInt32(TimeToTargetPos);
-            data.WriteUInt32(TimeToTargetUnk1205Curve);
+            data.WriteUInt32(TimeToTargetFacing);
             data.WriteUInt32(SpellID);
             data.WriteUInt32(SpellForVisuals);
             SpellVisual.GetValue().WriteCreate(data, receiver, owner);
@@ -10120,7 +10120,7 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    Unk1205Curve.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
+                    OverrideFacingCurve.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[7])
                 {
@@ -10148,7 +10148,7 @@ namespace Game.Entities
                 }
                 if (changesMask[13])
                 {
-                    data.WriteUInt32(TimeToTargetUnk1205Curve);
+                    data.WriteUInt32(TimeToTargetFacing);
                 }
                 if (changesMask[14])
                 {
@@ -10322,14 +10322,14 @@ namespace Game.Entities
             ClearChangesMask(OverrideMoveCurveX);
             ClearChangesMask(OverrideMoveCurveY);
             ClearChangesMask(OverrideMoveCurveZ);
-            ClearChangesMask(Unk1205Curve);
+            ClearChangesMask(OverrideFacingCurve);
             ClearChangesMask(Caster);
             ClearChangesMask(Duration);
             ClearChangesMask(TimeToTarget);
             ClearChangesMask(TimeToTargetScale);
             ClearChangesMask(TimeToTargetExtraScale);
             ClearChangesMask(TimeToTargetPos);
-            ClearChangesMask(TimeToTargetUnk1205Curve);
+            ClearChangesMask(TimeToTargetFacing);
             ClearChangesMask(SpellID);
             ClearChangesMask(SpellForVisuals);
             ClearChangesMask(SpellVisual);
