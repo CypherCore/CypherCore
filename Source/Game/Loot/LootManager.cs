@@ -276,7 +276,7 @@ namespace Game.Loots
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var (itemId, itemTemplate) in its)
-                if (!itemTemplate.HasFlag(ItemFlags.IsMillable))
+                if (itemTemplate.HasFlag(ItemFlags.IsMillable))
                     if (!lootIdSet.Remove(itemId))
                         Milling.ReportNonExistingId(itemId, itemId);
 

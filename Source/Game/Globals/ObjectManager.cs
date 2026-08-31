@@ -3617,7 +3617,7 @@ namespace Game
                     uint disallowedUnitFlags2 = (data.unit_flags2.Value & ~(uint)UnitFlags2.Allowed);
                     if (disallowedUnitFlags2 != 0)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `creature_template` lists creature (Entry: {cInfo.Entry}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
+                        Log.outError(LogFilter.Sql, $"Table `creature` has creature (GUID: {guid} Entry: {data.Id}) with disallowed `unit_flags2` {disallowedUnitFlags2}, removing incorrect flag.");
                         data.unit_flags2 = data.unit_flags2 & (uint)UnitFlags2.Allowed;
                     }
 

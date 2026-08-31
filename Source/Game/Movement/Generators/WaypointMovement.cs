@@ -678,12 +678,12 @@ namespace Game.Movement
                 }
 
                 if (!isReturningToStart)
-                    return path.Nodes[currentNode..segmentItr.Last];
+                    return path.Nodes.GetRange(currentNode, segmentItr.Last - (currentNode - segmentItr.First));
 
                 return path.Nodes[segmentItr.First..(currentNode - segmentItr.First + 1)];
             })();
 
-            lastWaypointOnPath = !isReturningToStart ? segment.Last() : segment.First();
+            lastWaypointOnPath = !isReturningToStart ? segment.LastOrDefault() : segment.FirstOrDefault();
 
             waypointTransitionSplinePoints.Clear();
 

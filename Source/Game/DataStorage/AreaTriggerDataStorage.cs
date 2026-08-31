@@ -239,7 +239,7 @@ namespace Game.DataStorage
                     createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(25));
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
-                    if (spline != null)
+                    if (!spline.Empty())
                         createProperties.Movement = spline;
 
                     _areaTriggerCreateProperties[createProperties.Id] = createProperties;

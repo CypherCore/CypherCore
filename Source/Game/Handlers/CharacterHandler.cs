@@ -384,9 +384,11 @@ namespace Game
                     }
                 }
                 else
+                {
                     Log.outError(LogFilter.Cheat, $"Expansion {GetAccountExpansion()} account:[{GetAccountId()}] tried to Create character for race/class combination that is missing requirements in db ({charCreate.CreateInfo.RaceId}/{charCreate.CreateInfo.ClassId})");
-                SendCharCreate(ResponseCodes.CharCreateExpansionClass);
-                return;
+                    SendCharCreate(ResponseCodes.CharCreateExpansionClass);
+                    return;
+                }
             }
 
             if (!HasPermission(RBACPermissions.SkipCheckCharacterCreationRacemask))

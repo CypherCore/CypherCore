@@ -1327,7 +1327,7 @@ namespace Game.Entities
                     if (GetLevel() < pItem.GetRequiredLevel())
                         return InventoryResult.CantEquipLevelI;
 
-                    InventoryResult res = CanUseItem(pProto);
+                    InventoryResult res = CanUseItem(pProto, true);
                     if (res != InventoryResult.Ok)
                         return res;
 

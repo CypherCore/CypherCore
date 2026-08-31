@@ -1412,24 +1412,24 @@ namespace Game.Entities
                             procEntry.ProcsPerMinute = 0;
                         }
                         if (!procEntry.ProcFlags)
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
-                        if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellTypeMask` set: {1}", spellInfo.Id, procEntry.SpellTypeMask);
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} doesn't have any `ProcFlags` value defined, proc will not be triggered.");
+                        if ((procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll) != 0)
+                            Log.outError(LogFilter.Sql, $"`spell_proc` table entry for spellId {spellInfo.Id} has wrong `SpellTypeMask` set: {procEntry.SpellTypeMask}");
                         if (procEntry.SpellTypeMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.SpellMask))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `SpellTypeMask` value defined, but it will not be used for the defined `ProcFlags` value.");
                         if (procEntry.SpellPhaseMask == 0 && procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, proc will not be triggered", spellInfo.Id);
-                        if (Convert.ToBoolean(procEntry.SpellPhaseMask & ~ProcFlagsSpellPhase.MaskAll))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellPhaseMask` set: {1}", spellInfo.Id, procEntry.SpellPhaseMask);
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} doesn't have any `SpellPhaseMask` value defined, but it is required for the defined `ProcFlags` value. Proc will not be triggered.");
+                        if ((procEntry.SpellPhaseMask & ~ProcFlagsSpellPhase.MaskAll) != 0)
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has wrong `SpellPhaseMask` set: {procEntry.SpellPhaseMask}");
                         if (procEntry.SpellPhaseMask != 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellPhaseMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has a `SpellPhaseMask` value defined, but it will not be used for the defined `ProcFlags` value.");
                         if (procEntry.SpellPhaseMask == 0 && !procEntry.ProcFlags.HasFlag(ProcFlags.ReqSpellPhaseMask) && procEntry.ProcFlags.HasFlag(ProcFlags2.CastSuccessful))
                             procEntry.SpellPhaseMask = ProcFlagsSpellPhase.Cast; // set default phase for PROC_FLAG_2_CAST_SUCCESSFUL
-                        if (Convert.ToBoolean(procEntry.HitMask & ~ProcFlagsHit.MaskAll))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
-                        if (procEntry.HitMask != 0 && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
-                        foreach (var spellEffectInfo in spellInfo.GetEffects())
+                        if ((procEntry.HitMask & ~ProcFlagsHit.MaskAll) != 0)
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has wrong `HitMask` set: {procEntry.HitMask}");
+                        if (procEntry.HitMask != 0 && !(procEntry.ProcFlags.HasFlag(ProcFlags.TakenHitMask) || (procEntry.ProcFlags.HasFlag(ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || (procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish)) != 0))))
+                            Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has `HitMask` value defined, but it will not be used for defined `ProcFlags` and `SpellPhaseMask` values.");
+                        foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
                             if ((procEntry.DisableEffectsMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsAura())
                                 Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has DisableEffectsMask with effect {spellEffectInfo.EffectIndex}, but effect {spellEffectInfo.EffectIndex} is not an aura effect");
 
@@ -1542,10 +1542,13 @@ namespace Game.Entities
                     continue;
                 }
 
-                SpellProcEntry procEntry = new();
-                procEntry.SchoolMask = 0;
-                procEntry.ProcFlags = spellInfo.ProcFlags;
-                procEntry.SpellFamilyName = 0;
+                SpellProcEntry procEntry = new()
+                {
+                    SchoolMask = 0,
+                    ProcFlags = spellInfo.ProcFlags,
+                    SpellFamilyName = 0
+                };
+
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                     if (spellEffectInfo.IsEffect() && IsTriggerAura(spellEffectInfo.ApplyAuraName))
                         procEntry.SpellFamilyMask |= spellEffectInfo.SpellClassMask;
