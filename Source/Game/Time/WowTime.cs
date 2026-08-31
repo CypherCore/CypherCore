@@ -34,7 +34,7 @@ public struct WowTime : IComparable<WowTime>
         if (_year == 31)
             _year = -1;
 
-        _month = (int)((packedTime >> 20) & 0xF);
+        _month = (int)((packedTime >> 20) & 0xF) + 1;
         if (_month == 15)
             _month = -1;
 
@@ -64,7 +64,7 @@ public struct WowTime : IComparable<WowTime>
         if (_year < 0 || _month < 0 || _monthDay < 0)
             return 0;
 
-        return Time.DateTimeToUnixTime(new DateTime(_year + 2000, _month + 1, _monthDay + 1, _hour, _minute, 0, DateTimeKind.Utc));
+        return Time.DateTimeToUnixTime(new DateTime(_year + 2000, _month, _monthDay + 1, _hour, _minute, 0, DateTimeKind.Utc));
     }
 
     public void SetUtcTimeFromUnixTime(long unixTime)

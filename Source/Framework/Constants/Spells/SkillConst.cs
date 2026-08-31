@@ -5,7 +5,7 @@ namespace Framework.Constants
 {
     public struct SkillConst
     {
-        public const int MaxPlayerSkills = 256;
+        public const int MaxPlayerSkills = 300;
         public const uint MaxSkillStep = 15;
     }
 

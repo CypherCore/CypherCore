@@ -4953,7 +4953,7 @@ namespace Game.Entities
         public bool HasSpellInfo(uint spellId, Difficulty difficulty)
         {
             var list = mSpellInfoMap.LookupByKey(spellId);
-            if (list.Count == 0)
+            if (list.Empty())
                 return false;
 
             return list.Any(spellInfo => spellInfo.Difficulty == difficulty);

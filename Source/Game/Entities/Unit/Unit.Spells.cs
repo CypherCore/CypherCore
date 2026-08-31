@@ -2018,7 +2018,7 @@ namespace Game.Entities
                     if (!pSpell.GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel))
                     {
                         // channel spells break generic non-delayed
-                        if (m_currentSpells[CurrentSpellTypes.Generic] != null
+                        if (GetCurrentSpell(CurrentSpellTypes.Generic) != null
                             && !m_currentSpells[CurrentSpellTypes.Generic].GetSpellInfo().HasAttribute(SpellAttr9.AllowCastWhileChanneling))
                             InterruptSpell(CurrentSpellTypes.Generic, false);
 

@@ -575,7 +575,7 @@ namespace Game.Networking.Packets
     {
         public uint QuestID;
         public uint TreasurePickerID;
-        public TreasurePickerPick Treasure;
+        public TreasurePickerPick Treasure = new();
 
         public TreasurePickerResponse() : base(ServerOpcodes.TreasurePickerResponse, ConnectionType.Instance) { }
 

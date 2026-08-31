@@ -4933,7 +4933,7 @@ namespace Game.Entities
                 // if not found free and can swap return slot with lower item level equipped
                 if (swap)
                 {
-                    freeSlot = (byte)slots.Min(candidateSlot =>
+                    freeSlot = (byte)slots.MinBy(candidateSlot =>
                     {
                         if (candidateSlot == ItemConst.NullSlot)
                             return uint.MaxValue;

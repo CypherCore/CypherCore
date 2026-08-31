@@ -59,7 +59,7 @@ namespace Game.Movement
 
         public bool Equals(MovementGenerator other)
         {
-            return Priority > other.Priority;
+            return Priority == other.Priority;
         }
 
         public int GetHashCode(MovementGenerator obj)

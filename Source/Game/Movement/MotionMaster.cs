@@ -18,6 +18,9 @@ namespace Game.Movement
     {
         public int Compare(MovementGenerator a, MovementGenerator b)
         {
+            if (a == null)
+                return -1;
+
             return a.Priority.CompareTo(b.Priority);
         }
     }
@@ -326,7 +329,7 @@ namespace Game.Movement
 
             if (movement.HasFlag(MovementGeneratorFlags.Immediate) && movement.HasFlag(MovementGeneratorFlags.InitializationPending))
             {
-                bool wouldBecomeTop = _generators.GetViewBetween(movement, null).FirstOrDefault() == _generators.FirstOrDefault();
+                bool wouldBecomeTop = _generators.FirstOrDefault(p => p.Priority <= movement.Priority) == _generators.FirstOrDefault();
                 if (!wouldBecomeTop || !movement.Initialize(_owner))
                     return;
             }
@@ -1213,7 +1216,7 @@ namespace Game.Movement
                 case MovementSlot.Active:
                     if (!_generators.Empty())
                     {
-                        var where = _generators.GetViewBetween(movement, null).FirstOrDefault(); // find movement with equal priority
+                        var where = _generators.FirstOrDefault(p => p.Priority == movement.Priority); // find movement with equal priority
                         bool replacesExisting = !movement.HasFlag(MovementGeneratorFlags.Immediate)
                             && where != null && !movement.Equals(where);
                         var top = _generators.FirstOrDefault();

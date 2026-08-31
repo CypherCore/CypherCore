@@ -1725,6 +1725,7 @@ namespace Game.Networking.Packets
             data.WriteBits(Points.Count, 6);
             data.WriteBits(EstimatedPoints.Count, 6);
             data.WriteBit(ContentTuning != null);
+            data.FlushBits();
 
             if (CastUnit.HasValue)
                 data.WritePackedGuid(CastUnit.Value);
