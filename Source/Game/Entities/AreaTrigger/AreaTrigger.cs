@@ -152,7 +152,7 @@ namespace Game.Entities
             if (IsServerSide())
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), 24u); // Blue decal, for .debug areatrigger visibility
 
-            SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), 1.0f);
+            SetOverrideCurve(areaTriggerData.ModifyValue(m_areaTriggerData.ExtraScaleCurve), 1.0f);
 
             if (caster != null && spellInfo != null)
             {
@@ -164,9 +164,9 @@ namespace Game.Entities
                     modOwner.GetSpellModValues(spellInfo, SpellModOp.Radius, spell, (float)m_areaTriggerData.BoundsRadius2D, ref flat, ref multiplier);
                     if (multiplier != 1.0f)
                     {
-                        ScaleCurveData overrideScale = new();
+                        OverrideCurveData overrideScale = new();
                         overrideScale.Curve = multiplier;
-                        SetScaleCurve(areaTriggerData.ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
+                        SetOverrideCurve(areaTriggerData.ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
                     }
                 }
             }
@@ -329,7 +329,7 @@ namespace Game.Entities
                     {
                         float orientation = 0.0f;
                         if (m_areaTriggerData.FacingCurveId != 0)
-                            orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                            orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
 
                         if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
                             orientation += target.GetOrientation();
@@ -345,7 +345,7 @@ namespace Game.Entities
                 {
                     if (m_areaTriggerData.FacingCurveId != 0)
                     {
-                        float orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                        float orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
                         if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
                             orientation += m_areaTriggerData.Facing;
 
@@ -388,80 +388,80 @@ namespace Game.Entities
 
         void SetOverrideScaleCurve(float overrideScale)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), overrideScale);
             UpdateDynamicShapeFlag();
         }
 
         void SetOverrideScaleCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), points, startTimeOffset, interpolation);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve), points, startTimeOffset, interpolation);
             SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
         }
 
         void ClearOverrideScaleCurve()
         {
-            ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve));
+            ClearOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideScaleCurve));
             UpdateDynamicShapeFlag();
         }
 
         void SetExtraScaleCurve(float extraScale)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), extraScale);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), extraScale);
             UpdateDynamicShapeFlag();
         }
 
         void SetExtraScaleCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), points, startTimeOffset, interpolation);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve), points, startTimeOffset, interpolation);
             SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
         }
 
         void ClearExtraScaleCurve()
         {
-            ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve));
+            ClearOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve));
             UpdateDynamicShapeFlag();
         }
 
         void SetOverrideMoveCurve(float x, float y, float z)
         {
             AreaTriggerFieldData areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
-            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), x);
-            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), y);
-            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), z);
+            SetOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), x);
+            SetOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), y);
+            SetOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), z);
             UpdateDynamicShapeFlag();
         }
 
         void SetOverrideMoveCurve(Vector2[] xCurvePoints, Vector2[] yCurvePoints, Vector2[] zCurvePoints, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
-            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), xCurvePoints, startTimeOffset, interpolation);
-            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), yCurvePoints, startTimeOffset, interpolation);
-            SetScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), zCurvePoints, startTimeOffset, interpolation);
+            SetOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX), xCurvePoints, startTimeOffset, interpolation);
+            SetOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY), yCurvePoints, startTimeOffset, interpolation);
+            SetOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ), zCurvePoints, startTimeOffset, interpolation);
             SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
         }
 
         void ClearOverrideMoveCurve()
         {
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
-            ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX));
-            ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY));
-            ClearScaleCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ));
+            ClearOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveX));
+            ClearOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveY));
+            ClearOverrideCurve(areaTriggerData.ModifyValue(areaTriggerData.OverrideMoveCurveZ));
             UpdateDynamicShapeFlag();
         }
 
         void SetOverrideFacingCurve(float overrideFacing)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve), overrideFacing);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve), overrideFacing);
         }
 
         void SetOverrideFacingCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            SetScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve), points, startTimeOffset, interpolation);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve), points, startTimeOffset, interpolation);
         }
 
         void ClearOverrideFacingCurve()
         {
-            ClearScaleCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve));
+            ClearOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve));
         }
 
         public void SetSpellVisual(SpellCastVisual visual)
@@ -496,11 +496,11 @@ namespace Game.Entities
         {
             float scale = 1.0f;
             if (m_areaTriggerData.OverrideScaleCurve.GetValue().OverrideActive)
-                scale *= Math.Max(GetScaleCurveValue(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale), 0.000001f);
+                scale *= Math.Max(GetOverrideCurveValue(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale), 0.000001f);
             else if (m_areaTriggerData.ScaleCurveId != 0)
-                scale *= Math.Max(Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.ScaleCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale)), 0.000001f);
+                scale *= Math.Max(Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.ScaleCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale)), 0.000001f);
 
-            scale *= Math.Max(GetScaleCurveValue(m_areaTriggerData.ExtraScaleCurve, m_areaTriggerData.TimeToTargetExtraScale), 0.000001f);
+            scale *= Math.Max(GetOverrideCurveValue(m_areaTriggerData.ExtraScaleCurve, m_areaTriggerData.TimeToTargetExtraScale), 0.000001f);
 
             return scale;
         }
@@ -513,69 +513,69 @@ namespace Game.Entities
             return Math.Clamp((float)GetTimeSinceCreated() / (float)GetTotalDuration(), 0.0f, 1.0f);
         }
 
-        float GetScaleCurveProgress(ScaleCurve scaleCurve, uint timeTo)
+        float GetOverrideCurveProgress(OverrideCurve overrideCurve, uint timeTo)
         {
             if (timeTo == 0)
                 return 0.0f;
 
-            return Math.Clamp((float)(GetTimeSinceCreated() - scaleCurve.StartTimeOffset) / (float)timeTo, 0.0f, 1.0f);
+            return Math.Clamp((float)(GetTimeSinceCreated() - overrideCurve.StartTimeOffset) / (float)timeTo, 0.0f, 1.0f);
         }
 
-        float GetScaleCurveValueAtProgress(ScaleCurve scaleCurve, float x)
+        float GetOverrideCurveValueAtProgress(OverrideCurve overrideCurve, float x)
         {
-            Cypher.Assert(scaleCurve.OverrideActive, "ScaleCurve must be active to evaluate it");
+            Cypher.Assert(overrideCurve.OverrideActive, "OverrideCurve must be active to evaluate it");
 
             // unpack ParameterCurve
-            if ((scaleCurve.ParameterCurve & 1u) != 0)
-                return BitConverter.UInt32BitsToSingle((uint)(scaleCurve.ParameterCurve & ~1u));
+            if ((overrideCurve.ParameterCurve & 1u) != 0)
+                return BitConverter.UInt32BitsToSingle((uint)(overrideCurve.ParameterCurve & ~1u));
 
             Vector2[] points = new Vector2[2];
-            for (var i = 0; i < scaleCurve.Points.GetSize(); ++i)
-                points[i] = new(scaleCurve.Points[i].X, scaleCurve.Points[i].Y);
+            for (var i = 0; i < overrideCurve.Points.GetSize(); ++i)
+                points[i] = new(overrideCurve.Points[i].X, overrideCurve.Points[i].Y);
 
-            CurveInterpolationMode mode = (CurveInterpolationMode)(scaleCurve.ParameterCurve >> 1 & 0x7);
-            int pointCount = (int)(scaleCurve.ParameterCurve >> 24 & 0xFF);
+            CurveInterpolationMode mode = (CurveInterpolationMode)(overrideCurve.ParameterCurve >> 1 & 0x7);
+            int pointCount = (int)(overrideCurve.ParameterCurve >> 24 & 0xFF);
 
             return Global.DB2Mgr.GetCurveValueAt(mode, points.AsSpan(0, pointCount).ToArray(), x);
         }
 
-        float GetScaleCurveValue(ScaleCurve scaleCurve, uint timeTo)
+        float GetOverrideCurveValue(OverrideCurve overrideCurve, uint timeTo)
         {
-            return GetScaleCurveValueAtProgress(scaleCurve, GetScaleCurveProgress(scaleCurve, timeTo));
+            return GetOverrideCurveValueAtProgress(overrideCurve, GetOverrideCurveProgress(overrideCurve, timeTo));
         }
 
-        void SetScaleCurve(ScaleCurve scaleCurve, float constantValue)
+        void SetOverrideCurve(OverrideCurve overrideCurve, float constantValue)
         {
-            ScaleCurveData curveTemplate = new();
+            OverrideCurveData curveTemplate = new();
             curveTemplate.Curve = constantValue;
-            SetScaleCurve(scaleCurve, curveTemplate);
+            SetOverrideCurve(overrideCurve, curveTemplate);
         }
 
-        void SetScaleCurve(ScaleCurve scaleCurve, Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
+        void SetOverrideCurve(OverrideCurve overrideCurve, Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            ScaleCurveData curveTemplate = new();
+            OverrideCurveData curveTemplate = new();
             curveTemplate.StartTimeOffset = startTimeOffset.GetValueOrDefault(GetTimeSinceCreated());
             curveTemplate.Mode = interpolation;
             curveTemplate.CurvePoints = points;
 
-            SetScaleCurve(scaleCurve, curveTemplate);
+            SetOverrideCurve(overrideCurve, curveTemplate);
         }
 
-        void ClearScaleCurve(ScaleCurve scaleCurve)
+        void ClearOverrideCurve(OverrideCurve overrideCurve)
         {
-            SetScaleCurve(scaleCurve, null);
+            SetOverrideCurve(overrideCurve, null);
         }
 
-        void SetScaleCurve(ScaleCurve scaleCurve, ScaleCurveData curve)
+        void SetOverrideCurve(OverrideCurve overrideCurve, OverrideCurveData curve)
         {
             if (curve == null)
             {
-                SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.OverrideActive), false);
+                SetUpdateFieldValue(overrideCurve.ModifyValue(overrideCurve.OverrideActive), false);
                 return;
             }
 
-            SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.OverrideActive), true);
-            SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.StartTimeOffset), curve.StartTimeOffset);
+            SetUpdateFieldValue(overrideCurve.ModifyValue(overrideCurve.OverrideActive), true);
+            SetUpdateFieldValue(overrideCurve.ModifyValue(overrideCurve.StartTimeOffset), curve.StartTimeOffset);
 
             Position point = new Position();
             // ParameterCurve packing information
@@ -587,11 +587,11 @@ namespace Game.Entities
                 uint packedCurve = BitConverter.SingleToUInt32Bits(simpleFloat);
                 packedCurve |= 1;
 
-                SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.ParameterCurve), packedCurve);
+                SetUpdateFieldValue(overrideCurve.ModifyValue(overrideCurve.ParameterCurve), packedCurve);
 
                 // clear points
-                for (var i = 0; i < scaleCurve.Points.GetSize(); ++i)
-                    SetUpdateFieldValue(ref scaleCurve.ModifyValue(scaleCurve.Points, i), point);
+                for (var i = 0; i < overrideCurve.Points.GetSize(); ++i)
+                    SetUpdateFieldValue(ref overrideCurve.ModifyValue(overrideCurve.Points, i), point);
             }
             else
             {
@@ -623,12 +623,12 @@ namespace Game.Entities
                         pointCount = 1;
 
                     uint packedCurve = ((uint)mode << 1) | (pointCount << 24);
-                    SetUpdateFieldValue(scaleCurve.ModifyValue(scaleCurve.ParameterCurve), packedCurve);
+                    SetUpdateFieldValue(overrideCurve.ModifyValue(overrideCurve.ParameterCurve), packedCurve);
 
                     for (var i = 0; i < curvePoints.Length; ++i)
                     {
                         point.Relocate(curvePoints[i].X, curvePoints[i].Y);
-                        SetUpdateFieldValue(ref scaleCurve.ModifyValue(scaleCurve.Points, i), point);
+                        SetUpdateFieldValue(ref overrideCurve.ModifyValue(overrideCurve.Points, i), point);
                     }
                 }
             }
@@ -1356,7 +1356,7 @@ namespace Game.Entities
 
             float orientation = 0.0f;
             if (m_areaTriggerData.FacingCurveId != 0)
-                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
 
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
             {
@@ -1405,7 +1405,7 @@ namespace Game.Entities
 
             float orientation = _stationaryPosition.GetOrientation();
             if (m_areaTriggerData.FacingCurveId != 0)
-                orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
 
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
             {
@@ -1434,16 +1434,16 @@ namespace Game.Entities
 
         void UpdateOverridePosition()
         {
-            float progress = GetScaleCurveProgress(m_areaTriggerData.OverrideMoveCurveX, m_areaTriggerData.TimeToTargetPos);
+            float progress = GetOverrideCurveProgress(m_areaTriggerData.OverrideMoveCurveX, m_areaTriggerData.TimeToTargetPos);
 
-            float x = GetScaleCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveX, progress);
-            float y = GetScaleCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveY, progress);
-            float z = GetScaleCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveZ, progress);
+            float x = GetOverrideCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveX, progress);
+            float y = GetOverrideCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveY, progress);
+            float z = GetOverrideCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveZ, progress);
             float orientation = GetOrientation();
 
             if (m_areaTriggerData.FacingCurveId != 0)
             {
-                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetScaleCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
                 if (HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
                     orientation += m_areaTriggerData.Facing;
             }
@@ -1686,7 +1686,7 @@ namespace Game.Entities
             public static implicit operator IDoWork<Player>(ValuesUpdateForPlayerWithMaskSender obj) => obj.Invoke;
         }
 
-        class ScaleCurveData
+        class OverrideCurveData
         {
             public uint StartTimeOffset;
             public CurveInterpolationMode Mode;

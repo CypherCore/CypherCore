@@ -9185,7 +9185,7 @@ namespace Game.Entities
         }
     }
 
-    public class ScaleCurve() : HasChangesMask(7), IsUpdateFieldStructure<AreaTrigger>
+    public class OverrideCurve() : HasChangesMask(7), IsUpdateFieldStructure<AreaTrigger>
     {
         public UpdateField<bool> OverrideActive = new(0, 1);
         public UpdateField<uint> StartTimeOffset = new(0, 2);
@@ -9959,12 +9959,12 @@ namespace Game.Entities
 
     public class AreaTriggerFieldData() : HasChangesMask((int)EntityFragment.CGObject, TypeId.AreaTrigger, 39), IsUpdateFieldStructure<AreaTrigger>
     {
-        public UpdateField<ScaleCurve> OverrideScaleCurve = new(0, 1);
-        public UpdateField<ScaleCurve> ExtraScaleCurve = new(0, 2);
-        public UpdateField<ScaleCurve> OverrideMoveCurveX = new(0, 3);
-        public UpdateField<ScaleCurve> OverrideMoveCurveY = new(0, 4);
-        public UpdateField<ScaleCurve> OverrideMoveCurveZ = new(0, 5);
-        public UpdateField<ScaleCurve> OverrideFacingCurve = new(0, 6);
+        public UpdateField<OverrideCurve> OverrideScaleCurve = new(0, 1);
+        public UpdateField<OverrideCurve> ExtraScaleCurve = new(0, 2);
+        public UpdateField<OverrideCurve> OverrideMoveCurveX = new(0, 3);
+        public UpdateField<OverrideCurve> OverrideMoveCurveY = new(0, 4);
+        public UpdateField<OverrideCurve> OverrideMoveCurveZ = new(0, 5);
+        public UpdateField<OverrideCurve> OverrideFacingCurve = new(0, 6);
         public UpdateField<ObjectGuid> Caster = new(0, 7);
         public UpdateField<uint> Duration = new(0, 8);
         public UpdateField<uint> TimeToTarget = new(0, 9);
