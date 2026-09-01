@@ -1238,7 +1238,7 @@ namespace Game.Entities
                 return;
 
             _spline = new Spline<float>();
-            _spline.InitSpline(splinePoints, splinePoints.Length, EvaluationMode.Linear, _stationaryPosition.GetOrientation());
+            _spline.InitSpline(splinePoints, splinePoints.Length, splinePoints.Length > 2 ? EvaluationMode.Catmullrom : EvaluationMode.Linear, _stationaryPosition.GetOrientation());
             _spline.InitLengths();
 
             float speed = overrideSpeed.GetValueOrDefault(GetCreateProperties().Speed);
@@ -1254,7 +1254,7 @@ namespace Game.Entities
             SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.Spline);
             var pathData = areaTriggerData.ModifyValue<AreaTriggerSplineCalculator>(m_areaTriggerData.PathData);
-            SetUpdateFieldValue(pathData.ModifyValue(pathData.Catmullrom), splinePoints.Length >= 4);
+            SetUpdateFieldValue(pathData.ModifyValue(pathData.Linear), _spline.m_mode == EvaluationMode.Linear);
             var points = pathData.ModifyValue(pathData.Points);
             ClearDynamicUpdateFieldValues(points);
             foreach (Vector3 point in splinePoints)

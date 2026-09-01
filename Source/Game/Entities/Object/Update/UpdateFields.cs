@@ -9394,13 +9394,13 @@ namespace Game.Entities
 
     public class AreaTriggerSplineCalculator() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
-        public UpdateField<bool> Catmullrom = new(0, 1);
+        public UpdateField<bool> Linear = new(0, 1);
         public DynamicUpdateField<Vector3> Points = new(0, 2);
 
         public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
             data.WriteBits(Points.Size(), 16);
-            data.WriteBit(Catmullrom);
+            data.WriteBit(Linear);
             data.FlushBits();
             for (int i = 0; i < Points.Size(); ++i)
             {
@@ -9420,7 +9420,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteBit(Catmullrom);
+                    data.WriteBit(Linear);
                 }
                 if (changesMask[2])
                 {
@@ -9448,7 +9448,7 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Catmullrom);
+            ClearChangesMask(Linear);
             ClearChangesMask(Points);
             _changesMask.ResetAll();
         }
