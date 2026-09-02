@@ -333,7 +333,7 @@ namespace Game.Maps
                 return;
 
             // x and y are swapped !!
-            LoadResult vmapLoadResult = Global.VMapMgr.LoadMap(Global.WorldMgr.GetDataPath(), GetId(), gx, gy);
+            LoadResult vmapLoadResult = Global.VMapMgr.LoadMap(Global.WorldMgr.GetDataPath() + "/vmaps", GetId(), gx, gy);
             switch (vmapLoadResult)
             {
                 case LoadResult.Success:

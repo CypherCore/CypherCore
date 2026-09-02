@@ -104,7 +104,7 @@ namespace BNetServer.Networking
                 {
                     do
                     {
-                        RealmId realmId = new(lastPlayerCharactersResult.Read<byte>(3), lastPlayerCharactersResult.Read<byte>(4), lastPlayerCharactersResult.Read<uint>(2));
+                        RealmId realmId = new(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
                         LastPlayedCharacterInfo lastPlayedCharacter = new()
                         {
                             RealmId = realmId,

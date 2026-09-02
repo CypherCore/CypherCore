@@ -58,12 +58,10 @@ namespace Game.Collision
                 if (treeInitResult != LoadResult.Success)
                     return treeInitResult;
 
-                iInstanceMapTrees.Add(mapId, newTree);
-
-                instanceTree = newTree;
+                iInstanceMapTrees[mapId] = newTree;
             }
 
-            return instanceTree.LoadMapTile(x, y, this);
+            return iInstanceMapTrees[mapId].LoadMapTile(x, y, this);
         }
 
         public void UnloadMap(uint mapId, uint x, uint y)
@@ -196,7 +194,7 @@ namespace Game.Collision
                     return worldmodel.Model;
 
                 worldmodel = new ManagedModel(this, filename);
-                if (!worldmodel.Model.ReadFile(basepath + filename + ".vmo"))
+                if (!worldmodel.Model.ReadFile(basepath + "/" + filename + ".vmo"))
                 {
                     Log.outError(LogFilter.Server, $"VMapManager: could not load '{basepath}{filename}.vmo'");
                     return null;

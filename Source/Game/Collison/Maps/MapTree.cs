@@ -58,10 +58,10 @@ namespace Game.Collision
         public LoadResult InitMap(string fname)
         {
             Log.outDebug(LogFilter.Maps, $"StaticMapTree.InitMap() : initializing StaticMapTree '{fname}'");
-            if (!File.Exists(fname))
+            if (!File.Exists(iBasePath + fname))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new(new FileStream(fname, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new(new FileStream(iBasePath + fname, FileMode.Open, FileAccess.Read)))
             {
                 var magic = reader.ReadStringFromChars(8);
                 if (magic != MapConst.VMapMagic)
@@ -188,28 +188,27 @@ namespace Game.Collision
         {
             TileFileOpenResult result = new();
             result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY, "vmtile");
-
             if (File.Exists(result.Name))
-            {
-                result.UsedMapId = mapID;
                 result.TileFile = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
-                if (File.Exists(vmapPath + GetTileFileName(mapID, tileX, tileY, "vmtileidx")))
-                    result.SpawnIndicesFile = new FileStream(vmapPath + GetTileFileName(mapID, tileX, tileY, "vmtileidx"), FileMode.Open, FileAccess.Read);
-                return result;
-            }
+            if (File.Exists(vmapPath + GetTileFileName(mapID, tileX, tileY, "vmtileidx")))
+                result.SpawnIndicesFile = new FileStream(vmapPath + GetTileFileName(mapID, tileX, tileY, "vmtileidx"), FileMode.Open, FileAccess.Read);
+            result.UsedMapId = mapID;
 
-            int parentMapId = vm.GetParentMapId(mapID);
-            while (parentMapId != -1)
+            if (result.TileFile == null)
             {
-                result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY, "vmtile");
-                if (File.Exists(result.Name))
+                int parentMapId = vm.GetParentMapId(mapID);
+                while (parentMapId != -1)
                 {
-                    result.TileFile = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
+                    result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY, "vmtile");
+                    if (File.Exists(result.Name))
+                        result.TileFile = new FileStream(result.Name, FileMode.Open, FileAccess.Read);
                     result.UsedMapId = (uint)parentMapId;
-                    return result;
-                }
 
-                parentMapId = vm.GetParentMapId((uint)parentMapId);
+                    if (result.TileFile != null)
+                        break;
+
+                    parentMapId = vm.GetParentMapId((uint)parentMapId);
+                }
             }
 
             return result;
