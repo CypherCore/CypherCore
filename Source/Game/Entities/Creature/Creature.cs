@@ -3584,11 +3584,11 @@ namespace Game.Entities
 
         // Returns true if CREATURE_STATIC_FLAG_FLOATING is set which is  disabling the gravity of the creature on spawn and reset
         public bool IsFloating() { return _staticFlags.HasFlag(CreatureStaticFlags.Floating); }
-        public void SetFloating(bool floating) { _staticFlags.ApplyFlag(CreatureStaticFlags.Floating, floating); SetDisableGravity(floating); }
+        public void SetFloating(bool floating) { _staticFlags.ApplyFlag(CreatureStaticFlags.Floating, floating); SetDisableGravity(floating, false); }
 
         // Returns true if CREATURE_STATIC_FLAG_SESSILE is set which permanently roots the creature in place
         public bool IsSessile() { return _staticFlags.HasFlag(CreatureStaticFlags.Sessile); }
-        public void SetSessile(bool sessile) { _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, sessile); SetControlled(sessile, UnitState.Root); }
+        public void SetSessile(bool sessile) { _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, sessile); SetControlled(sessile, UnitState.Root); SetDisableGravity(sessile, false, false); }
 
         // Returns true if CREATURE_STATIC_FLAG_3_CANNOT_PENETRATE_WATER is set which does not allow the creature to go below liquid surfaces
         public bool CannotPenetrateWater() { return _staticFlags.HasFlag(CreatureStaticFlags3.CannotPenetrateWater); }
