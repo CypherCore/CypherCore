@@ -60,6 +60,7 @@ namespace Game.Entities
                     break;
                 case TypeId.AreaTrigger:
                     map.AreaTriggerRelocation(passenger.ToAreaTrigger(), x, y, z, o);
+                    passenger.ToAreaTrigger().RelocateStationaryPosition(position);
                     break;
                 default:
                     break;

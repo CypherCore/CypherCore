@@ -508,6 +508,11 @@ namespace Game.Entities
             return null;
         }
 
+        public dynamic Visit(Func<dynamic, dynamic> visitor)
+        {
+            return visitor(_value);
+        }
+
         public void Visit(Action<dynamic> visitor)
         {
             visitor(_value);

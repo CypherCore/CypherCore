@@ -39,13 +39,6 @@ namespace Game.Entities
             Orientation = NormalizeOrientation(o);
         }
 
-        public Position(Vector3 vector)
-        {
-            posX = vector.X;
-            posY = vector.Y;
-            posZ = vector.Z;
-        }
-
         public Position(Position position)
         {
             posX = position.posX;
@@ -92,10 +85,6 @@ namespace Game.Entities
         public void Relocate(Position loc)
         {
             Relocate(loc.posX, loc.posY, loc.posZ, loc.Orientation);
-        }
-        public void Relocate(Vector3 pos)
-        {
-            Relocate(pos.X, pos.Y, pos.Z);
         }
         public void RelocateOffset(Position offset)
         {
@@ -411,6 +400,10 @@ namespace Game.Entities
         public static implicit operator Vector3(Position position)
         {
             return new(position.posX, position.posY, position.posZ);
+        }
+        public static implicit operator Position(Vector3 vector)
+        {
+            return new(vector.X, vector.Y, vector.Z);
         }
     }
 

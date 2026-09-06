@@ -67,7 +67,7 @@ namespace Framework.Constants
     {
         Spline = 0,
         Orbit = 1,
-        None = 2,
+        Stationary = 2,
         MovementScript = 3
     }
 

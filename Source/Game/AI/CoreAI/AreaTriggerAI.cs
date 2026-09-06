@@ -25,9 +25,6 @@ namespace Game.AI
         // Called on each AreaTrigger update
         public virtual void OnUpdate(uint diff) { }
 
-        // Called when the AreaTrigger reach splineIndex
-        public virtual void OnSplineIndexReached(int splineIndex) { }
-
         // Called when the AreaTrigger reach its destination
         public virtual void OnDestinationReached() { }
 

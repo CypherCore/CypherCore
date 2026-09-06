@@ -218,14 +218,23 @@ namespace Game.Entities
                 m_updateFlag.MovementTransport = true;
             }
 
+            // movement on transport of areatriggers on unit is handled by themself
+            ITransport transport = null;
+            if (caster != null)
+            {
+                transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
+                if (transport != null)
+                {
+                    // This object must be added to transport before adding to map for the client to properly display it
+                    transport.AddPassenger(this, transport.GetPositionOffsetTo(pos));
+                }
+            }
+
             if (!IsStaticSpawn())
                 UpdatePositionData();
 
-            UpdateShape();
-
-
             GetCreateProperties().Movement.Switch(
-                _ => SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (byte)AreaTriggerPathType.None),
+                _ => SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (byte)AreaTriggerPathType.Stationary),
                 splineInfo => InitSplineOffsets(splineInfo),
                 orbitInfo =>
                 {
@@ -240,26 +249,11 @@ namespace Game.Entities
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Facing), _stationaryPosition.GetOrientation());
 
-            // movement on transport of areatriggers on unit is handled by themself
-            ITransport transport = null;
-            if (caster != null)
-            {
-                transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
-
-                if (transport != null)
-                {
-                    // This object must be added to transport before adding to map for the client to properly display it
-                    transport.AddPassenger(this, transport.GetPositionOffsetTo(pos));
-                }
-            }
+            UpdateShape();
 
             AI_Initialize();
 
             UpdateDynamicShapeFlag();
-
-            // Relocate areatriggers with circular movement again
-            if (HasOrbit())
-                Relocate(CalculateOrbitPosition());
 
             if (!IsStaticSpawn())
             {
@@ -312,49 +306,7 @@ namespace Game.Entities
             base.Update(diff);
 
             if (!IsStaticSpawn())
-            {
-                // "If" order matter here, Orbit > Attached > Splines
-                if (HasOverridePosition())
-                {
-                    UpdateOverridePosition();
-                }
-                else if (HasOrbit())
-                {
-                    UpdateOrbitPosition();
-                }
-                else if (HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
-                {
-                    Unit target = GetTarget();
-                    if (target != null)
-                    {
-                        float orientation = 0.0f;
-                        if (m_areaTriggerData.FacingCurveId != 0)
-                            orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
-
-                        if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
-                            orientation += target.GetOrientation();
-
-                        GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), orientation);
-                    }
-                }
-                else if (HasSplines())
-                {
-                    UpdateSplinePosition(_spline);
-                }
-                else
-                {
-                    if (m_areaTriggerData.FacingCurveId != 0)
-                    {
-                        float orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
-                        if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
-                            orientation += m_areaTriggerData.Facing;
-
-                        SetOrientation(orientation);
-                    }
-
-                    UpdateShape();
-                }
-            }
+                UpdatePositionAndRotation();
 
             if (GetDuration() != -1)
             {
@@ -1210,6 +1162,98 @@ namespace Game.Entities
             }
         }
 
+        void UpdatePositionAndRotation()
+        {
+            Position oldPosition = GetPosition();
+            Position newPosition = null;
+            float oldRotation = GetOrientation();
+            var (movementUpdateResult, position, rotation) = CalculateLocalPositionAndRotation();
+
+            if (HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
+            {
+                Unit target = GetTarget();
+                if (target != null)
+                {
+                    RelocateStationaryPosition(target.GetPosition());
+
+                    newPosition = target.GetPositionWithOffset(position);
+
+                    if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
+                        rotation += target.GetOrientation();
+
+                    if (movementUpdateResult == MovementUpdateResult.MovementStatus.None)
+                        movementUpdateResult = MovementUpdateResult.MovementStatus.Moved;
+                }
+            }
+            else
+            {
+                ITransport transport = GetTransport();
+                if (transport != null)
+                {
+                    newPosition = transport.GetPositionWithOffset(position);
+
+                    if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
+                        rotation += transport.GetTransportOrientation();
+                }
+                else
+                    newPosition = GetMovementOrigin().GetPositionWithOffset(position);
+            }
+
+            if (newPosition != oldPosition)
+            {
+                GetMap().AreaTriggerRelocation(this, newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), rotation);
+            }
+            else if (!MathFunctions.fuzzyEq(rotation, oldRotation))
+            {
+                SetOrientation(rotation);
+                UpdateShape();
+            }
+
+#if DEBUG
+            if (movementUpdateResult != MovementUpdateResult.MovementStatus.None)
+                DebugVisualizePosition();
+#endif
+
+            if (movementUpdateResult == MovementUpdateResult.MovementStatus.Arrived)
+            {
+                if (!_reachedDestination)
+                    _ai.OnDestinationReached();
+
+                _reachedDestination = true;
+            }
+        }
+
+        MovementUpdateResult CalculateLocalPositionAndRotation()
+        {
+            MovementUpdateResult result = m_areaTriggerData.PathData.Visit(shape =>
+            {
+                if (shape is AreaTriggerSplineCalculator)
+                    return CalculateLocalSplinePositionAndRotation();
+                else if (shape is AreaTriggerOrbit orbit)
+                    return CalculateLocalOrbitPositionAndRotation(orbit);
+                else if (shape is AreaTriggerMovementScript)
+                {
+                    Cypher.Assert(false, "AreaTriggerMovementScript is not implemented");
+                    return null;
+                }
+                else
+                    return CalculateLocalStationaryPositionAndRotation();
+            });
+
+            if (HasOverridePosition())
+            {
+                result.Status = MovementUpdateResult.MovementStatus.Moved;
+                result.Position.X = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveX, m_areaTriggerData.TimeToTargetPos);
+                result.Position.Y = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveY, m_areaTriggerData.TimeToTargetPos);
+                result.Position.Z = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveZ, m_areaTriggerData.TimeToTargetPos);
+
+                if (m_movementInfo.transport.guid.IsEmpty())
+                    result.Position = GetMovementOrigin().GetPositionOffsetTo(result.Position);
+            }
+
+            return result;
+        }
+
         void InitSplineOffsets(List<Vector3> offsets, float? overrideSpeed = null, bool? speedIsTimeInSeconds = null)
         {
             float angleSin = (float)Math.Sin(GetOrientation());
@@ -1238,7 +1282,13 @@ namespace Game.Entities
                 return;
 
             _spline = new Spline<float>();
-            _spline.InitSpline(splinePoints, splinePoints.Length, splinePoints.Length > 2 ? EvaluationMode.Catmullrom : EvaluationMode.Linear, _stationaryPosition.GetOrientation());
+            _reachedDestination = false;
+
+            List<Vector3> offsets = [];
+            for (int i = 0; i < splinePoints.Length; ++i)
+                offsets.Add(GetStationaryPosition().GetPositionOffsetTo(splinePoints[i]));
+
+            _spline.InitSpline(offsets.ToArray(), offsets.Count, offsets.Count > 2 ? EvaluationMode.Catmullrom : EvaluationMode.Linear, _stationaryPosition.GetOrientation());
             _spline.InitLengths();
 
             float speed = overrideSpeed.GetValueOrDefault(GetCreateProperties().Speed);
@@ -1256,11 +1306,20 @@ namespace Game.Entities
             var pathData = areaTriggerData.ModifyValue<AreaTriggerSplineCalculator>(m_areaTriggerData.PathData);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.Linear), _spline.m_mode == EvaluationMode.Linear);
             var points = pathData.ModifyValue(pathData.Points);
-            ClearDynamicUpdateFieldValues(points);
-            foreach (Vector3 point in splinePoints)
-                AddDynamicUpdateFieldValue(points, point);
 
-            _reachedDestination = false;
+            ClearDynamicUpdateFieldValues(points);
+            if (m_movementInfo.transport.guid.IsEmpty())
+            {
+                foreach (Vector3 point in _spline.GetPoints())
+                    AddDynamicUpdateFieldValue(points, GetStationaryPosition().GetPositionWithOffset(point));
+            }
+            else
+            {
+                foreach (Vector3 point in _spline.GetPoints())
+                {
+                    AddDynamicUpdateFieldValue(points, point);
+                }
+            }
         }
 
         uint GetElapsedTimeForMovement()
@@ -1296,93 +1355,26 @@ namespace Game.Entities
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.Orbit);
             var pathData = areaTriggerData.ModifyValue<AreaTriggerOrbit>(m_areaTriggerData.PathData);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.CounterClockwise), orbit.CounterClockwise);
-            SetUpdateFieldValue(pathData.ModifyValue(pathData.Center), orbit.Center.GetValueOrDefault(new Position()));
             SetUpdateFieldValue(pathData.ModifyValue(pathData.Radius), orbit.Radius);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.InitialAngle), orbit.InitialAngle);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.BlendFromRadius), orbit.BlendFromRadius);
             SetUpdateFieldValue(pathData.ModifyValue(pathData.ExtraTimeForBlending), orbit.ExtraTimeForBlending);
-        }
 
-        Position GetOrbitCenterPosition()
-        {
-            AreaTriggerOrbit orbit = m_areaTriggerData.PathData.Get<AreaTriggerOrbit>();
-            if (orbit == null)
-                return null;
-
-            if (!m_areaTriggerData.OrbitPathTarget.GetValue().IsEmpty())
+            Vector3 center = orbit.Center.GetValueOrDefault(new Position());
+            if (orbit.Center.HasValue)
             {
-                WorldObject center = Global.ObjAccessor.GetWorldObject(this, m_areaTriggerData.OrbitPathTarget);
-                if (center != null)
-                    return center;
+                WorldObject attachedTo = Global.ObjAccessor.GetWorldObject(this, m_movementInfo.transport.guid);
+                if (attachedTo != null)
+                    center = attachedTo.GetPositionOffsetTo(orbit.Center.Value);
             }
 
-            return new Position(orbit.Center);
+            SetUpdateFieldValue(pathData.ModifyValue(pathData.Center), center);
         }
 
-        Position CalculateOrbitPosition()
+        MovementUpdateResult CalculateLocalSplinePositionAndRotation()
         {
-            Position centerPos = GetOrbitCenterPosition();
-            if (centerPos == null)
-                return GetPosition();
-
-            AreaTriggerOrbit cmi = m_areaTriggerData.PathData.Get<AreaTriggerOrbit>();
-
-            // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
-            float pathProgress = (float)(GetElapsedTimeForMovement() + cmi.ExtraTimeForBlending) / (float)GetTimeToTarget();
-            if (m_areaTriggerData.MoveCurveId != 0)
-                pathProgress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MoveCurveId, pathProgress);
-
-            // We already made one circle and can't loop
-            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.CanLoop))
-                pathProgress = Math.Min(1.0f, pathProgress);
-
-            float radius = cmi.Radius;
-            if (pathProgress <= 1.0f && MathFunctions.fuzzyNe(cmi.BlendFromRadius, radius))
-            {
-                float blendCurve = (cmi.BlendFromRadius - radius) / radius;
-                MathFunctions.RoundToInterval(ref blendCurve, 1.0f, 4.0f);
-                float blendProgress = Math.Min(1.0f, pathProgress / blendCurve * 0.63661975f);
-                radius = MathFunctions.Lerp(cmi.BlendFromRadius, radius, blendProgress);
-            }
-
-            // Adapt Path progress depending of circle direction
-            if (!cmi.CounterClockwise)
-                pathProgress *= -1;
-
-            float angle = cmi.InitialAngle + 2.0f * (float)Math.PI * pathProgress;
-            float x = centerPos.GetPositionX() + (radius * (float)Math.Cos(angle));
-            float y = centerPos.GetPositionY() + (radius * (float)Math.Sin(angle));
-            float z = centerPos.GetPositionZ() + m_areaTriggerData.ZOffset;
-
-            float orientation = 0.0f;
-            if (m_areaTriggerData.FacingCurveId != 0)
-                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
-
-            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
-            {
-                orientation += angle;
-                orientation += cmi.CounterClockwise ? MathFunctions.PiOver4 : -MathFunctions.PiOver4;
-            }
-
-            return new Position(x, y, z, orientation);
-        }
-
-        void UpdateOrbitPosition()
-        {
-            Position pos = CalculateOrbitPosition();
-
-            GetMap().AreaTriggerRelocation(this, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
-
-            DebugVisualizePosition();
-        }
-
-        void UpdateSplinePosition(Spline<float> spline)
-        {
-            if (_reachedDestination)
-                return;
-
-            float currentTimePercent = Math.Clamp((float)GetElapsedTimeForMovement() / (float)GetTimeToTarget(), 0.0f, 1.0f);
-            _reachedDestination = currentTimePercent >= 1.0f;
+            float currentTimePercent = Math.Clamp(GetElapsedTimeForMovement() / GetTimeToTarget(), 0.0f, 1.0f);
+            bool reachedDestination = currentTimePercent >= 1.0f;
 
             if (m_areaTriggerData.MoveCurveId != 0)
             {
@@ -1400,12 +1392,12 @@ namespace Game.Entities
             float percentFromLastPoint = 0;
             _spline.ComputeIndex(currentTimePercent, ref lastPositionIndex, ref percentFromLastPoint);
 
-            Vector3 currentPosition;
-            _spline.Evaluate_Percent(lastPositionIndex, percentFromLastPoint, out currentPosition);
+            _spline.Evaluate_Percent(lastPositionIndex, percentFromLastPoint, out Vector3 currentPosition);
 
-            float orientation = _stationaryPosition.GetOrientation();
+            float orientation = 0.0f;
             if (m_areaTriggerData.FacingCurveId != 0)
-                orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId,
+                    GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
 
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
             {
@@ -1414,22 +1406,83 @@ namespace Game.Entities
                     orientation += MathF.Atan2(derivative.Y, derivative.X);
             }
 
-            GetMap().AreaTriggerRelocation(this, currentPosition.X, currentPosition.Y, currentPosition.Z, orientation);
+            return new MovementUpdateResult() { Status = reachedDestination ? MovementUpdateResult.MovementStatus.Arrived : MovementUpdateResult.MovementStatus.Moved, Position = currentPosition, Rotation = orientation };
+        }
 
-            DebugVisualizePosition();
+        MovementUpdateResult CalculateLocalOrbitPositionAndRotation(AreaTriggerOrbit orbit)
+        {
+            // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
+            float pathProgress = (float)(GetElapsedTimeForMovement() + orbit.ExtraTimeForBlending) / (float)GetTimeToTarget();
+            if (m_areaTriggerData.MoveCurveId != 0)
+                pathProgress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MoveCurveId, pathProgress);
 
-            if (_lastSplineIndex != lastPositionIndex || _reachedDestination)
+            // We already made one circle and can't loop
+            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.CanLoop))
+                pathProgress = Math.Min(1.0f, pathProgress);
+
+            float radius = orbit.Radius;
+            if (pathProgress <= 1.0f && MathFunctions.fuzzyNe(orbit.BlendFromRadius, radius))
             {
-                _lastSplineIndex = lastPositionIndex;
-                _ai.OnSplineIndexReached(_lastSplineIndex - _spline.First() /*translate to index of the input array used for AreaTrigger::InitSplines*/);
-                if (_reachedDestination)
-                {
-                    _ai.OnDestinationReached();
-                    _spline = null;
-                    SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.PathType), (int)AreaTriggerPathType.None);
-                    UpdateDynamicShapeFlag();
-                }
+                float blendCurve = (orbit.BlendFromRadius - radius) / radius;
+                MathFunctions.RoundToInterval(ref blendCurve, 1.0f, 4.0f);
+                float blendProgress = Math.Min(1.0f, pathProgress / blendCurve * 0.63661975f);
+                radius = MathFunctions.Lerp(orbit.BlendFromRadius, radius, blendProgress);
             }
+
+            // Adapt Path progress depending of circle direction
+            if (!orbit.CounterClockwise)
+                pathProgress *= -1;
+
+            float angle = orbit.InitialAngle + 2.0f * MathF.PI * pathProgress;
+            Vector3 position = new(radius * MathF.Cos(angle), radius * MathF.Sin(angle), m_areaTriggerData.ZOffset);
+
+            float orientation = 0.0f;
+            if (m_areaTriggerData.FacingCurveId != 0)
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+
+            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
+            {
+                orientation += angle;
+                orientation += orbit.CounterClockwise ? MathFunctions.PiOver4 : -MathFunctions.PiOver4;
+            }
+
+            return new MovementUpdateResult() { Status = MovementUpdateResult.MovementStatus.Moved, Position = position, Rotation = orientation };
+        }
+
+        MovementUpdateResult CalculateLocalStationaryPositionAndRotation()
+        {
+            float orientation = 0.0f;
+            if (m_areaTriggerData.FacingCurveId != 0)
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+
+            if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
+                orientation += m_areaTriggerData.Facing;
+
+            return new MovementUpdateResult() { Status = MovementUpdateResult.MovementStatus.None, Position = Vector3.Zero, Rotation = orientation };
+        }
+
+        Position GetMovementOrigin()
+        {
+            return m_areaTriggerData.PathData.Visit(shape =>
+            {
+                if (shape is AreaTriggerSplineCalculator)
+                    return GetStationaryPosition();
+                else if (shape is AreaTriggerOrbit orbit)
+                {
+                    if (!m_areaTriggerData.OrbitPathTarget.GetValue().IsEmpty())
+                    {
+                        WorldObject pathTarget = Global.ObjAccessor.GetWorldObject(this, m_areaTriggerData.OrbitPathTarget);
+                        if (pathTarget != null)
+                            return pathTarget;
+                        return GetStationaryPosition();
+                    }
+                    return orbit.Center.GetValue();
+                }
+                else if (shape is AreaTriggerMovementScript script)
+                    return script.Center.GetValue();
+                else
+                    return GetStationaryPosition();
+            });
         }
 
         void UpdateOverridePosition()
@@ -1544,7 +1597,7 @@ namespace Game.Entities
 
         void UpdateDynamicShapeFlag()
         {
-            if (m_areaTriggerData.PathType != (int)AreaTriggerPathType.None
+            if (m_areaTriggerData.PathType != (int)AreaTriggerPathType.Stationary
                 || HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached)
                 || (m_areaTriggerData.OverrideScaleCurve.GetValue().OverrideActive && (m_areaTriggerData.OverrideScaleCurve.GetValue().ParameterCurve & 1) == 0)
                 || m_areaTriggerData.ScaleCurveId != 0
@@ -1577,12 +1630,12 @@ namespace Game.Entities
                 Player player = caster.ToPlayer();
                 if (player != null)
                     if (player.IsDebugAreaTriggers)
-                        player.SummonCreature(1, this, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(GetTimeToTarget()));
+                        player.SummonCreature(1, this, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(250));
             }
         }
 
         public override Position GetStationaryPosition() { return _stationaryPosition; }
-        void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
+        public void RelocateStationaryPosition(Position pos) { _stationaryPosition.Relocate(pos); }
 
         public bool IsRemoved() { return _isRemoved; }
         public uint GetSpellId() { return m_areaTriggerData.SpellID; }
@@ -1651,7 +1704,6 @@ namespace Game.Entities
         Spline<float> _spline;
 
         bool _reachedDestination;
-        int _lastSplineIndex;
 
         AreaTriggerOrbitInfo _orbitInfo;
 
@@ -1693,6 +1745,27 @@ namespace Game.Entities
 
             public Vector2[] CurvePoints;
             public float Curve;
+        }
+
+        struct MovementUpdateResult
+        {
+            public enum MovementStatus
+            {
+                None,
+                Moved,
+                Arrived
+            }
+
+            public MovementStatus Status;
+            public Vector3 Position;
+            public float Rotation;
+
+            public void Deconstruct(out MovementStatus status, out Vector3 position, out float rotation)
+            {
+                status = this.Status;
+                position = this.Position;
+                rotation = this.Rotation;
+            }
         }
     }
 }

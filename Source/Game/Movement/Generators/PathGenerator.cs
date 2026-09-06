@@ -930,8 +930,6 @@ namespace Game.Movement
 
             return length;
         }
-        
-        public void ShortenPathUntilDist(Position pos, float dist) { ShortenPathUntilDist(new Vector3(pos.posX, pos.posY, pos.posZ), dist); }
 
         public void ShortenPathUntilDist(Vector3 target, float dist)
         {
