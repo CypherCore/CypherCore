@@ -2742,10 +2742,10 @@ namespace Game.Entities
             SetHover(GetMovementTemplate().IsHoverInitiallyEnabled());
 
             // CREATURE_STATIC_FLAG_FLOATING disables gravity and plays hover anim
-            SetFloating(IsFloating());
+            UpdateFloatingMovementFlags();
 
             // CREATURE_STATIC_FLAG_SESSILE disables gravity and applies root
-            SetSessile(IsSessile());
+            UpdateSessileMovementFlags();
 
             if (CanOnlySwimIfTargetSwims())
             {
@@ -2784,8 +2784,15 @@ namespace Game.Entities
         public void SetFloating(bool floating)
         {
             _staticFlags.ApplyFlag(CreatureStaticFlags.Floating, floating);
+            UpdateFloatingMovementFlags();
+        }
 
-            if (floating)
+        /// <summary>
+        /// Enables or disables gravity and starts playing hover animations depending on wether CREATURE_STATIC_FLAG_FLOATING is set or not
+        /// </summary>
+        void UpdateFloatingMovementFlags()
+        {
+            if (IsFloating())
                 SetDisableGravity(true, false);
             else
             {
@@ -2802,8 +2809,15 @@ namespace Game.Entities
         public void SetSessile(bool sessile)
         {
             _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, sessile);
+            UpdateSessileMovementFlags();
+        }
 
-            if (sessile)
+        /// <summary>
+        /// Enables or disables gravity and root movement flags depending on wether CREATURE_STATIC_FLAG_SESSILE is set or not
+        /// </summary>
+        void UpdateSessileMovementFlags()
+        {
+            if (IsSessile())
             {
                 SetControlled(true, UnitState.Root);
                 SetDisableGravity(true, false, false);
