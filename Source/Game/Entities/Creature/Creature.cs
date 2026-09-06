@@ -2742,14 +2742,10 @@ namespace Game.Entities
             SetHover(GetMovementTemplate().IsHoverInitiallyEnabled());
 
             // CREATURE_STATIC_FLAG_FLOATING disables gravity and plays hover anim
-            SetDisableGravity(IsFloating(), false);
+            SetFloating(IsFloating());
 
-            if (IsSessile())
-            {
-                // CREATURE_STATIC_FLAG_SESSILE disables gravity and applies root
-                SetControlled(IsSessile(), UnitState.Root);
-                SetDisableGravity(IsFloating(), false, false);
-            }
+            // CREATURE_STATIC_FLAG_SESSILE disables gravity and applies root
+            SetSessile(IsSessile());
 
             if (CanOnlySwimIfTargetSwims())
             {
@@ -2783,6 +2779,50 @@ namespace Game.Entities
                 SetSwim(true);
             else if (!IsInWater()) // We do not want to disable swimming again when a creature is in water - may to lead some nasty bugs
                 SetSwim(false);
+        }
+
+        public void SetFloating(bool floating)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags.Floating, floating);
+
+            if (floating)
+                SetDisableGravity(true, false);
+            else
+            {
+                if (IsSessile() ||
+                    HasAuraType(AuraType.ModRootDisableGravity) ||
+                    HasAuraType(AuraType.ModStunDisableGravity) ||
+                    HasAuraType(AuraType.DisableGravity))
+                    return;
+
+                SetDisableGravity(false, false);
+            }
+        }
+
+        public void SetSessile(bool sessile)
+        {
+            _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, sessile);
+
+            if (sessile)
+            {
+                SetControlled(true, UnitState.Root);
+                SetDisableGravity(true, false, false);
+            }
+            else
+            {
+                if (!HasAuraType(AuraType.ModRootDisableGravity))
+                    return;
+
+                if (!HasAuraType(AuraType.ModRoot))
+                    SetControlled(false, UnitState.Root);
+
+                if (IsFloating() ||
+                    HasAuraType(AuraType.ModStunDisableGravity) ||
+                    HasAuraType(AuraType.DisableGravity))
+                    return;
+
+                SetDisableGravity(false, false, false);
+            }
         }
 
         public CreatureMovementData GetMovementTemplate()
@@ -3584,11 +3624,9 @@ namespace Game.Entities
 
         // Returns true if CREATURE_STATIC_FLAG_FLOATING is set which is  disabling the gravity of the creature on spawn and reset
         public bool IsFloating() { return _staticFlags.HasFlag(CreatureStaticFlags.Floating); }
-        public void SetFloating(bool floating) { _staticFlags.ApplyFlag(CreatureStaticFlags.Floating, floating); SetDisableGravity(floating, false); }
 
         // Returns true if CREATURE_STATIC_FLAG_SESSILE is set which permanently roots the creature in place
         public bool IsSessile() { return _staticFlags.HasFlag(CreatureStaticFlags.Sessile); }
-        public void SetSessile(bool sessile) { _staticFlags.ApplyFlag(CreatureStaticFlags.Sessile, sessile); SetControlled(sessile, UnitState.Root); SetDisableGravity(sessile, false, false); }
 
         // Returns true if CREATURE_STATIC_FLAG_3_CANNOT_PENETRATE_WATER is set which does not allow the creature to go below liquid surfaces
         public bool CannotPenetrateWater() { return _staticFlags.HasFlag(CreatureStaticFlags3.CannotPenetrateWater); }
