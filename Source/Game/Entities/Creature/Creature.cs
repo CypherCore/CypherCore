@@ -2740,8 +2740,16 @@ namespace Game.Entities
         public void InitializeMovementCapabilities()
         {
             SetHover(GetMovementTemplate().IsHoverInitiallyEnabled());
-            SetDisableGravity(IsFloating());
-            SetControlled(IsSessile(), UnitState.Root);
+
+            // CREATURE_STATIC_FLAG_FLOATING disables gravity and plays hover anim
+            SetDisableGravity(IsFloating(), false);
+
+            if (IsSessile())
+            {
+                // CREATURE_STATIC_FLAG_SESSILE disables gravity and applies root
+                SetControlled(IsSessile(), UnitState.Root);
+                SetDisableGravity(IsFloating(), false, false);
+            }
 
             if (CanOnlySwimIfTargetSwims())
             {
