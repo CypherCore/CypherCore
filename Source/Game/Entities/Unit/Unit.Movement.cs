@@ -948,7 +948,7 @@ namespace Game.Entities
             return IsInDist(obj, objBoundaryRadius);
         }
 
-        public bool SetDisableGravity(bool disable, bool updateAnimTier = true)
+        public bool SetDisableGravity(bool disable, bool updateAnimTier = true, bool playHoverAnim = true)
         {
             if (disable == IsGravityDisabled())
                 return false;
@@ -981,7 +981,7 @@ namespace Game.Entities
                 SendMessageToSet(packet, true);
             }
 
-            if (GetVehicle() == null)
+            if (playHoverAnim && GetVehicle() == null)
             {
                 if (IsAlive())
                 {
