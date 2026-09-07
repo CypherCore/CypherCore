@@ -434,7 +434,9 @@ namespace Game.Entities
         public void TryAdd(K key)
         {
             if (!_values.ContainsKey(key))
-                _values[key] = new() { state = MapUpdateFieldState.Changed, value = new() };
+                _values[key] = new() { value = new() };
+
+            _values[key].state = MapUpdateFieldState.Changed;
         }
 
         public void Remove(K key)

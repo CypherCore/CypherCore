@@ -1220,6 +1220,7 @@ namespace Game.Entities
                         traitConfig.Entries.Add(new TraitEntryPacket(grantedEntry));
 
                     var loadedEntriesNode = traitEntriesByConfig.LookupByKey(traitConfig.ID);
+                    traitEntriesByConfig.Remove(traitConfig.ID);
                     if (loadedEntriesNode != null)
                     {
                         foreach (var loadedEntry in loadedEntriesNode)
@@ -1227,9 +1228,10 @@ namespace Game.Entities
                             var itr = traitConfig.Entries.Find(entry => entry.TraitNodeID == loadedEntry.TraitNodeID && entry.TraitNodeEntryID == loadedEntry.TraitNodeEntryID);
                             if (itr == null)
                             {
-                                traitConfig.Entries.Add(traitConfig.Entries.Last());
-                                traitConfig.Entries[^1].TraitNodeID = loadedEntry.TraitNodeID;
-                                traitConfig.Entries[^1].TraitNodeEntryID = loadedEntry.TraitNodeEntryID;
+                                traitConfig.Entries.Add(new());
+                                itr = traitConfig.Entries[^1];
+                                itr.TraitNodeID = loadedEntry.TraitNodeID;
+                                itr.TraitNodeEntryID = loadedEntry.TraitNodeEntryID;
                             }
                             itr.Rank = loadedEntry.Rank;
                         }
