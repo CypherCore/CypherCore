@@ -9904,17 +9904,17 @@ namespace Game.Entities
 
     public class AreaTriggerBoundedPlane() : HasChangesMask(3), IsUpdateFieldStructure<AreaTrigger>
     {
-        public UpdateField<float> ExtentsX = new(0, 1);
-        public UpdateField<float> ExtentsY = new(0, 2);
-        public UpdateField<float> ExtentsTargetX = new(0, 3);
-        public UpdateField<float> ExtentsTargetY = new(0, 4);
+        public UpdateField<float> ExtentsY = new(0, 1);
+        public UpdateField<float> ExtentsZ = new(0, 2);
+        public UpdateField<float> ExtentsTargetY = new(0, 3);
+        public UpdateField<float> ExtentsTargetZ = new(0, 4);
 
         public void WriteCreate(WorldPacket data, Player receiver, AreaTrigger owner)
         {
-            data.WriteFloat(ExtentsX);
             data.WriteFloat(ExtentsY);
-            data.WriteFloat(ExtentsTargetX);
+            data.WriteFloat(ExtentsZ);
             data.WriteFloat(ExtentsTargetY);
+            data.WriteFloat(ExtentsTargetZ);
         }
 
         public void WriteUpdate(bool ignoreChangesMask, WorldPacket data, Player receiver, AreaTrigger owner)
@@ -9930,29 +9930,29 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteFloat(ExtentsX);
+                    data.WriteFloat(ExtentsY);
                 }
                 if (changesMask[2])
                 {
-                    data.WriteFloat(ExtentsY);
+                    data.WriteFloat(ExtentsZ);
                 }
                 if (changesMask[3])
                 {
-                    data.WriteFloat(ExtentsTargetX);
+                    data.WriteFloat(ExtentsTargetY);
                 }
                 if (changesMask[4])
                 {
-                    data.WriteFloat(ExtentsTargetY);
+                    data.WriteFloat(ExtentsTargetZ);
                 }
             }
         }
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(ExtentsX);
             ClearChangesMask(ExtentsY);
-            ClearChangesMask(ExtentsTargetX);
+            ClearChangesMask(ExtentsZ);
             ClearChangesMask(ExtentsTargetY);
+            ClearChangesMask(ExtentsTargetZ);
             _changesMask.ResetAll();
         }
     }
@@ -9964,14 +9964,14 @@ namespace Game.Entities
         public UpdateField<OverrideCurve> OverrideMoveCurveX = new(0, 3);
         public UpdateField<OverrideCurve> OverrideMoveCurveY = new(0, 4);
         public UpdateField<OverrideCurve> OverrideMoveCurveZ = new(0, 5);
-        public UpdateField<OverrideCurve> OverrideFacingCurve = new(0, 6);
+        public UpdateField<OverrideCurve> OverrideShapeCurve = new(0, 6);
         public UpdateField<ObjectGuid> Caster = new(0, 7);
         public UpdateField<uint> Duration = new(0, 8);
         public UpdateField<uint> TimeToTarget = new(0, 9);
         public UpdateField<uint> TimeToTargetScale = new(0, 10);
         public UpdateField<uint> TimeToTargetExtraScale = new(0, 11);
         public UpdateField<uint> TimeToTargetPos = new(0, 12);                                 // Linked to m_overrideMoveCurve
-        public UpdateField<uint> TimeToTargetFacing = new(0, 13);                        // Linked to m_overrideFacingCurve
+        public UpdateField<uint> TimeToTargetShape = new(0, 13);                        // Linked to m_overrideFacingCurve
         public UpdateField<uint> SpellID = new(0, 14);
         public UpdateField<uint> SpellForVisuals = new(0, 15);
         public UpdateField<SpellCastVisualField> SpellVisual = new(0, 16);
@@ -10006,14 +10006,14 @@ namespace Game.Entities
             OverrideMoveCurveX.GetValue().WriteCreate(data, receiver, owner);
             OverrideMoveCurveY.GetValue().WriteCreate(data, receiver, owner);
             OverrideMoveCurveZ.GetValue().WriteCreate(data, receiver, owner);
-            OverrideFacingCurve.GetValue().WriteCreate(data, receiver, owner);
+            OverrideShapeCurve.GetValue().WriteCreate(data, receiver, owner);
             data.WritePackedGuid(Caster);
             data.WriteUInt32(Duration);
             data.WriteUInt32(TimeToTarget);
             data.WriteUInt32(TimeToTargetScale);
             data.WriteUInt32(TimeToTargetExtraScale);
             data.WriteUInt32(TimeToTargetPos);
-            data.WriteUInt32(TimeToTargetFacing);
+            data.WriteUInt32(TimeToTargetShape);
             data.WriteUInt32(SpellID);
             data.WriteUInt32(SpellForVisuals);
             SpellVisual.GetValue().WriteCreate(data, receiver, owner);
@@ -10120,7 +10120,7 @@ namespace Game.Entities
                 }
                 if (changesMask[6])
                 {
-                    OverrideFacingCurve.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
+                    OverrideShapeCurve.GetValue().WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[7])
                 {
@@ -10148,7 +10148,7 @@ namespace Game.Entities
                 }
                 if (changesMask[13])
                 {
-                    data.WriteUInt32(TimeToTargetFacing);
+                    data.WriteUInt32(TimeToTargetShape);
                 }
                 if (changesMask[14])
                 {
@@ -10322,14 +10322,14 @@ namespace Game.Entities
             ClearChangesMask(OverrideMoveCurveX);
             ClearChangesMask(OverrideMoveCurveY);
             ClearChangesMask(OverrideMoveCurveZ);
-            ClearChangesMask(OverrideFacingCurve);
+            ClearChangesMask(OverrideShapeCurve);
             ClearChangesMask(Caster);
             ClearChangesMask(Duration);
             ClearChangesMask(TimeToTarget);
             ClearChangesMask(TimeToTargetScale);
             ClearChangesMask(TimeToTargetExtraScale);
             ClearChangesMask(TimeToTargetPos);
-            ClearChangesMask(TimeToTargetFacing);
+            ClearChangesMask(TimeToTargetShape);
             ClearChangesMask(SpellID);
             ClearChangesMask(SpellForVisuals);
             ClearChangesMask(SpellVisual);

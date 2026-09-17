@@ -146,7 +146,7 @@ namespace Game.Entities
             {
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetScale), GetCreateProperties().TimeToTargetScale != 0 ? GetCreateProperties().TimeToTargetScale : m_areaTriggerData.Duration);
                 SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetPos), m_areaTriggerData.Duration);
-                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetFacing), m_areaTriggerData.Duration);
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTargetShape), m_areaTriggerData.Duration);
             }
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.BoundsRadius2D), GetCreateProperties().Shape.GetMaxSearchRadius());
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.DecalPropertiesID), GetCreateProperties().DecalPropertiesId);
@@ -409,19 +409,19 @@ namespace Game.Entities
             UpdateDynamicShapeFlag();
         }
 
-        void SetOverrideFacingCurve(float overrideFacing)
+        void SetOverrideShapeCurve(float overrideFacing)
         {
-            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve), overrideFacing);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideShapeCurve), overrideFacing);
         }
 
-        void SetOverrideFacingCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
+        void SetOverrideShapeCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
         {
-            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve), points, startTimeOffset, interpolation);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideShapeCurve), points, startTimeOffset, interpolation);
         }
 
-        void ClearOverrideFacingCurve()
+        void ClearOverrideShapeCurve()
         {
-            ClearOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideFacingCurve));
+            ClearOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideShapeCurve));
         }
 
         public void SetSpellVisual(SpellCastVisual visual)
@@ -475,20 +475,17 @@ namespace Game.Entities
             if (m_areaTriggerData.OverrideScaleCurve.GetValue().OverrideActive)
                 scale *= Math.Max(GetOverrideCurveValue(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale), 0.000001f);
             else if (m_areaTriggerData.ScaleCurveId != 0)
-                scale *= Math.Max(Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.ScaleCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale)), 0.000001f);
+                scale *= Math.Max(Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.ScaleCurveId, GetScaleProgress()), 0.000001f);
 
             scale *= Math.Max(GetOverrideCurveValue(m_areaTriggerData.ExtraScaleCurve, m_areaTriggerData.TimeToTargetExtraScale), 0.000001f);
 
             return scale;
         }
 
-        float GetProgress()
-        {
-            if (_totalDuration <= 0)
-                return 1.0f;
-
-            return Math.Clamp((float)GetTimeSinceCreated() / (float)GetTotalDuration(), 0.0f, 1.0f);
-        }
+        float GetScaleProgress() => GetOverrideCurveProgress(m_areaTriggerData.OverrideScaleCurve, m_areaTriggerData.TimeToTargetScale);
+        float GetExtraScaleProgress() => GetOverrideCurveProgress(m_areaTriggerData.ExtraScaleCurve, m_areaTriggerData.TimeToTargetExtraScale);
+        float GetOverridePosProgress() => GetOverrideCurveProgress(m_areaTriggerData.OverrideMoveCurveX, m_areaTriggerData.TimeToTargetPos);
+        float GetShapeProgress() => GetOverrideCurveProgress(m_areaTriggerData.OverrideShapeCurve, m_areaTriggerData.TimeToTargetShape);
 
         float GetOverrideCurveProgress(OverrideCurve overrideCurve, uint timeTo)
         {
@@ -707,7 +704,7 @@ namespace Game.Entities
 
         void SearchUnitInSphere(AreaTriggerSphere sphere, List<Unit> targetList)
         {
-            float progress = GetProgress();
+            float progress = GetShapeProgress();
             if (m_areaTriggerData.MorphCurveId != 0)
                 progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -721,7 +718,7 @@ namespace Game.Entities
 
         void SearchUnitInBox(AreaTriggerBox box, List<Unit> targetList)
         {
-            float progress = GetProgress();
+            float progress = GetShapeProgress();
             if (m_areaTriggerData.MorphCurveId != 0)
                 progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -755,7 +752,7 @@ namespace Game.Entities
 
         void SearchUnitInPolygon(AreaTriggerPolygon polygon, List<Unit> targetList)
         {
-            float progress = GetProgress();
+            float progress = GetShapeProgress();
             if (m_areaTriggerData.MorphCurveId != 0)
                 progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -787,7 +784,7 @@ namespace Game.Entities
 
         void SearchUnitInCylinder(AreaTriggerCylinder cylinder, List<Unit> targetList)
         {
-            float progress = GetProgress();
+            float progress = GetShapeProgress();
             if (m_areaTriggerData.MorphCurveId != 0)
                 progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -822,7 +819,7 @@ namespace Game.Entities
 
         void SearchUnitInDisk(AreaTriggerDisk disk, List<Unit> targetList)
         {
-            float progress = GetProgress();
+            float progress = GetShapeProgress();
             if (m_areaTriggerData.MorphCurveId != 0)
                 progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -865,15 +862,15 @@ namespace Game.Entities
 
         void SearchUnitInBoundedPlane(AreaTriggerBoundedPlane boundedPlane, List<Unit> targetList)
         {
-            float progress = GetProgress();
+            float progress = GetShapeProgress();
             if (m_areaTriggerData.MorphCurveId != 0)
                 progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
             unsafe
             {
                 float scale = CalcCurrentScale();
-                float extentsY = MathFunctions.Lerp(boundedPlane.ExtentsX, boundedPlane.ExtentsTargetX, progress) * scale;
-                float extentsZ = MathFunctions.Lerp(boundedPlane.ExtentsY, boundedPlane.ExtentsTargetY, progress) * scale;
+                float extentsY = MathFunctions.Lerp(boundedPlane.ExtentsY, boundedPlane.ExtentsTargetY, progress) * scale;
+                float extentsZ = MathFunctions.Lerp(boundedPlane.ExtentsZ, boundedPlane.ExtentsTargetZ, progress) * scale;
                 float radius = MathF.Sqrt(extentsY * extentsY + extentsZ * extentsZ);
 
                 SearchUnits(targetList, radius, false);
@@ -1111,10 +1108,10 @@ namespace Game.Entities
                 {
                     SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)8);
                     var boundedPlane = areaTriggerData.ModifyValue<AreaTriggerBoundedPlane>(m_areaTriggerData.ShapeData);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsX), boundedPlaneInfo.Extents.X);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsY), boundedPlaneInfo.Extents.Y);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetX), boundedPlaneInfo.ExtentsTarget.X);
-                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetY), boundedPlaneInfo.ExtentsTarget.Y);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsY), boundedPlaneInfo.ExtentsY);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsZ), boundedPlaneInfo.ExtentsZ);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetY), boundedPlaneInfo.ExtentsTargetY);
+                    SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsTargetZ), boundedPlaneInfo.ExtentsTargetZ);
                 }
             );
 
@@ -1139,7 +1136,7 @@ namespace Game.Entities
 
             if (!shape.Vertices.Empty())
             {
-                float progress = GetProgress();
+                float progress = GetShapeProgress();
                 if (m_areaTriggerData.MorphCurveId != 0)
                     progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -1381,7 +1378,7 @@ namespace Game.Entities
 
             if (m_areaTriggerData.TargetRollPitchYaw.HasValue())
             {
-                float progress = GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing);
+                float progress = GetShapeProgress();
                 if (m_areaTriggerData.MorphCurveId != 0)
                     progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
 
@@ -1393,9 +1390,10 @@ namespace Game.Entities
             if (HasOverridePosition())
             {
                 result.Status = MovementUpdateResult.Moved;
-                result.Position.X = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveX, m_areaTriggerData.TimeToTargetPos);
-                result.Position.Y = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveY, m_areaTriggerData.TimeToTargetPos);
-                result.Position.Z = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveZ, m_areaTriggerData.TimeToTargetPos);
+                float progress = GetOverridePosProgress();
+                result.Position.X = GetOverrideCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveX, progress);
+                result.Position.Y = GetOverrideCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveY, progress);
+                result.Position.Z = GetOverrideCurveValueAtProgress(m_areaTriggerData.OverrideMoveCurveZ, progress);
 
                 if (m_movementInfo.transport.guid.IsEmpty())
                     result.Position = GetMovementOrigin().GetPositionOffsetTo(result.Position);
@@ -1546,8 +1544,7 @@ namespace Game.Entities
 
             float orientation = 0.0f;
             if (m_areaTriggerData.FacingCurveId != 0)
-                orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId,
-                    GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation += Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetShapeProgress());
 
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
             {
@@ -1608,7 +1605,7 @@ namespace Game.Entities
 
             float orientation = 0.0f;
             if (m_areaTriggerData.FacingCurveId != 0)
-                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetShapeProgress());
 
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
             {
@@ -1628,7 +1625,7 @@ namespace Game.Entities
         {
             float orientation = 0.0f;
             if (m_areaTriggerData.FacingCurveId != 0)
-                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetShapeProgress());
 
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
                 orientation += m_areaTriggerData.Facing;
@@ -1676,7 +1673,7 @@ namespace Game.Entities
 
             if (m_areaTriggerData.FacingCurveId != 0)
             {
-                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing));
+                orientation = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.FacingCurveId, GetOverrideCurveProgress(m_areaTriggerData.OverrideShapeCurve, m_areaTriggerData.TimeToTargetShape));
                 if (HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
                     orientation += m_areaTriggerData.Facing;
             }
@@ -1842,8 +1839,8 @@ namespace Game.Entities
         public uint GetTimeToTargetPos() { return m_areaTriggerData.TimeToTargetPos; }
         public void SetTimeToTargetPos(uint timeToTargetPos) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetPos), timeToTargetPos); }
 
-        public uint GetTimeToTargetFacing() { return m_areaTriggerData.TimeToTargetFacing; }
-        public void SetTimeToTargetFacing(uint timeToTargetFacing) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetFacing), timeToTargetFacing); }
+        public uint GetTimeToTargetFacing() { return m_areaTriggerData.TimeToTargetShape; }
+        public void SetTimeToTargetFacing(uint timeToTargetShape) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetShape), timeToTargetShape); }
 
         public int GetDuration() { return _duration; }
         public int GetTotalDuration() { return _totalDuration; }

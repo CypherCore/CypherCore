@@ -212,26 +212,28 @@ namespace Game.Entities
 
         public struct BoundedPlane : IShapeInfo
         {
-            public Vector2 Extents;
-            public Vector2 ExtentsTarget;
+            public float ExtentsY;
+            public float ExtentsZ;
+            public float ExtentsTargetY;
+            public float ExtentsTargetZ;
 
             public BoundedPlane() { }
             public BoundedPlane(float[] raw)
             {
-                Extents = new(raw[0], raw[1]);
-                ExtentsTarget = new(raw[2], raw[3]);
+                ExtentsY = raw[0];
+                ExtentsZ = raw[1];
+                ExtentsTargetY = raw[2];
+                ExtentsTargetZ = raw[3];
             }
 
             public bool IsDynamic()
             {
-                return Extents != ExtentsTarget;
+                return ExtentsY != ExtentsTargetY || ExtentsZ != ExtentsTargetZ;
             }
 
             public float GetMaxSearchRadius()
             {
-                return MathF.Sqrt(Math.Max(
-                    Extents.X * Extents.X / 4 + Extents.Y * Extents.Y / 4,
-                    ExtentsTarget.X * ExtentsTarget.X / 4 + ExtentsTarget.Y * ExtentsTarget.Y / 4));
+                return MathF.Sqrt(Math.Max(ExtentsY * ExtentsY + ExtentsZ * ExtentsZ, ExtentsTargetY * ExtentsTargetY + ExtentsTargetZ * ExtentsTargetZ));
             }
         }
     }
