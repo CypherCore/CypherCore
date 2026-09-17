@@ -2,6 +2,7 @@
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
 using Framework.Constants;
+using Framework.GameMath;
 using Game.AI;
 using Game.Maps;
 using Game.Movement;
@@ -19,7 +20,7 @@ namespace Game.Entities
     {
         public AreaTrigger() : base(false)
         {
-            _verticesUpdatePreviousOrientation = float.PositiveInfinity;
+            _verticesUpdatePreviousRotation = new();
             _reachedDestination = true;
 
             ObjectTypeId = TypeId.AreaTrigger;
@@ -249,11 +250,18 @@ namespace Game.Entities
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Facing), _stationaryPosition.GetOrientation());
 
-            UpdateShape();
-
             AI_Initialize();
 
             UpdateDynamicShapeFlag();
+
+            // Calculate initial position and rotation
+            {
+                var (_, movedPos, movedRot) = CalculateWorldPositionAndRotation();
+                Relocate(movedPos);
+                _rotation = new(movedRot.X, movedRot.Y, movedRot.Z, movedRot.W);
+            }
+
+            UpdateShape();
 
             if (!IsStaticSpawn())
             {
@@ -421,6 +429,23 @@ namespace Game.Entities
             SpellCastVisualField spellCastVisual = m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.SpellVisual);
             SetUpdateFieldValue(ref spellCastVisual.SpellXSpellVisualID, visual.SpellXSpellVisualID);
             SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, visual.ScriptVisualID);
+        }
+
+        void SetRollPitchYaw(float roll, float pitch, float yaw, float? targetRoll, float? targetPitch, float? targetYaw)
+        {
+            var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
+
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.RollPitchYaw), new Vector3(roll, pitch, yaw));
+            if (targetRoll.HasValue && targetPitch.HasValue && targetYaw.HasValue)
+            {
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.TargetRollPitchYaw), new Vector3(targetRoll.Value, targetPitch.Value, targetYaw.Value));
+                SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
+            }
+            else
+            {
+                RemoveOptionalUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.TargetRollPitchYaw));
+                UpdateDynamicShapeFlag();
+            }
         }
 
         public void SetDuration(int newDuration)
@@ -690,6 +715,8 @@ namespace Game.Entities
             float radius = MathFunctions.Lerp(sphere.Radius, sphere.RadiusTarget, progress) * scale;
 
             SearchUnits(targetList, radius, true);
+
+            targetList.RemoveAll(unit => !unit.IsWithinDist(this, radius));
         }
 
         void SearchUnitInBox(AreaTriggerBox box, List<Unit> targetList)
@@ -704,12 +731,25 @@ namespace Game.Entities
                 float extentsX = MathFunctions.Lerp(box.Extents.GetValue().X, box.ExtentsTarget.GetValue().X, progress) * scale;
                 float extentsY = MathFunctions.Lerp(box.Extents.GetValue().Y, box.ExtentsTarget.GetValue().Y, progress) * scale;
                 float extentsZ = MathFunctions.Lerp(box.Extents.GetValue().Z, box.ExtentsTarget.GetValue().Z, progress) * scale;
-                float radius = MathF.Sqrt(extentsX * extentsX + extentsY * extentsY);
+                float radius = MathF.Sqrt(extentsX * extentsX + extentsY * extentsY + extentsZ * extentsZ);
 
                 SearchUnits(targetList, radius, false);
 
-                Position boxCenter = GetPosition();
-                targetList.RemoveAll(unit => !unit.IsWithinBox(boxCenter, extentsX, extentsY, extentsZ / 2));
+                if (targetList.Empty())
+                    return;
+
+                Box rotatedBox = new CoordinateFrame(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W).ToRotationMatrix(), GetPosition())
+                    .ToWorldSpace(new AxisAlignedBox(new Vector3(-extentsX, -extentsY, -extentsZ / 2), new Vector3(extentsX, extentsY, extentsZ / 2)));
+
+                targetList.RemoveAll(unit => !rotatedBox.Contains(unit));
+
+# if DEBUG
+                // DebugVisualizeShape
+                Player caster = GetCaster()?.ToPlayer();
+                if (caster != null && caster.IsDebugAreaTriggers)
+                    for (int corner = 0; corner < 8; ++corner)
+                        caster.SummonCreature(1, rotatedBox.Corner(corner), TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(50));
+#endif
             }
         }
 
@@ -725,7 +765,24 @@ namespace Game.Entities
 
             SearchUnits(targetList, GetMaxSearchRadius(), false);
 
+            if (targetList.Empty())
+                return;
+
             targetList.RemoveAll(unit => unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ || !unit.IsInPolygon2D(this, _polygonVertices));
+
+#if DEBUG
+            // DebugVisualizeShape
+            Player caster = GetCaster()?.ToPlayer();
+            if (caster != null && caster.IsDebugAreaTriggers)
+            {
+                foreach (Position vertex in _polygonVertices)
+                {
+                    Vector3 pos = (Vector3)GetPosition() + vertex;
+                    caster.SummonCreature(1, pos + new Vector3(0, 0, -height), TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(50));
+                    caster.SummonCreature(1, pos + new Vector3(0, 0, +height), TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(50));
+                }
+            }
+#endif
         }
 
         void SearchUnitInCylinder(AreaTriggerCylinder cylinder, List<Unit> targetList)
@@ -740,12 +797,27 @@ namespace Game.Entities
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.HeightIgnoresScale))
                 height *= scale;
 
-            float minZ = GetPositionZ() - height;
-            float maxZ = GetPositionZ() + height;
+            float zOffset = MathFunctions.Lerp(cylinder.LocationZOffset, cylinder.LocationZOffsetTarget, progress) * scale;
 
-            SearchUnits(targetList, radius, false);
+            SearchUnits(targetList, MathF.Sqrt(radius * radius + height * height), false);
 
-            targetList.RemoveAll(unit => unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
+            if (targetList.Empty())
+                return;
+
+            Cylinder rotatedCylinder = new CoordinateFrame(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W).ToRotationMatrix(), GetPosition())
+                .ToWorldSpace(new Cylinder(new Vector3(0.0f, 0.0f, 0.0f + zOffset), new Vector3(0.0f, 0.0f, 0.0f + zOffset + height), radius));
+
+            targetList.RemoveAll(unit => !rotatedCylinder.Contains(unit));
+
+#if DEBUG
+            // DebugVisualizeShape
+            Player caster = GetCaster()?.ToPlayer();
+            if (caster != null && caster.IsDebugAreaTriggers)
+            {
+                for (int end = 0; end < 2; ++end)
+                    caster.SummonCreature(1, rotatedCylinder.GetPoint(end), TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(50));
+            }
+#endif
         }
 
         void SearchUnitInDisk(AreaTriggerDisk disk, List<Unit> targetList)
@@ -761,12 +833,34 @@ namespace Game.Entities
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.HeightIgnoresScale))
                 height *= scale;
 
-            float minZ = GetPositionZ() - height;
-            float maxZ = GetPositionZ() + height;
+            float zOffset = MathFunctions.Lerp(disk.LocationZOffset, disk.LocationZOffsetTarget, progress) * scale;
 
-            SearchUnits(targetList, outerRadius, false);
+            SearchUnits(targetList, MathF.Sqrt(outerRadius * outerRadius + height * height), false);
 
-            targetList.RemoveAll(unit => unit.IsInDist2d(this, innerRadius) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
+            if (targetList.Empty())
+                return;
+
+            Cylinder innerCylinder = new CoordinateFrame(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W).ToRotationMatrix(), GetPosition())
+                .ToWorldSpace(new Cylinder(new Vector3(0.0f, 0.0f, 0.0f + zOffset), new Vector3(0.0f, 0.0f, 0.0f + zOffset + height), innerRadius));
+
+            Cylinder outerCylinder = new CoordinateFrame(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W).ToRotationMatrix(), GetPosition())
+                .ToWorldSpace(new Cylinder(new Vector3(0.0f, 0.0f, 0.0f + zOffset), new Vector3(0.0f, 0.0f, 0.0f + zOffset + height), outerRadius));
+
+            targetList.RemoveAll(unit =>
+            {
+                Vector3 position = unit;
+                return innerCylinder.Contains(position) || !outerCylinder.Contains(position);
+            });
+
+#if DEBUG
+            // DebugVisualizeShape
+            Player caster = GetCaster()?.ToPlayer();
+            if (caster != null && caster.IsDebugAreaTriggers)
+            {
+                for (int end = 0; end < 2; ++end)
+                    caster.SummonCreature(1, innerCylinder.GetPoint(end), TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(50));
+            }
+#endif
         }
 
         void SearchUnitInBoundedPlane(AreaTriggerBoundedPlane boundedPlane, List<Unit> targetList)
@@ -778,14 +872,40 @@ namespace Game.Entities
             unsafe
             {
                 float scale = CalcCurrentScale();
-                float extentsX = MathFunctions.Lerp(boundedPlane.ExtentsX, boundedPlane.ExtentsTargetX, progress) * scale;
-                float extentsY = MathFunctions.Lerp(boundedPlane.ExtentsY, boundedPlane.ExtentsTargetY, progress) * scale;
-                float radius = MathF.Sqrt(extentsX * extentsX + extentsY * extentsY);
+                float extentsY = MathFunctions.Lerp(boundedPlane.ExtentsX, boundedPlane.ExtentsTargetX, progress) * scale;
+                float extentsZ = MathFunctions.Lerp(boundedPlane.ExtentsY, boundedPlane.ExtentsTargetY, progress) * scale;
+                float radius = MathF.Sqrt(extentsY * extentsY + extentsZ * extentsZ);
 
                 SearchUnits(targetList, radius, false);
 
-                Position boxCenter = GetPosition();
-                targetList.RemoveAll(unit => !unit.IsWithinBox(boxCenter, extentsX, extentsY, MapConst.MapSize));
+                if (targetList.Empty())
+                    return;
+
+                CoordinateFrame coordinateFrame = new CoordinateFrame(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W).ToRotationMatrix(), GetPosition());
+
+                Vector3[] corners =
+                {
+                    coordinateFrame.PointToWorldSpace(new Vector3(0.0f, -extentsY, -extentsZ)),
+                    coordinateFrame.PointToWorldSpace(new Vector3(0.0f,  extentsY, -extentsZ)),
+                    coordinateFrame.PointToWorldSpace(new Vector3(0.0f, -extentsY,  extentsZ)),
+                    coordinateFrame.PointToWorldSpace(new Vector3(0.0f,  extentsY,  extentsZ))
+                };
+
+                targetList.RemoveAll(unit =>
+                {
+                    Vector3 closestPoint = CollisionDetection.closestPointToRectangle(corners[0], corners[1], corners[2], corners[3], unit);
+                    return !unit.IsInDist(closestPoint.X, closestPoint.Y, closestPoint.Z, unit.GetCombatReach());
+                });
+
+#if DEBUG
+                // DebugVisualizeShape
+                Player caster = GetCaster()?.ToPlayer();
+                if (caster != null && caster.IsDebugAreaTriggers)
+                {
+                    foreach (Vector3 corner in corners)
+                        caster.SummonCreature(1, corner, TempSummonType.TimedDespawn, TimeSpan.FromMilliseconds(50));
+                }
+#endif
             }
         }
 
@@ -1010,10 +1130,9 @@ namespace Game.Entities
         void UpdatePolygonVertices()
         {
             AreaTriggerPolygon shape = m_areaTriggerData.ShapeData.Get<AreaTriggerPolygon>();
-            float newOrientation = GetOrientation();
 
             // No need to recalculate, orientation didn't change
-            if (MathFunctions.fuzzyEq(_verticesUpdatePreviousOrientation, newOrientation) && shape.VerticesTarget.Empty())
+            if (_verticesUpdatePreviousRotation == _rotation && shape.VerticesTarget.Empty())
                 return;
 
             _polygonVertices.AddRange(shape.Vertices._values.Select(p => new Position(p.X, p.Y)));
@@ -1034,19 +1153,16 @@ namespace Game.Entities
                 }
             }
 
-            float angleSin = (float)Math.Sin(newOrientation);
-            float angleCos = (float)Math.Cos(newOrientation);
+            Matrix4x4 rotationMatrix = Matrix4x4.CreateFromQuaternion(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W));
 
             // This is needed to rotate the vertices, following orientation
-            for (var i = 0; i < _polygonVertices.Count; ++i)
+            foreach (Position vertice in _polygonVertices)
             {
-                Vector2 vertice = _polygonVertices[i];
-
-                vertice.X = vertice.X * angleCos - vertice.Y * angleSin;
-                vertice.Y = vertice.Y * angleCos + vertice.X * angleSin;
+                Vector3 transformed = rotationMatrix.Multiply(vertice);
+                vertice.Relocate(transformed.X, transformed.Y);
             }
 
-            _verticesUpdatePreviousOrientation = newOrientation;
+            _verticesUpdatePreviousRotation = _rotation;
         }
 
         bool HasOverridePosition()
@@ -1164,57 +1280,36 @@ namespace Game.Entities
 
         void UpdatePositionAndRotation()
         {
-            Position oldPosition = GetPosition();
-            Position newPosition = null;
-            float oldRotation = GetOrientation();
-            var (movementUpdateResult, position, rotation) = CalculateLocalPositionAndRotation();
+            var (movementUpdateResult, newPosition, newRotation) = CalculateWorldPositionAndRotation();
 
             if (HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
             {
                 Unit target = GetTarget();
                 if (target != null)
-                {
                     RelocateStationaryPosition(target.GetPosition());
-
-                    newPosition = target.GetPositionWithOffset(position);
-
-                    if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
-                        rotation += target.GetOrientation();
-
-                    if (movementUpdateResult == MovementUpdateResult.MovementStatus.None)
-                        movementUpdateResult = MovementUpdateResult.MovementStatus.Moved;
-                }
             }
-            else
-            {
-                ITransport transport = GetTransport();
-                if (transport != null)
-                {
-                    newPosition = transport.GetPositionWithOffset(position);
 
-                    if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
-                        rotation += transport.GetTransportOrientation();
-                }
-                else
-                    newPosition = GetMovementOrigin().GetPositionWithOffset(position);
-            }
+            Position oldPosition = GetPosition();
+            Quaternion oldRotation = _rotation;
+            _rotation = new Quaternion(newRotation.X, newRotation.Y, newRotation.Z, newRotation.W);
 
             if (newPosition != oldPosition)
             {
-                GetMap().AreaTriggerRelocation(this, newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), rotation);
+                GetMap().AreaTriggerRelocation(this, newPosition.GetPositionX(), newPosition.GetPositionY(), newPosition.GetPositionZ(), newPosition.GetOrientation());
             }
-            else if (!MathFunctions.fuzzyEq(rotation, oldRotation))
+            else
             {
-                SetOrientation(rotation);
-                UpdateShape();
+                SetOrientation(newPosition.GetOrientation());
+                if (oldRotation != _rotation)
+                    UpdateShape();
             }
 
 #if DEBUG
-            if (movementUpdateResult != MovementUpdateResult.MovementStatus.None)
+            if (movementUpdateResult != MovementUpdateResult.None)
                 DebugVisualizePosition();
 #endif
 
-            if (movementUpdateResult == MovementUpdateResult.MovementStatus.Arrived)
+            if (movementUpdateResult == MovementUpdateResult.Arrived)
             {
                 if (!_reachedDestination)
                     _ai.OnDestinationReached();
@@ -1223,9 +1318,53 @@ namespace Game.Entities
             }
         }
 
-        MovementUpdateResult CalculateLocalPositionAndRotation()
+        MovementUpdateWorldResult CalculateWorldPositionAndRotation()
         {
-            MovementUpdateResult result = m_areaTriggerData.PathData.Visit(shape =>
+            var (status, localPosition, localRotation) = CalculateLocalPositionAndRotation();
+            MovementUpdateWorldResult worldResult = new()
+            {
+                Status = status,
+                Position = localPosition,
+                Rotation = Quaternion.CreateFromYawPitchRoll(localRotation.Z, localRotation.Y, localRotation.X)
+            };
+
+            if (HasAreaTriggerFlag(AreaTriggerFieldFlags.Attached))
+            {
+                Unit target = GetTarget();
+                if (target != null)
+                {
+                    worldResult.Position = target.GetPositionWithOffset(worldResult.Position);
+
+                    if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
+                        worldResult.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, target.GetOrientation()) * worldResult.Rotation;
+
+                    if (worldResult.Status == MovementUpdateResult.None)
+                        worldResult.Status = MovementUpdateResult.Moved;
+                }
+            }
+            else
+            {
+                ITransport transport = GetTransport();
+                if (transport != null)
+                {
+                    worldResult.Position = transport.GetPositionWithOffset(worldResult.Position);
+
+                    if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
+                        worldResult.Rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, transport.GetTransportOrientation()) * worldResult.Rotation;
+                }
+                else
+                    worldResult.Position = GetMovementOrigin().GetPositionWithOffset(worldResult.Position);
+            }
+
+            worldResult.Rotation.toEulerAnglesZYX(out localRotation.Z, out localRotation.Y, out localRotation.X);
+            worldResult.Position.SetOrientation(localRotation.Z);
+
+            return worldResult;
+        }
+
+        MovementUpdateLocalResult CalculateLocalPositionAndRotation()
+        {
+            MovementUpdateLocalResult result = m_areaTriggerData.PathData.Visit(shape =>
             {
                 if (shape is AreaTriggerSplineCalculator)
                     return CalculateLocalSplinePositionAndRotation();
@@ -1240,9 +1379,20 @@ namespace Game.Entities
                     return CalculateLocalStationaryPositionAndRotation();
             });
 
+            if (m_areaTriggerData.TargetRollPitchYaw.HasValue())
+            {
+                float progress = GetOverrideCurveProgress(m_areaTriggerData.OverrideFacingCurve, m_areaTriggerData.TimeToTargetFacing);
+                if (m_areaTriggerData.MorphCurveId != 0)
+                    progress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MorphCurveId, progress);
+
+                result.Rotation += Vector3.Lerp(m_areaTriggerData.TargetRollPitchYaw.GetValue(), m_areaTriggerData.RollPitchYaw.GetValue(), progress);
+            }
+            else
+                result.Rotation += m_areaTriggerData.RollPitchYaw.GetValue();
+
             if (HasOverridePosition())
             {
-                result.Status = MovementUpdateResult.MovementStatus.Moved;
+                result.Status = MovementUpdateResult.Moved;
                 result.Position.X = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveX, m_areaTriggerData.TimeToTargetPos);
                 result.Position.Y = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveY, m_areaTriggerData.TimeToTargetPos);
                 result.Position.Z = GetOverrideCurveValue(m_areaTriggerData.OverrideMoveCurveZ, m_areaTriggerData.TimeToTargetPos);
@@ -1371,7 +1521,7 @@ namespace Game.Entities
             SetUpdateFieldValue(pathData.ModifyValue(pathData.Center), center);
         }
 
-        MovementUpdateResult CalculateLocalSplinePositionAndRotation()
+        MovementUpdateLocalResult CalculateLocalSplinePositionAndRotation()
         {
             float currentTimePercent = Math.Clamp(GetElapsedTimeForMovement() / GetTimeToTarget(), 0.0f, 1.0f);
             bool reachedDestination = currentTimePercent >= 1.0f;
@@ -1406,13 +1556,31 @@ namespace Game.Entities
                     orientation += MathF.Atan2(derivative.Y, derivative.X);
             }
 
-            return new MovementUpdateResult() { Status = reachedDestination ? MovementUpdateResult.MovementStatus.Arrived : MovementUpdateResult.MovementStatus.Moved, Position = currentPosition, Rotation = orientation };
+            return new MovementUpdateLocalResult()
+            {
+                Status = reachedDestination ? MovementUpdateResult.Arrived : MovementUpdateResult.Moved,
+                Position = currentPosition,
+                Rotation = new Vector3(0.0f, 0.0f, orientation)
+            };
         }
 
-        MovementUpdateResult CalculateLocalOrbitPositionAndRotation(AreaTriggerOrbit orbit)
+        MovementUpdateLocalResult CalculateLocalOrbitPositionAndRotation(AreaTriggerOrbit orbit)
         {
-            // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
-            float pathProgress = (float)(GetElapsedTimeForMovement() + orbit.ExtraTimeForBlending) / (float)GetTimeToTarget();
+            uint movementTime = GetElapsedTimeForMovement();
+            uint timeToTarget = (uint)(GetTimeToTarget() + orbit.ExtraTimeForBlending);
+            bool firstLoop = true;
+            if (HasAreaTriggerFlag(AreaTriggerFieldFlags.CanLoop) && timeToTarget != 0)
+            {
+                // remove ExtraTimeForBlending if not on first loop
+                if (movementTime > timeToTarget)
+                {
+                    timeToTarget -= (uint)(int)orbit.ExtraTimeForBlending;
+                    movementTime = (uint)((movementTime - orbit.ExtraTimeForBlending) % timeToTarget);
+                    firstLoop = false;
+                }
+            }
+
+            float pathProgress = (float)movementTime / (float)timeToTarget;
             if (m_areaTriggerData.MoveCurveId != 0)
                 pathProgress = Global.DB2Mgr.GetCurveValueAt(m_areaTriggerData.MoveCurveId, pathProgress);
 
@@ -1421,19 +1589,21 @@ namespace Game.Entities
                 pathProgress = Math.Min(1.0f, pathProgress);
 
             float radius = orbit.Radius;
-            if (pathProgress <= 1.0f && MathFunctions.fuzzyNe(orbit.BlendFromRadius, radius))
+            if (firstLoop && MathFunctions.fuzzyNe(orbit.BlendFromRadius, radius))
             {
-                float blendCurve = (orbit.BlendFromRadius - radius) / radius;
-                MathFunctions.RoundToInterval(ref blendCurve, 1.0f, 4.0f);
-                float blendProgress = Math.Min(1.0f, pathProgress / blendCurve * 0.63661975f);
+                float blendCurve = Math.Clamp((orbit.BlendFromRadius - radius) / radius, 1.0f, 4.0f);
+                float blendProgress = Math.Clamp(Math.Abs(4.0f * pathProgress / blendCurve), 0.0f, 1.0f);
                 radius = MathFunctions.Lerp(orbit.BlendFromRadius, radius, blendProgress);
             }
 
-            // Adapt Path progress depending of circle direction
-            if (!orbit.CounterClockwise)
-                pathProgress *= -1;
+            float angle = 2.0f * MathF.PI * pathProgress;
 
-            float angle = orbit.InitialAngle + 2.0f * MathF.PI * pathProgress;
+            // Adapt angle depending of circle direction
+            if (!orbit.CounterClockwise)
+                angle *= -1;
+
+            angle += orbit.InitialAngle;
+
             Vector3 position = new(radius * MathF.Cos(angle), radius * MathF.Sin(angle), m_areaTriggerData.ZOffset);
 
             float orientation = 0.0f;
@@ -1446,10 +1616,15 @@ namespace Game.Entities
                 orientation += orbit.CounterClockwise ? MathFunctions.PiOver4 : -MathFunctions.PiOver4;
             }
 
-            return new MovementUpdateResult() { Status = MovementUpdateResult.MovementStatus.Moved, Position = position, Rotation = orientation };
+            return new MovementUpdateLocalResult()
+            {
+                Status = MovementUpdateResult.Moved,
+                Position = position,
+                Rotation = new Vector3(0.0f, 0.0f, orientation)
+            };
         }
 
-        MovementUpdateResult CalculateLocalStationaryPositionAndRotation()
+        MovementUpdateLocalResult CalculateLocalStationaryPositionAndRotation()
         {
             float orientation = 0.0f;
             if (m_areaTriggerData.FacingCurveId != 0)
@@ -1458,7 +1633,12 @@ namespace Game.Entities
             if (!HasAreaTriggerFlag(AreaTriggerFieldFlags.AbsoluteOrientation))
                 orientation += m_areaTriggerData.Facing;
 
-            return new MovementUpdateResult() { Status = MovementUpdateResult.MovementStatus.None, Position = Vector3.Zero, Rotation = orientation };
+            return new MovementUpdateLocalResult()
+            {
+                Status = MovementUpdateResult.None,
+                Position = Vector3.Zero,
+                Rotation = new Vector3(0.0f, 0.0f, orientation)
+            };
         }
 
         Position GetMovementOrigin()
@@ -1695,9 +1875,10 @@ namespace Game.Entities
         AuraEffect _aurEff;
 
         Position _stationaryPosition;
+        Quaternion _rotation;
         int _duration;
         int _totalDuration;
-        float _verticesUpdatePreviousOrientation;
+        Quaternion _verticesUpdatePreviousRotation;
         bool _isRemoved;
 
         List<Position> _polygonVertices = new();
@@ -1747,20 +1928,34 @@ namespace Game.Entities
             public float Curve;
         }
 
-        struct MovementUpdateResult
+        public enum MovementUpdateResult
         {
-            public enum MovementStatus
+            None,
+            Moved,
+            Arrived
+        }
+
+        struct MovementUpdateWorldResult
+        {
+            public MovementUpdateResult Status;
+            public Position Position;
+            public Quaternion Rotation;
+
+            public void Deconstruct(out MovementUpdateResult status, out Position position, out Quaternion rotation)
             {
-                None,
-                Moved,
-                Arrived
+                status = this.Status;
+                position = this.Position;
+                rotation = this.Rotation;
             }
+        }
 
-            public MovementStatus Status;
+        struct MovementUpdateLocalResult
+        {
+            public MovementUpdateResult Status;
             public Vector3 Position;
-            public float Rotation;
+            public Vector3 Rotation;
 
-            public void Deconstruct(out MovementStatus status, out Vector3 position, out float rotation)
+            public void Deconstruct(out MovementUpdateResult status, out Vector3 position, out Vector3 rotation)
             {
                 status = this.Status;
                 position = this.Position;

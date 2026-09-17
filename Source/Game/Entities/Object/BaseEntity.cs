@@ -824,6 +824,12 @@ namespace Game.Entities
                 AddToObjectUpdateIfNeeded();
         }
 
+        public void RemoveOptionalUpdateFieldValue<T>(OptionalUpdateField<T> updateField) where T : new()
+        {
+            if (updateField.RemoveValue())
+                AddToObjectUpdateIfNeeded();
+        }
+
         public void ClearDynamicUpdateFieldValues<T>(DynamicUpdateField<T> updateField) where T : new()
         {
             AddToObjectUpdateIfNeeded();

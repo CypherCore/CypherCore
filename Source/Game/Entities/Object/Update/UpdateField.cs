@@ -152,6 +152,17 @@ namespace Game.Entities
         public T GetValue() { return _value; }
 
         public bool HasValue() { return _hasValue; }
+
+        public bool RemoveValue()
+        {
+            if (HasValue())
+            {
+                _value = default;
+                _hasValue = false;
+                return true;
+            }
+            return false;
+        }
     }
 
     public class UpdateFieldArrayString

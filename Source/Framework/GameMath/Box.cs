@@ -13,7 +13,25 @@ namespace Framework.GameMath
         public float _area;
         public float _volume;
 
+        public Box(Box other)
+        {
+            _edgeVector = (Vector3[])other._edgeVector.Clone();
+            _center = other._center;
+            _area = other._area;
+            _volume = other._volume;
+        }
+
         public Box(Vector3 min, Vector3 max)
+        {
+            init(Vector3.Min(min, max), Vector3.Max(min, max));
+        }
+
+        public Box(AxisAlignedBox b)
+        {
+            init(b.Lo, b.Hi);
+        }
+
+        void init(Vector3 min, Vector3 max)
         {
             _center = (max + min) * 0.5f;
 
@@ -66,7 +84,7 @@ namespace Framework.GameMath
                 (osPoint.X <= 1) && (osPoint.Y <= 1) && (osPoint.Z <= 1);
         }
 
-        Vector3 Corner(int i)
+        public Vector3 Corner(int i)
         {
             switch (i)
             {

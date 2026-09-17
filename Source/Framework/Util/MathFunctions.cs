@@ -91,6 +91,10 @@ public static class MathFunctions
     {
         return (a == b) || (Math.Abs(a - b) <= eps(a, b));
     }
+    public static bool fuzzyEq(this Vector3 self, Vector3 other)
+    {
+        return fuzzyEq((self - other).LengthSquared(), 0);
+    }
     public static bool fuzzyGt(float a, float b)
     {
         return a > b + eps(a, b);
@@ -384,4 +388,6 @@ public static class MathFunctions
             elt.M21 * v.GetAt(0) + elt.M22 * v.GetAt(1) + elt.M23 * v.GetAt(2),
             elt.M31 * v.GetAt(0) + elt.M32 * v.GetAt(1) + elt.M33 * v.GetAt(2));
     }
+
+    public static float Magnitude(this Vector3 v) => MathF.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
 }
