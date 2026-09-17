@@ -257,7 +257,7 @@ namespace Game.DataStorage
                             break;
                     }
 
-                    createProperties.RollPitchYaw.Relocate(
+                    createProperties.RollPitchYaw = new Position(
                         Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(26)),
                         Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(27)),
                         Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(28)));
