@@ -3979,7 +3979,8 @@ namespace Game.Spells
                 castData.Immunities.Value = (uint)mechanicImmunityMask;
             }
 
-            UpdateSpellHealPrediction(castData.Predict, false);
+            if (castFlags.HasFlag(SpellCastFlags.HealPrediction))
+                UpdateSpellHealPrediction(castData.Predict, false);
 
             m_caster.SendMessageToSet(packet, true);
         }
