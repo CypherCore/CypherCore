@@ -286,6 +286,9 @@ namespace Game.Entities
         public bool SpeedIsTime;
         public OneOf<EmptyStruct, List<Vector3>, AreaTriggerOrbitInfo> Movement;
 
+        public Position RollPitchYaw;
+        public Position TargetRollPitchYaw;
+
         public uint ScriptId;
 
         public AreaTriggerCreateProperties()

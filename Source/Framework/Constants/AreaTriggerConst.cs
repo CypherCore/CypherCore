@@ -32,19 +32,14 @@ namespace Framework.Constants
 
     public enum AreaTriggerCreatePropertiesFlag
     {
-        None = 0x00,
-        HasAbsoluteOrientation = 0x01,
-        HasDynamicShape = 0x02, // DEPRECATED
-        HasAttached = 0x04, // DEPRECATED
-        HasFaceMovementDir = 0x08, // NYI
-        HasFollowsTerrain = 0x10, // NYI
-        AlwaysExterior = 0x20,
-        HasTargetRollPitchYaw = 0x40, // NYI
-        HasAnimId = 0x80, // DEPRECATED
-        VisualAnimIsDecay = 0x100,
-        HasAnimKitId = 0x200, // DEPRECATED
-        HasCircularMovement = 0x400, // DEPRECATED
-        Unk5 = 0x800,
+        None = 0x0000,
+        HeightIgnoresScale = 0x0001,
+        VisualAnimIsDecay = 0x0002,
+        AbsoluteOrientation = 0x0004,
+        FaceMovementDir = 0x0008, // NYI
+        FollowsTerrain = 0x0010, // NYI
+        AlwaysExterior = 0x0020,
+        UsesUnitRawFacing = 0x0040  // NYI
     }
 
     public enum AreaTriggerFieldFlags
@@ -58,7 +53,7 @@ namespace Framework.Constants
         Attached = 0x0020,
         FaceMovementDir = 0x0040, // applies when attached to unit (refers to movement direction of the unit)
         FollowsTerrain = 0x0080,
-        Unknown1025 = 0x0100,
+        UsesUnitRawFacing = 0x0100, // uses GetTransOffsetO instead of GetOrientation when attached to unit on a transport/vehicle
         AlwaysExterior = 0x0200,
         HasPlayers = 0x0400,
     }

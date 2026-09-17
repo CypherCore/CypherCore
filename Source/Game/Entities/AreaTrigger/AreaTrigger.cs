@@ -183,14 +183,16 @@ namespace Game.Entities
             {
                 var flags = GetCreateProperties().Flags;
                 AreaTriggerFieldFlags fieldFlags = AreaTriggerFieldFlags.None;
-                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasAbsoluteOrientation))
+                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.AbsoluteOrientation))
                     fieldFlags |= AreaTriggerFieldFlags.AbsoluteOrientation;
-                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFaceMovementDir))
+                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.FaceMovementDir))
                     fieldFlags |= AreaTriggerFieldFlags.FaceMovementDir;
-                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.HasFollowsTerrain))
+                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.FollowsTerrain))
                     fieldFlags |= AreaTriggerFieldFlags.FollowsTerrain;
                 if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.AlwaysExterior))
                     fieldFlags |= AreaTriggerFieldFlags.AlwaysExterior;
+                if (flags.HasFlag(AreaTriggerCreatePropertiesFlag.UsesUnitRawFacing))
+                    fieldFlags |= AreaTriggerFieldFlags.UsesUnitRawFacing;
                 return fieldFlags;
             }
 
@@ -249,6 +251,8 @@ namespace Game.Entities
                 });
 
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.Facing), _stationaryPosition.GetOrientation());
+
+            SetRollPitchYaw(GetCreateProperties().RollPitchYaw, GetCreateProperties().TargetRollPitchYaw);
 
             AI_Initialize();
 
@@ -409,9 +413,9 @@ namespace Game.Entities
             UpdateDynamicShapeFlag();
         }
 
-        void SetOverrideShapeCurve(float overrideFacing)
+        void SetOverrideShapeCurve(float overrideShape)
         {
-            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideShapeCurve), overrideFacing);
+            SetOverrideCurve(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.OverrideShapeCurve), overrideShape);
         }
 
         void SetOverrideShapeCurve(Vector2[] points, uint? startTimeOffset, CurveInterpolationMode interpolation)
@@ -433,12 +437,23 @@ namespace Game.Entities
 
         void SetRollPitchYaw(float roll, float pitch, float yaw, float? targetRoll, float? targetPitch, float? targetYaw)
         {
+            Position rollPitchYaw = new Position(roll, pitch, yaw);
+            Position targetRollPitchYaw = null;
+
+            if (targetRoll.HasValue && targetPitch.HasValue && targetYaw.HasValue)
+                targetRollPitchYaw = new Position(targetRoll.Value, targetPitch.Value, targetYaw.Value);
+
+            SetRollPitchYaw(rollPitchYaw, targetRollPitchYaw);
+        }
+
+        void SetRollPitchYaw(Position rollPitchYaw, Position targetRollPitchYaw = null)
+        {
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
 
-            SetUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.RollPitchYaw), new Vector3(roll, pitch, yaw));
-            if (targetRoll.HasValue && targetPitch.HasValue && targetYaw.HasValue)
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.RollPitchYaw), rollPitchYaw);
+            if (targetRollPitchYaw != null)
             {
-                SetUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.TargetRollPitchYaw), new Vector3(targetRoll.Value, targetPitch.Value, targetYaw.Value));
+                SetUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.TargetRollPitchYaw), targetRollPitchYaw);
                 SetAreaTriggerFlag(AreaTriggerFieldFlags.DynamicShape);
             }
             else
@@ -1839,8 +1854,8 @@ namespace Game.Entities
         public uint GetTimeToTargetPos() { return m_areaTriggerData.TimeToTargetPos; }
         public void SetTimeToTargetPos(uint timeToTargetPos) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetPos), timeToTargetPos); }
 
-        public uint GetTimeToTargetFacing() { return m_areaTriggerData.TimeToTargetShape; }
-        public void SetTimeToTargetFacing(uint timeToTargetShape) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetShape), timeToTargetShape); }
+        public uint GetTimeToTargetShape() { return m_areaTriggerData.TimeToTargetShape; }
+        public void SetTimeToTargetShape(uint timeToTargetShape) { SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetShape), timeToTargetShape); }
 
         public int GetDuration() { return _duration; }
         public int GetTotalDuration() { return _totalDuration; }

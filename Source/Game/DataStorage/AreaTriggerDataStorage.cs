@@ -6,6 +6,7 @@ using Framework.Database;
 using Game.Entities;
 using Game.Maps;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Game.DataStorage
@@ -126,8 +127,10 @@ namespace Game.DataStorage
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
                 //5            6             7             8              9       10         11                 12               13                 14     15
                 "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTargetScale, Speed, SpeedIsTime, " +
-                //16     17          18          19          20          21          22          23          24          25
-                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, ScriptName FROM `areatrigger_create_properties`");
+                //16     17          18          19          20          21          22          23          24
+                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, " +
+                //25    26     27   28          29           30         31
+                "Roll, Pitch, Yaw, TargetRoll, TargetPitch, TargetYaw, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
             {
                 do
@@ -235,8 +238,34 @@ namespace Game.DataStorage
                         default:
                             break;
                     }
+                    //25    26     27   28          29           30         31
+                    createProperties.RollPitchYaw.Relocate(
+                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(25)),
+                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(26)),
+                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(27)));
 
-                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(25));
+                    float?[] targetRollPitchYaw =
+                    {
+                        areatriggerCreateProperties.Read<float?>(28),
+                        areatriggerCreateProperties.Read<float?>(29),
+                        areatriggerCreateProperties.Read<float?>(30)
+                    };
+
+                    var trpyFields = targetRollPitchYaw.Count(angle => angle.HasValue);
+                    if (trpyFields == 3)
+                    {
+                        createProperties.TargetRollPitchYaw = new Position(
+                            Position.NormalizeOrientation(targetRollPitchYaw[0].Value),
+                            Position.NormalizeOrientation(targetRollPitchYaw[1].Value),
+                            Position.NormalizeOrientation(targetRollPitchYaw[2].Value));
+                    }
+                    else if (trpyFields != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) " +
+                            $"with invalid TargetRoll {targetRollPitchYaw[0]}, TargetPitch {targetRollPitchYaw[1]}, TargetYaw {targetRollPitchYaw[2]} combination, they must either all be NULL or all have value, ignored.");
+                    }
+
+                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(31));
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
                     if (!spline.Empty())
