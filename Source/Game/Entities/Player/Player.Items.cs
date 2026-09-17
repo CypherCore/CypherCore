@@ -6698,9 +6698,9 @@ namespace Game.Entities
                     if (azeriteItem != null)
                         azeriteLevel = azeriteItem.GetEffectiveLevel();
 
-                    uint itemLevel = Item.GetItemLevel(item.GetTemplate(), item.GetBonus(), GetLevel(), item.GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, azeriteLevel);
+                    uint itemLevel = Item.GetItemLevel(item.GetTemplate(), item.GetBonus(), GetLevel(), item.GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, azeriteLevel, 0);
                     uint itemLevelEffective = Item.GetItemLevel(item.GetTemplate(), item.GetBonus(), GetEffectiveLevel(), item.GetModifier(ItemModifier.TimewalkerLevel), m_unitData.MinItemLevel,
-                        m_unitData.MinItemLevelCutoff, IsUsingPvpItemLevels() && item.GetTemplate().HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0 : m_unitData.MaxItemLevel, IsUsingPvpItemLevels(), azeriteLevel);
+                        m_unitData.MinItemLevelCutoff, IsUsingPvpItemLevels() && item.GetTemplate().HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0 : m_unitData.MaxItemLevel, IsUsingPvpItemLevels(), azeriteLevel, 0);
                     totalItemLevel += itemLevel;
                     totalItemLevelEffective += itemLevelEffective;
                     if (!m_canTitanGrip && i == EquipmentSlot.MainHand && item.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand) // 2h weapon counts twice

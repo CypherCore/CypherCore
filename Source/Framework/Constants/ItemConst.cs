@@ -441,6 +441,10 @@ namespace Framework.Constants
         Reforge = 58,
         DbIdHigh = 59,
         DbIdLow = 60,
+        CurrencyWalletId = 61,
+        ItemModifierCurrencyWalletQuantity = 62,
+        ItemModifierCurrencyWalletVersion = 63,
+        ItemModifierRedirectedBaseStats = 64,
 
         Max
     }
@@ -470,11 +474,14 @@ namespace Framework.Constants
         OverrideCanDisenchant = 21,
         OverrideCanScrap = 22,
         ItemEffectId = 23,
+        OverrideCantUnequipInCombat = 24, /*NYI*/
         ModifiedCraftingStat = 25,
         RequiredLevelCurve = 27,
         IconFileDataID = 28,
+        MaxUpgradeSequenceValue = 29, /*NYI*/
         DescriptionText = 30,             // Item Description
         OverrideName = 31,             // Itemnamedescription Id
+        OverrideNoCreator = 32, /*NYI*/
         UpgradeSequenceValue = 33,
         ItemBonusListGroup = 34,
         ItemLimitCategory = 35,
@@ -482,6 +489,7 @@ namespace Framework.Constants
         ItemConversion = 37,
         ItemHistorySlot = 38,
         OverrideCanSalvage = 39,
+        SalvageLootId = 40, /*NYI*/
         OverrideCanRecraft = 41,
         ItemLevelBase = 42,
         PvpItemLevelBase = 43,
@@ -493,6 +501,8 @@ namespace Framework.Constants
         ScalingConfigAndReqLevel = 49,
         ItemBonusList = 50,
         ScalingConfig = 51,
+        CraftedItemLevel = 52,
+        ScalingItemLevelBonus = 53,             // Applied only when ItemScalingConfig is used
     }
 
     public enum ItemCollectionType : byte

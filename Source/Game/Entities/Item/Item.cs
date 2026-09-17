@@ -1792,10 +1792,10 @@ namespace Game.Entities
         public uint GetItemLevel(Player owner)
         {
             ItemTemplate itemTemplate = GetTemplate();
-            uint minItemLevel = owner.m_unitData.MinItemLevel;
-            uint minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
+            int minItemLevel = owner.m_unitData.MinItemLevel;
+            int minItemLevelCutoff = owner.m_unitData.MinItemLevelCutoff;
             bool pvpBonus = owner.IsUsingPvpItemLevels();
-            uint maxItemLevel = pvpBonus && itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0u : owner.m_unitData.MaxItemLevel;
+            int maxItemLevel = pvpBonus && itemTemplate.HasFlag(ItemFlags3.IgnoreItemLevelCapInPvp) ? 0 : owner.m_unitData.MaxItemLevel;
 
             uint azeriteLevel = 0;
             AzeriteItem azeriteItem = ToAzeriteItem();
@@ -1803,15 +1803,15 @@ namespace Game.Entities
                 azeriteLevel = azeriteItem.GetEffectiveLevel();
 
             return GetItemLevel(itemTemplate, _bonusData, owner.GetLevel(), GetModifier(ItemModifier.TimewalkerLevel),
-                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus, azeriteLevel);
+                minItemLevel, minItemLevelCutoff, maxItemLevel, pvpBonus, azeriteLevel, GetModifier(ItemModifier.ContentTuningId));
         }
 
-        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, uint minItemLevel, uint minItemLevelCutoff, uint maxItemLevel, bool pvpBonus, uint azeriteLevel)
+        public static uint GetItemLevel(ItemTemplate itemTemplate, BonusData bonusData, uint level, uint fixedLevel, int minItemLevel, int minItemLevelCutoff, int maxItemLevel, bool pvpBonus, uint azeriteLevel, uint overrideContentTuningId)
         {
             if (itemTemplate == null)
                 return 1;
 
-            uint itemLevel = bonusData.ItemLevel;
+            int itemLevel = (int)bonusData.ItemLevel;
             AzeriteLevelInfoRecord azeriteLevelInfo = CliDB.AzeriteLevelInfoStorage.LookupByKey(azeriteLevel);
             if (azeriteLevelInfo != null)
                 itemLevel = azeriteLevelInfo.ItemLevel;
@@ -1824,28 +1824,42 @@ namespace Game.Entities
                         level = fixedLevel;
                     else
                     {
-                        var levels = Global.DB2Mgr.GetContentTuningData(bonusData.ContentTuningId, [], true);
+                        var levels = Global.DB2Mgr.GetContentTuningData(overrideContentTuningId != 0 ? overrideContentTuningId : bonusData.ContentTuningId, [], true);
                         if (levels.HasValue)
                             level = (uint)Math.Min(Math.Max((ushort)level, levels.Value.MinLevel), levels.Value.MaxLevel);
                     }
 
-                    itemLevel = (uint)Math.Round(Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level));
+                    itemLevel = (int)Math.Round(Global.DB2Mgr.GetCurveValueAt(bonusData.PlayerLevelToItemLevelCurveId, level));
                 }
             }
             else
-                itemLevel = bonusData.ItemLevelOffset + (uint)Math.Round(Global.DB2Mgr.GetCurveValueAt(bonusData.ItemLevelOffsetCurveId, bonusData.ItemLevelOffsetItemLevel));
+            {
+                uint scalingLevel = bonusData.ItemLevelOffsetItemLevel;
+                if (bonusData.ScalingConfigUsesPlayerLevel)
+                    scalingLevel = fixedLevel != 0 ? fixedLevel : level;
+
+                if (bonusData.RestrictScalingToContentTuning)
+                {
+                    var levels = Global.DB2Mgr.GetContentTuningData(overrideContentTuningId != 0 ? overrideContentTuningId : bonusData.ContentTuningId, [], true);
+                    if (levels.HasValue)
+                        scalingLevel = (uint)Math.Min(Math.Max((short)scalingLevel, levels.Value.MinLevel), levels.Value.MaxLevel);
+                }
+
+                itemLevel = bonusData.ItemLevelOffset + (int)Math.Round(Global.DB2Mgr.GetCurveValueAt(bonusData.ItemLevelOffsetCurveId, scalingLevel));
+                itemLevel += bonusData.ScalingConfigItemLevelBonus;
+            }
 
             for (uint i = 0; i < ItemConst.MaxGemSockets; ++i)
-                itemLevel += bonusData.GemItemLevelBonus[i];
+                itemLevel += (int)bonusData.GemItemLevelBonus[i];
 
-            uint itemLevelBeforeUpgrades = itemLevel;
+            int itemLevelBeforeUpgrades = itemLevel;
 
             if (pvpBonus)
             {
                 if (bonusData.PvpItemLevel != 0)
                     itemLevel = bonusData.PvpItemLevel;
 
-                itemLevel += (uint)bonusData.PvpItemLevelBonus;
+                itemLevel += bonusData.PvpItemLevelBonus;
             }
 
             if (!bonusData.IgnoreSquish)
@@ -1866,10 +1880,13 @@ namespace Game.Entities
                             break;
 
                         if (squish.CurveID != 0)
-                            itemLevel = (uint)Math.Round(Global.DB2Mgr.GetCurveValueAt((uint)squish.CurveID, itemLevel));
+                            itemLevel = (int)Math.Round(Global.DB2Mgr.GetCurveValueAt((uint)squish.CurveID, itemLevel));
                     }
                 }
             }
+
+            if (bonusData.ItemLevelOffsetCurveId != 0)
+                itemLevel += bonusData.ScalingConfigCraftingQualityItemLevelBonus;
 
             if (itemTemplate.GetInventoryType() != InventoryType.NonEquip)
             {
@@ -1880,7 +1897,7 @@ namespace Game.Entities
                     itemLevel = maxItemLevel;
             }
 
-            return Math.Min(Math.Max(itemLevel, 1), 1300);
+            return (uint)Math.Min(Math.Max(itemLevel, 1), 1300);
         }
 
         public float GetItemStatValue(uint index, Player owner)
@@ -1919,7 +1936,7 @@ namespace Game.Entities
                 return _bonusData.DisenchantLootId;
 
             // ignore temporary item level scaling (pvp or timewalking)
-            uint itemLevel = GetItemLevel(GetTemplate(), _bonusData, (uint)_bonusData.RequiredLevel, GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, 0);
+            uint itemLevel = GetItemLevel(GetTemplate(), _bonusData, (uint)_bonusData.RequiredLevel, GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, 0, 0);
 
             var disenchantLoot = GetBaseDisenchantLoot(GetTemplate(), (uint)GetQuality(), itemLevel);
             if (disenchantLoot == null)
@@ -1934,7 +1951,7 @@ namespace Game.Entities
                 return null;
 
             // ignore temporary item level scaling (pvp or timewalking)
-            uint itemLevel = GetItemLevel(GetTemplate(), _bonusData, (uint)_bonusData.RequiredLevel, GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, 0);
+            uint itemLevel = GetItemLevel(GetTemplate(), _bonusData, (uint)_bonusData.RequiredLevel, GetModifier(ItemModifier.TimewalkerLevel), 0, 0, 0, false, 0, 0);
 
             var disenchantLoot = GetBaseDisenchantLoot(GetTemplate(), (uint)GetQuality(), itemLevel);
             if (disenchantLoot == null)
@@ -2945,8 +2962,10 @@ namespace Game.Entities
         public short PvpItemLevelBonus;
         public uint ItemLevelOffsetCurveId;
         public uint ItemLevelOffsetItemLevel;
-        public uint ItemLevelOffset;
+        public int ItemLevelOffset;
         public uint ItemSquishEraID;
+        public int ScalingConfigCraftingQualityItemLevelBonus;
+        public int ScalingConfigItemLevelBonus;
         public ItemEffectRecord[] Effects = new ItemEffectRecord[13];
         public int EffectCount;
         public uint LimitCategory;
@@ -2957,6 +2976,8 @@ namespace Game.Entities
         public bool HasFixedLevel;
         public bool CannotTradeBindOnPickup;
         public bool IgnoreSquish;
+        public bool RestrictScalingToContentTuning;
+        public bool ScalingConfigUsesPlayerLevel;
 
         State _state;
 
@@ -3002,6 +3023,8 @@ namespace Game.Entities
             ItemLevelOffsetCurveId = proto.GetItemLevelOffsetCurveId();
             ItemLevelOffsetItemLevel = proto.GetItemLevelOffsetItemLevel();
             ItemSquishEraID = proto.GetItemSquishEraId();
+            ScalingConfigItemLevelBonus = 0;
+            ScalingConfigCraftingQualityItemLevelBonus = 0;
 
             EffectCount = 0;
             foreach (ItemEffectRecord itemEffect in proto.Effects)
@@ -3018,6 +3041,8 @@ namespace Game.Entities
             CanRecraft = proto.HasFlag(ItemFlags4.Recraftable);
             CannotTradeBindOnPickup = proto.HasFlag(ItemFlags2.NoTradeBindOnAcquire);
             IgnoreSquish = false;
+            RestrictScalingToContentTuning = false;
+            ScalingConfigUsesPlayerLevel = false;
 
             _state.SuffixPriority = int.MaxValue;
             _state.AppearanceModPriority = int.MaxValue;
@@ -3028,6 +3053,8 @@ namespace Game.Entities
             _state.ItemLevelPriority = int.MaxValue;
             _state.PvpItemLevelPriority = int.MaxValue;
             _state.BondingPriority = int.MaxValue;
+            _state.ScalingConfigItemLevelBonusPriority = int.MaxValue;
+            _state.ScalingConfigCraftingQualityItemLevelBonusPriority = int.MaxValue;
         }
 
         public BonusData(ItemInstance itemInstance) : this(Global.ObjectMgr.GetItemTemplate(itemInstance.ItemID))
@@ -3212,6 +3239,7 @@ namespace Game.Entities
                 case ItemBonusType.ScalingConfigAndReqLevel:
                     if (values[1] < _state.ScalingStatDistributionPriority)
                     {
+                        _state.ScalingStatDistributionPriority = values[1];
                         ItemScalingConfigRecord scalingConfig = CliDB.ItemScalingConfigStorage.LookupByKey(values[0]);
                         if (scalingConfig != null)
                         {
@@ -3219,16 +3247,19 @@ namespace Game.Entities
                             if (itemOffsetCurve != null)
                             {
                                 ItemLevelOffsetCurveId = (uint)itemOffsetCurve.CurveID;
-                                ItemLevelOffset = (uint)itemOffsetCurve.Offset;
+                                ItemLevelOffset = itemOffsetCurve.Offset;
                             }
 
-                            ItemLevelOffsetItemLevel = (uint)scalingConfig.ItemLevel;
+                            ScalingConfigUsesPlayerLevel = false;
                             ItemSquishEraID = (uint)scalingConfig.ItemSquishEraID;
                             if ((scalingConfig.Flags & 0x1) != 0)
                                 IgnoreSquish = true;
+                            if ((scalingConfig.Flags & 0x2) != 0)
+                                RestrictScalingToContentTuning = true;
 
                             if (values[1] < _state.RequiredLevelCurvePriority)
                             {
+                                ItemLevelOffsetItemLevel = (uint)scalingConfig.ItemLevel;
                                 RequiredLevelOverride = scalingConfig.RequiredLevel;
                                 RequiredLevelCurve = 0;
                             }
@@ -3241,6 +3272,7 @@ namespace Game.Entities
                 case ItemBonusType.ScalingConfig:
                     if (values[1] < _state.ScalingStatDistributionPriority)
                     {
+                        _state.ScalingStatDistributionPriority = values[1];
                         ItemScalingConfigRecord scalingConfig = CliDB.ItemScalingConfigStorage.LookupByKey(values[0]);
                         if (scalingConfig != null)
                         {
@@ -3248,14 +3280,49 @@ namespace Game.Entities
                             if (itemOffsetCurve != null)
                             {
                                 ItemLevelOffsetCurveId = (uint)itemOffsetCurve.CurveID;
-                                ItemLevelOffset = (uint)itemOffsetCurve.Offset;
+                                ItemLevelOffset = itemOffsetCurve.Offset;
                             }
 
+                            ScalingConfigUsesPlayerLevel = true;
                             ItemLevelOffsetItemLevel = 0;
                             ItemSquishEraID = (uint)scalingConfig.ItemSquishEraID;
                             if ((scalingConfig.Flags & 0x1) != 0)
                                 IgnoreSquish = true;
+                            if ((scalingConfig.Flags & 0x2) != 0)
+                                RestrictScalingToContentTuning = true;
                         }
+                    }
+                    break;
+                case ItemBonusType.CraftedItemLevel:
+                    if (values[3] < _state.ScalingConfigCraftingQualityItemLevelBonusPriority)
+                    {
+                        bool isSquished = false;
+                        var currentRealm = Global.RealmMgr.GetCurrentRealm();
+                        if (currentRealm != null)
+                        {
+                            int currentBuild = (int)ClientBuildHelper.GetMinorMajorBugfixVersionForBuild(currentRealm.Build);
+
+                            // apply all squishes between items_squish and server_squish
+                            for (int squishId = values[1] + 1; squishId < CliDB.ItemSquishEraStorage.GetNumRows(); ++squishId)
+                            {
+                                ItemSquishEraRecord squish = CliDB.ItemSquishEraStorage.LookupByKey(squishId);
+                                if (squish == null || (squish.Flags & 0x1) != 0)
+                                    continue;
+
+                                isSquished = squish.Patch <= currentBuild;
+                                break;
+                            }
+                        }
+
+                        ScalingConfigCraftingQualityItemLevelBonus = values[isSquished ? 2 : 0];
+                        _state.ScalingConfigCraftingQualityItemLevelBonusPriority = values[3];
+                    }
+                    break;
+                case ItemBonusType.ScalingItemLevelBonus:
+                    if (values[1] < _state.ScalingConfigItemLevelBonusPriority)
+                    {
+                        ScalingConfigItemLevelBonus = values[0];
+                        _state.ScalingConfigItemLevelBonusPriority = values[1];
                     }
                     break;
             }
@@ -3272,6 +3339,8 @@ namespace Game.Entities
             public int ItemLevelPriority;
             public int PvpItemLevelPriority;
             public int BondingPriority;
+            public int ScalingConfigItemLevelBonusPriority;
+            public int ScalingConfigCraftingQualityItemLevelBonusPriority;
             public bool HasQualityBonus;
             public bool HasItemLimitCategory;
         }

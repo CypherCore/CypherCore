@@ -684,7 +684,7 @@ namespace Game.Loots
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
 
             // ignore temporary item level scaling (pvp or timewalking)
-            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, (uint)bonusData.RequiredLevel, 0, 0, 0, 0, false, 0);
+            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, (uint)bonusData.RequiredLevel, 0, 0, 0, 0, false, 0, 0);
 
             var disenchantLoot = Item.GetBaseDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
             if (disenchantLoot == null)
@@ -704,7 +704,7 @@ namespace Game.Loots
             ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(m_lootItem.itemid);
 
             // ignore temporary item level scaling (pvp or timewalking)
-            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, (uint)bonusData.RequiredLevel, 0, 0, 0, 0, false, 0);
+            uint itemLevel = Item.GetItemLevel(itemTemplate, bonusData, (uint)bonusData.RequiredLevel, 0, 0, 0, 0, false, 0, 0);
 
             var disenchantLoot = Item.GetBaseDisenchantLoot(itemTemplate, (uint)bonusData.Quality, itemLevel);
             if (disenchantLoot == null)

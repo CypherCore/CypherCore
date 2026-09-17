@@ -360,7 +360,7 @@ namespace Game.DataStorage
         public uint Id;
         public ulong BaseExperienceToNextLevel;
         public ulong MinimumExperienceToNextLevel;
-        public uint ItemLevel;
+        public int ItemLevel;
     }
 
     public sealed class AzeritePowerRecord

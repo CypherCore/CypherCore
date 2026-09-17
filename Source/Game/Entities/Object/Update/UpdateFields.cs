@@ -1329,9 +1329,9 @@ namespace Game.Entities
         public UpdateField<float> ManaCostMultiplier = new(96, 109);
         public UpdateField<float> MaxHealthModifier = new(96, 110);
         public UpdateField<float> HoverHeight = new(96, 111);
-        public UpdateField<uint> MinItemLevelCutoff = new(96, 112);
-        public UpdateField<uint> MinItemLevel = new(96, 113);
-        public UpdateField<uint> MaxItemLevel = new(96, 114);
+        public UpdateField<int> MinItemLevelCutoff = new(96, 112);
+        public UpdateField<int> MinItemLevel = new(96, 113);
+        public UpdateField<int> MaxItemLevel = new(96, 114);
         public UpdateField<uint> AzeriteItemLevel = new(96, 115);
         public UpdateField<uint> WildBattlePetLevel = new(96, 116);
         public UpdateField<uint> BattlePetCompanionExperience = new(96, 117);
@@ -1539,9 +1539,9 @@ namespace Game.Entities
             }
             data.WriteFloat(MaxHealthModifier);
             data.WriteFloat(HoverHeight);
-            data.WriteUInt32(MinItemLevelCutoff);
-            data.WriteUInt32(MinItemLevel);
-            data.WriteUInt32(MaxItemLevel);
+            data.WriteInt32(MinItemLevelCutoff);
+            data.WriteInt32(MinItemLevel);
+            data.WriteInt32(MaxItemLevel);
             data.WriteUInt32(AzeriteItemLevel);
             data.WriteUInt32(WildBattlePetLevel);
             data.WriteUInt32(BattlePetCompanionExperience);
@@ -2121,15 +2121,15 @@ namespace Game.Entities
                 }
                 if (changesMask[112])
                 {
-                    data.WriteUInt32(MinItemLevelCutoff);
+                    data.WriteInt32(MinItemLevelCutoff);
                 }
                 if (changesMask[113])
                 {
-                    data.WriteUInt32(MinItemLevel);
+                    data.WriteInt32(MinItemLevel);
                 }
                 if (changesMask[114])
                 {
-                    data.WriteUInt32(MaxItemLevel);
+                    data.WriteInt32(MaxItemLevel);
                 }
                 if (changesMask[115])
                 {
