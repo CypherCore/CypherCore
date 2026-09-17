@@ -154,7 +154,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    if (shape == AreaTriggerShapeType.Unk || shape >= AreaTriggerShapeType.Max)
+                    if (shape == AreaTriggerShapeType.Script || shape == AreaTriggerShapeType.FromUnit || shape >= AreaTriggerShapeType.Max)
                     {
                         Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid shape {shape}.");
                         continue;
@@ -221,8 +221,9 @@ namespace Game.DataStorage
                         case AreaTriggerShapeType.Box:
                             createProperties.Shape.Data = new AreaTriggerShapeInfo.Box(shapeData);
                             break;
+                        case AreaTriggerShapeType.Quad2D:
                         case AreaTriggerShapeType.Polygon:
-                            AreaTriggerShapeInfo.Polygon polygon = new AreaTriggerShapeInfo.Polygon(shapeData);
+                            AreaTriggerShapeInfo.Polygon polygon = new AreaTriggerShapeInfo.Polygon(shape, shapeData);
                             if (polygon.Height <= 0.0f)
                             {
                                 polygon.Height = 1.0f;

@@ -116,10 +116,12 @@ namespace Game.Entities
             public List<Vector2> PolygonVerticesTarget = new();
             public float Height;
             public float HeightTarget;
+            public AreaTriggerShapeType Type;
 
-            public Polygon() { }
-            public Polygon(float[] raw)
+            public Polygon() { Type = AreaTriggerShapeType.Polygon; }
+            public Polygon(AreaTriggerShapeType type, float[] raw)
             {
+                Type = type;
                 Height = raw[0];
                 HeightTarget = raw[1];
             }

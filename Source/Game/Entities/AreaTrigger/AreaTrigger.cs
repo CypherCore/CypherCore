@@ -1070,21 +1070,21 @@ namespace Game.Entities
             (
                 sphereInfo =>
                 {
-                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)0);
+                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)AreaTriggerShapeType.Sphere);
                     var sphere = areaTriggerData.ModifyValue<AreaTriggerSphere>(m_areaTriggerData.ShapeData);
                     SetUpdateFieldValue(sphere.ModifyValue(sphere.Radius), sphereInfo.Radius);
                     SetUpdateFieldValue(sphere.ModifyValue(sphere.RadiusTarget), sphereInfo.RadiusTarget);
                 },
                 boxInfo =>
                 {
-                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)1);
+                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)AreaTriggerShapeType.Box);
                     var box = areaTriggerData.ModifyValue<AreaTriggerBox>(m_areaTriggerData.ShapeData);
                     SetUpdateFieldValue(box.ModifyValue(box.Extents), boxInfo.Extents);
                     SetUpdateFieldValue(box.ModifyValue(box.ExtentsTarget), boxInfo.ExtentsTarget);
                 },
                 polygonInfo =>
                 {
-                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)3);
+                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)polygonInfo.Type);
                     var polygon = areaTriggerData.ModifyValue<AreaTriggerPolygon>(m_areaTriggerData.ShapeData);
                     var vertices = polygon.ModifyValue(polygon.Vertices);
                     ClearDynamicUpdateFieldValues(vertices);
@@ -1099,7 +1099,7 @@ namespace Game.Entities
                 },
                 cylinderInfo =>
                 {
-                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)4);
+                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)AreaTriggerShapeType.Cylinder);
                     var cylinder = areaTriggerData.ModifyValue<AreaTriggerCylinder>(m_areaTriggerData.ShapeData);
                     SetUpdateFieldValue(cylinder.ModifyValue(cylinder.Radius), cylinderInfo.Radius);
                     SetUpdateFieldValue(cylinder.ModifyValue(cylinder.RadiusTarget), cylinderInfo.RadiusTarget);
@@ -1110,7 +1110,7 @@ namespace Game.Entities
                 },
                 diskInfo =>
                 {
-                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)7);
+                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)AreaTriggerShapeType.Disk);
                     var disk = areaTriggerData.ModifyValue<AreaTriggerDisk>(m_areaTriggerData.ShapeData);
                     SetUpdateFieldValue(disk.ModifyValue(disk.InnerRadius), diskInfo.InnerRadius);
                     SetUpdateFieldValue(disk.ModifyValue(disk.InnerRadiusTarget), diskInfo.InnerRadiusTarget);
@@ -1123,7 +1123,7 @@ namespace Game.Entities
                 },
                 boundedPlaneInfo =>
                 {
-                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)8);
+                    SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.ShapeType), (byte)AreaTriggerShapeType.BoundedPlane);
                     var boundedPlane = areaTriggerData.ModifyValue<AreaTriggerBoundedPlane>(m_areaTriggerData.ShapeData);
                     SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsY), boundedPlaneInfo.ExtentsY);
                     SetUpdateFieldValue(boundedPlane.ModifyValue(boundedPlane.ExtentsZ), boundedPlaneInfo.ExtentsZ);
