@@ -278,6 +278,8 @@ namespace Game.Entities
 
         public uint? SpellForVisuals;
 
+        public int PositionalSoundKitId;
+
         public uint TimeToTargetScale;
 
         public AreaTriggerShapeInfo Shape = new();

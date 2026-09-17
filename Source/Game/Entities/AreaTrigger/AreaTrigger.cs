@@ -179,6 +179,8 @@ namespace Game.Entities
             if (GetCreateProperties() != null && GetCreateProperties().Flags.HasFlag(AreaTriggerCreatePropertiesFlag.VisualAnimIsDecay))
                 SetUpdateFieldValue(visualAnim.ModifyValue(visualAnim.IsDecay), true);
 
+            SetUpdateFieldValue(areaTriggerData.ModifyValue(areaTriggerData.PositionalSoundKitID), GetCreateProperties().PositionalSoundKitId);
+
             AreaTriggerFieldFlags fieldFlags()
             {
                 var flags = GetCreateProperties().Flags;

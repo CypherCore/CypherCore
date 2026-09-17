@@ -125,11 +125,13 @@ namespace Game.DataStorage
 
             //                                                              0   1         2              3                    4
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
-                //5            6             7             8              9       10         11                 12               13                 14     15
-                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, TimeToTargetScale, Speed, SpeedIsTime, " +
-                //16     17          18          19          20          21          22          23          24
+                //5            6             7             8              9       10         11                 12               
+                "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, " +
+                //13                    14                 15     16
+                "PositionalSoundKitId, TimeToTargetScale, Speed, SpeedIsTime, " +
+                //17     18          19          20          21          22          23          24          25
                 "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, " +
-                //25    26     27   28          29           30         31
+                //26    27     28   29          30           31         32
                 "Roll, Pitch, Yaw, TargetRoll, TargetPitch, TargetYaw, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
             {
@@ -144,7 +146,7 @@ namespace Game.DataStorage
 
                     createProperties.Flags = (AreaTriggerCreatePropertiesFlag)areatriggerCreateProperties.Read<uint>(4);
 
-                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(16);
+                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(17);
 
                     if (areaTriggerId.Id != 0 && createProperties.Template == null)
                     {
@@ -188,13 +190,28 @@ namespace Game.DataStorage
                         }
                     }
 
-                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(13);
-                    createProperties.Speed = areatriggerCreateProperties.Read<float>(14);
-                    createProperties.SpeedIsTime = areatriggerCreateProperties.Read<bool>(15);
+                    createProperties.PositionalSoundKitId = areatriggerCreateProperties.Read<int>(13);
+                    if (createProperties.PositionalSoundKitId != 0)
+                    {
+                        if (!CliDB.SoundKitStorage.HasRecord((uint)createProperties.PositionalSoundKitId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid PositionalSoundKitId {createProperties.PositionalSoundKitId}, set to 0.");
+                            createProperties.PositionalSoundKitId = 0;
+                        }
+                        else if (shape != AreaTriggerShapeType.Sphere && shape != AreaTriggerShapeType.Cylinder)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with PositionalSoundKitId {createProperties.PositionalSoundKitId} on unsupported shape {shape}, set to 0.");
+                            createProperties.PositionalSoundKitId = 0;
+                        }
+                    }
+
+                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(14);
+                    createProperties.Speed = areatriggerCreateProperties.Read<float>(15);
+                    createProperties.SpeedIsTime = areatriggerCreateProperties.Read<bool>(16);
 
                     float[] shapeData = new float[SharedConst.MaxAreatriggerEntityData];
                     for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                        shapeData[i] = areatriggerCreateProperties.Read<float>(17 + i);
+                        shapeData[i] = areatriggerCreateProperties.Read<float>(18 + i);
 
                     switch (shape)
                     {
@@ -238,17 +255,17 @@ namespace Game.DataStorage
                         default:
                             break;
                     }
-                    //25    26     27   28          29           30         31
+
                     createProperties.RollPitchYaw.Relocate(
-                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(25)),
                         Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(26)),
-                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(27)));
+                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(27)),
+                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(28)));
 
                     float?[] targetRollPitchYaw =
                     {
-                        areatriggerCreateProperties.Read<float?>(28),
                         areatriggerCreateProperties.Read<float?>(29),
-                        areatriggerCreateProperties.Read<float?>(30)
+                        areatriggerCreateProperties.Read<float?>(30),
+                        areatriggerCreateProperties.Read<float?>(31)
                     };
 
                     var trpyFields = targetRollPitchYaw.Count(angle => angle.HasValue);
@@ -265,7 +282,7 @@ namespace Game.DataStorage
                             $"with invalid TargetRoll {targetRollPitchYaw[0]}, TargetPitch {targetRollPitchYaw[1]}, TargetYaw {targetRollPitchYaw[2]} combination, they must either all be NULL or all have value, ignored.");
                     }
 
-                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(31));
+                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(32));
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
                     if (!spline.Empty())
