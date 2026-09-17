@@ -3692,23 +3692,23 @@ namespace Game.Entities
                         HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Base, (float)val, apply);
                         break;
                     case ItemModType.Agility:                          // modify agility
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Total, (float)val, apply);
                         UpdateStatBuffMod(Stats.Agility);
                         break;
                     case ItemModType.Strength:                         //modify strength
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Total, (float)val, apply);
                         UpdateStatBuffMod(Stats.Strength);
                         break;
                     case ItemModType.Intellect:                        //modify intellect
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Total, (float)val, apply);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
                     case ItemModType.Spirit:                           //modify spirit
-                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatSpirit, UnitModifierFlatType.Total, (float)val, apply);
                         UpdateStatBuffMod(Stats.Spirit);
                         break;
                     case ItemModType.Stamina:                          //modify stamina
-                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Base, (float)val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStamina, UnitModifierFlatType.Total, (float)val, apply);
                         UpdateStatBuffMod(Stats.Stamina);
                         break;
                     case ItemModType.DefenseSkillRating:
@@ -3847,28 +3847,28 @@ namespace Game.Entities
                         ApplyRatingMod(CombatRating.Studiness, (int)val, apply);
                         break;
                     case ItemModType.AgiStrInt:
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Total, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Total, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Total, val, apply);
                         UpdateStatBuffMod(Stats.Agility);
                         UpdateStatBuffMod(Stats.Strength);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
                     case ItemModType.AgiStr:
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Total, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Total, val, apply);
                         UpdateStatBuffMod(Stats.Agility);
                         UpdateStatBuffMod(Stats.Strength);
                         break;
                     case ItemModType.AgiInt:
-                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatAgility, UnitModifierFlatType.Total, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Total, val, apply);
                         UpdateStatBuffMod(Stats.Agility);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;
                     case ItemModType.StrInt:
-                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Base, val, apply);
-                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Base, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatStrength, UnitModifierFlatType.Total, val, apply);
+                        HandleStatFlatModifier(UnitMods.StatIntellect, UnitModifierFlatType.Total, val, apply);
                         UpdateStatBuffMod(Stats.Strength);
                         UpdateStatBuffMod(Stats.Intellect);
                         break;

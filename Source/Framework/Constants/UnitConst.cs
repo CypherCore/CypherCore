@@ -215,17 +215,16 @@ namespace Framework.Constants
 
     public enum UnitModifierFlatType
     {
-        Base = 0,
-        BasePCTExcludeCreate = 1, // percent modifier affecting all stat values from auras and gear but not player base for level
-        Total = 2,
-        End = 3
+        Base = 0, // flat value containing only fixed create stats, e.g. player_classlevelstats
+        Total = 1, // flat value containing flat modfiers from gear and auras
+        End
     }
 
     public enum UnitModifierPctType
     {
-        Base = 0,
-        Total = 1,
-        End = 2
+        Base = 0, // percent modifier affecting only BASE_VALUE
+        Total = 1, // percent modifier affecting BASE_VALUE and TOTAL_VALUE
+        End
     }
 
     public enum AttackPowerModIndex

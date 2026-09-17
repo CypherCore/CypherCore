@@ -104,7 +104,6 @@ namespace Game.Entities
         List<AreaTrigger> m_areaTrigger = new();
         List<AreaTrigger> m_insideAreaTriggers = new();
         protected List<DynamicObject> m_dynObj = new();
-        protected float[] CreateStats = new float[(int)Stats.Max];
         float[] m_floatStatPosBuff = new float[(int)Stats.Max];
         float[] m_floatStatNegBuff = new float[(int)Stats.Max];
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];

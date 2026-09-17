@@ -45,7 +45,6 @@ namespace Game.Entities
             {
                 m_auraFlatModifiersGroup[i] = new float[(int)UnitModifierFlatType.End];
                 m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.Base] = 0.0f;
-                m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.BasePCTExcludeCreate] = 100.0f;
                 m_auraFlatModifiersGroup[i][(int)UnitModifierFlatType.Total] = 0.0f;
 
                 m_auraPctModifiersGroup[i] = new float[(int)UnitModifierPctType.End];

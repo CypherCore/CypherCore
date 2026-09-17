@@ -27,7 +27,6 @@ namespace Game.Entities
             switch (modifierType)
             {
                 case UnitModifierFlatType.Base:
-                case UnitModifierFlatType.BasePCTExcludeCreate:
                 case UnitModifierFlatType.Total:
                     m_auraFlatModifiersGroup[(int)unitMod][(int)modifierType] += apply ? amount : -amount;
                     break;
@@ -241,29 +240,17 @@ namespace Game.Entities
         {
             float modPos = 0.0f;
             float modNeg = 0.0f;
-            float factor = 0.0f;
 
             UnitMods unitMod = UnitMods.StatStart + (int)stat;
 
-            // includes value from items and enchantments
-            float modValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
-            if (modValue > 0.0f)
-                modPos += modValue;
-            else
-                modNeg += modValue;
-
             if (IsGuardian())
             {
-                modValue = ((Guardian)this).GetBonusStatFromOwner(stat);
+                float modValue = ((Guardian)this).GetBonusStatFromOwner(stat);
                 if (modValue > 0.0f)
                     modPos += modValue;
                 else
                     modNeg += modValue;
             }
-
-            // SPELL_AURA_MOD_STAT_BONUS_PCT only affects BASE_VALUE
-            modPos = MathFunctions.CalculatePct(modPos, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-            modNeg = MathFunctions.CalculatePct(modNeg, Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
 
             modPos += GetTotalAuraModifier(AuraType.ModStat, aurEff =>
             {
@@ -279,25 +266,35 @@ namespace Game.Entities
                 return false;
             });
 
-            factor = GetTotalAuraMultiplier(AuraType.ModPercentStat, aurEff =>
-            {
-                if (aurEff.GetMiscValue() == -1 || aurEff.GetMiscValue() == (int)stat)
-                    return true;
-                return false;
-            });
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
+            baseValue *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            baseValue *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            float baseModFromPct = baseValue - GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
 
-            factor *= GetTotalAuraMultiplier(AuraType.ModTotalStatPercentage, aurEff =>
-            {
-                if (aurEff.GetMiscValue() == -1 || aurEff.GetMiscValue() == (int)stat)
-                    return true;
-                return false;
-            });
+            float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            MathFunctions.AddPct(ref totalValue, GetTotalAuraModifierByMiscValue(AuraType.ModStatBonusPct, (int)stat));
+            float totalModFromPct = totalValue * GetPctModifierValue(unitMod, UnitModifierPctType.Total) - totalValue;
+            float modsFromPct = baseModFromPct + totalModFromPct;
 
-            modPos *= factor;
-            modNeg *= factor;
+            // recalculate stat bonuses not applied by auras
+            float nonAuraMod = totalValue;
+            nonAuraMod -= modPos; // remove positive auras
+            nonAuraMod -= modNeg; // remove negative auras
 
-            m_floatStatPosBuff[(int)stat] = modPos;
-            m_floatStatNegBuff[(int)stat] = modNeg;
+            // add item stat bonuses to positive
+            if (nonAuraMod > 0.0f)
+                modPos += nonAuraMod;
+            else
+                modNeg += nonAuraMod;
+
+            // add pct mods
+            if (modsFromPct > 0.0f)
+                modPos += modsFromPct;
+            else
+                modNeg += modsFromPct;
+
+            m_floatStatPosBuff[(int)stat] = MathF.Round(modPos);
+            m_floatStatNegBuff[(int)stat] = MathF.Round(modNeg);
 
             UpdateStatBuffModForClient(stat);
         }
@@ -306,6 +303,18 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatPosBuff, (int)stat), (int)m_floatStatPosBuff[(int)stat]);
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StatNegBuff, (int)stat), (int)m_floatStatNegBuff[(int)stat]);
+        }
+
+        public void SetCreateStat(Stats stat, float val)
+        {
+            UnitMods unitMod = UnitMods.StatStart + (int)stat;
+            HandleStatFlatModifier(unitMod, UnitModifierFlatType.Base, val, true);
+        }
+
+        public float GetCreateStat(Stats stat)
+        {
+            UnitMods unitMod = UnitMods.StatStart + (int)stat;
+            return GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
         }
 
         public virtual bool UpdateStats(Stats stat) { return false; }
@@ -317,7 +326,7 @@ namespace Game.Entities
             if (school > SpellSchools.Normal)
             {
                 UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
-                float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+                float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
                 value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
 
                 float baseValue = value;
@@ -394,16 +403,6 @@ namespace Game.Entities
             SetBonusResistanceMod(SpellSchools.Normal, bonusVal);
         }
 
-        public float GetCreateStat(Stats stat)
-        {
-            return CreateStats[(int)stat];
-        }
-
-        public void SetCreateStat(Stats stat, float val)
-        {
-            CreateStats[(int)stat] = val;
-        }
-
         public float GetPosStat(Stats stat) { return m_unitData.StatPosBuff[(int)stat]; }
 
         public float GetNegStat(Stats stat) { return m_unitData.StatNegBuff[(int)stat]; }
@@ -472,13 +471,16 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.StatStart + (int)stat;
 
-            float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
-            value += GetCreateStat(stat);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+            // value = (base_value * base_pct) * total_pct + total_value * total_pct
+            float baseValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);
+            baseValue *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+            baseValue *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
-            return value;
+            float totalValue = GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            MathFunctions.AddPct(ref totalValue, GetTotalAuraModifierByMiscValue(AuraType.ModStatBonusPct, (int)stat));
+            totalValue *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+
+            return baseValue + totalValue;
         }
 
         //Health  
@@ -1128,6 +1130,7 @@ namespace Game.Entities
             {
                 float value = GetTotalStatValue(i);
                 SetStat(i, (int)value);
+                UpdateStatBuffMod(i);
             }
 
             UpdateArmor();
@@ -1159,10 +1162,11 @@ namespace Game.Entities
 
         public override bool UpdateStats(Stats stat)
         {
-            // value = ((base_value * base_pct) + total_value) * total_pct
+            // value = (base_value * base_pct) * total_pct + total_value * total_pct
             float value = GetTotalStatValue(stat);
 
             SetStat(stat, (int)value);
+            UpdateStatBuffMod(stat);
 
             if (stat == Stats.Stamina || stat == Stats.Intellect || stat == Stats.Strength)
             {

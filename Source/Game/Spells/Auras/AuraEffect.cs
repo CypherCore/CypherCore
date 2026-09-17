@@ -3443,24 +3443,13 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if (GetMiscValue() < -1 || GetMiscValue() > 4)
+            if (GetMiscValue() < 0 || GetMiscValue() >= (int)Stats.Max)
             {
                 Log.outError(LogFilter.Spells, "WARNING: Misc Value for SPELL_AURA_MOD_STAT_BONUS_PCT not valid");
                 return;
             }
 
-            // only players have base stats
-            if (!target.IsTypeId(TypeId.Player))
-                return;
-
-            for (Stats stat = Stats.Strength; stat < Stats.Max; ++stat)
-            {
-                if (GetMiscValue() == (int)stat || GetMiscValue() == -1)
-                {
-                    target.HandleStatFlatModifier(UnitMods.StatStart + (int)stat, UnitModifierFlatType.BasePCTExcludeCreate, (float)GetAmount(), apply);
-                    target.UpdateStatBuffMod(stat);
-                }
-            }
+            target.UpdateStats((Stats)GetMiscValue());
         }
 
         [AuraEffectHandler(AuraType.OverrideSpellPowerByApPct)]
