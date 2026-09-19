@@ -71,11 +71,14 @@ namespace Game.DataStorage
 
                 // pallet data
                 PalletData = new Value32[ColumnMeta.Length][];
-                for (int i = 0; i < ColumnMeta.Length; i++)
+                foreach (var palletType in new[] { DB2ColumnCompression.Pallet, DB2ColumnCompression.PalletArray })
                 {
-                    if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Pallet || ColumnMeta[i].CompressionType == DB2ColumnCompression.PalletArray)
+                    for (int i = 0; i < ColumnMeta.Length; i++)
                     {
-                        PalletData[i] = reader.ReadArray<Value32>(ColumnMeta[i].AdditionalDataSize / 4);
+                        if (ColumnMeta[i].CompressionType == palletType)
+                        {
+                            PalletData[i] = reader.ReadArray<Value32>(ColumnMeta[i].AdditionalDataSize / 4);
+                        }
                     }
                 }
 

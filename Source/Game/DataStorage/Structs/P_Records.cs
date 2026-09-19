@@ -72,7 +72,7 @@ namespace Game.DataStorage
     public sealed class PlayerConditionRecord
     {
         public uint Id;
-        public string FailureDescription;
+        public LocalizedString FailureDescription;
         public ushort MinLevel;
         public ushort MaxLevel;
         public int ClassMask;

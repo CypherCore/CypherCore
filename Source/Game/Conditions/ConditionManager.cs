@@ -2132,8 +2132,9 @@ namespace Game
                     return false;
             }
 
-            if (!Condition.MeetsGroupStatusCondition(player, (GroupStatusCondition)(condition.PartyStatus - 1)))
-                return false;
+            if (condition.PartyStatus != 0)
+                if (!Condition.MeetsGroupStatusCondition(player, (GroupStatusCondition)(condition.PartyStatus - 1)))
+                    return false;
 
             if (condition.PrevQuestID[0] != 0)
             {
