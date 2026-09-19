@@ -331,8 +331,8 @@ namespace Game
             _player.CancelAutoRepeatSpell();
         }
 
-        [WorldPacketHandler(ClientOpcodes.CancelChannelling, Processing = PacketProcessing.Inplace)]
-        void HandleCancelQueuedSpellOpcode(CancelQueuedSpell cancelQueuedSpell)
+        [WorldPacketHandler(ClientOpcodes.CancelQueuedSpell, Processing = PacketProcessing.Inplace)]
+        void HandleCancelQueuedSpell(CancelQueuedSpell cancelQueuedSpell)
         {
             _player.CancelPendingCastRequest();
         }
