@@ -2105,8 +2105,10 @@ namespace Game.Entities
             // channeled spells may be delayed, but they are still considered cast
             if (!skipChanneled && currentSpell != null && (currentSpell.GetState() != SpellState.Finished))
             {
-                if ((!isAutoshoot || !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr2.DoNotResetCombatTimers)) &&
-                    (!skipChanneledAllowingActions || !GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo().HasAttribute(SpellAttr5.AllowActionsDuringChannel)))
+                SpellInfo channeledSpellInfo = GetCurrentSpell(CurrentSpellTypes.Channeled).GetSpellInfo();
+
+                if ((!isAutoshoot || !channeledSpellInfo.HasAttribute(SpellAttr2.DoNotResetCombatTimers) || channeledSpellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.Action | SpellAuraInterruptFlags.ActionDelayed)) &&
+                    (!skipChanneledAllowingActions || !channeledSpellInfo.HasAttribute(SpellAttr5.AllowActionsDuringChannel)))
                     return true;
             }
 
@@ -3286,7 +3288,7 @@ namespace Game.Entities
                     && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
                     && (source == null || spell.GetSpellInfo().Id != source.Id)
                     && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo(), true, source))
-                    InterruptNonMeleeSpells(false);
+                    InterruptSpell(CurrentSpellTypes.Channeled, false, false);
             }
 
             UpdateInterruptMask();
