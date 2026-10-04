@@ -925,10 +925,12 @@ namespace Game
             moveApplyInertiaAck.Ack.Status.Time = AdjustClientMovementTime(moveApplyInertiaAck.Ack.Status.Time);
             mover.m_movementInfo = moveApplyInertiaAck.Ack.Status;
 
-            MoveUpdateApplyInertia updateApplyInertia = new();
-            updateApplyInertia.Status = mover.m_movementInfo;
-            updateApplyInertia.InertiaID = moveApplyInertiaAck.InertiaID;
-            updateApplyInertia.LifetimeMs = moveApplyInertiaAck.LifetimeMs;
+            MoveUpdateApplyInertia updateApplyInertia = new()
+            {
+                Status = mover.m_movementInfo,
+                InertiaID = moveApplyInertiaAck.InertiaID,
+                LifetimeMs = moveApplyInertiaAck.LifetimeMs
+            };
             mover.SendMessageToSet(updateApplyInertia, false);
         }
 
@@ -945,14 +947,38 @@ namespace Game
             moveRemoveInertiaAck.Ack.Status.Time = AdjustClientMovementTime(moveRemoveInertiaAck.Ack.Status.Time);
             mover.m_movementInfo = moveRemoveInertiaAck.Ack.Status;
 
-            MoveUpdateRemoveInertia updateRemoveInertia = new();
-            updateRemoveInertia.Status = mover.m_movementInfo;
-            updateRemoveInertia.InertiaID = moveRemoveInertiaAck.InertiaID;
+            MoveUpdateRemoveInertia updateRemoveInertia = new()
+            {
+                Status = mover.m_movementInfo,
+                InertiaID = moveRemoveInertiaAck.InertiaID
+            };
             mover.SendMessageToSet(updateRemoveInertia, false);
         }
 
+        [WorldPacketHandler(ClientOpcodes.MoveForceGravityModifierChangeAck, Processing = PacketProcessing.ThreadSafe)]
+        void HandleMoveForceGravityModifierChangeAck(MoveForceGravityModifierChangeAck moveForceGravityModifierChangeAck)
+        {
+            Unit mover = ValidateAndGetUnitBeingMoved(moveForceGravityModifierChangeAck.Ack.Status.Guid, moveForceGravityModifierChangeAck.GetOpcode(), true);
+            if (mover == null)
+                return;
+
+            if (!ValidateMovementInfo(mover, moveForceGravityModifierChangeAck.Ack.Status))
+                return;
+
+            moveForceGravityModifierChangeAck.Ack.Status.Time = AdjustClientMovementTime(moveForceGravityModifierChangeAck.Ack.Status.Time);
+            mover.m_movementInfo = moveForceGravityModifierChangeAck.Ack.Status;
+            mover.m_movementInfo.gravityModifier = moveForceGravityModifierChangeAck.Ack.Status.gravityModifier;
+
+            MoveUpdateSetGravityModifier updateSetGravityModifier = new()
+            {
+                Status = mover.m_movementInfo,
+                GravityModifier = moveForceGravityModifierChangeAck.GravityModifier
+            };
+            mover.SendMessageToSet(updateSetGravityModifier, false);
+        }
+
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
-        void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
+        void HandleMoveSplineDone(MoveSplineDone moveSplineDone)
         {
             Unit mover = ValidateAndGetUnitBeingMoved(moveSplineDone.Status.Guid, moveSplineDone.GetOpcode(), false);
             if (mover == null)

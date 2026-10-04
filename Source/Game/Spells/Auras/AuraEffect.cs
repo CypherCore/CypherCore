@@ -5758,6 +5758,19 @@ namespace Game.Spells
                 aurApp.GetTarget().SetMaxPower(PowerType.AlternatePower, 0);
         }
 
+        [AuraEffectHandler(AuraType.ModGravity)]
+        void HandleModGravity(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            var gravityAuras = target.GetAuraEffectsByType(AuraType.ModGravity);
+            float amount = gravityAuras.Aggregate(1.0f, (acc, aurEff) => acc * (float)aurEff.GetAmount());
+
+            target.SetGravityModifier(MathF.Max(amount, 0.01f));
+        }
+
         [AuraEffectHandler(AuraType.ModSpellCategoryCooldown)]
         void HandleModSpellCategoryCooldown(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

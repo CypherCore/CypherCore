@@ -1461,6 +1461,44 @@ namespace Game.Networking.Packets
         }
     }
 
+    class MoveForceGravityModifierChangeAck(WorldPacket packet) : ClientPacket(packet)
+    {
+        public MovementAck Ack;
+        public float GravityModifier = 1.0f;
+
+        public override void Read()
+        {
+            Ack.Read(_worldPacket);
+            _worldPacket.WriteFloat(GravityModifier);
+        }
+    }
+
+    class MoveSetGravityModifier() : ServerPacket(ServerOpcodes.MoveSetGravityModifier)
+    {
+        public ObjectGuid MoverGUID;
+        public uint SequenceIndex = 0;
+        public float GravityModifier = 1.0f;
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteUInt32(SequenceIndex);
+            _worldPacket.WriteFloat(GravityModifier);
+        }
+    }
+
+    class MoveUpdateSetGravityModifier() : ServerPacket(ServerOpcodes.MoveUpdateSetGravityModifier)
+    {
+        public MovementInfo Status;
+        public float GravityModifier = 1.0f;
+
+        public override void Write()
+        {
+            MovementExtensions.WriteMovementInfo(_worldPacket, Status);
+            _worldPacket.WriteFloat(GravityModifier);
+        }
+    }
+
     //Structs
     public struct MovementAck
     {

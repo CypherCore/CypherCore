@@ -2085,6 +2085,26 @@ namespace Game.Entities
 
         public bool IsPlayingHoverAnim() { return m_updateFlag.PlayHoverAnim; }
 
+        public void SetGravityModifier(float gravityModifier)
+        {
+            Player movingPlayer = GetPlayerMovingMe();
+            if (movingPlayer != null)
+            {
+                MoveSetGravityModifier setGravityModifier = new();
+                setGravityModifier.MoverGUID = GetGUID();
+                setGravityModifier.SequenceIndex = m_movementCounter++;
+                setGravityModifier.GravityModifier = gravityModifier;
+                movingPlayer.SendPacket(setGravityModifier);
+            }
+            else
+            {
+                MoveUpdateSetGravityModifier updateSetGravityModifier = new();
+                updateSetGravityModifier.Status = m_movementInfo;
+                updateSetGravityModifier.GravityModifier = gravityModifier;
+                SendMessageToSet(updateSetGravityModifier, true);
+            }
+        }
+
         void SetPlayHoverAnim(bool enable, bool sendUpdate = true)
         {
             if (IsPlayingHoverAnim() == enable)
