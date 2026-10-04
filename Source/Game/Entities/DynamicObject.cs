@@ -5,6 +5,7 @@ using Framework.Constants;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Entities
@@ -171,7 +172,7 @@ namespace Game.Entities
 
         public void Delay(int delaytime)
         {
-            SetDuration(GetDuration() - delaytime);
+            SetDuration(Math.Max(GetDuration() - delaytime, 0));
         }
 
         public void SetAura(Aura aura)
