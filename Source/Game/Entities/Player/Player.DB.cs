@@ -3397,6 +3397,14 @@ namespace Game.Entities
                 return false;
             }
 
+            atLoginFlags = (AtLoginFlags)at_login;
+
+            if (HasAtLoginFlag(AtLoginFlags.Rename))
+            {
+                Log.outError(LogFilter.Player, "Player::LoadFromDB: Player ({guid}) tried to login while forced to rename, can't load.'");
+                return false;
+            }
+
             _Create(guid);
 
             SetName(name);
@@ -3494,8 +3502,6 @@ namespace Game.Entities
             ReplaceAllPlayerFlags(playerFlags);
             ReplaceAllPlayerFlagsEx(playerFlagsEx);
             SetWatchedFactionIndex(watchedFaction);
-
-            atLoginFlags = (AtLoginFlags)at_login;
 
             if (!GetSession().ValidateAppearance(GetRace(), GetClass(), gender, customizations))
             {
@@ -3789,6 +3795,7 @@ namespace Game.Entities
                 }
             }
 
+            // no early return is allowed past this point, player will be deleted and still referenced by the map and battleground AddPlayer can apply auras also
             SetMap(map);
             UpdatePositionData();
 
