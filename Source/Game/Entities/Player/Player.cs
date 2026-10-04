@@ -8047,7 +8047,7 @@ namespace Game.Entities
                 offItem.SaveToDB(trans);                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
 
                 string subject = ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
-                new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied);
+                new MailDraft(subject, "There were problems with equipping one or several items").AddItem(offItem).SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied | MailCheckMask.NotReturnable);
 
                 DB.Characters.CommitTransaction(trans);
             }
