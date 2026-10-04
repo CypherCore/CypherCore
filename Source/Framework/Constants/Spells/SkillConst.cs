@@ -351,6 +351,7 @@ namespace Framework.Constants
         RacialDracthyr = 2808,
         Evoker = 2810,
         StygiaCrafting = 2811,
+        Adventurer = 2816,
         LanguageCypher = 2817,
         PhotoformSynthesis = 2819,
         ArcanaManipulation = 2821,
@@ -402,11 +403,13 @@ namespace Framework.Constants
         MidnightMining = 2916,
         MidnightSkinning = 2917,
         MidnightTailoring = 2918,
+        Traveler = 2929,
         RacialHaranir = 2930,
         AlchemyResearch = 2950,
         PetExoticWhiptail = 2961,
         DyeCrafting = 2984,
-        LangHarani = 2987
+        LangHarani = 2987,
+        HungryTortollan = 3004
     }
 
     public enum SkillState
