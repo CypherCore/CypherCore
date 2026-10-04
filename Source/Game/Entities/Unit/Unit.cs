@@ -754,11 +754,8 @@ namespace Game.Entities
                 ToCreature().GetAI().JustSummonedGameobject(gameObj);
         }
 
-        public void RemoveGameObject(GameObject gameObj, bool del)
+        void RemoveGameObjectImpl(GameObject gameObj, bool del)
         {
-            if (gameObj == null || gameObj.GetOwnerGUID() != GetGUID())
-                return;
-
             gameObj.SetOwnerGUID(ObjectGuid.Empty);
 
             for (byte i = 0; i < SharedConst.MaxGameObjectSlot; ++i)
@@ -783,8 +780,6 @@ namespace Game.Entities
                     GetSpellHistory().SendCooldownEvent(createBySpell);
             }
 
-            m_gameObj.Remove(gameObj);
-
             if (IsTypeId(TypeId.Unit) && ToCreature().IsAIEnabled())
                 ToCreature().GetAI().SummonedGameobjectDespawn(gameObj);
 
@@ -793,6 +788,16 @@ namespace Game.Entities
                 gameObj.SetRespawnTime(0);
                 gameObj.Delete();
             }
+        }
+
+        public void RemoveGameObject(GameObject gameObj, bool del)
+        {
+            if (gameObj == null || gameObj.GetOwnerGUID() != GetGUID())
+                return;
+
+            RemoveGameObjectImpl(gameObj, del);
+
+            m_gameObj.Remove(gameObj);
         }
 
         public void RemoveGameObject(uint spellid, bool del)
@@ -805,13 +810,7 @@ namespace Game.Entities
                 var obj = m_gameObj[i];
                 if (spellid == 0 || obj.GetSpellId() == spellid)
                 {
-                    obj.SetOwnerGUID(ObjectGuid.Empty);
-                    if (del)
-                    {
-                        obj.SetRespawnTime(0);
-                        obj.Delete();
-                    }
-
+                    RemoveGameObjectImpl(obj, del);
                     m_gameObj.Remove(obj);
                 }
             }
@@ -822,11 +821,9 @@ namespace Game.Entities
             // remove references to unit
             while (!m_gameObj.Empty())
             {
-                var obj = m_gameObj.First();
-                obj.SetOwnerGUID(ObjectGuid.Empty);
-                obj.SetRespawnTime(0);
-                obj.Delete();
-                m_gameObj.Remove(obj);
+                GameObject gameObj = m_gameObj.First();
+                m_gameObj.Remove(gameObj);
+                RemoveGameObjectImpl(gameObj, true);
             }
         }
 
