@@ -375,17 +375,6 @@ namespace Game
             }
             else // leave queue
             {
-                // if player leaves rated arena match before match start, it is counted as he played but he lost
-                if (bgQueue.GetQueueId().Rated && ginfo.IsInvitedToBGInstanceGUID != 0)
-                {
-                    ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById((uint)ginfo.Team);
-                    if (at != null)
-                    {
-                        Log.outDebug(LogFilter.Battleground, "UPDATING memberLost's personal arena rating for {0} by opponents rating: {1}, because he has left queue!", GetPlayer().GetGUID().ToString(), ginfo.OpponentsTeamRating);
-                        at.MemberLost(GetPlayer(), ginfo.OpponentsMatchmakerRating);
-                        at.SaveToDB();
-                    }
-                }
                 BattlefieldStatusNone battlefieldStatus = new();
                 battlefieldStatus.Ticket = battlefieldPort.Ticket;
                 SendPacket(battlefieldStatus);
