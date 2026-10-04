@@ -257,10 +257,7 @@ namespace Game.DataStorage
                             break;
                     }
 
-                    createProperties.RollPitchYaw = new Position(
-                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(26)),
-                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(27)),
-                        Position.NormalizeOrientation(areatriggerCreateProperties.Read<float>(28)));
+                    createProperties.RollPitchYaw = new Position(areatriggerCreateProperties.Read<float>(26), areatriggerCreateProperties.Read<float>(27), areatriggerCreateProperties.Read<float>(28));
 
                     float?[] targetRollPitchYaw =
                     {
@@ -272,10 +269,7 @@ namespace Game.DataStorage
                     var trpyFields = targetRollPitchYaw.Count(angle => angle.HasValue);
                     if (trpyFields == 3)
                     {
-                        createProperties.TargetRollPitchYaw = new Position(
-                            Position.NormalizeOrientation(targetRollPitchYaw[0].Value),
-                            Position.NormalizeOrientation(targetRollPitchYaw[1].Value),
-                            Position.NormalizeOrientation(targetRollPitchYaw[2].Value));
+                        createProperties.TargetRollPitchYaw = new Position(targetRollPitchYaw[0].Value, targetRollPitchYaw[1].Value, targetRollPitchYaw[2].Value);
                     }
                     else if (trpyFields != 0)
                     {
