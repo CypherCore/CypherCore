@@ -32,7 +32,7 @@ namespace Game.Chat.Commands
             // @todo Fix poor design
             SQLTransaction trans = new();
             new MailDraft(subject, text)
-                .SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender);
+                .SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender, MailCheckMask.NotReturnable);
 
             DB.Characters.CommitTransaction(trans);
 
@@ -113,7 +113,7 @@ namespace Game.Chat.Commands
                 }
             }
 
-            draft.SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender);
+            draft.SendMailTo(trans, new MailReceiver(playerIdentifier.GetGUID().GetCounter()), sender, MailCheckMask.NotReturnable);
             DB.Characters.CommitTransaction(trans);
 
             string nameLink = handler.PlayerLink(playerIdentifier.GetName());
@@ -131,7 +131,7 @@ namespace Game.Chat.Commands
 
             new MailDraft(subject, text)
                 .AddMoney((uint)money)
-                .SendMailTo(trans, new MailReceiver(receiver.GetConnectedPlayer(), receiver.GetGUID().GetCounter()), sender);
+                .SendMailTo(trans, new MailReceiver(receiver.GetConnectedPlayer(), receiver.GetGUID().GetCounter()), sender, MailCheckMask.NotReturnable);
 
             DB.Characters.CommitTransaction(trans);
 

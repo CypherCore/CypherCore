@@ -279,10 +279,15 @@ namespace Game
                 if (sendMail.Info.Attachments.Empty())
                     sendMail.Info.Cod = 0;
 
+                MailCheckMask mailFlags = sendMail.Info.Body.IsEmpty() ? MailCheckMask.Copied : MailCheckMask.HasBody;
+
+                if (player.IsGameMaster())
+                    mailFlags |= MailCheckMask.NotReturnable;
+
                 // will delete item or place to receiver mail list
                 draft.AddMoney((ulong)sendMail.Info.SendMoney)
                     .AddCOD((uint)sendMail.Info.Cod)
-                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), sendMail.Info.Body.IsEmpty() ? MailCheckMask.Copied : MailCheckMask.HasBody, deliver_delay);
+                    .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(receiverGuid), receiverGuid.GetCounter()), new MailSender(player), mailFlags, deliver_delay);
 
                 player.SaveInventoryAndGoldToDB(trans);
                 DB.Characters.CommitTransaction(trans);
