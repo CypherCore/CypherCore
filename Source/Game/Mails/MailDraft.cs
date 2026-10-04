@@ -31,7 +31,7 @@ namespace Game.Mails
 
         public MailDraft AddItem(Item item)
         {
-            m_items[item.GetGUID().GetCounter()] = item; 
+            m_items[item.GetGUID().GetCounter()] = item;
             return this;
         }
 
@@ -147,9 +147,9 @@ namespace Game.Mails
             // default case: expire time if COD 3 days, if no COD 30 days (or 90 days if sender is a game master)
             else
                 if (m_COD != 0)
-                expire_delay = 3 * Time.Day;
-            else
-                expire_delay = (uint)(pSender != null && pSender.IsGameMaster() ? 90 * Time.Day : 30 * Time.Day);
+                    expire_delay = 3 * Time.Day;
+                else
+                    expire_delay = (uint)(pSender != null && pSender.IsGameMaster() ? 90 * Time.Day : 30 * Time.Day);
 
             long expire_time = deliver_time + expire_delay;
 
@@ -169,7 +169,7 @@ namespace Game.Mails
             stmt.AddValue(++index, deliver_time);
             stmt.AddValue(++index, m_money);
             stmt.AddValue(++index, m_COD);
-            stmt.AddValue(++index, (byte)checkMask);
+            stmt.AddValue(++index, (uint)checkMask);
             trans.Append(stmt);
 
             foreach (var item in m_items.Values)

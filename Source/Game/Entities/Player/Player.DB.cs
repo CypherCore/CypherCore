@@ -171,7 +171,7 @@ namespace Game.Entities
                     {
                         draft.AddItem(problematicItems.Dequeue());
                     }
-                    draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied | MailCheckMask.NotReturnable);
+                    draft.SendMailTo(trans, this, new MailSender(this, MailStationery.Gm), MailCheckMask.Copied | MailCheckMask.NotReturnable | MailCheckMask.RestoredItem);
                 }
 
                 DB.Characters.CommitTransaction(trans);

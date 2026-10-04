@@ -161,7 +161,7 @@ namespace Game
                 if (!remover.IsEmpty() && invite.InviteeGuid != remover)
                 {
                     MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody(Global.ObjAccessor.FindConnectedPlayer(invite.InviteeGuid)));
-                    mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied);
+                    mail.SendMailTo(trans, new MailReceiver(invite.InviteeGuid.GetCounter()), new MailSender(calendarEvent), MailCheckMask.Copied | MailCheckMask.CalendarInvite);
                 }
             }
 

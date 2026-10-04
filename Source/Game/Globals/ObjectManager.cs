@@ -9992,7 +9992,7 @@ namespace Game
                 m.expire_time = result.Read<long>(5);
                 m.deliver_time = 0;
                 m.COD = result.Read<ulong>(6);
-                m.checkMask = (MailCheckMask)result.Read<byte>(7);
+                m.checkMask = (MailCheckMask)result.Read<uint>(7);
                 m.mailTemplateId = result.Read<ushort>(8);
 
                 // Delete or return mail
@@ -10003,7 +10003,7 @@ namespace Game
                     Extensions.Swap(ref m.items, ref temp);
 
                     // if it is mail from non-player, or if it's already return mail, it shouldn't be returned, but deleted
-                    if (m.messageType != MailMessageType.Normal || (m.checkMask.HasAnyFlag(MailCheckMask.CodPayment | MailCheckMask.Returned)))
+                    if (m.messageType != MailMessageType.Normal || m.checkMask.HasAnyFlag(MailCheckMask.CodPayment | MailCheckMask.Returned | MailCheckMask.NotReturnable))
                     {
                         // mail open and then not returned
                         foreach (var itemInfo in m.items)
