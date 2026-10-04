@@ -53,6 +53,15 @@ namespace Game.Entities
             if (cinematicCameraId == 0)
                 return;
 
+            CinematicSequencesRecord activeCinematic = m_activeCinematic;
+            int activeCamera = m_activeCinematicCameraIndex;
+
+            if (!m_CinematicObjectGUID.IsEmpty())
+                EndCinematic();
+
+            m_activeCinematic = activeCinematic;
+            m_activeCinematicCameraIndex = activeCamera;
+
             var flyByCameras = M2Storage.GetFlyByCameras(cinematicCameraId);
             if (!flyByCameras.Empty())
             {
@@ -101,6 +110,8 @@ namespace Game.Entities
                 WorldObject cinematicObject = Global.ObjAccessor.GetWorldObject(player, m_CinematicObjectGUID);
                 if (cinematicObject != null)
                     cinematicObject.AddObjectToRemoveList();
+
+                m_CinematicObjectGUID.Clear();
             }
         }
 
