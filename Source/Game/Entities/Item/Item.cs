@@ -1748,7 +1748,7 @@ namespace Game.Entities
         {
             ItemTemplate itemTemplate = GetTemplate();
             long price = GetSellPrice(itemTemplate, (uint)GetQuality(), GetItemLevel(owner));
-            if (forVendor)
+            if (price != 0 && forVendor)
             {
                 var effects = GetEffects();
                 var effectWithCharges = effects.FirstOrDefault(itemEffect => itemEffect.SpellID != 0 && itemEffect.TriggerType == ItemSpelltriggerType.OnUse && itemEffect.Charges < 0);
