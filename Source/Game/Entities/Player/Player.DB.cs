@@ -1390,21 +1390,22 @@ namespace Game.Entities
             {
                 do
                 {
-                    Mail m = new();
-
-                    m.messageID = mailsResult.Read<ulong>(0);
-                    m.messageType = (MailMessageType)mailsResult.Read<byte>(1);
-                    m.sender = mailsResult.Read<uint>(2);
-                    m.receiver = mailsResult.Read<uint>(3);
-                    m.subject = mailsResult.Read<string>(4);
-                    m.body = mailsResult.Read<string>(5);
-                    m.expire_time = mailsResult.Read<long>(6);
-                    m.deliver_time = mailsResult.Read<long>(7);
-                    m.money = mailsResult.Read<ulong>(8);
-                    m.COD = mailsResult.Read<ulong>(9);
-                    m.checkMask = (MailCheckMask)mailsResult.Read<byte>(10);
-                    m.stationery = (MailStationery)mailsResult.Read<byte>(11);
-                    m.mailTemplateId = mailsResult.Read<ushort>(12);
+                    Mail m = new()
+                    {
+                        messageID = mailsResult.Read<ulong>(0),
+                        messageType = (MailMessageType)mailsResult.Read<byte>(1),
+                        sender = mailsResult.Read<uint>(2),
+                        receiver = mailsResult.Read<uint>(3),
+                        subject = mailsResult.Read<string>(4),
+                        body = mailsResult.Read<string>(5),
+                        expire_time = mailsResult.Read<long>(6),
+                        deliver_time = mailsResult.Read<long>(7),
+                        money = mailsResult.Read<ulong>(8),
+                        COD = mailsResult.Read<ulong>(9),
+                        checkMask = (MailCheckMask)mailsResult.Read<uint>(10),
+                        stationery = (MailStationery)mailsResult.Read<byte>(11),
+                        mailTemplateId = mailsResult.Read<ushort>(12)
+                    };
 
                     if (m.mailTemplateId != 0 && !CliDB.MailTemplateStorage.ContainsKey(m.mailTemplateId))
                     {
@@ -2718,7 +2719,7 @@ namespace Game.Entities
                     stmt.AddValue(2, m.deliver_time);
                     stmt.AddValue(3, m.money);
                     stmt.AddValue(4, m.COD);
-                    stmt.AddValue(5, (byte)m.checkMask);
+                    stmt.AddValue(5, (uint)m.checkMask);
                     stmt.AddValue(6, m.messageID);
 
                     trans.Append(stmt);

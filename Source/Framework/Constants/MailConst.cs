@@ -19,11 +19,23 @@ namespace Framework.Constants
     public enum MailCheckMask
     {
         None = 0x00,
-        Read = 0x01,
-        Returned = 0x02,                     // This Mail Was Returned. Do Not Allow Returning Mail Back Again.
-        Copied = 0x04,                     // This Mail Was Copied. Do Not Allow Making A Copy Of Items In Mail.
-        CodPayment = 0x08,
-        HasBody = 0x10                      // This Mail Has Body Text.
+        Read = 0x01,  ///< This Mail Was Read.
+        Returned = 0x02,  ///< This Mail Was Returned. Do Not Allow Returning Mail Back Again.
+        Copied = 0x04,  ///< This Mail Was Copied. Do Not Allow Making A Copy Of Items In Mail.
+        CodPayment = 0x08,  ///< This Mail Is Payable On Delivery
+        HasBody = 0x10,  ///< This Mail Has Body Text.
+        Unk5 = 0x20,
+        AuctionWon = 0x40,  ///< This Mail Is Delivering Won Auction Items.
+        Unk7 = 0x80,
+        CalendarInvite = 0x100,  ///< This Mail Is Related To Calendar Invite.
+        NotReturnable = 0x200,  ///< This Mail Cannot Be Returned Even If Mail Was Not Returned Before.
+        Auction = 0x400,  ///< This Mail Came From Auction House.
+        NotDeletableWithAttachments = 0x800,  ///< This Mail Cannot Be Deleted Without Taking Attachments First.
+        Unk12 = 0x1000,
+        Unk13 = 0x2000,
+        RestoredItem = 0x4000,  ///< This Mail Contains Recovered Items.
+        NotCopyable = 0x8000,  ///< This Mail Cannot Be Copied.
+        Commerce = 0x10000,  ///< Wow Token Mail.
     }
 
     public enum MailStationery
@@ -42,15 +54,6 @@ namespace Framework.Constants
         Unchanged = 1,
         Changed = 2,
         Deleted = 3
-    }
-
-    public enum MailShowFlags
-    {
-        Unk0 = 0x0001,
-        Delete = 0x0002,                             // Forced Show Delete Button Instead Return Button
-        Auction = 0x0004,                             // From Old Comment
-        Unk2 = 0x0008,                             // Unknown, Cod Will Be Shown Even Without That Flag
-        Return = 0x0010
     }
 
     public enum MailResponseType
