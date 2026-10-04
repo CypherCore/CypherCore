@@ -5017,6 +5017,7 @@ class spell_gen_skinning : SpellScript
 [Script("spell_sha_heroism", SpellIds.ShamanExhaustion)]
 [Script("spell_mage_time_warp", SpellIds.MageTemporalDisplacement)]
 [Script("spell_hun_primal_rage", SpellIds.HunterFatigued)]
+[Script("spell_hun_harriers_cry", SpellIds.HunterFatigued)]
 [Script("spell_evo_fury_of_the_aspects", SpellIds.EvokerExhaustion)]
 [Script("spell_item_bloodlust_drums", SpellIds.ShamanExhaustion)]
 class spell_gen_bloodlust(uint exhaustionSpellId) : SpellScript()
