@@ -243,7 +243,7 @@ namespace Game
                 new() { Name = "Arena.RatedUpdateTimer", DefaultValue = 5 * Time.InMilliseconds, Index = WorldCfg.ArenaRatedUpdateTimer },
                 new() { Name = "Arena.ArenaSeason.ID", DefaultValue = 32, Index = WorldCfg.ArenaSeasonId },
                 new() { Name = "Arena.ArenaStartRating", DefaultValue = 0, Index = WorldCfg.ArenaStartRating },
-                new() { Name = "Arena.ArenaStartPersonalRating", DefaultValue = 1000, Index = WorldCfg.ArenaStartPersonalRating },
+                new() { Name = "Arena.ArenaStartPersonalRating", DefaultValue = 0, Index = WorldCfg.ArenaStartPersonalRating },
                 new() { Name = "Arena.ArenaStartMatchmakerRating", DefaultValue = 1500, Index = WorldCfg.ArenaStartMatchmakerRating },
                 new() { Name = "Creature.PickPocketRefillDelay", DefaultValue = 10 * Time.Minute, Index = WorldCfg.CreaturePickpocketRefill },
                 new() { Name = "Creature.MovingStopTimeForPlayer", DefaultValue = 3 * Time.Minute * Time.InMilliseconds, Index = WorldCfg.CreatureStopForPlayer },
