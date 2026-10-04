@@ -1893,7 +1893,6 @@ namespace Framework.Constants
         StartAllSpells,
         StartDeathKnightPlayerLevel,
         StartDemonHunterPlayerLevel,
-        StartEvokerPlayerLevel,
         StartGmLevel,
         StartPlayerLevel,
         StartPlayerMoney,

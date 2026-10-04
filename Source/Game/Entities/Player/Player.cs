@@ -2215,7 +2215,7 @@ namespace Game.Entities
         public uint GetStartLevel(Race race, Class playerClass, uint? characterTemplateId = null)
         {
             uint startLevel = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
-            if (CliDB.ChrRacesStorage.LookupByKey(race).HasFlag(ChrRacesFlag.IsAlliedRace))
+            if (CliDB.ChrRacesStorage.LookupByKey(race).HasFlag(ChrRacesFlag.IsAlliedRace) || race == Race.DracthyrAlliance || race == Race.DracthyrHorde)
                 startLevel = WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel);
 
             if (playerClass == Class.DeathKnight)
@@ -2227,8 +2227,6 @@ namespace Game.Entities
             }
             else if (playerClass == Class.DemonHunter)
                 startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartDemonHunterPlayerLevel), startLevel);
-            else if (playerClass == Class.Evoker)
-                startLevel = Math.Max(WorldConfig.GetUIntValue(WorldCfg.StartEvokerPlayerLevel), startLevel);
 
             if (characterTemplateId.HasValue)
             {

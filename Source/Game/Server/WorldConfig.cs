@@ -169,7 +169,6 @@ namespace Game
                 new() { Name = "StartPlayerLevel", DefaultValue = 1, Index = WorldCfg.StartPlayerLevel, Min = 1 },
                 new() { Name = "StartDeathKnightPlayerLevel", DefaultValue = 8, Index = WorldCfg.StartDeathKnightPlayerLevel, Min = 1 },
                 new() { Name = "StartDemonHunterPlayerLevel", DefaultValue = 8, Index = WorldCfg.StartDemonHunterPlayerLevel, Min = 1 },
-                new() { Name = "StartEvokerPlayerLevel", DefaultValue = 10, Index = WorldCfg.StartEvokerPlayerLevel, Min = 1 },
                 new() { Name = "StartAlliedRacePlayerLevel", DefaultValue = 10, Index = WorldCfg.StartAlliedRaceLevel, Min = 1 },
                 new() { Name = "Currency.ResetHour", DefaultValue = 3, Index = WorldCfg.CurrencyResetHour, Min = 0, Max = 23 },
                 new() { Name = "Currency.ResetDay", DefaultValue = 3, Index = WorldCfg.CurrencyResetDay, Min = 0, Max = 6 },
@@ -492,8 +491,7 @@ namespace Game
             validateStartLevel(WorldCfg.StartPlayerLevel, "StartPlayerLevel");
             validateStartLevel(WorldCfg.StartDeathKnightPlayerLevel, "StartDeathKnightPlayerLevel");
             validateStartLevel(WorldCfg.StartDemonHunterPlayerLevel, "StartDemonHunterPlayerLevel");
-            validateStartLevel(WorldCfg.StartEvokerPlayerLevel, "StartEvokerPlayerLevel");
-            validateStartLevel(WorldCfg.StartAlliedRaceLevel, "StartDemonHunterPlayerLevel");
+            validateStartLevel(WorldCfg.StartAlliedRaceLevel, "StartAlliedRacePlayerLevel");
             validateStartLevel(WorldCfg.MaxRecruitAFriendBonusPlayerLevel, "RecruitAFriend.MaxLevel");
 
             if ((uint)Values[WorldCfg.StartGmLevel] < (uint)Values[WorldCfg.StartPlayerLevel])

@@ -1209,7 +1209,7 @@ namespace Framework.Constants
         DAMMComponentNoMaleGeneration = 0x200000,
         DAMMComponentNoFemaleGeneration = 0x400000,
         NoAssociatedFactionReputationInRaceChange = 0x800000,
-        InternalOnly = 0x100000,
+        InternalOnly = 0x1000000,
     }
 
     public enum ChrSpecializationFlag
