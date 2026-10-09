@@ -55,8 +55,6 @@ struct SpellIds
     public const uint MastersCallTriggered = 62305;
     public const uint Misdirection = 34477;
     public const uint MisdirectionProc = 35079;
-    public const uint MultiShotFocus = 213363;
-    public const uint PetLastStandTriggered = 53479;
     public const uint PetHeartOfThePhoenixTriggered = 54114;
     public const uint PetHeartOfThePhoenixDebuff = 55711;
     public const uint PosthasteIncreaseSpeed = 118922;
@@ -496,28 +494,6 @@ class areatrigger_hun_implosive_trap(AreaTrigger areaTrigger) : AreaTriggerAI(ar
     }
 }
 
-[Script] // 53478 - Last Stand Pet
-class spell_hun_last_stand_pet : SpellScript
-{
-    public override bool Validate(SpellInfo spellInfo)
-    {
-        return ValidateSpellInfo(SpellIds.PetLastStandTriggered);
-    }
-
-    void HandleDummy(uint effIndex)
-    {
-        Unit caster = GetCaster();
-        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-        args.AddSpellMod(SpellValueModFloat.BasePoint0, (int)caster.CountPctFromMaxHealth(30));
-        caster.CastSpell(caster, SpellIds.PetLastStandTriggered, args);
-    }
-
-    public override void Register()
-    {
-        OnEffectHitTarget.Add(new(HandleDummy, 0, SpellEffects.Dummy));
-    }
-}
-
 [Script] // 378016 - Latent Poison
 class spell_hun_latent_poison_damage : SpellScript
 {
@@ -786,8 +762,8 @@ class spell_hun_misdirection : AuraScript
 
     public override void Register()
     {
-        AfterEffectRemove.Add(new(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-        OnEffectProc.Add(new(HandleProc, 1, AuraType.Dummy));
+        AfterEffectRemove.Add(new(OnRemove, 2, AuraType.Dummy, AuraEffectHandleModes.Real));
+        OnEffectProc.Add(new(HandleProc, 2, AuraType.Dummy));
     }
 }
 
@@ -802,32 +778,6 @@ class spell_hun_misdirection_proc : AuraScript
     public override void Register()
     {
         AfterEffectRemove.Add(new(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-    }
-}
-
-[Script] // 2643 - Multi-Shot
-class spell_hun_multi_shot : SpellScript
-{
-    public override bool Validate(SpellInfo spellInfo)
-    {
-        return ValidateSpellInfo(SpellIds.MultiShotFocus);
-    }
-
-    public override bool Load()
-    {
-        return GetCaster().IsPlayer();
-    }
-
-    void HandleOnHit()
-    {
-        // We need to check hunter's spec because it doesn't generate focus on other specs than Mm
-        if (GetCaster().ToPlayer().GetPrimarySpecialization() == ChrSpecialization.HunterMarksmanship)
-            GetCaster().CastSpell(GetCaster(), SpellIds.MultiShotFocus, true);
-    }
-
-    public override void Register()
-    {
-        OnHit.Add(new(HandleOnHit));
     }
 }
 
