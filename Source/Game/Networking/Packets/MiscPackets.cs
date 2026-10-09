@@ -648,13 +648,13 @@ namespace Game.Networking.Packets
     public class StartMirrorTimer : ServerPacket
     {
         public MirrorTimerType Timer;
-        public int Scale;
-        public int MaxValue;
-        public uint SpellID;
         public int Value;
+        public int MaxValue;
+        public int Scale;
+        public int SpellID;
         public bool Paused;
 
-        public StartMirrorTimer(MirrorTimerType timer, int value, int maxValue, int scale, uint spellID, bool paused) : base(ServerOpcodes.StartMirrorTimer)
+        public StartMirrorTimer(MirrorTimerType timer, int value, int maxValue, int scale, int spellID, bool paused) : base(ServerOpcodes.StartMirrorTimer)
         {
             Timer = timer;
             Value = value;
@@ -670,7 +670,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Value);
             _worldPacket.WriteInt32(MaxValue);
             _worldPacket.WriteInt32(Scale);
-            _worldPacket.WriteUInt32(SpellID);
+            _worldPacket.WriteInt32(SpellID);
             _worldPacket.WriteBit(Paused);
             _worldPacket.FlushBits();
         }

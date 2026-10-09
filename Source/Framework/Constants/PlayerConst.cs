@@ -170,11 +170,20 @@ namespace Framework.Constants
 
     public enum MirrorTimerType
     {
-        Disabled = -1,
         Fatigue = 0,
         Breath = 1,
-        Fire = 2, // feign death
-        Max = 3
+        FeignDeath = 2,
+
+        Max
+    }
+
+    [Flags]
+    public enum MirrorTimerFlags
+    {
+        None = 0x00,
+        Paused = 0x01,
+        Changed = 0x02,
+        PausedChanged = 0x04
     }
 
     public enum TransferAbortReason
@@ -342,8 +351,6 @@ namespace Framework.Constants
         InLava = 0x02,             // terrain type is lava and player is afflicted by it
         InSlime = 0x04,             // terrain type is lava and player is afflicted by it
         InDarkWater = 0x08,             // terrain type is dark water and player is afflicted by it
-
-        ExistTimers = 0x10
     }
 
     public struct RuneCooldowns

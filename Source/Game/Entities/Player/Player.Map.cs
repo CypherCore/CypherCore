@@ -691,8 +691,22 @@ namespace Game.Entities
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InSlime;
             }
 
-            if (HasAuraType(AuraType.ForceBeathBar))
-                m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
+            m_mirrorTimers[MirrorTimerType.Fatigue].SetScale((m_MirrorTimerFlags & PlayerUnderwaterState.InDarkWater) != 0 ? -1 : 10);
+            m_mirrorTimers[MirrorTimerType.Breath].SetScale(
+                ((m_MirrorTimerFlags & PlayerUnderwaterState.InWater) != 0 || HasAuraType(AuraType.ForceBeathBar)) && !HasAuraType(AuraType.WaterBreathing)
+                ? -1 : 10);
+        }
+
+        public void UpdateLiquidMirrorTimerValuesOnAura()
+        {
+            if (m_mirrorTimers[MirrorTimerType.Breath].IsActive())
+            {
+                int oldMaxValue = m_mirrorTimers[MirrorTimerType.Breath].GetMaxValue();
+                int newMaxValue = GetMirrorTimerMaxValue(MirrorTimerType.Breath);
+                m_mirrorTimers[MirrorTimerType.Breath].SetMaxValue(newMaxValue);
+                int valueDiff = newMaxValue - oldMaxValue;
+                m_mirrorTimers[MirrorTimerType.Breath].SetValue(m_mirrorTimers[MirrorTimerType.Breath].GetValue() + valueDiff);
+            }
         }
 
         public uint GetRecentInstanceId(uint mapId)

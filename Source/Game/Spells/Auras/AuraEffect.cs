@@ -2337,8 +2337,35 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             // update timers in client
-            if (target.IsTypeId(TypeId.Player))
-                target.ToPlayer().UpdateMirrorTimers();
+            target.UpdatePositionData();
+        }
+
+        [AuraEffectHandler(AuraType.ModWaterBreathing)]
+        void HandleModWaterBreathing(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            target.UpdateLiquidMirrorTimerValuesOnAura();
+        }
+
+        [AuraEffectHandler(AuraType.ForceBeathBar)]
+        void HandleForceBreathBar(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player playerTarget = aurApp.GetTarget().ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            playerTarget.UpdatePositionData();
+            if (!apply)
+                playerTarget.UpdateLiquidMirrorTimerValuesOnAura();
         }
 
         [AuraEffectHandler(AuraType.ForceMoveForward)]
@@ -6177,19 +6204,6 @@ namespace Game.Spells
             // Refresh applications
             foreach (Aura aura in suppressedAuras)
                 aura.ApplyForTargets();
-        }
-
-        [AuraEffectHandler(AuraType.ForceBeathBar)]
-        void HandleForceBreathBar(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                return;
-
-            Player playerTarget = aurApp.GetTarget().ToPlayer();
-            if (playerTarget == null)
-                return;
-
-            playerTarget.UpdatePositionData();
         }
 
         [AuraEffectHandler(AuraType.ActAsControlZone)]

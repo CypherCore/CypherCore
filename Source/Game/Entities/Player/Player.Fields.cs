@@ -89,9 +89,6 @@ namespace Game.Entities
         PlayerDelayedOperations m_DelayedOperations;
         bool m_bCanDelayTeleport;
 
-        PlayerUnderwaterState m_MirrorTimerFlags;
-        PlayerUnderwaterState m_MirrorTimerFlagsLast;
-
         //Stats
         uint m_baseSpellPower;
         uint m_baseManaRegen;
@@ -231,7 +228,9 @@ namespace Game.Entities
 
         CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
-        int[] m_MirrorTimer = new int[3];
+        Dictionary<MirrorTimerType, MirrorTimer> m_mirrorTimers = [];
+        int m_environmentalDamageTimer;
+        PlayerUnderwaterState m_MirrorTimerFlags;
 
         ulong m_GuildIdInvited;
         Runes m_runes = new();

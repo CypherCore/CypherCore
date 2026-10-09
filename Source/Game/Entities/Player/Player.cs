@@ -63,8 +63,9 @@ namespace Game.Entities
             PlayerTalkClass = new PlayerMenu(session);
             m_currentBuybackSlot = InventorySlots.BuyBackStart;
 
-            for (byte i = 0; i < (int)MirrorTimerType.Max; i++)
-                m_MirrorTimer[i] = -1;
+            for (MirrorTimerType i = 0; i < MirrorTimerType.Max; i++)
+                m_mirrorTimers[i] = new();
+            m_environmentalDamageTimer = 1 * Time.InMilliseconds;
 
             m_logintime = GameTime.GetGameTime();
             m_Last_tick = m_logintime;
@@ -449,7 +450,7 @@ namespace Game.Entities
             }
 
             //Handle Water/drowning
-            HandleDrowning(diff);
+            UpdateMirrorTimers(diff);
 
             // Played time
             if (now > m_Last_tick)
@@ -4183,156 +4184,8 @@ namespace Game.Entities
             // to prevent cheating
             corpse.ResetGhostTime();
 
-            StopMirrorTimers();                                     //disable timers(bars)
-
             // OnPlayerRepop hook
             ScriptMgr.OnPlayerRepop(this);
-        }
-
-        public void StopMirrorTimers()
-        {
-            StopMirrorTimer(MirrorTimerType.Fatigue);
-            StopMirrorTimer(MirrorTimerType.Breath);
-            StopMirrorTimer(MirrorTimerType.Fire);
-        }
-
-        public bool IsMirrorTimerActive(MirrorTimerType type)
-        {
-            return m_MirrorTimer[(int)type] == GetMaxTimer(type);
-        }
-
-        void HandleDrowning(uint time_diff)
-        {
-            if (m_MirrorTimerFlags == 0)
-                return;
-
-            int breathTimer = (int)MirrorTimerType.Breath;
-            int fatigueTimer = (int)MirrorTimerType.Fatigue;
-            int fireTimer = (int)MirrorTimerType.Fire;
-
-            uint getEnvironmentalDamage(EnviromentalDamage damageType)
-            {
-                byte damagePercent = 10;
-                if (damageType == EnviromentalDamage.Drowning || damageType == EnviromentalDamage.Exhausted)
-                    damagePercent *= 2;
-
-                uint damage = (uint)(GetMaxHealth() * damagePercent / 100);
-
-                // Randomize damage
-                damage += RandomHelper.URand(0, Math.Pow(10, Math.Max(0, (int)Math.Log10(damage) - 1)));
-
-                return damage;
-            }
-
-            // In water
-            if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InWater))
-            {
-                // Breath timer not activated - activate it
-                if (m_MirrorTimer[breathTimer] == -1)
-                {
-                    m_MirrorTimer[breathTimer] = GetMaxTimer(MirrorTimerType.Breath);
-                    SendMirrorTimer(MirrorTimerType.Breath, m_MirrorTimer[breathTimer], m_MirrorTimer[breathTimer], -1, 0);
-                }
-                else                                                              // If activated - do tick
-                {
-                    m_MirrorTimer[breathTimer] -= (int)time_diff;
-                    // Timer limit - need deal damage
-                    if (m_MirrorTimer[breathTimer] < 0)
-                    {
-                        m_MirrorTimer[breathTimer] += 1 * Time.InMilliseconds;
-                        // Calculate and deal damage
-                        uint damage = getEnvironmentalDamage(EnviromentalDamage.Drowning);
-                        EnvironmentalDamage(EnviromentalDamage.Drowning, damage);
-                    }
-                    else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))      // Update time in client if need
-                        SendMirrorTimer(MirrorTimerType.Breath, GetMaxTimer(MirrorTimerType.Breath), m_MirrorTimer[breathTimer], -1, 0);
-                }
-            }
-            else if (m_MirrorTimer[breathTimer] != -1)        // Regen timer
-            {
-                int UnderWaterTime = GetMaxTimer(MirrorTimerType.Breath);
-                // Need breath regen
-                m_MirrorTimer[breathTimer] += (int)(10 * time_diff);
-                if (m_MirrorTimer[breathTimer] >= UnderWaterTime || !IsAlive())
-                    StopMirrorTimer(MirrorTimerType.Breath);
-                else if (m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))
-                    SendMirrorTimer(MirrorTimerType.Breath, UnderWaterTime, m_MirrorTimer[breathTimer], 10, 0);
-            }
-
-            // In dark water
-            if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-            {
-                // Fatigue timer not activated - activate it
-                if (m_MirrorTimer[fatigueTimer] == -1)
-                {
-                    m_MirrorTimer[fatigueTimer] = GetMaxTimer(MirrorTimerType.Fatigue);
-                    SendMirrorTimer(MirrorTimerType.Fatigue, m_MirrorTimer[fatigueTimer], m_MirrorTimer[fatigueTimer], -1, 0);
-                }
-                else
-                {
-                    m_MirrorTimer[fatigueTimer] -= (int)time_diff;
-                    // Timer limit - need deal damage or teleport ghost to graveyard
-                    if (m_MirrorTimer[fatigueTimer] < 0)
-                    {
-                        m_MirrorTimer[fatigueTimer] += 1 * Time.InMilliseconds;
-                        if (IsAlive())                                            // Calculate and deal damage
-                        {
-                            uint damage = getEnvironmentalDamage(EnviromentalDamage.Exhausted);
-                            EnvironmentalDamage(EnviromentalDamage.Exhausted, damage);
-                        }
-                        else if (HasPlayerFlag(PlayerFlags.Ghost))       // Teleport ghost to graveyard
-                            RepopAtGraveyard();
-                    }
-                    else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-                        SendMirrorTimer(MirrorTimerType.Fatigue, GetMaxTimer(MirrorTimerType.Fatigue), m_MirrorTimer[fatigueTimer], -1, 0);
-                }
-            }
-            else if (m_MirrorTimer[fatigueTimer] != -1)       // Regen timer
-            {
-                int DarkWaterTime = GetMaxTimer(MirrorTimerType.Fatigue);
-                m_MirrorTimer[fatigueTimer] += (int)(10 * time_diff);
-                if (m_MirrorTimer[fatigueTimer] >= DarkWaterTime || !IsAlive())
-                    StopMirrorTimer(MirrorTimerType.Fatigue);
-                else if (m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-                    SendMirrorTimer(MirrorTimerType.Fatigue, DarkWaterTime, m_MirrorTimer[fatigueTimer], 10, 0);
-            }
-
-            if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InLava) && !(_lastLiquid != null && _lastLiquid.SpellID != 0))
-            {
-                // Breath timer not activated - activate it
-                if (m_MirrorTimer[fireTimer] == -1)
-                    m_MirrorTimer[fireTimer] = GetMaxTimer(MirrorTimerType.Fire);
-                else
-                {
-                    m_MirrorTimer[fireTimer] -= (int)time_diff;
-                    if (m_MirrorTimer[fireTimer] < 0)
-                    {
-                        m_MirrorTimer[fireTimer] += 1 * Time.InMilliseconds;
-                        // Calculate and deal damage
-                        uint damage = getEnvironmentalDamage(EnviromentalDamage.Lava);
-                        if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InLava))
-                            EnvironmentalDamage(EnviromentalDamage.Lava, damage);
-                        // need to skip Slime damage in Undercity,
-                        // maybe someone can find better way to handle environmental damage
-                        //else if (m_zoneUpdateId != 1497)
-                        //    EnvironmentalDamage(DAMAGE_SLIME, damage);
-                    }
-                }
-            }
-            else
-                m_MirrorTimer[fireTimer] = -1;
-
-            // Recheck timers flag
-            m_MirrorTimerFlags &= ~PlayerUnderwaterState.ExistTimers;
-            for (byte i = 0; i < (int)MirrorTimerType.Max; ++i)
-            {
-                if (m_MirrorTimer[i] != -1)
-                {
-                    m_MirrorTimerFlags |= PlayerUnderwaterState.ExistTimers;
-                    break;
-                }
-            }
-            m_MirrorTimerFlagsLast = m_MirrorTimerFlags;
         }
 
         void HandleSobering()
@@ -4344,54 +4197,164 @@ namespace Game.Entities
             SetDrunkValue(drunk);
         }
 
-        void SendMirrorTimer(MirrorTimerType Type, int MaxValue, int CurrentValue, int Regen, uint SpellID)
+        void SendMirrorTimer(MirrorTimerType type, int value, int maxValue, int scale, int spellId, bool paused)
         {
-            if (MaxValue == -1)
-            {
-                if (CurrentValue != -1)
-                    StopMirrorTimer(Type);
-                return;
-            }
-
-            SendPacket(new StartMirrorTimer(Type, CurrentValue, MaxValue, Regen, SpellID, false));
+            SendPacket(new StartMirrorTimer(type, value, maxValue, scale, spellId, paused));
         }
 
-        void StopMirrorTimer(MirrorTimerType Type)
+        void PauseMirrorTimer(MirrorTimerType type, bool paused)
         {
-            m_MirrorTimer[(int)Type] = -1;
-            SendPacket(new StopMirrorTimer(Type));
+            SendPacket(new PauseMirrorTimer(type, paused));
         }
 
-        int GetMaxTimer(MirrorTimerType timer)
+        void StopMirrorTimer(MirrorTimerType type)
         {
-            switch (timer)
+            SendPacket(new StopMirrorTimer(type));
+        }
+
+        int GetMirrorTimerMaxValue(MirrorTimerType type)
+        {
+            switch (type)
             {
                 case MirrorTimerType.Fatigue:
                     return Time.Minute * Time.InMilliseconds;
                 case MirrorTimerType.Breath:
+                    return Math.Max((int)(3 * Time.Minute * Time.InMilliseconds * GetTotalAuraMultiplier(AuraType.ModWaterBreathing)), 1);
+                case MirrorTimerType.FeignDeath:
                 {
-                    if (!IsAlive() || HasAuraType(AuraType.WaterBreathing) || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
-                        return -1;
-                    int UnderWaterTime = 3 * Time.Minute * Time.InMilliseconds;
-                    UnderWaterTime *= (int)GetTotalAuraMultiplier(AuraType.ModWaterBreathing);
-                    return UnderWaterTime;
-                }
-                case MirrorTimerType.Fire:
-                {
-                    if (!IsAlive())
-                        return -1;
-                    return 1 * Time.InMilliseconds;
+                    var feignDeathAuras = GetAuraEffectsByType(AuraType.FeignDeath);
+                    return feignDeathAuras.Empty() ? 0
+                        : feignDeathAuras.MaxBy(aurEff => aurEff.GetBase().GetDuration()).GetBase().GetMaxDuration();
                 }
                 default:
                     return 0;
             }
         }
 
-        public void UpdateMirrorTimers()
+        public bool IsMirrorTimerActive(MirrorTimerType type)
         {
-            // Desync flags for update on next HandleDrowning
-            if (m_MirrorTimerFlags != 0)
-                m_MirrorTimerFlagsLast = ~m_MirrorTimerFlags;
+            return m_mirrorTimers[type].IsActive();
+        }
+
+        public void UpdateMirrorTimers(uint diff)
+        {
+            bool shouldMirrorTimerBeActive(MirrorTimerType type)
+            {
+                switch (type)
+                {
+                    case MirrorTimerType.Fatigue:
+                        if (!IsAlive() && !HasPlayerFlag(PlayerFlags.Ghost))
+                            return false;
+                        return ((m_MirrorTimerFlags & PlayerUnderwaterState.InDarkWater) != 0
+                            || m_mirrorTimers[type].GetValue() < m_mirrorTimers[type].GetMaxValue());
+                    case MirrorTimerType.Breath:
+                        if (!IsAlive() || GetSession().GetSecurity() >= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.DisableBreathing))
+                            return false;
+                        return (m_MirrorTimerFlags & PlayerUnderwaterState.InWater) != 0
+                            || HasAuraType(AuraType.ForceBeathBar)
+                            || m_mirrorTimers[type].GetValue() < m_mirrorTimers[type].GetMaxValue();
+                    case MirrorTimerType.FeignDeath:
+                        return HasAuraType(AuraType.FeignDeath);
+                    default:
+                        return false;
+                }
+            }
+
+            uint getEnvironmentalDamage(EnviromentalDamage damageType)
+            {
+                byte damagePercent = 10;
+                if (damageType == EnviromentalDamage.Drowning || damageType == EnviromentalDamage.Exhausted)
+                    damagePercent *= 2;
+
+                uint damage = (uint)(GetMaxHealth() * damagePercent / 100);
+
+                // Randomize damage
+                damage += RandomHelper.URand(0, (uint)Math.Pow(10, Math.Max(0, (int)Math.Log10(damage) - 1)));
+
+                return damage;
+            }
+
+            for (MirrorTimerType type = MirrorTimerType.Fatigue; (int)type < m_mirrorTimers.Count; type = type + 1)
+            {
+                MirrorTimer timer = m_mirrorTimers[type];
+                bool isActive = timer.IsActive();
+                bool shouldBeActive = shouldMirrorTimerBeActive(type);
+                if (isActive)
+                {
+                    if (shouldBeActive)
+                    {
+                        if (timer.Update(diff) == MirrorTimer.UpdateResult.ExpiredTicked)
+                        {
+                            // do env damage tick
+                            switch (type)
+                            {
+                                case MirrorTimerType.Fatigue:
+                                    if (IsAlive())                                    // Calculate and deal damage
+                                        EnvironmentalDamage(EnviromentalDamage.Exhausted, getEnvironmentalDamage(EnviromentalDamage.Exhausted));
+                                    else if (HasPlayerFlag(PlayerFlags.Ghost))       // Teleport ghost to graveyard
+                                        RepopAtGraveyard();
+                                    break;
+                                case MirrorTimerType.Breath:
+                                    EnvironmentalDamage(EnviromentalDamage.Drowning, getEnvironmentalDamage(EnviromentalDamage.Drowning));
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    else
+                        timer.Stop();
+                }
+                else if (shouldBeActive)
+                {
+                    switch (type)
+                    {
+                        case MirrorTimerType.Fatigue:
+                        case MirrorTimerType.Breath:
+                            timer.Start(GetMirrorTimerMaxValue(type), 0);
+                            break;
+                        case MirrorTimerType.FeignDeath:
+                        {
+                            Aura longestFeign = GetAuraEffectsByType(AuraType.FeignDeath).MaxBy(aurEff => aurEff.GetBase().GetDuration()).GetBase();
+                            timer.Start(longestFeign.GetDuration(), longestFeign.GetMaxDuration(), (int)longestFeign.GetId());
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+
+                if (timer.IsChanged())
+                {
+                    if (timer.IsActive())
+                        SendMirrorTimer(type, timer.GetValue(), timer.GetMaxValue(), timer.GetScale(), timer.GetSpellId(), timer.IsPaused());
+                    else
+                        StopMirrorTimer(type);
+                }
+                else if (timer.IsPausedChanged())
+                    PauseMirrorTimer(type, timer.IsPaused());
+
+                timer.ClearChanged();
+            }
+
+            if ((m_MirrorTimerFlags & (PlayerUnderwaterState.InLava /*| UNDERWATER_INSLIME*/)) != 0 && !(_lastLiquid != null & _lastLiquid.SpellID != 0) && IsAlive())
+            {
+                m_environmentalDamageTimer -= (int)diff;
+                if (m_environmentalDamageTimer < 0)
+                {
+                    m_environmentalDamageTimer += 1 * Time.InMilliseconds;
+                    // Calculate and deal damage
+                    uint damage = getEnvironmentalDamage(EnviromentalDamage.Lava);
+                    if ((m_MirrorTimerFlags & PlayerUnderwaterState.InLava) != 0)
+                        EnvironmentalDamage(EnviromentalDamage.Lava, damage);
+                    // need to skip Slime damage in Undercity,
+                    // maybe someone can find better way to handle environmental damage
+                    //else if (m_zoneUpdateId != 1497)
+                    //    EnvironmentalDamage(DAMAGE_SLIME, damage);
+                }
+            }
+            else
+                m_environmentalDamageTimer = 1 * Time.InMilliseconds;
         }
 
         public void ResurrectPlayer(float restore_percent, bool applySickness = false)
@@ -4518,8 +4481,6 @@ namespace Game.Entities
                 GetMotionMaster().MoveFall();
 
             SetRooted(true);
-
-            StopMirrorTimers();                                     //disable timers(bars)
 
             SetDeathState(DeathState.Corpse);
 
@@ -8395,6 +8356,159 @@ namespace Game.Entities
         public override int GetHashCode()
         {
             return HashCode.Combine(DefinitionId, Rank);
+        }
+    }
+
+    class MirrorTimer
+    {
+        int m_value;
+        int m_maxValue;
+        int m_scale = -1;
+        int m_spellId;
+        MirrorTimerFlags m_flags;
+
+        static int ExpiredTickPeriod = 1 * Time.InMilliseconds;
+        PeriodicTimer m_expiredTick = new(ExpiredTickPeriod, ExpiredTickPeriod);
+
+        public bool IsActive() { return m_maxValue > 0; }
+        public bool IsRegenerating() { return m_scale > 0; }
+
+        public int GetValue() { return m_value; }
+        public void SetValue(int value)
+        {
+            if (IsActive() && value != GetValue())
+                m_flags |= MirrorTimerFlags.Changed;
+
+            m_value = value;
+        }
+
+        public int GetMaxValue() { return m_maxValue; }
+        public void SetMaxValue(int maxValue)
+        {
+            if (maxValue == 0)
+                Stop();
+
+            if (!IsActive())
+                return;
+
+            if (maxValue != GetMaxValue())
+                m_flags |= MirrorTimerFlags.Changed;
+
+            m_maxValue = maxValue;
+            SetValue(Math.Min(GetValue(), GetMaxValue()));
+        }
+
+        public int GetScale() { return m_scale; }
+        public void SetScale(int scale)
+        {
+            if (scale == 0)
+            {
+                SetPaused(true);
+                return;
+            }
+
+            if (IsActive() && scale != GetScale())
+                m_flags |= MirrorTimerFlags.Changed;
+
+            m_scale = scale;
+        }
+
+        public int GetSpellId() { return m_spellId; }
+
+        public bool IsPaused() { return m_flags.HasFlag(MirrorTimerFlags.Paused) && !IsRegenerating(); }
+        public void SetPaused(bool state)
+        {
+            if (IsActive() && state != IsPaused())
+                m_flags |= MirrorTimerFlags.PausedChanged;
+
+            if (state)
+                m_flags |= MirrorTimerFlags.Paused;
+            else
+                m_flags &= ~MirrorTimerFlags.Paused;
+        }
+
+        public bool IsChanged() { return m_flags.HasFlag(MirrorTimerFlags.Changed); }
+        public bool IsPausedChanged() { return m_flags.HasFlag(MirrorTimerFlags.PausedChanged); }
+        public void ClearChanged() { m_flags &= ~(MirrorTimerFlags.Changed | MirrorTimerFlags.PausedChanged); }
+
+        public void Start(int maxValue, int spellId)
+        {
+            if (m_scale < 0)
+            {
+                m_value = maxValue;
+                m_maxValue = maxValue;
+                m_spellId = spellId;
+                m_flags |= MirrorTimerFlags.Changed;
+                m_expiredTick.SetPeriodic(ExpiredTickPeriod, ExpiredTickPeriod);
+            }
+            else
+                Stop();
+        }
+
+        public void Start(int value, int maxValue, int spellId)
+        {
+            Start(maxValue, spellId);
+
+            if (IsActive())
+                m_value = value;
+        }
+
+        public void Stop()
+        {
+            if (!IsActive())
+                return;
+
+            m_value = 0;
+            m_maxValue = 0;
+            m_flags = MirrorTimerFlags.Changed;
+        }
+
+        public enum UpdateResult
+        {
+            Inactive,
+            Decreased,
+            DecreasedExpired,
+            ExpiredTicked,
+            Regenerated
+        }
+
+        public UpdateResult Update(uint diff)
+        {
+            if (!IsActive() || IsPaused())
+                return UpdateResult.Inactive;
+
+            int delta = (int)diff * GetScale();
+
+            if (delta < 0)      // Timer running out
+            {
+                if (GetValue() > -delta)
+                {
+                    m_value += delta;
+                    return UpdateResult.Decreased;
+                }
+
+                if (m_value == 0)   // subsequent ticks after expiration
+                {
+                    if (!m_expiredTick.Update((int)diff))
+                        return UpdateResult.DecreasedExpired;
+                }
+                else
+                    m_value = 0;
+
+                return UpdateResult.ExpiredTicked;
+            }
+            else                // Timer regenerating
+            {
+                if (GetValue() + delta < GetMaxValue())
+                {
+                    m_value += delta;
+                    m_expiredTick.SetPeriodic(ExpiredTickPeriod, ExpiredTickPeriod);
+                }
+                else
+                    Stop();
+
+                return UpdateResult.Regenerated;
+            }
         }
     }
 }
