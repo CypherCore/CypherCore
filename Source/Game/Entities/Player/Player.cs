@@ -4231,7 +4231,7 @@ namespace Game.Entities
                 if (m_MirrorTimer[breathTimer] == -1)
                 {
                     m_MirrorTimer[breathTimer] = GetMaxTimer(MirrorTimerType.Breath);
-                    SendMirrorTimer(MirrorTimerType.Breath, m_MirrorTimer[breathTimer], m_MirrorTimer[breathTimer], -1);
+                    SendMirrorTimer(MirrorTimerType.Breath, m_MirrorTimer[breathTimer], m_MirrorTimer[breathTimer], -1, 0);
                 }
                 else                                                              // If activated - do tick
                 {
@@ -4245,7 +4245,7 @@ namespace Game.Entities
                         EnvironmentalDamage(EnviromentalDamage.Drowning, damage);
                     }
                     else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))      // Update time in client if need
-                        SendMirrorTimer(MirrorTimerType.Breath, GetMaxTimer(MirrorTimerType.Breath), m_MirrorTimer[breathTimer], -1);
+                        SendMirrorTimer(MirrorTimerType.Breath, GetMaxTimer(MirrorTimerType.Breath), m_MirrorTimer[breathTimer], -1, 0);
                 }
             }
             else if (m_MirrorTimer[breathTimer] != -1)        // Regen timer
@@ -4256,7 +4256,7 @@ namespace Game.Entities
                 if (m_MirrorTimer[breathTimer] >= UnderWaterTime || !IsAlive())
                     StopMirrorTimer(MirrorTimerType.Breath);
                 else if (m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InWater))
-                    SendMirrorTimer(MirrorTimerType.Breath, UnderWaterTime, m_MirrorTimer[breathTimer], 10);
+                    SendMirrorTimer(MirrorTimerType.Breath, UnderWaterTime, m_MirrorTimer[breathTimer], 10, 0);
             }
 
             // In dark water
@@ -4266,7 +4266,7 @@ namespace Game.Entities
                 if (m_MirrorTimer[fatigueTimer] == -1)
                 {
                     m_MirrorTimer[fatigueTimer] = GetMaxTimer(MirrorTimerType.Fatigue);
-                    SendMirrorTimer(MirrorTimerType.Fatigue, m_MirrorTimer[fatigueTimer], m_MirrorTimer[fatigueTimer], -1);
+                    SendMirrorTimer(MirrorTimerType.Fatigue, m_MirrorTimer[fatigueTimer], m_MirrorTimer[fatigueTimer], -1, 0);
                 }
                 else
                 {
@@ -4284,7 +4284,7 @@ namespace Game.Entities
                             RepopAtGraveyard();
                     }
                     else if (!m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-                        SendMirrorTimer(MirrorTimerType.Fatigue, GetMaxTimer(MirrorTimerType.Fatigue), m_MirrorTimer[fatigueTimer], -1);
+                        SendMirrorTimer(MirrorTimerType.Fatigue, GetMaxTimer(MirrorTimerType.Fatigue), m_MirrorTimer[fatigueTimer], -1, 0);
                 }
             }
             else if (m_MirrorTimer[fatigueTimer] != -1)       // Regen timer
@@ -4294,7 +4294,7 @@ namespace Game.Entities
                 if (m_MirrorTimer[fatigueTimer] >= DarkWaterTime || !IsAlive())
                     StopMirrorTimer(MirrorTimerType.Fatigue);
                 else if (m_MirrorTimerFlagsLast.HasAnyFlag(PlayerUnderwaterState.InDarkWater))
-                    SendMirrorTimer(MirrorTimerType.Fatigue, DarkWaterTime, m_MirrorTimer[fatigueTimer], 10);
+                    SendMirrorTimer(MirrorTimerType.Fatigue, DarkWaterTime, m_MirrorTimer[fatigueTimer], 10, 0);
             }
 
             if (m_MirrorTimerFlags.HasAnyFlag(PlayerUnderwaterState.InLava) && !(_lastLiquid != null && _lastLiquid.SpellID != 0))
@@ -4344,7 +4344,7 @@ namespace Game.Entities
             SetDrunkValue(drunk);
         }
 
-        void SendMirrorTimer(MirrorTimerType Type, int MaxValue, int CurrentValue, int Regen)
+        void SendMirrorTimer(MirrorTimerType Type, int MaxValue, int CurrentValue, int Regen, uint SpellID)
         {
             if (MaxValue == -1)
             {
@@ -4353,7 +4353,7 @@ namespace Game.Entities
                 return;
             }
 
-            SendPacket(new StartMirrorTimer(Type, CurrentValue, MaxValue, Regen, 0, false));
+            SendPacket(new StartMirrorTimer(Type, CurrentValue, MaxValue, Regen, SpellID, false));
         }
 
         void StopMirrorTimer(MirrorTimerType Type)
