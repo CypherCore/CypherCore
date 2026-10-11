@@ -1205,7 +1205,7 @@ namespace Game.AI
                     foreach (var target in targets)
                     {
                         Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
-                        Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
+                        Quaternion rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, pos.GetOrientation());
                         GameObject summon = summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
                         if (e.Action.summonGO.storedTargetId != 0 && summon != null)
                             AddToStoredTargetList([summon], e.Action.summonGO.storedTargetId);
@@ -1214,7 +1214,7 @@ namespace Game.AI
                     if (e.GetTargetType() != SmartTargets.Position)
                         break;
 
-                    Quaternion rot1 = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
+                    Quaternion rot1 = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, e.Target.o);
                     GameObject summon1 = summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), rot1, TimeSpan.FromSeconds(e.Action.summonGO.despawnTime), (GameObjectSummonType)e.Action.summonGO.summonType);
                     if (e.Action.summonGO.storedTargetId != 0 && summon1 != null)
                         AddToStoredTargetList([summon1], e.Action.summonGO.storedTargetId);

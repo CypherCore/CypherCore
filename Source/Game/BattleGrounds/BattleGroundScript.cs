@@ -4,7 +4,6 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Maps;
-using System;
 using System.Numerics;
 
 namespace Game.BattleGrounds
@@ -79,7 +78,7 @@ namespace Game.BattleGrounds
                 Log.outDebug(LogFilter.Battleground, $"Battleground::AddObject: gameoobject [entry: {entry}] for BG (map: {battlegroundMap.GetId()}) has zeroed rotation fields, " +
                     "orientation used temporally, but please fix the spawn");
 
-                rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
+                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, o);
             }
 
             // Must be created this way, adding to godatamap would add it to the base map of the instance

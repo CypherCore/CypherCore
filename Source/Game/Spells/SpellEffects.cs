@@ -2676,7 +2676,7 @@ namespace Game.Spells
             Map map = target.GetMap();
 
             Position pos = new(x, y, z, o);
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, o);
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
             if (go == null)
                 return;
@@ -2944,7 +2944,7 @@ namespace Game.Spells
                 posZ = caster.GetPositionZ(),
                 Orientation = caster.GetOrientation()
             };
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f));
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, pos.GetOrientation());
 
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 0, GameObjectState.Ready);
             if (go == null)
@@ -3303,7 +3303,7 @@ namespace Game.Spells
 
             Map map = m_caster.GetMap();
             Position pos = new(x, y, z, o);
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, o);
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
             if (go == null)
                 return;
@@ -4204,7 +4204,7 @@ namespace Game.Spells
                 unitCaster.GetPosition(out fx, out fy, out fz, out fo);
 
             Position pos = new(fx, fy, fz, fo);
-            Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(fo, 0.0f, 0.0f));
+            Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, fo);
 
             GameObject go = GameObject.CreateGameObject(name_id, cMap, pos, rotation, 255, GameObjectState.Ready);
             if (go == null)
@@ -5092,7 +5092,7 @@ namespace Game.Spells
 
             Map map = m_caster.GetMap();
             Position pos = new(x, y, z, o);
-            Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(o, 0.0f, 0.0f));
+            Quaternion rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, o);
             GameObject go = GameObject.CreateGameObject(goId, map, pos, rot, 255, GameObjectState.Ready);
 
             if (go == null)

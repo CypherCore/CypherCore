@@ -494,7 +494,7 @@ namespace Game.Chat
                 Player player = handler.GetPlayer();
                 Map map = player.GetMap();
 
-                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
+                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.CreateFromAxisAngle(Vector3.UnitZ, player.GetOrientation()), 255, GameObjectState.Ready);
                 if (obj == null)
                     return false;
 
@@ -524,7 +524,7 @@ namespace Game.Chat
                 Player player = handler.GetPlayer();
                 TimeSpan spawntm = TimeSpan.FromSeconds(spawntime.GetValueOrDefault(300));
 
-                Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
+                Quaternion rotation = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, player.GetOrientation());
                 if (Global.ObjectMgr.GetGameObjectTemplate(objectId) == null)
                 {
                     handler.SendSysMessage(CypherStrings.GameobjectNotExist, objectId);

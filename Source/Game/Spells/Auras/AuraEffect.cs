@@ -6082,7 +6082,7 @@ namespace Game.Spells
                             if (gameObjectCaster != null)
                             {
                                 gameObjectCaster.HandleCustomTypeCommand(new SetNewFlagState(FlagState.Dropped, target));
-                                GameObject droppedFlag = gameObjectCaster.SummonGameObject(gameObjectCaster.GetGoInfo().NewFlag.FlagDrop, target.GetPosition(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromSeconds(gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration / 1000), GameObjectSummonType.TimedDespawn);
+                                GameObject droppedFlag = gameObjectCaster.SummonGameObject(gameObjectCaster.GetGoInfo().NewFlag.FlagDrop, target.GetPosition(), Quaternion.CreateFromAxisAngle(Vector3.UnitZ, target.GetOrientation()), TimeSpan.FromSeconds(gameObjectCaster.GetGoInfo().NewFlag.ExpireDuration / 1000), GameObjectSummonType.TimedDespawn);
                                 if (droppedFlag != null)
                                     droppedFlag.SetOwnerGUID(gameObjectCaster.GetGUID());
                             }
@@ -6238,7 +6238,7 @@ namespace Game.Spells
                 return;
             }
 
-            GameObject controlZone = auraOwner.SummonGameObject(gameobjectTemplate.entry, auraOwner.GetPosition(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(aurApp.GetTarget().GetOrientation(), 0.0f, 0.0f)), TimeSpan.FromHours(24), GameObjectSummonType.TimedOrCorpseDespawn);
+            GameObject controlZone = auraOwner.SummonGameObject(gameobjectTemplate.entry, auraOwner.GetPosition(), Quaternion.CreateFromAxisAngle(Vector3.UnitZ, aurApp.GetTarget().GetOrientation()), TimeSpan.FromHours(24), GameObjectSummonType.TimedOrCorpseDespawn);
             if (controlZone != null)
                 controlZone.SetSpellId(GetSpellInfo().Id);
         }

@@ -2877,7 +2877,7 @@ namespace Game.Entities
 
         public void SetLocalRotationAngles(float z_rot, float y_rot, float x_rot)
         {
-            Quaternion quat = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(z_rot, y_rot, x_rot));
+            Quaternion quat = Quaternion.CreateFromYawPitchRoll(z_rot, y_rot, x_rot);
             SetLocalRotation(quat.X, quat.Y, quat.Z, quat.W);
         }
 
@@ -2893,9 +2893,7 @@ namespace Game.Entities
                 Quaternion worldRotationQuat = new(worldRotation.X, worldRotation.Y, worldRotation.Z, worldRotation.W);
                 Quaternion localRotationQuat = new(localRotation.X, localRotation.Y, localRotation.Z, localRotation.W);
 
-                Quaternion resultRotation = localRotationQuat * worldRotationQuat;
-
-                return resultRotation;
+                localRotation = localRotationQuat * worldRotationQuat;
             }
 
             return localRotation;
