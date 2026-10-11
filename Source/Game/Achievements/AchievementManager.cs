@@ -790,7 +790,7 @@ namespace Game.Achievements
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
                     if (criteria == null)
                     {
-                        // we will remove not existed criteria for all guilds
+                        // Remove non-existing achievements from all guilds
                         Log.outError(LogFilter.Achievement, "Non-existing achievement criteria {0} data removed from table `guild_achievement_progress`.", id);
 
                         PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_INVALID_ACHIEV_PROGRESS_CRITERIA_GUILD);

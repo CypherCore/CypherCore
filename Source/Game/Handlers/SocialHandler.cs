@@ -20,16 +20,6 @@ namespace Game
         {
             WhoRequest request = whoRequest.Request;
 
-            // zones count, client limit = 10 (2.0.10)
-            // can't be received from real client or broken packet
-            if (whoRequest.Areas.Count > 10)
-                return;
-
-            // user entered strings count, client limit=4 (checked on 2.0.10)
-            // can't be received from real client or broken packet
-            if (request.Words.Count > 4)
-                return;
-
             // @todo: handle following packet values
             // VirtualRealmNames
             // ShowEnemies
@@ -83,11 +73,8 @@ namespace Game
                 if (!request.RaceFilter.HasRace((Race)target.Race))
                     continue;
 
-                if (!whoRequest.Areas.Empty())
-                {
-                    if (whoRequest.Areas.Contains((int)target.ZoneId))
-                        continue;
-                }
+                if (!whoRequest.Areas.Empty() && whoRequest.Areas.Contains((int)target.ZoneId))
+                    continue;
 
                 string wTargetName = target.PlayerName.ToLower();
                 if (!(request.Name.IsEmpty() || wTargetName.Equals(request.Name)))
@@ -110,7 +97,7 @@ namespace Game
                         if (!string.IsNullOrEmpty(request.Words[i]))
                         {
                             if (wTargetName.Equals(request.Words[i]) ||
-                                wTargetGuildName.Equals(request.Words[i]) || 
+                                wTargetGuildName.Equals(request.Words[i]) ||
                                 aname.Equals(request.Words[i]))
                             {
                                 show = true;

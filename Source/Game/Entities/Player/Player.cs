@@ -3351,19 +3351,15 @@ namespace Game.Entities
 
         public void SendMailResult(ulong mailId, MailResponseType mailAction, MailResponseResult mailError, InventoryResult equipError = 0, ulong itemGuid = 0, uint itemCount = 0)
         {
-            MailCommandResult result = new();
-            result.MailID = mailId;
-            result.Command = (int)mailAction;
-            result.ErrorCode = (int)mailError;
-
-            if (mailError == MailResponseResult.EquipError)
-                result.BagResult = (int)equipError;
-            else if (mailAction == MailResponseType.ItemTaken)
+            MailCommandResult result = new()
             {
-                result.AttachID = itemGuid;
-                result.QtyInInventory = (int)itemCount;
-            }
-
+                MailID = mailId,
+                Command = (int)mailAction,
+                ErrorCode = (int)mailError,
+                BagResult = (int)equipError,
+                AttachID = itemGuid,
+                QtyInInventory = (int)itemCount
+            };
             SendPacket(result);
         }
 

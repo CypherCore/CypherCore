@@ -51,7 +51,7 @@ namespace Game.Entities
 
             _bonusData = new BonusData(itemProto);
             SetCount(1);
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), itemProto.MaxDurability);
+            SetMaxDurability(itemProto.MaxDurability);
             SetDurability(itemProto.MaxDurability);
 
             foreach (var effect in GetEffects())
@@ -470,7 +470,7 @@ namespace Game.Entities
             uint durability = fields.Read<uint>(10);
             SetDurability(durability);
             // update max durability (and durability) if need
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), proto.MaxDurability);
+            SetMaxDurability(proto.MaxDurability);
 
             // do not overwrite durability for wrapped items
             if (durability > proto.MaxDurability && !IsWrapped())

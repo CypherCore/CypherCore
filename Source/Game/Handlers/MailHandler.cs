@@ -56,10 +56,7 @@ namespace Game
             if (!CanOpenMailBox(sendMail.Info.Mailbox))
                 return;
 
-            if (string.IsNullOrEmpty(sendMail.Info.Target))
-                return;
-
-            if (!ValidateHyperlinksAndMaybeKick(sendMail.Info.Subject) || !ValidateHyperlinksAndMaybeKick(sendMail.Info.Body))
+            if (sendMail.Info.Target.IsEmpty())
                 return;
 
             Player player = GetPlayer();
@@ -76,7 +73,7 @@ namespace Game
             if (receiverGuid.IsEmpty())
             {
                 Log.outInfo(LogFilter.Network, "Player {0} is sending mail to {1} (GUID: not existed!) with subject {2}" +
-                    "and body {3} includes {4} items, {5} copper and {6} COD copper with StationeryID = {7}",
+                    "and body {3} including {4} items, {5} copper and {6} COD copper with StationeryID = {7}",
                     GetPlayerInfo(), sendMail.Info.Target, sendMail.Info.Subject, sendMail.Info.Body,
                     sendMail.Info.Attachments.Count, sendMail.Info.SendMoney, sendMail.Info.Cod, sendMail.Info.StationeryID);
                 player.SendMailResult(0, MailResponseType.Send, MailResponseResult.RecipientNotFound);
@@ -199,9 +196,9 @@ namespace Game
                         return;
                     }
 
-                    if (item.IsBoundAccountWide() && item.IsSoulBound() && player.GetSession().GetAccountId() != receiverAccountId)
+                    if (item.IsBoundAccountWide() && item.IsSoulBound() && GetAccountId() != receiverAccountId)
                     {
-                        if (!item.IsBattlenetAccountBound() || player.GetSession().GetBattlenetAccountId() == 0 || player.GetSession().GetBattlenetAccountId() != receiverBnetAccountId)
+                        if (!item.IsBattlenetAccountBound() || GetBattlenetAccountId() == 0 || GetBattlenetAccountId() != receiverBnetAccountId)
                         {
                             player.SendMailResult(0, MailResponseType.Send, MailResponseResult.EquipError, InventoryResult.NotSameAccount);
                             return;
@@ -243,7 +240,7 @@ namespace Game
                         {
                             if (log)
                             {
-                                Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail item: {item.GetTemplate().GetName()} " +
+                                Log.outCommand(GetAccountId(), $"GM {GetPlayerName()} ({_player.GetGUID()}) (Account: {GetAccountId()}) mail item: {item.GetName(Global.WorldMgr.GetDefaultDbcLocale())} " +
                                     $"(Entry: {item.GetEntry()} Count: {item.GetCount()}) to: {sendMail.Info.Target} ({receiverGuid}) (Account: {receiverAccountId})");
                             }
 
@@ -259,7 +256,7 @@ namespace Game
                         }
 
                         // if item send to character at another account, then apply item delivery delay
-                        needItemDelay = player.GetSession().GetAccountId() != receiverAccountId;
+                        needItemDelay = GetAccountId() != receiverAccountId;
                     }
 
                     if (log && sendMail.Info.SendMoney > 0)
@@ -339,6 +336,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MailDelete)]
         void HandleMailDelete(MailDelete mailDelete)
         {
+            if (!CanOpenMailBox(_player.PlayerTalkClass.GetInteractionData().SourceGuid))
+                return;
+
             Mail m = GetPlayer().GetMail(mailDelete.MailID);
             Player player = GetPlayer();
             player.m_mailsUpdated = true;
@@ -411,8 +411,6 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MailTakeItem)]
         void HandleMailTakeItem(MailTakeItem takeItem)
         {
-            ulong AttachID = takeItem.AttachID;
-
             if (!CanOpenMailBox(takeItem.Mailbox))
                 return;
 
@@ -426,7 +424,7 @@ namespace Game
             }
 
             // verify that the mail has the item to avoid cheaters taking COD items without paying
-            if (!m.items.Any(p => p.item_guid == AttachID))
+            if (!m.items.Any(p => p.item_guid == takeItem.AttachID))
             {
                 player.SendMailResult(takeItem.MailID, MailResponseType.ItemTaken, MailResponseResult.InternalError);
                 return;
@@ -473,7 +471,7 @@ namespace Game
                                 sender_name = Global.ObjectMgr.GetCypherString(CypherStrings.Unknown);
                         }
                         Log.outCommand(GetAccountId(), "GM {0} (Account: {1}) receiver mail item: {2} (Entry: {3} Count: {4}) and send COD money: {5} to player: {6} (Account: {7})",
-                            GetPlayerName(), GetAccountId(), it.GetTemplate().GetName(), it.GetEntry(), it.GetCount(), m.COD, sender_name, sender_accId);
+                            GetPlayerName(), GetAccountId(), it.GetName(Global.WorldMgr.GetDefaultDbcLocale()), it.GetEntry(), it.GetCount(), m.COD, sender_name, sender_accId);
                     }
                     else if (receiver == null)
                         sender_accId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(sender_guid);

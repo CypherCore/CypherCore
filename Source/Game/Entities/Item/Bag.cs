@@ -79,7 +79,7 @@ namespace Game.Entities
                 SetContainedIn(owner.GetGUID());
             }
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.MaxDurability), itemProto.MaxDurability);
+            SetMaxDurability(itemProto.MaxDurability);
             SetDurability(itemProto.MaxDurability);
             SetCount(1);
             SetContext(context);
