@@ -4773,6 +4773,12 @@ namespace Game.Entities
                 spellInfo._LoadSqrtTargetLimit(5, 0, 390163, 0, null, null);
             });
 
+            // Starfire
+            ApplySpellFix([194153], spellInfo =>
+            {
+                spellInfo._LoadSqrtTargetLimit(8, 0, null, 4, null, null);
+            });
+
             Log.outInfo(LogFilter.ServerLoading, $"Loaded SpellInfo target caps in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
