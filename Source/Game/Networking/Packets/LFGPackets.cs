@@ -368,13 +368,14 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(EncounterMask);
             _worldPacket.WriteInt32(Players.Count);
             _worldPacket.WriteUInt8(PromisedShortageRolePriority);
+
+            foreach (var player in Players)
+                player.Write(_worldPacket);
+
             _worldPacket.WriteBit(ValidCompletedMask);
             _worldPacket.WriteBit(ProposalSilent);
             _worldPacket.WriteBit(FailedByMyParty);
             _worldPacket.FlushBits();
-
-            foreach (var player in Players)
-                player.Write(_worldPacket);
         }
 
         public RideTicket Ticket;
