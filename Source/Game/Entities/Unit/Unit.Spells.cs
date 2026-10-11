@@ -2002,7 +2002,7 @@ namespace Game.Entities
                     if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
                     {
                         // break autorepeat if not Auto Shot
-                        if (m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                        if (!m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.IsAutoShot())
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
                     }
                     if (pSpell.m_spellInfo.CalcCastTime() > 0)
@@ -2024,7 +2024,7 @@ namespace Game.Entities
 
                         // it also does break autorepeat if not Auto Shot
                         if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null &&
-                            m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.Id != 75)
+                            !m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo.IsAutoShot())
                             InterruptSpell(CurrentSpellTypes.AutoRepeat);
 
                         AddUnitState(UnitState.Casting);
@@ -2038,7 +2038,7 @@ namespace Game.Entities
                         GetCurrentSpell(CSpellType).SetState(SpellState.Finished);
 
                     // only Auto Shoot does not break anything
-                    if (pSpell.m_spellInfo.Id != 75)
+                    if (!pSpell.m_spellInfo.IsAutoShot())
                     {
                         // generic autorepeats break generic non-delayed and channeled non-delayed spells
                         InterruptSpell(CurrentSpellTypes.Generic, false);

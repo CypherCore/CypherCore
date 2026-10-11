@@ -570,6 +570,11 @@ namespace Game.Spells
             return HasAttribute(SpellAttr0.OnNextSwingNoDamage | SpellAttr0.OnNextSwing);
         }
 
+        public bool IsAutoShot()
+        {
+            return IsAffected(SpellFamilyNames.Hunter, new FlagArray128(0x1)) && IsAutoRepeatRangedSpell();
+        }
+
         public bool IsRangedWeaponSpell()
         {
             return (SpellFamilyName == SpellFamilyNames.Hunter && !SpellFamilyFlags[1].HasAnyFlag(0x10000000u)) // for 53352, cannot find better way
