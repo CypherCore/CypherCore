@@ -2214,18 +2214,23 @@ namespace Framework.Constants
     [Flags]
     public enum PowerTypeFlags
     {
-        StopRegenWhileCasting = 0x01,
+        StopRegenWhileCasting = 0x01, // NYI
         UseRegenInterrupt = 0x02,
-        FillFractionalPowerOnEnergize = 0x08,
-        NoClientPrediction = 0x10,
+        ClearFractionalPowerOnLeaveCombat = 0x04, // NYI (unused)
+        FillFractionalPowerOnEnergize = 0x08, // NYI
+        NoClientPrediction = 0x10, // clientside
         UnitsUseDefaultPowerOnInit = 0x20,
         NotSetToDefaultOnResurrect = 0x40,
         IsUsedByNPCs = 0x80,
-        ContinueRegenWhileFatigued = 0x200,
+        CostHiddenOnTooltip = 0x100, // clientside
+        ContinueRegenWhileFatigued = 0x200, // NYI
         RegenAffectedByHaste = 0x400,
+        SetToDefaultAfterRegenInterrupt = 0x800, // NYI (unused)
         SetToMaxOnLevelUp = 0x1000,
         SetToMaxOnInitialLogIn = 0x2000,
-        AllowCostModsForPlayers = 0x4000
+        SetToMaxOnResurrect = 0x4000,
+        AlwaysSecret = 0x8000, // clientside
+        NeverSecret = 0x10000  // clientside
     }
 
     public enum PrestigeLevelInfoFlags : byte

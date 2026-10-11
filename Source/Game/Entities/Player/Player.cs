@@ -4392,10 +4392,15 @@ namespace Game.Entities
             {
                 SetHealth((ulong)(GetMaxHealth() * restore_percent));
                 SetPower(PowerType.Mana, (int)(GetMaxPower(PowerType.Mana) * restore_percent));
-                SetPower(PowerType.Rage, 0);
-                SetPower(PowerType.Energy, (int)(GetMaxPower(PowerType.Energy) * restore_percent));
-                SetPower(PowerType.Focus, (int)(GetMaxPower(PowerType.Focus) * restore_percent));
-                SetPower(PowerType.LunarPower, 0);
+            }
+
+            foreach (var power in GetPowerTypes())
+            {
+                var powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
+                if (powerType.HasFlag(PowerTypeFlags.SetToMaxOnResurrect))
+                    SetPower(power, GetMaxPower(power));
+                else if (!powerType.HasFlag(PowerTypeFlags.NotSetToDefaultOnResurrect))
+                    SetPower(power, powerType.DefaultPower);
             }
 
             // trigger update zone for alive state zone updates
