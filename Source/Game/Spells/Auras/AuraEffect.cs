@@ -671,7 +671,7 @@ namespace Game.Spells
                     if (spellInfo == null || (spellInfo.GetAllEffectsMechanicMask() & (1ul << GetMiscValue())) == 0)
                         return false;
                     break;
-                case AuraType.ModCastingSpeedNotStack:
+                case AuraType.ModCastingSpeed:
                     // skip melee hits and instant cast spells
                     if (eventInfo.GetProcSpell() == null || eventInfo.GetProcSpell().GetCastTime() == 0)
                         return false;
@@ -2174,8 +2174,8 @@ namespace Game.Spells
                             }
                         }
                         // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
-                        //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
-                        //    creatureEntry = mountVehicle->VehicleCreatureId;
+                        //if (MountVehicle const* mountVehicle = sObjectMgr.GetMountVehicle(mountEntry.Id))
+                        //    creatureEntry = mountVehicle.VehicleCreatureId;
 
                         if (mode.HasFlag(AuraEffectHandleModes.Real) && !mountEntry.HasFlag(MountFlags.MountEquipmentEffectsSuppressed))
                         {
@@ -3982,8 +3982,7 @@ namespace Game.Spells
         /********************************/
         /***         ATTACK SPEED     ***/
         /********************************/
-        [AuraEffectHandler(AuraType.HasteSpells)]
-        [AuraEffectHandler(AuraType.ModCastingSpeedNotStack)]
+        [AuraEffectHandler(AuraType.ModCastingSpeed)]
         void HandleModCastingSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
@@ -4002,7 +4001,7 @@ namespace Game.Spells
                     // it's some rare case that you have 2 auras like that, but just in case ;)
 
                     bool remove = true;
-                    var castingSpeedNotStack = target.GetAuraEffectsByType(AuraType.ModCastingSpeedNotStack);
+                    var castingSpeedNotStack = target.GetAuraEffectsByType(AuraType.ModCastingSpeed);
                     foreach (AuraEffect aurEff in castingSpeedNotStack)
                     {
                         if (aurEff != this && aurEff.GetAmount() >= 1000)
@@ -4024,97 +4023,236 @@ namespace Game.Spells
                 return;
 
             if (spellGroupVal != 0)
+            {
                 target.ApplyCastTimePercentMod((float)spellGroupVal, !apply);
+                target.ApplySpellHastePercentMod((float)spellGroupVal, !apply);
+            }
 
             target.ApplyCastTimePercentMod((float)GetAmount(), apply);
+            target.ApplySpellHastePercentMod((float)GetAmount(), apply);
         }
 
-        [AuraEffectHandler(AuraType.ModMeleeRangedHaste)]
-        [AuraEffectHandler(AuraType.ModMeleeRangedHaste2)]
-        void HandleModMeleeRangedSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        [AuraEffectHandler(AuraType.ModMeleeHaste)]
+        void HandleModMeleeHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
-            //! ToDo: Haste auras with the same handler _CAN'T_ stack together
+            Unit target = aurApp.GetTarget();
+            var spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, GetAuraType());
+            if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
+                return;
+
+            if (spellGroupVal != 0)
+            {
+                target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)spellGroupVal, !apply);
+                target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)spellGroupVal, !apply);
+                target.ApplyHasteRegenPercentMod((float)spellGroupVal, !apply);
+            }
+            target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
+            target.ApplyHasteRegenPercentMod((float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModRangedHaste)]
+        void HandleModRangedHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
+            target.ApplyHasteRegenPercentMod((float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModMeleeRangedHaste)]
+        void HandleModMeleeRangedHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
             Unit target = aurApp.GetTarget();
 
             target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
             target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
             target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
+            target.ApplyHasteRegenPercentMod((float)GetAmount(), apply);
         }
 
-        [AuraEffectHandler(AuraType.MeleeSlow)]
-        [AuraEffectHandler(AuraType.ModSpeedSlowAll)]
-        void HandleModCombatSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        [AuraEffectHandler(AuraType.ModMeleeRangedCastingHaste)]
+        void HandleModMeleeRangedCastingHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
-            double spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, AuraType.MeleeSlow);
+            var spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, AuraType.ModMeleeRangedCastingHaste);
             if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
                 return;
 
             if (spellGroupVal != 0)
             {
                 target.ApplyCastTimePercentMod((float)spellGroupVal, !apply);
+                target.ApplySpellHastePercentMod((float)spellGroupVal, !apply);
+                target.ApplyHasteRegenPercentMod((float)spellGroupVal, !apply);
                 target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)spellGroupVal, !apply);
                 target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)spellGroupVal, !apply);
                 target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)spellGroupVal, !apply);
             }
 
             target.ApplyCastTimePercentMod((float)GetAmount(), apply);
+            target.ApplySpellHastePercentMod((float)GetAmount(), apply);
+            target.ApplyHasteRegenPercentMod((float)GetAmount(), apply);
             target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
             target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
             target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
         }
 
-        [AuraEffectHandler(AuraType.ModAttackspeed)]
-        void HandleModAttackSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        [AuraEffectHandler(AuraType.ModMeleeSlowNoStack)]
+        void HandleModMeleeSlowNoStack(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            float minOtherValue = target.GetMaxNegativeAuraModifier(GetAuraType(), aurEff => aurEff != this);
+            if (GetAmount() >= minOtherValue)
+                return;
+
+            if (minOtherValue != 0)
+            {
+                target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)minOtherValue, !apply);
+                target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)minOtherValue, !apply);
+            }
+
+            target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModRangedSlowNoStack)]
+        void HandleModRangedSlowNoStack(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            float minOtherValue = target.GetMaxNegativeAuraModifier(GetAuraType(), aurEff => aurEff != this);
+            if (GetAmount() >= minOtherValue)
+                return;
+
+            if (minOtherValue != 0)
+                target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)minOtherValue, !apply);
+
+            target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModSpellSlowNoStack)]
+        void HandleModSpellSlowNoStack(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            float minOtherValue = target.GetMaxNegativeAuraModifier(GetAuraType(), aurEff => aurEff != this);
+            if (GetAmount() >= minOtherValue)
+                return;
+
+            if (minOtherValue != 0)
+            {
+                target.ApplyCastTimePercentMod((float)minOtherValue, !apply);
+                target.ApplySpellHastePercentMod((float)minOtherValue, !apply);
+            }
+
+            target.ApplyCastTimePercentMod((float)GetAmount(), apply);
+            target.ApplySpellHastePercentMod((float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModCastingSlowNoStack)]
+        void HandleModCastingSlowNoStack(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            float minOtherValue = target.GetMaxNegativeAuraModifier(GetAuraType(), aurEff => aurEff != this);
+            if (GetAmount() >= minOtherValue)
+                return;
+
+            if (minOtherValue != 0)
+                target.ApplyCastTimePercentMod((float)minOtherValue, !apply);
+
+            target.ApplyCastTimePercentMod((float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModMeleeRangedCastingSlowNoStack)]
+        void HandleModMeleeRangedCastingSlowNoStack(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            float minOtherValue = target.GetMaxNegativeAuraModifier(GetAuraType(), aurEff => aurEff != this);
+            if (GetAmount() >= minOtherValue)
+                return;
+
+            if (minOtherValue != 0)
+            {
+                target.ApplyCastTimePercentMod((float)minOtherValue, !apply);
+                target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)minOtherValue, !apply);
+                target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)minOtherValue, !apply);
+                target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)minOtherValue, !apply);
+            }
+
+            target.ApplyCastTimePercentMod((float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModMeleeHasteNoRegen)]
+        void HandleModMeleeHasteNoRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModRangedHasteNoRegen)]
+        void HandleModRangedHasteNoRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModMeleeRangedHasteNoRegen)]
+        void HandleModMeleeRangedHasteNoRegen(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            Unit target = aurApp.GetTarget();
+            target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
+            target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
+        }
+
+        [AuraEffectHandler(AuraType.ModAttackSpeed)]
+        void HandleModAttackSpeed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
                 return;
 
             Unit target = aurApp.GetTarget();
 
             target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
             target.UpdateDamagePhysical(WeaponAttackType.BaseAttack);
-        }
-
-        [AuraEffectHandler(AuraType.ModMeleeHaste)]
-        [AuraEffectHandler(AuraType.ModMeleeHaste2)]
-        [AuraEffectHandler(AuraType.ModMeleeHaste3)]
-        void HandleModMeleeSpeedPct(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            //! ToDo: Haste auras with the same handler _CAN'T_ stack together
-            Unit target = aurApp.GetTarget();
-            double spellGroupVal = target.GetHighestExclusiveSameEffectSpellGroupValue(this, AuraType.ModMeleeHaste);
-            if (Math.Abs(spellGroupVal) >= Math.Abs(GetAmount()))
-                return;
-
-            if (spellGroupVal != 0)
-            {
-                target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)spellGroupVal, !apply);
-                target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)spellGroupVal, !apply);
-            }
-            target.ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, (float)GetAmount(), apply);
-            target.ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, (float)GetAmount(), apply);
-        }
-
-        [AuraEffectHandler(AuraType.ModRangedHaste)]
-        void HandleAuraModRangedHaste(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            //! ToDo: Haste auras with the same handler _CAN'T_ stack together
-            Unit target = aurApp.GetTarget();
-
-            target.ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, (float)GetAmount(), apply);
         }
 
         /********************************/

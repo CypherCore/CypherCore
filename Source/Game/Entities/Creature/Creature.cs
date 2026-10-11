@@ -253,6 +253,7 @@ namespace Game.Entities
             SetName(creatureInfo.Name);                              // at normal entry always
 
             SetModCastingSpeed(1.0f);
+            SetModCastingSpeedNeg(1.0f);
             SetModSpellHaste(1.0f);
             SetModHaste(1.0f);
             SetModRangedHaste(1.0f);

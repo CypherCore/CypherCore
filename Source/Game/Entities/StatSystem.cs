@@ -437,6 +437,8 @@ namespace Game.Entities
 
         public void SetModCastingSpeed(float castingSpeed) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), castingSpeed); }
 
+        public void SetModCastingSpeedNeg(float castingSpeedNeg) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeedNeg), castingSpeedNeg); }
+
         public void SetModSpellHaste(float spellHaste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), spellHaste); }
 
         public void SetModHaste(float haste) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHaste), haste); }
@@ -1376,20 +1378,15 @@ namespace Game.Entities
                     result_regen_interrupted += base_regen;
                     break;
                 }
-                case PowerType.Runes:
-                {
-                    float base_regen = (float)(1 * Time.InMilliseconds) / (float)GetRuneBaseCooldown();
-
-                    result_regen = base_regen;
-                    result_regen_interrupted = base_regen;
-                    break;
-                }
                 default:
                     break;
             }
 
             if (PowerRegenInfo[(int)power] != 0)
                 pct_modifier *= WorldConfig.GetFloatValue(PowerRegenInfo[(int)power]); // Config rate
+
+            if (powerType.HasFlag(PowerTypeFlags.RegenAffectedByHaste))
+                pct_modifier /= m_unitData.ModHasteRegen;
 
             pct_modifier *= GetTotalAuraMultiplierByMiscValue(AuraType.ModPowerRegenPercent, (int)power);
             flat_modifier += GetTotalAuraModifierByMiscValue(AuraType.ModPowerRegen, (int)power) / 5.0f;
@@ -1689,6 +1686,7 @@ namespace Game.Entities
                     float multiplier = GetRatingMultiplier(cr);
                     float oldVal = ApplyRatingDiminishing(cr, oldRating * multiplier);
                     float newVal = ApplyRatingDiminishing(cr, amount * multiplier);
+                    uint highestOtherRating = 0;
                     switch (cr)
                     {
                         case CombatRating.HasteMelee:
@@ -1696,19 +1694,29 @@ namespace Game.Entities
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, oldVal, false);
                             ApplyAttackTimePercentMod(WeaponAttackType.BaseAttack, newVal, true);
                             ApplyAttackTimePercentMod(WeaponAttackType.OffAttack, newVal, true);
-                            if (GetClass() == Class.DeathKnight)
-                                UpdatePowerRegen(PowerType.Runes);
+                            highestOtherRating = Math.Max(m_activePlayerData.CombatRatings[(int)CombatRating.HasteRanged], m_activePlayerData.CombatRatings[(int)CombatRating.HasteSpell]);
                             break;
                         case CombatRating.HasteRanged:
                             ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, oldVal, false);
                             ApplyAttackTimePercentMod(WeaponAttackType.RangedAttack, newVal, true);
+                            highestOtherRating = Math.Max(m_activePlayerData.CombatRatings[(int)CombatRating.HasteMelee], m_activePlayerData.CombatRatings[(int)CombatRating.HasteSpell]);
                             break;
                         case CombatRating.HasteSpell:
                             ApplyCastTimePercentMod(oldVal, false);
+                            ApplySpellHastePercentMod(oldVal, false);
                             ApplyCastTimePercentMod(newVal, true);
+                            ApplySpellHastePercentMod(newVal, true);
+                            highestOtherRating = Math.Max(m_activePlayerData.CombatRatings[(int)CombatRating.HasteMelee], m_activePlayerData.CombatRatings[(int)CombatRating.HasteRanged]);
                             break;
                         default:
                             break;
+                    }
+                    float oldHasteRegenVal = ApplyRatingDiminishing(cr, Math.Max(oldRating, highestOtherRating) * multiplier);
+                    float newHasteRegenVal = ApplyRatingDiminishing(cr, Math.Max(amount, highestOtherRating) * multiplier);
+                    if (oldHasteRegenVal != newHasteRegenVal)
+                    {
+                        ApplyHasteRegenPercentMod(oldHasteRegenVal, false);
+                        ApplyHasteRegenPercentMod(newHasteRegenVal, true);
                     }
                     break;
                 }

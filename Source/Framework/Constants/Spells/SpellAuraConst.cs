@@ -16,7 +16,7 @@ namespace Framework.Constants
         ModCharm = 6,
         ModFear = 7,
         PeriodicHeal = 8,
-        ModAttackspeed = 9,
+        ModAttackSpeed = 9,
         ModThreat = 10,
         ModTaunt = 11,
         ModStun = 12,
@@ -72,7 +72,7 @@ namespace Framework.Constants
         PeriodicHealthFunnel = 62,
         ModAdditionalPowerCost = 63,   // NYI
         PeriodicManaLeech = 64,
-        ModCastingSpeedNotStack = 65,
+        ModCastingSpeed = 65,
         FeignDeath = 66,
         ModDisarm = 67,
         ModStalked = 68,
@@ -200,7 +200,7 @@ namespace Framework.Constants
         ModFactionReputationGain = 190,
         UseNormalMovementSpeed = 191,
         ModMeleeRangedHaste = 192,
-        MeleeSlow = 193,
+        ModMeleeRangedCastingHaste = 193,
         ModTargetAbsorbSchool = 194,
         LearnSpell = 195,
         ModCooldown = 196,  // Only 24818 Noxious Breath
@@ -223,8 +223,8 @@ namespace Framework.Constants
         ModRageFromDamageDealt = 213,
         Unk214 = 214,
         ArenaPreparation = 215,
-        HasteSpells = 216,
-        ModMeleeHaste2 = 217,
+        ModSpellSlowNoStack = 216,
+        ModMeleeSlowNoStack = 217,
         AddPctModifierBySpellLabel = 218,
         AddFlatModifierBySpellLabel = 219,
         ModAbilitySchoolMask = 220, //NYI
@@ -259,7 +259,7 @@ namespace Framework.Constants
         ModDamagePercentDoneByTargetAuraMechanic = 249,
         ModIncreaseHealth2 = 250,
         ModEnemyDodge = 251,
-        ModSpeedSlowAll = 252,
+        ModMeleeRangedCastingSlowNoStack = 252,
         ModBlockCritChance = 253,
         ModDisarmOffhand = 254,
         ModMechanicDamageTakenPercent = 255,
@@ -326,7 +326,7 @@ namespace Framework.Constants
         SchoolAbsorbOverkill = 316, // NYI - absorbs overkill damage
         ModSpellPowerPct = 317,
         Mastery = 318,
-        ModMeleeHaste3 = 319,
+        ModMeleeHasteNoRegen = 319,
         Unk320 = 320,
         ModNoActions = 321,
         InterfereEnemyTargeting = 322,
@@ -349,7 +349,7 @@ namespace Framework.Constants
         ModCritChanceForCasterPet = 339,
         ModResurrectedHealthByGuildMember = 340,  // Increases Health Gained When Resurrected By A Guild Member By X
         ModSpellCategoryCooldown = 341,
-        ModMeleeRangedHaste2 = 342,
+        ModMeleeRangedHasteNoRegen = 342,
         ModMeleeDamageFromCaster = 343,
         ModAutoAttackDamage = 344,
         BypassArmorForCaster = 345,
@@ -362,7 +362,7 @@ namespace Framework.Constants
         Unk352 = 352,
         ModCamouflage = 353,  // Nyi
         ModHealingDonePctVersusTargetHealth = 354,  // Restoration Shaman Mastery - Mod Healing Based On Target'S Health (Less = More Healing)
-        ModCastingSpeed = 355,  // NYI
+        ModCastingSlowNoStack = 355,
         ProvideTotemCategory = 356,
         EnableBoss1UnitFrame = 357,
         WorgenAlteredForm = 358,
@@ -588,7 +588,7 @@ namespace Framework.Constants
         Unk578 = 578,
         Unk579 = 579,
         Unk580 = 580,
-        Unk581 = 581,
+        ModRangedSlowNoStack = 581,
         Unk582 = 582,
         Unk583 = 583,
         Unk584 = 584,
@@ -622,7 +622,7 @@ namespace Framework.Constants
         Unk612 = 612,
         Unk613 = 613,
         Unk614 = 614,
-        Unk615 = 615,
+        ModRangedHasteNoRegen = 615,
         Unk616 = 616,
         Unk617 = 617,
         Unk618 = 618,

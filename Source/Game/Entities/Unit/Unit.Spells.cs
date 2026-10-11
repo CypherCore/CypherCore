@@ -2270,15 +2270,36 @@ namespace Game.Entities
             if (val > 0.0f)
             {
                 ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), val, !apply);
-                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), val, !apply);
-                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), val, !apply);
             }
             else
             {
                 ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeed), -val, apply);
-                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), -val, apply);
-                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), -val, apply);
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModCastingSpeedNeg), -val, apply);
             }
+        }
+
+        public void ApplySpellHastePercentMod(float val, bool apply)
+        {
+            if (val > 0.0f)
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), val, !apply);
+            else
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModSpellHaste), -val, apply);
+        }
+
+        public void ApplyHasteRegenPercentMod(float val, bool apply)
+        {
+            if (val > 0.0f)
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), val, !apply);
+            else if (val < 0.0f)
+                ApplyPercentModUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ModHasteRegen), -val, apply);
+            else
+                return;
+
+            Player player = ToPlayer();
+            if (player != null)
+                foreach (var power in GetPowerTypes())
+                    if (Global.DB2Mgr.GetPowerTypeEntry(power).HasFlag(PowerTypeFlags.RegenAffectedByHaste))
+                        player.UpdatePowerRegen(power);
         }
 
         public void RemoveAllGroupBuffsFromCaster(ObjectGuid casterGUID)

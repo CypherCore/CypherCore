@@ -4882,7 +4882,7 @@ namespace Game.Entities
                 case AuraType.DamageImmunity:
                 case AuraType.ProcTriggerSpell:
                 case AuraType.ProcTriggerDamage:
-                case AuraType.ModCastingSpeedNotStack:
+                case AuraType.ModCastingSpeed:
                 case AuraType.SchoolAbsorb:
                 case AuraType.ModPowerCostSchoolPct:
                 case AuraType.ModPowerCostSchool:
@@ -4897,7 +4897,7 @@ namespace Game.Entities
                 case AuraType.ModMechanicResistance:
                 case AuraType.MeleeAttackPowerAttackerBonus:
                 case AuraType.ModMeleeHaste:
-                case AuraType.ModMeleeHaste3:
+                case AuraType.ModMeleeHasteNoRegen:
                 case AuraType.ModAttackerMeleeHitChance:
                 case AuraType.ProcTriggerSpellWithValue:
                 case AuraType.ModSchoolMaskDamageFromCaster:

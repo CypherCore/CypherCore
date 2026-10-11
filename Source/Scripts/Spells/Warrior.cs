@@ -652,7 +652,7 @@ namespace Scripts.Spells.Warrior
         {
             return ValidateSpellInfo(SpellIds.FrenziedEnrage)
                 && ValidateSpellEffect((spellInfo.Id, 1))
-                && spellInfo.GetEffect(0).IsAura(AuraType.MeleeSlow)
+                && spellInfo.GetEffect(0).IsAura(AuraType.ModMeleeRangedCastingHaste)
                 && spellInfo.GetEffect(1).IsAura(AuraType.ModIncreaseSpeed);
         }
 

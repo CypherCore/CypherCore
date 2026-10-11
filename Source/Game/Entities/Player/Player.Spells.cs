@@ -3276,24 +3276,14 @@ namespace Game.Entities
 
         public uint GetRuneBaseCooldown()
         {
-            double cooldown = RuneCooldowns.Base;
+            var powerType = Global.DB2Mgr.GetPowerTypeEntry(PowerType.Runes);
+            float regen = powerType.RegenPeace;
 
-            var regenAura = GetAuraEffectsByType(AuraType.ModPowerRegenPercent);
-            foreach (var i in regenAura)
-                if (i.GetMiscValue() == (int)PowerType.Runes)
-                    cooldown *= 1.0 - i.GetAmount() / 100.0;
+            uint powerIndex = GetPowerIndex(PowerType.Runes);
+            if (powerIndex <= (int)PowerType.MaxPerClass)
+                regen += m_unitData.PowerRegenFlatModifier[(int)powerIndex];
 
-            // Runes cooldown are now affected by player's haste from equipment ...
-            float hastePct = GetRatingBonusValue(CombatRating.HasteMelee);
-
-            // ... and some auras.
-            hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste);
-            hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste2);
-            hastePct += GetTotalAuraModifier(AuraType.ModMeleeHaste3);
-
-            cooldown *= 1.0 - (hastePct / 100.0);
-
-            return (uint)cooldown;
+            return (uint)(1.0f / regen * Time.InMilliseconds);
         }
 
         public void ResyncRunes()

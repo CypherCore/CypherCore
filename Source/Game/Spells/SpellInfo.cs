@@ -3515,9 +3515,13 @@ namespace Game.Spells
                     case AuraType.ModSpellHitChance:
                     case AuraType.ModSpellCritChance:
                     case AuraType.ModRangedHaste:
+                    case AuraType.ModRangedHasteNoRegen:
                     case AuraType.ModMeleeRangedHaste:
-                    case AuraType.ModCastingSpeedNotStack:
-                    case AuraType.HasteSpells:
+                    case AuraType.ModCastingSpeed:
+                    case AuraType.ModCastingSlowNoStack:
+                    case AuraType.ModMeleeSlowNoStack:
+                    case AuraType.ModRangedSlowNoStack:
+                    case AuraType.ModSpellSlowNoStack:
                     case AuraType.ModRecoveryRateBySpellLabel:
                     case AuraType.ModDetectRange:
                     case AuraType.ModIncreaseHealthPercent:
@@ -3529,8 +3533,9 @@ namespace Game.Spells
                         if (bp < 0 || bpScalePerLevel < 0) //TODO: What if both are 0? Should it be a buff or debuff?
                             return false;
                         break;
-                    case AuraType.ModAttackspeed:            // some buffs have negative bp, check both target and bp
+                    case AuraType.ModAttackSpeed:            // some buffs have negative bp, check both target and bp
                     case AuraType.ModMeleeHaste:
+                    case AuraType.ModMeleeHasteNoRegen:
                     case AuraType.ModDamageDone:
                     case AuraType.ModResistance:
                     case AuraType.ModResistancePct:
@@ -3538,8 +3543,8 @@ namespace Game.Spells
                     case AuraType.ModAttackPower:
                     case AuraType.ModRangedAttackPower:
                     case AuraType.ModDamagePercentDone:
-                    case AuraType.ModSpeedSlowAll:
-                    case AuraType.MeleeSlow:
+                    case AuraType.ModMeleeRangedCastingSlowNoStack:
+                    case AuraType.ModMeleeRangedCastingHaste:
                     case AuraType.ModAttackPowerPct:
                     case AuraType.ModHealingDonePercent:
                     case AuraType.ModHealingPct:
@@ -3764,7 +3769,7 @@ namespace Game.Spells
                     case AuraType.ModFear:
                     case AuraType.ModTaunt:
                     case AuraType.Transform:
-                    case AuraType.ModAttackspeed:
+                    case AuraType.ModAttackSpeed:
                     case AuraType.ModDecreaseSpeed:
                     {
                         for (uint j = spellEffectInfo.EffectIndex + 1; j < GetEffects().Count; ++j)
