@@ -3258,15 +3258,15 @@ namespace Game.Entities
                 if (questGiver.IsGossip())
                     packet.LaunchGossip = quest.HasFlag(QuestFlags.LaunchGossipComplete);
 
-                if (questGiver.IsQuestGiver())
-                    packet.LaunchQuest = (GetQuestDialogStatus(questGiver) & ~QuestGiverStatus.FutureMask) != QuestGiverStatus.None;
-
                 if (!quest.HasFlag(QuestFlags.AutoComplete))
                 {
                     Quest rewardQuest = GetNextQuest(questGiver, quest);
                     if (rewardQuest != null)
                         packet.UseQuestReward = CanTakeQuest(rewardQuest, false);
                 }
+
+                if (questGiver.IsQuestGiver())
+                    packet.LaunchQuest = !packet.UseQuestReward && (GetQuestDialogStatus(questGiver) & ~QuestGiverStatus.FutureMask) != QuestGiverStatus.None;
             }
 
             packet.HideChatMessage = hideChatMessage;
