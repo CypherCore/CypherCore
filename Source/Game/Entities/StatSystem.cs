@@ -308,7 +308,7 @@ namespace Game.Entities
         public void SetCreateStat(Stats stat, float val)
         {
             UnitMods unitMod = UnitMods.StatStart + (int)stat;
-            HandleStatFlatModifier(unitMod, UnitModifierFlatType.Base, val, true);
+            SetStatFlatModifier(unitMod, UnitModifierFlatType.Base, val);
         }
 
         public float GetCreateStat(Stats stat)
