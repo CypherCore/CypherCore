@@ -97,11 +97,7 @@ class spell_dk_advantage_t10_4p : AuraScript
             if (player == null || caster.GetClass() != Class.DeathKnight)
                 return false;
 
-            for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                if (player.GetRuneCooldown(i) == 0)
-                    return false;
-
-            return true;
+            return player.GetRunesState() == 0;
         }
 
         return false;

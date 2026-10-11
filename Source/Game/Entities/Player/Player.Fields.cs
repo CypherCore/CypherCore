@@ -398,7 +398,7 @@ namespace Game.Entities
         }
 
         public List<byte> CooldownOrder = new();
-        public uint[] Cooldown = new uint[PlayerConst.MaxRunes];
+        public float[] Cooldown = new float[PlayerConst.MaxRunes];
         public byte RuneState;                                        // mask of available runes
     }
 

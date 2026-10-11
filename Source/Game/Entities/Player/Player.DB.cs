@@ -3989,10 +3989,9 @@ namespace Game.Entities
             {
                 int runes = GetPower(PowerType.Runes);
                 int maxRunes = GetMaxPower(PowerType.Runes);
-                uint runeCooldown = GetRuneBaseCooldown();
                 while (runes < maxRunes)
                 {
-                    SetRuneCooldown((byte)runes, runeCooldown);
+                    SetRuneCooldown((byte)runes, 0.0f);
                     ++runes;
                 }
             }

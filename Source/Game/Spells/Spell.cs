@@ -21,6 +21,7 @@ using Game.Scripting.v2;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Game.Spells
@@ -3963,11 +3964,7 @@ namespace Game.Spells
                     runeData.Start = m_runesState; // runes state before
                     runeData.Count = player.GetRunesState(); // runes state after
                     for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                    {
-                        // float casts ensure the division is performed on floats as we need float result
-                        float baseCd = player.GetRuneBaseCooldown();
-                        runeData.Cooldowns.Add((byte)((baseCd - player.GetRuneCooldown(i)) / baseCd * 255)); // rune cooldown passed
-                    }
+                        castData.RemainingRunes.Cooldowns.Add((byte)(player.GetRuneCooldown(i) * 255.0f)); // rune cooldown passed
                 }
                 else
                 {
@@ -4065,11 +4062,7 @@ namespace Game.Spells
                 runeData.Start = m_runesState; // runes state before
                 runeData.Count = player.GetRunesState(); // runes state after
                 for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                {
-                    // float casts ensure the division is performed on floats as we need float result
-                    float baseCd = (float)player.GetRuneBaseCooldown();
-                    runeData.Cooldowns.Add((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255)); // rune cooldown passed
-                }
+                    castData.RemainingRunes.Cooldowns.Add((byte)(player.GetRuneCooldown(i) * 255.0f)); // rune cooldown passed
             }
 
             if (castFlags.HasFlag(SpellCastFlags.AdjustMissile))
@@ -4807,11 +4800,7 @@ namespace Game.Spells
             if (player.GetClass() != Class.DeathKnight)
                 return SpellCastResult.SpellCastOk;
 
-            int readyRunes = 0;
-            for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                if (player.GetRuneCooldown(i) == 0)
-                    ++readyRunes;
-
+            int readyRunes = BitOperations.PopCount(player.GetRunesState());
             if (readyRunes < runeCost)
                 return SpellCastResult.NoPower;                       // not sure if result code is correct
 
@@ -4830,11 +4819,11 @@ namespace Game.Spells
                 return;
 
             int runeCost = m_powerCost.Sum(cost => cost.Power == PowerType.Runes ? cost.Amount : 0);
-            for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
+            for (byte i = 0; i < player.GetMaxPower(PowerType.Runes) && runeCost > 0; ++i)
             {
-                if (player.GetRuneCooldown(i) == 0 && runeCost > 0)
+                if ((m_runesState & (1u << i)) != 0)
                 {
-                    player.SetRuneCooldown(i, player.GetRuneBaseCooldown());
+                    player.SetRuneCooldown(i, 0.0f);
                     --runeCost;
                 }
             }
@@ -4850,7 +4839,7 @@ namespace Game.Spells
             // restore old rune state
             for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                 if ((m_runesState & (1 << i)) != 0)
-                    player.SetRuneCooldown(i, 0);
+                    player.SetRuneCooldown(i, 1.0f);
         }
 
         void TakeReagents()

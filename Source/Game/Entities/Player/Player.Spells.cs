@@ -10,6 +10,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -3260,31 +3261,21 @@ namespace Game.Entities
         /**********************************/
         /*************Runes****************/
         /**********************************/
-        public void SetRuneCooldown(byte index, uint cooldown)
-        {
-            m_runes.Cooldown[index] = cooldown;
-            m_runes.SetRuneState(index, (cooldown == 0));
-            int activeRunes = m_runes.Cooldown.Count(p => p == 0);
-            if (activeRunes != GetPower(PowerType.Runes))
-                SetPower(PowerType.Runes, activeRunes);
-        }
-
         public byte GetRunesState()
         {
             return (byte)(m_runes.RuneState & ((1 << GetMaxPower(PowerType.Runes)) - 1));
         }
 
-        public uint GetRuneBaseCooldown()
+        public void SetRuneCooldown(byte index, float cooldown)
         {
-            var powerType = Global.DB2Mgr.GetPowerTypeEntry(PowerType.Runes);
-            float regen = powerType.RegenPeace;
-
-            uint powerIndex = GetPowerIndex(PowerType.Runes);
-            if (powerIndex <= (int)PowerType.MaxPerClass)
-                regen += m_unitData.PowerRegenFlatModifier[(int)powerIndex];
-
-            return (uint)(1.0f / regen * Time.InMilliseconds);
+            m_runes.Cooldown[index] = Math.Clamp(cooldown, 0.0f, 1.0f);
+            m_runes.SetRuneState(index, cooldown >= 1.0f);
+            int activeRunes = BitOperations.PopCount(GetRunesState());
+            if (activeRunes != GetPower(PowerType.Runes))
+                SetPower(PowerType.Runes, activeRunes);
         }
+
+        public float GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
 
         public void ResyncRunes()
         {
@@ -3294,9 +3285,8 @@ namespace Game.Entities
             data.Runes.Start = (byte)((1 << maxRunes) - 1);
             data.Runes.Count = GetRunesState();
 
-            float baseCd = GetRuneBaseCooldown();
             for (byte i = 0; i < maxRunes; ++i)
-                data.Runes.Cooldowns.Add((byte)((baseCd - GetRuneCooldown(i)) / baseCd * 255));
+                data.Runes.Cooldowns.Add((byte)(GetRuneCooldown(i) * 255.0f));
 
             SendPacket(data);
         }
@@ -3311,17 +3301,10 @@ namespace Game.Entities
                 return;
 
             m_runes = new Runes();
-            m_runes.RuneState = 0;
 
             for (byte i = 0; i < PlayerConst.MaxRunes; ++i)
-                SetRuneCooldown(i, 0);                                          // reset cooldowns
-
-            // set a base regen timer equal to 10 sec
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenFlatModifier, (int)runeIndex), 0.0f);
-            SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.PowerRegenInterruptedFlatModifier, (int)runeIndex), 0.0f);
+                SetRuneCooldown(i, 1.0f);                                       // reset cooldowns
         }
-
-        public uint GetRuneCooldown(byte index) { return m_runes.Cooldown[index]; }
 
         public bool CanNoReagentCast(SpellInfo spellInfo)
         {

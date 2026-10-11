@@ -512,8 +512,7 @@ namespace Game.Chat
                 if (obj == null)
                     return false;
 
-                // TODO: is it really necessary to add both the real and DB table guid here ?
-                Global.ObjectMgr.AddGameObjectToGrid(Global.ObjectMgr.GetGameObjectData(spawnId));
+                Global.ObjectMgr.AddGameObjectToGrid(obj.GetGameObjectData());
                 handler.SendSysMessage(CypherStrings.GameobjectAdd, objectId, objectInfo.name, spawnId, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
                 return true;
             }

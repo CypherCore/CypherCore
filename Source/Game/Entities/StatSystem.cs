@@ -1347,7 +1347,6 @@ namespace Game.Entities
             if (powerIndex >= (int)PowerType.MaxPerClass)
                 return;
 
-            // TODO: updating haste should update UnitData::PowerRegenFlatModifier for certain power types
             PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeEntry(power);
             if (powerType == null)
                 return;

@@ -581,14 +581,13 @@ namespace Game.Entities
 
                 if (HasRuneState)
                 {
-                    float baseCd = player.GetRuneBaseCooldown();
                     uint maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
 
                     data.WriteUInt8((byte)((1 << (int)maxRunes) - 1u));
                     data.WriteUInt8(player.GetRunesState());
                     data.WriteUInt32(maxRunes);
                     for (byte i = 0; i < maxRunes; ++i)
-                        data.WriteUInt8((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255));
+                        data.WriteUInt8((byte)(player.GetRuneCooldown(i) * 255.0f));
                 }
             }
 

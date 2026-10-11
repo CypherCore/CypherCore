@@ -3755,17 +3755,18 @@ namespace Game.Entities
             {
                 uint regeneratedRunes = 0;
                 int regenIndex = 0;
+                float regenAmount = GetPowerRegen(PowerType.Runes) * 0.001f * RegenTimer;
                 while (regeneratedRunes < PlayerConst.MaxRechargingRunes && m_runes.CooldownOrder.Count > regenIndex)
                 {
                     byte runeToRegen = m_runes.CooldownOrder[regenIndex];
-                    uint runeCooldown = GetRuneCooldown(runeToRegen);
-                    if (runeCooldown > RegenTimer)
+                    float runeCooldown = GetRuneCooldown(runeToRegen) + regenAmount;
+                    if (runeCooldown < 1.0f)
                     {
-                        SetRuneCooldown(runeToRegen, runeCooldown - RegenTimer);
+                        SetRuneCooldown(runeToRegen, runeCooldown);
                         ++regenIndex;
                     }
                     else
-                        SetRuneCooldown(runeToRegen, 0);
+                        SetRuneCooldown(runeToRegen, 1.0f);
 
                     ++regeneratedRunes;
                 }
@@ -6883,10 +6884,12 @@ namespace Game.Entities
 
             SendSysMessage(result, args);
         }
+
         public void SendSysMessage(string str, params object[] args)
         {
             new CommandHandler(_session).SendSysMessage(string.Format(str, args));
         }
+
         public void SendBuyError(BuyResult msg, Creature creature, uint item)
         {
             BuyFailed packet = new();
@@ -6895,6 +6898,7 @@ namespace Game.Entities
             packet.Reason = msg;
             SendPacket(packet);
         }
+
         public void SendSellError(SellResult msg, Creature creature, ObjectGuid guid)
         {
             SellResponse sellResponse = new();
