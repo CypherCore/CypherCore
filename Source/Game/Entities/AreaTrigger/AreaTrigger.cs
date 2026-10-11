@@ -507,7 +507,7 @@ namespace Game.Entities
         float GetOverrideCurveProgress(OverrideCurve overrideCurve, uint timeTo)
         {
             if (timeTo == 0)
-                return 0.0f;
+                return 1.0f;
 
             return Math.Clamp((float)(GetTimeSinceCreated() - overrideCurve.StartTimeOffset) / (float)timeTo, 0.0f, 1.0f);
         }
@@ -753,7 +753,7 @@ namespace Game.Entities
                     return;
 
                 Box rotatedBox = new CoordinateFrame(new Quaternion(_rotation.X, _rotation.Y, _rotation.Z, _rotation.W).ToRotationMatrix(), GetPosition())
-                    .ToWorldSpace(new AxisAlignedBox(new Vector3(-extentsX, -extentsY, -extentsZ / 2), new Vector3(extentsX, extentsY, extentsZ / 2)));
+                    .ToWorldSpace(new AxisAlignedBox(new Vector3(-extentsX, -extentsY, -extentsZ), new Vector3(extentsX, extentsY, extentsZ)));
 
                 targetList.RemoveAll(unit => !rotatedBox.Contains(unit));
 
@@ -1462,6 +1462,12 @@ namespace Game.Entities
 
             uint timeToTarget = (speedIsTimeInSeconds.GetValueOrDefault(GetCreateProperties().SpeedIsTime) ? speed : _spline.Length() / speed) * Time.InMilliseconds;
 
+            if (timeToTarget == 0)
+            {
+                _spline = null;
+                return;
+            }
+
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.MovementStartTime), GameTime.GetGameTimeMS());
@@ -1505,6 +1511,9 @@ namespace Game.Entities
                 speed = 1.0f;
 
             uint timeToTarget = (uint)(speedIsTimeInSeconds.GetValueOrDefault(GetCreateProperties().SpeedIsTime) ? speed : (uint)(orbit.Radius * 2.0f * MathF.PI / speed)) * Time.InMilliseconds;
+
+            if (timeToTarget == 0)
+                return;
 
             var areaTriggerData = m_values.ModifyValue(m_areaTriggerData);
             SetUpdateFieldValue(areaTriggerData.ModifyValue(m_areaTriggerData.TimeToTarget), timeToTarget);
