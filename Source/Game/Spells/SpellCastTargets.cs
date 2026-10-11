@@ -31,29 +31,28 @@ namespace Game.Spells
             if (spellCastRequest.Target.SrcLocation != null)
             {
                 m_src.TransportGUID = spellCastRequest.Target.SrcLocation.Transport;
-                Position pos;
-                if (!m_src.TransportGUID.IsEmpty())
-                    pos = m_src.TransportOffset;
-                else
-                    pos = m_src.Position;
-
-                pos.Relocate(spellCastRequest.Target.SrcLocation.Location);
+                Position pos = new(spellCastRequest.Target.SrcLocation.Location);
                 if (spellCastRequest.Target.Orientation.HasValue)
                     pos.SetOrientation(spellCastRequest.Target.Orientation.Value);
+
+                if (!m_src.TransportGUID.IsEmpty())
+                    m_src.TransportOffset = pos;
+                else
+                    m_src.Position = new WorldLocation(pos);
             }
 
             if (spellCastRequest.Target.DstLocation != null)
             {
                 m_dst.TransportGUID = spellCastRequest.Target.DstLocation.Transport;
-                Position pos;
-                if (!m_dst.TransportGUID.IsEmpty())
-                    pos = m_dst.TransportOffset;
-                else
-                    pos = m_dst.Position;
 
-                pos.Relocate(spellCastRequest.Target.DstLocation.Location);
+                Position pos = new(spellCastRequest.Target.DstLocation.Location);
                 if (spellCastRequest.Target.Orientation.HasValue)
                     pos.SetOrientation(spellCastRequest.Target.Orientation.Value);
+
+                if (!m_dst.TransportGUID.IsEmpty())
+                    pos = m_dst.TransportOffset = pos;
+                else
+                    pos = m_dst.Position = new WorldLocation(pos);
             }
 
             SetPitch(spellCastRequest.MissileTrajectory.Pitch);
