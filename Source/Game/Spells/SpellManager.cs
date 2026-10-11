@@ -874,27 +874,30 @@ namespace Game.Entities
             {
                 uint spell_id = result.Read<uint>(0);
 
-                var node = new SpellLearnSpellNode();
-                node.SourceSpell = spell_id;
-                node.Spell = result.Read<uint>(1);
-                node.OverridesSpell = 0;
-                node.Active = result.Read<bool>(2);
-                node.AutoLearned = false;
+                var node = new SpellLearnSpellNode
+                {
+                    SourceSpell = spell_id,
+                    Spell = result.Read<uint>(1),
+                    OverridesSpell = 0,
+                    Active = result.Read<bool>(2),
+                    AutoLearned = false
+                };
 
-                SpellInfo spellInfo = GetSpellInfo(spell_id, Difficulty.None);
-                if (spellInfo == null)
+
+                if (GetSpellInfo(spell_id, Difficulty.None) == null)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` does not exist", spell_id);
                     continue;
                 }
 
-                if (!HasSpellInfo(node.Spell, Difficulty.None))
+                SpellInfo learnedSpellInfo = GetSpellInfo(node.Spell, Difficulty.None);
+                if (learnedSpellInfo == null)
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` learning not existed spell {1}", spell_id, node.Spell);
                     continue;
                 }
 
-                if (spellInfo.HasAttribute(SpellCustomAttributes.IsTalent))
+                if (learnedSpellInfo.HasAttribute(SpellCustomAttributes.IsTalent))
                 {
                     Log.outError(LogFilter.Sql, "Spell {0} listed in `spell_learn_spell` attempt learning talent spell {1}, skipped", spell_id, node.Spell);
                     continue;
