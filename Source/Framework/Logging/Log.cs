@@ -139,8 +139,9 @@ public class Log
     {
         if (!ShouldLog(LogFilter.Commands, LogLevel.Info))
             return;
-
-        var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, string.Format(text, args));
+        // Use a safe formatter to avoid crashing when the message contains
+        // braces or when formatting fails for unexpected reasons.
+        var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, SafeFormat(text, args));
         msg.dynamicName = accountId.ToString();
 
         Logger logger = GetLoggerByType(LogFilter.Commands);
@@ -150,7 +151,33 @@ public class Log
     static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
     {
         Logger logger = GetLoggerByType(type);
-        logger.write(new LogMessage(level, type, string.Format(text, args)));
+        logger.write(new LogMessage(level, type, SafeFormat(text, args)));
+    }
+
+    static string SafeFormat(string text, params object[] args)
+    {
+        if (string.IsNullOrEmpty(text))
+            return text;
+
+        if (args == null || args.Length == 0)
+            return text;
+
+        try
+        {
+            return string.Format(text, args);
+        }
+        catch (FormatException)
+        {
+            // Fallback: append args to the original text to avoid throwing
+            try
+            {
+                return text + " " + string.Join(", ", args.Select(a => a?.ToString()));
+            }
+            catch
+            {
+                return text;
+            }
+        }
     }
 
     static byte NextAppenderId()

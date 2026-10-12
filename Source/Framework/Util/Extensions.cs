@@ -32,7 +32,14 @@ namespace System
 
         public static byte[] ToByteArray(this string str, bool reverse = false)
         {
+            if (string.IsNullOrEmpty(str))
+                return Array.Empty<byte>();
+
             str = str.Replace(" ", String.Empty);
+
+            // If an odd length is provided, pad with a leading zero to form full bytes
+            if ((str.Length & 1) != 0)
+                str = "0" + str;
 
             var res = new byte[str.Length / 2];
             for (int i = 0; i < res.Length; ++i)
@@ -41,7 +48,7 @@ namespace System
                 res[i] = Convert.ToByte(temp, 16);
             }
             if (reverse)
-                res.Reverse();
+                Array.Reverse(res);
 
             return res;
         }
