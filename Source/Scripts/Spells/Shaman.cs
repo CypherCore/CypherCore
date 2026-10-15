@@ -341,8 +341,8 @@ class WindfuryProcEvent : BasicEvent
         }
 
         int attacks = 2;
-        AuraEffect unrulyWinds = shaman.GetAuraEffect(SpellIds.UnrulyWinds, 0); RandomHelper.randChance(unrulyWinds.GetAmount());
-        if (unrulyWinds != null)
+        AuraEffect unrulyWinds = shaman.GetAuraEffect(SpellIds.UnrulyWinds, 0);
+        if (unrulyWinds != null && RandomHelper.randChance(unrulyWinds.GetAmount()))
             ++attacks;
 
         shaman.m_Events.AddEventAtOffset(new WindfuryProcEvent(shaman, target, attacks), Sequence.First().Delay);
