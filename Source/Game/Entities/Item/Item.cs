@@ -949,7 +949,7 @@ namespace Game.Entities
 
         uint GetEnchantRequiredLevel()
         {
-            uint level = 0;
+            int level = 0;
 
             // Check all enchants for required level
             for (var enchant_slot = EnchantmentSlot.Perm; enchant_slot < EnchantmentSlot.Max; ++enchant_slot)
@@ -964,7 +964,7 @@ namespace Game.Entities
                 }
             }
 
-            return level;
+            return (uint)level;
         }
 
         bool IsBoundByEnchant()

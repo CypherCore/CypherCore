@@ -1535,17 +1535,17 @@ namespace Game.Networking.Packets
     {
         public PhaseShiftDataPhase(uint phaseFlags, uint id)
         {
-            PhaseFlags = phaseFlags;
+            PhaseFlags = (byte)phaseFlags;
             Id = (ushort)id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(PhaseFlags);
+            data.WriteUInt8(PhaseFlags);
             data.WriteUInt16(Id);
         }
 
-        public uint PhaseFlags;
+        public byte PhaseFlags;
         public ushort Id;
     }
 

@@ -100,8 +100,8 @@ namespace Framework.Constants
         HousingOpenCharterConfirmation = 63,
         ItemUpgrade = 64,
         HouseFinder = 65,
-        Placeholder6 = 66,
-
+        TieredEntrance = 66,
+        RewardsShop = 67,
         Max
     }
 

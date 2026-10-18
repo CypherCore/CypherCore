@@ -3031,6 +3031,9 @@ namespace Game.Spells
 
             foreach (SpellProcsPerMinuteModRecord mod in ProcPPMMods)
             {
+                if (mod.PlayerConditionID != 0 && (!caster.IsPlayer() || !ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), mod.PlayerConditionID)))
+                    continue;
+
                 switch (mod.Type)
                 {
                     case SpellProcsPerMinuteModType.Haste:
@@ -4982,6 +4985,7 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 357 SPELL_EFFECT_357
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 358 SPELL_EFFECT_358
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Item), // 359 SPELL_EFFECT_359
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit,     SpellTargetObjectTypes.None), // 360 SPELL_EFFECT_360
         };
 
         #region Fields

@@ -732,10 +732,11 @@ namespace Game.Networking.Packets
         {
             data.WritePackedGuid(Victim);
             data.WriteUInt8(MissReason);
-            if (data.WriteBit(Debug.HasValue))
-                Debug.Value.Write(data);
-
+            data.WriteBit(Debug.HasValue);
             data.FlushBits();
+
+            if (Debug.HasValue)
+                Debug.Value.Write(data);
         }
 
         public ObjectGuid Victim;

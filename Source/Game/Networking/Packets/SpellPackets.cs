@@ -792,20 +792,16 @@ namespace Game.Networking.Packets
         public int SpellVisualKitID;
         public TimeSpan Duration;
         public int Delay;
-        public bool Unknown_1210;
+        public bool IsTransfer;
 
-        public SpellVisualLoadScreen(int spellVisualKitId, TimeSpan duration) : base(ServerOpcodes.SpellVisualLoadScreen, ConnectionType.Instance)
-        {
-            SpellVisualKitID = spellVisualKitId;
-            Duration = duration;
-        }
+        public SpellVisualLoadScreen() : base(ServerOpcodes.SpellVisualLoadScreen, ConnectionType.Instance) { }
 
         public override void Write()
         {
             _worldPacket.WriteInt32(SpellVisualKitID);
             _worldPacket.WriteInt32((int)Duration.TotalMilliseconds);
             _worldPacket.WriteInt32(Delay);
-            _worldPacket.WriteBit(Unknown_1210);
+            _worldPacket.WriteBit(IsTransfer);
         }
     }
 

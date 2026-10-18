@@ -234,6 +234,12 @@ namespace Game.Entities
         public assistAction AssistAction;
 
         [FieldOffset(88)]
+        public reserved13A Reserved13A;
+
+        [FieldOffset(88)]
+        public reserved13B Reserved13B;
+
+        [FieldOffset(88)]
         public raw Raw;
 
         [FieldOffset(232)]
@@ -1653,6 +1659,15 @@ namespace Game.Entities
             public uint spell;                                   // 3 spell, References: Spell, NoValue = 0
             public uint playerCast;                              // 4 playerCast, enum { false, true, }; Default: false
         }
+
+        public struct reserved13A
+        {
+        }
+
+        public struct reserved13B
+        {
+        }
+
         #endregion
     }
 

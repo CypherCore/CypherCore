@@ -2208,7 +2208,8 @@ namespace Framework.Constants
         GuildRename = 76,
         OpenNeighborhoodCharterConfirmation = 77,
         OpenHouseFinder = 78,
-        PlaceholderType79 = 79,
+        TieredEntrance = 79,
+        RewardsShop = 80,
     }
 
     [Flags]

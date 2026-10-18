@@ -705,7 +705,16 @@ namespace Game.Spells
             {
                 Player playerTarget = unitTarget.ToPlayer();
                 if (playerTarget != null)
-                    playerTarget.SendPacket(new SpellVisualLoadScreen(effectInfo.MiscValueB, TimeSpan.FromMilliseconds(effectInfo.MiscValue)));
+                {
+                    SpellVisualLoadScreen spellVisualLoadScreen = new()
+                    {
+                        SpellVisualKitID = effectInfo.MiscValueB,
+                        Duration = TimeSpan.FromMilliseconds(effectInfo.MiscValue),
+                        IsTransfer = targetDest.Location.GetMapId() != playerTarget.GetMapId()
+                            || (targetDest.InstanceId != 0 && targetDest.InstanceId != playerTarget.GetInstanceId())
+                    };
+                    playerTarget.SendPacket(spellVisualLoadScreen);
+                }
             }
 
             TeleportToOptions options = GetTeleportOptions(m_caster, unitTarget, m_destTargets[effectInfo.EffectIndex]);

@@ -211,20 +211,6 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
     }
 
-    public class HealthUpdate : ServerPacket
-    {
-        public HealthUpdate() : base(ServerOpcodes.HealthUpdate) { }
-
-        public override void Write()
-        {
-            _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteInt64(Health);
-        }
-
-        public ObjectGuid Guid;
-        public long Health;
-    }
-
     public class ThreatClear : ServerPacket
     {
         public ThreatClear() : base(ServerOpcodes.ThreatClear) { }

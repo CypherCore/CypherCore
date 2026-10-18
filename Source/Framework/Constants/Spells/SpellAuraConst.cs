@@ -672,6 +672,16 @@ namespace Framework.Constants
         Unk662 = 662,
         Unk663 = 663,
         Unk664 = 664,
+        Unk665 = 665,
+        Unk666 = 666,
+        Unk667 = 667,
+        Unk668 = 668,
+        Unk669 = 669,
+        Unk670 = 670,
+        Unk671 = 671,
+        Unk672 = 672,
+        Unk673 = 673,
+        Unk674 = 674,
 
         Total
     }

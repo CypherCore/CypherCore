@@ -3427,7 +3427,7 @@ namespace Game.Entities
                 if (changesMask.GetBlock(i) != 0)
                     data.WriteBits(changesMask.GetBlock(i), 32);
 
-            bool noQuestLogChangesMask = data.WriteBit(IsQuestLogChangesMaskSkipped());
+            bool noPartyMemberChangesMask = data.WriteBit(IsPartyMemberChangesMaskSkipped());
             if (changesMask[0])
             {
                 if (changesMask[1])
@@ -3510,7 +3510,7 @@ namespace Game.Entities
                     {
                         if (QuestSessionQuestLog.HasChanged(i) || ignoreNestedChangesMask)
                         {
-                            if (noQuestLogChangesMask)
+                            if (noPartyMemberChangesMask)
                                 QuestSessionQuestLog[i].WriteCreate(data, receiver, owner);
                             else
                                 QuestSessionQuestLog[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
@@ -3613,7 +3613,10 @@ namespace Game.Entities
                 }
                 if (changesMask[25])
                 {
-                    WriteMapFieldUpdate(QuestLogQuestIdToIndex, ignoreNestedChangesMask, data, receiver, owner);
+                    if (noPartyMemberChangesMask)
+                        WriteMapFieldCreate(QuestLogQuestIdToIndex, data, receiver, owner);
+                    else
+                        WriteMapFieldUpdate(QuestLogQuestIdToIndex, ignoreNestedChangesMask, data, receiver, owner);
                 }
                 if (changesMask[26])
                 {
@@ -3739,7 +3742,7 @@ namespace Game.Entities
                 {
                     if (changesMask[54 + i])
                     {
-                        if (noQuestLogChangesMask)
+                        if (noPartyMemberChangesMask)
                             QuestLog[i].WriteCreate(data, receiver, owner);
                         else
                             QuestLog[i].WriteUpdate(ignoreNestedChangesMask, data, receiver, owner);
@@ -3858,7 +3861,7 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        bool IsQuestLogChangesMaskSkipped() { return false; } // bandwidth savings aren't worth the cpu time
+        bool IsPartyMemberChangesMaskSkipped() { return false; }
     }
 
     public class SkillInfo() : HasChangesMask(2101), IsUpdateFieldStructure<Player>
@@ -12302,6 +12305,7 @@ namespace Game.Entities
         {
             data.WriteBits(changesMask.GetBlock(0), 6);
 
+            bool noOwnerChangesMask = data.WriteBit(IsOwnerChangesMaskSkipped());
             if (changesMask[0])
             {
                 if (changesMask[1])
@@ -12352,7 +12356,10 @@ namespace Game.Entities
                 }
                 if (changesMask[5])
                 {
-                    WriteSetFieldUpdate(Houses, ignoreNestedChangesMask, data, receiver, owner);
+                    if (noOwnerChangesMask)
+                        WriteSetFieldCreate(Houses, data, receiver, owner);
+                    else
+                        WriteSetFieldUpdate(Houses, ignoreNestedChangesMask, data, receiver, owner);
                 }
             }
         }
@@ -12366,5 +12373,7 @@ namespace Game.Entities
             ClearChangesMask(Houses);
             _changesMask.ResetAll();
         }
+
+        bool IsOwnerChangesMaskSkipped() { return false; }
     }
 }

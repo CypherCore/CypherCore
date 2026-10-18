@@ -168,6 +168,7 @@ namespace Game.DataStorage
         public int StorageIndex;
         public int Type;
         public int Unknown1125;
+        public int Unknown1215;
 
         public PlayerDataElementType GetElementType() { return (PlayerDataElementType)Type; }
     }
@@ -178,6 +179,7 @@ namespace Game.DataStorage
         public int StorageIndex;
         public int Type;
         public int Unknown1125;
+        public int Unknown1215;
 
         public PlayerDataElementType GetElementType() { return (PlayerDataElementType)Type; }
     }

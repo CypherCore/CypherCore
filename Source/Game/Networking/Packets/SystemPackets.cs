@@ -37,6 +37,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Squelch.BnetAccountGuid);
             _worldPacket.WritePackedGuid(Squelch.GuildGuid);
 
+            _worldPacket.WriteInt32(AgeVerificationRestrictionState);
             _worldPacket.WriteInt32(ContentSetID);
             _worldPacket.WriteInt32(DisabledGameModes.Count);
             _worldPacket.WriteInt32(GameRules.Count);
@@ -151,6 +152,7 @@ namespace Game.Networking.Packets
         public uint ClubsPresenceDelay;
         public uint ClubPresenceUnsubscribeDelay; // Timer for updating club presence when communities ui frame is hidden
         public uint KioskSessionDurationMinutes;
+        public int AgeVerificationRestrictionState;
         public int ContentSetID; // Currently active Classic season
         public short MaxPlayerGuidLookupsPerRequest = 50;
         public short NameLookupTelemetryInterval = 600;

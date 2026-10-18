@@ -70,6 +70,8 @@ namespace Framework.Constants
         PerksProgramChest = 62,
         FuturePatch = 63,
         AssistAction = 64,
+        Reserved13A = 65,
+        Reserved13B = 66,
 
         Max
     }

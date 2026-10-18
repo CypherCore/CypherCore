@@ -376,26 +376,27 @@ namespace Game.DataStorage
         public string Name;
         public string HordeName;
         public int Duration;
+        public int Charges;
+        public ItemEnchantmentType[] Effect = new ItemEnchantmentType[ItemConst.MaxItemEnchantmentEffects];
+        public int[] EffectPointsMin = new int[ItemConst.MaxItemEnchantmentEffects];
         public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public int Flags;
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
-        public uint IconFileDataID;
+        public int ScalingClass;
+        public int ScalingClassRestricted;
+        public uint ConditionID;
+        public int RequiredSkillID;
+        public int RequiredSkillRank;
+        public int MinLevel;
+        public int MaxLevel;
+        public int IconFileDataID;
         public int MinItemLevel;
         public int MaxItemLevel;
         public uint TransmogUseConditionID;
-        public uint TransmogCost;
-        public ushort[] EffectPointsMin = new ushort[ItemConst.MaxItemEnchantmentEffects];
+        public int TransmogCost;
+        public int ItemSquishEraID;
         public ushort ItemVisual;
-        public ushort RequiredSkillID;
-        public ushort RequiredSkillRank;
         public ushort ItemLevel;
-        public byte Charges;
-        public ItemEnchantmentType[] Effect = new ItemEnchantmentType[ItemConst.MaxItemEnchantmentEffects];
-        public sbyte ScalingClass;
-        public sbyte ScalingClassRestricted;
-        public byte ConditionID;
-        public byte MinLevel;
-        public byte MaxLevel;
 
         public bool HasFlag(SpellItemEnchantmentFlags spellItemEnchantmentFlags) { return (Flags & (ushort)spellItemEnchantmentFlags) != 0; }
     }
@@ -514,6 +515,7 @@ namespace Game.DataStorage
         public SpellProcsPerMinuteModType Type;
         public uint Param;
         public float Coeff;
+        public uint PlayerConditionID;
         public uint SpellProcsPerMinuteID;
     }
 
@@ -690,6 +692,10 @@ namespace Game.DataStorage
         public int ClutterLevel;
         public int DecayTimeAfterImpact;
         public ushort Unused1100;
+        public int MinimumSpellVisualDensityFilterType;
+        public int MinimumSpellVisualDensityFilterParam;
+        public int ReducedSpellVisualDensityFilterType;
+        public int ReducedSpellVisualDensityFilterParam;
         public uint SpellVisualMissileSetID;
     }
 

@@ -2755,6 +2755,7 @@ namespace Framework.Constants
         Unk357 = 357, // MiscValue[0] = ItemBonusList
         Unk358 = 358, // MiscValue[0] = ItemBonusList
         Unk359 = 359,
+        Unk360 = 360,
 
         TotalSpellEffects
     }

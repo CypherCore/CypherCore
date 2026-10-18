@@ -3204,17 +3204,6 @@ namespace Game.Entities
                 gain = maxHealth - curHealth;
             }
 
-            if (dVal < 0)
-            {
-                HealthUpdate packet = new();
-                packet.Guid = GetGUID();
-                packet.Health = (long)GetHealth();
-
-                Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
-                if (player != null)
-                    player.SendPacket(packet);
-            }
-
             return gain;
         }
 

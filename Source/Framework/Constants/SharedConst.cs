@@ -3190,6 +3190,8 @@ namespace Framework.Constants
         SoloJoinTrainingGround = 1240,
         LfgJoinedTrainingGroundsQueue = 1241,
         RestrictedAccountLfgListClassTrial = 1242,
+        RestrictedMailMinor = 1243,
+        RestrictedMailUnverified = 1244,
     }
 
     public enum SceneFlags

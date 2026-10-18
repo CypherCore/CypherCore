@@ -1161,17 +1161,17 @@ namespace Game.Networking.Packets
     {
         public PartyMemberPhase(uint flags, uint id)
         {
-            Flags = flags;
+            Flags = (byte)flags;
             Id = (ushort)id;
         }
 
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(Flags);
+            data.WriteUInt8(Flags);
             data.WriteUInt16(Id);
         }
 
-        public uint Flags;
+        public byte Flags;
         public ushort Id;
     }
 
@@ -1361,7 +1361,7 @@ namespace Game.Networking.Packets
         public byte Subgroup;
         public byte Flags;
         public byte RolesAssigned;
-        public byte RolesUnk_1210;   // forces role displayed to be tank if this field contains tank role and RolesAssigned is dps
+        public byte RolesDesired;   // forces role displayed to be tank if this field contains tank role and RolesAssigned is dps
         public byte FactionGroup;
         public bool FromSocialQueue;
         public bool VoiceChatSilenced;
@@ -1378,7 +1378,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Subgroup);
             data.WriteUInt8(Flags);
             data.WriteUInt8(RolesAssigned);
-            data.WriteUInt8(RolesUnk_1210);
+            data.WriteUInt8(RolesDesired);
             data.WriteUInt8(Class);
             data.WriteUInt8(FactionGroup);
             Leaver.Write(data);
