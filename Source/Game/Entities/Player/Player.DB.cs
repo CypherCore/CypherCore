@@ -2775,6 +2775,7 @@ namespace Game.Entities
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATION);
                     stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, pair.Key);
                     trans.Append(stmt);
                     m_storedAuraTeleportLocations.Remove(pair.Key);
                     continue;
@@ -2784,6 +2785,7 @@ namespace Game.Entities
                 {
                     PreparedStatement stmt = CharacterDatabase.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATION);
                     stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, pair.Key);
                     trans.Append(stmt);
 
                     stmt = CharacterDatabase.GetPreparedStatement(CharStatements.INS_CHARACTER_AURA_STORED_LOCATION);
@@ -2795,6 +2797,8 @@ namespace Game.Entities
                     stmt.AddValue(5, storedLocation.Loc.GetPositionZ());
                     stmt.AddValue(6, storedLocation.Loc.GetOrientation());
                     trans.Append(stmt);
+
+                    storedLocation.CurrentState = StoredAuraTeleportLocation.State.Unchanged;
                 }
             }
         }
