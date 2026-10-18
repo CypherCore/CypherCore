@@ -4448,6 +4448,9 @@ namespace Game.Entities
                         foundAura.SetCastItemLevel(createInfo.CastItemLevel);
                     }
 
+                    if (createInfo.Dst != null)
+                        foundAura.m_dst = new WorldLocation(createInfo.Dst);
+
                     // try to increase stack amount
                     foundAura.ModStackAmount(createInfo.StackAmount, AuraRemoveMode.Default, createInfo.ResetPeriodicTimer);
                     return foundAura;

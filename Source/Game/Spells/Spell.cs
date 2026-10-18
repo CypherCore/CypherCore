@@ -2404,6 +2404,9 @@ namespace Game.Spells
                         createInfo.SetStackAmount(m_spellValue.AuraStackAmount);
                         createInfo.SetSpellVisual(m_SpellVisual);
 
+                        if (m_targets.HasDst())
+                            createInfo.SetDst(m_targets.GetDstPos());
+
                         Aura aura = Aura.TryRefreshStackOrCreate(createInfo, false);
                         if (aura != null)
                         {

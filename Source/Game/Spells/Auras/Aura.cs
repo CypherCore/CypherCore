@@ -292,6 +292,8 @@ namespace Game.Spells
                             auraData.EstimatedPoints.Add((float)effect.GetEstimatedAmount().GetValueOrDefault(effect.GetAmount()));
                 }
             }
+
+            auraData.DstLocation = aura.GetDst();
         }
 
         public void ClientUpdate(bool remove = false)
@@ -378,6 +380,9 @@ namespace Game.Spells
             m_procCharges = CalcMaxCharges(createInfo.Caster);
             m_isUsingCharges = m_procCharges != 0;
             // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
+
+            if (createInfo.Dst != null)
+                m_dst = new WorldLocation(createInfo.Dst);
         }
 
         public virtual void Heartbeat() { }
@@ -2510,6 +2515,8 @@ namespace Game.Spells
         public byte GetStackAmount() { return m_stackAmount; }
         public byte GetCasterLevel() { return (byte)m_casterLevel; }
 
+        public WorldLocation GetDst() { return m_dst; }
+
         public bool IsRemoved() { return m_isRemoved; }
 
         public bool IsSingleTarget() { return m_isSingleTarget; }
@@ -2726,6 +2733,8 @@ namespace Game.Spells
         uint m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
         byte m_procCharges;                                // Aura charges (0 for infinite)
         byte m_stackAmount;                                // Aura stack amount
+
+        public WorldLocation m_dst;
 
         //might need to be arrays still
         AuraEffect[] _effects;
@@ -3085,6 +3094,7 @@ namespace Game.Spells
         public bool IsRefresh;
         public int StackAmount = 1;
         public bool ResetPeriodicTimer = true;
+        public WorldLocation Dst;
 
         internal ObjectGuid _castId;
         internal SpellInfo _spellInfo;
@@ -3128,6 +3138,7 @@ namespace Game.Spells
         public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }
         public void SetAuraEffectMask(uint effMask) { _auraEffectMask = effMask; }
         public void SetSpellVisual(SpellCastVisual spellVisual) { _spellVisual = spellVisual; }
+        public void SetDst(WorldLocation dst) { Dst = dst; }
 
         public SpellInfo GetSpellInfo() { return _spellInfo; }
         public uint GetAuraEffectMask() { return _auraEffectMask; }

@@ -891,6 +891,7 @@ namespace Game.Entities
                     int maxDuration = auraResult.Read<int>(6);
                     int remainTime = auraResult.Read<int>(7);
                     byte remainCharges = auraResult.Read<byte>(8);
+                    WorldLocation dst = new WorldLocation(auraResult.Read<uint>(9), auraResult.Read<float>(10), auraResult.Read<float>(11), auraResult.Read<float>(12), auraResult.Read<float>(13));
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
                     if (spellInfo == null)
@@ -923,6 +924,10 @@ namespace Game.Entities
                     else
                         remainCharges = 0;
 
+                    if ((dst.GetMapId() != 0xFFFFFFFF && !CliDB.MapStorage.HasRecord(dst.GetMapId()))
+                        || !GridDefines.IsValidMapCoord(dst.GetPositionX(), dst.GetPositionY(), dst.GetPositionZ(), dst.GetOrientation()))
+                        dst = new WorldLocation();
+
                     var info = effectInfo[key];
                     ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
 
@@ -930,6 +935,7 @@ namespace Game.Entities
                     createInfo.SetCasterGUID(casterGuid);
                     createInfo.SetBaseAmount(info.BaseAmounts);
                     createInfo.SetStackAmount(stackCount);
+                    createInfo.SetDst(dst);
 
                     Aura aura = Aura.TryCreate(createInfo);
                     if (aura != null)
@@ -986,6 +992,11 @@ namespace Game.Entities
                 stmt.AddValue(index++, aura.GetMaxDuration());
                 stmt.AddValue(index++, aura.GetDuration());
                 stmt.AddValue(index++, aura.GetCharges());
+                stmt.AddValue(index++, aura.GetDst().GetMapId());
+                stmt.AddValue(index++, aura.GetDst().GetPositionX());
+                stmt.AddValue(index++, aura.GetDst().GetPositionY());
+                stmt.AddValue(index++, aura.GetDst().GetPositionZ());
+                stmt.AddValue(index++, aura.GetDst().GetOrientation());
                 trans.Append(stmt);
 
                 foreach (AuraEffect effect in aura.GetAuraEffects())
