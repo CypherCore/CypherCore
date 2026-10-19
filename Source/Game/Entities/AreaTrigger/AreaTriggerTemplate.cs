@@ -280,6 +280,9 @@ namespace Game.Entities
 
         public uint? SpellForVisuals;
 
+        public int? MaxSummons;                             ///< Maximum number of areatriggers that can be summoned with these properties
+        public int? MaxUnits;                               ///< Maximum number of units that count as being inside the areatrigger
+
         public int PositionalSoundKitId;
 
         public uint TimeToTargetScale;

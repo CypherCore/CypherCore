@@ -257,19 +257,6 @@ class spell_pri_angelic_feather_trigger : SpellScript
 [Script] // Angelic Feather areatrigger - created by SpellIds.AngelicFeatherAreatrigger
 class areatrigger_pri_angelic_feather(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 {
-    // Called when the AreaTrigger has just been initialized, just before added to map
-    public override void OnInitialize()
-    {
-        Unit caster = at.GetCaster();
-        if (caster != null)
-        {
-            List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
-
-            if (areaTriggers.Count >= 3)
-                areaTriggers.First().SetDuration(0);
-        }
-    }
-
     public override void OnUnitEnter(Unit unit)
     {
         Unit caster = at.GetCaster();

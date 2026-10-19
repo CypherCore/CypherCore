@@ -127,11 +127,11 @@ namespace Game.DataStorage
             SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, IsCustom, AreaTriggerId, IsAreatriggerCustom, Flags, " +
                 //5            6             7             8              9       10         11                 12               
                 "MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, SpellForVisuals, " +
-                //13                    14                 15     16
-                "PositionalSoundKitId, TimeToTargetScale, Speed, SpeedIsTime, " +
-                //17     18          19          20          21          22          23          24          25
+                //13          14        15                    16                 17     18
+                "MaxSummons, MaxUnits, PositionalSoundKitId, TimeToTargetScale, Speed, SpeedIsTime, " +
+                //19     20          21          22          23          24          25          26          27
                 "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5, ShapeData6, ShapeData7, " +
-                //26    27     28   29          30           31         32
+                //28    29     30   31          32           33         34
                 "Roll, Pitch, Yaw, TargetRoll, TargetPitch, TargetYaw, ScriptName FROM `areatrigger_create_properties`");
             if (!areatriggerCreateProperties.IsEmpty())
             {
@@ -146,7 +146,7 @@ namespace Game.DataStorage
 
                     createProperties.Flags = (AreaTriggerCreatePropertiesFlag)areatriggerCreateProperties.Read<uint>(4);
 
-                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(17);
+                    AreaTriggerShapeType shape = (AreaTriggerShapeType)areatriggerCreateProperties.Read<byte>(19);
 
                     if (areaTriggerId.Id != 0 && createProperties.Template == null)
                     {
@@ -190,7 +190,21 @@ namespace Game.DataStorage
                         }
                     }
 
-                    createProperties.PositionalSoundKitId = areatriggerCreateProperties.Read<int>(13);
+                    createProperties.MaxSummons = areatriggerCreateProperties.Read<int?>(13);
+                    if (createProperties.MaxSummons.HasValue && createProperties.MaxSummons < 1)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid MaxSummons {createProperties.MaxSummons.Value} (must be NULL or greater than 0), set to none.");
+                        createProperties.MaxSummons = null;
+                    }
+
+                    createProperties.MaxUnits = areatriggerCreateProperties.Read<int?>(14);
+                    if (createProperties.MaxUnits.HasValue && createProperties.MaxUnits < 1)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has AreaTriggerCreatePropertiesId (Id: {createPropertiesId.Id}, IsCustom: {createPropertiesId.IsCustom}) with invalid MaxUnits {createProperties.MaxUnits.Value} (must be NULL or greater than 0), set to none.");
+                        createProperties.MaxUnits = null;
+                    }
+
+                    createProperties.PositionalSoundKitId = areatriggerCreateProperties.Read<int>(15);
                     if (createProperties.PositionalSoundKitId != 0)
                     {
                         if (!CliDB.SoundKitStorage.HasRecord((uint)createProperties.PositionalSoundKitId))
@@ -205,13 +219,13 @@ namespace Game.DataStorage
                         }
                     }
 
-                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(14);
-                    createProperties.Speed = areatriggerCreateProperties.Read<float>(15);
-                    createProperties.SpeedIsTime = areatriggerCreateProperties.Read<bool>(16);
+                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(16);
+                    createProperties.Speed = areatriggerCreateProperties.Read<float>(17);
+                    createProperties.SpeedIsTime = areatriggerCreateProperties.Read<bool>(18);
 
                     float[] shapeData = new float[SharedConst.MaxAreatriggerEntityData];
                     for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                        shapeData[i] = areatriggerCreateProperties.Read<float>(18 + i);
+                        shapeData[i] = areatriggerCreateProperties.Read<float>(20 + i);
 
                     switch (shape)
                     {
@@ -257,13 +271,13 @@ namespace Game.DataStorage
                             break;
                     }
 
-                    createProperties.RollPitchYaw = new Position(areatriggerCreateProperties.Read<float>(26), areatriggerCreateProperties.Read<float>(27), areatriggerCreateProperties.Read<float>(28));
+                    createProperties.RollPitchYaw = new Position(areatriggerCreateProperties.Read<float>(28), areatriggerCreateProperties.Read<float>(29), areatriggerCreateProperties.Read<float>(30));
 
                     float?[] targetRollPitchYaw =
                     {
-                        areatriggerCreateProperties.Read<float?>(29),
-                        areatriggerCreateProperties.Read<float?>(30),
-                        areatriggerCreateProperties.Read<float?>(31)
+                        areatriggerCreateProperties.Read<float?>(31),
+                        areatriggerCreateProperties.Read<float?>(32),
+                        areatriggerCreateProperties.Read<float?>(33)
                     };
 
                     var trpyFields = targetRollPitchYaw.Count(angle => angle.HasValue);
@@ -277,7 +291,7 @@ namespace Game.DataStorage
                             $"with invalid TargetRoll {targetRollPitchYaw[0]}, TargetPitch {targetRollPitchYaw[1]}, TargetYaw {targetRollPitchYaw[2]} combination, they must either all be NULL or all have value, ignored.");
                     }
 
-                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(32));
+                    createProperties.ScriptId = Global.ObjectMgr.GetScriptId(areatriggerCreateProperties.Read<string>(34));
 
                     var spline = splinesByCreateProperties.LookupByKey(createProperties.Id);
                     if (!spline.Empty())

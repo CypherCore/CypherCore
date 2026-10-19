@@ -852,6 +852,11 @@ namespace Game.Entities
             return m_areaTrigger.Where(trigger => trigger.GetSpellId() == spellId).ToList();
         }
 
+        public List<AreaTrigger> GetAreaTriggers(Func<AreaTrigger, bool> predicate)
+        {
+            return m_areaTrigger.Where(predicate).ToList();
+        }
+
         public void RemoveAreaTrigger(uint spellId)
         {
             for (var i = 0; i < m_areaTrigger.Count; ++i)

@@ -38,9 +38,7 @@ struct SpellIds
     public const uint ExhilarationR2 = 231546;
     public const uint ExplosiveShotDamage = 212680;
     public const uint GreviousInjury = 1217789;
-    public const uint HighExplosiveTrap = 236775;
     public const uint HighExplosiveTrapDamage = 236777;
-    public const uint ImplosiveTrap = 462032;
     public const uint ImplosiveTrapDamage = 462033;
     public const uint Intimidation = 19577;
     public const uint IntimidationMarksmanship = 474421;
@@ -219,16 +217,6 @@ class spell_hun_binding_shot : SpellScript
 class at_hun_binding_shot(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 {
     TaskScheduler _scheduler = new();
-
-    public override void OnInitialize()
-    {
-        Unit caster = at.GetCaster();
-        if (caster != null)
-        {
-            foreach (AreaTrigger other in caster.GetAreaTriggers(SpellIds.BindingShot))
-                other.SetDuration(0);
-        }
-    }
 
     public override void OnCreate(Spell creatingSpell)
     {
@@ -421,16 +409,6 @@ class spell_hun_explosive_shot : AuraScript
 [Script] // 9810 - AreatriggerId
 class areatrigger_hun_high_explosive_trap(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 {
-    public override void OnInitialize()
-    {
-        Unit caster = at.GetCaster();
-        if (caster != null)
-        {
-            foreach (AreaTrigger other in caster.GetAreaTriggers(SpellIds.HighExplosiveTrap))
-                other.SetDuration(0);
-        }
-    }
-
     public override void OnUnitEnter(Unit unit)
     {
         Unit caster = at.GetCaster();
@@ -470,16 +448,6 @@ class spell_hun_hunting_party : AuraScript
 [Script] // 34378 - AreatriggerId
 class areatrigger_hun_implosive_trap(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 {
-    public override void OnInitialize()
-    {
-        Unit caster = at.GetCaster();
-        if (caster != null)
-        {
-            foreach (AreaTrigger other in caster.GetAreaTriggers(SpellIds.ImplosiveTrap))
-                other.SetDuration(0);
-        }
-    }
-
     public override void OnUnitEnter(Unit unit)
     {
         Unit caster = at.GetCaster();
@@ -1280,14 +1248,6 @@ class areatrigger_hun_tar_trap(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrig
 [Script] // 4435 - AreatriggerId
 class areatrigger_hun_tar_trap_activate(AreaTrigger areaTrigger) : AreaTriggerAI(areaTrigger)
 {
-    public override void OnInitialize()
-    {
-        Unit caster = at.GetCaster();
-        if (caster != null)
-            foreach (AreaTrigger other in caster.GetAreaTriggers(SpellIds.TarTrap))
-                other.SetDuration(0);
-    }
-
     public override void OnUnitEnter(Unit unit)
     {
         Unit caster = at.GetCaster();

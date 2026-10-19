@@ -67,7 +67,7 @@ namespace Game.Entities
                 _ai.OnRemove();
 
                 // Handle removal of all units, calling OnUnitExit & deleting auras if needed
-                HandleUnitEnterExit(new List<Unit>(), AreaTriggerExitReason.ByExpire);
+                HandleUnitEnterExit([], AreaTriggerExitReason.ByExpire);
 
                 base.RemoveFromWorld();
                 if (IsStaticSpawn())
@@ -279,7 +279,25 @@ namespace Game.Entities
                 }
             }
 
-            caster?._RegisterAreaTrigger(this);
+            if (caster != null)
+            {
+                caster._RegisterAreaTrigger(this);
+                if (spellInfo != null && GetCreateProperties().MaxSummons.HasValue)
+                {
+                    int maxSummons = GetCreateProperties().MaxSummons.Value;
+                    Player spellModOwner = caster.GetSpellModOwner();
+                    if (spellModOwner != null)
+                        spellModOwner.ApplySpellMod(spellInfo, SpellModOp.AreaTriggerMaxSummons, ref maxSummons, spell);
+
+                    var createProperties = GetCreateProperties();
+                    var areaTriggers = caster.GetAreaTriggers(at => at.GetCreateProperties() == createProperties);
+                    if (areaTriggers.Count > maxSummons)
+                    {
+                        AreaTrigger oldestAreaTriggger = areaTriggers.MinBy(at => at.m_areaTriggerData.CreationTime);
+                        oldestAreaTriggger.Remove();
+                    }
+                }
+            }
 
             _ai.OnCreate(spell);
 
@@ -923,24 +941,32 @@ namespace Game.Entities
             }
         }
 
-        void HandleUnitEnterExit(List<Unit> newTargetList, AreaTriggerExitReason exitMode = AreaTriggerExitReason.NotInside)
+        void HandleUnitEnterExit(ICollection<Unit> targetList, AreaTriggerExitReason exitMode = AreaTriggerExitReason.NotInside)
         {
             List<ObjectGuid> exitUnits = _insideUnits;
             _insideUnits.Clear();
 
             List<Unit> enteringUnits = new();
 
-            foreach (Unit unit in newTargetList)
+            foreach (Unit unit in targetList)
             {
-                if (!exitUnits.Remove(unit.GetGUID())) // erase(key_type) returns number of elements erased
+                var existingUnit = exitUnits.Remove(unit.GetGUID());
+                if (existingUnit)
+                    _insideUnits.Add(unit.GetGUID()); // unit was already in areatrigger
+                else
                     enteringUnits.Add(unit);
-
-                _insideUnits.Add(unit.GetGUID());
             }
 
+            var enteringUnitsEnd = enteringUnits.Count;
+            if (GetCreateProperties().MaxUnits.HasValue)
+                enteringUnitsEnd = GetCreateProperties().MaxUnits.Value - _insideUnits.Count;
+
+            for (var i = 0; i < enteringUnitsEnd; ++i)
+                _insideUnits.Add(enteringUnits[i].GetGUID());
+
             // Handle after _insideUnits have been reinserted so we can use GetInsideUnits() in hooks
-            foreach (Unit unit in enteringUnits)
-                HandleUnitEnter(unit);
+            for (var i = 0; i < enteringUnitsEnd; ++i)
+                HandleUnitEnter(enteringUnits[i]);
 
             foreach (ObjectGuid exitUnitGuid in exitUnits)
             {
